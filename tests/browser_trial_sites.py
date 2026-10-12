@@ -103,6 +103,7 @@ def main():
                         assert page.evaluate('game.pending_event.id.startsWith("SYS_TRIAL_SITE_")')
                         assert page.locator('.trial-mechanism').count() == 5
                         assert page.locator('.trial-meter-track').count() == 2
+                        assert page.evaluate('game.trial_site.session.name') in page.locator('.trial-session-heading').inner_text()
                         page.screenshot(path=str(output / f'{world}-{theme}-{width}-event.png'))
                         blueprint = copy.deepcopy(engine.store.load(game.id).trial_site_state)
                         page.reload()

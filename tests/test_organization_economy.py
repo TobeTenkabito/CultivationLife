@@ -77,6 +77,7 @@ def test_zero_funds_cannot_grant_permanent_welfare_and_partial_payment_is_exact(
     entity = sect(game)
     source = finance.key('sect', entity.id)
     assert balance(game, source) == 0
+    game.player.faction_id = entity.id
     assert finance.welfare(game, entity) == 0
     game.player.age += 1
     transfer_value(game, 'background:human', source, 25, '测试预算')

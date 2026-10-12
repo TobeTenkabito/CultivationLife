@@ -82,6 +82,9 @@ def _intrigue_resolve(
         from ..organization_relocation import validate as validate_relocation
         validate_relocation(game,deps.maps,kind,faction_id,target_id)
     record = deps._ensure_intrigue_faction(game, kind, faction_id)
+    if resolution_type == 'replace_leader':
+        from .leadership import validate as validate_leader
+        validate_leader(game, record, deps._intrigue_members(game, kind, faction_id), target_id)
     ballots: list[dict[str, Any]] = []
     if deps._intrigue_has_decision_authority(game, kind, faction_id) and player_vote is not None:
         ballots.append({"id": deps.PLAYER_ID, "name": game.player.name, "vote": bool(player_vote), "player": True, "reasons": ["一人一票"]})
@@ -147,6 +150,10 @@ def _intrigue_apply_resolution(
     target_id: str, rng: random.Random, *, context: dict[str, Any] | None = None,
 ) -> None:
     kind, faction_id = str(record["kind"]), str(record["id"])
+    if resolution_type == 'replace_leader':
+        from .leadership import appoint
+        appoint(game, record, deps._intrigue_members(game, kind, faction_id), target_id)
+        return
     from ..territory.actions import ACTIONS, apply
     if resolution_type in ACTIONS:
         return apply(game,deps.maps,game.sects.get(faction_id),resolution_type,target_id,rng,

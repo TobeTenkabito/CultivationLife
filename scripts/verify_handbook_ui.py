@@ -40,7 +40,8 @@ def verify_matrix(page, config):
         assert all(word not in economy_text for word in ('分桶', '缓存', '代表商品', '后台循环', '聚合近似'))
         assert '500 年' not in json.dumps(by_id, ensure_ascii=False)
         for i, (key, *_) in enumerate(packages):
-            assert (f'dlc-{key}' in by_id) == bool(mask & (1 << i)), (mask, key)
+            chapter_id = 'trial-sites' if key == 'trial' else f'dlc-{key}'
+            assert (chapter_id in by_id) == bool(mask & (1 << i)), (mask, key)
         route_text = json.dumps(by_id['routes'], ensure_ascii=False)
         assert '妖界与幻冥界都是二级' in route_text
         assert '魔气必须达到 8 级' in route_text
@@ -52,12 +53,12 @@ def verify_matrix(page, config):
     for status in ('disabled', 'error', 'incompatible'):
         cfg = {**config, 'extensions': [dict(id=p[1], name=p[2], kind='dlc',
                       enabled=True, next_enabled=True, status=status) for p in packages]}
-        assert not any(c['id'].startswith('dlc-') for c in page.evaluate('c=>TutorialHandbook.build(c)', cfg))
+        assert not any(c['id'].startswith('dlc-') or c['id']=='trial-sites' for c in page.evaluate('c=>TutorialHandbook.build(c)', cfg))
     active = copy.deepcopy(reports[-1])
     for row in active['extensions']:
         row.update(next_enabled=False)
     page.evaluate('c=>TutorialGuide.configure(c)', active)
-    assert page.locator('[data-chapter^="dlc-"]').count() == len(packages)-1
+    assert page.locator('[data-chapter^="dlc-"], [data-chapter="trial-sites"]').count() == len(packages)-1
     assert '待重启' in page.locator('.handbook-edition').inner_text()
     # An obsolete filter must not hide every chapter when configuration changes.
     page.evaluate("document.querySelectorAll('.handbook-categories button').forEach(b=>{if(b.textContent==='DLC')b.click();})")

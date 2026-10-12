@@ -127,6 +127,8 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
     definition = deps._faction_meta(game, sect.id)
     unlocked = player.realm_index >= 4
     sect_members = deps._sect_members(game, sect)
+    offices = game.intrigue_state.get('factions', {}).get(f'sect:{sect.id}', {}).get('positions', {})
+    leader = offices.get('leader')
     roster = []
     for npc in sect_members:
         if not npc.alive or npc.world != sect.world:
@@ -224,7 +226,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         "name": player.name,
         "gender": player.gender,
         "gender_name": gender_name(player.gender),
-        "title": "议事长老" if unlocked else "门下弟子",
+        "title": "掌门" if leader == "player" else "议事长老" if unlocked else "门下弟子",
         "realm_index": player.realm_index,
         "layer": player.layer,
         "age": current_body_age(player),
@@ -256,6 +258,13 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         "can_invite_faction": False,
         "can_intercept": False,
     })
+    if 'leader' in offices:
+        for entry in roster:
+            if not entry['is_player']:
+                if entry['id'] == leader:
+                    entry['title'] = '掌门'
+                elif any(word in entry['title'] for word in ('掌门', '宗主')):
+                    entry['title'] = '宗门长老' if entry['realm_index'] >= 3 else '门下弟子'
     roster.sort(key=lambda entry: (-entry["realm_index"], -entry["layer"], entry["name"]))
     return {
         "member": True,
@@ -272,7 +281,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
             sect.allegiance_race or definition.get("allegiance_race", "human"),
             {"name":sect.allegiance_race or definition.get("allegiance_race", "human")},
         )["name"],
-        "role": "开山祖师" if sect.founded_by_player else "议事长老" if unlocked else "宗门弟子",
+        "role": "掌门" if leader == "player" else "开山祖师" if sect.founded_by_player else "议事长老" if unlocked else "宗门弟子",
         "join_age": player.faction_join_age,
         "contribution": player.faction_contribution,
         "fixed_reward_unlocked": unlocked,

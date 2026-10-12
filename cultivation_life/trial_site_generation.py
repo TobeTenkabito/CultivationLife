@@ -26,6 +26,8 @@ def rank_for_floor(world, number):
 
 
 def generate(seed, world, number, base_power, reward_pool):
+    from .content_registry import WORLD_SYSTEMS
+    boss_names = WORLD_SYSTEMS['trial_sites']['boss_names']
     realm, layer = rank_for_floor(world, number)
     situation = rng(seed, world, f'floor:{number}:situation')
     rewards = rng(seed, world, f'floor:{number}:rewards')
@@ -41,7 +43,7 @@ def generate(seed, world, number, base_power, reward_pool):
         nodes.append(dict(kind=kind, subject=subject, variant=situation.randrange(4), order=order))
     identity = hashlib.sha256(f'{seed}:{world}:{number}:v{VERSION}'.encode()).hexdigest()[:16]
     return dict(id=f'{PREFIX}{world}_{number}_{identity}', number=number, realm=realm, layer=layer,
-                base_power=base_power, boss_name=('玄甲炉卫', '回光枢卫', '封藏石卫')[template],
+                base_power=base_power, boss_name=boss_names[template],
                 template=template, nodes=nodes, rewards=[dict(rewards.choice(pool)) for _ in range(2)],
                 index=0, delta=0., guard=True, bonus=False, supply=True, cooling=False,
                 treasure=True, field=realm >= 9, history=[], attempts=0, revision=0,

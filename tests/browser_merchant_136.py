@@ -15,7 +15,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def main():
     with tempfile.TemporaryDirectory() as directory:
@@ -40,7 +40,7 @@ def main():
                     page.wait_for_function('configData?.debug===true')
                     page.evaluate('async id=>{await loadGame(id);render(game);}',game_id)
                     navigation_locator(page,'[data-panel-target="merchant"]').click()
-                    page.locator('.merchant-debug-hq').first.click()
+                    click_control(page.locator('.merchant-debug-hq').first)
                     page.wait_for_function('game.merchant_system.membership?.rank===2')
                     assert '总部 特使' in page.locator('.merchant-membership').text_content()
                     panel=page.locator('.merchant-alliance').first

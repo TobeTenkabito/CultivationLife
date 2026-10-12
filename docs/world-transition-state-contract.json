@@ -336,5 +336,11 @@
   },
   "trial_site_ownership_notes": {
     "GameState.trial_site_state": "万象试境 DLC 十一普通界面：入口固定原 world/location，按权威 tier 使用 7/14/22 层；五节点、守关有限资源、首次奖励收据按原遗迹保留，不随移动复制。活动指针为本地会话，不移动人物。无年度或行动时间钩子，正式提交沿原效果/战斗/奖励入口及原子保存。关闭 DLC 冻结数据，安全会话摘除活动指针，真实受控或封逃结果不得借开关解除；后续奖励保留。重新开启只恢复原记录，返访须亲至原入口；结构 10，不转换 1–9。"
+  },
+  "release_2130_ownership_notes": {
+    "GameState.economy_v2.organizations.*.dividend_due/dividend_paid/dividend_rate": "原组织唯一府库年度分红的应付、实付及当期比例；沿 welfare_year 防重，本界在籍活着的玩家领取，跨界不追发。无新增现金或年度人物扫描。",
+    "GameState.trial_site_state.sites.*.floors.*.rewards[].roll": "首次生成并持久绑定的不可执行遗宝配方；未领取时归原试境，关闭DLC冻结，已获物品通过原inventory/known_techniques/crafted_artifacts持有，不注册全局动态目录。",
+    "Player.inventory/known_techniques/crafted_artifacts": "种子遗宝落入原个人字段，随玩家保留；使用、配置与本命化继续按原入口和力量资格验证，不因关闭DLC删除。",
+    "sect_leadership": "沿用 intrigue_state.factions.positions.leader 作为独立组织职务；任命不改变控制、决策权、成员或空间归属。客卿禁任；候选限同界存活正式成员。"
   }
 }

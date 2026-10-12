@@ -1,6 +1,255 @@
 {
   "schema_version": 1,
   "systems": {
-    "trial_sites": {"enabled": true, "package_id": "official.trial-sites"}
+    "trial_sites": {
+      "enabled": true,
+      "package_id": "official.trial-sites",
+      "world_names": {
+        "human": "烟霞",
+        "demon": "赤冥",
+        "spirit": "碧落",
+        "true_demon": "玄煞",
+        "monster_realm": "苍麟",
+        "phantom_underworld": "幽梦",
+        "hell": "忘川",
+        "celestial": "太清",
+        "asura": "血月",
+        "nether": "溟荒",
+        "reincarnation": "照世"
+      },
+      "floor_names": [
+        "问心渡",
+        "落星台",
+        "听雨庐",
+        "埋剑冢",
+        "照影潭",
+        "忘言峰",
+        "归尘庭",
+        "栖霞谷",
+        "无相台",
+        "渡厄桥",
+        "观海崖",
+        "眠龙涧",
+        "还真洞",
+        "长明殿",
+        "天外楼",
+        "踏月阶",
+        "问道宫",
+        "无涯海",
+        "劫灰原",
+        "往生岸",
+        "太初门",
+        "万象天"
+      ],
+      "boss_names": [
+        "负剑遗影",
+        "守誓真灵",
+        "照心古镜"
+      ],
+      "reward_names": {
+        "prefix": [
+          "太初",
+          "照夜",
+          "九华",
+          "清微",
+          "沉星",
+          "归鸿",
+          "玄露",
+          "问心",
+          "流霞",
+          "无尘",
+          "长生",
+          "藏月"
+        ],
+        "technique": [
+          "归真诀",
+          "养神篇",
+          "问道经",
+          "御灵法",
+          "太虚剑意",
+          "观心录"
+        ],
+        "artifact": [
+          "剑",
+          "印",
+          "鼎",
+          "镜",
+          "幡",
+          "铃",
+          "珠",
+          "尺"
+        ],
+        "treasure": [
+          "护心佩",
+          "碧玉簪",
+          "踏云履",
+          "镇魂玦"
+        ],
+        "item": [
+          "养元丹",
+          "玉髓露",
+          "凝神散",
+          "回春丸"
+        ]
+      },
+      "scenes": {
+        "flow": {
+          "title": "香火旧愿",
+          "clues": [
+            "古祠前香烟逆风凝聚，尽数没入守关遗影；它每受一缕香火，眉心金纹便亮一分。",
+            "古祠的香烟却从遗影眉间飘出，流向无名牌位；遗影的轮廓随之淡去。",
+            "古祠香案已倾，旧画仍绘着百姓向守关遗影献愿；遗影的眉心只余一点微光。",
+            "香案倾覆后，遗影眉间的金纹不再散去。旧画中，牌位本应收回遗影借走的愿力。"
+          ],
+          "choices": [
+            "拂灭残香，散去旧愿",
+            "重立香案，续上旧愿",
+            "稽首而过，不扰香火"
+          ],
+          "results": [
+            "香火缘断，遗影借来的庇护随之改变。",
+            "你扶起香案，旧愿再度回响。",
+            "你记住香烟的去向，静静穿过古祠。"
+          ]
+        },
+        "cooling": {
+          "title": "剑冢听魂",
+          "clues": [
+            "风过荒冢，万剑齐鸣。剑下残魂正裹挟怨气涌向遗影，一遍遍低唤“送我归乡”。",
+            "风过荒冢，残魂正吞噬遗影逸出的煞气。剑穗虽旧，却有一线清光护着它们，低语“莫惊归梦”。"
+          ],
+          "previous": [
+            "此前香火仍续，旧愿牵动了剑下亡魂。",
+            "此前香火已散，剑下亡魂因此改了归途。"
+          ],
+          "choices": [
+            "诵往生章，送残魂归去",
+            "温养剑穗，护残魂入梦",
+            "收敛气息，绕过剑冢"
+          ],
+          "results": [
+            "你诵罢往生章，残魂化作流萤；剑意随归途而变。",
+            "你以法力温养旧穗，亡魂的归梦渐深。",
+            "剑鸣未歇，你带着未尽的因缘离开。"
+          ]
+        },
+        "seal": {
+          "title": "丹心遗誓",
+          "clues": [
+            "石匣中藏着古修遗下的一缕心火。火焰舔过誓书，纸上姓名正在焦黑；远处遗影随火光一同膨胀。",
+            "石匣中的心火已近熄灭，誓书上的姓名也逐渐褪去；你感到遗藏正随最后的承诺一同消散。"
+          ],
+          "previous": [
+            "剑下残魂已受你引渡，遗誓也随之改变。",
+            "剑下残魂尚未安顿，这缕遗誓仍承着旧日因果。"
+          ],
+          "choices": [
+            "以清心诀化去执念",
+            "以自身灵力续护遗誓",
+            "任遗誓归尘，舍弃遗藏"
+          ],
+          "results": [
+            "你低诵清心诀，古人的执念在掌中消散。",
+            "你的灵力渡入誓书，沉睡的心火重新跳动。",
+            "誓书化灰，守关者也失去一分寄托。"
+          ]
+        },
+        "treasure": {
+          "title": "月下取舍",
+          "clues": [
+            "月下遗藏仍然完好。一缕红丝将它与守关遗影相系，护住宝物，也护住了执念未散的故人。",
+            "月下遗藏已碎，红丝却还牵着守关遗影。你知道逝去的灵性无法挽回，但这段牵系仍能解开。"
+          ],
+          "choices": [
+            "斩断红丝，任遗藏归尘",
+            "以自身灵力替遗藏承缘",
+            "留下这段牵系，与遗影一战"
+          ],
+          "results": [
+            "红丝断去，遗藏散入月色，守关者失了庇护。",
+            "你接过这一缕因缘，守关者的庇护散去。",
+            "红丝仍在，遗影借月色凝实，静候你的到来。"
+          ]
+        },
+        "core": {
+          "title": "照心问道",
+          "clues": [
+            "古镜映出你的来路，却不见你的身影。镜中月华正涌向守关者，它额前的道纹愈发清晰。",
+            "古镜中浮起守关者的倒影。每有一片道纹落入镜底，门外的遗影便淡去一分。"
+          ],
+          "previous": [
+            "一路香火未断，镜中的旧愿仍与守关者相应。",
+            "一路香火已断，镜中余愿正另觅归处。"
+          ],
+          "choices": [
+            "拂去镜中道纹",
+            "以神识照彻镜底",
+            "合袖静候，直面守关者"
+          ],
+          "results": [
+            "镜面如水荡开，道纹沿原来的方向消散。",
+            "你的神识照入镜底，一段尘封的道意重新苏醒。",
+            "你不再扰动旧梦，整衣踏入最后一道门。"
+          ]
+        }
+      },
+      "locations": {
+        "human": [
+          "wudi_plain",
+          "muling_desert",
+          "lanjiang_steppe"
+        ],
+        "spirit": [
+          "tianyuan_realm",
+          "thunder_continent",
+          "mist_sea_isles"
+        ],
+        "celestial": [
+          "ascension_terrace",
+          "jade_capital",
+          "law_sea"
+        ],
+        "demon": [
+          "gathering_baleful_plain",
+          "corpse_refining_valley",
+          "red_marrow_city"
+        ],
+        "true_demon": [
+          "black_sun_plain",
+          "bloodflame_range",
+          "abyss_city"
+        ],
+        "monster_realm": [
+          "myriad_beast_city",
+          "ancestral_mountain",
+          "azure_scale_sea"
+        ],
+        "phantom_underworld": [
+          "moonbeast_plain",
+          "myriad_spirit_forest",
+          "sky_bone_ridge"
+        ],
+        "hell": [
+          "ghost_gate",
+          "forgetful_river",
+          "iron_tree_wastes"
+        ],
+        "asura": [
+          "asura_gate",
+          "ten_thousand_battle_city",
+          "blood_moon_wilds"
+        ],
+        "nether": [
+          "ancestral_beast_garden",
+          "world_tree_crown",
+          "primal_chaos_wilds"
+        ],
+        "reincarnation": [
+          "reincarnation_well",
+          "karma_city",
+          "timeless_grave"
+        ]
+      }
+    }
   }
 }

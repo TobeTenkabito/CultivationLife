@@ -115,7 +115,11 @@ def decode_state(value):
             if not isinstance(floor['rewards'], list) or len(floor['rewards']) != 2:
                 raise ValueError('试境奖励记录无效')
             for reward in floor['rewards']:
-                fields(reward, 'kind content_id name tier')
+                if 'roll' in reward:
+                    from .generated_loot_schema import validate_reward
+                    validate_reward(reward)
+                else:
+                    fields(reward, 'kind content_id name tier')
                 if reward['kind'] not in {'item', 'technique'}:
                     raise ValueError('试境奖励类别无效')
                 text(reward['content_id'], 120)

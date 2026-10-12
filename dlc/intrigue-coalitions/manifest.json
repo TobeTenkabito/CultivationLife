@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.intrigue-coalitions",
   "name": "明争暗斗：合纵连横",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 120,

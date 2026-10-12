@@ -40,7 +40,7 @@ def main():
                             page.get_by_label('查找本地商品').fill('矿')
                             assert page.locator('.economy-good').count()>0
                             assert all('矿' in name for name in page.locator('.economy-good b').all_text_contents())
-                            page.get_by_role('button',name='正则',exact=True).click()
+                            page.get_by_label('匹配方式').select_option('pattern')
                             page.get_by_label('查找本地商品').fill('矿|草|丹')
                             page.wait_for_function('document.querySelector(".economy-search-feedback").textContent.startsWith("找到")')
                             expected=page.evaluate('game.map.economy.rows.filter(r=>/矿|草|丹/u.test(r.name)).length')
@@ -89,9 +89,9 @@ def main():
                     navigation_locator(page,'[data-panel-target=market]').click()
                     page.locator('#market-view-tabs [data-market-view=local]').click()
                     page.evaluate('''()=>LocalEconomy.prepare({...game.map.economy,rows:[{...game.map.economy.rows[0],name:'a'.repeat(40000)+'!'}]},game,()=>{},()=>{})''')
-                    page.get_by_label('查找本地商品').fill('(a+)+$');page.get_by_role('button',name='正则',exact=True).click()
+                    page.get_by_label('查找本地商品').fill('(a+)+$');page.get_by_label('匹配方式').select_option('pattern')
                     page.get_by_role('status').filter(has_text='表达式过于复杂').wait_for(timeout=10000)
-                    page.get_by_role('button',name='正则',exact=True).click();page.get_by_label('查找本地商品').fill('a')
+                    page.get_by_label('匹配方式').select_option('text');page.get_by_label('查找本地商品').fill('a')
                     assert page.locator('.economy-good').count()==1
                     page.close();browser.close()
             finally:http.shutdown();http.server_close()

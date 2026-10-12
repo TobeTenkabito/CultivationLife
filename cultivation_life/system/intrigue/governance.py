@@ -14,7 +14,7 @@ def _intrigue_auto_appoint_player(
 ) -> None:
     """Let cultivation order, rather than voting rights, drive ordinary offices.
 
-    The controller still occupies the first (leader) office.  Remaining
+    The sect leader is appointed independently. Remaining
     offices follow the faction's cultivation order, while guest offices
     remain reserved for external retainers.  This makes a powerful member
     eligible for office even when their realm is below the independent
@@ -32,7 +32,7 @@ def _intrigue_auto_appoint_player(
     player_is_member = deps._intrigue_player_faction_id(game, kind) == faction_id and game.player.alive
     entity = deps._intrigue_entity(game, kind, faction_id)
     player_is_local = not entity or entity.world == game.player.world
-    if not player_is_member or not player_is_local or record.get("controller_id") == deps.PLAYER_ID:
+    if not player_is_member or not player_is_local or record.get("controller_id") == deps.PLAYER_ID or positions.get('leader') == deps.PLAYER_ID or positions.get('guest_elder') == deps.PLAYER_ID or any(g.get('npc_id') == deps.PLAYER_ID for g in record.get('guests', [])):
         if existing:
             positions[existing] = None
         record["player_auto_office"] = None
@@ -91,6 +91,9 @@ def _intrigue_decision_threshold(deps: IntrigueGovernanceDependencies, kind: str
 def _intrigue_has_control(deps: IntrigueGovernanceDependencies, game: GameState, kind: str, faction_id: str) -> bool:
     if kind == "race" or deps._intrigue_player_faction_id(game, kind) != faction_id:
         return False
+    entity = deps._intrigue_entity(game, kind, faction_id)
+    if not game.player.alive or not entity or entity.extinct or entity.world != game.player.world:
+        return False
     return deps._ensure_intrigue_faction(game, kind, faction_id).get("controller_id") == deps.PLAYER_ID
 
 
@@ -118,6 +121,16 @@ def intrigue_personnel_action(
     if game.pending_event or game.player.imprisonment:
         raise ValueError("当前状态无法处理势力人事")
     record = deps._ensure_intrigue_faction(game, kind, faction_id)
+    if kind == 'sect' and action == 'appoint' and position_id == 'leader':
+        from .leadership import appoint
+        name = appoint(game, record, deps._intrigue_members(game, kind, faction_id), npc_id)
+        game.history.append(HistoryRecord(
+            'SYS_INTRIGUE_PERSONNEL', 1, game.player.age, '掌门任命', action, 'executed',
+            f'你任命{name}为掌门。', {'kind': kind, 'faction_id': faction_id, 'npc_id': npc_id},
+            ['system', 'intrigue', kind, 'faction']))
+        game.updated_at = now_iso()
+        deps.store.save(game)
+        return deps.present(game)
     npc = deps._intrigue_find_npc(game, npc_id)
     member_ids = {row.id for row in deps._intrigue_members(game, kind, faction_id)}
     if not npc or npc.id not in member_ids or not npc.alive:

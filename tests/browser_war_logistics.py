@@ -17,7 +17,7 @@ from cultivation_life.system.economy.ledger import transfer_value
 from browser_caravan_economy import prepare as prepare_caravans
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def prepare(engine):
     gid=prepare_caravans(engine);game=engine._load(gid)
@@ -53,7 +53,7 @@ def main():
                             gid=prepare(engine);page=browser.new_page(viewport=dict(width=width,height=height));errors=[]
                             page.on('pageerror',lambda e:errors.append(str(e)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData && window.GameThemes')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            click_control(page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]'))
                             page.evaluate('async id=>loadGame(id)',gid)
                             if 'panel-open' not in page.locator('#war-card').get_attribute('class'):navigation_locator(page,'[data-panel-target=war]').click()
                             card=page.locator('.war-card').first
@@ -61,44 +61,44 @@ def main():
                             assert '敌情未明' in card.inner_text(), (errors,card.inner_text())
                             war_id=page.evaluate("game.war_system.wars.find(w=>w.player_controls && w.status==='active').id")
                             full=sum(next(w for w in engine._load(gid).wars if w['id']==war_id)['logistics']['sides']['attacker']['realm_groups'].values())
-                            page.locator('[data-war-strategy=deploy_half]').first.click()
+                            click_control(page.locator('[data-war-strategy=deploy_half]').first)
                             page.wait_for_function("id=>!busy && game.war_system.wars.find(w=>w.id===id).supply_actions.some(a=>a.action==='deploy_half' && !a.allowed)",arg=war_id)
                             assert sum(next(w for w in engine._load(gid).wars if w['id']==war_id)['logistics']['sides']['attacker']['realm_groups'].values())<full
                             assert page.locator('[data-war-strategy=deploy_half]').first.is_disabled()
-                            page.locator('[data-war-strategy=scout]').first.click()
+                            click_control(page.locator('[data-war-strategy=scout]').first)
                             page.wait_for_function("id=>!busy && game.war_system.wars.find(w=>w.id===id).supply_actions.some(a=>a.action==='scout' && a.reason)",arg=war_id)
                             assert page.locator('[data-war-strategy=scout]').first.is_disabled()
                             assert page.locator('#war-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             page.screenshot(path=str(output/f'{theme}-{width}-war.png'))
                             navigation_locator(page,'[data-panel-target=faction]').click()
-                            box=page.locator('#faction-card .organization-depot');box.locator('summary').click()
+                            box=page.locator('#faction-card .organization-depot');click_control(box.locator('summary'))
                             box.get_by_role('button',name='申请一件').first.click();page.wait_for_function('!busy')
-                            if box.get_attribute('open') is None:box.locator('summary').click()
+                            if box.get_attribute('open') is None:click_control(box.locator('summary'))
                             assert '尚需推进一个行动单位' in box.inner_text()
                             assert box.get_by_role('button',name='请高层审批').is_disabled()
                             # Advance only the authoritative action clock to isolate this approval UI.
                             game=engine._load(gid);game.diplomacy_unit+=1;engine.store.save(game)
                             page.evaluate('async id=>loadGame(id)',gid)
-                            if box.get_attribute('open') is None:box.locator('summary').click()
+                            if box.get_attribute('open') is None:click_control(box.locator('summary'))
                             box.get_by_role('button',name='请高层审批').click();page.wait_for_function('!busy')
-                            if box.get_attribute('open') is None:box.locator('summary').click()
+                            if box.get_attribute('open') is None:click_control(box.locator('summary'))
                             box.get_by_role('button',name='领取物资',exact=True).click();page.wait_for_function('!busy')
-                            if box.get_attribute('open') is None:box.locator('summary').click()
+                            if box.get_attribute('open') is None:click_control(box.locator('summary'))
                             assert '已领取' in box.inner_text()
                             assert box.evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             page.screenshot(path=str(output/f'{theme}-{width}-depot.png'))
                             g=engine._load(gid);g.player.location_id=g.merchant_state['worlds']['human'][0]['hq'];engine.store.save(g)
                             page.evaluate('async id=>loadGame(id)',gid)
-                            navigation_locator(page,'[data-panel-target=map]').click();page.get_by_role('button',name='本地市场',exact=True).click()
+                            navigation_locator(page,'[data-panel-target=map]').click();click_control(page.get_by_role('button',name='本地市场',exact=True))
                             assert page.locator('.economy-good[data-supply]').count()>0
                             atlas=page.locator('.caravan-atlas')
                             assert atlas.count()==1
                             if atlas.count():
                                 overview=page.locator('.economy-overview')
-                                if overview.get_attribute('open') is None:overview.locator(':scope > summary').click()
+                                if overview.get_attribute('open') is None:click_control(overview.locator(':scope > summary'))
                                 freight=page.locator('.economy-freight')
-                                if freight.get_attribute('open') is None:freight.locator(':scope > summary').click()
-                                atlas.locator('.caravan-map-roster button').first.click()
+                                if freight.get_attribute('open') is None:click_control(freight.locator(':scope > summary'))
+                                click_control(atlas.locator('.caravan-map-roster button').first)
                                 assert atlas.locator('[aria-pressed=true]').count()==1
                                 assert atlas.locator('svg').evaluate('(n)=>!n.innerHTML.includes("NaN")')
                                 atlas.scroll_into_view_if_needed()
@@ -116,15 +116,15 @@ def main():
                             g.pending_event=old;engine.store.save(g)
                             page.evaluate('(event)=>{game.pending_event=event;render(game);}',old)
                             page.keyboard.press('Escape')
-                            page.locator('#event-choices button').first.click()
+                            click_control(page.locator('#event-choices button').first)
                             page.wait_for_function('(id)=>!busy && game.pending_event?.id===id',arg=reward['id'])
                             assert engine.store.load(cid).player.immortal_conversion_stage==0
-                            page.locator('#event-choices button').first.click()
+                            click_control(page.locator('#event-choices button').first)
                             page.wait_for_function('!busy && !game.pending_event')
                             assert page.evaluate('game.id')==cid, page.evaluate('({id:game.id,world:game.player.world,realm:game.player.realm_index,doctrine:game.doctrines})')
                             assert page.evaluate('game.doctrines.available'), page.evaluate('({world:game.player.world,realm:game.player.realm_index,alive:game.player.alive,doctrine:game.doctrines})')
                             navigation_locator(page,'[data-panel-target=immortal-conversion]').click()
-                            page.get_by_role('button',name='推进下一阶段',exact=True).click()
+                            click_control(page.get_by_role('button',name='推进下一阶段',exact=True))
                             page.wait_for_function('!busy && game.player.immortal_conversion_stage===1')
                             assert page.get_by_role('button',name='推进下一阶段',exact=True).is_disabled()
                             assert engine.store.load(cid).player.opportunity==0
@@ -134,7 +134,7 @@ def main():
                             g.player.asura_cultivation['conversion']=0;g.player.opportunity=100;engine.store.save(g)
                             page.evaluate('async id=>loadGame(id)',aid)
                             navigation_locator(page,'[data-panel-target=asura-conversion]').click()
-                            page.locator('[data-asura-action=convert]').click()
+                            click_control(page.locator('[data-asura-action=convert]'))
                             page.wait_for_function('!busy && game.asura.conversion===1')
                             assert page.locator('[data-asura-action=convert]').is_disabled()
                             assert engine.store.load(aid).player.opportunity==0

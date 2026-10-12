@@ -135,7 +135,7 @@ def intrigue_guest_action(deps: IntrigueGuestsDependencies, game_id: str, kind: 
             if game.player.faction_contribution < 30:
                 raise ValueError("转正需要消耗 30 点势力贡献")
             specs = deps._intrigue_position_specs(kind)
-            vacancy = next((pid for pid, spec in specs.items() if pid not in {"leader", "family_head"} and not record["positions"].get(pid) and npc.realm_index >= int(spec.get("minimum_realm", 0))), None)
+            vacancy = next((pid for pid, spec in specs.items() if pid not in {"leader", "family_head", "guest_elder", "guest_retainer"} and not record["positions"].get(pid) and npc.realm_index >= int(spec.get("minimum_realm", 0))), None)
             if not vacancy:
                 raise ValueError("没有符合其修为的正式职位空缺")
             entity = deps._intrigue_entity(game, kind, faction_id)

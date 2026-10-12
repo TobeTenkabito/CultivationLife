@@ -2,7 +2,7 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v2.12.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v2.13.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
 
 v2.11.2 调整宗门与家族供养、经营养护及自动生产止损，保留基本储备和空府库恢复能力。坊市新增本地市场及正则搜索；妖修第二 DLC 入口仅向妖修显示，采用独立灵纹按钮。Windows 沿用桌面侧栏，Android 使用分类导航。规则与验收范围见[调整说明](docs/organization-balance-and-market.md)。
 
@@ -106,10 +106,10 @@ Windows ZIP 附带 `scripts/debug_agent.py` 及最小标准库客户端。CLI／
 | [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.15.2 | 妖修本源、血脉进化、族血规则与八源本相铸域 |
 | [万灵争衡：百族兴衰](dlc/monster-civilizations/README.md) | 1.0.0 | 独立生态、氏族、王庭与万灵志 |
 | [百鬼夜行：往生轮回](dlc/ghost-reincarnation/README.md) | 3.9.1 | 鬼修魂魄、魂蚀、往生与轮回 |
-| [明争暗斗：合纵连横](dlc/intrigue-coalitions/README.md) | 1.4.0 | NPC 性格、势力职位、客卿、议案与内政 |
+| [明争暗斗：合纵连横](dlc/intrigue-coalitions/README.md) | 1.5.0 | NPC 性格、势力职位、客卿、议案与内政 |
 | [圣人之道：内圣外王](dlc/sage-way/README.md) | 1.4.0 | 学说、教化、门人、经典、外王之策与儒修剧情 |
-| [归墟之潮：九死一生](dlc/guixu-tide/README.md) | 2.6.0 | 十一界归墟副本、探索、宝物与 NPC 争夺 |
-| [万象试境](dlc/trial-sites/README.md) | 1.0.0 | 十一界五事件守关、可视化层图与种子遗藏，探索不耗时间 |
+| [归墟之潮：九死一生](dlc/guixu-tide/README.md) | 2.7.0 | 十一界归墟副本、探索、宝物与 NPC 争夺 |
+| [万象试境：问道无涯](dlc/trial-sites/README.md) | 1.1.0 | 十一界五事件守关、可视化层图与种子遗藏，探索不耗时间 |
 | [神机百变：巧夺天工](dlc/tianji-artifacts/README.md) | 2.2.0 | 天工神机榜、分层情报、动态材料、仿制与重铸 |
 
 主页右上角可管理启用状态，游戏内「拓」面板可查看本次启动的加载情况。被禁用、依赖缺失或校验失败的扩展会被跳过；玩家开关不会改写包内清单。扩展格式、合并规则和依赖声明分别见 [DLC 说明](dlc/README.md) 与 [MOD 说明](mods/README.md)。

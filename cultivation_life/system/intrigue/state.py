@@ -123,11 +123,18 @@ def _ensure_intrigue_faction(deps: IntrigueStateDependencies, game: GameState, k
     record["controller_id"] = controller or None
     position_ids = list(deps.intrigue_rules().get("positions", {}).get(kind, {}))
     leader_id = position_ids[0] if position_ids else ""
-    if leader_id:
+    if kind == 'sect' and leader_id:
+        from .leadership import candidates
+        eligible = candidates(game, record, members)
+        if leader_id not in record['positions']:
+            record['positions'][leader_id] = controller if controller in eligible else next(iter(eligible), None)
+        elif record['positions'][leader_id] not in eligible:
+            record['positions'][leader_id] = None
+    elif leader_id:
         record["positions"][leader_id] = controller or None
     if not record.get("positions_initialized"):
         if controller != deps.PLAYER_ID:
-            claimed = {controller}
+            claimed = {controller, record['positions'].get(leader_id)}
             ordered = sorted(members, key=lambda row: (-row.realm_index, -row.layer, row.age, row.id))
             for position_id, spec in deps._intrigue_position_specs(kind).items():
                 if position_id == leader_id or position_id in {"guest_elder", "guest_retainer"}:

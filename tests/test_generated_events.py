@@ -109,7 +109,7 @@ def test_rewarded_choice_uses_existing_resource_and_reward_entries(local, path_i
         techniques = [saved.player.technique, *saved.player.known_techniques]
         assert any(t and t.id == reward['content_id'] for t in techniques) or any(
             item.technique_copy_id == reward['content_id'] for item in saved.player.inventory)
-    assert any('遗藏得以保存' in row.summary for row in saved.history)
+    assert any('一份遗泽留在掌中' in row.summary for row in saved.history)
 
 
 def test_wrong_interpretation_causes_saved_damage_without_reward(local):

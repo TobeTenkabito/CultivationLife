@@ -51,7 +51,7 @@ class GuixuTideTests(unittest.TestCase):
         manifest = json.loads(
             (SOURCE_ROOT / "dlc" / "guixu-tide" / "manifest.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(manifest["version"], "2.6.0")
+        self.assertEqual(manifest["version"], "2.7.0")
         dungeons = GUIXU_TIDE_CONTENT["dungeons"]
         self.assertEqual(
             {row["world"] for row in dungeons},
@@ -59,7 +59,7 @@ class GuixuTideTests(unittest.TestCase):
         )
         self.assertEqual(
             {row["name"] for row in dungeons},
-            {"葬海天渊", "诸界尾闾", "血河沉渊", "太古葬魔墟", "万兽祖涡", "黄泉无底狱", "妖祖沉庭", "天律沉宫", "修罗劫海", "太初龙渊", "无时轮回墟"},
+            {"葬海天渊","诸界尾闾","血河沉渊","太古葬魔墟","万兽祖涡","黄泉无底狱","妖祖沉庭","天律沉宫","修罗劫海","太初龙渊","无时轮回墟","青岚古洞","落霞仙府","烬骨遗宫","无相魔窟","千梦花墟","黄泉旧驿","眠龙古泽","悬星别府","百战沉台","归源祖窟","三生故院"},
         )
         seen = set()
         expected = {
@@ -154,13 +154,13 @@ class GuixuTideTests(unittest.TestCase):
         game_id = created["id"]
         human = self.engine.get_game(game_id)["guixu_tide"]
         self.assertTrue(human["available"])
-        self.assertEqual([row["world"] for row in human["dungeons"]], ["human"])
+        self.assertEqual([row["world"] for row in human["dungeons"]], ["human", "human"])
 
         game = self.engine.store.load(game_id)
         game.player.world = "spirit"
         self.engine.store.save(game)
         spirit = self.engine.get_game(game_id)["guixu_tide"]
-        self.assertEqual([row["world"] for row in spirit["dungeons"]], ["spirit"])
+        self.assertEqual([row["world"] for row in spirit["dungeons"]], ["spirit", "spirit"])
 
         for world in ("demon", "true_demon", "phantom_underworld", "hell"):
             game = self.engine.store.load(game_id)
@@ -168,14 +168,14 @@ class GuixuTideTests(unittest.TestCase):
             game.player.location_id = self.engine.maps.default_location(world)
             self.engine.store.save(game)
             shown = self.engine.get_game(game_id)["guixu_tide"]
-            self.assertEqual([row["world"] for row in shown["dungeons"]], [world])
+            self.assertEqual([row["world"] for row in shown["dungeons"]], [world, world])
 
         game = self.engine.store.load(game_id)
         game.player.world = "celestial"
         self.engine.store.save(game)
         celestial = self.engine.get_game(game_id)["guixu_tide"]
         self.assertTrue(celestial["available"])
-        self.assertEqual(len(celestial["dungeons"]), 1)
+        self.assertEqual(len(celestial["dungeons"]), 2)
 
     def test_dlc_loads_with_only_base_content_and_uses_base_map_entries(self):
         with tempfile.TemporaryDirectory() as directory:

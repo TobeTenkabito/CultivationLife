@@ -42,6 +42,7 @@ STYLE_LABELS = {
     "military": "军事型",
 }
 RESOLUTION_LABELS = {
+    "replace_leader": "更换掌门",
     "expand_influence": "投放地方影响力",
     "build_outpost": "新建地方据点",
     "territory_policy": "地方治理政策",

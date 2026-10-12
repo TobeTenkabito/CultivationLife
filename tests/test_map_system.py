@@ -166,7 +166,10 @@ class MapEngineTests(unittest.TestCase):
 
     def test_low_realm_can_enter_any_gated_map_but_dies_on_arrival(self):
         created = self.engine.create_game("越境者", "supreme_earth", "dao", 2305)
-        result = self.engine.travel_map(created["id"], "cangwu_mountains")
+        from unittest.mock import patch
+        # Isolate arrival hazards from a separate, legitimate calendar interruption.
+        with patch.object(self.engine, "_advance_guixu_calendar", return_value=False):
+            result = self.engine.travel_map(created["id"], "cangwu_mountains")
         self.assertFalse(result["player"]["alive"])
         self.assertEqual(result["player"]["location_id"], "cangwu_mountains")
         self.assertIn("境界低于此地要求", result["player"]["death_reason"])
@@ -174,6 +177,15 @@ class MapEngineTests(unittest.TestCase):
             row["event_id"] == "SYS_MAP_TRAVEL" and row["result"] == "dead"
             for row in result["history"]
         ))
+
+    def test_new_guixu_announcement_interrupts_before_dangerous_arrival(self):
+        created = self.engine.create_game("潮讯行客", "supreme_earth", "dao", 2305)
+        result = self.engine.travel_map(created["id"], "cangwu_mountains")
+        self.assertTrue(result["player"]["alive"])
+        self.assertEqual(result["player"]["location_id"], created["player"]["location_id"])
+        self.assertGreater(result["player"]["age"], created["player"]["age"])
+        self.assertEqual(result["pending_event"]["id"], "EVT_GUIXU_ANNOUNCE")
+        self.assertEqual(result["pending_event"]["runtime"]["dungeon_id"], "guixu_human_second")
 
     def test_legacy_save_without_location_is_migrated(self):
         created = self.engine.create_game("旧卷", "supreme_earth", "dao", 2303)

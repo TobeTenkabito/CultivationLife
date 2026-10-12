@@ -78,7 +78,6 @@ def controls(game,entity):
 def decision(game, entity):
     if not member(game, entity) or entity.world != game.player.world: return False
     row=game.intrigue_state.get('factions',{}).get(f'{depot.owner_kind(game,entity)}:{entity.id}',{})
-    if row.get('controller_id') == 'player': return True
     kind=depot.owner_kind(game,entity)
     thresholds=WORLD_SYSTEMS['player_faction']['governance_threshold']
     fallback=2+WORLD_SYSTEMS['world_profiles'][entity.world]['tier'] if entity.kind=='family' else thresholds.get(entity.world,thresholds['human' if entity.world=='human' else 'spirit'])

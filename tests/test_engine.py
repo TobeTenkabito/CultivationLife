@@ -1228,8 +1228,9 @@ class EngineTests(unittest.TestCase):
         start_age = game.player.age
         xiang_age = game.world_npcs["xiang_zhili"].age
         self.engine.store.save(game)
-        # 隔离主线剧情的逐年概率门，只验证百年单位本身的结算语义。
-        with patch.object(self.engine, "_maybe_probability_story_event", return_value=False):
+        # 隔离剧情与副本潮讯，只验证未被事件中断时的百年结算语义。
+        with patch.object(self.engine, "_maybe_probability_story_event", return_value=False), \
+                patch.object(self.engine, "_advance_guixu_calendar", return_value=False):
             result = self.engine.advance(created["id"], "rest")
         self.assertEqual(result["player"]["age"], start_age + 100)
         self.assertEqual(result["player"]["time_unit_years"], 100)

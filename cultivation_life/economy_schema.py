@@ -152,6 +152,9 @@ def validate_economy(value, merchants=None, document=None):
             require(type(row.get('industry_level', 0)) is int and 0 <= row.get('industry_level', 0) <= 10)
             for field in ('industry_utilization', 'war_funding'):
                 require(nonnegative(row.get(field, 1)) and row.get(field, 1) <= 1)
+            for field in ('dividend_due', 'dividend_paid'):
+                if field in row: require(type(row[field]) is int and row[field] >= 0)
+            if 'dividend_rate' in row: require(type(row['dividend_rate']) in (int,float) and 0 <= row['dividend_rate'] <= .19)
             if 'welfare_year' in row:
                 require(type(row['welfare_year']) is int and row['welfare_year'] >= 0)
     validate_estates(value, require, document)

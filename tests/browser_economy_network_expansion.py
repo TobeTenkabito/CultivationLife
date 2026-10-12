@@ -20,7 +20,7 @@ from test_economy_network import found
 from test_economy_network_expansion import visit, recruit
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def main():
     output = ROOT / 'build/economy-expansion-step1-browser'
@@ -54,7 +54,7 @@ def main():
                             page.on('pageerror', lambda error: errors.append(str(error)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}')
                             page.wait_for_function('configData && window.GameThemes')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            click_control(page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]'))
                             def load():
                                 page.evaluate('async id => loadGame(id)', game.id)
                                 page.wait_for_function('!busy && !!game.fleet_network')
@@ -64,14 +64,14 @@ def main():
                             def expand(index):
                                 section = page.locator('#fleet-network-content > details').nth(index)
                                 if section.get_attribute('open') is None:
-                                    section.locator('summary').click()
+                                    click_control(section.locator('summary'))
                                 return section
                             load()
                             expand(1)
-                            page.locator('[data-fleet-action=relocate]').click()
+                            click_control(page.locator('[data-fleet-action=relocate]'))
                             page.wait_for_function('!busy && game.fleet_network.main_hq')
                             expand(2)
-                            page.locator('[data-fleet-action=build_passage]').click()
+                            click_control(page.locator('[data-fleet-action=build_passage]'))
                             page.wait_for_function('!busy && game.fleet_network.destinations.some(d => d.open)')
                             expand(2)
                             assert page.locator('[data-fleet-action=build_passage]').is_disabled()
@@ -90,7 +90,7 @@ def main():
                             expand(3)
                             page.get_by_label('跨界出发商队').select_option(fleet['id'])
                             page.get_by_label('总部索款比例').select_option('50')
-                            page.locator('[data-fleet-action=cross_dispatch]').click()
+                            click_control(page.locator('[data-fleet-action=cross_dispatch]'))
                             page.wait_for_function('!busy && game.fleet_network.fleets.some(f => !!f.cross_trip)')
                             expand(3)
                             assert page.get_by_label('跨界出发商队').locator('option').evaluate_all('(options, id) => options.every(o => o.value !== id)', fleet['id'])
@@ -104,12 +104,12 @@ def main():
                             engine.store.save(saved)
                             load()
                             expand(0)
-                            page.locator('[data-fleet-action=cross_recall]').click()
+                            click_control(page.locator('[data-fleet-action=cross_recall]'))
                             page.wait_for_function('!busy && game.fleet_network.fleets.some(f => f.cross_trip?.phase === "return")')
                             expand(0)
                             assert page.locator('[data-fleet-action=cross_recall]').is_disabled()
                             expand(2)
-                            page.locator('[data-fleet-action=build_passage]').click()
+                            click_control(page.locator('[data-fleet-action=build_passage]'))
                             page.wait_for_function('!busy && game.fleet_network.destinations.some(d => d.open)')
                             expand(3)
                             page.screenshot(path=str(output / f'{theme}-{width}.png'))

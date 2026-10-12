@@ -13,19 +13,8 @@ from ..rules import expected_combat_power, max_hp, max_mp
 from ..runtime import decode_rng, encode_rng, now_iso
 
 # Versioned safe ordinary map candidates, not spatial instances or high-rank hazards.
-LOCATIONS = {
-    'human': ('wudi_plain', 'muling_desert', 'lanjiang_steppe'),
-    'spirit': ('tianyuan_realm', 'thunder_continent', 'mist_sea_isles'),
-    'celestial': ('ascension_terrace', 'jade_capital', 'law_sea'),
-    'demon': ('gathering_baleful_plain', 'corpse_refining_valley', 'red_marrow_city'),
-    'true_demon': ('black_sun_plain', 'bloodflame_range', 'abyss_city'),
-    'monster_realm': ('myriad_beast_city', 'ancestral_mountain', 'azure_scale_sea'),
-    'phantom_underworld': ('moonbeast_plain', 'myriad_spirit_forest', 'sky_bone_ridge'),
-    'hell': ('ghost_gate', 'forgetful_river', 'iron_tree_wastes'),
-    'asura': ('asura_gate', 'ten_thousand_battle_city', 'blood_moon_wilds'),
-    'nether': ('ancestral_beast_garden', 'world_tree_crown', 'primal_chaos_wilds'),
-    'reincarnation': ('reincarnation_well', 'karma_city', 'timeless_grave'),
-}
+# The base retains only the optional execution port; authored entrances live in the DLC.
+LOCATIONS = WORLD_SYSTEMS.get('trial_sites', {}).get('locations', {})
 REALM_NAMES = ('凡人', '练气', '筑基', '结丹', '元婴', '化神', '炼虚', '合体', '大乘', '真仙', '金仙', '太乙', '大罗')
 LOCAL_COMMANDS = frozenset({
     'get_game', 'present', 'choose', 'trial_site_action', 'use_item', 'equip_known_technique',
@@ -116,59 +105,66 @@ def event_id(floor):
     return f"{floor['id']}_node_{floor['index'] + 1}"
 
 
+def floor_name(world, number):
+    cfg = WORLD_SYSTEMS['trial_sites']
+    return cfg['world_names'][world] + '·' + cfg['floor_names'][number - 1]
+
+
 def situation(floor):
-    """Compute consequences from saved objects; no outcome RNG or client truth."""
+    """Finite state solver; authored clues and choices belong to the loaded DLC."""
     node = floor['nodes'][floor['index']]
-    kind, subject, variant = node['kind'], node['subject'], node['variant']
+    kind, variant = node['kind'], node['variant']
     positive, active = variant % 2 == 0, variant < 2
-    outcomes = {}
     if kind == 'flow':
-        direction = '流入守卫，甲片随之亮起' if positive else '从守卫流出，甲片随之黯淡'
-        clue = f'{subject}的铜管中灵光{direction}。' if active else f'{subject}旁铜管已有断口；残图标明灵光应当{direction}。'
+        branch = variant
         outcomes = {
-            'a': ('截断铜管', 0.03, 0., dict(supply=False, guard=False, delta=-.12 if positive and active else .12 if active else 0.), '铜管已断；' + ('供能强化已解除。' if positive else '抽能停止，守卫不再损耗灵力。')),
-            'b': ('接通铜管', .03, 0., dict(supply=True, guard=positive, delta=.12 if positive and not active else -.12 if not positive and not active else 0.), '铜管接通；' + ('供能恢复，守卫甲胄亮起。' if positive else '抽能回路运转，守卫威能下降。')),
-            'c': ('保留当前回路', 0., 0., dict(supply=active, guard=positive and active), '你保留了当前回路，记下灵流方向。'),
+            'a': (.03, 0., dict(supply=False, guard=False, delta=-.12 if positive and active else .12 if active else 0.)),
+            'b': (.03, 0., dict(supply=True, guard=positive, delta=.12 if positive and not active else -.12 if not positive and not active else 0.)),
+            'c': (0., 0., dict(supply=active, guard=positive and active)),
         }
-        # The initial blueprint's flow orientation must also enter unchanged routes.
     elif kind == 'cooling':
-        heating = positive != floor['supply']
-        clue = f'{subject}的支路' + ('已把热流送回守卫，刻文提示先疏后封。' if heating else '正在抽取守卫余热，刻文提示引寒应续。')
-        clue += '此前铜管' + ('保持接通。' if floor['supply'] else '已被截断，支路流向随之改变。')
+        heating = positive != floor['supply']; branch = 0 if heating else 1
         outcomes = {
-            'a': ('疏导支路热流', .04, 0. if heating else .04, dict(cooling=True, delta=-.08 if heating else .08), '支路已疏导，' + ('守卫余热散去，威能下降。' if heating else '原抽热关系被破坏，守卫威能恢复。')),
-            'b': ('续接引寒支路', .04, .04 if heating else 0., dict(cooling=True, delta=.08 if heating else -.08), '支路已续接，' + ('热流回灌，守卫威能增强。' if heating else '抽热稳定，守卫威能下降。')),
-            'c': ('保持支路原状', 0., 0., {}, '支路原状保留。'),
+            'a': (.04, 0. if heating else .04, dict(cooling=True, delta=-.08 if heating else .08)),
+            'b': (.04, .04 if heating else 0., dict(cooling=True, delta=.08 if heating else -.08)),
+            'c': (0., 0., {}),
         }
     elif kind == 'seal':
-        swollen = positive != floor['cooling']
-        clue = f'{subject}后的封匣' + ('向外鼓起，缝隙有灵火喷出；刻着“胀则泄”。' if swollen else '向内闭合，导灵纹失去供给；刻着“枯则充”。')
-        clue += '此前' + ('支路处理改变了匣内压力。' if floor['cooling'] else '支路尚未调整。')
+        swollen = positive != floor['cooling']; branch = 0 if swollen else 1
         outcomes = {
-            'a': ('打开泄压孔', .04, 0. if swollen else .04, {} if swollen else dict(treasure=False, bonus=True), '压力稳定，遗藏保持完好。' if swollen else '处理方向相反，遗藏受损，逸出的灵火强化守卫。'),
-            'b': ('补入封匣灵力', .04, .04 if swollen else 0., dict(treasure=False, bonus=True) if swollen else {}, '灵压过盛，遗藏受损，逸出的灵火强化守卫。' if swollen else '供给恢复，遗藏保持完好。'),
-            'c': ('放弃关联遗藏，泄去储能', 0., 0., dict(treasure=False, delta=-.1), '你主动放弃关联遗藏，储能泄去，守卫威能降低。'),
+            'a': (.04, 0. if swollen else .04, {} if swollen else dict(treasure=False, bonus=True)),
+            'b': (.04, .04 if swollen else 0., dict(treasure=False, bonus=True) if swollen else {}),
+            'c': (0., 0., dict(treasure=False, delta=-.1)),
         }
     elif kind == 'treasure':
-        clue = f'{subject}中的遗藏' + ('仍完好，但保全阵同时护持守卫。' if floor['treasure'] else '已经损毁，尚存的隔离环仍护持守卫；不能恢复已毁遗藏。')
-        clue += '刻文说明：拆除隔离环能削弱守卫，投入法力可将护持仅留在遗藏一侧。'
+        branch = 0 if floor['treasure'] else 1
         outcomes = {
-            'a': ('拆除隔离环，放弃关联遗藏', 0., 0., dict(treasure=False, guard=False, bonus=False, delta=-.08), '隔离环拆除，关联遗藏不再可得，守卫护持减弱。'),
-            'b': ('以自身法力隔离护持', .08, 0., dict(guard=False, bonus=False), '你支付法力，护持与守卫分离；已损毁遗藏仍不能复原。'),
-            'c': ('保留护持，承受更强守卫', 0., 0., dict(bonus=True), '护持保留，守卫获得余灵增幅；遗藏状态不变。'),
+            'a': (0., 0., dict(treasure=False, guard=False, bonus=False, delta=-.08)),
+            'b': (.08, 0., dict(guard=False, bonus=False)),
+            'c': (0., 0., dict(bonus=True)),
         }
     else:
-        feeds = positive != floor['supply']
-        clue = f'{subject}所接阵枢的灵光' + ('流入守卫，供能刻线朝向甲胄。' if feeds else '从守卫流向阵枢，抽能刻线朝向石槽。')
-        clue += '此前铜管' + ('仍在运行。' if floor['supply'] else '已断，备用接点承担当前回路。')
-        if floor['realm'] >= 9:
-            clue += '这也是守卫展开邻域的接点；断开真实供能接点可封停该邻域，普通战力下降不会自行解除金光。'
+        feeds = positive != floor['supply']; branch = 0 if feeds else 1
         outcomes = {
-            'a': ('关闭当前刻线接点', .05, 0. if feeds else .04, dict(delta=-.08 if feeds else .08, field=False if feeds else floor['field'], guard=False if feeds else floor['guard']), '真实供能切断，守卫强化解除' + ('，邻域接点封停。' if floor['realm'] >= 9 and feeds else '。') if feeds else '抽能停止，守卫威能恢复；邻域资格没有解除。'),
-            'b': ('接通备用刻线接点', .05, .04 if feeds else 0., dict(delta=.08 if feeds else -.08, field=floor['field'] if feeds else False), '供能增强，守卫威能提高。' if feeds else '抽能稳定，守卫威能降低' + ('，邻域接点封停。' if floor['realm'] >= 9 else '。')),
-            'c': ('保留当前阵枢', 0., 0., {}, '当前阵枢保留，按已有局势迎战。'),
+            'a': (.05, 0. if feeds else .04, dict(delta=-.08 if feeds else .08, field=False if feeds else floor['field'], guard=False if feeds else floor['guard'])),
+            'b': (.05, .04 if feeds else 0., dict(delta=.08 if feeds else -.08, field=floor['field'] if feeds else False)),
+            'c': (0., 0., {}),
         }
-    return f'{subject} · {kind}', clue, outcomes
+    scene = WORLD_SYSTEMS['trial_sites']['scenes'][kind]
+    clue = scene['clues'][branch]
+    if 'previous' in scene:
+        prior = floor['cooling'] if kind == 'seal' else floor['supply']
+        clue += scene['previous'][0 if prior else 1]
+    result = {}
+    for index, (key, (mp, hp, changes)) in enumerate(outcomes.items()):
+        summary = scene['results'][index]
+        if changes.get('delta', 0):
+            summary += '守关者气息' + ('衰落。' if changes['delta'] < 0 else '增强。')
+        if hp: summary += '因果相冲，你受到了反噬。'
+        if changes.get('treasure') is False: summary += '这一份遗藏已不可得。'
+        if changes.get('field') is False: summary += '守关者的道域归于沉寂。'
+        result[key] = (scene['choices'][index], mp, hp, changes, summary)
+    return scene['title'], clue, result
 
 
 def available(game, site, floor, choice):
@@ -198,12 +194,12 @@ def project_event(game):
     for key in floor['nodes'][floor['index']]['order']:
         label, mp, _, _, _ = outcomes[key]
         risk = max(row[2] for row in outcomes.values())
-        cost = f'；法力上限 -{mp:.0%}' if mp else '；不消耗法力'
+        cost = f'；消耗法力上限的 {mp:.0%}' if mp else '；不消耗法力'
         warning = f'；判断失当可能损失 {risk:.0%} 气血上限' if risk else ''
         choices.append(dict(id=key, text=label + cost + warning,
                             enabled=available(game, site, floor, key), disabled_reason='所在地或状态已变化，或气血、法力不足'))
     choices.append(dict(id='pause', text='暂停离开，保留本层局势', enabled=available(game, site, floor, 'pause'), disabled_reason='当前受控状态不能离开'))
-    return dict(id=event_id(floor), title=f"万象试境 · 第 {floor['number']} 层 · 事件 {floor['index'] + 1}/5",
+    return dict(id=event_id(floor), title=f"{title} · 事件 {floor['index'] + 1}/5",
                 body=clue, choices=choices)
 
 
@@ -228,7 +224,7 @@ def public(game, maps):
     for number, realm in enumerate(REALM_ROWS[world], 1):
         saved = site['floors'].get(str(number))
         _, layer = rank_for_floor(world, number)
-        rows.append(dict(number=number, realm_name=REALM_NAMES[realm], layer=layer,
+        rows.append(dict(number=number, name=floor_name(world, number), realm_name=REALM_NAMES[realm], layer=layer,
                          status=saved['status'] if saved else 'unvisited', unlocked=number <= site['cleared'] + 1))
     view = dict(enabled=True, available=True, active=active, world=world, site_id=site['id'],
                 world_name=WORLD_SYSTEMS['world_names'][world], tier=WORLD_TIERS[world],
@@ -237,7 +233,7 @@ def public(game, maps):
                 unavailable_reason=reason, session=None)
     if floor:
         view['session'] = dict(world=active_site['world'], number=floor['number'], status=floor['status'],
-            floor_id=floor['id'], revision=floor['revision'], event_index=floor['index'],
+            name=floor_name(active_site['world'], floor['number']), floor_id=floor['id'], revision=floor['revision'], event_index=floor['index'],
             boss_name=floor['boss_name'], realm_name=REALM_NAMES[floor['realm']], layer=floor['layer'],
             known=[row['summary'] for row in floor['history']], attempts=floor['attempts'], result=copy.deepcopy(floor['result']),
             can_pause=available(game, active_site, floor, 'pause'))
@@ -271,9 +267,9 @@ def target_for(site, floor):
                   members=[member], natural_terrain='开阔', artificial_conditions=[],
                   static_resource_ids=[key], enemy_buffs=[])
     if floor['guard']:
-        target['enemy_buffs'].append(dict(id='trial_guard', name='阵甲供能', stat='guard', multiplier=1.2))
+        target['enemy_buffs'].append(dict(id='trial_guard', name='香火庇护', stat='guard', multiplier=1.2))
     if floor['bonus']:
-        target['enemy_buffs'].append(dict(id='trial_residue', name='余灵增幅', stat='might', multiplier=1.1))
+        target['enemy_buffs'].append(dict(id='trial_residue', name='旧愿加持', stat='might', multiplier=1.1))
     if floor['realm'] >= 9:
         domain_id = key + '_field'
         member['transcendence'] = dict(version=1, conversion=1, capacity=1200., current=floor['energy'],
@@ -323,6 +319,8 @@ def command(deps, game_id, action, payload):
             # ordinal keeps repeated late and early floors strictly increasing.
             base = expected_combat_power(realm, layer) * (1 + .12 * ordinal)
             floor = generate(game.seed, world, number, base, pool)
+            from .generated_loot import generate_rewards
+            floor['rewards'] = generate_rewards(game.seed, world, number, realm, game.player.path, WORLD_SYSTEMS['trial_sites']['reward_names'])
             site['floors'][str(number)] = floor
         if not game.trial_site_state:
             game.trial_site_state = dict(version=VERSION, sites={}, active=None)
@@ -351,7 +349,7 @@ def command(deps, game_id, action, payload):
                 raise ValueError('当前没有此选项，或气血、法力不足')
             _, _, outcomes = situation(floor)
             _, mp, hp, updates, summary = outcomes[choice]
-            for effect in ([{'type': 'restore_mp', 'value': -mp}] if mp else []) + ([{'type': 'damage', 'value': hp, 'reason': '试境机关失衡'}] if hp else []):
+            for effect in ([{'type': 'restore_mp', 'value': -mp}] if mp else []) + ([{'type': 'damage', 'value': hp, 'reason': '试境因果反噬'}] if hp else []):
                 _, effect_text = deps.effect(effect, game, pending, rng)
                 summary += effect_text
             for name, value in updates.items():
@@ -397,10 +395,14 @@ def command(deps, game_id, action, payload):
             offered = [row for index, row in enumerate(floor['rewards']) if index == 0 or floor['treasure']]
             for row in offered:
                 catalog = TECHNIQUE_CATALOG if row['kind'] == 'technique' else ITEM_CATALOG
-                if row['content_id'] not in catalog:
+                if 'roll' not in row and row['content_id'] not in catalog:
                     raise ValueError('奖励内容已不可用，保留本层记录')
             summaries = []
             for row in offered:
+                if 'roll' in row:
+                    from .generated_loot import grant
+                    summaries.append(grant(game, row))
+                    continue
                 effect = {'type': 'learn_technique', 'technique_id': row['content_id']} if row['kind'] == 'technique' else {'type': 'add_item', 'item_id': row['content_id'], 'quantity': 1}
                 _, summary = deps.effect(effect, game, {}, rng)
                 summaries.append(summary)

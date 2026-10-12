@@ -10,6 +10,7 @@ from playwright.sync_api import sync_playwright
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item, max_mp
+from scripts.browser_navigation import click_control
 
 class Quiet(server.Handler):
     def log_message(self,*args):pass
@@ -59,7 +60,7 @@ def main():
                 assert engine.store.load(game.id).player.puppets[0]['form']=='dragon'
                 page.evaluate("UtilityPanels.open('captive')")
                 training=page.locator('.owned-training').first
-                training.locator('summary').click()
+                click_control(training.locator('summary'))
                 training.get_by_label('培养方向').select_option('body')
                 training.get_by_label('培养轮数').select_option('5')
                 training.get_by_role('button',name='培养炼体 · 5轮',exact=True).click()

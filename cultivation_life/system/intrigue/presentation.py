@@ -168,7 +168,10 @@ def _public_intrigue_system(deps: IntriguePresentationDependencies, game: GameSt
                     "relationship": "道友" if any(str(row.get("id", "")) == npc_id for row in game.player.dao_friends) else "故交",
                 })
             candidates.sort(key=lambda row: (-row["affinity"], -row["realm_index"]))
+        from .leadership import candidates as leader_candidates
+        eligible_leaders = leader_candidates(game, record, deps._intrigue_members(game, kind, faction_id)) if kind == 'sect' else {}
         sections.append({
+            'leader_candidates': [{'id': identity, 'name': name} for identity, name in eligible_leaders.items()],
             "kind": kind, "kind_name": {"sect": "宗门", "family": "家族", "race": "种族"}[kind],
             "id": faction_id, "name": deps._intrigue_faction_name(game, kind, faction_id),
             "control_authority": deps._intrigue_has_control(game, kind, faction_id),

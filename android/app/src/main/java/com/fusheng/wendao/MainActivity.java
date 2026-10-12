@@ -32,6 +32,8 @@ public class MainActivity extends Activity {
     private boolean destroyed;
     private static final int DEBUG_EXPORT = 5701, DEBUG_IMPORT = 5702;
     private String pendingDebugExport;
+    private static final int PRESET_EXPORT=5703, PRESET_IMPORT=5704;
+    private String pendingPresetExport;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -121,6 +123,19 @@ public class MainActivity extends Activity {
     }
 
     public class Bridge {
+        @JavascriptInterface public void exportStartPreset(String text) {
+            if(text==null || text.length()>1024*1024)return;
+            runOnUiThread(()->{if(destroyed || pendingPresetExport!=null)return;
+                pendingPresetExport=text;Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.setType("application/json");intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.putExtra(Intent.EXTRA_TITLE,"浮生问道-开局预设.json");startActivityForResult(intent,PRESET_EXPORT);
+            });
+        }
+        @JavascriptInterface public void importStartPreset() {
+            runOnUiThread(()->{if(destroyed)return;Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.setType("application/json");intent.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(intent,PRESET_IMPORT);
+            });
+        }
         @JavascriptInterface public void requestDebugMode() {
             runOnUiThread(() -> {
                 if (destroyed) return;
@@ -187,6 +202,26 @@ public class MainActivity extends Activity {
 
     @Override protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
+        if(request==PRESET_EXPORT || request==PRESET_IMPORT){
+            String exporting=pendingPresetExport;pendingPresetExport=null;
+            if(result!=RESULT_OK || data==null || data.getData()==null)return;
+            new Thread(()->{try{
+                if(request==PRESET_EXPORT){
+                    try(java.io.OutputStream out=getContentResolver().openOutputStream(data.getData())){
+                        if(out==null || exporting==null)throw new java.io.IOException("无法写入预设");out.write(exporting.getBytes(StandardCharsets.UTF_8));
+                    }
+                    runOnUiThread(()->{if(!destroyed)web.evaluateJavascript("window.CustomStart?.notify('预设已保存。')",null);});
+                }else{
+                    ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+                    try(InputStream in=getContentResolver().openInputStream(data.getData())){
+                        if(in==null)throw new java.io.IOException("无法读取预设");byte[] buffer=new byte[8192];int n;
+                        while((n=in.read(buffer))!=-1){if(bytes.size()+n>1024*1024)throw new java.io.IOException("预设超过 1 MiB");bytes.write(buffer,0,n);}
+                    }
+                    String text=new String(bytes.toByteArray(),StandardCharsets.UTF_8);
+                    runOnUiThread(()->{if(!destroyed)web.evaluateJavascript("window.CustomStart?.beginNativeImport()", ignored -> deliverPresetImport(text, 0));});
+                }
+            }catch(Exception error){runOnUiThread(()->{if(!destroyed)web.evaluateJavascript("window.CustomStart?.notify("+org.json.JSONObject.quote("预设操作失败："+error.getMessage())+")",null);});}},"preset-document").start();return;
+        }
         if (request != DEBUG_EXPORT && request != DEBUG_IMPORT) return;
         String exporting = pendingDebugExport;
         pendingDebugExport = null;
@@ -219,6 +254,18 @@ public class MainActivity extends Activity {
                     "window.DebugConsole?.notify(" + org.json.JSONObject.quote("复现包操作失败：" + error.getMessage()) + ")", null); });
             }
         }, "debug-document").start();
+    }
+
+    private void deliverPresetImport(String text, int offset) {
+        if (destroyed) return;
+        if (offset == text.length()) {
+            web.evaluateJavascript("window.CustomStart?.finishNativeImport()", null);
+            return;
+        }
+        int end = Math.min(offset + 48 * 1024, text.length());
+        String chunk = org.json.JSONObject.quote(text.substring(offset, end));
+        web.evaluateJavascript("window.CustomStart?.appendNativeImport(" + chunk + ")",
+                ignored -> deliverPresetImport(text, end));
     }
 
     private void deliverDebugImport(String text, int offset) {

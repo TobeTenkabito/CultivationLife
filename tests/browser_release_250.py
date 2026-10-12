@@ -13,7 +13,7 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def main():
     output=ROOT/'build/release-250-browser';output.mkdir(parents=True,exist_ok=True)
@@ -33,8 +33,8 @@ def main():
                             errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}')
                             page.wait_for_selector('#custom-start')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
-                            page.locator('#custom-start > summary').click()
+                            click_control(page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]'))
+                            click_control(page.locator('#custom-start > summary'))
                             page.locator('#custom-world').select_option('celestial')
                             page.locator('#custom-realm').select_option('11')
                             page.locator('#custom-layer').select_option('9')
@@ -43,13 +43,13 @@ def main():
                             assert field.get_attribute('inputmode')=='numeric'
                             page.locator('#custom-item-search').fill('spirit_stone')
                             page.locator('#custom-item').select_option('spirit_stone')
-                            page.get_by_role('button',name='100 万',exact=True).click()
-                            page.locator('#custom-add-item').click()
+                            click_control(page.get_by_role('button',name='100 万',exact=True))
+                            click_control(page.locator('#custom-add-item'))
                             field=page.locator('#custom-bag-spirit_stone');field.click();page.keyboard.type('2500000')
                             assert field.input_value()=='2500000'
                             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
                             page.locator('#custom-start').screenshot(path=str(output/f'{theme}-{width}-numbers.png'))
-                            page.locator('#custom-start-submit').click()
+                            click_control(page.locator('#custom-start-submit'))
                             page.wait_for_function('game && !busy && game.player.realm_index===11')
                             game=engine._load(page.evaluate('game.id'))
                             assert game.player.immortal_veins=={'9':27,'10':27,'11':24}
@@ -73,11 +73,11 @@ def main():
                             page.wait_for_function('!busy && game.spatial.scene.society.families[0].joined')
                             assert page.locator('#family-card').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
                             page.locator('#family-card').screenshot(path=str(output/f'{theme}-{width}-family.png'))
-                            page.locator('#family-toggle').click()
-                            page.locator('[data-action=rest]').click()
+                            click_control(page.locator('#family-toggle'))
+                            click_control(page.locator('[data-action=rest]'))
                             page.wait_for_function('!busy && !!game.pending_event')
                             assert page.evaluate('game.pending_event.id.startsWith("EVT_WANDER_SHARED_")')
-                            page.locator('#event-choices button').last.click()
+                            click_control(page.locator('#event-choices button').last)
                             page.wait_for_function('!busy && !game.pending_event')
                             assert not errors,errors
                             page.close()

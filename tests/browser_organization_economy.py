@@ -16,7 +16,7 @@ from cultivation_life.system.economy import organizations as finance
 from test_family_expansion import family_game
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control, reveal_subpage
 
 def prepare(engine):
     game = family_game(engine)
@@ -61,28 +61,28 @@ def main():
                             page.on('pageerror', lambda error: errors.append(str(error)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}')
                             page.wait_for_function('configData && window.GameThemes')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            click_control(page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]'))
                             page.evaluate('async id=>loadGame(id)', gid)
                             navigation_locator(page,'[data-panel-target=family]').click()
                             saved = engine.store.load(gid)
                             source = finance.key('family', saved.family.id)
                             before = finance.balance(saved, source)
-                            page.locator('[data-family-funds]').fill('1000')
-                            page.get_by_role('button', name='注资', exact=True).click()
+                            reveal_subpage(page, page.locator('[data-family-funds]')).fill('1000')
+                            click_control(page.get_by_role('button', name='注资', exact=True))
                             page.wait_for_function('!busy && game.family.ledger.resources===' + str(before + 1000))
                             saved = engine.store.load(gid)
                             assert finance.balance(saved, source) == before + 1000
-                            page.get_by_role('button', name='组织经营采集（每年一次）', exact=True).click()
+                            click_control(page.get_by_role('button', name='组织经营采集（每年一次）', exact=True))
                             page.wait_for_function('!busy && game.family.gather_used')
                             assert page.get_by_role('button', name='本年已经营', exact=True).is_disabled()
-                            page.locator('#family-card .organization-finance summary').click()
+                            click_control(page.locator('#family-card .organization-finance summary'))
                             assert '驻地产出' in page.locator('#family-card .organization-finance').inner_text()
                             settle_panel(page, '#family-card')
                             assert page.locator('#family-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             page.locator('#family-card .organization-finance').scroll_into_view_if_needed()
                             page.screenshot(path=str(output / f'{theme}-{width}-family.png'))
                             navigation_locator(page,'[data-panel-target=faction]').click()
-                            page.locator('#faction-card .organization-finance summary').click()
+                            click_control(page.locator('#faction-card .organization-finance summary'))
                             assert '福利实付' in page.locator('#faction-card .organization-finance').inner_text()
                             settle_panel(page, '#faction-card')
                             page.screenshot(path=str(output / f'{theme}-{width}-sect.png'))

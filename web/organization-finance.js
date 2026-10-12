@@ -9,7 +9,7 @@
     section.append(title);
     const metrics = document.createElement('div');
     metrics.className = 'family-metrics';
-    for (const [label, value] of [['最近结算收入', data.income], ['已付开支', data.expense], ['经营养护实付', data.operating_paid], ['供养缺口', data.shortfall], ['福利应付', data.benefit_due], ['福利实付', data.benefit_paid]]) {
+    for (const [label, value] of [['最近结算收入', data.income], ['已付开支', data.expense], ['经营养护实付', data.operating_paid], ['供养缺口', data.shortfall], ['福利应付', data.benefit_due], ['福利实付', data.benefit_paid], ['盈余分红', data.dividend_paid]]) {
       const row = document.createElement('span'), name = document.createElement('small'), amount = document.createElement('b');
       name.textContent = label; amount.textContent = num(value); row.append(name, amount); metrics.append(row);
     }

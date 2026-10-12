@@ -30,8 +30,10 @@ def validate_guixu_catalog(
         "human", "spirit", "demon", "true_demon", "phantom_underworld", "hell",
         "monster_realm", "celestial", "asura", "nether", "reincarnation",
     }
-    if len(dungeons) != len(expected_worlds) or {row.get("world") for row in dungeons} != expected_worlds:
-        raise ContentError("归墟必须在本体十一界各配置一座副本")
+    if not len(expected_worlds) <= len(dungeons) <= 4 * len(expected_worlds) or {row.get("world") for row in dungeons} != expected_worlds:
+        raise ContentError("归墟须覆盖本体十一界，且每界最多四座副本")
+    if any(sum(row.get('world') == world for row in dungeons) > 4 for world in expected_worlds):
+        raise ContentError("归墟同界副本超过四座上限")
     settings = document.get("settings", {})
     if int(settings.get("draw_per_cycle", 0)) <= 0:
         raise ContentError("归墟每届抽取数量必须为正数")
@@ -79,6 +81,8 @@ def validate_guixu_catalog(
         entry_location = locations.get(str(dungeon.get("entry_location_id", "")))
         if entry_location is None:
             raise ContentError(f"归墟副本 {dungeon_id} 的入口地域不存在")
+        if dungeon.get('unrestricted_entry') and int(entry_location.get('min_realm_index', 0)) > 0:
+            raise ContentError(f"归墟副本 {dungeon_id} 必须位于无境界门槛的地域")
         for field in ("max_entry_rank", "eject_rank"):
             rank = dungeon.get(field)
             if (

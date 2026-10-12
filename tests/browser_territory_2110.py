@@ -71,7 +71,7 @@ def main():
                             # Discoverable shortcuts in the actual DLC panel,
                             # with lazy map rendering and no gameplay mutation.
                             stored=engine.store._path(identity).read_bytes()
-                            for view in ['guide','decisions','influence']:
+                            for view in ['decisions','influence']:
                                 navigation_locator(page,'[data-panel-target=intrigue]').click()
                                 page.locator(f'[data-territory-entry={view}]').click()
                                 assert page.locator('#map-card').evaluate('n=>n.classList.contains("panel-open")')
@@ -119,7 +119,8 @@ def main():
                                 assert page.evaluate("Array.from(document.querySelectorAll('[data-organization-action]:not([data-organization-action=relocate])')).every(n=>n.disabled)")
                                 page.evaluate('renderButtons()')
                                 assert page.evaluate("Array.from(document.querySelectorAll('[data-organization-action]:not([data-organization-action=relocate])')).every(n=>n.disabled)")
-                                page.locator('[data-atlas-view=guide]').click();assert page.locator('.atlas-policy-cards article').count()==4
+                                assert page.locator('[data-atlas-view=guide]').count()==0
+                                page.locator('[data-atlas-view=influence]').click()
                                 assert engine.store._path(made['id']).read_bytes()==stored
                                 assert not errors,errors
                                 rows.append(dict(role=role,width=width,status='passed'));page.close()

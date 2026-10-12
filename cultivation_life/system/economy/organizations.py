@@ -199,10 +199,14 @@ def public_finance(game, kind, identity):
         workforce=dict(row.get('workforce', {})), labor_capacity=row.get('labor_capacity', 0),
         expected_upkeep=row.get('expected_upkeep', 0), supply_coverage=row.get('supply_coverage',1),
         supply_expense=row.get('supply_expense',0),supplies_consumed=row.get('supplies_consumed',0),
-        operating_due=row.get('operating_due',0),operating_paid=row.get('operating_paid',0))
+        operating_due=row.get('operating_due',0),operating_paid=row.get('operating_paid',0),
+        dividend_due=row.get('dividend_due',0),dividend_paid=row.get('dividend_paid',0),dividend_rate=row.get('dividend_rate',0))
 
 
 def welfare(game, entity):
+    if (not game.player.alive or entity.extinct or entity.kind != 'sect'
+            or game.player.faction_id != entity.id or game.player.world != entity.world):
+        return 0.
     row = register(game, 'sect', entity.id, entity.world)
     if row.get('welfare_year', -1) >= game.player.age:
         return 0.
@@ -213,4 +217,17 @@ def welfare(game, entity):
     paid=pay(game,source,f'background:{entity.world}',min(due,max(0,balance(game,source)-reserve)),'宗门年度修炼福利采购')
     row['benefit_due'], row['benefit_paid'] = due, paid
     row['expense'] += paid
+    from ..organization_heritage import controls, decision
+    rate = .15 if controls(game, entity) else .08 if decision(game, entity) else .03
+    office = game.intrigue_state.get('factions', {}).get(f'sect:{entity.id}', {})
+    if (not game.player.imprisonment and office.get('positions', {}).get('leader') == 'player'
+            and office.get('positions', {}).get('guest_elder') != 'player'
+            and not any(g.get('npc_id') == 'player' for g in office.get('guests', []))):
+        rate = round(rate + .04, 2)
+    surplus = max(0, row['income'] - row['expense']) if not row.get('shortfall') else 0
+    dividend_due = int(surplus * rate)
+    dividend = pay(game, source, 'player', min(dividend_due, max(0, balance(game, source)-reserve)), '宗门年度盈余分红')
+    row.update(dividend_due=dividend_due, dividend_paid=dividend, dividend_rate=rate)
+    row['expense'] += dividend
+    row['supply_budget_credit'] = min(row.get('supply_budget_credit',0), max(0,balance(game,source)-reserve))
     return paid / due
