@@ -314,7 +314,8 @@
     "last_saved_with_game_version": "history",
     "version": "history",
     "map_war_last_encounter_unit": "clock",
-    "monster_civilization_state": "global"
+    "monster_civilization_state": "global",
+    "generated_event_state": "session"
   },
   "true_form_ownership_notes": {
     "Player.world_voisinages.nether.true_form": "个人固定原始种属、祖谱编号与合法规则快照、主辅权能及阶段锁；仅幽冥界妖修九阶以上生效，离界或关闭 DLC 沉寂并保留。未知版本/错误编号保留原记录且禁止执行，不随机重建。levels/active 仍为唯一培养与上阵记录，元力只用既有仙窍。",
@@ -328,5 +329,8 @@
   },
   "monster_civilization_ownership_notes": {
     "GameState.monster_civilization_state": "独立 DLC 文化与生态记录按原 world/location 分域，不携带人物、物资、账户或改变玩家 world；显式考察激活，关闭冻结，不补算。种群为非 NPC 聚合数、邻接迁徙两端守恒；氏族仅引用权威人物 ID，分支并族转移份额和成员，祖源编号永久保留。观察快照归发现者，历史有界；王庭绑定原万妖宫人物和 5/4/3/2/1 票重，无财政写入，离界及独立空间冻结政治。"
+  },
+  "generated_event_ownership_notes": {
+    "GameState.generated_event_state": "本体种子异闻：序号、生成版本、原 world/location/instance、未完成情境与固定奖励归原会话；页面仅投影线索与合法选项，不发送隐藏后果。已处理结果只保留最近一条，真实资源使用原事件效果入口。本地勘察不移动玩家、不创建人物或复制资源池；普通移动不得跳过待处理事件，场景不匹配拒绝提交。只支持结构 10，不转换结构 1–9。"
   }
 }

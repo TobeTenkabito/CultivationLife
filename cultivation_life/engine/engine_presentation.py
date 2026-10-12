@@ -231,6 +231,8 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "updated_at": game.updated_at,
         "player": player_data,
         "pending_event": game.pending_event,
+        "generated_event": {"pending": bool(game.generated_event_state.get("active")),
+                            "last_result": copy.deepcopy(game.generated_event_state.get("last_result"))},
         "last_combat_report": copy.deepcopy(game.last_combat_report),
         "settings": {**game.settings, 'manual_combat_plan': bool(game.player.combat_plan.get('manual'))},
         "combat_plan": public_plan(game.player),

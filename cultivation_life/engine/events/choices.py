@@ -5,6 +5,7 @@ from ...content_registry import FACTION_SYSTEMS
 from ...models import GameState, HistoryRecord
 from ...runtime import decode_rng, encode_rng, now_iso
 from ..dependencies import ChoiceDependencies
+from ...system import generated_events
 
 
 def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: str | None = None) -> dict[str, Any]:
@@ -21,8 +22,15 @@ def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: 
         raise ValueError('当前事件没有提供此选项')
     if offered.get('enabled') is False:
         raise ValueError(offered.get('disabled_reason', '当前条件不满足'))
+    generated = generated_events.is_generated(pending)
+    if generated and event_id is None:
+        raise ValueError("提交随机异闻必须提供本次事件编号")
+    if generated:
+        event = generated_events.definition_for(game, pending)
+        generated_events.require_scene(game, game.generated_event_state["active"], choice_id)
+    else:
+        event = deps.events_by_id[pending["id"]]
     followup_event = pending.get("_followup_event")
-    event = deps.events_by_id[pending["id"]]
     tags = event.get("tags", [])
     history_tags = pending.get("_history_tags", tags)
     shareholder_option = (
@@ -62,11 +70,17 @@ def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: 
             result = outcome
         if not game.player.alive:
             break
+    generated_result = generated_events.finish(game, pending, choice_id) if generated else None
     after = deps._snapshot(game.player)
+    if generated:
+        summaries.insert(0, choice["result_text"])
+    difference = deps._diff(before, after)
+    if generated_result:
+        difference["generated_event"] = generated_result
     game.history.append(HistoryRecord(
         event["id"], event.get("version", 1), game.player.age, event["title"], choice_id, result,
         " ".join(filter(None, summaries)) or choice.get("result_text", "你做出了选择。"),
-        deps._diff(before, after), history_tags,
+        difference, history_tags,
     ))
     deps._resolve_breakthroughs(game, rng)
     deps._enforce_guixu_rank_boundary(game, "breakthrough")

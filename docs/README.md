@@ -46,6 +46,7 @@
 - [战斗内核与资源](combat-domains.md)
 - [邻域效果与主战资格](combat-effects.md)
 - [战斗语义 V3](combat-semantics.md)
+- [本体种子随机异闻](generated-events.md)：情境生成、真实选择结算、存档与后续副本复用。
 - [仙界道统与养成](doctrines.md)
 - [仙窍、灵域与交通](immortal-1470.md)
 - [压制与战斗预案](immortal-1471.md)

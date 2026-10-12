@@ -4,6 +4,7 @@ import copy
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from .generated_event_schema import decode_state as decode_generated_event_state
 from .version import BASE_GAME_VERSION
 from .save_schema import SAVE_SCHEMA_VERSION
 from .relationship_schema import normalize_relationship_document
@@ -888,6 +889,7 @@ class GameState:
     updated_at: str
     rng_state: str = ""
     pending_event: dict[str, Any] | None = None
+    generated_event_state: dict[str, Any] = field(default_factory=dict)
     history: list[HistoryRecord] = field(default_factory=list)
     sects: dict[str, SectState] = field(default_factory=dict)
     world_npcs: dict[str, SectNpc] = field(default_factory=dict)
@@ -990,6 +992,7 @@ class GameState:
             "updated_at": self.updated_at,
             "rng_state": self.rng_state,
             "pending_event": self.pending_event,
+            "generated_event_state": decode_generated_event_state(self.generated_event_state),
             "history": [record.to_dict() for record in self.history],
             "sects": {sect_id: sect.to_dict() for sect_id, sect in self.sects.items()},
             "world_npcs": {npc_id: npc.to_dict() for npc_id, npc in self.world_npcs.items()},
@@ -1071,6 +1074,7 @@ class GameState:
             updated_at=value["updated_at"],
             rng_state=value.get("rng_state", ""),
             pending_event=value.get("pending_event"),
+            generated_event_state=decode_generated_event_state(value.get("generated_event_state", {})),
             history=[HistoryRecord(**entry) for entry in value.get("history", [])],
             sects={sect_id: SectState.from_dict(sect) for sect_id, sect in value.get("sects", {}).items()},
             world_npcs={npc_id: SectNpc.from_dict(npc) for npc_id, npc in value.get("world_npcs", {}).items()},

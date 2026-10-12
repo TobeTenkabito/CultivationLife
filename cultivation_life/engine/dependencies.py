@@ -280,6 +280,7 @@ class AdvancementDependencies:
     _personal_combat_step: Callable[..., str]
     _prepare_sage_action: Callable[..., None]
     _prepare_treasure_reward_event: Callable[..., dict[str, Any]]
+    _prepare_generated_event: Callable[..., dict[str, Any]]
     _queue_followup_event: Callable[..., None]
     _select_event: Callable[..., dict[str, Any] | None]
     _sense_training_step: Callable[..., float]
