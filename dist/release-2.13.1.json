@@ -1,0 +1,26 @@
+{
+  "base_version": "2.13.1",
+  "save_schema": 10,
+  "inputs_sha256": "adff7d7da60fb8f1b9e7c802b8ad3e54e4d38ef6f24c735b2d5200250e8145aa",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.0",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0",
+    "trial-sites": "1.1.0"
+  },
+  "full_repository_regression": false,
+  "validation_scope": "User-authorized map, routes, territory, transport, transition and UI checks",
+  "passed_tests": 385,
+  "browser_cases": 88,
+  "worlds": 11,
+  "validation_receipt": "map-release-2131.json",
+  "platform": "Windows",
+  "exe_sha256": "bfa72dbecadfc8af063f2519c6b332b420839f58472e5e62b157b955531e8bb4",
+  "root_launcher_updated": true
+}

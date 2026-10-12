@@ -1,5 +1,6 @@
 """Map validation and indexed topology independent of the loaded content registry."""
 from __future__ import annotations
+import math
 from typing import Any
 
 
@@ -42,7 +43,32 @@ class MapDefinition:
                 raise MapContentError(f"{world_id} 至少需要两个且 ID 唯一的地图")
             if world.get("default") not in indexed:
                 raise MapContentError(f"{world_id} 的默认地图不存在")
+            atlas = world.get("atlas", {})
+            if not isinstance(atlas, dict) or not isinstance(atlas.get("profile", ""), str):
+                raise MapContentError(f"{world_id} 包含无效地图地貌")
+            centers = atlas.get("centers", [])
+            if (not isinstance(centers, list)
+                    or any(not isinstance(center, str) or center not in indexed for center in centers)
+                    or len(centers) != len(set(centers))):
+                raise MapContentError(f"{world_id} 包含无效地图中心")
             for location_id, location in indexed.items():
+                visual = location.get("atlas", {})
+                if not isinstance(visual, dict):
+                    raise MapContentError(f"{world_id}/{location_id} 包含无效地图展示配置")
+                position = visual.get("position")
+                if position is not None and (
+                    not isinstance(position, list) or len(position) != 3
+                    or any(isinstance(v, bool) or not isinstance(v, (int, float))
+                           or not math.isfinite(v) or abs(v) > 10000 for v in position)
+                ):
+                    raise MapContentError(f"{world_id}/{location_id} 包含无效三维坐标")
+                if not isinstance(visual.get("terrain", "land"), str) or visual.get("terrain", "land") not in {"land", "sky", "deep", "snow", "fire"}:
+                    raise MapContentError(f"{world_id}/{location_id} 包含无效地图地形")
+                if not isinstance(visual.get("region", "outer"), str) or visual.get("region", "outer") not in {"core", "border", "outer"}:
+                    raise MapContentError(f"{world_id}/{location_id} 包含无效地图区域")
+                island = visual.get("island")
+                if island is not None and (not isinstance(island, str) or not island.strip() or len(island) > 120):
+                    raise MapContentError(f"{world_id}/{location_id} 包含无效岛屿分组")
                 efficiencies = location.get("qi_gain_efficiencies", {})
                 if (
                     set(efficiencies) != QI_SOURCES

@@ -164,9 +164,11 @@ class MapCatalog(MapDefinition):
             locations.append({
                 **row, "current":location_id == current, "travel_years":years,
                 "travel_status":status, "warning":warning, "route_names":route_names,
+                "route_ids": list(plan.route) if plan else [location_id],
             })
         return {
             "world":world, "world_name":world_name, "current":current,
+            "atlas": self.worlds[world].get("atlas", {}),
             "current_name":self._locations[world][current]["name"], "locations":locations,
             "roads": [{"from":node,"to":neighbor,"years":years}
                       for node,neighbors in self._graphs[world].items()
