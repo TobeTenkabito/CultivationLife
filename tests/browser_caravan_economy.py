@@ -15,7 +15,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.system.economy import state, caravans
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def prepare(engine):
     game=engine._load(engine.create_game('商路经营','supreme_metal','dao',213,preset_id='core')['id'])
@@ -54,29 +54,29 @@ def main():
                             page.on('pageerror',lambda err:errors.append(str(err)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}')
                             page.wait_for_function('configData && window.GameThemes')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            click_control(page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]'))
                             page.evaluate('async id=>loadGame(id)',gid)
                             navigation_locator(page,'[data-panel-target=merchant]').click()
                             group=page.locator('.merchant-alliance').first
-                            group.locator('.merchant-caravans summary').click()
+                            click_control(group.locator('.merchant-caravans summary'))
                             assert group.locator('.caravan-row').count()>=3
                             assert not group.locator('.caravan-row').get_by_text('周转资金',exact=False).count()
                             group.get_by_role('button',name='加入商盟',exact=True).click()
                             page.wait_for_function('!busy && !!game.merchant_system.membership')
-                            group.locator('.merchant-caravans summary').click()
+                            click_control(group.locator('.merchant-caravans summary'))
                             assert '周转资金' in group.locator('.caravan-row').first.inner_text()
                             assert '已上缴' in group.locator('.caravan-row').first.inner_text()
                             before=engine.store._path(gid).read_bytes()
-                            group.locator('.merchant-caravans summary').click()
-                            group.locator('.merchant-caravans summary').click()
+                            click_control(group.locator('.merchant-caravans summary'))
+                            click_control(group.locator('.merchant-caravans summary'))
                             assert engine.store._path(gid).read_bytes()==before
                             assert page.locator('#merchant-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1')
                             group.locator('.merchant-caravans').scroll_into_view_if_needed()
                             page.screenshot(path=str(output/f'{theme}-{width}-merchant.png'))
                             navigation_locator(page,'[data-panel-target=map]').click()
-                            page.get_by_role('button',name='本地市场',exact=True).click()
-                            page.locator('.economy-overview > summary').click()
-                            page.locator('.economy-freight summary').click()
+                            click_control(page.get_by_role('button',name='本地市场',exact=True))
+                            click_control(page.locator('.economy-overview > summary'))
+                            click_control(page.locator('.economy-freight summary'))
                             assert page.locator('.economy-freight').is_visible()
                             page.wait_for_function('getComputedStyle(document.querySelector("#map-card")).opacity==="1" && document.querySelector("#map-card").scrollWidth<=document.querySelector("#map-card").clientWidth+1')
                             assert page.locator('#map-card').evaluate('(n)=>n.scrollWidth<=n.clientWidth+1'), (theme, width, page.locator('#map-card').evaluate('(root)=>({width:root.clientWidth,scroll:root.scrollWidth,overflow:[...root.querySelectorAll("*")].filter(n=>n.scrollWidth>root.clientWidth).map(n=>[n.tagName,n.className,n.scrollWidth,n.textContent.slice(0,100)])})'))

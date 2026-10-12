@@ -1,10 +1,10 @@
 # 归墟之潮：九死一生 · 当前实现规格
 
-维护基线：本体 v1.58.0 / DLC 2.6.0，2026-10-04。沿用旧文件名保持引用；早期“两座副本首版计划”已被十一界实现取代，原策划可从 Git 历史查阅。本页以 `dlc/guixu-tide/content/guixu_tide.json` 和 `cultivation_life/system/guixu/` 为依据。
+维护基线：本体 v2.13.0 / DLC 2.7.0，2026-10-12。沿用旧文件名保持引用；早期“两座副本首版计划”已被十一界实现取代，原策划可从 Git 历史查阅。本页以 `dlc/guixu-tide/content/guixu_tide.json` 和 `cultivation_life/system/guixu/` 为依据。
 
 ## 副本与配置
 
-当前十一座副本，每座四个常规层与一个秘层，各六十条宝池条目，共六百六十条。每轮从剩余宝池抽取最多六条，已消耗条目不按开关或读档重生。表中周期、预告单位为年，窗口单位为副本天。
+当前二十二座副本，每座四个常规层与一个秘层，各六十条宝池条目，共一千三百二十条。每轮从剩余宝池抽取最多六条，已消耗条目不按开关或读档重生。表中周期、预告单位为年，窗口单位为副本天。
 
 | 副本 | 世界 | 入口地图 ID | 周期年 | 提前年 | 开窗天 | 宝池条目 |
 | --- | --- | --- | ---: | ---: | ---: | ---: |
@@ -20,6 +20,20 @@
 | 太初龙渊 | `nether` | `dragon_origin_sea` | 300 | 18 | 49 | 60 |
 | 无时轮回墟 | `reincarnation` | `timeless_grave` | 300 | 21 | 49 | 60 |
 
+| 青岚古洞 | `human` | `wudi_plain` | 100 | 10 | 90 | 60 |
+| 落霞仙府 | `spirit` | `tianyuan_realm` | 200 | 20 | 120 | 60 |
+| 烬骨遗宫 | `demon` | `gathering_baleful_plain` | 120 | 12 | 42 | 60 |
+| 无相魔窟 | `true_demon` | `black_sun_plain` | 240 | 24 | 56 | 60 |
+| 眠龙古泽 | `monster_realm` | `myriad_beast_city` | 180 | 18 | 49 | 60 |
+| 千梦花墟 | `phantom_underworld` | `moonbeast_plain` | 180 | 18 | 49 | 60 |
+| 黄泉旧驿 | `hell` | `ghost_gate` | 210 | 21 | 49 | 60 |
+| 悬星别府 | `celestial` | `ascension_terrace` | 300 | 24 | 56 | 60 |
+| 百战沉台 | `asura` | `asura_gate` | 300 | 24 | 56 | 60 |
+| 归源祖窟 | `nether` | `ancestral_beast_garden` | 300 | 18 | 49 | 60 |
+| 三生故院 | `reincarnation` | `reincarnation_well` | 300 | 21 | 49 | 60 |
+
+新增十一入口全部无地图境界门槛，每个副本用唯一ID维护周期和宝池；只共享不可变的物品定义，不共享剩余宝池、参战人员或领奖状态。
+
 可入最高修为 `max_entry_rank` 与突破传出线 `eject_rank` 分开配置；不可将一个上限同时用于两种判定。层级行程、四气、修士数量和奖品由同一 JSON 配置，玩家面板读取当前值。
 
 ## 时间、夺宝与退出
@@ -34,7 +48,7 @@
 
 ## 存档与职责
 
-`GameState.guixu_state` 保存 `cycles`、`entered_cycles`、`external_treasures` 和 `player_session`。容器自身 `schema_version=1` 是归墟子协议，当前角色存档结构为 8，二者不能混用。
+`GameState.guixu_state` 保存 `cycles`、`entered_cycles`、`external_treasures` 和 `player_session`。容器自身 `schema_version=1` 是归墟子协议，当前角色存档结构为 10，二者不能混用。
 
 | 模块 | 职责 |
 | --- | --- |

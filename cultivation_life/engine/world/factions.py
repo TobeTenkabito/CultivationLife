@@ -338,6 +338,9 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
         reward_text = f"独立战斗力永久 +{3 * funding:g}"
     player.faction_contribution += 1
     sect_name = faction_meta["name"]
+    from ...system.economy.organization_accounts import key as organization_key
+    fiscal = game.economy_v2.get('organizations', {}).get(organization_key('sect', player.faction_id), {})
+    reward_text += f"；盈余分红 {fiscal.get('dividend_paid', 0):,} 灵石"
     game.history.append(HistoryRecord(
         "SYS_FACTION_WELFARE", 1, player.age, f"{sect_name}年度结算", reward_id, "rewarded",
         f"宗门发放{reward_name}：{reward_text}（财政支付 {funding:.0%}）；年度履职记宗门贡献 +1。",

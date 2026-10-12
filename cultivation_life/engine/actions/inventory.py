@@ -60,6 +60,8 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
                 f'炼化{item.name}，获得当前境界一成机缘。',{},['spatial','item']))
             deps.store.save(game)
             return deps.present(game)
+    if item is None and item_id.startswith('RELIC_'):
+        item = next((i for i in game.player.inventory if i.id == item_id and 'generated_loot' in i.tags), None)
     if not item or not has_item(game.player, item_id):
         raise ValueError("物品不存在")
     from ...economy_content import specification

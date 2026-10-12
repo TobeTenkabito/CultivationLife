@@ -18,7 +18,7 @@ from cultivation_life.system.possession_system import enter_host_body
 from test_ghost_phase_two import GhostPhaseTwoTests
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def verify_ghost_controls(page, engine):
     game = engine.store.load(engine.create_game('魂位验收', 'mutated_yin', 'ghost', 212)['id'])
@@ -111,7 +111,7 @@ def main():
                                 engine.store.save(game)
                                 page.evaluate('async id => loadGame(id)', game.id)
                                 navigation_locator(page,'[data-panel-target=relationship]').click()
-                                page.get_by_role('button', name=label, exact=True).click()
+                                click_control(page.get_by_role('button', name=label, exact=True, include_hidden=True))
                                 page.wait_for_function("!busy && game.pending_event?.id === 'EVT_SECT_FIRST_WARNING_001'")
                                 # Return from the relationship window to the main event card.
                                 page.keyboard.press('Escape')

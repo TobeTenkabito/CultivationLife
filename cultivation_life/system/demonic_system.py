@@ -321,7 +321,7 @@ class DemonicSystemMixin:
             "secluded_refine_years": self._secluded_refining_years(player),
             "secluded_refine_multiplier": float(self._demonic_rules().get("soul_seclusion_time_multiplier", 1.2)),
             "breakthrough_bonus": round(player.devouring_breakthrough_bonus, 4),
-            "pill_options": [{"id": item_id, "name": ITEM_CATALOG[item_id].name} for item_id in pill_ids],
+            "pill_options": [{"id": item_id, "name": ITEM_CATALOG[item_id].name} for item_id in pill_ids if item_id in ITEM_CATALOG],
             "technique_options": techniques,
             "puppet_crafting": crafting_public(player),
             "control_mp_cost": round(max_mp(player) * float(self._demonic_rules()["control_reinforce_mp_ratio"]), 1),

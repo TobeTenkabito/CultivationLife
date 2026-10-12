@@ -1,7 +1,7 @@
 /* One DLC panel and one navigation control; previews never submit a command. */
 (() => {
   let state, send, isBusy = () => false, identity, selectedFloor;
-  const names = {flow:'灵流回路', cooling:'冷却支路', seal:'封匣压力', treasure:'遗藏取舍', core:'守关阵枢'};
+  const names = {flow:'香火旧愿', cooling:'剑冢听魂', seal:'丹心遗誓', treasure:'月下取舍', core:'照心问道'};
   const paths = {
     tower:'M8 28h32M12 28V14h24v14M9 14l15-9 15 9M17 28V18h14v10M12 5h24M16 5V1h16v4M20 18v10m8-10v10',
     flow:'M4 10h20m-6-5 6 5-6 5M28 26H8m6-5-6 5 6 5M4 18h28',
@@ -45,28 +45,28 @@
   function hero(view) {
     const box = node('header', undefined, 'trial-hero');
     const art = node('div', undefined, 'trial-relic'); art.append(node('i', undefined, 'trial-orbit'), icon('tower'));
-    const copy = node('div', undefined, 'trial-hero-copy'); copy.append(node('small', '万象试境 · 独立 DLC', 'trial-kicker'), node('h3', '探机关，问修持'));
+    const copy = node('div', undefined, 'trial-hero-copy'); copy.append(node('small', '万象试境 · 浮生问道', 'trial-kicker'), node('h3', '入万象，叩道心'));
     copy.append(node('p', `${view.world_name} · ${view.location_name}`), node('span', '五处异闻 / 一位守关者 / 探索零耗时', 'trial-subtitle'));
     const progress = node('div', undefined, 'trial-progress'); progress.style.setProperty('--trial-progress', `${360 * view.cleared / view.total}deg`);
     const center = node('div'); center.append(node('b', `${view.cleared}`), node('small', `/ ${view.total} 层`)); progress.append(center);
     progress.setAttribute('aria-label', `已通过 ${view.cleared}/${view.total} 层`); box.append(art, copy, progress); return box;
   }
   function floors(view, panel) {
-    const box = node('section', undefined, 'trial-level-map'); box.append(node('h4', '试境层图'), node('p', '同境界逐层增强。点选层位查看，沿已解锁路径进入。', 'muted'));
+    const box = node('section', undefined, 'trial-level-map'); box.append(node('h4', '试境层图'), node('p', '山外有山，境中藏境。循来路拾级而上。', 'muted'));
     const grid = node('div', undefined, 'trial-site-floors');
     view.floors.forEach(floor => {
       const completed = floor.status === 'claimed', locked = !floor.unlocked;
       const button = node('button', undefined, `trial-site-floor ${completed ? 'complete' : locked ? 'locked' : 'reachable'}${selectedFloor === floor.number ? ' selected' : ''}`);
       button.type = 'button'; button.dataset.trialFloor = floor.number; button.setAttribute('aria-pressed', String(selectedFloor === floor.number));
       button.append(node('span', String(floor.number).padStart(2, '0'), 'trial-level-number'), icon(completed ? 'check' : locked ? 'lock' : 'tower'));
-      button.append(node('b', floor.realm_name), node('small', `${floor.layer}层 · ${completed ? '已通过' : locked ? '待解锁' : '可续行'}`));
+      button.append(node('b', floor.name), node('small', `${completed ? '已通过' : locked ? '待解锁' : '可续行'}`));
       button.onclick = () => { selectedFloor = floor.number; draw(); }; grid.append(button);
     }); box.append(grid); panel.append(box);
     const floor = view.floors.find(row => row.number === selectedFloor) || view.floors[0];
     const entry = node('section', undefined, 'trial-entry');
     entry.append(icon('route'), node('div', undefined, 'trial-entry-copy'));
-    const copy = entry.lastChild; copy.append(node('h4', `第 ${floor.number} 层 · ${floor.realm_name}${floor.layer}层`));
-    copy.append(node('p', floor.status === 'claimed' ? '此层已取得通行资格，奖励记录保留。' : !floor.unlocked ? '先通过前一层，才能探明此处守关者。' : '五个事件决定守关局势与遗藏，完成后进入自动交锋。'));
+    const copy = entry.lastChild; copy.append(node('h4', `第 ${floor.number} 层 · ${floor.name}`));
+    copy.append(node('p', floor.status === 'claimed' ? '此层已取得通行资格，奖励记录保留。' : !floor.unlocked ? '先通过前一层，才能探明此处守关者。' : '五段因缘，一场问道。所遇皆有回响，所取皆有代价。'));
     if (state.player.location_id !== view.location_id) {
       const route = state.map?.locations?.find(row => row.id === view.location_id);
       copy.append(node('small', route ? `${(route.route_names || []).join(' → ')} · 预计 ${route.travel_years} 年` : '请循正常地图路线抵达此地'));
@@ -79,7 +79,7 @@
     panel.insertBefore(entry, box); if (!view.can_enter) entry.append(node('p', view.unavailable_reason || '当前不能开始挑战', 'trial-unavailable'));
   }
   function route(session) {
-    const track = node('ol', undefined, 'trial-mechanism-route'); track.setAttribute('aria-label', '五处机关探索进度');
+    const track = node('ol', undefined, 'trial-mechanism-route'); track.setAttribute('aria-label', '五处异闻探索进度');
     session.mechanisms.forEach((mechanism, index) => {
       const step = node('li', undefined, `trial-mechanism ${mechanism.status}`);
       const symbol = node('div', undefined, 'trial-mechanism-symbol'); symbol.append(icon(mechanism.kind));
@@ -92,21 +92,22 @@
     const grid = node('div', undefined, 'trial-reward-grid');
     session.rewards.forEach((reward, index) => {
       const tile = node('div', undefined, `trial-reward ${reward.preserved ? '' : 'damaged'}`);
-      tile.append(icon('treasure'), node('small', index ? '关联遗藏' : '基础奖励'), node('b', reward.name), node('span', `${reward.tier}阶 · ${reward.preserved ? '通关可得' : '已损毁'}`)); grid.append(tile);
+      tile.append(icon('treasure'), node('small', index ? '关联遗藏' : '基础奖励'), node('b', reward.name), node('span', `${reward.roll?.quality || ''} · ${reward.preserved ? '通关可得' : '已损毁'}`));
+      if(reward.roll){const labels={combat_bonus:'战力',combat_power:'战力',hp_bonus:'气血',max_hp:'气血',mp_bonus:'法力',max_mp:'法力',opportunity_bonus:'机缘',permanent_intrinsic_hp_bonus:'永久气血',permanent_intrinsic_mp_bonus:'永久法力'};for(const [key,value] of Object.entries(reward.roll.stats))tile.append(node('small',`${labels[key]} +${format(value)}`));}grid.append(tile);
     }); return grid;
   }
   function readiness(session, panel) {
     const box = node('section', undefined, 'trial-guardian-card');
     const header = node('div', undefined, 'trial-guardian-heading'); header.append(icon('guardian'), node('div'));
-    header.lastChild.append(node('small', '守关者'), node('h4', session.boss_name), node('span', `${session.realm_name}${session.layer}层 · 尝试 ${session.attempts} 次`)); box.append(header);
+    header.lastChild.append(node('small', '守关者'), node('h4', session.boss_name), node('span', `${session.name} · 尝试 ${session.attempts} 次`)); box.append(header);
     const strength = node('div', undefined, 'trial-strength'); strength.append(node('span', '当前守关战力'), node('b', format(session.power)), node('small', `基准 ${format(session.base_power)} · ${(session.power_ratio * 100).toFixed(0)}%`));
     const track = node('div', undefined, 'trial-strength-track'), fill = node('span'); fill.style.width = `${Math.max(0, Math.min(100, (session.power_ratio - .7) / .7 * 100))}%`; track.append(fill); strength.append(track); box.append(strength);
     const conditions = node('div', undefined, 'trial-condition-grid');
-    for (const [label, description, active] of [['阵甲',session.guard ? '供能保留 · 防护 ×1.20' : '供能已断',session.guard], ['余灵',session.bonus ? '威能 ×1.10' : '无增幅',session.bonus], ['遗藏',session.treasure ? '保持完好' : '已损毁',!session.treasure]]) {
+    for (const [label, description, active] of [['阵甲',session.guard ? '香火庇护' : '香火已散',session.guard], ['余灵',session.bonus ? '旧愿加持' : '无增幅',session.bonus], ['遗藏',session.treasure ? '保持完好' : '已损毁',!session.treasure]]) {
       const tile = node('div', undefined, `trial-condition ${active ? 'active' : 'clear'}`); tile.append(node('small', label), node('b', description)); conditions.append(tile);
     }
     if (session.realm_name === '真仙' || ['金仙','太乙','大罗'].includes(session.realm_name)) {
-      const tile = node('div', undefined, `trial-condition ${session.field ? 'active' : 'clear'}`); tile.append(node('small','邻域与防护'),node('b',session.field ? '守关域可展开' : '接点已封停'),node('small',session.golden_light ? '护体金光仍有效' : '无护体金光')); conditions.append(tile);
+      const tile = node('div', undefined, `trial-condition ${session.field ? 'active' : 'clear'}`); tile.append(node('small','邻域与防护'),node('b',session.field ? '守关域可展开' : '道域已沉寂'),node('small',session.golden_light ? '护体金光仍有效' : '无护体金光')); conditions.append(tile);
       box.append(meter('守关元力', session.energy, 1200, 'energy'));
     }
     box.append(conditions); panel.append(box); panel.append(rewards(session));
@@ -117,7 +118,7 @@
   }
   function sessionView(view, panel) {
     const session = view.session, header = node('div', undefined, 'trial-session-heading');
-    header.append(node('h4', `第 ${session.number} 层 · ${session.realm_name}${session.layer}层`),node('span', `${session.event_index}/5 处机关已处理`)); panel.append(header, route(session));
+    header.append(node('h4', `第 ${session.number} 层 · ${session.name}`),node('span', `${session.event_index}/5 处异闻已处理`)); panel.append(header, route(session));
     const resources = node('div', undefined, 'trial-player-resources'); resources.append(meter('气血', state.player.hp, state.player.max_hp, 'hp'),meter('法力',state.player.mp,state.player.max_mp,'mp')); panel.append(resources);
     const pending = state.pending_event;
     if (session.status === 'exploring' && pending?.id.startsWith('SYS_TRIAL_SITE_')) {
@@ -141,7 +142,7 @@
       panel.append(control('暂停离开，保留本层局势','pause',payload,!session.can_pause||!!state.pending_event,'trial-pause'));
     }
     if (session.known.length) {
-      const facts = node('details',undefined,'trial-known'); facts.append(node('summary','已知机关与选择记录')); const list = node('ol'); session.known.forEach(text=>list.append(node('li',text))); facts.append(list); panel.append(facts);
+      const facts = node('details',undefined,'trial-known'); facts.append(node('summary','已知异闻与选择记录')); const list = node('ol'); session.known.forEach(text=>list.append(node('li',text))); facts.append(list); panel.append(facts);
     }
   }
   function draw() {
@@ -166,7 +167,7 @@
     notice.classList.toggle('hidden', !view?.active); notice.replaceChildren();
     if (view?.active) {
       if (view.blocked_session) notice.append(node('span','已有守关封锁仍未解除；重新启用万象试境后可续战。'));
-      else {notice.append(icon('tower'),node('span',`万象试境 · 第 ${view.session.number} 层 · ${view.session.event_index}/5 机关`));const link=node('button','查看试境局势');link.type='button';link.onclick=open;notice.append(link);}
+      else {notice.append(icon('tower'),node('span',`万象试境 · 第 ${view.session.number} 层 · ${view.session.event_index}/5 异闻`));const link=node('button','查看试境局势');link.type='button';link.onclick=open;notice.append(link);}
     }
   }
   function badge(location, container) {

@@ -65,12 +65,13 @@
     if (!market.caravans?.length) freight.append(el('p', '当前没有涉及本地的商队运输。'));
     if (market.suppliers?.length) freight.append(el('p', `近期已建模组织与商队的最大供给占比：${Math.round(market.suppliers[0].share * 100)}%。此比例不含背景作坊；新增产出和外来商队会稀释集中度。`));
     const tools = el('div',null,'economy-tools');
-    const input = el('input'); input.type='search'; input.maxLength=80; input.placeholder='查找商品，例如：矿|草|丹'; input.setAttribute('aria-label','查找本地商品'); input.value=search;
-    const regex = el('button','正则');regex.type='button';regex.setAttribute('aria-pressed',String(regexMode));regex.title='开启后支持 ^、$、字符组与 |；关闭后按商品名称查找';
+    const input = el('input'); input.type='search'; input.maxLength=80; input.placeholder='搜索商品名称'; input.setAttribute('aria-label','查找本地商品'); input.value=search;
+    const regex=el('select');regex.setAttribute('aria-label','匹配方式');regex.append(new Option('名称','text'),new Option('表达式','pattern'));regex.value=regexMode?'pattern':'text';
+    const searchButton=el('button','搜索');searchButton.type='button';searchButton.onclick=()=>{search=input.value;filter();};
     const feedback = el('p',null,'muted economy-search-feedback');feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
     const quantity = el('select'); quantity.setAttribute('aria-label','本地市场交易数量');
     for (const value of ['1','10','100']) { const option=el('option',`每笔 ${value} 件`); option.value=value; quantity.append(option); }
-    quantity.value=selectedQuantity; tools.append(input,regex,quantity);
+    quantity.value=selectedQuantity; tools.append(input,searchButton,regex,quantity);
     const note = el('p',`交易手续费 ${Math.round(market.fee_rate*100)}%；买入显示含费总额，卖出显示扣费实得。收购价低于售价。`, 'muted');
     const list = el('div',null,'economy-goods');
     function draw(rows=market.rows.filter(row=>row.name.toLocaleLowerCase().includes(search.toLocaleLowerCase())),searching=false) {
@@ -118,7 +119,7 @@
       };
     }
     input.oninput=()=>{search=input.value;cancelSearch();if(regexMode){draw([],true);feedback.textContent='正在检索…';debounce=setTimeout(filter,180);}else filter();};
-    regex.onclick=()=>{regexMode=!regexMode;regex.setAttribute('aria-pressed',String(regexMode));filter();};
+    regex.onchange=()=>{regexMode=regex.value==='pattern';filter();};
     quantity.onchange=()=>{selectedQuantity=quantity.value;filter();};
     const overview=el('details',null,'economy-overview');
     overview.open=overviewOpen;

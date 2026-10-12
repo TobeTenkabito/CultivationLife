@@ -16,7 +16,7 @@ from cultivation_life.rules import add_item
 from cultivation_life.system.crafting_system import make_crafting_material_instance
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def main():
     with tempfile.TemporaryDirectory() as directory:
@@ -43,12 +43,12 @@ def main():
                 page.evaluate('async id => { await loadGame(id); render(game); }', game_id)
                 navigation_locator(page,'[data-panel-target="merchant"]').click()
                 assert page.locator('.merchant-alliance').count() == 3
-                page.locator('.merchant-alliance').first.get_by_role('button', name='加入商盟', exact=True).click()
+                click_control(page.locator('.merchant-alliance').first.get_by_role('button', name='加入商盟', exact=True))
                 page.wait_for_function('!!game.merchant_system.membership')
                 assert '分部 成员' in page.locator('.merchant-membership').text_content()
-                page.locator('.merchant-task').first.get_by_role('button', name='接取', exact=True).click()
+                click_control(page.locator('.merchant-task').first.get_by_role('button', name='接取', exact=True))
                 page.wait_for_function('!!game.merchant_system.active')
-                page.get_by_role('button',name='执行 / 继续任务',exact=True).click()
+                click_control(page.get_by_role('button',name='执行 / 继续任务',exact=True))
                 page.wait_for_function('!game.merchant_system.active')
                 assert engine._load(game_id).merchant_state['influence']
                 panel = page.locator('.merchant-alliance').first

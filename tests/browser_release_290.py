@@ -8,7 +8,7 @@ from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control, reveal_subpage
 from playwright.sync_api import sync_playwright
 spec=importlib.util.spec_from_file_location('orgfixture',ROOT/'tests/fixtures/organizations-290.py')
 fixture=importlib.util.module_from_spec(spec);spec.loader.exec_module(fixture)
@@ -37,58 +37,59 @@ def main():
                             def settle():page.wait_for_function('!busy')
                             def library():
                                 d=page.locator('#faction-card .organization-heritage')
-                                if not d.evaluate('d=>d.open'):d.locator(':scope > summary').click()
+                                if not d.evaluate('d=>d.open'):click_control(d.locator(':scope > summary'))
                                 return d
                             navigation_locator(page,'[data-panel-target=faction]').click()
-                            library().locator('[data-heritage-action=heritage_learn]').click();settle()
+                            click_control(library().locator('[data-heritage-action=heritage_learn]'));settle()
                             assert any(t.id=='TECH_HUMAN_HERITAGE_1' for t in engine._load(identity).player.known_techniques)
-                            library().locator('[data-heritage-action=heritage_copy]').click();settle()
+                            click_control(library().locator('[data-heritage-action=heritage_copy]'));settle()
                             assert any(i.technique_id=='TECH_HUMAN_HERITAGE_1' for i in engine._load(identity).player.inventory)
-                            library().locator('select').select_option('TECH_HUMAN_HERITAGE_2');library().locator('button[type=submit]').click();settle()
+                            library().locator('select').select_option('TECH_HUMAN_HERITAGE_2');click_control(library().locator('button[type=submit]'));settle()
                             assert len(engine._load(identity).sects[made['player']['faction_id']].heritage['books'])==2
-                            dep=page.locator('#faction-card .organization-depot');dep.locator(':scope>summary').click()
-                            dep.locator('[data-depot-action=depot_request]').first.click();settle()
+                            dep=page.locator('#faction-card .organization-depot');click_control(dep.locator(':scope>summary'))
+                            click_control(dep.locator('[data-depot-action=depot_request]').first);settle()
                             assert engine._load(identity).player.faction_contribution==9
-                            if not dep.evaluate('d=>d.open'):dep.locator(':scope>summary').click()
-                            dep.locator('[data-depot-action=depot_cancel]').click();settle()
+                            if not dep.evaluate('d=>d.open'):click_control(dep.locator(':scope>summary'))
+                            click_control(dep.locator('[data-depot-action=depot_cancel]'));settle()
                             assert engine._load(identity).player.faction_contribution==10
                             navigation_locator(page,'[data-panel-target=map]').click()
-                            page.locator('.teleport-controls>summary').click()
-                            page.locator('[data-teleport-build]').click();page.locator('#game-confirm-accept').click();settle()
+                            click_control(page.locator('.teleport-controls>summary'))
+                            click_control(page.locator('[data-teleport-build]'));click_control(page.locator('#game-confirm-accept'));settle()
                             assert engine._load(identity).economy_v2['teleport_arrays']
                             page.screenshot(path=str(output/f'{theme}-{width}-array.png'))
                             fixture.activities(engine,identity,'scheduled');load()
                             compact=page.evaluate('GameNavigation.isCompact()')
                             if compact:
                                 assert page.locator('[data-navigation-category=economy]').evaluate('b=>b.classList.contains("navigation-notice")')
-                                page.locator('[data-navigation-category=common]').click()
+                                click_control(page.locator('[data-navigation-category=common]'))
                                 assert page.locator('#navigation-current-events [data-navigation-shortcut]').count()==2
-                                page.locator('#navigation-current-events [data-navigation-shortcut=auction]').click()
+                                click_control(page.locator('#navigation-current-events [data-navigation-shortcut=auction]'))
                             else:
                                 assert page.locator('#strategy-dock [data-panel-target=auction].navigation-activity').is_visible()
                                 assert page.locator('#strategy-dock [data-panel-target=exchange].navigation-activity').is_visible()
-                                page.locator('#strategy-dock [data-panel-target=auction]').click()
+                                click_control(page.locator('#strategy-dock [data-panel-target=auction]'))
                             page.wait_for_selector('#auction-card.panel-open');assert '预告' in page.locator('#auction-title').inner_text()
                             fixture.activities(engine,identity,'open');load()
                             if compact:
-                                page.locator('[data-navigation-category=common]').click()
-                                page.locator('#navigation-current-events [data-navigation-shortcut=exchange]').click()
+                                click_control(page.locator('[data-navigation-category=common]'))
+                                click_control(page.locator('#navigation-current-events [data-navigation-shortcut=exchange]'))
                             else:
-                                page.locator('#strategy-dock [data-panel-target=exchange]').click()
+                                click_control(page.locator('#strategy-dock [data-panel-target=exchange]'))
                             page.wait_for_selector('#exchange-card.panel-open');assert '剩余' in page.locator('#exchange-description').inner_text()
                             fixture.activities(engine,identity,'closed');load()
                             if compact:
-                                page.locator('[data-navigation-category=common]').click()
+                                click_control(page.locator('[data-navigation-category=common]'))
                                 assert page.locator('#navigation-current-events').count()==0
-                                page.locator('#navigation-close').click()
+                                click_control(page.locator('#navigation-close'))
                             else:
                                 assert not page.locator('#strategy-dock .navigation-activity').count()
                             fixture.clan(engine,identity);load();navigation_locator(page,'[data-panel-target=family]').click()
-                            page.locator('[data-family]:not(:disabled)').filter(has_text='申请加入').first.click();settle()
+                            click_control(page.locator('[data-family]:not(:disabled)').filter(has_text='申请加入').first);settle()
                             assert engine._load(identity).family_state['membership']['kin'] is False
+                            reveal_subpage(page, page.locator('#family-card .family-overview'))
                             assert '外姓修士' in page.locator('#family-card').inner_text()
                             fixture.succeed(engine,identity);load()
-                            page.locator('[data-family-name]').fill('新本家仙族');page.locator('[data-family]').filter(has_text='使用一次更名资格').click();settle()
+                            reveal_subpage(page, page.locator('[data-family-name]')).fill('新本家仙族');click_control(page.locator('[data-family]').filter(has_text='使用一次更名资格'));settle()
                             assert engine._load(identity).family.name=='新本家仙族'
                             page.reload();page.wait_for_function('!!configData && !busy');load()
                             navigation_locator(page,'[data-panel-target=family]').click()

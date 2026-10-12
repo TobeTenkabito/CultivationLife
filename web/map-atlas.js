@@ -3,12 +3,14 @@
   const layouts=new Map();let selected=null,world=null,gameId=null,faction='',zoom=1,view='influence',display='map',lastRender=null,lockRule=()=>true;
   const el=(tag,text,cls='')=>{const n=document.createElement(tag);n.className=cls;if(text!=null)n.textContent=text;return n;};
   const svg=(tag,a={})=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(a).forEach(([k,v])=>n.setAttribute(k,v));return n;};
-  const colors=['#477e81','#ad7650','#78719a','#649063','#b26b78','#8c854e','#547caa'];
-  const color=id=>{let n=0;for(const c of id)n=(n*31+c.charCodeAt(0))>>>0;return colors[n%colors.length];};
+  let factionColors=new Map();
+  const palette=['#387C92','#BF6338','#7861AC','#4D8550','#B54976','#9C852B','#3563B0','#A44135','#407F77','#865632','#AD57A0','#607539'];
+  const color=id=>factionColors.get(id)||'#698080';
+  const roadKey=(a,b)=>[a,b].sort().join(':');
   const button=(text,action,cls='')=>{const b=el('button',text,cls);b.type='button';b.onclick=action;return b;};
   function open(next='influence',location=null){
     if(!lastRender)return;
-    view=['influence','decisions','guide'].includes(next)?next:'influence';
+    view=['influence','decisions'].includes(next)?next:'influence';
     if(location&&lastRender[0].locations.some(r=>r.id===location))selected=location;
     render(...lastRender);
   }
@@ -18,16 +20,9 @@
     if(!t.can_propose)return '你在本门暂无决策权，仍可查看地方形势与政策。取得本门议事资格后，才能提出地方议案。';
     return '你可提出本门地方议案，须经有权成员多数表决通过；费用与资材由本门府库承担。';
   }
-  function guide(host,t){
-    const box=el('section',null,'atlas-guide');box.append(el('h3','地方影响如何经营'),el('p',authority(t),'atlas-access'));
-    const bands=el('div',null,'atlas-bands');
-    for(const [name,range] of [['中枢地区','90–100'],['核心地区','70–不足90'],['战略要地','50–不足70'],['边缘地区','30–不足50'],['缓冲地区','不足30']]){const r=el('div');r.append(el('strong',name),el('small',range));bands.append(r);}box.append(bands);
-    box.append(el('p','驻地固定 100，宗门传送阵保底 40，据点保底 50。新地必须紧邻己方已有影响的地域；非驻地地区至多容纳三宗，名额已满须先让一方退出。有境界门槛的地域禁止新扩张，已有山门保持原驻地影响。'));
-    const policies=el('div',null,'atlas-policy-cards');
-    const descriptions={stewardship:'减少巡守开支，稳固地方关系。',extraction:'加强采办收益，但养护投入与影响衰退有所增加。',patrol:'重在维持影响，巡守开支较高，采办收益略有减少。',conciliation:'节省养护投入，减缓影响衰退，采办收益有所减少。'};
-    for(const [id,p] of Object.entries(t?.policies||{})){const card=el('article');card.append(el('h4',p.name),el('small',`适用影响 ${p.minimum}–${p.maximum}`),el('p',descriptions[id]||'按当地形势施行。'));policies.append(card);}box.append(policies);
-    box.append(el('p','在“政策与决议”中选择地域，提出投放、建据点、比试或边界袭扰。政策只能用于适用影响范围；本门尚未经营的地域，需先投放或建立据点。'),el('p','地方经营会消耗府库，也影响当地资源获取；同地相对影响越大，所得份额越大。外交或战斗长老可以减缓影响衰退。每次修行或旅行结束后，查看该段岁月的收支与最新形势。'));
-    host.append(box);
+  function bands(host){
+    const box=el('div',null,'atlas-bands');box.setAttribute('aria-label','影响力层级');
+    [['中枢','90–100'],['核心','70–90'],['战略','50–70'],['边缘','30–50'],['缓冲','0–30']].forEach(([name,range])=>{const badge=el('div');badge.append(el('strong',name),el('small',range));box.append(badge);});host.append(box);
   }
   function regionList(host,map,choose){
     const list=el('div',null,'atlas-region-list');
@@ -38,34 +33,35 @@
     }if(!places.length)list.append(el('p','本界暂无该宗门的地方影响。','muted'));host.append(list);
   }
   function layout(map){
-    const key=`${map.world}:${map.locations.map(n=>n.id).join(',')}:${map.roads?.length}`;if(layouts.has(key))return layouts.get(key);
-    const nodes=map.locations.map((n,i)=>({id:n.id,x:500+300*Math.cos(i*2.4),y:360+250*Math.sin(i*2.4)})),index=new Map(nodes.map(n=>[n.id,n]));
-    // Bounded, cached presentation work; never part of a yearly settlement.
-    for(let tick=0;tick<160;tick++){
-      const force=new Map(nodes.map(n=>[n.id,{x:0,y:0}]));
-      for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.max(25,Math.hypot(dx,dy)),f=30000/(d*d*d);force.get(a.id).x+=dx*f;force.get(a.id).y+=dy*f;force.get(b.id).x-=dx*f;force.get(b.id).y-=dy*f;}
-      for(const edge of map.roads||[]){const a=index.get(edge.from),b=index.get(edge.to);if(!a||!b)continue;const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(1,Math.hypot(dx,dy)),f=(d-150)*.015;force.get(a.id).x+=dx/d*f;force.get(a.id).y+=dy/d*f;force.get(b.id).x-=dx/d*f;force.get(b.id).y-=dy/d*f;}
-      nodes.forEach(n=>{const f=force.get(n.id);n.x=Math.max(75,Math.min(925,n.x+Math.max(-8,Math.min(8,f.x))));n.y=Math.max(65,Math.min(635,n.y+Math.max(-8,Math.min(8,f.y))));});
-    }layouts.set(key,index);return index;
+    const key=map.world+':'+map.locations.map(n=>n.id).join(',')+':'+(map.roads||[]).map(r=>roadKey(r.from,r.to)).sort().join(',');
+    if(layouts.has(key))return layouts.get(key);
+    const preset=window.MapLayouts?.[map.world], nodes=new Map();
+    map.locations.forEach((n,i)=>{const p=preset?.points[n.id]||[80+(i%6)*160,80+Math.floor(i/6)*125];nodes.set(n.id,{id:n.id,x:p[0],y:p[1]});});
+    const roads=new Set((preset?.roads||[]).map(([a,b])=>roadKey(a,b)));
+    const links=(map.roads||[]).filter(r=>!roads.has(roadKey(r.from,r.to)));
+    const result={nodes,roads,links};if(layouts.size>=24)layouts.delete(layouts.keys().next().value);layouts.set(key,result);return result;
   }
   function render(map,state,send,locked){
     const host=document.querySelector('#map-atlas');if(!host)return;lastRender=[map,state,send,locked];lockRule=locked;if(world!==map.world||gameId!==state.id){world=map.world;gameId=state.id;selected=map.current;faction='';zoom=1;view='influence';display='map';}if(!map.locations.some(n=>n.id===selected))selected=map.current;
-    host.replaceChildren();host.classList.add('map-atlas');const places=new Map(map.locations.map(n=>[n.id,n])),points=layout(map),bar=el('div',null,'atlas-toolbar');bar.append(el('strong',map.territory?'山川形势 · 宗门影响':'山川形势'));
+    const ids=[...new Set(map.locations.flatMap(n=>(n.influences||[]).map(r=>r.id)))].sort();
+    factionColors=new Map(ids.map((id,i)=>[id,i<palette.length?palette[i]:`hsl(${(i*137.508)%360} 62% ${40+Math.floor(i/palette.length)%3*10}%)`]));
+    host.replaceChildren();host.classList.add('map-atlas');const places=new Map(map.locations.map(n=>[n.id,n])),topology=layout(map),points=topology.nodes,bar=el('div',null,'atlas-toolbar');bar.append(el('strong',map.territory?'山川形势 · 宗门影响':'山川形势'));
     const select=el('select');select.setAttribute('aria-label','地图地点');map.locations.forEach(n=>{const o=el('option',n.name);o.value=n.id;select.append(o);});select.value=selected;select.onchange=()=>{selected=select.value;render(map,state,send,locked);};bar.append(select);
     if(map.territory?.enabled){const filter=el('select');filter.setAttribute('aria-label','影响力宗门');const all=el('option','各方影响');all.value='';filter.append(all);const factions=new Map(map.locations.flatMap(n=>(n.influences||[]).map(r=>[r.id,r.name])));factions.forEach((name,id)=>{const o=el('option',name);o.value=id;filter.append(o);});filter.value=faction;filter.onchange=()=>{faction=filter.value;render(map,state,send,locked);};bar.append(filter);}
     if(view==='influence'&&display==='map')[['−',()=>zoom=Math.max(1,zoom-.5)],['＋',()=>zoom=Math.min(3,zoom+.5)]].forEach(([name,act])=>{const b=button(name,()=>{act();render(map,state,send,locked);});b.setAttribute('aria-label',name==='＋'?'放大地图':'缩小地图');bar.append(b);});host.append(bar);
-    if(map.territory){const nav=el('nav',null,'atlas-view-tabs');nav.setAttribute('aria-label','地方影响功能');for(const [id,name] of [['influence','势力分布'],['decisions','政策与决议'],['guide','机制说明']]){const b=button(name,()=>open(id));b.dataset.atlasView=id;b.setAttribute('aria-pressed',String(view===id));nav.append(b);}host.append(nav);
+    if(map.territory){const nav=el('nav',null,'atlas-view-tabs');nav.setAttribute('aria-label','地方影响功能');for(const [id,name] of [['influence','势力分布'],['decisions','政策与决议']]){const b=button(name,()=>open(id));b.dataset.atlasView=id;b.setAttribute('aria-pressed',String(view===id));nav.append(b);}host.append(nav);
       if(!map.territory.enabled)host.append(el('p',authority(map.territory),'atlas-access'));
-      if(view==='guide'){guide(host,map.territory);return;}
     }
     const choose=id=>{selected=id;render(map,state,send,locked);};
     if(view==='influence'){
     if(map.territory?.enabled){const modes=el('div',null,'atlas-display-tabs');for(const [id,name] of [['map','地图'],['list','地区列表']]){const b=button(name,()=>{display=id;render(map,state,send,locked);});b.dataset.atlasDisplay=id;b.setAttribute('aria-pressed',String(display===id));modes.append(b);}host.append(modes);}
     if(display==='list'&&map.territory?.enabled)regionList(host,map,choose);else{
     const viewport=el('div',null,'atlas-viewport'),drawing=svg('svg',{viewBox:'0 0 1000 710',role:'group','aria-label':`${map.world_name}道路与势力图`});drawing.style.width=`${zoom*100}%`;drawing.style.minWidth=zoom>1?'600px':'';drawing.append(svg('path',{d:'M0 630 Q180 430 330 630 T650 650 T1000 600 V710 H0Z',class:'atlas-mountains'}));
-    for(const edge of map.roads||[]){const a=points.get(edge.from),b=points.get(edge.to);if(a&&b)drawing.append(svg('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'atlas-road'}));}
+    for(const edge of map.roads||[]){const a=points.get(edge.from),b=points.get(edge.to);if(a&&b&&topology.roads.has(roadKey(edge.from,edge.to)))drawing.append(svg('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'atlas-road'}));}
     for(const place of map.locations){const p=points.get(place.id),influences=(place.influences||[]).filter(r=>!faction||r.id===faction),description=influences.map(r=>`${r.name} ${r.value}，${r.band}`).join('；'),g=svg('g',{transform:`translate(${p.x},${p.y})`,class:`atlas-node${place.current?' current':''}${place.id===selected?' selected':''}`,role:'button',tabindex:'0','aria-label':`${place.name}${place.current?'，当前位置':''}${place.min_realm_index?'，有境界门槛':''}${description?'，'+description:''}`,'data-atlas-location':place.id});const title=svg('title');title.textContent=`${place.name}${description?'：'+description:''}`;g.append(title);if(influences.length)g.append(svg('circle',{r:41,fill:color(influences[0].id),'fill-opacity':.08+influences[0].value/500,stroke:'none'}));influences.slice(0,3).forEach((r,i)=>g.append(svg('circle',{r:25+i*7,fill:'none',stroke:color(r.id),'stroke-width':6,'stroke-opacity':.35+r.value/160})));g.append(svg('circle',{r:13,class:'atlas-dot'}));const icon=svg('text',{y:5,'text-anchor':'middle',class:'atlas-seal'});icon.textContent=place.current?'你':place.min_realm_index?'禁':(place.factions||[]).length?'府':(place.wars||[]).length?'战':'·';g.append(icon);const label=svg('text',{y:55,'text-anchor':'middle',class:'atlas-label'});label.textContent=place.name;g.append(label);if(influences.length){const value=svg('text',{y:73,'text-anchor':'middle',class:'atlas-value'});const r=influences.find(r=>r.owned)||influences[0];value.textContent=`${r.owned?'本门 ':''}${r.value}`;g.append(value);}g.onclick=()=>choose(place.id);g.onkeydown=e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();choose(place.id);}};drawing.append(g);}
-    viewport.append(drawing);host.append(viewport);host.append(el('p',map.territory?.enabled?'彩环表示宗门影响，环越深影响越强。驻地固定 100，传送阵保底 40，据点保底 50。':'道路表示实际连接；“你”为当前位置，“府”为势力驻地，“禁”为有境界门槛的地域。','atlas-legend'));
+    viewport.append(drawing);host.append(viewport);
+    if(topology.links.length){const links=el('div',null,'atlas-road-links'),markers=new Map();links.append(el('small','同号路标相连'));topology.links.forEach((edge,i)=>{const a=places.get(edge.from),b=places.get(edge.to);if(!a||!b)return;links.append(button(`〔${i+1}〕${a.name} ↔ ${b.name}`,()=>choose(selected===a.id?b.id:a.id)));for(const id of [a.id,b.id]){if(!markers.has(id))markers.set(id,[]);markers.get(id).push(i+1);}});for(const [id,numbers] of markers){const p=points.get(id),badge=svg('text',{x:p.x,y:p.y-26,'text-anchor':'middle',class:'atlas-route-number'});badge.textContent=`〔${numbers.join('·')}〕`;drawing.append(badge);}host.append(links);}
+    if(map.territory?.enabled)bands(host);
     }
     if(map.territory?.enabled){const legend=el('div',null,'atlas-factions');legend.setAttribute('aria-label','宗门颜色图例');const factions=new Map(map.locations.flatMap(n=>(n.influences||[]).map(r=>[r.id,r.name])));factions.forEach((name,id)=>{const b=button(name,()=>{faction=faction===id?'':id;render(map,state,send,locked);});b.style.setProperty('--sect-color',color(id));b.setAttribute('aria-pressed',String(faction===id));legend.append(b);});host.append(legend);}
     }

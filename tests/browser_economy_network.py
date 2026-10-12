@@ -15,7 +15,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.system.economy.ledger import transfer_value, balance
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def main():
     output = ROOT / 'build/economy-v2-r4-browser'
@@ -44,7 +44,7 @@ def main():
                             page.on('pageerror', lambda err: errors.append(str(err)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}')
                             page.wait_for_function('configData && window.GameThemes')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            click_control(page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]'))
                             page.evaluate('async id => loadGame(id)', game.id)
                             page.wait_for_function('!busy && document.querySelector("#personal-economy-content h3")')
                             navigation_locator(page,'[data-panel-target=personal-economy]').click()
@@ -52,17 +52,17 @@ def main():
                             expect(page.locator('#personal-economy-content')).to_contain_text('现有灵石')
                             before = engine.store._path(game.id).read_bytes()
                             page.screenshot(path=str(output / f'{theme}-{width}-personal.png'))
-                            page.locator('#personal-economy-toggle').click()
+                            click_control(page.locator('#personal-economy-toggle'))
                             navigation_locator(page,'[data-panel-target=merchant]').click()
                             management = page.locator('#fleet-network-content > details').nth(0)
-                            management.locator('summary').click()
+                            click_control(management.locator('summary'))
                             management.get_by_role('button', name='自建独立商队', exact=True).click()
                             page.wait_for_function('!busy && game.fleet_network.fleets.some(f => f.player_controlled)')
-                            management.locator('summary').click()
+                            click_control(management.locator('summary'))
                             own = page.locator('#fleet-network-content [data-fleet-id]').filter(has=page.locator('[data-fleet-action=guard]')).first
-                            own.locator('[data-fleet-action=guard]').click()
+                            click_control(own.locator('[data-fleet-action=guard]'))
                             page.wait_for_function('!busy && game.fleet_network.fleets.some(f => f.player_controlled && f.guard_power > 0)')
-                            management.locator('summary').click()
+                            click_control(management.locator('summary'))
                             assert own.locator('[data-fleet-action=guard]').is_disabled()
                             assert management.get_by_role('button', name='自建独立商队', exact=True).is_disabled()
                             latest = engine._load(game.id)
@@ -74,13 +74,13 @@ def main():
                                 page.evaluate('async id => loadGame(id)', game.id)
                                 if 'panel-open' not in page.locator('#merchant-card').get_attribute('class'):
                                     navigation_locator(page,'[data-panel-target=merchant]').click()
-                                management.locator('summary').click()
-                                page.locator(f'[data-fleet-id="{identity}"] [data-fleet-action=pledge]').click()
+                                click_control(management.locator('summary'))
+                                click_control(page.locator(f'[data-fleet-id="{identity}"] [data-fleet-action=pledge]'))
                                 page.wait_for_function('!busy && game.fleet_network.fleets.some(f => f.id === "' + identity + '" && f.pledged)')
-                            page.locator('#fleet-network-content > details').nth(1).locator('summary').click()
-                            page.locator('[data-fleet-action=found]').click()
+                            click_control(page.locator('#fleet-network-content > details').nth(1).locator('summary'))
+                            click_control(page.locator('[data-fleet-action=found]'))
                             page.wait_for_function('!busy && !!game.fleet_network.owned')
-                            management.locator('summary').click()
+                            click_control(management.locator('summary'))
                             assert page.locator('[data-fleet-action=create]').filter(has_text='向商盟申请').is_disabled()
                             management.scroll_into_view_if_needed()
                             page.screenshot(path=str(output / f'{theme}-{width}-network.png'))

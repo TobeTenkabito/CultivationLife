@@ -19,7 +19,7 @@ from cultivation_life.system.economy.ledger import transfer_value
 from cultivation_life.system.economy.state import local_market
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def main():
     output=ROOT/'build/economy-diversity/browser';output.mkdir(parents=True,exist_ok=True)
@@ -49,29 +49,29 @@ def main():
                             page=browser.new_page(viewport=dict(width=width,height=height));errors=[]
                             page.on('pageerror',lambda error:errors.append(str(error)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData && window.GameThemes')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            click_control(page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]'))
                             page.evaluate('async id=>loadGame(id)',game.id)
                             navigation_locator(page,'[data-panel-target=auction]').click()
                             page.locator('#black-market-pattern').fill(ITEM_CATALOG[core].name)
-                            page.locator('#black-market-search-form button').click()
+                            click_control(page.locator('#black-market-search-form button'))
                             page.wait_for_function('!busy && game.auction_system.black_market_results.length>0')
                             result=page.locator('#black-market-results .auction-lot').filter(has_text=ITEM_CATALOG[core].name).first
                             result.locator('input').fill('3');result.get_by_role('button').click()
                             page.wait_for_function('id=>!busy && game.player.inventory.some(i=>i.id===id && i.quantity===3)',arg=core)
                             assert local_market(engine.store.load(game.id))['commodities'][core]['stock']==0
-                            page.locator('#black-market-leave').click();page.wait_for_function('!busy')
+                            click_control(page.locator('#black-market-leave'));page.wait_for_function('!busy')
                             navigation_locator(page,'[data-panel-target=spirit-field]').click()
-                            workbench=page.locator('.alchemy-workbench');workbench.locator('summary').click()
+                            workbench=page.locator('.alchemy-workbench');click_control(workbench.locator('summary'))
                             page.locator('#alchemy-target').select_option(pill)
                             assert '完整' in page.locator('#alchemy-recipe-hint').inner_text()
                             required=inputs('human',4,'longevity')
                             first=next(iter(required))
                             page.locator(f'#alchemy-materials input[data-item-id="{first}"]').fill('1')
                             saved=engine.store._path(game.id).read_bytes()
-                            page.locator('#alchemy-refine').click();page.wait_for_function('!busy')
+                            click_control(page.locator('#alchemy-refine'));page.wait_for_function('!busy')
                             assert engine.store._path(game.id).read_bytes()==saved
                             for item,n in required.items():page.locator(f'#alchemy-materials input[data-item-id="{item}"]').fill(str(n))
-                            page.locator('#alchemy-refine').click()
+                            click_control(page.locator('#alchemy-refine'))
                             page.wait_for_function('ids=>!busy && ids.every(k=>!game.player.inventory.some(i=>i.id===k))',arg=list(required))
                             assert engine.store.load(game.id).history[-1].event_id=='SYS_ALCHEMY'
                             assert all(not any(i.id==k for i in engine.store.load(game.id).player.inventory) for k in required)
@@ -84,24 +84,24 @@ def main():
                             row.get_by_role('button',name='服用',exact=True).click();page.wait_for_function('!busy')
                             assert engine.store._path(game.id).read_bytes()==saved
                             navigation_locator(page,'[data-panel-target=map]').click()
-                            page.get_by_role('button',name='本地市场',exact=True).click()
-                            page.locator('.economy-overview > summary').click()
-                            box=page.locator('#enterprise-panel');box.locator(':scope > summary').click()
+                            click_control(page.get_by_role('button',name='本地市场',exact=True))
+                            click_control(page.locator('.economy-overview > summary'))
+                            box=page.locator('#enterprise-panel');click_control(box.locator(':scope > summary'))
                             page.get_by_label('购置产业',exact=True).select_option('hunt')
-                            page.locator('[data-estate-action=buy]').click()
+                            click_control(page.locator('[data-estate-action=buy]'))
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned.some(r=>r.kind==="hunt")')
                             card=page.locator('[data-estate-id$=":hunt"]')
-                            if box.get_attribute('open') is None:box.locator(':scope > summary').click()
-                            card.locator(':scope > summary').click()
+                            if box.get_attribute('open') is None:click_control(box.locator(':scope > summary'))
+                            click_control(card.locator(':scope > summary'))
                             assert '本地资源' in card.inner_text()
                             card.get_by_label('产业资金金额').fill('100000')
-                            card.locator('[data-estate-action=fund]').click();page.wait_for_function('!busy')
+                            click_control(card.locator('[data-estate-action=fund]'));page.wait_for_function('!busy')
                             def opened():
                                 for detail in (box,card):
-                                    if detail.get_attribute('open') is None:detail.locator(':scope > summary').click()
+                                    if detail.get_attribute('open') is None:click_control(detail.locator(':scope > summary'))
                             opened();card.get_by_label('自动补足原料／进货').check()
-                            card.locator('[data-estate-action=configure]').click();page.wait_for_function('!busy')
-                            opened();card.locator('[data-estate-action=start]').click()
+                            click_control(card.locator('[data-estate-action=configure]'));page.wait_for_function('!busy')
+                            opened();click_control(card.locator('[data-estate-action=start]'))
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned.some(r=>r.kind==="hunt" && r.job)')
                             opened();assert card.locator('[data-estate-action=start]').is_disabled()
                             actual=engine.store.load(game.id);hunter=next(r for r in actual.economy_v2['estates'].values() if r['kind']=='hunt')

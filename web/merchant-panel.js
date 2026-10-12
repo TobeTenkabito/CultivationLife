@@ -53,10 +53,10 @@
     }
     system.alliances.forEach(alliance => {
       const panel = element('section', null, 'merchant-alliance');
-      panel.append(element('h3', `${alliance.name}${alliance.cross_world ? ' · 跨界商盟' : ''}`));
-      panel.append(element('p', `${alliance.policy_name}（第${alliance.next_policy_age}年调整） · 势力 ${money(alliance.power)} · 资材 ${money(alliance.reserves)} · ${alliance.relation}`));
+      panel.append(element('span',alliance.name.slice(0,1),'merchant-crest'),element('h3',alliance.name));
+      const metrics=element('div',null,'merchant-metrics');for(const [label,value] of [['势力',money(alliance.power)],['资材',money(alliance.reserves)],['商队',(alliance.caravans||[]).length]]){const tile=element('div');tile.append(element('small',label),element('b',value));metrics.append(tile);}panel.append(element('small',alliance.policy_name+' · '+alliance.relation),metrics);
       panel.append(element('p', `本界总部：${alliance.hq_name} · 盟主 ${alliance.leader_name}（${alliance.leader_realm}）${alliance.cross_world ? `；总盟主 ${alliance.chief_name}（${alliance.chief_realm}），战力 ${money(alliance.chief_power)}` : ''}`));
-      panel.append(element('p', `分部：${alliance.offices.map(row => `${row.name}〔${row.leader} · ${row.realm}〕`).join('、')}`));
+      const route=element('div',null,'merchant-route');route.append(element('span','◎ '+alliance.hq_name));alliance.offices.forEach(row=>{const stop=element('span','◇ '+row.name);stop.title=row.leader+' · '+row.realm;route.append(stop);});panel.append(route);
       const fleets = element('details', null, 'merchant-caravans');
       fleets.dataset.allianceId = alliance.id;
       fleets.append(element('summary', `商队经营 · ${(alliance.caravans || []).length} 支`));

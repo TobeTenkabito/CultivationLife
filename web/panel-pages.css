@@ -1,0 +1,18 @@
+[data-page-hidden]{display:none!important}
+.panel-page-tabs{display:flex;gap:6px;overflow-x:auto;max-width:100%;padding:8px 0 12px;margin:0 0 18px;border-bottom:1px solid var(--line);scrollbar-width:thin;overscroll-behavior-x:contain}
+.panel-page-tabs button{flex:0 0 auto;min-height:44px;white-space:nowrap;transition:none;border-radius:8px;padding:9px 17px;background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.utility-panel .panel-page-tabs button[aria-selected=true],.utility-panel .panel-page-tabs button[aria-selected=true]:hover{background:var(--pine);color:var(--on-accent);border-color:var(--pine)}
+.panel-page-tabs button:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+[data-page-hidden]+*{margin-top:0}
+.inventory-groups:has(>.panel-page-tabs){display:block}
+.atlas-road-links{display:flex;gap:6px;flex-wrap:wrap;padding:8px}.atlas-route-number{font-size:15px;fill:var(--cinnabar);font-weight:700}
+.atlas-bands{margin:12px 0}.atlas-bands small{font-size:11px}
+.merchant-alliance{border:1px solid var(--line);border-radius:16px;padding:20px;margin:12px 0;background:var(--surface)}
+.merchant-crest{width:64px;height:64px;border:1px solid var(--pine);border-radius:50%;display:grid;place-items:center;font-size:30px;color:var(--pine);float:left;margin:0 16px 10px 0}
+.merchant-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0;clear:both}
+.merchant-metrics>div{padding:12px;border-radius:10px;background:color-mix(in srgb,var(--pine) 9%,var(--surface));min-width:0}.merchant-metrics small{display:block;color:var(--muted)}.merchant-metrics b{display:block;font-size:clamp(16px,2.3vw,24px);overflow-wrap:anywhere}
+.merchant-route{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}.merchant-route span{padding:7px 12px;border:1px solid var(--line);border-radius:20px;font-size:13px}
+.merchant-task-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:12px}.merchant-task{border:1px solid var(--line);border-radius:12px;padding:14px}.merchant-task strong{display:block}
+@media(max-width:600px){.panel-page-tabs{gap:4px}.panel-page-tabs button{padding:9px 12px}.merchant-alliance{padding:14px}.merchant-metrics{gap:6px}.merchant-metrics>div{padding:9px}}
+
+#inventory-list:has(>.panel-page-tabs){min-width:0;max-width:100%;box-sizing:border-box}#inventory-card .inventory-category{min-width:0;overflow-wrap:anywhere}#inventory-card .item{flex-wrap:wrap}#inventory-card .item>span{flex:1 1 180px}

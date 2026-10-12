@@ -18,7 +18,7 @@ class Quiet(server.Handler):
         pass
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def main():
     with tempfile.TemporaryDirectory() as directory:
@@ -54,10 +54,10 @@ def main():
                 page.evaluate('(id)=>loadGame(id)', game.id)
                 # Open whichever shared utility panel owns the soul list.
                 page.evaluate("UtilityPanels.open('captive')")
-                page.get_by_role('button', name='提纯为精魂', exact=True).click()
+                click_control(page.locator('#captive-card').get_by_role('button', name='提纯为精魂', exact=True, include_hidden=True))
                 page.wait_for_function('game.asura.souls === 10090')
                 training=page.locator('.owned-training').first
-                training.locator('summary').click()
+                click_control(training.locator('summary'))
                 training.get_by_label('培养方向').select_option('body')
                 training.get_by_label('培养轮数').select_option('5')
                 training.get_by_role('button',name='培养炼体 · 5轮',exact=True).click()
@@ -104,7 +104,7 @@ def main():
                         assert '仙痕' not in page.locator('#hud-power').inner_text()
                         assert page.locator('#hud-mp').get_attribute('data-energy-kind')=='asura'
                         page.evaluate("UtilityPanels.open('captive')")
-                        page.locator('.owned-training summary').first.click()
+                        click_control(page.locator('.owned-training summary').first)
                         assert page.locator('.owned-training').first.evaluate('e=>e.scrollWidth <= e.clientWidth + 1')
                         if width==1440:
                             page.evaluate("UtilityPanels.open('asura-veins')")

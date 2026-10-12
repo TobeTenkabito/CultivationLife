@@ -78,6 +78,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
     }
 
     private void enterNumericField(String field, String label, String value) throws Exception {
+        revealSubpage(field);
         String selector=JSONObject.quote(field);
         js("window.__imeField=document.querySelector("+selector+");__imeField.scrollIntoView({block:'center'});true");
         Thread.sleep(350);
@@ -129,6 +130,16 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         check(Boolean.TRUE.equals(js("document.activeElement===__imeField")),label+": quote stole focus");
     }
 
+    private void revealSubpage(String selector) throws Exception {
+        String quoted=JSONObject.quote(selector);
+        // Select owning subpages using real native taps before the target itself.
+        for (int depth=0; depth<8; depth++) {
+            boolean hidden=Boolean.TRUE.equals(js("(()=>{const node=document.querySelector("+quoted+");let hidden=null;for(let n=node;n;n=n.parentElement)if(n.hasAttribute('data-page-hidden'))hidden=n;if(!hidden)return false;let host=hidden.parentElement;while(host&&!host.querySelector(':scope>.panel-page-tabs'))host=host.parentElement;if(!host)return false;const tab=[...host.querySelector(':scope>.panel-page-tabs').children].find(b=>b.dataset.subpage===hidden.dataset.pageName);if(!tab)return false;document.querySelectorAll('[data-native-subpage]').forEach(n=>n.removeAttribute('data-native-subpage'));tab.setAttribute('data-native-subpage','1');return true;})()"));
+            if (!hidden) break;
+            tapSelector("[data-native-subpage]");
+        }
+    }
+
     private void tapSelector(String selector) throws Exception {
         String quoted=JSONObject.quote(selector);
         if(selector.contains("data-panel-target")) {
@@ -141,6 +152,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 waitForJs("document.querySelector('#navigation-menu').open","Navigation directory did not open");
             }
         }
+        revealSubpage(selector);
+        // Active parallel details are already expanded by the user's tab selection.
+        if (selector.contains("summary") && Boolean.TRUE.equals(js("(()=>{const n=document.querySelector("+quoted+");return n?.tagName==='SUMMARY'&&n.parentElement.hasAttribute('data-page-name')&&n.parentElement.open;})()"))) return;
         // Observe before tutorial capture handlers intercept the intended click.
         js("window.__releaseNativeTap=false;window.addEventListener('click',event=>{const target=document.querySelector("+quoted+");window.__releaseNativeTap=!!target&&target.contains(event.target);},{once:true,capture:true});document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
         Thread.sleep(300);
@@ -301,7 +315,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("[data-panel-target=market]");
                     tapSelector("[data-market-view=local]");
                     js("window.__search=document.querySelector('[aria-label=\"查找本地商品\"]');__search.value='矿|草|丹';__search.dispatchEvent(new Event('input',{bubbles:true}));true");
-                    if(Boolean.TRUE.equals(js("document.querySelector('#local-market-content .economy-tools button').getAttribute('aria-pressed')!=='true'"))) tapSelector("#local-market-content .economy-tools button");
+                    js("(()=>{const s=document.querySelector('[aria-label=匹配方式]');s.value='pattern';s.dispatchEvent(new Event('change'));})()");
                     waitForJs("document.querySelector('.economy-search-feedback').textContent.startsWith('找到')","APK worker regex did not complete");
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('.economy-good').length>0 && Array.from(document.querySelectorAll('.economy-good b')).every(n=>/矿|草|丹/u.test(n.textContent))")),"APK regex results mismatch");
                     js("__search.value='[';__search.dispatchEvent(new Event('input',{bubbles:true}));true");
@@ -388,7 +402,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector(".atlas-relocation-form button");waitForJs("!busy && game.map.locations.find(r=>r.current).influences.some(r=>r.owned && r.headquarters)","Native headquarters vote failed");
                     python(assetText("territory-2110.py")+"\nfrom cultivation_life import server\nassert_relocated(server.ENGINE,"+JSONObject.quote(id)+")");
                     python("from cultivation_life import server\nserver._territory_native_before=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
-                    for(String view:new String[]{"guide","decisions","influence"}) {
+                    for(String view:new String[]{"decisions","influence"}) {
                         tapSelector("[data-panel-target=intrigue]");
                         tapSelector("[data-territory-entry="+view+"]");
                         check(Boolean.TRUE.equals(js("document.querySelector('[data-atlas-view="+view+"]').getAttribute('aria-pressed')==='true' && !document.querySelector('#map-atlas').classList.contains('hidden') && document.querySelector('#map-locations').classList.contains('hidden')")),"Native DLC shortcut opened wrong subpage");
@@ -401,7 +415,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     async("loadGame("+JSONObject.quote(id)+")");
                     check(Boolean.TRUE.equals(js("game.map.locations.find(r=>r.current).influences.some(r=>r.owned && r.value===100)")),"Native relocated headquarters did not persist");
                 }
-                result.putString("territory_scope","Four themes, independent atlas subpage, real SVG taps and three DLC shortcuts without state writes, influence list, local material outpost, policy majority, same-world relocation and persistence");
+                result.putString("territory_scope","Four themes, independent atlas subpage, real SVG taps and two DLC shortcuts without state writes, influence list, local material outpost, policy majority, same-world relocation and persistence");
             } else if(phase.equals("organizations")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'势力原生验收',spirit_root:'supreme_earth',path:'dao',seed:290,custom_start:{world:'human',realm_index:4,sect:'new',sect_name:'验收宗'}})});return g.id;})()");
@@ -543,6 +557,50 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     }
                 }
                 result.putString("custom_eligibility_scope","Four themes, native Mahayana/true-immortal creation, zero body training, conversion qualification and reload");
+            } else if(phase.equals("release-2130")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    js("document.querySelector('#new-game-button').click();window.__presetOld=game?.id;document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();document.querySelector('#custom-start').open=true;document.querySelector('#custom-realm').value='4';document.querySelector('#custom-realm').dispatchEvent(new Event('change'));document.querySelector('#custom-sect').value='new';document.querySelector('#custom-sect').dispatchEvent(new Event('change'));document.querySelector('#custom-sect-name').value='原生听松宗';document.querySelector('#custom-family').value='new';document.querySelector('#custom-family').dispatchEvent(new Event('change'));document.querySelector('#custom-family-name').value='原生听松家';true");
+                    async("GameThemes.saved");
+                    File preset=new File(getTargetContext().getExternalFilesDir(null),"verification/start-preset-2130.json");
+                    preset.getParentFile().mkdirs();if(preset.exists())check(preset.delete(),"Clear preset fixture");
+                    Intent document=new Intent().setData(android.net.Uri.fromFile(preset));
+                    android.content.IntentFilter exportFilter=new android.content.IntentFilter(Intent.ACTION_CREATE_DOCUMENT);exportFilter.addCategory(Intent.CATEGORY_OPENABLE);exportFilter.addDataType("application/json");
+                    ActivityMonitor exporting=addMonitor(exportFilter,new ActivityResult(Activity.RESULT_OK,document),true);
+                    tapSelector("#custom-preset-export");
+                    long presetDeadline=System.currentTimeMillis()+20000;
+                    while((!preset.isFile()||preset.length()==0)&&System.currentTimeMillis()<presetDeadline)Thread.sleep(100);
+                    removeMonitor(exporting);check(preset.length()>0,"Preset export document");
+                    JSONObject exported=new JSONObject(new String(java.nio.file.Files.readAllBytes(preset.toPath()),StandardCharsets.UTF_8));
+                    check(exported.getString("format").equals("wendao-custom-start"),"Preset file format");
+                    check(exported.getJSONObject("payload").getJSONObject("custom_start").getString("sect_name").equals("原生听松宗"),"Preset export values");
+                    exported.put("test_padding",new String(new char[180000]).replace('\0','x'));
+                    java.nio.file.Files.write(preset.toPath(),exported.toString().getBytes(StandardCharsets.UTF_8));
+                    js("document.querySelector('#custom-sect-name').value='待恢复';true");
+                    android.content.IntentFilter importFilter=new android.content.IntentFilter(Intent.ACTION_OPEN_DOCUMENT);importFilter.addCategory(Intent.CATEGORY_OPENABLE);importFilter.addDataType("application/json");
+                    ActivityMonitor importing=addMonitor(importFilter,new ActivityResult(Activity.RESULT_OK,document),true);
+                    tapSelector("#custom-preset-import");
+                    waitForJs("document.querySelector('#custom-sect-name').value==='原生听松宗'","Chunked preset restore");removeMonitor(importing);
+                    tapSelector("#custom-start-submit");waitForJs("!busy&&game&&game.id!==__presetOld&&game.faction.name==='原生听松宗'","Actual preset creation",60000);
+                    String id=(String)js("game.id");
+                    python("from cultivation_life import server\nserver._preset_nav_before=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+                    for(String panel:new String[]{"faction","family","relationship","inventory","transformation","captive","merchant"}) {
+                        tapSelector("[data-panel-target="+panel+"]");
+                        int count=((Number)js("document.querySelector('#"+panel+"-card .panel-page-tabs')?.children.length||0")).intValue();
+                        check(count>0,"Parallel subpage tabs: "+panel);
+                        for(int i=0;i<count;i++) {
+                            tapSelector("#"+panel+"-card .panel-page-tabs>button:nth-child("+(i+1)+")");
+                            check(Boolean.TRUE.equals(js("document.querySelector('#"+panel+"-card .panel-page-tabs').querySelectorAll('[aria-selected=true]').length===1")),"Single active tab");
+                        }
+                        check(Boolean.TRUE.equals(js("document.querySelector('#"+panel+"-card').scrollWidth<=document.querySelector('#"+panel+"-card').clientWidth+1")),"Subpage overflow: "+panel);
+                    }
+                    python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._preset_nav_before");
+                    tapSelector("[data-panel-target=intrigue]");
+                    js("(()=>{const s=document.querySelector('.intrigue-sect [aria-label=掌门候选人]');s.value=[...s.options].find(o=>o.value!=='player').value;window.__leader=s.value;})();true");
+                    tapSelector(".intrigue-sect .intrigue-position button");waitForJs("!busy&&game.intrigue_system.sections.find(s=>s.kind==='sect').positions.find(p=>p.id==='leader').holder_id===__leader","Native leader appointment");
+                    check(Boolean.TRUE.equals(js("game.intrigue_system.sections.find(s=>s.kind==='sect').control_authority")),"Appointment preserves control");
+                    capture("release-2130-"+theme+"-"+arguments.getString("orientation","portrait"));
+                }
+                result.putString("release_2130_scope","Four themes, real native preset document export/import with chunked 180K file, actual creation, seven parallel panels and leader appointment without authority transfer");
             } else if(phase.equals("custom-start")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     js("document.querySelector('#new-game-button').click();window.__customOld=game?.id;document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click();document.querySelector('#custom-start').open=true;true");
@@ -1587,6 +1645,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             if(dlcPreferences!=null){if(previousDlcPreferences!=null)java.nio.file.Files.write(dlcPreferences.toPath(),previousDlcPreferences);else java.nio.file.Files.deleteIfExists(dlcPreferences.toPath());}
             finish(Activity.RESULT_OK,result);
         } catch(Throwable failure) {
+            try { result.putString("preset_status",(String)js("document.querySelector('.custom-preset-bar [role=status]')?.textContent||''")); } catch(Throwable ignored) {}
             android.util.Log.e("ReleaseVerification","Verification failed",failure);
             try {
                 result.putString("guide_debug", (String)js("JSON.stringify((()=>{const n=document.querySelector('[data-native-guide-target]'),r=n?.getBoundingClientRect();return {step:game?.tutorial?.guide?.step,target:n?.outerHTML?.slice(0,1200),rect:r,coach:document.querySelector('.tutorial-coach')?.getBoundingClientRect(),hit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML?.slice(0,1200):null,dialog:Array.from(document.querySelectorAll('dialog[open]')).map(d=>d.id)};})())"));

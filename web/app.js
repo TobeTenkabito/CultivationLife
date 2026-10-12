@@ -701,7 +701,7 @@ function render(data) {
   window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm, immortal:payload=>mutate(`/api/games/${data.id}/immortal-action`, payload)});
   window.FleetNetworkPanel?.render(data.personal_economy || {}, data.fleet_network || {}, payload => mutate(`/api/games/${data.id}/fleet-action`, payload));
   window.LocalEconomy?.prepare(data.map?.economy,data,payload=>mutate(`/api/games/${data.id}/local-market-trade`,payload),payload=>mutate(`/api/games/${data.id}/fleet-action`,payload));
-  UtilityPanels.schedule('inventory',()=>renderInventory(p.inventory)); renderArtSkills(data.art_skills || []); UtilityPanels.schedule('spirit-field',()=>renderSpiritField(data.spirit_field || {})); renderDemonicSystem(data.demonic_system || {}); renderAsura(data.asura || {}); UtilityPanels.schedule('map',()=>{renderMap(data.map, data.auction_system);window.ExplorationPanel?.renderMap(data,mutate);}); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:!!configData?.console_available && !!window.DebugConsole?.active(), debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent(); window.ExplorationPanel?.render(data, mutate);
+  UtilityPanels.schedule('inventory',()=>{renderInventory(p.inventory);window.PanelPages?.refresh(data.id);}); renderArtSkills(data.art_skills || []); UtilityPanels.schedule('spirit-field',()=>renderSpiritField(data.spirit_field || {})); renderDemonicSystem(data.demonic_system || {}); renderAsura(data.asura || {}); UtilityPanels.schedule('map',()=>{renderMap(data.map, data.auction_system);window.ExplorationPanel?.renderMap(data,mutate);}); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:!!configData?.console_available && !!window.DebugConsole?.active(), debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent(); window.ExplorationPanel?.render(data, mutate);
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   window.GameThemes?.render(data);
@@ -709,6 +709,7 @@ function render(data) {
   renderButtons();
   window.TutorialGuide?.render(data,payload=>mutate(`/api/games/${data.id}/tutorial`,payload));
   window.GameNavigation?.refresh();
+  window.PanelPages?.refresh(data.id);
 }
 
 function renderPostBattlePossession() {
@@ -1248,7 +1249,7 @@ function renderIntrigue(system) {
     const title = document.createElement('strong'); title.textContent = '山川形势 · 地方经营';
     const hint = document.createElement('p'); hint.textContent = '查看各宗地图影响、地区政策与地方决议；选定地域后议事。';
     const links = document.createElement('div'); links.className = 'atlas-entry-links';
-    for (const [view, label] of [['influence','查看势力影响地图'],['decisions','地方政策与决议'],['guide','影响力机制说明']]) {
+    for (const [view, label] of [['influence','查看势力影响地图'],['decisions','地方政策与决议']]) {
       const link = document.createElement('button'); link.type = 'button'; link.textContent = label;
       link.dataset.territoryEntry = view;
       link.onclick = () => {
@@ -1295,7 +1296,18 @@ function renderIntrigue(system) {
       (section.positions || []).forEach(position => {
         const row = document.createElement('div'); row.className = `intrigue-position${position.holder_id ? ' occupied' : ''}`;
         const info = document.createElement('span'); const name = document.createElement('b'); const detail = document.createElement('small');
-        name.textContent = `${position.name}：${position.holder_name}`; detail.textContent = `${position.duty} · 最低境界序 ${position.minimum_realm}`; info.append(name, detail); row.appendChild(info);
+        name.textContent = `${position.name}：${position.holder_name}`; detail.textContent = position.id === 'leader' ? position.duty : `${position.duty} · 最低境界序 ${position.minimum_realm}`; info.append(name, detail); row.appendChild(info);
+        if (section.kind === 'sect' && position.id === 'leader' && section.control_authority) {
+          const select = document.createElement('select'); select.setAttribute('aria-label','掌门候选人');
+          for (const member of section.leader_candidates || []) {
+            const option = document.createElement('option'); option.value = member.id; option.textContent = member.name;
+            option.selected = member.id === position.holder_id; select.append(option);
+          }
+          const appoint = document.createElement('button'); appoint.textContent = '任命掌门';
+          appoint.disabled = locked() || !select.options.length;
+          appoint.onclick = () => mutate(`/api/games/${game.id}/intrigue-personnel`, {kind:'sect', action:'appoint', npc_id:select.value, position_id:'leader'});
+          row.append(select,appoint);
+        }
         if (section.control_authority && !['leader','family_head','guest_elder','guest_retainer'].includes(position.id)) {
           const select = document.createElement('select');
           const empty = document.createElement('option'); empty.value = ''; empty.textContent = '选择候选人'; select.appendChild(empty);
@@ -1392,12 +1404,13 @@ function renderIntrigue(system) {
     const vote = document.createElement('form'); vote.className = 'intrigue-resolution-form';
     const voteTitle = document.createElement('b'); voteTitle.textContent = '发起重大决议';
     const type = document.createElement('select');
-    Object.entries(system.resolution_types || {}).filter(([id]) => !['expand_influence','build_outpost','territory_policy','territory_spar','territory_harass','relocate'].includes(id) && id !== 'disciple_recruitment' && !(section.kind === 'sect' && id === 'mass_recruitment') && (section.kind !== 'family' || ['mass_recruitment','investment','policy'].includes(id))).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
+    Object.entries(system.resolution_types || {}).filter(([id]) => (id !== 'replace_leader' || section.kind === 'sect') && !['expand_influence','build_outpost','territory_policy','territory_spar','territory_harass','relocate'].includes(id) && id !== 'disciple_recruitment' && !(section.kind === 'sect' && id === 'mass_recruitment') && (section.kind !== 'family' || ['mass_recruitment','investment','policy'].includes(id))).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
     const target = document.createElement('select');
     const playerChoice = document.createElement('select'); [['1','投赞成票'],['0','投反对票']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;playerChoice.appendChild(option);});
     const refreshTargets = () => {
       target.innerHTML=''; let rows=[];
       if (['declare_war','make_peace','form_alliance','break_alliance'].includes(type.value)) rows=section.resolution_targets || [];
+      else if (type.value === 'replace_leader') rows=section.leader_candidates || [];
       else if (type.value === 'policy') rows=Object.entries(system.styles || {}).map(([id,name])=>({id,name}));
       else if (type.value === 'relocate') rows=system.available_worlds || [];
       else if (type.value === 'intervene_war') rows=section.war_targets || [];

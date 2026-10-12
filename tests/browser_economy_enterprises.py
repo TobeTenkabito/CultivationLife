@@ -15,7 +15,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.system.economy.ledger import transfer_value
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 def main():
     output=ROOT/'build/economy-expansion-step2-browser';output.mkdir(parents=True,exist_ok=True)
@@ -38,37 +38,37 @@ def main():
                             page=browser.new_page(viewport=dict(width=width,height=height));errors=[]
                             page.on('pageerror',lambda error:errors.append(str(error)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData && window.GameThemes')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            click_control(page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]'))
                             page.evaluate('async id=>loadGame(id)',game.id);navigation_locator(page,'[data-panel-target=map]').click()
-                            page.get_by_role('button',name='本地市场',exact=True).click()
-                            page.locator('.economy-overview > summary').click()
+                            click_control(page.get_by_role('button',name='本地市场',exact=True))
+                            click_control(page.locator('.economy-overview > summary'))
                             def expand(locator):
-                                if locator.get_attribute('open') is None:locator.locator(':scope > summary').click()
+                                if locator.get_attribute('open') is None:click_control(locator.locator(':scope > summary'))
                             box=page.locator('#enterprise-panel');expand(box)
                             page.get_by_label('购置产业',exact=True).select_option('mine')
-                            page.locator('[data-estate-action=buy]').click()
+                            click_control(page.locator('[data-estate-action=buy]'))
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned.length===1')
                             key=page.evaluate('game.map.economy.enterprises.owned[0].id')
                             card=page.locator(f'[data-estate-id="{key}"]')
-                            page.locator('#map-view-tabs button[aria-controls=map-locations]').click()
-                            page.locator('.map-directory-link.estate').click()
-                            page.get_by_role('button',name='管理产业',exact=True).click()
+                            click_control(page.locator('#map-view-tabs button[aria-controls=map-locations]'))
+                            click_control(page.locator('.map-directory-link.estate'))
+                            click_control(page.get_by_role('button',name='管理产业',exact=True))
                             assert card.get_attribute('open') is not None
                             def opened():expand(box);expand(card)
-                            opened();page.get_by_label('产业资金金额').fill('10000');card.locator('[data-estate-action=fund]').click()
+                            opened();page.get_by_label('产业资金金额').fill('10000');click_control(card.locator('[data-estate-action=fund]'))
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned[0].cash===10000')
                             opened();card.get_by_label('自动经营保留灵石').fill('321')
                             card.get_by_label('单次自动投产支出上限').fill('4321')
-                            card.locator('[data-estate-action=configure]').click()
+                            click_control(card.locator('[data-estate-action=configure]'))
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned[0].reserve_cash===321 && game.map.economy.enterprises.owned[0].expense_limit===4321')
                             # A second page writes first. Stale native buttons cannot charge again.
                             opened();saved=engine._load(game.id);row=saved.economy_v2['estates'][key]
                             engine.fleet_action(game.id,dict(action='estate_fund',estate_id=key,revision=row['revision'],amount=1))
                             before=engine.store._path(game.id).read_bytes()
-                            card.locator('[data-estate-action=fund]').click()
+                            click_control(card.locator('[data-estate-action=fund]'))
                             page.wait_for_function('!busy && game.map.economy.enterprises.owned[0].cash===10001')
                             assert engine.store._path(game.id).read_bytes()==before
-                            opened();card.locator('[data-estate-action=start]').click()
+                            opened();click_control(card.locator('[data-estate-action=start]'))
                             page.wait_for_function('!busy && !!game.map.economy.enterprises.owned[0].job')
                             opened();assert card.locator('[data-estate-action=start]').is_disabled()
                             card.scroll_into_view_if_needed();page.screenshot(path=str(output/f'{theme}-{width}-estate.png'))
@@ -83,12 +83,12 @@ def main():
                             page.wait_for_function('!busy && game.fleet_network.fleets.some(f=>f.player_controlled)')
                             orders=page.locator('#trade-orders-panel');expand(orders);form=orders.locator('[data-order-fleet]').first;expand(form)
                             form.get_by_label('订单执行方式').select_option('repeat');form.get_by_label('订单商品').select_option('purple_cloud_ginseng_seed')
-                            form.locator('[data-fleet-action=order_configure]').click()
+                            click_control(form.locator('[data-fleet-action=order_configure]'))
                             page.wait_for_function("!busy && game.fleet_network.fleets.some(f=>f.trade_order?.mode==='repeat')")
-                            expand(orders);expand(form);form.locator('[data-fleet-action=order_dispatch]').click()
+                            expand(orders);expand(form);click_control(form.locator('[data-fleet-action=order_dispatch]'))
                             page.wait_for_function("!busy && game.fleet_network.fleets.some(f=>f.player_controlled && f.status==='travelling')")
                             expand(orders);expand(form);assert form.locator('[data-fleet-action=order_dispatch]').is_disabled()
-                            form.get_by_label('订单执行方式').select_option('hold');form.locator('[data-fleet-action=order_configure]').click()
+                            form.get_by_label('订单执行方式').select_option('hold');click_control(form.locator('[data-fleet-action=order_configure]'))
                             page.wait_for_function("!busy && game.fleet_network.fleets.some(f=>f.trade_order?.mode==='hold' && f.status==='travelling')")
                             expand(orders);expand(form);form.scroll_into_view_if_needed()
                             page.screenshot(path=str(output/f'{theme}-{width}-orders.png'))

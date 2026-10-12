@@ -77,7 +77,7 @@
       document.querySelector('#map-atlas')?.classList.toggle('hidden', mode !== 'atlas');
       const description = document.querySelector('#map-description');
       description.textContent = mode === 'atlas'
-        ? '点选地域查看道路与宗门影响；政策与决议、机制说明在页签中查看。看图不消耗时间。'
+        ? '点选地域查看道路与宗门影响；政策与决议在页签中查看。看图不消耗时间。'
         : '地域地图查看行程；可视地图查看山川与宗门影响。移动沿最短路线消耗时间，旅途中世界与人物继续演化。';
       directory.classList.toggle('hidden', mode !== 'directory');
       document.querySelector('#map-economy').classList.toggle('hidden', mode !== 'economy' || !map.economy?.available);

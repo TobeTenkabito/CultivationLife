@@ -40,7 +40,7 @@ def main():
         result=log(f'android-{phase}-{RELEASE_ID}.log')
         require('status=passed' in result and 'status=failed' not in result, f'Android independent DLC check must pass: {phase}')
     for orientation in ('portrait', 'landscape'):
-        for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'trial-sites'):
+        for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'trial-sites', 'release-2130'):
             result = log(f'android-{phase}-{orientation}-{RELEASE_ID}.log')
             require('status=passed' in result and 'status=failed' not in result, f'Android {phase} {orientation} must pass')
         result = log(f'android-heavens-{orientation}-{RELEASE_ID}.log')

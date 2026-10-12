@@ -828,7 +828,10 @@ def roll_lifespan(player: Player, rng: random.Random) -> int | None:
     return rng.randint(*span) * multiplier
 
 
-def add_item(player: Player, item_id: str, quantity: int = 1) -> None:
+def add_item(player: Player, item_id: str | Item, quantity: int = 1) -> None:
+    instance = item_id if isinstance(item_id, Item) else None
+    if instance is not None:
+        item_id = instance.id
     if item_id == 'immortal_trace':
         player.immortal_traces += max(0, int(quantity))
         return
@@ -836,7 +839,7 @@ def add_item(player: Player, item_id: str, quantity: int = 1) -> None:
         if item.id == item_id:
             item.quantity += quantity
             return
-    source = ITEM_CATALOG[item_id]
+    source = instance if instance is not None else ITEM_CATALOG[item_id]
     player.inventory.append(Item(**source.to_dict() | {"quantity": quantity}))
 
 
