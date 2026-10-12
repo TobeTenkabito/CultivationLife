@@ -2854,6 +2854,14 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _prepare_treasure_reward_event(self, game: GameState, rng: Any) -> dict[str, Any]:
         return economy_treasure._prepare_treasure_reward_event(self._dependencies.economy.treasure, game, rng)
 
+    def _prepare_generated_event(self, game: GameState) -> dict[str, Any]:
+        from ..system.generated_events import prepare
+        return prepare(
+            game, {category: self._treasure_reward_pool(game, category)
+                   for category in ("artifact", "technique", "pill")},
+            self.maps.location(game.player.world, game.player.location_id)["name"],
+        )
+
     def _claim_treasure_reward(self, game: GameState, pending: dict[str, Any], category: str) -> tuple[str, str]:
         return economy_treasure._claim_treasure_reward(self._dependencies.economy.treasure, game, pending, category)
 

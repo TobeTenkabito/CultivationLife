@@ -5,6 +5,7 @@ import copy
 from ...content_registry import FACTION_SYSTEMS
 from ...models import GameState, HistoryRecord
 from .dependencies import EventsPreparationDependencies
+from ...system import generated_events
 
 
 def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool:
@@ -13,7 +14,9 @@ def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool
     retained = []
     while head:
         following = head.get('_followup_event')
-        definition = deps.events_by_id.get(head.get('id'))
+        generated = generated_events.is_generated(head)
+        definition = (generated_events.definition_for(game, head) if generated
+                      else deps.events_by_id.get(head.get('id')))
         if head.get('id') == 'SYS_POST_BATTLE_POSSESSION':
             retained.append(head)
         elif definition is None:
@@ -40,12 +43,17 @@ def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool
             saved = {row['id']: row for row in head.get('choices', []) if isinstance(row, dict) and row.get('id')}
             choices = []
             for original in originals:
-                row = copy.deepcopy(saved.get(original['id'], original))
+                row = copy.deepcopy(original if generated else saved.get(original['id'], original))
                 row.pop('effects', None)
                 row.pop('conditions', None)
+                if generated:
+                    row.pop('result_text', None)
                 if original.get('conditions') or original['id'] not in saved:
                     row['enabled'] = deps._condition(original.get('conditions', {}), game)
                 row.setdefault('enabled', True)
+                if generated:
+                    row['enabled'] = generated_events.choice_available(
+                        game, game.generated_event_state['active'], original['id'])
                 row.setdefault('text', original['text'])
                 if original.get('disabled_reason'):
                     row['disabled_reason'] = original['disabled_reason']
@@ -53,10 +61,24 @@ def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool
             if choices != head.get('choices'):
                 head['choices'] = choices
                 changed = True
+            if generated:
+                if 'runtime' in head:
+                    del head['runtime']
+                    changed = True
+                for key in ('title', 'body'):
+                    if head.get(key) != definition[key]:
+                        head[key] = definition[key]
+                        changed = True
             # Trigger eligibility governs selection, not completion of an opened
             # encounter. A realm change must not erase an authorized event.
             retained.append(head)
         head = following
+    active_generated = game.generated_event_state.get('active')
+    if active_generated and not any(row.get('id') == active_generated['id'] for row in retained):
+        # Restore only the saved discovery, behind any existing authorized
+        # event. Never regenerate its situation, reward or random sequence.
+        retained.append(generated_events.project(game, active_generated))
+        changed = True
     if changed:
         for index, event in enumerate(retained):
             event.pop('_followup_event', None)

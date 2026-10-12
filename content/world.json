@@ -55,6 +55,12 @@
       "hp": 0.03,
       "mp": 0.15
     },
+    "generated_explore": {
+      "name": "勘察异闻",
+      "opportunity": [0, 0],
+      "hp": 0,
+      "mp": 0
+    },
     "travel": {
       "name": "下山游历",
       "opportunity": [

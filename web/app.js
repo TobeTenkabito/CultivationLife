@@ -3955,6 +3955,7 @@ function renderButtons() {
     const trappedInGuixu = !!guixuSession?.trapped;
     const trappedTraining = ['cultivate', 'body_train', 'sense_train', 'rest'].includes(button.dataset.action);
     const blockedByGuixu = !!guixuSession && !(trappedInGuixu && trappedTraining);
+    const generatedUnavailable = button.dataset.action === 'generated_explore' && (!!game?.trial?.active || game?.generated_event?.pending);
       const localSage = game?.player.world==='lost' && ['sage_preach','sage_teach','sage_answer'].includes(button.dataset.action);
       const blockedBySpatial = !!game?.spatial?.inside && !trappedTraining && !localSage;
     const instantUnavailable = game?.instant_actions?.[button.dataset.action] === false;
@@ -3962,13 +3963,13 @@ function renderButtons() {
       button.title = instantUnavailable ? '本次已完成，推进至少一年后恢复' : '即时交互 · 不消耗年份 · 当年限一次';
       button.classList.toggle('action-completed', instantUnavailable);
     }
-    const mortalCommission = button.dataset.action === 'commission' && game?.player?.realm_index === 0;
+    const mortalCommission = ['commission', 'generated_explore'].includes(button.dataset.action) && game?.player?.realm_index === 0;
     const mortalCombat = ['hunt_beast', 'spar', 'slay', 'capture'].includes(button.dataset.action) && game?.player?.realm_index === 0;
     const adaptingToImmortalPower = game?.player?.world === 'celestial' && !game?.player?.immortal_power?.converted;
     const blockedDuringAdaptation = adaptingToImmortalPower && !['cultivate', 'rest', 'commission'].includes(button.dataset.action);
     const controlledGhost = game?.ghost_system?.phase_two?.state === 'controlled' && !['cultivate', 'rest'].includes(button.dataset.action);
     const cultivationSuppressed = !!game?.secret_arts?.suppression?.active && button.dataset.action === 'cultivate' && !trappedInGuixu;
-      button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || instantUnavailable || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost || cultivationSuppressed || blockedByGuixu || blockedBySpatial;
+      button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || instantUnavailable || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost || cultivationSuppressed || blockedByGuixu || blockedBySpatial || generatedUnavailable;
   });
   document.querySelectorAll('#event-choices button').forEach(button => {
     const index = [...button.parentNode.children].indexOf(button);

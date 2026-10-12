@@ -152,6 +152,7 @@ def bind_advancement(engine: GameEngine) -> AdvancementDependencies:
         _personal_combat_step=lambda *args, **kwargs: engine._personal_combat_step(*args, **kwargs),
         _prepare_sage_action=lambda *args, **kwargs: engine._prepare_sage_action(*args, **kwargs),
         _prepare_treasure_reward_event=lambda *args, **kwargs: engine._prepare_treasure_reward_event(*args, **kwargs),
+        _prepare_generated_event=lambda game: engine._prepare_generated_event(game),
         _queue_followup_event=lambda *args, **kwargs: engine._queue_followup_event(*args, **kwargs),
         _select_event=lambda *args, **kwargs: engine._select_event(*args, **kwargs),
         _sense_training_step=lambda *args, **kwargs: engine._sense_training_step(*args, **kwargs),

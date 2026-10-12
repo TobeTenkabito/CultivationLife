@@ -73,10 +73,17 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         raise ValueError("凡人尚无力参与修士层面的猎杀与斗法")
     if action in INSTANT_ACTIONS:
         return _instant_action(deps, game, action)
+    if action == "generated_explore":
+        if player.realm_index == 0:
+            raise ValueError("踏入修行后才能以法力勘察异闻")
+        if game.active_trial or game.generated_event_state.get("active"):
+            raise ValueError("请先完成当前试炼或随机异闻")
+        if guixu_session:
+            raise ValueError("归墟内不能勘察外界异闻")
     deps._prepare_sage_action(game, action)
     if action == "cultivate" and player.technique and not can_player_practice_technique(player, player.technique.element):
         raise ValueError("灵根属性与五行功法不合，无法修炼")
-    units = max(1, min(10, int(years)))
+    units = 1 if action == "generated_explore" else max(1, min(10, int(years)))
     from ...system.upper_institutions import begin_work, finish_work, advance_time
     if action == "institution_work":
         begin_work(game)
@@ -166,7 +173,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         if (elapsed_index + 1) % time_unit == 0 and deps.heavens_take_pause and deps.heavens_take_pause(game):
             era_news.append('已完成当前时间单位，停下查看诸天联系。')
             break
-        if action == 'treasure' and (elapsed_index + 1) % time_unit == 0:
+        if action in {'treasure', 'generated_explore'} and (elapsed_index + 1) % time_unit == 0:
             # Selecting the reward is a manual event. Stop this batch before
             # starting another expedition whose reward could be overwritten.
             break
@@ -197,6 +204,8 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             if action == "body_train"
             else f"你主动收敛声势、修复近邻关系，威名 -{total_fame_reduction:.0f}；当前威名 {player.fame:.0f}。"
             if action == "befriend_neighbors"
+            else "你完成一次本地勘察，异闻情境与遗藏已确定，等待判断处理。"
+            if action == "generated_explore"
             else f"从 {start_age} 岁修行至 {current_body_age(player)} 岁，获得 {total_gain:.1f} 点机缘。"
         )
         game.history.append(HistoryRecord(
@@ -210,6 +219,8 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         ))
         if action == "treasure":
             deps._queue_followup_event(game, deps._prepare_treasure_reward_event(game, rng))
+        elif action == "generated_explore" and player.age > start_world_age:
+            deps._queue_followup_event(game, deps._prepare_generated_event(game))
         settle_elapsed_time(
             deps.settlement, game, rng, era_news, action=action,
             units=completed_action_units(max(1, player.age - start_world_age), time_unit),
