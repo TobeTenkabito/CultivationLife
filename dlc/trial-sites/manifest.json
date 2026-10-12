@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version": 1,
+  "id": "official.trial-sites",
+  "name": "万象试境",
+  "version": "1.0.0",
+  "kind": "dlc",
+  "enabled": true,
+  "load_order": 160,
+  "requires": [],
+  "description": "十一界静态守关挑战：五事件判断、种子遗藏、分层强敌与可视化试境；探索不推进时间。"
+}

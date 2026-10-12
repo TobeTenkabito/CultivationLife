@@ -148,7 +148,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         // Window centering can put controls underneath that heading in landscape.
         js("(()=>{const target=document.querySelector("+quoted+"),panel=target.closest('.utility-panel.panel-open');if(!panel)return;const box=panel.getBoundingClientRect(),heading=panel.querySelector(':scope > .section-title')?.getBoundingClientRect(),r=target.getBoundingClientRect(),top=Math.max(box.top,heading?.bottom||box.top)+8,bottom=Math.min(box.bottom,innerHeight)-8;if(bottom>top+20)panel.scrollTop+=(r.top+r.bottom)/2-(top+bottom)/2;})();true");
         Thread.sleep(150);
-        String locate="(()=>{const target=document.querySelector("+quoted+");if(!target)return {ready:false};const r=target.getBoundingClientRect();for(const [fx,fy] of [[.5,.5],[.25,.25],[.75,.25],[.25,.75],[.75,.75]]){const x=r.left+r.width*fx,y=r.top+r.height*fy,hit=document.elementFromPoint(x,y);if(!target.disabled&&hit&&target.contains(hit))return {ready:true,x,y,width:innerWidth};}return {ready:false,rect:r.toJSON(),panel:target.closest('.utility-panel')?.className,hit:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML};})()";
+        String locate="(()=>{const target=document.querySelector("+quoted+");if(!target)return {ready:false};const r=target.getBoundingClientRect();for(const [fx,fy] of [[.5,.5],[.25,.25],[.75,.25],[.25,.75],[.75,.75]]){const x=r.left+r.width*fx,y=r.top+r.height*fy,hit=document.elementFromPoint(x,y);if(!target.disabled&&hit&&target.contains(hit))return {ready:true,x,y,width:innerWidth};}return {ready:false,rect:r.toJSON(),panel:target.closest('.utility-panel')?.className,hit:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML?.slice(0,1200)};})()";
         waitForJs("("+locate+").ready===true", "Native target not clickable: "+selector+": "+js("JSON.stringify("+locate+")"));
         JSONObject point=new JSONObject((String)js("JSON.stringify("+locate+")"));
         int[] origin=new int[2];runOnMainSync(()->web.getLocationOnScreen(origin));
@@ -168,6 +168,11 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         // with a deadline instead of blocking the instrumentation indefinitely.
         waitForJs("window.__releaseNativeTap===true", "Native click missing: "+selector);
         Thread.sleep(250);
+    }
+
+    private void openEconomicDetails(String selector) throws Exception {
+        if(Boolean.TRUE.equals(js("!!document.querySelector('.economy-overview') && !document.querySelector('.economy-overview').open"))) tapSelector(".economy-overview > summary");
+        if(Boolean.TRUE.equals(js("!document.querySelector("+JSONObject.quote(selector)+").open"))) tapSelector(selector+" > summary");
     }
 
     private void python(String code) {
@@ -219,6 +224,14 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 JSONObject document=new JSONObject();document.put("schema_version",1);document.put("enabled",enabled);
                 java.nio.file.Files.write(dlcPreferences.toPath(),document.toString().getBytes(StandardCharsets.UTF_8));
             }
+            if(requested.equals("trial-sites-disabled")) {
+                dlcPreferences=new File(getTargetContext().getFilesDir(),"game/data/extension_preferences.json");
+                if(dlcPreferences.isFile())previousDlcPreferences=java.nio.file.Files.readAllBytes(dlcPreferences.toPath());
+                File directory=dlcPreferences.getParentFile();check(directory.isDirectory()||directory.mkdirs(),"Trial preference directory");
+                JSONObject enabled=new JSONObject();enabled.put("official.trial-sites",false);
+                JSONObject document=new JSONObject();document.put("schema_version",1);document.put("enabled",enabled);
+                java.nio.file.Files.write(dlcPreferences.toPath(),document.toString().getBytes(StandardCharsets.UTF_8));
+            }
             activity=startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             if("portrait".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
             if("landscape".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
@@ -234,7 +247,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                       "Release page configuration did not load",120000);
             async("GameThemes.ready");
             String baseVersion=getTargetContext().getPackageManager().getPackageInfo(getTargetContext().getPackageName(),0).versionName.split("-android")[0];
-            check(Boolean.TRUE.equals(js("configData.base_game.version==="+JSONObject.quote(baseVersion)+" && !configData.debug && configData.extensions.some(e=>e.id==='official.monster-civilizations') && configData.extensions.every(e=>e.status==='loaded'"+(requested.startsWith("civilizations-")?"||e.status==='disabled'":"")+")")),"Version, release mode or DLC mismatch: installed="+baseVersion+" config="+js("JSON.stringify({version:configData?.base_game?.version,debug:configData?.debug,extensions:configData?.extensions})"));
+            check(Boolean.TRUE.equals(js("configData.base_game.version==="+JSONObject.quote(baseVersion)+" && !configData.debug && configData.extensions.some(e=>e.id==='official.monster-civilizations') && configData.extensions.every(e=>e.status==='loaded'"+((requested.startsWith("civilizations-")||requested.equals("trial-sites-disabled"))?"||e.status==='disabled'":"")+")")),"Version, release mode or DLC mismatch: installed="+baseVersion+" config="+js("JSON.stringify({version:configData?.base_game?.version,debug:configData?.debug,extensions:configData?.extensions})"));
             SharedPreferences marker=getTargetContext().getSharedPreferences("release-verification",0);
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
@@ -242,14 +255,42 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             if(phase.startsWith("civilizations-")) {
                 boolean second=phase.equals("civilizations-ii-only"), first=phase.equals("civilizations-i-only");
                 check(Boolean.TRUE.equals(js("configData.extensions.some(e=>e.id==='official.monster-civilizations'&&e.status==='loaded')==="+second+"&&configData.extensions.some(e=>e.id==='official.monster-bloodlines'&&e.status==='loaded')==="+first)),"Independent package loading");
-                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'独立万灵验收',spirit_root:'supreme_earth',path:'dao',seed:2100,custom_start:{world:'human',realm_index:4}})});return g.id;})()");
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'独立万灵验收',spirit_root:'supreme_earth',path:'monster',monster_species_id:'fox',seed:2100,custom_start:{world:'human',realm_index:4}})});return g.id;})()");
                 async("loadGame("+JSONObject.quote(id)+")");
-                check(Boolean.TRUE.equals(js("game.monster_civilizations.available==="+second)),"Independent atlas availability");
+                check(Boolean.TRUE.equals(js("game.monster_civilizations.available==="+second+" && game.monster_civilizations.ui_available==="+second)),"Independent atlas availability");
                 if(second) {
                     tapSelector("[data-panel-target=civilizations]");waitForJs("!!document.querySelector('.mc-region')","Independent atlas load");
                     tapSelector("[data-civilization-action=observe]");waitForJs("!!document.querySelector('.mc-species') && !busy","Independent real observation");
                 }
                 result.putString("civilizations_matrix_scope","Signed native actual restart with original loader and user preference switches: "+phase);
+            } else if(phase.equals("trial-sites-disabled")) {
+                String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'试境关闭验收',spirit_root:'heavenly',path:'dao',seed:341,preset_id:'core'})}).then(g=>g.id)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("configData.extensions.some(e=>e.id==='official.trial-sites' && e.status==='disabled') && !game.trial_site.enabled && document.querySelector('[data-panel-target=trial-site]').classList.contains('hidden') && document.querySelector('#trial-site-card').classList.contains('hidden')")),"Actual disabled DLC shortcut and gameplay");
+                check(Boolean.TRUE.equals(async("api('/api/games/'+game.id+'/trial-site-action',{method:'POST',body:JSON.stringify({action:'enter',world:'human',floor:1})}).then(()=>false).catch(()=>true)")),"Disabled DLC rejects actual trial RPC");
+                result.putString("trial_sites_disabled_scope","Actual preference file and restart disable the package, shortcut, panel and command");
+            } else if(phase.equals("trial-sites")) {
+                for(String world:new String[]{"human","spirit","celestial","demon","true_demon","monster_realm","phantom_underworld","hell","asura","nether","reincarnation"}) {
+                    String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'试境原生验收',spirit_root:'heavenly',path:'dao',seed:341,preset_id:'core'})}).then(g=>g.id)");
+                    python("from cultivation_life import server\nfrom cultivation_life.system import trial_sites\nfrom cultivation_life.rules import max_hp,max_mp\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.player.world="+JSONObject.quote(world)+"\ng.player.realm_index="+(world.equals("celestial")?"9":"3")+"\ng.player.layer=1\ng.player.immortal_power_converted=True\ng.player.opportunity=0\ng.settings['silent_events']=True\ng.settings['combat_popup']=False\ng.player.location_id=trial_sites.bound_site(g,e.maps,g.player.world)['location_id']\ng.player.hp=max_hp(g.player)\ng.player.mp=max_mp(g.player)\ne.store.save(g)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("game.trial_site.enabled && game.trial_site.available && !document.querySelector('[data-panel-target=trial-site]').classList.contains('hidden')")),"DLC shortcut: "+world);
+                    check(Boolean.TRUE.equals(js("game.trial_site.can_enter")),"Trial availability: "+world+" "+js("JSON.stringify({reason:game.trial_site.unavailable_reason,pending:game.pending_event,trial:game.trial})"));
+                    js("window.__trialAge=game.player.age;UtilityPanels.open('trial-site');true");
+                    waitForJs("getComputedStyle(document.querySelector('#trial-site-card')).opacity==='1'","Trial panel transition");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.trial-site-floor').length===game.trial_site.total && !!document.querySelector('.trial-progress') && document.documentElement.scrollWidth<=innerWidth+1")),"Visual layers: "+world);
+                    tapSelector("[data-trial-action=enter]");waitForJs("!busy && game.trial_site.active","Trial enter");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.trial-mechanism').length===5")),"Five mechanisms");
+                    tapSelector("[data-trial-choice=pause]");waitForJs("!busy && !game.trial_site.active","Trial pause");
+                    tapSelector("[data-trial-action=enter]");waitForJs("!busy && game.trial_site.active","Trial resume");
+                    for(int n=0;n<5;n++) {tapSelector("[data-trial-choice=c]");waitForJs("!busy","Trial choice");}
+                    check(Boolean.TRUE.equals(js("game.trial_site.session.status==='ready' && !!document.querySelector('.trial-guardian-card')")),"Guardian projection");
+                    capture("trial-sites-"+world+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("[data-trial-action=fight]");waitForJs("!busy && game.trial_site.session.status==='won'","Trial combat");
+                    tapSelector("[data-trial-action=claim]");waitForJs("!busy && game.trial_site.cleared===1","Trial reward");
+                    check(Boolean.TRUE.equals(js("game.player.age===window.__trialAge && !game.trial_site.active")),"Zero-time settlement");
+                }
+                result.putString("trial_sites_scope","Eleven worlds, native taps, visual layer map, five choices, pause/resume, combat, rewards and zero time");
             } else if(phase.equals("market-release")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'新版市场安装包验收',spirit_root:'supreme_earth',path:'dao',seed:315,custom_start:{world:'human',realm_index:4}})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.rules import add_item\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\nadd_item(g.player,'spirit_stone',100000000)\ne.store.save(g)");
@@ -998,12 +1039,12 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js("document.querySelector('.war-peace-form select').value='economic_rights';true");
                     tapSelector(".war-peace-form button[type=submit]");
                     waitForJs("!busy && game.war_system.wars.some(w=>w.economic_transfers?.length)","Native economic peace");
-                    tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs button[aria-controls=map-economy]");tapSelector("#market-governance > summary");
+                    tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs button[aria-controls=map-economy]");openEconomicDetails("#market-governance");
                     js("document.querySelector('[aria-label=市税经营方针]').value='reinvest';true");tapSelector("[data-governance=market_policy]");
                     waitForJs("!busy && game.map.economy.competition.control.policy==='reinvest'","Native fiscal policy");
-                    tapSelector("#market-governance > summary");tapSelector("[data-governance=market_relief]");waitForJs("!busy","Native competition funding");
+                    openEconomicDetails("#market-governance");tapSelector("[data-governance=market_relief]");waitForJs("!busy","Native competition funding");
                     python("from cultivation_life import server\nfrom cultivation_life.system.economy.market_power import record_trade\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\nm=g.economy_v2['markets'][g.player.world+':'+g.player.location_id]\ni=next(iter(m['commodities']))\nm['commodities'][i]['stock']=0\nrecord_trade(g,m,i,'player','buy',100000)\nm['competition'][i]['pressure']=16\ne.store.save(g)\ne.advance(g.id,'rest',1)\ng=e._load(g.id)\ng.pending_event=None\ne.store.save(g)");
-                    async("loadGame("+JSONObject.quote(id)+")");tapSelector("#market-governance > summary");
+                    async("loadGame("+JSONObject.quote(id)+")");openEconomicDetails("#market-governance");
                     check(Boolean.TRUE.equals(js("game.map.economy.competition.rows.some(r=>r.added>0)&&document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+2")),"Paid competition and narrow layout");
                     tapSelector(".competition-card");capture("economy-governance-"+theme+"-"+arguments.getString("orientation","portrait"));
                     async("loadGame("+JSONObject.quote(id)+")");
@@ -1017,17 +1058,17 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     async("loadGame("+JSONObject.quote(id)+")");
                     js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                     tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs button[aria-controls=map-economy]");
-                    tapSelector("#enterprise-panel > summary");
+                    openEconomicDetails("#enterprise-panel");
                     js("document.querySelector('[aria-label=购置产业]').value='mine';true");
                     tapSelector("[data-estate-action=buy]");
                     waitForJs("!busy && game.map.economy.enterprises.owned.length===1","Native estate title");
                     tapSelector("#map-view-tabs button[aria-controls=map-locations]");tapSelector(".map-directory-link.estate");tapSelector(".map-directory-entry.estate button");
                     tapSelector("[data-estate-action=fund]");
                     waitForJs("!busy && game.map.economy.enterprises.owned[0].cash===10000","Native working capital");
-                    tapSelector("#enterprise-panel > summary");tapSelector("[data-estate-id] > summary");
+                    openEconomicDetails("#enterprise-panel");tapSelector("[data-estate-id] > summary");
                     tapSelector("[data-estate-action=start]");
                     waitForJs("!busy && !!game.map.economy.enterprises.owned[0].job","Native paid production");
-                    tapSelector("#enterprise-panel > summary");tapSelector("[data-estate-id] > summary");
+                    openEconomicDetails("#enterprise-panel");tapSelector("[data-estate-id] > summary");
                     check(Boolean.TRUE.equals(js("document.querySelector('[data-estate-action=start]').disabled && document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+2")),"Production duplicate disabled and layout");
                     js("document.querySelector('[data-estate-action=start]').scrollIntoView({block:'center'});true");
                     capture("enterprises-estate-"+theme+"-"+arguments.getString("orientation","portrait"));
@@ -1548,10 +1589,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         } catch(Throwable failure) {
             android.util.Log.e("ReleaseVerification","Verification failed",failure);
             try {
-                result.putString("guide_debug", (String)js("JSON.stringify((()=>{const n=document.querySelector('[data-native-guide-target]'),r=n?.getBoundingClientRect();return {step:game?.tutorial?.guide?.step,target:n?.outerHTML,rect:r,coach:document.querySelector('.tutorial-coach')?.getBoundingClientRect(),hit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML:null,dialog:Array.from(document.querySelectorAll('dialog[open]')).map(d=>d.id)};})())"));
+                result.putString("guide_debug", (String)js("JSON.stringify((()=>{const n=document.querySelector('[data-native-guide-target]'),r=n?.getBoundingClientRect();return {step:game?.tutorial?.guide?.step,target:n?.outerHTML?.slice(0,1200),rect:r,coach:document.querySelector('.tutorial-coach')?.getBoundingClientRect(),hit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML?.slice(0,1200):null,dialog:Array.from(document.querySelectorAll('dialog[open]')).map(d=>d.id)};})())"));
                 capture("failure-1520");
             } catch(Throwable ignored) { /* Screenshot assertions must not mask the original failure. */ }
-            result.putString("status","failed");result.putString("error",failure.toString());
+            result.putString("status","failed");result.putString("error",failure.toString().substring(0,Math.min(6000,failure.toString().length())));
             try{if(dlcPreferences!=null){if(previousDlcPreferences!=null)java.nio.file.Files.write(dlcPreferences.toPath(),previousDlcPreferences);else java.nio.file.Files.deleteIfExists(dlcPreferences.toPath());}}catch(Exception restore){result.putString("restore_error",restore.toString());}
             finish(Activity.RESULT_CANCELED,result);
         }

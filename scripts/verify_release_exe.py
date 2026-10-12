@@ -56,7 +56,7 @@ def verify(with_dlc):
                 assert (key in catalog) == with_dlc
                 if with_dlc:
                     assert catalog[key]['source']['id'] == source
-            for asset in ('local-economy.js', 'local-economy.css', 'local-market-search-worker.js', 'monster-civilizations.js', 'monster-civilizations.css', 'organization-finance.js', 'organization-heritage.js', 'navigation.js', 'custom-start.js', 'custom-start.css', 'caravan-map.js', 'organization-depot.js', 'war-logistics.js', 'war-logistics.css', 'heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
+            for asset in ('trial-site-panel.js', 'trial-site-panel.css', 'local-economy.js', 'local-economy.css', 'local-market-search-worker.js', 'monster-civilizations.js', 'monster-civilizations.css', 'organization-finance.js', 'organization-heritage.js', 'navigation.js', 'custom-start.js', 'custom-start.css', 'caravan-map.js', 'organization-depot.js', 'war-logistics.js', 'war-logistics.css', 'heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()
             for theme in 'abdf':
@@ -79,6 +79,10 @@ def verify(with_dlc):
                                  "preset_id": "core"}).encode(), headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(request, timeout=20) as response:
                 game = json.load(response)
+            assert game['trial_site']['enabled'] == with_dlc
+            assert game['trial_site']['available'] == with_dlc
+            if with_dlc:
+                assert game['trial_site']['total'] == 7
             assert len(game['heavens']['incidents']) == 2
             assert len(game['heavens']['anomalies']) == len(game['heavens']['conflicts']) == 2
             assert game['heavens']['sites'] == []

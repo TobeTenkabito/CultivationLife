@@ -6,14 +6,24 @@ from ...content_registry import FACTION_SYSTEMS
 from ...models import GameState, HistoryRecord
 from .dependencies import EventsPreparationDependencies
 from ...system import generated_events
+from ...system import trial_sites
 
 
 def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool:
-    changed = False
+    changed = trial_sites.freeze_disabled(game)
     head = game.pending_event
     retained = []
     while head:
         following = head.get('_followup_event')
+        if trial_sites.is_trial(head):
+            projected = trial_sites.project_event(game)
+            if projected and not any(row.get('id') == projected['id'] for row in retained):
+                retained.append(projected)
+            elif projected:
+                changed = True
+            changed = changed or projected != {key: val for key, val in head.items() if key != '_followup_event'}
+            head = following
+            continue
         generated = generated_events.is_generated(head)
         definition = (generated_events.definition_for(game, head) if generated
                       else deps.events_by_id.get(head.get('id')))
@@ -78,6 +88,10 @@ def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool
         # Restore only the saved discovery, behind any existing authorized
         # event. Never regenerate its situation, reward or random sequence.
         retained.append(generated_events.project(game, active_generated))
+        changed = True
+    active_trial_event = trial_sites.project_event(game)
+    if active_trial_event and not any(row.get('id') == active_trial_event['id'] for row in retained):
+        retained.append(active_trial_event)
         changed = True
     if changed:
         for index, event in enumerate(retained):

@@ -110,6 +110,10 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                       for index, row in enumerate(target.get("player_allies", []))})
     rosters = (("player", player_units), ("enemy", PlayerCombatSystem._enemy_units(target)))
     persistent = persistent_owners(game, {unit.id for _, units in rosters for unit in units})
+    static_ids = set(target.get('static_resource_ids', ()))
+    for key in static_ids:
+        if key in persistent or key not in ephemeral or ephemeral[key].get('kind') not in {'mechanical', 'artifact', 'formation', 'environment'}:
+            raise ValueError('Static combat resources require an owned non-person battlefield object')
     sources = battle_sources(game, {**ephemeral, **persistent})
     for side, units in rosters:
         for unit in units:
@@ -125,7 +129,9 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
             if unit.id != "player" and state is not None:
                 source = sources.get(unit.id)
                 imitation = bool(source and any(d.id.startswith('spirit:') for d in source.voisinages))
-                resources[unit.id] = prepare(owner, game.player.age, config, imitation=imitation)
+                # Explicit static objects accrue no world-time recovery. Actual
+                # people always retain the normal authoritative resource clock.
+                resources[unit.id] = prepare(owner, None if unit.id in static_ids else game.player.age, config, imitation=imitation)
                 state = resources[unit.id].state
             elif (unit.id == "player" and state is None and game.player.realm_index >= 9
                   and game.player.immortal_power_converted):

@@ -444,6 +444,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  window.UtilityPanels?.close('trial-site');
   window.GameNavigation?.close({restoreFocus:false});
   window.UtilityPanels?.close('heavens');
   invalidateFormationPreview();
@@ -461,6 +462,7 @@ function showStart() {
 
 function render(data) {
   game = data;
+  window.TrialSitePanel?.update(data, mutate, () => busy);
   window.HeavensPanel?.render(data,{api,toast,confirm:openGameConfirm,busy:()=>busy,
     refresh:async()=>render(await api(`/api/games/${game.id}`)),command:async(id,payload)=>{
     if(busy)return;
@@ -2724,6 +2726,7 @@ function renderMap(map, auction) {
     };
     row.dataset.location = location.id; row.tabIndex = -1;
     row.append(heading, description);
+    window.TrialSitePanel?.badge(location, row);
     const links = directoryLinks(location); if (links) row.append(links);
     row.append(qiEfficiency, route, button);
     const array=map.teleport?.arrays.find(a=>a.id===location.id);
@@ -3949,6 +3952,7 @@ function renderEvent() {
 
 function renderButtons() {
   window.MapAtlas?.syncBusy();
+  window.TrialSitePanel?.syncBusy();
   document.querySelectorAll('.exploration-action').forEach(b=>b.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.trial?.active||!!game?.imprisonment||b.dataset.unavailable==='1');
   document.querySelectorAll('[data-action]').forEach(button => {
     const guixuSession = game?.guixu_tide?.session;
@@ -3969,7 +3973,7 @@ function renderButtons() {
     const blockedDuringAdaptation = adaptingToImmortalPower && !['cultivate', 'rest', 'commission'].includes(button.dataset.action);
     const controlledGhost = game?.ghost_system?.phase_two?.state === 'controlled' && !['cultivate', 'rest'].includes(button.dataset.action);
     const cultivationSuppressed = !!game?.secret_arts?.suppression?.active && button.dataset.action === 'cultivate' && !trappedInGuixu;
-      button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || instantUnavailable || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost || cultivationSuppressed || blockedByGuixu || blockedBySpatial || generatedUnavailable;
+      button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || instantUnavailable || mortalCommission || mortalCombat || blockedDuringAdaptation || controlledGhost || cultivationSuppressed || blockedByGuixu || blockedBySpatial || generatedUnavailable || !!game?.trial_site?.active;
   });
   document.querySelectorAll('#event-choices button').forEach(button => {
     const index = [...button.parentNode.children].indexOf(button);
@@ -4120,6 +4124,9 @@ function renderButtons() {
     const choiceMissing = preset?.select_path && (!selectedPath || (selectedPath === 'monster' && !button.parentElement.querySelector('[data-quick-species]')?.value));
     button.disabled = busy || (preset ? !preset.enabled || speciesMissing || choiceMissing : false);
   });
+  if (game?.trial_site?.active) {
+    document.querySelectorAll('.map-travel, .map-teleport, .market-buy, .market-lock, .relationship-action, .contact-action, .party-action, .companion-action, .friend-action, .relationship-exit, .technique-upgrade, .technique-merge, .bloodline-evolve, #body-train-action, #sense-train-action, #breakthrough-action, #body-breakthrough-action, #sense-breakthrough-action, #spirit-crossing-action, #cross-world-action, #cross-world-secondary-action').forEach(button => { button.disabled = true; });
+  }
 }
 
 function number(value) { return Math.round(Number(value)).toLocaleString('zh-CN'); }

@@ -89,6 +89,11 @@ class Capability:
 
 
 CAPABILITIES = (
+    Capability('trial site', 'trial-site-action',
+        (S('action', choices=('enter', 'fight', 'pause', 'claim')),
+         S('world', required=False, choices=('human','demon','spirit','true_demon','monster_realm','phantom_underworld','hell','celestial','asura','nether','reincarnation')),
+         I('floor', 1, 22), S('floor_id', required=False), I('revision', 0, 2000000)),
+        lambda e,g,p:e.trial_site_action(g,p['action'],p), dlc='official.trial-sites'),
     Capability('civilizations view', 'civilizations-view',
         (S('world',required=False,choices=('human','monster_realm','phantom_underworld','nether')),
          I('page',0,15),S('query',required=False),S('kind',required=False)),
@@ -120,8 +125,8 @@ CAPABILITIES = (
         lambda e,g,p: e.talisman_action(g,p['action'],p)),
     Capability('action advance', 'advance', (S('action', required=False), I('years', 0, 10)),
         lambda e, g, p: e.advance(g, p.get('action', 'cultivate'), p.get('years', 1))),
-    Capability('event choose', 'choice', (S('choice_id'),),
-        lambda e, g, p: e.choose(g, p.get('choice_id', ''))),
+    Capability('event choose', 'choice', (S('choice_id'), S('event_id', required=False)),
+        lambda e, g, p: e.choose(g, p.get('choice_id', ''), event_id=p.get('event_id'))),
     Capability('npc contact', 'npc-contact', (S('npc_id'), S('action', choices=('party', 'companion', 'friend', 'master', 'disciple', 'concubine', 'slay', 'improve', 'worsen', 'capture'))),
         lambda e, g, p: e.contact_action(g, p.get('npc_id', ''), p.get('action', ''))),
     Capability('relationship violence', 'relationship-violence', (S('kind'), S('target_id'), B('capture')),

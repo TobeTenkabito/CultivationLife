@@ -84,7 +84,7 @@ def main():
                             page.screenshot(path=str(output/f'{theme}-{width}-influence-list.png'))
                             page.locator('[data-atlas-display=map]').click()
                             page.screenshot(path=str(output/f'{theme}-{width}-map.png'))
-                            page.reload();page.wait_for_function('!!configData && !busy');page.evaluate('async id=>loadGame(id)',identity);navigation_locator(page,'[data-panel-target=map]').click();page.locator('#map-view-tabs button',has_text='可视地图').click();page.wait_for_selector('#map-atlas svg')
+                            page.reload();page.wait_for_function('!!configData && !busy');page.evaluate('async id=>{while(busy)await new Promise(resolve=>setTimeout(resolve,50));await loadGame(id)}',identity);page.wait_for_function('(id)=>game?.id===id && !busy && !document.querySelector("#game-screen").classList.contains("hidden")',arg=identity);navigation_locator(page,'[data-panel-target=map]').click();page.locator('#map-view-tabs button',has_text='可视地图').click();page.wait_for_selector('#map-atlas svg')
                             assert '100' in page.locator('.atlas-detail').inner_text()
                             stored=engine.store._path(identity).read_bytes()
                             page.evaluate('showStart();renderButtons()')

@@ -1,4 +1,5 @@
 """Debug capability availability; gameplay remains the authority on eligibility."""
+from ..system.trial_sites import enabled as trial_sites_available
 from ..system.asura import enabled as asura_available
 from ..system.buddhist.rules import buddhist_config
 from ..system.guixu_system import guixu_content_available
@@ -9,6 +10,7 @@ from ..system.monster_civilizations.core import config as civilizations_config
 
 
 CHECKS = {
+    'official.trial-sites': trial_sites_available,
     'official.monster-civilizations': lambda: bool(civilizations_config()),
     'official.asura-manifestation': asura_available,
     'official.buddhist-dharma': lambda: bool(buddhist_config().get('enabled')),

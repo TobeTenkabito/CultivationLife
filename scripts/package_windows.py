@@ -32,7 +32,7 @@ def main():
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     require(exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log, 'Both EXE checks must pass')
     for check in ('true-form', 'world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
-                  'territory', 'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events'):
+                  'territory', 'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events', 'trial-sites', 'generated-events'):
         result = log(f'{check}-ui-{RELEASE_ID}.log')
         require('passed' in result and 'Traceback' not in result, f'UI check must pass: {check}')
     evidence_file = ROOT / f'build/exe-{RELEASE_ID}-verification.json'
@@ -60,6 +60,7 @@ def main():
             'Eleven-world dossiers: four themes, 1980 browser checks including short landscape, real touch and persisted outcomes',
             f'{passed.group(1)} automated regression tests passed',
             'Four-theme start layout, live tutorial, quick starts, spatial/talisman/royal gameplay, debug console, Asura, handbook and puppet UI checks passed',
+            'Eleven-world trial DLC: visual layers, five choices, zero-time combat, receipts, normal travel and disabled/re-enabled progress verified',
             'Exact executable hash verified in isolated directories with and without optional DLC',
             'Release inputs match the fingerprint recorded by EXE verification',
         ],

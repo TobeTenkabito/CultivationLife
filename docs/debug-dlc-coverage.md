@@ -1,6 +1,6 @@
 # Debug DLC 指令与验证范围
 
-维护基线：本体 **2.10.0**，仅支持存档结构 **10**。当前命令、角色入口及 DLC 门禁以 `help`、`capability list` 的注册表输出为准。这里的“覆盖”指可调用入口，不能等同于穷举所有玩法分支。
+维护基线：本体 **2.12.0**，仅支持存档结构 **10**。当前命令、角色入口及 DLC 门禁以 `help`、`capability list` 的注册表输出为准。这里的“覆盖”指可调用入口，不能等同于穷举所有玩法分支。
 
 ## 调用约定
 
@@ -20,6 +20,7 @@
 
 | 指令 | 正式入口 | 操作 / 参数要点 | 选项来源 |
 | --- | --- | --- | --- |
+| `trial site` | `trial-site-action` | `enter` 使用 `world` / `floor`；`fight` / `pause` / `claim` 使用 `floor_id` / `revision`，五事件沿 `event choose` | `game view /trial_site` |
 | `civilizations view` | `civilizations-view` | 可选 `world`、`page`、`query`、`kind`，只读 | 已知界面与图志 |
 | `civilizations action` | `civilizations-action` | `action`、万灵 `expected_revision`；可选 `target_id`、`name`、`expected_world`、`expected_location` | `civilizations view` |
 | `buddhist action` | `buddhist-action` | `action`；可选 `blessing`、`authority`、`technique` | `game view /buddhist_system`、已学功法 |

@@ -54,7 +54,7 @@ dlc/
 
 ## 当前官方包
 
-八个包的默认启用状态、加载次序和版本以清单为准。
+十个包的默认启用状态、加载次序和版本以清单为准。
 
 本相、魂相和八部魔域的专属成就按相应 DLC 实际加载；三级界面的境界、普通邻域和三套机构成就属于本体。既有跨存档成就记录不因关闭扩展而清除。
 
@@ -69,3 +69,4 @@ dlc/
 | [万灵争衡：百族兴衰](monster-civilizations/README.md) | 1.0.0 | `official.monster-civilizations` |
 | [圣人之道：内圣外王](sage-way/README.md) | 1.4.0 | `official.sage-way` |
 | [神机百变：巧夺天工](tianji-artifacts/README.md) | 2.2.0 | `official.tianji-artifacts` |
+| [万象试境](trial-sites/README.md) | 1.0.0 | `official.trial-sites` |

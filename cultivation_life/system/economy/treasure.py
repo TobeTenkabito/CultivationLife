@@ -10,16 +10,21 @@ def _treasure_reward_pool(deps: TreasureDependencies, game: GameState, category:
     player = game.player
     target_tier = max(1, player.realm_index)
     location_id = deps.maps.normalize_location(player.world, player.location_id)
+    return reward_pool_for_scene(deps, player.world, location_id, target_tier, category)
+
+
+def reward_pool_for_scene(deps: TreasureDependencies, world: str, location_id: str, target_tier: int, category: str) -> list[dict[str, Any]]:
+    """Reuse legal local distribution without manufacturing a player/game copy."""
     profiles = WORLD_SYSTEMS['world_profiles']
-    world_tier = profiles[player.world]['tier']
+    world_tier = profiles[world]['tier']
     # Ordinary inheritances can circulate among peers and higher worlds. Relabel
     # copies for local distribution; never change market stock or import upper loot.
     sources = [row for row in MARKET_GOODS if int(row['tier']) <= target_tier
-               and (row.get('world', 'human') == player.world
+               and (row.get('world', 'human') == world
                     or 0 < profiles.get(row.get('world', 'human'), {}).get('tier', 0) <= world_tier)]
     unique = {}
-    for row in sorted(sources, key=lambda row: row.get('world', 'human') != player.world):
-        unique.setdefault((row['kind'], row['content_id']), dict(row, world=player.world))
+    for row in sorted(sources, key=lambda row: row.get('world', 'human') != world):
+        unique.setdefault((row['kind'], row['content_id']), dict(row, world=world))
     world_goods = list(unique.values())
     if category == "technique":
         eligible = [row for row in world_goods if row["kind"] == "technique"]
@@ -33,9 +38,9 @@ def _treasure_reward_pool(deps: TreasureDependencies, game: GameState, category:
         ]
     else:
         raise ValueError("未知探宝奖励类别")
-    eligible = deps.maps.localize_goods(eligible, player.world, location_id, "treasure")
+    eligible = deps.maps.localize_goods(eligible, world, location_id, "treasure")
     if not eligible:
-        raise ValueError(f"{player.world}界缺少可用的{category}探宝奖励")
+        raise ValueError(f"{world}界缺少可用的{category}探宝奖励")
     return eligible
 
 
