@@ -224,6 +224,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                               "hint": "循祖兽梦径往返；同阶界面不压制修为" if lateral else "解除界面压制，完整恢复封存道果" if restoring else
                               f"修为将受当地法则压制至{deps._npc_realm_name(target_shell)}；可循原路返界"})
     eligible = {row["destination"] for row in travel_routes}
+    from ..system.trial_sites import public as public_trial_sites
     return {
         "id": game.id,
         "seed": game.seed,
@@ -233,6 +234,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "pending_event": game.pending_event,
         "generated_event": {"pending": bool(game.generated_event_state.get("active")),
                             "last_result": copy.deepcopy(game.generated_event_state.get("last_result"))},
+        "trial_site": public_trial_sites(game, deps.maps),
         "last_combat_report": copy.deepcopy(game.last_combat_report),
         "settings": {**game.settings, 'manual_combat_plan': bool(game.player.combat_plan.get('manual'))},
         "combat_plan": public_plan(game.player),

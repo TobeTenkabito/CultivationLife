@@ -94,7 +94,10 @@ def main():
                             atlas=page.locator('.caravan-atlas')
                             assert atlas.count()==1
                             if atlas.count():
-                                atlas.locator('xpath=..').evaluate('(n)=>n.open=true')
+                                overview=page.locator('.economy-overview')
+                                if overview.get_attribute('open') is None:overview.locator(':scope > summary').click()
+                                freight=page.locator('.economy-freight')
+                                if freight.get_attribute('open') is None:freight.locator(':scope > summary').click()
                                 atlas.locator('.caravan-map-roster button').first.click()
                                 assert atlas.locator('[aria-pressed=true]').count()==1
                                 assert atlas.locator('svg').evaluate('(n)=>!n.innerHTML.includes("NaN")')
@@ -118,6 +121,8 @@ def main():
                             assert engine.store.load(cid).player.immortal_conversion_stage==0
                             page.locator('#event-choices button').first.click()
                             page.wait_for_function('!busy && !game.pending_event')
+                            assert page.evaluate('game.id')==cid, page.evaluate('({id:game.id,world:game.player.world,realm:game.player.realm_index,doctrine:game.doctrines})')
+                            assert page.evaluate('game.doctrines.available'), page.evaluate('({world:game.player.world,realm:game.player.realm_index,alive:game.player.alive,doctrine:game.doctrines})')
                             navigation_locator(page,'[data-panel-target=immortal-conversion]').click()
                             page.get_by_role('button',name='推进下一阶段',exact=True).click()
                             page.wait_for_function('!busy && game.player.immortal_conversion_stage===1')

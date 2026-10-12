@@ -33,15 +33,16 @@ def release_inputs(tmp_path):
             f'start-layout-ui-{rid}.log': 'Start layout passed',
             f'true-form-ui-{rid}.log': 'Release 251 UI passed:',
             f'world-life-ui-{rid}.log': 'Release 250 UI passed:', f'civilizations-ui-{rid}.log':'passed',
-            f'territory-ui-{rid}.log':'Territory UI passed:'}
-    phases = ('civilizations-i-only','civilizations-ii-only','civilizations-neither','heavens-portrait', 'heavens-landscape', 'experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
+            f'territory-ui-{rid}.log':'Territory UI passed:',
+            f'trial-sites-ui-{rid}.log':'Trial sites UI passed: 44'}
+    phases = ('trial-sites-disabled','civilizations-i-only','civilizations-ii-only','civilizations-neither','heavens-portrait', 'heavens-landscape', 'experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
               'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
               'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape',
               'debug-console-portrait', 'debug-console-landscape',
               'start-layout-portrait', 'start-layout-landscape', 'spatial-talisman-portrait', 'spatial-talisman-landscape')
     logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
     logs.update({f'android-{phase}-{orientation}-{rid}.log': 'status=passed'
-                 for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion')
+                 for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'trial-sites')
                  for orientation in ('portrait', 'landscape')})
     for name, content in logs.items():
         (build / name).write_text(content, encoding='utf-8')
@@ -66,6 +67,9 @@ def release_inputs(tmp_path):
 
 @pytest.mark.parametrize('optimization', ['', '-O', '-OO'])
 @pytest.mark.parametrize('failure,expected', [
+    ('trial-sites', 'Android trial-sites portrait must pass'),
+    ('trial-disabled', 'Android independent DLC check must pass: trial-sites-disabled'),
+    ('trial-browser', 'Trial DLC browser acceptance must pass'),
     ('suite', 'Full regression suite must pass'),
     ('collection', 'Full regression suite must pass'),
     ('phase', 'android-experience-'),
@@ -88,6 +92,9 @@ def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure
     root = release_inputs
     rid = package_android.RELEASE_ID
     corruptions = {
+        'trial-sites': (f'android-trial-sites-portrait-{rid}.log', 'status=failed'),
+        'trial-disabled': (f'android-trial-sites-disabled-{rid}.log', 'status=failed'),
+        'trial-browser': (f'trial-sites-ui-{rid}.log', 'Trial sites UI passed: 44 Traceback'),
         'heavens-workbench': (f'heavens-workbench-ui-{rid}.log', 'Traceback: workbench failed'),
         'heavens': (f'android-heavens-portrait-{rid}.log', 'status=failed'),
         'heavens-browser': (f'heavens-ui-{rid}.log', '1980 dossier checks\nTraceback'),

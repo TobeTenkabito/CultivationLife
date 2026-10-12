@@ -198,6 +198,10 @@
           <section id="map-directory" class="map-directory hidden" aria-label="活动与商盟据点"></section>
           <section id="map-economy" class="hidden" aria-label="本地市场"></section>
         </article>
+        <article id="trial-site-card" class="paper utility-panel hidden" role="dialog" aria-modal="false" aria-label="万象试境">
+          <div class="section-title"><div><p class="eyebrow">机关遗境</p><h2>万象试境</h2></div><div class="panel-heading"><span>DLC · 种子守关</span><button id="trial-site-toggle" type="button">关闭</button></div></div>
+          <div id="trial-site-panel" class="trial-site-panel"></div>
+        </article>
         <article id="market-card" class="paper market-card utility-panel" role="dialog" aria-modal="false" aria-label="修仙坊市">
           <div class="section-title"><div><p class="eyebrow">互通有无</p><h2 id="market-title">修仙坊市</h2></div><div class="market-heading-actions"><strong id="market-wallet"></strong><button id="market-toggle" type="button">关闭</button></div></div>
           <nav id="market-view-tabs" class="economy-tools" aria-label="坊市分类">
@@ -522,6 +526,7 @@
         <button type="button" data-panel-target="daomen" title="道门同道" class="hidden"><span>门</span><small>道门</small></button>
         <button type="button" data-panel-target="map" title="界面地图"><span>图</span><small>地图</small></button>
         <button type="button" data-panel-target="guixu" data-dlc="guixu" title="归墟之潮" class="hidden guixu-dock-button"><span>墟</span><small>归墟</small></button>
+        <button type="button" data-panel-target="trial-site" data-dlc="trial-sites" title="万象试境 · 定位本界遗迹并开始挑战" class="hidden trial-site-dock-button"><span>象</span><small>试境</small></button>
         <button type="button" data-panel-target="market" title="坊市"><span>市</span><small>坊市</small></button>
         <button type="button" data-panel-target="merchant" title="商盟"><span>盟</span><small>商盟</small></button>
         <button type="button" data-panel-target="auction" title="拍卖会与黑市"><span>拍</span><small>拍卖</small></button>
@@ -628,7 +633,9 @@
   <script src="/custom-start.js?v=2.4.0"></script>
   <link rel="stylesheet" href="/map-atlas.css?v=territory-ui2">
   <script src="/map-atlas.js?v=territory-ui2"></script>
-  <script src="/app.js?v=territory-ui2"></script>
+  <link rel="stylesheet" href="/trial-site-panel.css?v=2120">
+  <script src="/trial-site-panel.js?v=2120"></script>
+  <script src="/app.js?v=trial-site-1"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

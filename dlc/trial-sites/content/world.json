@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "systems": {
+    "trial_sites": {"enabled": true, "package_id": "official.trial-sites"}
+  }
+}

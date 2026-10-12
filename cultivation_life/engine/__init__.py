@@ -787,14 +787,17 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _load(self, game_id: str) -> GameState:
         from .transactions import request_games, active_command
         from ..system.spatial import guard
+        from ..system.trial_sites import guard as trial_guard
         games = request_games(self)
         if games is not None and game_id in games:
             if active_command():
                 guard(games[game_id], active_command())
+                trial_guard(games[game_id], active_command())
             return games[game_id]
         game = persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
         if active_command():
             guard(game, active_command())
+            trial_guard(game, active_command())
         if games is not None:
             games[game_id] = game
         return game
@@ -2861,6 +2864,23 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
                    for category in ("artifact", "technique", "pill")},
             self.maps.location(game.player.world, game.player.location_id)["name"],
         )
+
+    def _trial_site_reward_pool(self, world: str, location_id: str, tier: int) -> list[dict[str, Any]]:
+        from ..content_registry import ITEM_CATALOG, TECHNIQUE_CATALOG
+        pools = []
+        for category in ("artifact", "technique", "pill"):
+            rows = economy_treasure.reward_pool_for_scene(self._dependencies.economy.treasure, world, location_id, tier, category)
+            for row in rows:
+                kind = 'technique' if category == 'technique' else 'item'
+                catalog = TECHNIQUE_CATALOG if kind == 'technique' else ITEM_CATALOG
+                pools.append(dict(kind=kind, content_id=row['content_id'], name=catalog[row['content_id']].name, tier=int(row['tier'])))
+        best = max(row['tier'] for row in pools)
+        return [row for row in pools if row['tier'] == best]
+
+    def trial_site_action(self, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:
+        from .composition.trial_sites import bind
+        from ..system.trial_sites import command
+        return command(bind(self), game_id, action, payload)
 
     def _claim_treasure_reward(self, game: GameState, pending: dict[str, Any], category: str) -> tuple[str, str]:
         return economy_treasure._claim_treasure_reward(self._dependencies.economy.treasure, game, pending, category)

@@ -1,6 +1,6 @@
 # Debug 本体通用功能覆盖清单
 
-维护基线：本体 **2.11.2**，仅支持存档结构 **10**。命令与入口以当前注册表的 `help`、`capability list` 为准。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
+维护基线：本体 **2.12.0**，仅支持存档结构 **10**。命令与入口以当前注册表的 `help`、`capability list` 为准。它们覆盖本体通用玩法及当前全部 DLC 的角色操作入口；专属指令详见 [DLC 指令清单](debug-dlc-coverage.md)。使用与开发约定见 [开发规范](debug-development.md)。
 
 ## 如何理解覆盖范围
 
@@ -8,6 +8,7 @@
 
 | 系统 | 已覆盖的操作链 | 发现当前选项 |
 | --- | --- | --- |
+| 万象试境 DLC | 入层、五事件、暂停续行、原战斗、一次领奖；保持 DLC、地点与局势修订校验 | `game view /trial_site`、`help trial site` |
 | 万灵图志 | 只读图志、当地考察、护育、氏族与王庭事务 | `civilizations view`、`help civilizations action` |
 | 开局与现场 | 复制存档、新建隔离角色、固定种子、命名快照、恢复、差异、复现导入导出 | `scenario list`、`save list`、`debug sessions` |
 | 玩家与修炼 | 数据修改、正常行动、修为/炼体/神识突破、秘法、道统、元府 | `player fields`、`game view /breakthrough`、`game view /secret_arts` |

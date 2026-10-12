@@ -271,8 +271,9 @@ def build_registry():
         lambda ctx, action, units: ctx.services.simulate(ctx.session, 'advance', {'action': action, 'years': units}),
         (Argument('action', tuple(ACTIONS)), Argument('units', type='integer', minimum=1, maximum=10)))
     add('event choose', 'simulation', 'Resolve a pending event choice through ordinary rules.',
-        lambda ctx, choice_id: ctx.services.simulate(ctx.session, 'choice', {'choice_id': choice_id}),
-        (Argument('choice_id'),))
+        lambda ctx, choice_id, event_id: ctx.services.simulate(ctx.session, 'choice', {
+            'choice_id': choice_id, 'event_id': event_id if event_id is not None else (ctx.document.get('pending_event') or {}).get('id')}),
+        (Argument('choice_id'), Argument('event_id', required=False)))
     add('save validate', 'query', 'Run lightweight, non-mutating validation.', lambda ctx: validate(ctx.document))
     add('snapshot create', 'snapshot', 'Save game, overrides and isolated achievements.',
         snapshot_create, (Argument('name'),))

@@ -315,7 +315,8 @@
     "version": "history",
     "map_war_last_encounter_unit": "clock",
     "monster_civilization_state": "global",
-    "generated_event_state": "session"
+    "generated_event_state": "session",
+    "trial_site_state": "scope"
   },
   "true_form_ownership_notes": {
     "Player.world_voisinages.nether.true_form": "个人固定原始种属、祖谱编号与合法规则快照、主辅权能及阶段锁；仅幽冥界妖修九阶以上生效，离界或关闭 DLC 沉寂并保留。未知版本/错误编号保留原记录且禁止执行，不随机重建。levels/active 仍为唯一培养与上阵记录，元力只用既有仙窍。",
@@ -332,5 +333,8 @@
   },
   "generated_event_ownership_notes": {
     "GameState.generated_event_state": "本体种子异闻：序号、生成版本、原 world/location/instance、未完成情境与固定奖励归原会话；页面仅投影线索与合法选项，不发送隐藏后果。已处理结果只保留最近一条，真实资源使用原事件效果入口。本地勘察不移动玩家、不创建人物或复制资源池；普通移动不得跳过待处理事件，场景不匹配拒绝提交。只支持结构 10，不转换结构 1–9。"
+  },
+  "trial_site_ownership_notes": {
+    "GameState.trial_site_state": "万象试境 DLC 十一普通界面：入口固定原 world/location，按权威 tier 使用 7/14/22 层；五节点、守关有限资源、首次奖励收据按原遗迹保留，不随移动复制。活动指针为本地会话，不移动人物。无年度或行动时间钩子，正式提交沿原效果/战斗/奖励入口及原子保存。关闭 DLC 冻结数据，安全会话摘除活动指针，真实受控或封逃结果不得借开关解除；后续奖励保留。重新开启只恢复原记录，返访须亲至原入口；结构 10，不转换 1–9。"
   }
 }

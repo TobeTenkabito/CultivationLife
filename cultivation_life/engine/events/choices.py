@@ -6,6 +6,7 @@ from ...models import GameState, HistoryRecord
 from ...runtime import decode_rng, encode_rng, now_iso
 from ..dependencies import ChoiceDependencies
 from ...system import generated_events
+from ...system import trial_sites
 
 
 def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: str | None = None) -> dict[str, Any]:
@@ -15,6 +16,18 @@ def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: 
     pending = game.pending_event
     if not pending:
         raise ValueError("当前没有待处理事件")
+    if trial_sites.is_trial(pending):
+        _, floor = trial_sites.current(game)
+        if not floor:
+            raise ValueError('活动试境已经变化')
+        if choice_id == 'pause':
+            if event_id != pending['id']:
+                raise ValueError('本层事件已变化，请重新查看')
+            action = 'pause'
+        else:
+            action = 'choose'
+        return deps._trial_site_action(game_id, action, dict(floor_id=floor['id'], revision=floor['revision'],
+                                                             event_id=event_id, choice_id=choice_id))
     if event_id is not None and pending['id'] != event_id:
         raise ValueError('待处理事件已经变化，请查看当前事件后再选择')
     offered = next((row for row in pending.get('choices', []) if row.get('id') == choice_id), None)
