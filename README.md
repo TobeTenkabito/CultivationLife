@@ -2,7 +2,7 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v2.13.1**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v2.13.2**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
 
 v2.11.2 调整宗门与家族供养、经营养护及自动生产止损，保留基本储备和空府库恢复能力。坊市新增本地市场及正则搜索；妖修第二 DLC 入口仅向妖修显示，采用独立灵纹按钮。Windows 沿用桌面侧栏，Android 使用分类导航。规则与验收范围见[调整说明](docs/organization-balance-and-market.md)。
 

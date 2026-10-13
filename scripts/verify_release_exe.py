@@ -56,7 +56,7 @@ def verify(with_dlc):
                 assert (key in catalog) == with_dlc
                 if with_dlc:
                     assert catalog[key]['source']['id'] == source
-            for asset in ('map-scene.js', 'map-atlas.js', 'map-atlas.css', 'map-layouts.js', 'trial-site-panel.js', 'trial-site-panel.css', 'local-economy.js', 'local-economy.css', 'local-market-search-worker.js', 'monster-civilizations.js', 'monster-civilizations.css', 'organization-finance.js', 'organization-heritage.js', 'navigation.js', 'custom-start.js', 'custom-start.css', 'caravan-map.js', 'organization-depot.js', 'war-logistics.js', 'war-logistics.css', 'heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
+            for asset in ('map-artwork-data.js', 'map-artwork.js', 'map-camera.js', *[f'assets/maps/{w}.svg' for w in ('human','demon','spirit','true_demon','monster_realm','phantom_underworld','hell','celestial','asura','nether','reincarnation')], 'map-scene.js', 'map-atlas.js', 'map-atlas.css', 'map-layouts.js', 'trial-site-panel.js', 'trial-site-panel.css', 'local-economy.js', 'local-economy.css', 'local-market-search-worker.js', 'monster-civilizations.js', 'monster-civilizations.css', 'organization-finance.js', 'organization-heritage.js', 'navigation.js', 'custom-start.js', 'custom-start.css', 'caravan-map.js', 'organization-depot.js', 'war-logistics.js', 'war-logistics.css', 'heavens-atlas.js', 'debug-heavens.js', 'heavens-incidents.js', 'heavens-panel.js', 'heavens-panel.css', 'heavens-campaign.js', 'asura-court-panel.js', 'asura-court-panel.css', 'asura-panel.js', 'asura-meridians.js', 'asura-panel.css', 'upper-energy.js', 'upper-energy.css', 'puppet-workshop.js', 'meridian-atlas.js', 'meridian-atlas.css', 'assets/asura-anatomy.png', 'assets/immortal-anatomy.png'):
                 with urllib.request.urlopen(base + '/' + asset, timeout=5) as response:
                     assert response.read() == (ROOT/'web'/asset).read_bytes()
             for theme in 'abdf':
@@ -389,7 +389,10 @@ def verify(with_dlc):
             def post_forge(operation,payload):
                 req=urllib.request.Request(base+f"/api/games/{immortal['id']}/"+operation,method='POST',
                     data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
-                with urllib.request.urlopen(req,timeout=30) as response:return json.load(response)
+                try:
+                    with urllib.request.urlopen(req,timeout=30) as response:return json.load(response)
+                except urllib.error.HTTPError as error:
+                    raise RuntimeError(f'{operation}: HTTP {error.code}: {error.read().decode()}') from error
             payload=dict(form='bird',core=parts[0],shell=parts[1],energy=parts[2])
             predicted=post_forge('puppet-preview',payload)
             forged=post_forge('craft-puppet',payload)

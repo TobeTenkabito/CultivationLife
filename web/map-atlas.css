@@ -29,3 +29,5 @@
 .atlas-scene .atlas-node { pointer-events: visiblePainted; }
 
 .atlas-scene .atlas-node > circle:not(.atlas-dot) { pointer-events: none; }
+
+.atlas-viewport .atlas-scene{touch-action:none;cursor:grab}.atlas-viewport .atlas-scene.dragging{cursor:grabbing}.scene-authored-landscape{pointer-events:none}
