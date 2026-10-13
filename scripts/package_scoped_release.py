@@ -30,6 +30,7 @@ def main():
     evidence=json.loads((ROOT/f'build/exe-{tag}-verification.json').read_text(encoding='utf-8'))
     validate_evidence(ROOT,VERSION,evidence)
     native=json.loads((ROOT/f'build/android-{tag}-scoped.json').read_text(encoding='utf-8'))
+    require(native.get('version')==VERSION,'Native version mismatch')
     apk=ROOT/'android/app/build/outputs/apk/release/app-release.apk'
     require(native['apk_sha256']==file_digest(apk) and native['signed'] and native['status']=='passed','Native/signature evidence invalid')
     for logfile in native['logs']:
@@ -38,6 +39,18 @@ def main():
         require(file_digest(ROOT/logfile)==native['log_hashes'][logfile],'Native evidence changed')
     with zipfile.ZipFile(apk) as archive:
         provenance=validate_apk_inputs(ROOT,archive)
+        require(archive.testzip() is None,'APK integrity check failed')
+        require(all(f'lib/{abi}/libpython3.13.so' in archive.namelist() for abi in ('arm64-v8a','x86_64')),'Android ABI missing')
+    if scoped.get('profile')=='economy':
+        required={f'build/android-{phase}-{orientation}-{tag}.log'
+                  for phase in ('economy-trust','economy-enterprises','economy-network') for orientation in ('portrait','landscape')}
+        require(set(native['logs'])==required,'Native economic scope incomplete')
+        require(native.get('sdk')=='31','Android 12 native acceptance required')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        current_code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{current_code}'" in metadata and f"versionName='{VERSION}-android.{current_code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
     dlcs={p.parent.name:json.loads(p.read_text(encoding='utf-8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],
               incompatible_save_schemas='1–9; no migration',dlc_versions=dlcs,

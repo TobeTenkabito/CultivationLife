@@ -1,0 +1,160 @@
+{
+  "base_version": "2.13.4",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.0",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested economic, related interaction and release tests only; not full repository regression",
+  "tests": 331,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-6",
+      "log": "build\\related-tests-6-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-7",
+      "log": "build\\related-tests-7-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-8",
+      "log": "build\\related-tests-8-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-9",
+      "log": "build\\related-tests-9-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-10",
+      "log": "build\\related-tests-10-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-11",
+      "log": "build\\related-tests-11-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-12",
+      "log": "build\\related-tests-12-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-13",
+      "log": "build\\related-tests-13-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-14",
+      "log": "build\\related-tests-14-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-15",
+      "log": "build\\related-tests-15-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-16",
+      "log": "build\\related-tests-16-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-17",
+      "log": "build\\related-tests-17-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-18",
+      "log": "build\\related-tests-18-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_economy_trust",
+      "log": "build\\browser_economy_trust-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_economy_enterprises",
+      "log": "build\\browser_economy_enterprises-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_organization_economy",
+      "log": "build\\browser_organization_economy-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-2134.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-2134.log",
+  "inputs_sha256": "03debf9b7bc3fdcca4f565e49ca9617d4ca7ed1689877af0f6eca3e0666bb0ba",
+  "platform": "Windows",
+  "exe_sha256": "47fb660d9b5ac404ae35a262f3072fa57e8b73956f56384e355cce3777b19ddd",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}
