@@ -35,7 +35,7 @@ def register(game, kind, identity, world):
         rows[address] = dict(kind=kind, identity=identity, world=world,
             last_year=max(game.player.age, game.economy_v2['last_year']),
             income=0, expense=0, shortfall=0, benefit_paid=0, benefit_due=0,
-            produced=0, commodity=None, history=[])
+            produced=0, commodity=None, history=[], settlement_years=0, turnover=0)
         # A finite transfer funds institutions without a pre-existing treasury.
         if kind == 'yaochi':
             pay(game, f'background:{world}', address, 2000000, '瑶池设立采购周转金')
@@ -101,15 +101,19 @@ def estate_cost(game, estate, amount):
         row['estate_cost_credit']+=amount
 
 
-def estate_sale(game, estate, receipt):
+def estate_sale(game, estate, receipt, gross=0):
     """Recover paid inputs/maintenance first, then service new operating profit."""
     row=_estate_finance(game,estate)
     if row is None:
         return 0
+    book_turnover(game, row, gross)
     surplus=max(0,receipt-row['estate_cost_credit'])
     row['estate_cost_credit']=max(0,row['estate_cost_credit']-receipt)
     if not surplus:
         return 0
+    if not current_period(game, row):
+        row['pending_income'] = row.get('pending_income', 0) + surplus
+        return 0  # Optional services run once when this actual interval settles.
     row['income']+=surplus
     paid=operating_services(game,row,surplus)
     reserve=int(row.get('expected_upkeep',0)*.65*3)
@@ -118,5 +122,36 @@ def estate_sale(game, estate, receipt):
     if row['history'] and row['history'][-1][0]==game.player.age:
         row['history'][-1][1:]=[row['income'],row['expense']]
     return paid
+
+
+def estate_purchase(game, estate, gross):
+    row = _estate_finance(game, estate)
+    if row is not None:
+        book_turnover(game, row, gross)
+
+
+def current_period(game, row):
+    return row['last_year'] == game.player.age and bool(row.get('settlement_years'))
+
+
+def book_turnover(game, row, gross):
+    field = 'turnover' if current_period(game, row) else 'pending_turnover'
+    row[field] = row.get(field, 0) + gross
+
+
+def book_expense(game, row, amount):
+    field = 'expense' if current_period(game, row) else 'pending_expense'
+    row[field] = row.get(field, 0) + amount
+
+
+def caravan_dividend(game, fleet, amount):
+    """Caravans settle before organizations: carry only the real paid dividend."""
+    if fleet.get('owner_kind') not in {'sect', 'family'} or not amount:
+        return
+    address = key(fleet['owner_kind'], fleet['owner_id'])
+    address = game.economy_v2.get('organization_aliases', {}).get(address, address)
+    row = game.economy_v2.get('organizations', {}).get(address)
+    if row is not None:
+        row['pending_income'] = row.get('pending_income', 0) + amount
 
 

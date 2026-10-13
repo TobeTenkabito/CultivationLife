@@ -65,6 +65,8 @@ def command(game, maps, payload):
     elif action == 'entrust':
         if type(payload.get('enabled')) is not bool:
             raise ValueError('请明确启用或收回委托')
+        from .economy_trust import release
+        release(row)
         row['entrusted'] = payload['enabled']
         if row['entrusted']:
             from .estate_management import plan
@@ -73,6 +75,8 @@ def command(game, maps, payload):
             row.update(enabled=False, auto_buy=False, auto_sell=False)
         log(row, p.age, '委托驻地掌柜自动经营' if row['entrusted'] else '收回经营委托并暂停自动经营；保留已付批次、库存与配方')
     elif action == 'configure':
+        from .economy_trust import release
+        release(row)
         row['entrusted'] = False
         for name in ('enabled', 'auto_buy', 'auto_sell'):
             if type(payload.get(name)) is not bool:
@@ -110,9 +114,8 @@ def command(game, maps, payload):
         cost = price(game, maps, row, row['level'] + 1)
         if payload.get('cost') != cost:
             raise ValueError('扩建报价已变化')
-        transfer_value(game, key, f'background:{p.world}', cost, '产业与仓储扩建')
-        row['level'] += 1
-        row['expense'] += cost
+        from .enterprise_acquisition import upgrade
+        upgrade(game, maps, row, expected_cost=cost)
     elif action in {'deposit', 'withdraw', 'purchase', 'sell', 'move_stock'}:
         item, number = payload.get('item'), quantity(payload.get('quantity'))
         if item not in commodity_catalog() or item not in ITEM_CATALOG:
@@ -158,6 +161,8 @@ def command(game, maps, payload):
         transfer_value(game, source, recipient, refund, '产业产权实付转让')
         if row['owner_kind'] == 'player':
             transfer_value(game, key, 'player', balance(game, key), '产权交接提回原经营现金')
+        row.pop('trust_config', None)
+        row.pop('trust_profit_base', None)
         row.update(owner_kind=kind, owner_id=identity, enabled=False, entrusted=False, last_year=p.age)
         if kind != 'background':
             cash_ready(game, row)

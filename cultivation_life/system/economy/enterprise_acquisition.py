@@ -38,3 +38,18 @@ def acquire(game, maps, world, location, kind, owner_kind, identity, source, rea
     log(row, game.player.age, '产权登记完成；库存、储量与产业地点保持唯一')
     return row
 
+
+def upgrade(game, maps, row, expected_cost=None):
+    from .enterprise_rules import MAX_LEVEL
+    from .organization_accounts import estate_cost
+    if row['level'] >= MAX_LEVEL:
+        raise ValueError('产业已达五级上限')
+    cost = price(game, maps, row, row['level'] + 1)
+    if expected_cost is not None and cost != expected_cost:
+        raise ValueError('扩建报价已变化')
+    transfer_value(game, cash_ready(game, row), f'background:{row["world"]}', cost, '产业与仓储扩建')
+    estate_cost(game, row, cost)
+    row['expense'] += cost
+    row['level'] += 1
+    return cost
+

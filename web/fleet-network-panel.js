@@ -4,7 +4,7 @@
   function render(statement, system, act) {
     const personal = document.querySelector('#personal-economy-content');
     personal.replaceChildren(node('h3', `现有灵石 ${money(statement.balance)}`),
-      node('p', `自第 ${statement.since ?? 0} 年起 · 期初 ${money(statement.opening)} · 已记收入 ${money(statement.income)} · 已记支出 ${money(statement.expense)}`),
+      node('p', `自第 ${statement.since ?? 0} 年起 · 期初 ${money(statement.opening)} · 现金流入 ${money(statement.income)} · 现金流出 ${money(statement.expense)}（含注资、提款及本金归还）`),
       node('p', `其他现金净变动 ${money(statement.other_change)}。旧玩法未逐笔记账的奖励与消耗计入此项；背包物品不计入现金资产。`, 'muted'));
     const records = node('details'); records.open = true; records.append(node('summary', '最近个人流水（最多 80 笔）'));
     for (const entry of statement.entries || []) records.append(node('p', `第 ${entry.year} 年 · ${entry.reason} · ${entry.destination === 'player' ? '+' : '−'}${money(entry.amount)}`));
@@ -29,7 +29,7 @@
     management.append(node('p', '组织执掌者可在驻地扩建产业，费用随当地原料价格变化，最高十级。战争会削弱产出，军需采购消耗真实库存与府库。'));
     management.append(action('扩建家族产业', 'industry', {owner_kind:'family'}), action('扩建宗门产业', 'industry', {owner_kind:'sect'}));
     for (const a of system.alliances || []) management.append(node('p', `${a.name}：${a.count} / ${a.capacity} 支商队`));
-    for (const f of system.fleets.filter(f => f.owner_kind !== 'alliance' || f.player_controlled || f.can_raid)) {
+    for (const f of system.fleets.filter(f => f.owner_kind !== 'alliance' || f.player_controlled || f.can_order || f.can_raid)) {
       const row = node('section', '', 'merchant-order'); row.dataset.fleetId = f.id;
       const status = {waiting:'留驻',travelling:'运输中',selling:'待售',stranded:'受阻',retired:'解散'}[f.status];
       row.append(node('strong', `${f.name} · ${f.pledged ? '已约定加盟' : status}`),
@@ -37,10 +37,12 @@
       row.append(node('small','领队 1 名 · 护卫 1 名'));
       if(f.can_raid)row.append(action('劫掠货财','raid',{fleet_id:f.id}),action('灭队夺货','exterminate',{fleet_id:f.id}));
       if (f.detail) row.append(node('p', `周转金 ${money(f.cash)} · 经营净收支 ${money(f.profit)} · ${f.last_result}`));
+      if (f.detail) row.append(node('p', `统计启用后成交额 ${money(f.turnover)} · 销售实收 ${money(f.sale_income)}；成交额含采购和销售，利润另扣工料、运费与养护，不含注资及托运款。`));
       if (f.cross_trip) row.append(node('p', `跨界运输 · ${{outbound:'去程',selling:'异界待售',return:'返航',return_selling:'返程货物待售'}[f.cross_trip.phase]} · 本段预计第 ${f.cross_trip.arrival} 年抵达`));
       if (f.cross_trip && f.player_controlled) row.append(action('撤回本趟跨界商队', 'cross_recall', {fleet_id:f.id}, !system.at_hq || ['return','return_selling'].includes(f.cross_trip.phase)));
       const unavailable = f.location_id !== system.location || f.status !== 'waiting' || !!f.cross_trip;
-      if (f.player_controlled) row.append(action(`聘请足额护卫 · ${money(system.guard_cost)}`, 'guard', {fleet_id:f.id}, unavailable || f.guard_power >= f.guard_required), action(`追加周转金 · ${money(system.capital)}`, 'fund', {fleet_id:f.id}, unavailable));
+      if (f.can_order) row.append(action(`委派护卫 · ${money(system.guard_cost)} 灵石（本人支付）`, 'guard', {fleet_id:f.id}, !f.can_guard || f.guard_power >= f.guard_required));
+      if (f.player_controlled) row.append(action(`追加周转金 · ${money(system.capital)}`, 'fund', {fleet_id:f.id}, unavailable));
       else if (f.owner_kind === 'independent') row.append(action(f.pledged ? '已招揽' : `招揽合作 · ${money(system.pledge_cost)}`, 'pledge', {fleet_id:f.id}, unavailable || f.pledged));
       management.append(row);
     }

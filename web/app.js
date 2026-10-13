@@ -3490,6 +3490,7 @@ function transformationFormCard(form, system, isStored) {
 }
 
 function renderSettings(settings) {
+  $('#setting-economy-trust').checked=!!settings.economy_trust;
   $("#setting-silent-events").checked=!!settings.silent_events;
   $('#setting-court-election').checked=settings.court_election_popup===false;
   $('#setting-manual-combat-plan').value=settings.manual_combat_plan?'manual':'auto';
@@ -4010,6 +4011,7 @@ function renderButtons() {
   window.LocalEconomy?.setBusy(busy);
   window.CustomStart?.setBusy(busy);
   window.EnterprisePanel?.setBusy(busy);
+  $('#setting-economy-trust').disabled=busy;
   document.querySelectorAll('[data-org-business]').forEach(b=>b.disabled=busy||b.dataset.unavailable==='1');
   document.querySelectorAll('#merchant-card button, #merchant-card input, #merchant-card select').forEach(control=>{if(control.id!=='merchant-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.merchantUnavailable==='1';});
   document.querySelectorAll('#exchange-card button, #exchange-card input').forEach(control=>{if(control.id!=='exchange-toggle')control.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.imprisonment||!!game?.guixu_tide?.session||control.dataset.exchangeUnavailable==='1';});
@@ -4152,6 +4154,7 @@ function finePercent(value) {
 }
 
 $('#setting-silent-events').onchange=event=>mutate(`/api/games/${game.id}/settings`,{setting:'silent_events',enabled:event.target.checked});
+$('#setting-economy-trust').onchange=event=>mutate(`/api/games/${game.id}/settings`,{setting:'economy_trust',enabled:event.target.checked});
 $('#setting-combat-popup').onchange = event => mutate(`/api/games/${game.id}/settings`, {
   setting:'combat_popup', enabled:!event.target.checked,
 });

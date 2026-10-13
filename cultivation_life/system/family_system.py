@@ -282,6 +282,8 @@ class FamilySystemMixin:
                 debt = int(game.family_state.get('debt',0))
                 paid = min(debt,amount)
                 finance.procure(game, treasury, family.world, paid, '偿还家族供养欠款')
+                from .economy.organization_accounts import book_expense
+                book_expense(game, fiscal, paid)
                 game.family_state['debt'] = debt-paid
                 summary = f'你向家族资材注入{amount}灵石。'
             elif action == 'gather':
@@ -289,8 +291,13 @@ class FamilySystemMixin:
                     raise ValueError('本年已组织过产业经营')
                 game.family_state['gather_age'] = player.age
                 amount = finance.produce(game, self.maps, family, fiscal, extra=True)
-                fiscal['income'] += amount
-                services = finance.operating_services(game,fiscal,amount)
+                from .economy.organization_accounts import current_period
+                if current_period(game, fiscal):
+                    fiscal['income'] += amount
+                    services = finance.operating_services(game,fiscal,amount)
+                else:
+                    fiscal['pending_income'] = fiscal.get('pending_income',0) + amount
+                    services = 0
                 summary = f'家族组织经营采集，实际收购所得{amount}灵石，经营养护支出{services}灵石。'
             else:
                 if not npc or npc not in family.npcs:
@@ -378,20 +385,28 @@ class FamilySystemMixin:
             source, target = finance.key('sect', sect.id), finance.key('family', family.id)
             if state.get('finance_year', -1) < game.player.age:
                 if officials and relation['status'] != 'war' and family.world == game.player.world and game.player.alive:
-                    office_income += finance.pay(game, source, 'player', int(sum(max(100,n.realm_index**4*12) for n in officials)), '宗门族人奉赠')
+                    paid = finance.pay(game, source, 'player', int(sum(max(100,n.realm_index**4*12) for n in officials)), '宗门族人奉赠')
+                    office_income += paid
+                    from .economy.organization_accounts import book_expense
+                    book_expense(game, game.economy_v2['organizations'][source], paid)
                 if relation['status'] == 'vassal' and relation.get('overlord') == family.id:
-                    tribute += finance.pay(game, source, target, max(200,int(self._family_total_power(game,sect)**.5 * 8)), '附属宗门上供')
+                    paid = finance.pay(game, source, target, max(200,int(self._family_total_power(game,sect)**.5 * 8)), '附属宗门上供')
+                    tribute += paid
+                    from .economy.organization_accounts import book_expense
+                    book_expense(game, game.economy_v2['organizations'][source], paid)
         fiscal = finance.register(game, 'family', family.id, family.world)
         if state.get('finance_year', -1) >= game.player.age:
             return news
         state['finance_year'] = game.player.age
-        income, expenses = fiscal['income'] + tribute, fiscal['expense']
+        fiscal['income'] += tribute
+        income, expenses = fiscal['income'], fiscal['expense']
         surplus = max(0, income - expenses)
         dividend = 0
         if family.world == game.player.world and game.player.alive and player_kin(game,family) and not state.get('debt', 0):
             dividend = finance.pay(game, finance.key('family', family.id), 'player', int(surplus * .15), '家族年度盈余分红')
         if player_kin(game,family): fiscal['benefit_due'], fiscal['benefit_paid'] = int(surplus * .15), dividend
         fiscal['expense'] += dividend
+        expenses = fiscal['expense']
         state['ledger'] = dict(year=game.player.age, income=income, expenses=expenses, balance=income-expenses,
             tribute=tribute, dividend=dividend, office_income=office_income, shortfall=int(state.get('debt', 0)),
             wage=0 if player_kin(game,family) else fiscal.get('benefit_paid',0),wage_due=0 if player_kin(game,family) else fiscal.get('benefit_due',0))
@@ -466,4 +481,10 @@ class FamilySystemMixin:
             record=game.intrigue_state.get('factions', {}).get(f'family:{family.id}', {})
             result['ledger'] = {**copy.deepcopy(game.family_state.get('ledger',{})), 'resources':int(record.get('resources',0)), 'shortfall':int(game.family_state.get('debt',0))}
             result['finance'] = finance.public_finance(game, 'family', family.id)
+            if result['finance']:
+                fiscal = result['finance']
+                result['ledger'].update(annual_income=fiscal['annual_income'], annual_expenses=fiscal['annual_expense'],
+                    annual_balance=(fiscal['annual_income']-fiscal['annual_expense'] if fiscal['annual_income'] is not None else None),
+                    income=fiscal['income'], expenses=fiscal['expense'], balance=fiscal['income']-fiscal['expense'],
+                    turnover=fiscal['turnover'], settlement_years=fiscal['settlement_years'])
         return result

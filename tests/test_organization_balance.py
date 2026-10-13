@@ -84,6 +84,9 @@ def test_estate_receipt_recovers_actual_costs_across_owned_estates_before_servic
     engine,g,row,farm=organization_estate(setup)
     start_job(g,engine.maps,farm)
     job=copy.deepcopy(farm['job']);g.player.age=job['finish'];advance_estates(g,engine.maps)
+    # Isolate receipts in a completed fiscal interval. Intervening-year receipts
+    # and their deferred services are exercised in test_economy_trust.
+    row.update(last_year=g.player.age,settlement_years=job['finish']-job['started'])
     assert row['estate_cost_credit']>0
     credit=row['estate_cost_credit'];key=finance.key('sect',row['identity'])
     shop=acquire(g,engine.maps,'human',g.player.location_id,'shop','sect',row['identity'],key,4)

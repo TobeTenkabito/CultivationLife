@@ -34,7 +34,7 @@ def recruitment_ready(game, entity):
     return not row.get('shortfall') and game.intrigue_state.get('factions', {}).get(f'{kind}:{entity.id}', {}).get('resources', 0) >= (upkeep + 100 * tier) * 3
 
 
-def plan(game, maps, row):
+def plan(game, maps, row, *, funds=None, optimize_batches=False):
     """A resident steward configures at most one real batch per annual tick."""
     # Paid batches have fixed inputs/output; reassess after they finish.
     if row['job']:
@@ -42,34 +42,45 @@ def plan(game, maps, row):
         return
     market = market_at(game, maps, row)
     options = recipes(row['world'], commodity_catalog(row['world']))
-    cash = balance(game, payer(row))
+    cash = balance(game, payer(row)) if funds is None else funds
     if row['owner_kind'] in {'sect', 'family'}:
         org = game.economy_v2.get('organizations', {}).get(payer(row), {})
         cash = max(0, cash - org.get('expected_upkeep', 0) * 3)
     budget = cash // 10
     dealer_cash = balance(game,f'market:{market["id"]}')
+    max_tier = game.player.realm_index + 1 if owner_allowed(game, row['owner_kind'], row['owner_id'], row['world']) else None
     candidates = []
     from .resource_access import permits
     for identity, recipe in options.items():
         if recipe['kind'] != row['kind'] or not permits(row,recipe):
             continue
         product = market['commodities'][recipe['output']]
+        if max_tier is not None and product['tier'] > max_tier:
+            continue
         room = max(0,int(product['target']*1.5-product['stock']))
-        if recipe['quantity'] > room:
-            continue
-        sale = quote(product,'sell',recipe['quantity'])
-        if sale['gross'] > dealer_cash:
-            continue
-        cost = production_cost(row, market, recipe)
-        revenue = sale['total']
-        if revenue >= cost*1.05 and cost <= budget:
-            candidates.append(((revenue - cost) / recipe['years'], identity))
+        maximum = min(row['level']*4, room//recipe['quantity']) if optimize_batches else 1
+        if optimize_batches and row['kind'] in {'mine','hunt'}:
+            maximum = min(maximum, row.get('reserve',5000)//recipe['quantity'])
+        # At most three quotes per permitted recipe, independent of elapsed years.
+        for batches in sorted({1, maximum, max(1, maximum//2)}):
+            if batches < 1 or recipe['quantity']*batches > room or (optimize_batches and batches > maximum):
+                continue
+            if optimize_batches and any(max(0, units*batches-row['stock'].get(item,0)) > market['commodities'][item]['stock']
+                                        for item,units in recipe['inputs'].items()):
+                continue
+            sale = quote(product,'sell',recipe['quantity']*batches)
+            if sale['gross'] > dealer_cash:
+                continue
+            cost = production_cost(row, market, recipe, batches)
+            revenue = sale['total']
+            if revenue >= cost*1.05 and cost <= budget:
+                candidates.append(((revenue - cost) / recipe['years'], identity, batches))
     if not row['job'] and candidates:
         row['recipe'] = max(candidates)[1]
     # Shop stewards liquidate actual holdings. They do not buy and resell the
     # same local goods at a guaranteed spread loss simply to show activity.
     row.update(enabled=True, auto_buy=bool(candidates) and row['kind'] != 'shop',
-               auto_sell=True, batches=1, buy_limit=max(1, budget), sell_limit=0,
+               auto_sell=True, batches=max(candidates)[2] if candidates else 1, buy_limit=max(1, budget), sell_limit=0,
                sale_quota=1000000, expense_limit=budget)
     if not candidates and not row['job'] and row['kind'] != 'shop':
         row['enabled'] = bool(row['stock'])
