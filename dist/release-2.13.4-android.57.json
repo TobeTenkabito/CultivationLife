@@ -1,0 +1,187 @@
+{
+  "base_version": "2.13.4",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.0",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested economic, related interaction and release tests only; not full repository regression",
+  "tests": 331,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-6",
+      "log": "build\\related-tests-6-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-7",
+      "log": "build\\related-tests-7-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-8",
+      "log": "build\\related-tests-8-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-9",
+      "log": "build\\related-tests-9-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-10",
+      "log": "build\\related-tests-10-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-11",
+      "log": "build\\related-tests-11-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-12",
+      "log": "build\\related-tests-12-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-13",
+      "log": "build\\related-tests-13-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-14",
+      "log": "build\\related-tests-14-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-15",
+      "log": "build\\related-tests-15-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-16",
+      "log": "build\\related-tests-16-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-17",
+      "log": "build\\related-tests-17-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-18",
+      "log": "build\\related-tests-18-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_economy_trust",
+      "log": "build\\browser_economy_trust-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_economy_enterprises",
+      "log": "build\\browser_economy_enterprises-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_organization_economy",
+      "log": "build\\browser_organization_economy-2134.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-2134.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-2134.log",
+  "inputs_sha256": "03debf9b7bc3fdcca4f565e49ca9617d4ca7ed1689877af0f6eca3e0666bb0ba",
+  "platform": "Android 12",
+  "android_version": "2.13.4-android.57",
+  "version_code": 57,
+  "apk_sha256": "8c6db6477b1a55db788ce803a90969848809c5ecb5a241c6bd6814ac6d624a36",
+  "native": {
+    "version": "2.13.4",
+    "apk_sha256": "8c6db6477b1a55db788ce803a90969848809c5ecb5a241c6bd6814ac6d624a36",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-economy-trust-portrait-2134.log",
+      "build/android-economy-trust-landscape-2134.log",
+      "build/android-economy-enterprises-portrait-2134.log",
+      "build/android-economy-enterprises-landscape-2134.log",
+      "build/android-economy-network-portrait-2134.log",
+      "build/android-economy-network-landscape-2134.log"
+    ],
+    "log_hashes": {
+      "build/android-economy-trust-portrait-2134.log": "2a812d2b3bdc7d7a6f144ce94854ae8a9ffdbaeff09da80fb623686153b16a00",
+      "build/android-economy-trust-landscape-2134.log": "2a812d2b3bdc7d7a6f144ce94854ae8a9ffdbaeff09da80fb623686153b16a00",
+      "build/android-economy-enterprises-portrait-2134.log": "11ab08d2688c308bfc7ef534aa888418cba6bb64c55cf9750b1acceb105338a7",
+      "build/android-economy-enterprises-landscape-2134.log": "11ab08d2688c308bfc7ef534aa888418cba6bb64c55cf9750b1acceb105338a7",
+      "build/android-economy-network-portrait-2134.log": "ca1f4c78cbad9a8931ff61cbd6bdd5f3dd61862adc18970461e7aded296f7c02",
+      "build/android-economy-network-landscape-2134.log": "ca1f4c78cbad9a8931ff61cbd6bdd5f3dd61862adc18970461e7aded296f7c02"
+    },
+    "scope": "Annual finance, original organizational guards, trust and real production; six native orientation phases"
+  },
+  "physical_device_tested": false
+}

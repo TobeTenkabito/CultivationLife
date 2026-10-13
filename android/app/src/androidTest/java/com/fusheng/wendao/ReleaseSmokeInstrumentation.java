@@ -1278,6 +1278,33 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("game.fleet_network.main_hq && game.fleet_network.fleets.some(f=>f.cross_trip?.phase==='return')")),"Expansion persistence");
                 }
                 result.putString("economy_expansion_scope","Four themes, native relocation, passage build, dispatch, recall, repair, layout and persistence");
+            } else if(phase.equals("economy-trust")) {
+                String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'托管原生验收',preset_id:'core',seed:419})});return g.id;})()");
+                python(assetText("economy_trust_release.py")+"\nfrom cultivation_life import server\nprepare_economy_trust(server.ENGINE,"+JSONObject.quote(id)+")");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.family.finance.settlement_years===5 && game.family.finance.annual_income===game.family.finance.income/5 && game.family.finance.annual_expense===game.family.finance.expense/5")),"Native annual finance period");
+                tapSelector("[data-panel-target=family]");
+                tapSelector("#family-card .organization-finance summary");
+                check(Boolean.TRUE.equals(js("document.querySelector('#family-card .organization-finance').innerText.includes('年度收入') && document.querySelector('#family-card .organization-finance').innerText.includes('本期成交额')")),"Native distinct income and turnover");
+                tapSelector("#family-card .organization-business > summary");
+                tapSelector("#family-card [data-fleet-id='human:release-trust-guard'] [data-org-business=guard]");
+                waitForJs("!busy && game.fleet_network.fleets.find(f=>f.id==='human:release-trust-guard').guard_power>0","Native organization guard payment");
+                check(Boolean.TRUE.equals(js("document.querySelector('#family-card [data-fleet-id=\"human:release-trust-guard\"] [data-org-business=guard]').disabled")),"Native full guards stay disabled");
+                tapSelector("[data-panel-target=settings]");
+                tapSelector("#setting-economy-trust");
+                waitForJs("!busy && game.settings.economy_trust","Native trust enable");
+                tapSelector("#settings-toggle");
+                tapSelector("[data-action=rest]");
+                waitForJs("!busy && game.map.economy.enterprises.owned.some(r=>r.trust_managed)","Native real annual trust settlement",60000);
+                js("window.__paidTrustJob=JSON.stringify(game.map.economy.enterprises.owned.find(r=>r.kind==='mine').job);true");
+                tapSelector("[data-panel-target=settings]");
+                tapSelector("#setting-economy-trust");
+                waitForJs("!busy && !game.settings.economy_trust","Native trust disable");
+                check(Boolean.TRUE.equals(js("game.map.economy.enterprises.owned.every(r=>!r.trust_managed&&!r.enabled) && JSON.stringify(game.map.economy.enterprises.owned.find(r=>r.kind==='mine').job)===__paidTrustJob")),"Native restores plan and retains paid work");
+                capture("economy-trust-"+arguments.getString("orientation","portrait"));
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("!game.settings.economy_trust && !busy")),"Native trust save reload");
+                result.putString("economy_trust_scope","Annual five-year accounting, distinct turnover, real organization guard tap, trust on/off, real time and paid-job preservation");
             } else if(phase.equals("economy-network")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'四轮商路验收',preset_id:'core',seed:419})});return g.id;})()");
                 python("from cultivation_life import server\nfrom cultivation_life.system.economy.ledger import transfer_value\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.player.realm_index=2\ntransfer_value(g,'background:human','player',10000000,'验收资本')\ne.store.save(g)");
@@ -1294,7 +1321,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js("UtilityPanels.close('personal-economy');true");
                     tapSelector("[data-panel-target=personal-economy]");
                     waitForJs("getComputedStyle(document.querySelector('#personal-economy-card')).opacity==='1'","Native personal account open");
-                    check(Boolean.TRUE.equals(js("document.querySelector('#personal-economy-content').innerText.includes('聘请商队护卫') && document.querySelector('#personal-economy-card').scrollWidth<=document.querySelector('#personal-economy-card').clientWidth+1")),"Native personal statement");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#personal-economy-content').innerText.includes('委派商队护卫') && document.querySelector('#personal-economy-card').scrollWidth<=document.querySelector('#personal-economy-card').clientWidth+1")),"Native personal statement");
                     capture("network-personal-"+theme+"-"+arguments.getString("orientation","portrait"));
                     tapSelector("[data-panel-target=merchant]");
                     js("document.querySelector('#fleet-network-content > details').open=false;window.__fleetCash=game.fleet_network.fleets.find(f=>f.player_controlled).cash;true");

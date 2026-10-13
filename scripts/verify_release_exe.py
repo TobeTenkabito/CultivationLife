@@ -180,6 +180,8 @@ def verify(with_dlc):
             verify_economy_enterprises(base, folder)
             from scripts.verify_economy_governance import verify_economy_governance
             verify_economy_governance(base, folder)
+            from scripts.verify_economy_trust import verify_economy_trust
+            verify_economy_trust(base, folder)
             from scripts.verify_war_logistics import verify_war_logistics
             verify_war_logistics(base, folder)
             from scripts.verify_custom_start import verify_custom_start
