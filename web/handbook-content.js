@@ -1,4 +1,4 @@
-/* Official player handbook, audited against v2.13.2. Pure assembly: no save,
+/* Official player handbook, audited against v2.13.3. Pure assembly: no save,
    RNG, time or gameplay calls. Preferences pending restart are NOT active. */
 (() => {
   const packages = [

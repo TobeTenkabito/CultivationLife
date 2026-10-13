@@ -4,11 +4,12 @@ from pathlib import Path
 from scripts.release_evidence import require,inputs_digest
 TEST_MODULES=('test_maps_2131','test_map_system','test_territory_system','test_caravan_economy','test_economy_network_expansion','test_world_transition_system','test_spatial_talismans','test_release_211','test_release_212','test_release_2130','test_windows_release_evidence','test_android_release_checks')
 ART_MODULES=('test_maps_2131','test_maps_2132','test_map_system','test_release_212','test_windows_release_evidence','test_android_release_checks')
-PROFILES={'2.13.1':{'modules':TEST_MODULES,'native_cases':44},'2.13.2':{'modules':ART_MODULES,'native_cases':14}}
+VIEW_MODULES=('test_maps_2133','test_release_212','test_windows_release_evidence','test_android_release_checks')
+PROFILES={'2.13.1':{'modules':TEST_MODULES,'native_cases':44},'2.13.2':{'modules':ART_MODULES,'native_cases':14},'2.13.3':{'modules':VIEW_MODULES,'native_cases':14}}
 BROWSERS=('maps','territory','map-directory','events')
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def validate(root,version):
- require(version in PROFILES,'Map-only release scope is registered only for 2.13.1 and 2.13.2');rid=version.replace('.','');profile=PROFILES[version]
+ require(version in PROFILES,'Map-only release scope is registered only for 2.13.1, 2.13.2 and 2.13.3');rid=version.replace('.','');profile=PROFILES[version]
  path=root/f'build/map-release-{rid}.json';require(path.is_file(),'Missing map-release verification receipt')
  r=json.loads(path.read_text(encoding='utf8'));require(r.get('version')==version and r.get('scope')=='maps' and r.get('full_repository_regression') is False,'Invalid map-only scope')
  current=inputs_digest(root);require(r.get('inputs_sha256')==current,'Map release source changed after verification')

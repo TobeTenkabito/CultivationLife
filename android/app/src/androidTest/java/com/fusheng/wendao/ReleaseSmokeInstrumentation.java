@@ -156,7 +156,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         // Active parallel details are already expanded by the user's tab selection.
         if (selector.contains("summary") && Boolean.TRUE.equals(js("(()=>{const n=document.querySelector("+quoted+");return n?.tagName==='SUMMARY'&&n.parentElement.hasAttribute('data-page-name')&&n.parentElement.open;})()"))) return;
         // Observe before tutorial capture handlers intercept the intended click.
-        js("window.__releaseNativeTap=false;window.addEventListener('click',event=>{const target=document.querySelector("+quoted+");window.__releaseNativeTap=!!target&&target.contains(event.target);},{once:true,capture:true});document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
+        js("window.__releaseNativeTap=false;window.__releaseNativeDownId='';window.addEventListener('pointerdown',event=>{window.__releaseNativeDownId=event.target.closest('[data-atlas-location]')?.dataset.atlasLocation||'';},{once:true,capture:true});window.addEventListener('click',event=>{const target=document.querySelector("+quoted+"),node=target?.closest('[data-atlas-location]');window.__releaseNativeTap=!!target&&(target.contains(event.target)||(node&&node.dataset.atlasLocation===window.__releaseNativeDownId&&event.target.closest('svg')===target.closest('svg')));},{once:true,capture:true});document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
         Thread.sleep(300);
         // Center within the panel's usable content, below its sticky heading.
         // Window centering can put controls underneath that heading in landscape.
@@ -201,6 +201,44 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             Thread.sleep(25);
         }
         waitForJs("document.querySelector('.atlas-scene').dataset.orientation!=="+JSONObject.quote(before),"Native drag must rotate freely");
+    }
+
+    private void panMapNative(boolean pinch) throws Exception {
+        String before=(String)js("document.querySelector('#map-atlas .atlas-viewport svg').dataset.panX");
+        String orientation=(String)js("document.querySelector('#map-atlas .atlas-viewport svg').dataset.orientation || ''");
+        double zoom=((Number)js("Number(document.querySelector('#map-atlas .atlas-viewport svg').dataset.zoom)")).doubleValue();
+        js("(()=>{const v=document.querySelector('.atlas-viewport'),p=v.closest('.utility-panel'),h=p.querySelector(':scope > .section-title').getBoundingClientRect();p.scrollTop+=v.getBoundingClientRect().top-h.bottom-16;})()");
+        JSONObject q=new JSONObject((String)js("JSON.stringify((()=>{const v=document.querySelector('.atlas-viewport').getBoundingClientRect(),h=document.querySelector('#map-card > .section-title').getBoundingClientRect(),top=Math.max(v.top,h.bottom)+24,bottom=Math.min(v.bottom,innerHeight-110),e=document.querySelector('#map-atlas .current .atlas-dot').getBoundingClientRect();return {x:v.left+v.width*.4,y:top+20,dx:Math.min(80,v.width*.22),dy:Math.max(12,Math.min(40,(bottom-top-20)*.5)),width:innerWidth,probeX:e.x,probeY:e.y};})())"));
+        int[] origin=new int[2];runOnMainSync(()->web.getLocationOnScreen(origin));
+        float scale=web.getWidth()/(float)q.getDouble("width");long down=android.os.SystemClock.uptimeMillis();
+        int count=pinch?2:1;
+        android.view.MotionEvent.PointerProperties[] props=new android.view.MotionEvent.PointerProperties[count];
+        for(int p=0;p<count;p++){props[p]=new android.view.MotionEvent.PointerProperties();props[p].id=p;props[p].toolType=android.view.MotionEvent.TOOL_TYPE_FINGER;}
+        for(int step=0;step<=16;step++){
+            float t=Math.min(1,Math.max(0,(step-1)/14f));
+            android.view.MotionEvent.PointerCoords[] coords=new android.view.MotionEvent.PointerCoords[count];
+            for(int p=0;p<count;p++){
+                coords[p]=new android.view.MotionEvent.PointerCoords();
+                double x=q.getDouble("x")+(pinch?(p==0?-1:1)*(35+25*t):q.getDouble("dx")*t);
+                double y=q.getDouble("y")+(pinch?(p==0?-1:1)*12*t:q.getDouble("dy")*t);
+                coords[p].x=origin[0]+(float)x*scale;coords[p].y=origin[1]+(float)y*scale;coords[p].pressure=1;coords[p].size=.1f;
+            }
+            int action=step==0?android.view.MotionEvent.ACTION_DOWN:step==16?android.view.MotionEvent.ACTION_UP:pinch&&step==1?android.view.MotionEvent.ACTION_POINTER_DOWN|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT):pinch&&step==15?android.view.MotionEvent.ACTION_POINTER_UP|(1<<android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT):android.view.MotionEvent.ACTION_MOVE;
+            int pointerCount=pinch&&(step==0||step==16)?1:count;
+            android.view.MotionEvent event=android.view.MotionEvent.obtain(down,android.os.SystemClock.uptimeMillis(),action,pointerCount,props,coords,0,0,1,1,0,0,android.view.InputDevice.SOURCE_TOUCHSCREEN,0);
+            try{check(getUiAutomation().injectInputEvent(event,true),"Native map pan/pinch injection");}finally{event.recycle();}
+            Thread.sleep(25);
+        }
+        Thread.sleep(200);
+        if(pinch){
+            check(((Number)js("Number(document.querySelector('#map-atlas .atlas-viewport svg').dataset.zoom)")).doubleValue()>zoom,"Native pinch increases projection zoom");
+            check(!orientation.equals(js("document.querySelector('#map-atlas .atlas-viewport svg').dataset.orientation || ''")),"Native two-finger twist rotates");
+        }else{
+            check(!before.equals(js("document.querySelector('#map-atlas .atlas-viewport svg').dataset.panX")),"Native finger must move view center");
+            check(orientation.equals(js("document.querySelector('#map-atlas .atlas-viewport svg').dataset.orientation || ''")),"Single finger pans without changing angle");
+            JSONObject p=new JSONObject((String)js("JSON.stringify((()=>{const r=document.querySelector('#map-atlas .current .atlas-dot').getBoundingClientRect();return {x:r.x,y:r.y};})())"));
+            check(Math.abs(p.getDouble("x")-q.getDouble("probeX")-q.getDouble("dx"))<3 && Math.abs(p.getDouble("y")-q.getDouble("probeY")-q.getDouble("dy"))<3,"Native marker follows finger pixels");
+        }
     }
 
     private void openEconomicDetails(String selector) throws Exception {
@@ -286,17 +324,17 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("maps-2131") || phase.equals("maps-2132")) {
+            if(phase.equals("maps-2131") || phase.equals("maps-2132") || phase.equals("maps-2133")) {
                 int mapCases=0;
                 for(String world:new String[]{"human","demon","spirit","true_demon","monster_realm","phantom_underworld","hell","celestial","asura","nether","reincarnation"}) {
                     int rank=(world.equals("human")||world.equals("demon"))?4:(world.equals("celestial")||world.equals("asura")||world.equals("nether")||world.equals("reincarnation"))?9:7;
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'立体山海原生验收',spirit_root:'supreme_earth',path:'dao',seed:2131,custom_start:{world:"+JSONObject.quote(world)+",realm_index:"+rank+"}})});return g.id;})()");
                     python("from cultivation_life import server\ne=server.ENGINE\ng=e.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.settings['silent_events']=True\ng.settings['combat_popup']=False\ne.store.save(g)");
                     async("loadGame("+JSONObject.quote(id)+")");
-                    for(String theme:phase.equals("maps-2132") && !world.equals("human")?new String[]{"a"}:new String[]{"a","b","d","f"}) {
+                    for(String theme:(phase.equals("maps-2132") || phase.equals("maps-2133")) && !world.equals("human")?new String[]{"a"}:new String[]{"a","b","d","f"}) {
                         js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();UtilityPanels.close('map');true");async("GameThemes.saved");
                         tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-atlas]");tapSelector("[data-atlas-mode='3d']");
-                        if(phase.equals("maps-2132")) {waitForJs("document.querySelector('.atlas-scene').dataset.artworkState==='ready'","Independent SVG artwork loaded");check(Boolean.TRUE.equals(js("document.querySelector('[data-world-artwork]').dataset.worldArtwork==="+JSONObject.quote(world))),"Correct realm artwork");}
+                        if(phase.equals("maps-2132") || phase.equals("maps-2133")) {waitForJs("document.querySelector('.atlas-scene').dataset.artworkState==='ready'","Independent SVG artwork loaded");check(Boolean.TRUE.equals(js("document.querySelector('[data-world-artwork]').dataset.worldArtwork==="+JSONObject.quote(world))),"Correct realm artwork");}
                         check(Boolean.TRUE.equals(js("document.querySelectorAll('.atlas-scene [data-atlas-location]').length===game.map.locations.length && document.querySelectorAll('[data-atlas-road]').length===game.map.roads.length")),"All real locations and roads are visible");
                         python("from cultivation_life import server\nserver._maps_native_before=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
                         String yaw=(String)js("document.querySelector('.atlas-scene').dataset.yaw");tapSelector("[aria-label='向右旋转地图']");
@@ -304,14 +342,15 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                         tapSelector("[aria-label='复位地图视角']");check(yaw.equals(js("document.querySelector('.atlas-scene').dataset.yaw")),"Native camera reset");
                         tapSelector("[aria-label='放大地图']");check(Boolean.TRUE.equals(js("Number(document.querySelector('.atlas-scene').dataset.zoom)>1")),"Native zoom");tapSelector("[aria-label='复位地图视角']");
                         if(phase.equals("maps-2132")) {dragMapNative();tapSelector("[aria-label='复位地图视角']");}
+                        if(phase.equals("maps-2133")) {panMapNative(false);panMapNative(true);tapSelector("[aria-label='复位地图视角']");}
                         String destination=(String)js("game.map.locations.find(n=>!n.current && !n.min_realm_index).id");tapSelector("[data-atlas-location="+JSONObject.quote(destination)+"] .atlas-dot");
                         check(Boolean.TRUE.equals(js("document.querySelector('#map-atlas .atlas-detail').dataset.selectedLocation==="+JSONObject.quote(destination)+" && document.querySelectorAll('.scene-road.route').length===game.map.locations.find(n=>n.id==="+JSONObject.quote(destination)+").route_ids.length-1")),"Native selection highlights authoritative itinerary");
-                        tapSelector("[data-atlas-mode=flat]");check(Boolean.TRUE.equals(js("!document.querySelector('.atlas-scene') && !!document.querySelector('#map-atlas svg')")),"Native planar fallback");tapSelector("[data-atlas-mode='3d']");
+                        tapSelector("[data-atlas-mode=flat]");check(Boolean.TRUE.equals(js("!document.querySelector('.atlas-scene') && !!document.querySelector('#map-atlas svg')")),"Native planar fallback");if(phase.equals("maps-2133"))panMapNative(false);tapSelector("[data-atlas-mode='3d']");
                         js("(()=>{window.__mapFuture=JSON.parse(JSON.stringify(game.map));const p=JSON.parse(JSON.stringify(__mapFuture.locations[0]));p.id='native-future';p.name='新生山海';p.current=false;delete p.atlas;__mapFuture.locations.push(p);__mapFuture.roads.push({from:__mapFuture.current,to:p.id,years:3});MapAtlas.render(__mapFuture,game,()=>{},()=>false);return true;})()");
                         check(Boolean.TRUE.equals(js("!!document.querySelector('[data-atlas-location=native-future]') && document.querySelectorAll('[data-atlas-road]').length===game.map.roads.length+1")),"Native new-location fallback");
                         js("renderMap(game.map,game.auction_system);busy=true;MapAtlas.syncBusy();true");check(Boolean.TRUE.equals(js("document.querySelector('#map-atlas .atlas-detail [data-atlas-unavailable]').disabled")),"Map remains disabled while busy");js("busy=false;MapAtlas.syncBusy();true");
                         python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._maps_native_before");
-                        tapSelector("[aria-label='定位当前地域']");check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('.atlas-scene .current .atlas-dot'),r=e.getBoundingClientRect(),p=e.closest('.utility-panel'),h=p.querySelector(':scope > .section-title').getBoundingClientRect();return r.bottom>h.bottom && r.top<Math.min(p.getBoundingClientRect().bottom,innerHeight);})()")),"Native locate reveals current marker below sticky heading");check(Boolean.TRUE.equals(js("document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+2")),"Native map remains inside panel");
+                        tapSelector("[aria-label='定位当前地域']");check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('.atlas-scene .current .atlas-dot'),r=e.getBoundingClientRect(),p=e.closest('.utility-panel'),h=p.querySelector(':scope > .section-title').getBoundingClientRect();return r.bottom>h.bottom && r.top<Math.min(p.getBoundingClientRect().bottom,innerHeight);})()")),"Native locate reveals current marker below sticky heading");if(phase.equals("maps-2133"))check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('.atlas-scene .current .atlas-dot').getBoundingClientRect(),v=document.querySelector('.atlas-viewport').getBoundingClientRect();return Math.abs(e.x+e.width/2-v.x-v.width/2)<3 && Math.abs(e.y+e.height/2-v.y-v.height/2)<3;})()")),"Native locate truly centers marker");check(Boolean.TRUE.equals(js("document.querySelector('#map-card').scrollWidth<=document.querySelector('#map-card').clientWidth+2")),"Native map remains inside panel");
                         capture(phase+"-"+world+"-"+theme+"-"+arguments.getString("orientation","portrait"));mapCases++;
                     }
                     if(world.equals("human")) {
