@@ -41,6 +41,24 @@ def guard_required(world):
     return max(100, round(expected_combat_power(tier + 1, 1) * 2))
 
 
+def guard_cost(world):
+    return max(100, round(guard_required(world) ** .5) * 5)
+
+
+def recruit_guard(game, fleet, source):
+    if fleet['status'] != 'waiting' or fleet.get('cargo') or fleet.get('cross_trip'):
+        raise ValueError('商队正在运输或已解散，不能委派护卫')
+    if fleet['guard_power'] >= guard_required(fleet['world']):
+        raise ValueError('现有护卫已足额')
+    cost = guard_cost(fleet['world'])
+    transfer_value(game, source, f'background:{fleet["world"]}', cost, '委派商队护卫')
+    fleet['guard_power'] = guard_required(fleet['world'])
+    if source == f'caravan:{fleet["id"]}':
+        fleet['operating_costs'] += cost
+        fleet['profit'] -= cost
+    return cost
+
+
 def new_fleet(game, region, world, identity, kind, location, name, *, identifier=None, player=False):
     if identifier is None:
         region['sequence'] = region.get('sequence', 0) + 1

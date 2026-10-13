@@ -1,6 +1,12 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "economy_v2.organizations.*.pending_expense / pending_turnover": "global：尚未到原年度结算点的实际支出与采购销售成交额，只是非现金收据；与 pending_income 一起在下次真实区间结算消费一次，不能覆盖丢失、不混入上一期折年值。初始手工经营或五年聚合间隙的产业盈余先归待结算收入，额外养护到本期结算只支付一次。家族还欠费、宗门上供和奉赠在原实际付款时留支出记录。",
+    "economy_v2.estates.*.trust_profit_base": "global：开始本轮托管时原产业净收支基线，仅一个有符号整数，非现金；投资预算只使用托管后新实现盈余，不能拿前任或旧账利润重复扩张。收回授权或产权交接删除，重新托管重新取当前基线。",
+    "GameState.settings.economy_trust": "history：同一玩家存档的明确经济委托，缺失默认关闭；设置只保存授权，不即时结算或移动玩家。当地掌柜复用原产业唯一库存、在制批次和原资金，原商队沿既有路线交割；无需玩家亲赴的例外只限已授权年度管理，不开放远程手工购货、提款或产权操作。关闭恢复原产业方案，已付批次和在途货物不取消。",
+    "economy_v2.estates.*.trust_config / economy_v2.trust_growth_year": "global：trust_config 仅保存至多十项原产业配置，不含现金、库存、人物或地点；年度入口核验原所有权，手动修改先解除旧快照。关闭托管恢复方案；产权或战争交接删除快照，不能恢复前任委托。trust_growth_year 为原存档实际投资决策年，每五年最多一次，不回放跳过年份；仅实际盈利产业以原经营资金购买同地产权或扩建，保留三年养护及三分之二可用资金，不自动扣玩家行囊。",
+    "economy_v2.organizations.*.settlement_years / turnover / pending_income": "global：最近组织结算区间的实际年数和真实采购销售成交额；年度收入、年度支出由同区间 income/expense 除实际年数只读派生，缺少年数不虚构年度历史。收入扣生产工料，另列供养等支出不重复扣成本；成交额不含注资、调拨、上供或分红。pending_income 只暂记商队先于组织结算的实际利润上缴，下次结算消费一次，无第二现金账户。家族上供原府库实转，付款方记支出、收款方记收入；家族分红计入实付支出。",
+    "economy_v2.estates.*.turnover / turnover_since / transport.worlds.*.fleets.*.turnover / turnover_since / sale_income": "global：原固定产业及原商队实际采购销售累计成交额、统计起始年和商队净手续费后销售实收；不追补过去交易，不是可花费余额或利润，不含注资、府库汇款或运输货物调拨。原护卫是付薪聚合战力，不抽走或复制 NPC；托管补足护卫使用原商队周转金并记经营成本，手工委派沿原同地驻留权限与本人实付入口。",
     "economy_v2.organizations.*.operating_due / operating_paid / estate_cost_credit": "经营养护应付、实付归原组织最近结算记录，不是现金或可复制物资；依据实际新增经营盈余支付，保留三年基本养护，不追扣旧府库、不形成家族额外欠债。estate_cost_credit 为原府库已付而未收回的产权工料、劳务和仓储成本，仅一个非现金余额，组织内实物转仓共享，产权或战争转属不复制到新所有者；组织迁址保留原身份已付成本，旧界固定产业、库存与订单仍留原地点。首次采用仅确认已有未收回成本；查询不初始化，真实支付与销售入口才更新。",
     "economy_v2.demand_policy / demand_policy_year / markets.*.goods_policy / basket_credit / resource_use": "商品细化政策仅对结构 10 在采用年生效，不追扣过去；已有地区新增材料从零库存加入，原实物与既付批次不变。basket_credit 为原市场最多 96 个用途品阶小数，不保存物资；resource_use 仅原地址本年已完成公共采集数量，最多 108 种、逐年重置。私人产权占用本地资源份额，公共生产不读取或恢复私人矿藏和丹源；运行时索引最多 64 个市场，不复制库存。",
     "economy_v2.markets.*.household_year": "原市场背景居民五真实年聚合采购的起始年；稀疏访问按当前库存结算完整区间，不逐年制造历史。采用时从当前年开始，不追扣旧消费；个人当年福利、产业到期完工、战争、事件保持真实年度时钟，内容标明的偏远小宗门可五年汇总经营。玩家即时交易不受五年节拍限制。",

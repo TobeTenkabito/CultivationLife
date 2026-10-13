@@ -45,6 +45,8 @@ def buy(game, fleet, source, target, hops, order=None):
     record_trade(game, source, best['item'], cash, 'buy', quantity)
     row['volume'] += quantity
     source['turnover'] += purchase['gross']
+    fleet['turnover'] = fleet.get('turnover', 0) + purchase['gross']
+    fleet.setdefault('turnover_since', game.player.age)
     source['fees'] += purchase['fee']
     source['freight_out'] = source.get('freight_out', 0) + quantity
     reprice(game, source, row)
@@ -68,6 +70,9 @@ def sell(game, fleet, trip, target):
         row['stock'] += low
         row['volume'] += low
         target['turnover'] += sale['gross']
+        fleet['turnover'] = fleet.get('turnover', 0) + sale['gross']
+        fleet.setdefault('turnover_since', game.player.age)
+        fleet['sale_income'] = fleet.get('sale_income', 0) + sale['total']
         target['fees'] += sale['fee']
         target['freight_in'] = target.get('freight_in', 0) + low
         trip['quantity'] -= low

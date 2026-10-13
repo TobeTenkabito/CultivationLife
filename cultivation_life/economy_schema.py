@@ -12,6 +12,8 @@ def validate_economy(value, merchants=None, document=None):
             raise ValueError('经济存档结构或数值无效，原文件已保留')
     require(isinstance(value, dict) and value.get('schema_version') == 1)
     require(type(value.get('issued',0)) is int and value.get('issued',0)>=0)
+    if 'trust_growth_year' in value:
+        require(type(value['trust_growth_year']) is int and value['trust_growth_year'] >= value['base_year'])
     aliases=value.get('organization_aliases',{})
     require(isinstance(aliases,dict))
     for source,target in aliases.items():
@@ -137,7 +139,8 @@ def validate_economy(value, merchants=None, document=None):
             require(isinstance(row.get('history'), list) and len(row['history']) <= 12)
             require(nonnegative(row.get('production_credit', 0)))
             require(nonnegative(row.get('supply_coverage',1)) and row.get('supply_coverage',1) <= 1)
-            for field in ('supplies_consumed','supply_expense','supply_budget_credit','operating_due','operating_paid','estate_cost_credit'):
+            for field in ('supplies_consumed','supply_expense','supply_budget_credit','operating_due','operating_paid','estate_cost_credit',
+                          'settlement_years','turnover','pending_income','pending_expense','pending_turnover'):
                 require(type(row.get(field,0)) is int and row.get(field,0) >= 0)
             require(isinstance(row.get('demand_credit',{}),dict) and len(row.get('demand_credit',{})) <= 104)
             require(all(nonnegative(n) and n < 1 for n in row.get('demand_credit',{}).values()))
@@ -229,6 +232,8 @@ def validate_economy(value, merchants=None, document=None):
                 for field in ('capacity','investment','dividends','voyages','delivered','lost','loss_streak',
                               'idle_years','next_departure','operating_costs'):
                     require(type(fleet.get(field)) is int and fleet[field] >= 0)
+                for field in ('turnover', 'sale_income', 'turnover_since'):
+                    if field in fleet: require(type(fleet[field]) is int and fleet[field] >= 0)
                 require(6 <= fleet['capacity'] <= 240 and type(fleet.get('profit')) is int)
                 cargo = fleet.get('cargo')
                 require((cargo is None) == (fleet['status'] in {'waiting','retired'}))

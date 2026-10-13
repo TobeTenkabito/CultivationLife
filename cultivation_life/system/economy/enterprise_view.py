@@ -45,7 +45,8 @@ def public_estates(game, maps):
             job=dict(row['job']) if row['job'] else None, history=list(row['history']),
             upgrade_cost=price(kind, row['level'] + 1), release_price=price(kind, row['level']) // 2)
         record.update(annual_maintenance=annual_maintenance(row,market),operating_reserve=operating_reserve(game,row,market),
-                      maintenance=maintenance_breakdown(row, market))
+                      maintenance=maintenance_breakdown(row, market), turnover=row.get('turnover', 0),
+                      turnover_since=row.get('turnover_since'), trust_managed='trust_config' in row)
         record['resources']=[ITEM_CATALOG[k].name for k in site_profile(p.world,p.location_id,kind)]
         owned.append(record)
     return dict(available=True, can_act=trade_available(game), offers=offers, owned=owned,

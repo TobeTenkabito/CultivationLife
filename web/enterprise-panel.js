@@ -15,10 +15,11 @@
     button(buy,'购置产权','buy',()=>({owner_kind:owner.value,kind:kind.value,cost:data.offers.find(o=>o.kind===kind.value)?.cost}),!kind.options.length);box.append(buy);
     for(const row of data.owned){
       const card=e('details');card.dataset.estateId=row.id;card.append(e('summary',`${row.name} · ${row.level} 级 · ${owners.find(x=>x[0]===row.owner_kind)?.[1]}`));
-      card.append(e('p',`周转金 ${money(row.cash)} · 经营收入 ${money(row.income)} / 支出 ${money(row.expense)} · 欠费 ${money(row.arrears)}`),e('p',`仓储及在制占用 ${row.used} / ${row.capacity} 件 · 累计生产 ${row.produced} 件${row.kind==='mine'?` · 剩余矿藏 ${row.reserve} 件`:''}`));
+      card.append(e('p',`周转金 ${money(row.cash)} · 累计销售收入 ${money(row.income)} / 支出 ${money(row.expense)} · 经营净收支 ${money(row.income-row.expense)} · 欠费 ${money(row.arrears)}`),e('p',`统计启用后成交额 ${money(row.turnover)}（采购与销售合计，不含注资及转仓）`),e('p',`仓储及在制占用 ${row.used} / ${row.capacity} 件 · 累计生产 ${row.produced} 件${row.kind==='mine'?` · 剩余矿藏 ${row.reserve} 件`:''}`));
       const configured=data.recipes.find(r=>r.id===row.recipe);
       const missing=Object.entries(configured?.inputs||{}).some(([id,n])=>(row.stock.find(s=>s.id===id)?.quantity||0)<n*row.batches);
       card.append(e('p',`经营状态：${row.entrusted?'掌柜受托经营':row.enabled?'持续经营已启用':'自动经营已暂停'}${!row.job&&missing&&!row.auto_buy?'；仓库原料不足，无法投产':''}。收入来自实际出售库存，支出包含采购、劳务和养护。`));
+      if(row.trust_managed)card.append(e('p','经济托管经营中；手动修改方案后，下次年度结算继续托管。可在设置中关闭并恢复修改后的方案。'));
       if(row.resources?.length)card.append(e('p',`本地资源：${row.resources.join('、')}；扩建提高容量，不改变天然品阶。${row.kind==='hunt'?` 剩余丹源 ${row.reserve} 件。`:''}`));
       if(row.job)card.append(e('p',`在制 ${row.job.quantity} 件 · 第 ${row.job.finish} 年完工（已扣原料与劳务）`));
       const base={estate_id:row.id,revision:row.revision},operation=(parent,label,action,payload={},disabled=false)=>button(parent,label,action,()=>({...base,...(typeof payload==='function'?payload():payload)}),disabled);

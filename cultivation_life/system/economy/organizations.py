@@ -173,7 +173,9 @@ def advance_organizations(game, maps):
         years = game.player.age - row['last_year']
         if years < settlement_interval(game, row):
             continue
-        row.update(income=0, expense=0, shortfall=0, produced=0, benefit_due=0, benefit_paid=0,operating_due=0,operating_paid=0)
+        row.update(income=row.pop('pending_income', 0), expense=row.pop('pending_expense', 0),
+                   turnover=row.pop('pending_turnover', 0), settlement_years=years,
+                   shortfall=0, produced=0, benefit_due=0, benefit_paid=0,operating_due=0,operating_paid=0)
         if row['kind'] in {'sect', 'family'}:
             settle_faction(game, maps, row, years)
         else:
@@ -194,6 +196,11 @@ def public_finance(game, kind, identity):
     if not row or row['world'] != game.player.world:
         return None
     return {k: row[k] for k in ('last_year', 'income', 'expense', 'shortfall', 'benefit_paid', 'benefit_due', 'produced')} | dict(
+        settlement_years=row.get('settlement_years'), turnover=row.get('turnover', 0),
+        pending_income=row.get('pending_income', 0), pending_expense=row.get('pending_expense', 0),
+        pending_turnover=row.get('pending_turnover', 0),
+        annual_income=(row['income']/row['settlement_years'] if row.get('settlement_years') else None),
+        annual_expense=(row['expense']/row['settlement_years'] if row.get('settlement_years') else None),
         balance=balance(game, address), product=ITEM_CATALOG[row['commodity']].name if row['commodity'] else None,
         industry_level=row.get('industry_level', 0), war_funding=row.get('war_funding', 1.),
         workforce=dict(row.get('workforce', {})), labor_capacity=row.get('labor_capacity', 0),

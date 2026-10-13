@@ -1,5 +1,6 @@
 """Real HTTP event choices, stale displays and relationship interception."""
 import random
+import os
 import sys
 import tempfile
 import threading
@@ -73,6 +74,7 @@ def verify_ghost_controls(page, engine):
 
 
 def main():
+    low_memory = os.environ.get('CULTIVATION_BROWSER_LOW_MEMORY') == '1'
     output = ROOT / 'build/events-browser-212'
     output.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as folder:
@@ -85,10 +87,12 @@ def main():
             threading.Thread(target=httpd.serve_forever, daemon=True).start()
             try:
                 with sync_playwright() as pw:
-                    browser = pw.chromium.launch()
-                    for theme in ('a', 'b', 'd', 'f'):
+                    browser = None if low_memory else pw.chromium.launch()
+                    for theme in (('a',) if low_memory else ('a', 'b', 'd', 'f')):
                         for width, height in ((393, 852), (1440, 960)):
-                            page = browser.new_page(viewport=dict(width=width, height=height))
+                            if browser is None: browser = pw.chromium.launch(args=['--disable-gpu','--renderer-process-limit=1'])
+                            page = browser.new_page(viewport=dict(width=width, height=height),reduced_motion='reduce' if low_memory else 'no-preference')
+                            if low_memory: page.route('**/assets/maps/**', lambda route: route.abort())
                             errors, submissions = [], []
                             page.on('pageerror', lambda error: errors.append(str(error)))
                             page.on('request', lambda req: submissions.append(req.post_data_json)
@@ -160,11 +164,14 @@ def main():
                             verify_ghost_controls(page, engine)
                             assert not errors, errors
                             page.close()
-                    browser.close()
+                            if low_memory:
+                                browser.close()
+                                browser = None
+                    if browser: browser.close()
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Events UI passed: four themes, mobile/desktop, interception, stale-state recovery, rewards and ghost controls')
+    print('Events UI passed: '+('low-memory theme a' if low_memory else 'four themes')+', mobile/desktop, interception, stale-state recovery, rewards and ghost controls')
 
 
 if __name__ == '__main__':

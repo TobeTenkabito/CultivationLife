@@ -84,10 +84,17 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
             continue
         room=max(0,int(product['target']*1.5-product['stock']))
         allowance=quota(game,market,source,item,room)
+        before_turnover = market['turnover']
         quantity, net = workshop_produce(game, market, source, item,
             min(int(credit/product['reference']),allowance), labor_credit=credit)
         if not quantity:
             continue
+        gross = market['turnover'] - before_turnover
+        if extra:
+            from .organization_accounts import book_turnover
+            book_turnover(game, row, gross)
+        else:
+            row['turnover'] = row.get('turnover', 0) + gross
         supplier_delivery(market, source, quantity, game=game, item=item)
         record(game,market,source,item,quantity)
         earned += net; credit -= quantity*product['reference']

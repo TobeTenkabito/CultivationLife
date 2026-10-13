@@ -598,10 +598,13 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
             return self.present(game)
         if setting not in {
             "combat_popup", "achievement_popup", "auto_advance_player_wars",
-            "guixu_event_popup", "court_election_popup", "silent_events",
+            "guixu_event_popup", "court_election_popup", "silent_events", "economy_trust",
         }:
             raise ValueError("未知设置项")
         game.settings[setting] = bool(enabled)
+        if setting == 'economy_trust' and not enabled:
+            from ..system.economy.economy_trust import release_all
+            release_all(game)
         if setting == "court_election_popup" and not enabled:
             rng = decode_rng(game.seed, game.rng_state)
             self._court_finish_unattended(game, rng)

@@ -68,6 +68,7 @@
         row.append(element('strong', `${fleet.name} · ${status}`),
           element('p', `运力 ${money(fleet.capacity)} 件 · 已发 ${money(fleet.voyages)} 趟${fleet.destination ? ` · ${fleet.origin} → ${fleet.destination} · 预计第 ${fleet.arrival} 年抵达` : ` · 驻 ${fleet.location}`}`));
         if (fleet.detail) {
+          row.append(element('p', `统计启用后成交额 ${money(fleet.turnover)} · 销售实收 ${money(fleet.sale_income)}；采购与销售分别成交，注资与托运款不作收入。`));
           row.append(element('p', `周转资金 ${money(fleet.cash)} · 累计经营净收支 ${money(fleet.profit)} · 已上缴 ${money(fleet.dividends)} 灵石`),
             element('p', `已交付 ${money(fleet.delivered)} 件 · 途中损失 ${money(fleet.lost)} 件 · 留驻及扩编支出 ${money(fleet.operating_costs)} 灵石`),
             element('p', fleet.last_result));

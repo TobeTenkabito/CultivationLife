@@ -7,7 +7,7 @@ from .enterprise_state import estates, payer, cash_ready, put, take, used, log, 
 from .ledger import balance, transfer_value
 from .local_market import quote
 from .state import ensure_regional_market, commodity_catalog, reprice
-from .organization_accounts import estate_cost, estate_sale
+from .organization_accounts import estate_cost, estate_sale, estate_purchase
 
 
 
@@ -28,6 +28,7 @@ def market_trade(game, row, market, item, number, side):
         from .market_power import record_trade
         record_trade(game, market, item, f'estate:{row["id"]}', 'buy', number)
         estate_cost(game,row,bill['total'])
+        estate_purchase(game,row,bill['gross'])
         row['expense'] += bill['total']
     else:
         if balance(game, dealer) < bill['gross']:
@@ -36,12 +37,14 @@ def market_trade(game, row, market, item, number, side):
         transfer_value(game, dealer, key, bill['total'], '产业仓库实货销售')
         transfer_value(game, dealer, operator, bill['fee'], '产业销售手续费')
         product['stock'] += number
-        services=estate_sale(game,row,bill['total'])
+        services=estate_sale(game,row,bill['total'],bill['gross'])
         row['income'] += bill['total']
         row['expense'] += services
         from .industry import supplier_delivery
         supplier_delivery(market, f'estate:{row["id"]}', number, game=game, item=item)
     product['volume'] += number
+    row.setdefault('turnover_since', game.player.age)
+    row['turnover'] = row.get('turnover', 0) + bill['gross']
     market['turnover'] += bill['gross']
     market['fees'] += bill['fee']
     reprice(game, market, product)
@@ -133,7 +136,9 @@ def sell_stock(game, row, market):
 
 
 def advance_estates(game, maps):
-    for row in estates(game).values():
+    from .economy_trust import prepare, grow
+    # Acquisitions become active on the next tick, never recursively this tick.
+    for row in list(estates(game).values()):
         years = game.player.age - row['last_year']
         if years <= 0:
             continue
@@ -148,6 +153,7 @@ def advance_estates(game, maps):
         row['revision'] += 1
         if row['owner_kind'] == 'background':
             continue
+        managed = prepare(game, row)
         if row['owner_kind'] in {'sect', 'family'}:
             entity = game.family if row['owner_kind'] == 'family' else game.sects.get(row['owner_id'])
             if not entity or entity.extinct or entity.world != row['world']:
@@ -172,7 +178,7 @@ def advance_estates(game, maps):
             row['produced'] += job['quantity']
             log(row, game.player.age, f'实物完工入库 {job["quantity"]} 件')
         sold_by_steward = False
-        if row.get('entrusted'):
+        if row.get('entrusted') or managed:
             # Liquidate the old recipe before selecting the next batch.
             row['auto_sell'] = True
             sell_stock(game, row, market)
@@ -181,10 +187,12 @@ def advance_estates(game, maps):
             unsold = row['stock'].get(old_recipe.get('output'), 0)
             if row['job'] or not unsold:
                 from .estate_management import plan
-                plan(game, maps, row)
+                plan(game, maps, row, optimize_batches=managed)
             else:
                 row['enabled']=False
                 row['auto_buy']=False
+        if managed:
+            grow(game, maps, row, market)
         if not row['enabled']:
             continue
         if row['auto_sell'] and not sold_by_steward:
@@ -202,7 +210,7 @@ def advance_estates(game, maps):
                     market_trade(game, row, market, item, amount, 'buy')
                 except ValueError:
                     pass
-        elif row['kind'] != 'shop' and not row['job'] and not row['arrears'] and (not row.get('entrusted') or row['auto_buy']):
+        elif row['kind'] != 'shop' and not row['job'] and not row['arrears'] and (not (row.get('entrusted') or managed) or row['auto_buy']):
             try:
                 start_job(game, maps, row, automatic=True)
             except ValueError as exc:

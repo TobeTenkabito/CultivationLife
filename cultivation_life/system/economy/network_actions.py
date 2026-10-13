@@ -6,7 +6,7 @@ from ...runtime import now_iso
 from .ledger import balance, transfer_value
 from .local_market import require_access
 from .dependencies import MarketDependencies
-from .fleet_network import (alliance_at, active_fleets, fleet_limit, new_fleet, guard_required,
+from .fleet_network import (alliance_at, active_fleets, fleet_limit, new_fleet, guard_required, recruit_guard,
     owner_key, leader_record, route_key, routes, maintenance_quote, member_of)
 
 
@@ -149,14 +149,13 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None, comba
             fleet['pledged'] = True
             fleet['investment'] += 1000 * tier
         else:
-            if not fleet.get('player_controlled'):
-                raise ValueError('只能管理本人领办的商队')
             if action == 'guard':
-                if fleet['guard_power'] >= guard_required(p.world):
-                    raise ValueError('现有护卫已足额')
-                transfer_value(game, 'player', f'background:{p.world}', max(100, round(guard_required(p.world) ** .5) * 5), '聘请商队护卫')
-                fleet['guard_power'] = guard_required(p.world)
+                from .trade_orders import authorized
+                authorized(game, fleet)
+                recruit_guard(game, fleet, 'player')
             else:
+                if not fleet.get('player_controlled'):
+                    raise ValueError('只能管理本人领办的商队')
                 transfer_value(game, 'player', f'caravan:{fleet["id"]}', capital, '商队追加周转金')
                 fleet['investment'] += capital
     elif action in {'found', 'regional_hq', 'affiliate'}:
@@ -252,8 +251,10 @@ def public_network(game, maps):
         try:
             authorized(game, fleet)
             view.update(can_order=True, trade_order=copy.deepcopy(fleet.get('trade_order', {'mode':'auto'})))
+            view['can_guard'] = fleet['location'] == p.location_id and fleet['status'] == 'waiting' and not fleet.get('cross_trip') and not fleet.get('cargo')
         except ValueError:
             view['can_order'] = False
+            view['can_guard'] = False
     member = game.merchant_state.get('membership') or {}
     joined = next((a for a in game.merchant_state.get('worlds', {}).get(p.world, []) if member_of(game, a)), None)
     tier = WORLD_SYSTEMS['world_profiles'][p.world]['tier']

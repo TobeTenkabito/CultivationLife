@@ -27,6 +27,20 @@ def validate_estates(value, require, document):
         require(row['buy_limit'] <= 10**12 and row['sell_limit'] <= 10**12)
         require(type(row.get('sale_quota', 1000000)) is int and 0 <= row.get('sale_quota', 1000000) <= 1000000)
         require(type(row.get('entrusted', False)) is bool)
+        for field in ('turnover', 'turnover_since'):
+            if field in row: require(type(row[field]) is int and row[field] >= 0)
+        if 'trust_profit_base' in row:
+            require('trust_config' in row and type(row['trust_profit_base']) is int)
+        if 'trust_config' in row:
+            config = row['trust_config']
+            require(isinstance(config, dict) and set(config) <= {'recipe','enabled','auto_buy','auto_sell',
+                'batches','buy_limit','sell_limit','sale_quota','expense_limit','entrusted'})
+            for name, setting in config.items():
+                if name in {'enabled','auto_buy','auto_sell','entrusted'}: require(type(setting) is bool)
+                elif name == 'recipe': require(setting is None or isinstance(setting, str))
+                elif name == 'batches': require(type(setting) is int and 1 <= setting <= row['level']*4)
+                elif name == 'sale_quota': require(type(setting) is int and 0 <= setting <= 1000000)
+                else: require(type(setting) is int and 0 <= setting <= 10**12)
         for field, default in (('reserve_cash',100),('expense_limit',100000)):
             require(type(row.get(field,default)) is int and 0 <= row.get(field,default) <= 10**12)
         for field in ('enabled','auto_buy','auto_sell'):

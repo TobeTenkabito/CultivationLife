@@ -199,6 +199,8 @@ def _dispatch(game, maps, alliance, fleet, region):
         record_trade(game, source, item, _cash(fleet), 'buy', quantity)
         row['volume'] += quantity
     source['turnover'] += purchase['gross']
+    fleet['turnover'] = fleet.get('turnover', 0) + purchase['gross']
+    fleet.setdefault('turnover_since', game.player.age)
     source['fees'] += purchase['fee']
     source['freight_out'] = source.get('freight_out', 0) + quantity
     reprice(game, source, row)
@@ -261,6 +263,9 @@ def _arrival(game, maps, fleet, region):
         row['stock'] += low
         row['volume'] += low
         target['turnover'] += sale['gross']
+        fleet['turnover'] = fleet.get('turnover', 0) + sale['gross']
+        fleet.setdefault('turnover_since', game.player.age)
+        fleet['sale_income'] = fleet.get('sale_income', 0) + sale['total']
         target['fees'] += sale['fee']
         target['freight_in'] = target.get('freight_in', 0) + low
         reprice(game, target, row)
@@ -279,13 +284,15 @@ def _arrival(game, maps, fleet, region):
     if dividend:
         transfer_value(game, _cash(fleet), owner_key(fleet), dividend, '商队实得利润分红')
         fleet['dividends'] += dividend
+        from .organization_accounts import caravan_dividend
+        caravan_dividend(game, fleet, dividend)
     _history(region, game.player.age, fleet, f"本趟交割完成，净收益 {profit:+,} 灵石，上缴 {dividend:,} 灵石")
     from .trade_orders import finish
     finish(fleet, cargo)
     fleet.update(status='waiting', cargo=None, next_departure=game.player.age + 1)
     if fleet['loss_streak'] >= 2:
         fleet['capacity'] = max(6, fleet['capacity'] // 2)
-    elif balance(game, _cash(fleet)) >= max(100, fleet['investment'] * 2) and fleet['capacity'] < 240:
+    elif profit > 0 and fleet['profit'] > 0 and balance(game, _cash(fleet)) >= max(100, fleet['investment'] * 2) and fleet['capacity'] < 240:
         cost = max(20, fleet['investment'] // 4)
         transfer_value(game, _cash(fleet), f'background:{world}', cost, '商队扩充运力')
         fleet['operating_costs'] += cost
@@ -348,6 +355,13 @@ def advance_caravans(game, maps):
             elif game.player.age >= fleet['next_departure']:
                 if fleet.get('trade_order', {}).get('mode') == 'hold':
                     continue
+                from .enterprise_state import owner_allowed
+                if game.settings.get('economy_trust') and game.player.alive and (fleet.get('player_controlled') or owner_allowed(game,fleet['owner_kind'],fleet['owner_id'],world)):
+                    from .fleet_network import guard_cost, recruit_guard
+                    cost = guard_cost(world)
+                    reserve = (max(1, fleet['capacity']//12) + max(1, round(guard_required(world)**.5))) * 3
+                    if fleet['guard_power'] < guard_required(world) and balance(game, _cash(fleet)) >= cost + reserve + 20:
+                        recruit_guard(game, fleet, _cash(fleet))
                 try:
                     _dispatch(game, maps, alliance, fleet, region)
                 except ValueError as exc:
@@ -394,7 +408,8 @@ def public_caravans(game, maps, alliance_id=None, *, local=False):
         owned_alliance = fleet.get('owner_kind') == 'alliance' and any(
             a['id'] == fleet['alliance_id'] and a.get('player_owned')
             for a in game.merchant_state.get('worlds', {}).get(world, []))
-        owned = fleet.get('player_controlled') or owned_alliance or (member.get('world') == world and member.get('alliance_id') == fleet['alliance_id'])
+        from .enterprise_state import owner_allowed
+        owned = fleet.get('player_controlled') or owned_alliance or owner_allowed(game,fleet.get('owner_kind'),fleet.get('owner_id'),world) or (member.get('world') == world and member.get('alliance_id') == fleet['alliance_id'])
         row = {key: fleet[key] for key in ('id','name','alliance_id','status','capacity','voyages','last_result')}
         row.update(location=maps.location(world, fleet['location'])['name'],
             origin_id=cargo['origin'] if cargo else None,
@@ -415,6 +430,8 @@ def public_caravans(game, maps, alliance_id=None, *, local=False):
             row.update(cash=balance(game, _cash(fleet)), profit=fleet['profit'], dividends=fleet['dividends'],
                 delivered=fleet['delivered'], lost=fleet['lost'], investment=fleet['investment'])
             row['operating_costs'] = fleet['operating_costs']
+            row.update(turnover=fleet.get('turnover', 0), sale_income=fleet.get('sale_income', 0),
+                       turnover_since=fleet.get('turnover_since'))
             if cargo:
                 row['cargo'] = {key:cargo[key] for key in ('quantity','cost','expected_profit','normal_years','years',
                     'transport_cost','array_fee','risk','saved_ratio')}
