@@ -2,6 +2,7 @@
 import math
 from .enterprise_market import market_at
 from .enterprise_rules import recipes, capacity
+from .enterprise_costs import annual_maintenance, operating_reserve, production_cost
 from .enterprise_state import estates, payer, cash_ready, put, take, used, log, owner_allowed
 from .ledger import balance, transfer_value
 from .local_market import quote
@@ -94,8 +95,9 @@ def start_job(game, maps, row, *, automatic=False):
             raise ValueError('当地收购资金不足以承接本批成品，暂停自动投产')
         if count > max(0,int(product['target']*1.5-product['stock'])):
             raise ValueError('当地同类商品库存已充裕，暂停自动投产')
-        if sale['total'] < total*1.05:
-            raise ValueError('预期利润不足工料成本的 5%，暂停自动投产')
+        expected_cost = production_cost(row, market, recipe, batches)
+        if sale['total'] < expected_cost*1.05:
+            raise ValueError('预期利润不足完整工料与批次养护成本的 5%，暂停自动投产')
     for item, number in missing.items():
         if number:
             market_trade(game, row, market, item, number, 'buy')
@@ -169,10 +171,12 @@ def advance_estates(game, maps):
             put(row, job['item'], job['quantity'])
             row['produced'] += job['quantity']
             log(row, game.player.age, f'实物完工入库 {job["quantity"]} 件')
+        sold_by_steward = False
         if row.get('entrusted'):
             # Liquidate the old recipe before selecting the next batch.
             row['auto_sell'] = True
             sell_stock(game, row, market)
+            sold_by_steward = True
             old_recipe = recipes(row['world'], commodity_catalog(row['world'])).get(row['recipe'], {})
             unsold = row['stock'].get(old_recipe.get('output'), 0)
             if row['job'] or not unsold:
@@ -183,33 +187,23 @@ def advance_estates(game, maps):
                 row['auto_buy']=False
         if not row['enabled']:
             continue
-        if row['auto_sell']:
+        if row['auto_sell'] and not sold_by_steward:
             sell_stock(game, row, market)
         if row['kind'] == 'shop' and row['auto_buy'] and not row['arrears'] and row['recipe'] in market['commodities']:
             item = row['recipe']
             amount = min(row['batches'] * 4 - row['stock'].get(item, 0), capacity(row) - used(row))
             bill = quote(market['commodities'][item], 'buy', max(0,amount)) if amount > 0 else {'total':0}
             available = max(0,balance(game,source)-operating_reserve(game,row,market))
-            if amount > 0 and bill['total'] <= min(amount*row['buy_limit'],available,row.get('expense_limit',100000)):
+            product = market['commodities'][item]
+            sale = quote(dict(product, stock=product['stock']-amount), 'sell', amount) if amount > 0 else {'total':0}
+            profitable = amount > 0 and sale['total'] >= (bill['total'] + annual_maintenance(row, market))*1.05
+            if profitable and bill['total'] <= min(amount*row['buy_limit'],available,row.get('expense_limit',100000)):
                 try:
                     market_trade(game, row, market, item, amount, 'buy')
                 except ValueError:
                     pass
-        elif not row['job'] and not row['arrears'] and (not row.get('entrusted') or row['auto_buy']):
+        elif row['kind'] != 'shop' and not row['job'] and not row['arrears'] and (not row.get('entrusted') or row['auto_buy']):
             try:
                 start_job(game, maps, row, automatic=True)
             except ValueError as exc:
                 log(row, game.player.age, str(exc))
-
-
-def annual_maintenance(row,market):
-    return max(1,math.ceil(sum(n*market['commodities'][k]['price']*.002
-        for k,n in row['stock'].items() if k in market['commodities'])))
-
-
-def operating_reserve(game,row,market):
-    reserve=max(row.get('reserve_cash',100),annual_maintenance(row,market)*3)
-    if row['owner_kind'] in {'sect','family'}:
-        org=game.economy_v2.get('organizations',{}).get(payer(row),{})
-        reserve+=math.ceil(org.get('expected_upkeep',0)*.65*3)
-    return reserve

@@ -90,6 +90,14 @@ def test_estate_receipt_recovers_actual_costs_across_owned_estates_before_servic
     take(farm,job['item'],job['quantity']);put(shop,job['item'],job['quantity'])
     market=market_at(g,engine.maps,shop);before=total_cash(g);cash_before=balance(g,key)
     bill=market_trade(g,shop,market,job['item'],job['quantity'],'sell')
+    # A slow, small crop no longer guarantees profit after facility upkeep.
+    # Recover the remainder with an explicit existing-inventory sale.
+    remaining=max(0,credit-bill['total'])
+    assert row['estate_cost_credit']==remaining and row['income']==0
+    assert balance(g,key)==cash_before+bill['total'] and total_cash(g)==before
+    put(shop,'foundation_pill',100)
+    cash_before=balance(g,key);credit=remaining
+    bill=market_trade(g,shop,market,'foundation_pill',100,'sell')
     surplus=max(0,bill['total']-credit)
     assert surplus>0 and row['income']==surplus
     assert row['operating_paid']>0 and row['operating_paid']<bill['total']*.4

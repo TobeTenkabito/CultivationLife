@@ -58,6 +58,8 @@ def command(game, maps, payload):
         transfer_value(game, key, 'player', quantity(payload.get('amount'), 10**12), '在产业所在地提取经营现金')
     elif action == 'pay_arrears':
         transfer_value(game, key, f'background:{p.world}', row['arrears'], '结清产业仓储欠费')
+        from .organization_accounts import estate_cost
+        estate_cost(game, row, row['arrears'])
         row['expense'] += row['arrears']
         row['arrears'] = 0
     elif action == 'entrust':
@@ -67,7 +69,9 @@ def command(game, maps, payload):
         if row['entrusted']:
             from .estate_management import plan
             plan(game, maps, row)
-        log(row, p.age, '委托驻地掌柜自动经营' if row['entrusted'] else '收回经营委托，保留当前批次与方案')
+        else:
+            row.update(enabled=False, auto_buy=False, auto_sell=False)
+        log(row, p.age, '委托驻地掌柜自动经营' if row['entrusted'] else '收回经营委托并暂停自动经营；保留已付批次、库存与配方')
     elif action == 'configure':
         row['entrusted'] = False
         for name in ('enabled', 'auto_buy', 'auto_sell'):

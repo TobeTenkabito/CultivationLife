@@ -30,7 +30,8 @@ def transfer(game, maps, war, winner, loser, *, strict=False):
     receipt = dict(year=game.player.age, winner=winner, loser=loser, estates=[], markets=[], fleets=[], released=[])
     for row in game.economy_v2.get('estates', {}).values():
         if (row['world'], row['owner_kind'], row['owner_id']) == (war['world'], old_kind, loser):
-            row.update(owner_kind=kind, owner_id=winner, enabled=False, revision=row['revision'] + 1)
+            row.update(owner_kind=kind, owner_id=winner, enabled=False, entrusted=False,
+                       auto_buy=False, auto_sell=False, revision=row['revision'] + 1)
             log(row, game.player.age, '战后产权交接；保留原仓储、在制品及矿藏，暂停后续生产')
             receipt['estates'].append(row['id'])
     from ..faction_geography import faction_site
