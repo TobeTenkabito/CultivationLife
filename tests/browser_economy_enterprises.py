@@ -77,6 +77,47 @@ def main():
                             assert page.evaluate('game.map.economy.enterprises.owned[0].produced')==4
                             if page.evaluate('!!game.pending_event'):
                                 g=engine._load(game.id);g.pending_event=None;engine.store.save(g);page.evaluate('async id=>loadGame(id)',game.id)
+                            # An idle farm's missing inputs must never create sales,
+                            # while the background market may keep trading.
+                            expand(box)
+                            assert page.get_by_text('全市场累计成交',exact=True).count()==1
+                            assert '场地年费' in page.get_by_label('购置产业',exact=True).text_content()
+                            page.get_by_label('购置产业',exact=True).select_option('farm')
+                            click_control(box.locator('[data-estate-action=buy]'))
+                            page.wait_for_function('!busy && game.map.economy.enterprises.owned.length===2')
+                            farm_key=page.evaluate("game.map.economy.enterprises.owned.find(r=>r.kind==='farm').id")
+                            farm_card=page.locator(f'[data-estate-id="{farm_key}"]')
+                            expand(box);expand(farm_card)
+                            farm_card.get_by_label('产业资金金额').fill('10000')
+                            click_control(farm_card.locator('[data-estate-action=fund]'))
+                            page.wait_for_function("!busy && game.map.economy.enterprises.owned.find(r=>r.kind==='farm').cash===10000")
+                            expand(box);expand(farm_card)
+                            farm_card.get_by_label('持续经营',exact=True).check()
+                            farm_card.get_by_label('自动补足原料／进货',exact=True).uncheck()
+                            farm_card.get_by_label('自动销售所选成品',exact=True).check()
+                            click_control(farm_card.locator('[data-estate-action=configure]'))
+                            page.wait_for_function("!busy && game.map.economy.enterprises.owned.find(r=>r.kind==='farm').enabled")
+                            expand(box);expand(farm_card)
+                            assert '仓库原料不足，无法投产' in farm_card.text_content()
+                            before=engine.store._path(game.id).read_bytes()
+                            click_control(farm_card.locator('[data-estate-action=start]'))
+                            page.wait_for_function('!busy')
+                            assert engine.store._path(game.id).read_bytes()==before
+                            engine.advance(game.id,'rest',10)
+                            page.evaluate('async id=>loadGame(id)',game.id)
+                            farm_row=page.evaluate("game.map.economy.enterprises.owned.find(r=>r.kind==='farm')")
+                            assert farm_row['income']==farm_row['produced']==0 and not farm_row['job'] and not farm_row['stock']
+                            assert farm_row['expense']>1 and farm_row['maintenance']['site']==20
+                            if page.evaluate('!!game.pending_event'):
+                                g=engine._load(game.id);g.pending_event=None;engine.store.save(g);page.evaluate('async id=>loadGame(id)',game.id)
+                            expand(box);expand(farm_card)
+                            click_control(farm_card.locator('[data-estate-action=entrust]'))
+                            page.wait_for_function("!busy && game.map.economy.enterprises.owned.find(r=>r.kind==='farm').entrusted")
+                            expand(box);expand(farm_card)
+                            click_control(farm_card.locator('[data-estate-action=entrust]'))
+                            page.wait_for_function("!busy && !game.map.economy.enterprises.owned.find(r=>r.kind==='farm').entrusted")
+                            farm_row=page.evaluate("game.map.economy.enterprises.owned.find(r=>r.kind==='farm')")
+                            assert not farm_row['enabled'] and not farm_row['auto_buy'] and not farm_row['auto_sell']
                             navigation_locator(page,'[data-panel-target=merchant]').click()
                             management=page.locator('#fleet-network-content > details').nth(0);expand(management)
                             management.get_by_role('button',name='自建独立商队',exact=True).click()
@@ -100,7 +141,7 @@ def main():
                     browser.close()
             finally:httpd.shutdown();httpd.server_close()
     (output/'report.json').write_text(json.dumps(checks,indent=2),encoding='utf-8')
-    print('Enterprise browser passed: 8 layouts, deeds, production, stale recovery, standing dispatch and reload')
+    print('Enterprise browser passed: 8 layouts, deeds, idle missing-input rejection, upkeep, steward recall, production, stale recovery, standing dispatch and reload')
 
 
 if __name__=='__main__':main()

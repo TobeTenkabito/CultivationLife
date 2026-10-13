@@ -26,11 +26,14 @@ def public_estates(game, maps):
         return max(1, round(title_cost(p.world, kind, level) * multiplier))
     offers, owned = [], []
     from .resource_access import site_profile,permits
+    from .enterprise_costs import annual_maintenance, operating_reserve, maintenance_breakdown
     for kind, name in KINDS.items():
         identity = f'{p.world}:{p.location_id}:{kind}'
         row = estates(game).get(identity)
         offers.append(dict(kind=kind, name=name, cost=price(kind, row['level'] if row else 1),
                            occupied=bool(row and row['owner_kind'] != 'background'),
+                           site_maintenance=maintenance_breakdown(dict(world=p.world, kind=kind,
+                               level=row['level'] if row else 1, stock={}), market)['site'],
                            resources=[ITEM_CATALOG[k].name for k in site_profile(p.world,p.location_id,kind)]))
         if not row or not owner_allowed(game, row['owner_kind'], row['owner_id'], p.world):
             continue
@@ -41,8 +44,8 @@ def public_estates(game, maps):
             stock=[dict(id=k, name=ITEM_CATALOG[k].name, quantity=n) for k,n in row['stock'].items()],
             job=dict(row['job']) if row['job'] else None, history=list(row['history']),
             upgrade_cost=price(kind, row['level'] + 1), release_price=price(kind, row['level']) // 2)
-        from .enterprise_operations import annual_maintenance,operating_reserve
-        record.update(annual_maintenance=annual_maintenance(row,market),operating_reserve=operating_reserve(game,row,market))
+        record.update(annual_maintenance=annual_maintenance(row,market),operating_reserve=operating_reserve(game,row,market),
+                      maintenance=maintenance_breakdown(row, market))
         record['resources']=[ITEM_CATALOG[k].name for k in site_profile(p.world,p.location_id,kind)]
         owned.append(record)
     return dict(available=True, can_act=trade_available(game), offers=offers, owned=owned,

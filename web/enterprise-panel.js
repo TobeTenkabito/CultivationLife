@@ -11,11 +11,14 @@
     const button=(parent,label,action,payload,disabled=false)=>{const b=e('button',label);b.type='button';b.dataset.estateAction=action;b.dataset.unavailable=!data.can_act||disabled?'1':'0';b.disabled=b.dataset.unavailable==='1';b.onclick=()=>act({action:'estate_'+action,...(typeof payload==='function'?payload():payload)});parent.append(b);return b;};
     const owners=[['player','本人'],['family','家族'],['sect','宗门'],['alliance','自建商盟']].filter(o=>!data.scope||o[0]===data.scope);
     const buy=e('section');buy.className='estate-controls';
-    const owner=select(buy,'产权登记方',owners),kind=select(buy,'购置产业',data.offers.filter(o=>!o.occupied).map(o=>[o.kind,`${o.name} · ${money(o.cost)} 灵石`]));
+    const owner=select(buy,'产权登记方',owners),kind=select(buy,'购置产业',data.offers.filter(o=>!o.occupied).map(o=>[o.kind,`${o.name} · ${money(o.cost)} 灵石 · 场地年费 ${money(o.site_maintenance)}`]));
     button(buy,'购置产权','buy',()=>({owner_kind:owner.value,kind:kind.value,cost:data.offers.find(o=>o.kind===kind.value)?.cost}),!kind.options.length);box.append(buy);
     for(const row of data.owned){
       const card=e('details');card.dataset.estateId=row.id;card.append(e('summary',`${row.name} · ${row.level} 级 · ${owners.find(x=>x[0]===row.owner_kind)?.[1]}`));
       card.append(e('p',`周转金 ${money(row.cash)} · 经营收入 ${money(row.income)} / 支出 ${money(row.expense)} · 欠费 ${money(row.arrears)}`),e('p',`仓储及在制占用 ${row.used} / ${row.capacity} 件 · 累计生产 ${row.produced} 件${row.kind==='mine'?` · 剩余矿藏 ${row.reserve} 件`:''}`));
+      const configured=data.recipes.find(r=>r.id===row.recipe);
+      const missing=Object.entries(configured?.inputs||{}).some(([id,n])=>(row.stock.find(s=>s.id===id)?.quantity||0)<n*row.batches);
+      card.append(e('p',`经营状态：${row.entrusted?'掌柜受托经营':row.enabled?'持续经营已启用':'自动经营已暂停'}${!row.job&&missing&&!row.auto_buy?'；仓库原料不足，无法投产':''}。收入来自实际出售库存，支出包含采购、劳务和养护。`));
       if(row.resources?.length)card.append(e('p',`本地资源：${row.resources.join('、')}；扩建提高容量，不改变天然品阶。${row.kind==='hunt'?` 剩余丹源 ${row.reserve} 件。`:''}`));
       if(row.job)card.append(e('p',`在制 ${row.job.quantity} 件 · 第 ${row.job.finish} 年完工（已扣原料与劳务）`));
       const base={estate_id:row.id,revision:row.revision},operation=(parent,label,action,payload={},disabled=false)=>button(parent,label,action,()=>({...base,...(typeof payload==='function'?payload():payload)}),disabled);
@@ -34,7 +37,7 @@
       const buyLimit=input(production,'最高采购均价',row.buy_limit),sellLimit=input(production,'最低销售均价',row.sell_limit);
       const quota=input(production,'每次结算自动出货上限',row.sale_quota);quota.max='1000000';
       const reserve=input(production,'自动经营保留灵石',row.reserve_cash),budget=input(production,'单次自动投产支出上限',row.expense_limit);
-      card.append(e('p',`当前养护约 ${money(row.annual_maintenance)} 灵石 / 年；自动经营保留 ${money(row.operating_reserve)} 灵石。欠费暂停进货与投产，可销售库存清偿。`));
+      card.append(e('p',`当前养护约 ${money(row.annual_maintenance)} 灵石 / 年（场地设施 ${money(row.maintenance?.site)}，库存及在制仓储 ${money(row.maintenance?.storage)}）；自动经营保留 ${money(row.operating_reserve)} 灵石。停产仍需养护；原料不足不会产生新成品或销售收入。欠费暂停进货与投产，经营中可销售已有库存清偿。收回委托会暂停自动经营，已付批次仍按期完工。`));
       const checks={};for(const [key,title] of [['enabled','持续经营'],['auto_buy','自动补足原料／进货'],['auto_sell','自动销售所选成品']]){const label=e('label',title),check=e('input');check.type='checkbox';check.checked=row[key];check.setAttribute('aria-label',title);label.append(check);production.append(label);checks[key]=check;}
       operation(production,'保存经营方案','configure',()=>({recipe:recipe.value,batches:Number(batches.value),buy_limit:Number(buyLimit.value),sell_limit:Number(sellLimit.value),sale_quota:Number(quota.value),reserve_cash:Number(reserve.value),expense_limit:Number(budget.value),...Object.fromEntries(Object.entries(checks).map(([k,v])=>[k,v.checked]))}),!recipes.length);
       if(row.kind!=='shop')operation(production,'开始一批生产','start',{},!!row.job||!!row.arrears||!row.recipe);card.append(production);

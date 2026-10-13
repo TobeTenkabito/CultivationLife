@@ -50,10 +50,10 @@
     if (address !== `${game.id}:${market.market_id}`) { address = `${game.id}:${market.market_id}`; search = ''; regexMode=false; }
     const head = el('div', null, 'economy-heading');
     head.append(el('h3', `${market.name} · 本地市场`), el('span', `世界历 ${market.year} 年`));
-    const intro = el('p', '当地作坊供货、居民消费形成库存。大笔买卖会改变成交均价，坊市货架另为你保留精选商品。', 'muted');
+    const intro = el('p', '当地作坊供货、居民消费形成库存。市场成交额包含居民、组织与商队交易；本人产业收入请查看下方产业账目。大笔买卖会改变成交均价，坊市货架另为你保留精选商品。', 'muted');
     if (market.war_pressure) intro.append(' 当地战事正在压低生产并增加运输风险。');
     const metrics = el('div', null, 'economy-metrics');
-    for (const [label, value] of [['累计成交',market.turnover],['居民实付',market.household_spending||0],['实际消费件数',market.terminal_consumed||0],['收购资金',market.liquidity],['运营府库',market.operator_balance],['军需成交',market.war_income||0]]) {
+    for (const [label, value] of [['全市场累计成交',market.turnover],['居民实付',market.household_spending||0],['实际消费件数',market.terminal_consumed||0],['收购资金',market.liquidity],['运营府库',market.operator_balance],['军需成交',market.war_income||0]]) {
       const cell = el('div'); cell.append(el('small',label), el('strong',money(value))); metrics.append(cell);
     }
     const macro = el('details', null, 'economy-world');

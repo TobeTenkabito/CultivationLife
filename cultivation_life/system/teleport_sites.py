@@ -6,12 +6,16 @@ from .territory.rules import enabled
 def arrays(game,maps,world=None):
     world=world or game.player.world
     factions=sorted((s for s in game.sects.values() if s.world==world and not s.extinct and s.id not in {'heavenly_court','yaochi'}),key=lambda s:s.id)
+    registered=game.economy_v2.get('organization_sites',{}).get('initial_arrays',{})
+    adopted=any(key.startswith(world+':') for key in registered)
     result={}
     for location in maps.worlds[world]['locations']:
-        if not location.get('teleport_array'):continue
+        original=registered.get(f'{world}:{location["id"]}')
+        # Once adopted, these real facilities remain at their saved addresses.
+        # A new-game content layout neither moves them nor gifts new sites.
+        if not original and (adopted or not location.get('teleport_array')):continue
         seed=int.from_bytes(hashlib.blake2s((world+location['id']).encode(),digest_size=4).digest(),'big')
         owner=factions[seed%len(factions)] if factions else None
-        original=game.economy_v2.get('organization_sites',{}).get('initial_arrays',{}).get(f'{world}:{location["id"]}')
         if original and game.economy_v2.get('organization_sites',{}).get('retired_arrays',{}).get(f'{world}:{location["id"]}:{original}'):continue
         if original:
             owner=game.sects.get(original)

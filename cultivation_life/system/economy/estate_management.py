@@ -6,6 +6,7 @@ from .enterprise_rules import recipes, KINDS
 from .enterprise_market import market_at
 from .state import commodity_catalog
 from .local_market import quote
+from .enterprise_costs import production_cost
 
 
 def settlement_interval(game, row):
@@ -59,8 +60,7 @@ def plan(game, maps, row):
         sale = quote(product,'sell',recipe['quantity'])
         if sale['gross'] > dealer_cash:
             continue
-        cost = max(1, int(product['price'] * recipe['quantity'] * recipe['labor'] + .999))
-        cost += sum(quote(market['commodities'][k], 'buy', q)['total'] for k, q in recipe['inputs'].items())
+        cost = production_cost(row, market, recipe)
         revenue = sale['total']
         if revenue >= cost*1.05 and cost <= budget:
             candidates.append(((revenue - cost) / recipe['years'], identity))

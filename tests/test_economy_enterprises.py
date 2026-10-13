@@ -230,7 +230,7 @@ def test_warehouse_trade_and_no_free_old_production(economy):
     assert cash(game)==before
     game, mine = buy(engine, game, 'mine')
     game = estate_act(engine, game, mine, 'fund', amount=10000)
-    game = configure(engine, game, mine, enabled=True)
+    game = configure(engine, game, mine, enabled=True, batches=4)
     game.player.age += 100
     advance_estates(game, engine.maps)
     assert game.economy_v2['estates'][mine]['produced']==0

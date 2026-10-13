@@ -200,7 +200,7 @@
             "monster": 0.78,
             "yin": 0.82
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -584,7 +584,7 @@
             "monster": 0.59,
             "yin": 0.66
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -612,6 +612,7 @@
             "monster": 0.5,
             "yin": 0.57
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -749,7 +750,7 @@
             "monster": 0.46,
             "yin": 0.54
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -777,6 +778,7 @@
             "monster": 0.76,
             "yin": 0.46
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -1222,7 +1224,7 @@
             "monster": 1.12,
             "yin": 0.74
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -1359,7 +1361,7 @@
             "monster": 0.75,
             "yin": 0.69
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -1552,7 +1554,7 @@
             "monster": 1.07,
             "yin": 0.92
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "snow",
@@ -1580,6 +1582,7 @@
             "monster": 0.91,
             "yin": 0.8
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -1717,7 +1720,7 @@
             "monster": 0.83,
             "yin": 0.75
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -1745,6 +1748,7 @@
             "monster": 1.39,
             "yin": 0.64
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -2513,7 +2517,7 @@
             "monster": 0.7,
             "yin": 1.05
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "fire",
@@ -2541,6 +2545,7 @@
             "monster": 0.59,
             "yin": 0.92
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "fire",
@@ -2678,7 +2683,7 @@
             "monster": 0.54,
             "yin": 0.86
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "fire",
@@ -2706,6 +2711,7 @@
             "monster": 0.9,
             "yin": 0.73
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "fire",
@@ -3098,7 +3104,7 @@
             "monster": 0.62,
             "yin": 1.22
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -3456,7 +3462,7 @@
             "monster": 0.7,
             "yin": 1.05
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "fire",
@@ -3484,6 +3490,7 @@
             "monster": 0.59,
             "yin": 0.92
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "fire",
@@ -3621,7 +3628,7 @@
             "monster": 0.54,
             "yin": 0.86
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "snow",
@@ -3649,6 +3656,7 @@
             "monster": 0.9,
             "yin": 0.73
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -4033,7 +4041,7 @@
             "monster": 1.85,
             "yin": 1.4
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -4090,7 +4098,7 @@
             "monster": 1.7,
             "yin": 1.35
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -4231,7 +4239,7 @@
             "monster": 1.82,
             "yin": 1.62
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -4589,7 +4597,7 @@
             "monster": 1.39,
             "yin": 1.31
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -4617,6 +4625,7 @@
             "monster": 1.18,
             "yin": 1.15
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -4754,7 +4763,7 @@
             "monster": 1.08,
             "yin": 1.07
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -4782,6 +4791,7 @@
             "monster": 1.81,
             "yin": 0.91
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -5343,7 +5353,7 @@
             "monster": 0.5,
             "yin": 1.68
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -5732,7 +5742,7 @@
             "monster": 0.59,
             "yin": 1.7
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -5760,6 +5770,7 @@
             "monster": 0.5,
             "yin": 1.49
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -5897,7 +5908,7 @@
             "monster": 0.46,
             "yin": 1.39
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -5925,6 +5936,7 @@
             "monster": 0.76,
             "yin": 1.18
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -9615,7 +9627,7 @@
             "monster": 1.95,
             "yin": 1.15
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -9812,6 +9824,7 @@
             "monster": 2.05,
             "yin": 0.92
           },
+          "teleport_array": true,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -9868,7 +9881,7 @@
             "monster": 2.12,
             "yin": 1.08
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "core",
             "terrain": "land",
@@ -10170,7 +10183,7 @@
             "monster": 1.82,
             "yin": 0.72
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -10198,6 +10211,7 @@
             "monster": 1.55,
             "yin": 0.63
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -10335,7 +10349,7 @@
             "monster": 1.41,
             "yin": 0.59
           },
-          "teleport_array": true,
+          "teleport_array": false,
           "atlas": {
             "region": "outer",
             "terrain": "land",
@@ -10363,6 +10377,7 @@
             "monster": 2.36,
             "yin": 0.5
           },
+          "teleport_array": true,
           "atlas": {
             "region": "outer",
             "terrain": "land",
