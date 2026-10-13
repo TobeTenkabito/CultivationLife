@@ -26,7 +26,7 @@ def main():
   provenance=validate_apk_inputs(ROOT,z);require(z.testzip() is None,'APK integrity check failed')
   require(all(f'lib/{abi}/libpython3.13.so' in z.namelist() for abi in ['arm64-v8a','x86_64']),'Missing Android ABI')
   with zipfile.ZipFile(io.BytesIO(z.read('assets/game-assets.zip'))) as assets:
-   for name in ['web/map-scene.js','web/map-atlas.js','web/map-layouts.js','content/maps.json',*(['web/map-camera.js','web/map-artwork.js','web/map-artwork-data.js',*[p.relative_to(ROOT).as_posix() for p in (ROOT/'web/assets/maps').glob('*.svg')]] if VERSION=='2.13.2' else [])]:require(assets.read(name)==(ROOT/name).read_bytes(),'Map assets changed: '+name)
+   for name in ['web/map-scene.js','web/map-atlas.js','web/map-layouts.js','content/maps.json',*(['web/map-camera.js','web/map-artwork.js','web/map-artwork-data.js',*(['web/map-input.js'] if VERSION=='2.13.3' else []),*[p.relative_to(ROOT).as_posix() for p in (ROOT/'web/assets/maps').glob('*.svg')]] if VERSION in {'2.13.2','2.13.3'} else [])]:require(assets.read(name)==(ROOT/name).read_bytes(),'Map assets changed: '+name)
    require(not any(n.startswith('data/') for n in assets.namelist()),'User data included in APK')
  versions={p.parent.name:json.loads(p.read_text(encoding='utf8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
  shared=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,inputs_sha256=r['inputs_sha256'],dlc_versions=versions,full_repository_regression=False,validation_scope='User-authorized map, routes, territory, transport, transition and UI checks',passed_tests=r['passed_tests'],browser_cases=r['browser_cases'],worlds=11,validation_receipt=f'map-release-{rid}.json')

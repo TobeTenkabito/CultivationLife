@@ -1,7 +1,7 @@
 {
-  "base_version": "2.13.2",
+  "base_version": "2.13.3",
   "save_schema": 10,
-  "inputs_sha256": "549abf38741605a52720da55d66111f2a6904fb921fda5e57fb413840bae112d",
+  "inputs_sha256": "283d9b98403b1f6450017ffd4727d5f219779ed70d8cbf3950d4d5787ec6f9e0",
   "dlc_versions": {
     "asura-manifestation": "1.2.1",
     "buddhist-dharma": "1.0.0",
@@ -16,11 +16,11 @@
   },
   "full_repository_regression": false,
   "validation_scope": "User-authorized map, routes, territory, transport, transition and UI checks",
-  "passed_tests": 235,
+  "passed_tests": 121,
   "browser_cases": 88,
   "worlds": 11,
-  "validation_receipt": "map-release-2132.json",
+  "validation_receipt": "map-release-2133.json",
   "platform": "Windows",
-  "exe_sha256": "f4b59e97135e56e6091f13ec1d273d656b17785b5ecc08bef88542016aed2ec0",
+  "exe_sha256": "80b3a9cfa7880cbcaa0276dbd43029f1bb51d5df785f673194d98a5a7bd7881d",
   "root_launcher_updated": true
 }

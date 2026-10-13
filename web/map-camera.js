@@ -15,7 +15,15 @@ function fromAxis(axis,angle){const n=Math.hypot(...axis),s=Math.sin(angle/2)/n;
 function start(camera,p,box){return {orientation:[...matrix(camera)],ball:vector(p,box),point:p,box,yaw:camera.yaw,pitch:camera.pitch};}
 function drag(camera,gesture,p){camera.orientation=multiply(fromTo(gesture.ball,vector(p,gesture.box)),gesture.orientation);const size=Math.max(1,Math.min(gesture.box.width,gesture.box.height));camera.yaw=gesture.yaw+(p.x-gesture.point.x)*Math.PI/size;camera.pitch=gesture.pitch+(p.y-gesture.point.y)*Math.PI/size;}
 function rotate(camera,angle){camera.orientation=multiply(fromAxis([0,1,0],angle),matrix(camera));camera.yaw+=angle;}
-function reset(camera){Object.assign(camera,{yaw:-.2,pitch:.64,zoom:1,orientation:initial()});}
+function reset(camera){Object.assign(camera,{yaw:-.2,pitch:.64,zoom:1,orientation:initial(),panX:0,panY:0});}
 function project(camera,x,y,z=0){const m=matrix(camera);return {x:m[0]*x+m[1]*y+m[2]*z,y:m[3]*x+m[4]*y+m[5]*z,depth:m[6]*x+m[7]*y+m[8]*z};}
-window.MapCamera={matrix,start,drag,rotate,reset,project};
+function pan(camera,dx,dy,box){camera.panX=(camera.panX||0)+dx*1600/Math.max(1,box.width);camera.panY=(camera.panY||0)+dy*1600/Math.max(1,box.width);}
+function zoomAt(camera,next,point,box){
+ const old=camera.zoom||1;next=Math.max(.65,Math.min(2.4,next));const ratio=next/old;
+ const x=(point.x-box.left)*1600/Math.max(1,box.width),y=(point.y-box.top)*1600/Math.max(1,box.width),height=box.height*1600/Math.max(1,box.width);
+ camera.panX=(camera.panX||0)+(1-ratio)*(x-800-(camera.panX||0));
+ camera.panY=(camera.panY||0)+(1-ratio)*(y-height/2-(camera.panY||0));camera.zoom=next;
+}
+function twist(camera,angle){camera.orientation=multiply(fromAxis([0,0,1],angle),matrix(camera));}
+window.MapCamera={matrix,start,drag,rotate,reset,project,pan,zoomAt,twist};
 })();
