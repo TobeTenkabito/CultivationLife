@@ -36,7 +36,8 @@ def settle_claim(game, market):
     claim['last_year'] = game.player.age
     organization = game.economy_v2.get('organizations', {}).get(recipient(claim))
     if organization:
-        organization['income'] += paid
+        from .organization_accounts import book_income
+        book_income(game, organization, paid)
 
 
 def advance_governance(game):

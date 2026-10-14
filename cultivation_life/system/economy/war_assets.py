@@ -2,7 +2,7 @@
 from .organizations import register
 from .market_governance import assign
 from .state import ensure_regional_market
-from .enterprise_state import owner_allowed, log
+from .enterprise_state import log
 
 
 def entity(game, identity):
@@ -53,7 +53,7 @@ def transfer(game, maps, war, winner, loser, *, strict=False):
             continue
         row.update(trade_order={'mode': 'hold'}, pledged=False, alliance_id='')
         if slots:
-            row.update(owner_kind=kind, owner_id=winner, player_controlled=owner_allowed(game, kind, winner, war['world']))
+            row.update(owner_kind=kind, owner_id=winner, player_controlled=False)
             receipt['fleets'].append(row['id'])
             slots -= 1
         else:

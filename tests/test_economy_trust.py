@@ -291,6 +291,7 @@ def test_original_organization_fleet_uses_existing_order_authority_for_guards(ec
     game, key = own_fleet(engine, game)
     organizations.register(game,'sect','tianjian','human')
     game.sects['tianjian'].founded_by_player = True
+    game.player.faction_id = 'tianjian'
     f = fleet(game,key)
     f.update(owner_kind='sect',owner_id='tianjian',player_controlled=False)
     before = cash(game)

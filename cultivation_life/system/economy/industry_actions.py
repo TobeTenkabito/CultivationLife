@@ -12,6 +12,10 @@ def invest(game, maps, kind):
     authority = game.intrigue_state.get('factions', {}).get(f'{kind}:{entity.id}', {})
     if kind == 'sect' and not entity.founded_by_player and authority.get('controller_id') != 'player':
         raise ValueError('只有宗门执掌者可安排产业投资')
+    if kind == 'family':
+        from ..organization_heritage import decision
+        if not decision(game, entity):
+            raise ValueError('须拥有家族决策权才能安排产业投资')
     if p.location_id != faction_site(entity)['id']:
         raise ValueError('请前往产业所在的组织驻地')
     row = register(game, kind, entity.id, p.world)
@@ -24,4 +28,5 @@ def invest(game, maps, kind):
     cost = max(1, round(10000 * (level + 1) ** 2 * multiplier))
     transfer_value(game, f'organization:{kind}:{entity.id}', f'background:{p.world}', cost, '组织产业扩建')
     row['industry_level'] = level + 1
-    row['expense'] += cost
+    from .organization_accounts import book_expense
+    book_expense(game, row, cost)

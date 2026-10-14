@@ -309,10 +309,11 @@ def _finish_auction(deps: AuctionsDependencies, game: GameState, rng: Any, reaso
     if state.get('economy_settled'):
         return
     from .state import ensure_state
-    from .ledger import transfer_value, record_external
+    from .ledger import balance, transfer_value, record_external
     ensure_state(game)
     purchased: list[str] = []
     sold: list[str] = []
+    unsold: list[str] = []
     commission = float(deps._auction_rules()["commission_rate"])
     for lot in state.get("lots", []):
         if lot.get("seller") != "player" and not deps._is_world_market_good(
@@ -333,6 +334,11 @@ def _finish_auction(deps: AuctionsDependencies, game: GameState, rng: Any, reaso
                             int(lot['current_bid']), '拍卖货款交割')
             purchased.append(f"{lot['name']}（{lot['current_bid']}灵石）")
         if lot.get("seller") == "player":
+            if balance(game, f'background:{game.player.world}') < int(lot['current_bid']):
+                _return_consignment(game.player, lot)
+                lot.update(unsold=True, seller_net=0)
+                unsold.append(str(lot['name']))
+                continue
             net = max(0, math.floor(int(lot["current_bid"]) * (1 - commission)))
             transfer_value(game, f'background:{game.player.world}', 'player', net, '拍卖寄售收入')
             from .local_market import auction_fee
@@ -345,10 +351,12 @@ def _finish_auction(deps: AuctionsDependencies, game: GameState, rng: Any, reaso
         summary += "；你拍得" + "、".join(purchased)
     if sold:
         summary += "；寄拍成交后扣除30%手续费，你获得" + "、".join(sold)
+    if unsold:
+        summary += "；买方资金不足，以下拍品流拍并原物退回（占位费不退）：" + "、".join(unsold)
     summary += "。散场修士随即转入同地图黑市。"
     game.history.append(HistoryRecord(
         "SYS_AUCTION_FINISH", 1, game.player.age, "拍卖结清与黑市开启", state.get("location_id"),
-        "black_market", summary, {"purchased":purchased, "sold":sold},
+        "black_market", summary, {"purchased":purchased, "sold":sold, "unsold":unsold},
         ["system", "auction", "black_market", f"world:{game.player.world}"],
     ))
 
@@ -447,6 +455,14 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
 
 
 
+def _return_consignment(player: Player, row: dict[str, Any]) -> None:
+    if row.get('kind') == 'crafted_artifact' and isinstance(row.get('artifact'), dict):
+        from ..crafting_system import store_crafted_artifact
+        store_crafted_artifact(player, copy.deepcopy(row['artifact']))
+    else:
+        add_item(player, str(row['content_id']))
+
+
 def _cancel_auction_for_world_change(deps: AuctionsDependencies, game: GameState) -> None:
     state = game.auction_state
     if not state or state.get("status") == "cooldown":
@@ -458,11 +474,7 @@ def _cancel_auction_for_world_change(deps: AuctionsDependencies, game: GameState
             if lot.get("current_bidder") == "player":
                 add_item(game.player, "spirit_stone", int(lot.get("current_bid", 0)))
         for consignment in state.get("consignments", []):
-            if consignment.get("kind") == "crafted_artifact" and isinstance(consignment.get("artifact"), dict):
-                from ..crafting_system import store_crafted_artifact
-                store_crafted_artifact(game.player, copy.deepcopy(consignment["artifact"]))
-            else:
-                add_item(game.player, str(consignment["content_id"]))
+            _return_consignment(game.player, consignment)
     game.auction_state = {
         "status":"cooldown", "actions_remaining":int(deps._auction_rules()["cooldown_actions"]),
     }

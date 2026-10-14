@@ -8,12 +8,12 @@ from .enterprise_rules import capacity
 
 
 def authorized(game, fleet):
-    from .fleet_network import alliance_at
+    from .fleet_network import alliance_at, managed_by_player
     if not fleet or fleet['world'] != game.player.world or fleet['status'] == 'retired':
         raise ValueError('商队不在本界或已经解散')
     owner = alliance_at(game, fleet['world'], fleet['alliance_id']) if fleet['owner_kind'] == 'alliance' else None
     controlled = owner_allowed(game, fleet['owner_kind'], fleet['owner_id'], fleet['world'])
-    if not fleet.get('player_controlled') and not controlled:
+    if not managed_by_player(game, fleet):
         raise ValueError('只能安排本人领办或自建商盟的商队')
     hq = owner['hq'] if owner else None
     if controlled and fleet['owner_kind'] in {'sect', 'family'}:

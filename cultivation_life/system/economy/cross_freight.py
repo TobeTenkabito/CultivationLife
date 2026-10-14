@@ -63,7 +63,10 @@ def dispatch(game, maps, fleet, destination, *, remittance_percent=25, order=Non
     target = alliance_at(game, destination, _identity(owner))
     source_market = market(game, maps, fleet['world'], fleet['location'])
     target_market = market(game, maps, destination, target['hq'])
-    cargo = buy(game, fleet, source_market, target_market, len(path) - 1, order)
+    travel_years = sum(leg_years(first, second) for first, second in zip(path, path[1:]))
+    # No return cargo is guaranteed; finance both legs before leaving home.
+    cargo = buy(game, fleet, source_market, target_market, len(path) - 1, order,
+                travel_years=travel_years * 2)
     if cargo is None:
         raise ValueError('现有资金、库存和跨界价差不足以支持盈利运输')
     fleet['voyages'] += 1
@@ -107,8 +110,9 @@ def _risk(game, fleet, trip, first, second):
 def _finish(game, fleet):
     trip = fleet['cross_trip']
     transfer_value(game, f'freight:{fleet["id"]}', owner_key(fleet), trip['remittance'], '跨界商队实际返抵总部交回托运款')
-    profit = trip['revenue'] - trip['cost']
-    fleet['profit'] += profit
+    margin = trip['revenue'] - trip['cost']
+    profit = margin - trip.get('running_costs', 0)
+    fleet['profit'] += margin  # Paid annual wages already reduced cumulative profit.
     dividend = min(balance(game, f'caravan:{fleet["id"]}'), max(0, profit) // 4)
     transfer_value(game, f'caravan:{fleet["id"]}', owner_key(fleet), dividend, '跨界贸易利润上缴本界所属商盟')
     fleet['dividends'] += dividend
@@ -182,7 +186,8 @@ def advance_freight(game, maps, fleet, region):
     selection = None
     if trip.get('return_item'):
         selection = dict(item=trip['return_item'], quantity=trip['order_quantity'], buy_limit=trip['buy_limit'])
-    cargo = buy(game, fleet, target, source, len(path) - 1, selection)
+    travel_years = sum(leg_years(first, second) for first, second in zip(path, path[1:]))
+    cargo = buy(game, fleet, target, source, len(path) - 1, selection, travel_years=travel_years)
     if cargo:
         trip.update(item=cargo['item'], quantity=cargo['quantity'], purchased=cargo['purchased'], tariff=cargo['tariff'])
         trip['cost'] += cargo['cost']

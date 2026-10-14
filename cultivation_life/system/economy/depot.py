@@ -74,7 +74,7 @@ def occupied(row):
     return sum(row['stock'].values()) + sum(r['reserved'] for r in row['requests'])
 
 
-def purchase(game, maps, entity, key, quantity):
+def purchase(game, maps, entity, key, quantity, *, finance=None):
     row = ensure(game, entity)
     good = catalog(row['world']).get(key)
     if not good or type(quantity) is not int or not 1 <= quantity <= 1000:
@@ -117,6 +117,15 @@ def purchase(game, maps, entity, key, quantity):
     market['turnover'] += bill['gross']
     market['fees'] += bill['fee']
     row['stock'][key] = row['stock'].get(key, 0) + quantity
+    if finance is not None:
+        # Annual settlement is still in progress: last_year advances afterward.
+        finance['expense'] += bill['total']
+        finance['turnover'] = finance.get('turnover', 0) + bill['gross']
+    else:
+        from .organization_accounts import register, book_expense, book_turnover
+        finance = register(game, owner_kind(game, entity), entity.id, entity.world)
+        book_expense(game, finance, bill['total'])
+        book_turnover(game, finance, bill['gross'])
     record(row, game, f"采购{good['name']} ×{quantity}，实付 {bill['total']} 灵石")
     return bill['total']
 
@@ -187,11 +196,10 @@ def advance(game, maps, entity, finance):
         if unit_value(game, row, key) * 1.1 > budget:
             continue
         try:
-            paid = purchase(game, maps, entity, key, 1)
+            paid = purchase(game, maps, entity, key, 1, finance=finance)
         except ValueError:
             continue
         budget -= paid
-        finance['expense'] += paid
     for request in row['requests']:
         if request['status'] == 'pending' and game.diplomacy_unit >= request['ready_unit']:
             elder = next((n for n in seniors(game, entity) if (n.affinity or 0) >= 0), None)

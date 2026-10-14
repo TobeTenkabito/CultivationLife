@@ -17,10 +17,16 @@ def owner_allowed(game, kind, identity, world):
     entity = game.family if kind == 'family' else game.sects.get(identity) if kind == 'sect' else None
     if not entity or entity.id != identity or entity.world != world or entity.extinct or entity.kind == 'institution':
         return False
-    record = game.intrigue_state.get('factions', {}).get(f'{kind}:{identity}', {})
-    if entity.founded_by_player or record.get('controller_id') == 'player':
-        return True
     member = entity is game.family if kind == 'family' else p.faction_id == identity
+    if not member:
+        return False
+    record = game.intrigue_state.get('factions', {}).get(f'{kind}:{identity}', {})
+    if entity.founded_by_player:
+        return True
+    if record.get('controller_id') == 'player':
+        from ..organization_authority import player_controls
+        if player_controls(game, entity, entity.npcs, member=member):
+            return True
     from ...content_registry import WORLD_SYSTEMS
     intrigue = WORLD_SYSTEMS.get('intrigue_dlc', {})
     if intrigue.get('enabled'):
@@ -30,6 +36,12 @@ def owner_allowed(game, kind, identity, world):
         threshold = WORLD_SYSTEMS['player_faction']['governance_threshold']
         return member and p.realm_index >= int(threshold.get(world, threshold.get('human', 4)))
     return False
+
+
+def operating_tier(game, row):
+    """Recheck player-operated licenses; autonomous owners keep their own work."""
+    return game.player.realm_index + 1 if owner_allowed(
+        game, row['owner_kind'], row['owner_id'], row['world']) else None
 
 
 def payer(row):

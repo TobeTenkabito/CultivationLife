@@ -1,7 +1,7 @@
 """Bounded organization investment and local stewards using real market orders."""
 from ...content_registry import WORLD_SYSTEMS, FACTION_DEFINITIONS
 from .ledger import balance
-from .enterprise_state import estates, owner_allowed, payer
+from .enterprise_state import estates, owner_allowed, payer, operating_tier
 from .enterprise_rules import recipes, KINDS
 from .enterprise_market import market_at
 from .state import commodity_catalog
@@ -48,7 +48,7 @@ def plan(game, maps, row, *, funds=None, optimize_batches=False):
         cash = max(0, cash - org.get('expected_upkeep', 0) * 3)
     budget = cash // 10
     dealer_cash = balance(game,f'market:{market["id"]}')
-    max_tier = game.player.realm_index + 1 if owner_allowed(game, row['owner_kind'], row['owner_id'], row['world']) else None
+    max_tier = operating_tier(game, row)
     candidates = []
     from .resource_access import permits
     for identity, recipe in options.items():
@@ -64,6 +64,9 @@ def plan(game, maps, row, *, funds=None, optimize_batches=False):
         # At most three quotes per permitted recipe, independent of elapsed years.
         for batches in sorted({1, maximum, max(1, maximum//2)}):
             if batches < 1 or recipe['quantity']*batches > room or (optimize_batches and batches > maximum):
+                continue
+            if max_tier is not None and any(market['commodities'][item]['tier'] > max_tier
+                    and units*batches > row['stock'].get(item, 0) for item, units in recipe['inputs'].items()):
                 continue
             if optimize_batches and any(max(0, units*batches-row['stock'].get(item,0)) > market['commodities'][item]['stock']
                                         for item,units in recipe['inputs'].items()):
