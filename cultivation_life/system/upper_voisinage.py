@@ -122,7 +122,27 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
         game.updated_at = now_iso()
         deps.store.save(game)
         return deps.present(game)
+    inherited = None
+    if action == 'inherit':
+        from .spirit_inheritance_rules import plan, record as inherited_record, discounted
+        inherited = plan(game, voisinage_id)
+        if inherited['mode'] not in {'native', 'monster', 'ghost'}:
+            raise ValueError('请使用本命、本相或魂相的专属承接入口')
+        cost = discounted(quote(p, 1, game), inherited['source_level'])
+        cost['materials'] = 1
+        if p.opportunity < cost['opportunity'] or sum(i.quantity for i in p.inventory if i.id == 'spirit_stone') < cost['stones'] or len(material_stock(p)) < 1:
+            raise ValueError('承接所需机缘、灵石或本界筑域材料不足')
+        state = p.world_voisinages.setdefault(p.world, {})
+        if inherited['mode'] in {'monster', 'ghost'}:
+            voisinage_id = inherited['target_id']
+            state.setdefault('spirit_bindings', {})[voisinage_id] = inherited_record(inherited)
+        else:
+            state.setdefault('spirit_inheritances', {})[inherited['id']] = inherited_record(inherited)
+            voisinage_id = inherited['id']
+        action = 'train'
     row = next((r for r in public_upper_voisinages(p, game)['rows'] if r['id'] == voisinage_id), None)
+    if inherited:
+        row['cost'], row['reason'] = cost, None
     if not row:
         raise ValueError('只能修习或上阵本界邻域')
     if action == 'select':
@@ -153,14 +173,16 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
             p.crafting_materials.remove(material)
         state = p.world_voisinages.setdefault(p.world, {})
         state['progression_version'] = 2
-        state.setdefault('levels', {})[voisinage_id] = row['level'] + 1
-        if action == 'train' and row.get('true_form') and row['level'] + 1 == 13:
+        state.setdefault('levels', {})[voisinage_id] = max(1, row['level']) if inherited else row['level'] + 1
+        if not inherited and action == 'train' and row.get('true_form') and row['level'] + 1 == 13:
             state['true_form']['finalized'] = True
-        if action == 'train' and row.get('soul_form') and row['level'] + 1 == 13:
+        if not inherited and action == 'train' and row.get('soul_form') and row['level'] + 1 == 13:
             state['ghost_soul_form']['finalized'] = True
         state.setdefault('active', voisinage_id)
+        if inherited:
+            state['active'] = voisinage_id
         from .doctrine.voisinage_training import label
-        target = label(row['level'] + 1)
+        target = label(state['levels'][voisinage_id])
         summary = (f"【{row['name']}】修至 {target}，消耗机缘 {cost['opportunity']}、"
                    f"灵石 {cost['stones']}、{cost['material_name']} ×{cost['materials']}。")
     else:

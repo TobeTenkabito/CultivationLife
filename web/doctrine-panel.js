@@ -41,13 +41,13 @@
     const voisinage = document.querySelector('#voisinage-content'); voisinage.replaceChildren();
     const daomen = document.querySelector('#daomen-content'); daomen.replaceChildren();
     const body = document.querySelector('#immortal-body-content'); body.replaceChildren();
-    const blocked = options.pending || !options.alive;
+    const blocked = options.pending || !options.alive || data.cultivation_blocked;
     function button(text, payload, disabled = false, dispatch = act) {
       const node = el('button', text); node.type = 'button'; node.disabled = disabled || blocked;
       node.dataset.doctrineAction = payload.action;
       node.onclick = () => dispatch(payload); return node;
     }
-    content.append(el('p', '仙界二十五道统 · Lv4 开域 · Lv5 归源 · Lv9 道成', 'doctrine-lead'));
+    content.append(el('p', '仙界二十五本土道统 · 可承接异源传承 · Lv4 开域 · Lv5 归源 · Lv9 道成', 'doctrine-lead'));
     content.append(el('p', `可兼修多门，只有一个道统能越过 Lv4。修成当前阶段后才会揭示下一阶段。每次专修推进一个时间单位（${fmt(data.unit_years)} 年），至多修成一个道统等级。`, 'muted'));
     const conversion = el('section', null, 'doctrine-conversion');
     conversion.append(el('h3', '仙灵力转化'), el('p', `${data.conversion.stage}/5 阶段 · 仙窍容量 ${fmt(data.conversion.capacity)} · 当前储量 ${fmt(data.conversion.current)}`));

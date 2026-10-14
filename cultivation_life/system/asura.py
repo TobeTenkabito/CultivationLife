@@ -130,11 +130,13 @@ def field_for(player, cap=None):
     strength = (95 + 10 * s.get('level', 1) + 5 * s.get('domain_power', 0)) * multiplier(value)
     kind = route['effect']
     key = 'asura:' + s['route']
-    return VoisinageDefinition(key, s['domain_name'], key, 1, strength, 45, 18,
+    field = VoisinageDefinition(key, s['domain_name'], key, 1, strength, 45, 18,
         kind, 24, .2, max_investment=120, max_targets=3, extra_target_cost=5,
         stability=strength * (1.15 if kind.startswith('restore') else 1),
         incursion=strength * (1.15 if kind == 'strike' else 1), authority=strength,
         effects=(VoisinageEffect(kind, 24, .2, target='self' if kind.startswith('restore') else 'enemy'),))
+    from .spirit_inheritance_rules import asura_field
+    return asura_field(player, field)
 
 
 def source(player, cap=None):

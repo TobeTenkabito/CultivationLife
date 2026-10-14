@@ -16,6 +16,7 @@ from .doctrine.provider import battle_sources, conversion_state
 from .combat.voisinages import VoisinageBattle
 from .combat.npc_lifecycle import NpcResourceBinding, prepare, commit_condition
 from .combat_system import BattleUnit, PlayerCombatSystem
+from .aperture_resources import ApertureResourceBinding, available, bind_energy
 
 
 def persistent_owner(game: GameState, key: str) -> Any | None:
@@ -67,7 +68,7 @@ def persistent_owners(game: GameState, keys: set[str]) -> dict[str, Any]:
 class CapabilityBinding:
     battle: VoisinageBattle
     owners: dict[str, Any]
-    resources: dict[str, NpcResourceBinding]
+    resources: dict[str, NpcResourceBinding | ApertureResourceBinding]
 
     def commit(self, updates: list[dict[str, Any]], *, lethal: bool = False) -> None:
         for update in updates:
@@ -79,11 +80,6 @@ class CapabilityBinding:
                 # rounds and stories which normally waive conventional MP loss.
                 owner.mp = update["current"]
                 continue
-            if update['id'] == 'player' and owner.transcendence is None:
-                from .aperture_resources import available, commit_energy
-                if available(owner):
-                    commit_energy(owner, update['current'])
-                    continue
             state = owner.get("transcendence") if isinstance(owner, dict) else owner.transcendence
             if update["id"] in self.resources:
                 self.resources[update["id"]].commit(update["current"])
@@ -102,7 +98,7 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
             raise ValueError(f"Duplicate battle voisinage: {key}")
         definitions[key] = definition
     owners: dict[str, Any] = {}
-    resources: dict[str, NpcResourceBinding] = {}
+    resources: dict[str, NpcResourceBinding | ApertureResourceBinding] = {}
     combatants: list[Combatant] = []
     raw_enemies = target.get("members") or [target]
     ephemeral = {str(row.get("npc_id") or f"enemy-{index}"): row for index, row in enumerate(raw_enemies)}
@@ -145,6 +141,8 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                 linked_current=game.player.mp if unit.id == "player" else 0,
                 linked_capacity=max_mp(game.player) if unit.id == "player" else 0,
             )
+            if unit.id == 'player' and game.player.transcendence is None and available(game.player):
+                resources[unit.id] = bind_energy(game.player, capabilities.current)
             if unit.id == "player" and target.get("player_interventions"):
                 capabilities = replace(capabilities, interventions=(
                     *capabilities.interventions, *target["player_interventions"]))

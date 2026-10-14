@@ -23,12 +23,12 @@ def prerequisites(record, key, manual_level):
         raise ValueError(f"须先取得此道统 Lv{target} 的注解")
 
 
-def attempt(progress, definition, years, origin, rules, roll):
+def attempt(progress, definition, years, origin, rules, roll, *, required_years=None):
     """One action, at most one revelation. Failed time is spent; notes persist."""
     level = int(progress.get("level", 0))
     if level >= 9 or (level >= 4 and origin not in (None, definition["id"])):
         return "blocked"
-    required = definition["stages"][level]["years"]
+    required = definition["stages"][level]["years"] if required_years is None else required_years
     progress["experience"] = min(required, progress.get("experience", 0) + max(0, years))
     if progress["experience"] < required:
         return "training"

@@ -129,6 +129,20 @@ def _asura_cultivate(deps: AsuraActionDependencies, game, action, target_id, bod
         return f'肉身条件指向{asura.ROUTE_NAMES[routes[0]]}，开始融合镇压战。'
     if not s.get('route'):
         raise ValueError('须先完成八部肉身融合')
+    if action == 'inherit':
+        from ...system.spirit_inheritance_rules import plan, record, discounted
+        from ...system.spirit_inheritance import blocked
+        reason = blocked(game)
+        if reason:
+            raise ValueError(reason)
+        proposal = plan(game, target_id)
+        if proposal['mode'] != 'eightfold':
+            raise ValueError('此传承不能由八部承接')
+        bill = discounted({'souls': 100}, proposal['source_level'])
+        deps._spend_asura_souls(s, bill['souls'])
+        s['spirit_inheritance'] = record(proposal)
+        s['domain_name'] = proposal['name']
+        return f"将{proposal['source_name']}融入本命魔域，原十三阶培养与威能滋养保留；不增加元力或第二领域。"
     if action == 'rename':
         clean = str(name).strip()
         if not 1 <= len(clean) <= 24:

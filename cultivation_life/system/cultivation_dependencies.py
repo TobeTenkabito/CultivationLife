@@ -86,6 +86,7 @@ class ImmortalBodyDependencies:
 
 @dataclass(frozen=True, slots=True)
 class ApertureDependencies:
+    asura_action: Callable[..., Any]
     _load: Callable[[str], GameState]
     present: Callable[[GameState], dict[str, Any]]
     _get_store: Callable[[], SavePort]

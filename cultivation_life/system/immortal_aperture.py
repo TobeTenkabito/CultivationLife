@@ -46,7 +46,9 @@ def public_aperture(player, game=None):
         if source.voisinages:
             from dataclasses import asdict
             field = asdict(source.voisinages[0])
+    from .spirit_inheritance import public as public_inheritance
     return {'available': True, 'lower': lower, 'field': field,
+            'inheritances': public_inheritance(game) if game is not None and not lower else [],
             'spirit_studies': studies,
             'name': upper['energy'] if upper else '仿仙灵力' if lower else '仙灵力',
             'title': upper['aperture'] if upper else '仙窍', 'native': bool(upper),
@@ -57,7 +59,7 @@ def public_aperture(player, game=None):
             'capacity': state['capacity'] * state['conversion'],
             'investment_multiplier': investment_multiplier(player),
             'sealed_reserve': ledger['current'] if lower else 0,
-            'conversion': asura_conversion if asura_conversion is not None else 1 if upper or player.immortal_power_converted else player.immortal_conversion_stage / 5,
+            'conversion': state['conversion'] if not lower else 1 if player.immortal_power_converted else player.immortal_conversion_stage / 5,
             'origin_hp': intrinsic['hp']['current'], 'origin_mp': intrinsic['mp']['current'],
             'max_hp': intrinsic['hp']['maximum'], 'max_mp': intrinsic['mp']['maximum'],
             'refine_gain': 20 if lower else ledger['capacity'] / 4,
@@ -73,6 +75,9 @@ def upper_voisinage_action(deps: ApertureDependencies, game_id, action, voisinag
 
 
 def aperture_action(deps: ApertureDependencies, game_id, action, manual_id=None):
+    if action == 'inherit':
+        from .spirit_inheritance import act
+        return act(deps, game_id, manual_id)
     game = deps._load(game_id)
     p = game.player
     if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
