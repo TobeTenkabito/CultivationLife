@@ -1463,9 +1463,9 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return npcs._npc_cultivation_perception(self._dependencies.npcs, game, npc, require_realm_visibility)
 
     @staticmethod
-    def _dynamic_sect_title(npc: SectNpc, sect: SectState) -> str:
+    def _dynamic_sect_title(npc: SectNpc, sect: SectState, *, realm_index: int | None = None) -> str:
         '随修为投影宗门职位，同时保留掌门等唯一职衔。'
-        return npcs._dynamic_sect_title(npc, sect)
+        return npcs._dynamic_sect_title(npc, sect, realm_index=realm_index)
 
     @staticmethod
     def _default_npc_main_technique(npc: SectNpc) -> str | None:

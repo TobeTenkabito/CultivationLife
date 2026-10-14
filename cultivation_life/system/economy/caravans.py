@@ -144,7 +144,22 @@ def _candidate(game, maps, alliance, fleet):
         for item in _candidate_items(source, target):
             row, other = source['commodities'][item], target['commodities'][item]
             maximum = min(fleet['capacity'], int(row['stock']))
-            for quantity in sorted({maximum, maximum // 2, maximum // 4}, reverse=True):
+            if maximum <= 0:
+                continue
+            quantities = sorted({maximum, maximum // 2, maximum // 4} - {0}, reverse=True)
+            minimum = quantities[-1]
+            cheapest = purchases.get((item, minimum))
+            if cheapest is None:
+                cheapest = quote(row, 'buy', minimum)
+                purchases[item, minimum] = cheapest
+            wages = annual_wages * geography['years']
+            cheapest_cost = cheapest['total'] + max(1, math.ceil(cheapest['total'] * .003 * geography['normal_years']))
+            # Purchase totals and proportional freight increase with quantity.
+            # Quotes are read-only: an unaffordable smallest original batch
+            # rules out the larger batches without changing candidate order.
+            if cheapest_cost + wages > budget:
+                continue
+            for quantity in quantities:
                 if quantity <= 0:
                     continue
                 purchase = purchases.get((item, quantity))
@@ -153,7 +168,6 @@ def _candidate(game, maps, alliance, fleet):
                     purchases[item, quantity] = purchase
                 transport_cost = max(1, math.ceil(purchase['total'] * .003 * geography['normal_years']))
                 cost = purchase['total'] + transport_cost
-                wages = annual_wages * geography['years']
                 if cost + wages > budget:
                     continue
                 sale = quote(other, 'sell', quantity)

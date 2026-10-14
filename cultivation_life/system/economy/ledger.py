@@ -1,5 +1,6 @@
 """Integer spirit-stone transfers; the player's inventory stays authoritative."""
 from ...rules import add_item, remove_item
+from .personal import record as record_personal
 
 
 def _organization(game, key):
@@ -59,33 +60,51 @@ def transfer_value(game, source, destination, amount, reason):
         direct_destination['balance']+=amount;direct_destination['income']+=amount
         _record_transfer(game,source,destination,amount,reason)
         return
-    if any(key != 'player' and key not in accounts and _merchant(game, key) is None and _organization(game, key) is None
-           for key in (source, destination)):
+    source_org = _organization(game, source)
+    destination_org = _organization(game, destination)
+    source_merchant = _merchant(game, source) if source_org is None else None
+    destination_merchant = _merchant(game, destination) if destination_org is None else None
+    if any(key != 'player' and key not in accounts and organization is None and merchant is None
+           for key, organization, merchant in ((source, source_org, source_merchant),
+                                               (destination, destination_org, destination_merchant))):
         raise ValueError('资金账户不存在')
-    balance(game, destination)  # Validate the receiving treasury before any debit.
-    if balance(game, source) < amount:
+    # Resolve original treasuries once per transfer. Never retain these mutable
+    # records beyond the transaction or create a second organization wallet.
+    if destination_org is not None:
+        int(destination_org[0][destination_org[1]])
+    elif destination_merchant is not None:
+        destination_merchant['reserves']
+    else:
+        balance(game, destination)
+    if source_org is not None:
+        available = int(source_org[0][source_org[1]])
+    elif source_merchant is not None:
+        available = source_merchant['reserves']
+    else:
+        available = balance(game, source)
+    if available < amount:
         raise ValueError('付款方灵石不足')
     if not amount:
         return
     if source == 'player':
         if not remove_item(game.player, 'spirit_stone', amount):
             raise ValueError('灵石不足')
-    elif _organization(game, source) is not None:
-        row, field = _organization(game, source)
+    elif source_org is not None:
+        row, field = source_org
         row[field] -= amount
-    elif _merchant(game, source) is not None:
-        _merchant(game, source)['reserves'] -= amount
+    elif source_merchant is not None:
+        source_merchant['reserves'] -= amount
     else:
         row = game.economy_v2['accounts'][source]
         row['balance'] -= amount
         row['expense'] += amount
     if destination == 'player':
         add_item(game.player, 'spirit_stone', amount)
-    elif _organization(game, destination) is not None:
-        row, field = _organization(game, destination)
+    elif destination_org is not None:
+        row, field = destination_org
         row[field] += amount
-    elif _merchant(game, destination) is not None:
-        _merchant(game, destination)['reserves'] += amount
+    elif destination_merchant is not None:
+        destination_merchant['reserves'] += amount
     else:
         row = game.economy_v2['accounts'][destination]
         row['balance'] += amount
@@ -98,8 +117,7 @@ def _record_transfer(game,source,destination,amount,reason):
     entries.append(dict(year=game.player.age, source=source, destination=destination,
                         amount=amount, reason=reason))
     del entries[:-80]
-    from .personal import record
-    record(game, entries[-1])
+    record_personal(game, entries[-1])
 
 
 def record_external(game, source, destination, amount, reason):
@@ -117,5 +135,4 @@ def record_external(game, source, destination, amount, reason):
     entries.append(dict(year=game.player.age, source=source, destination=destination,
                         amount=amount, reason=reason))
     del entries[:-80]
-    from .personal import record
-    record(game, entries[-1])
+    record_personal(game, entries[-1])

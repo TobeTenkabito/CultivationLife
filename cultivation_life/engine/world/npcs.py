@@ -604,15 +604,16 @@ def _npc_cultivation_perception(
     }
 
 
-def _dynamic_sect_title(npc: SectNpc, sect: SectState) -> str:
+def _dynamic_sect_title(npc: SectNpc, sect: SectState, *, realm_index: int | None = None) -> str:
     """随修为投影宗门职位，同时保留掌门等唯一职衔。"""
     if sect.kind == 'institution':
         return npc.title
     if any(marker in npc.title for marker in ("宗主","掌门","台主","住持","方丈","太上","宫主","山主","族长","祭酒","老祖","尊者")):
         return npc.title
+    rank = npc.realm_index if realm_index is None else realm_index
     if sect.world == "human":
-        return {0:"杂役",1:"外门弟子",2:"宗门执事",3:"结丹护法",4:"元婴长老",5:"供奉老祖"}.get(npc.realm_index,"门人")
-    return {0:"杂役",1:"外门弟子",2:"内门弟子",3:"真传弟子",4:"宗门执事",5:"化神护法",6:"炼虚长老",7:"合体太上",8:"大乘老祖"}.get(npc.realm_index,"门人")
+        return {0:"杂役",1:"外门弟子",2:"宗门执事",3:"结丹护法",4:"元婴长老",5:"供奉老祖"}.get(rank,"门人")
+    return {0:"杂役",1:"外门弟子",2:"内门弟子",3:"真传弟子",4:"宗门执事",5:"化神护法",6:"炼虚长老",7:"合体太上",8:"大乘老祖"}.get(rank,"门人")
 
 
 def _default_npc_main_technique(npc: SectNpc) -> str | None:
