@@ -144,6 +144,11 @@ def book_expense(game, row, amount):
     row[field] = row.get(field, 0) + amount
 
 
+def book_income(game, row, amount):
+    field = 'income' if current_period(game, row) else 'pending_income'
+    row[field] = row.get(field, 0) + amount
+
+
 def caravan_dividend(game, fleet, amount):
     """Caravans settle before organizations: carry only the real paid dividend."""
     if fleet.get('owner_kind') not in {'sect', 'family'} or not amount:

@@ -32,7 +32,11 @@ def acquire(game, maps, world, location, kind, owner_kind, identity, source, rea
     if expected_cost is not None and expected_cost != cost:
         raise ValueError('产权报价已变化，请刷新后重新办理')
     transfer_value(game, source, f'background:{world}', cost, '购入固定地点产业产权')
-    row.update(owner_kind=owner_kind, owner_id=identity, last_year=game.player.age, enabled=False, entrusted=False, revision=row['revision'] + 1)
+    row.pop('trust_config', None)
+    row.pop('trust_profit_base', None)
+    row.update(owner_kind=owner_kind, owner_id=identity, last_year=game.player.age,
+               recipe=recipe, enabled=False, entrusted=False, auto_buy=False, auto_sell=False,
+               revision=row['revision'] + 1)
     game.economy_v2.setdefault('estates', {})[key] = row
     cash_ready(game, row)
     log(row, game.player.age, '产权登记完成；库存、储量与产业地点保持唯一')

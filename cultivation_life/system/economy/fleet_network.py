@@ -26,6 +26,34 @@ def owner_key(fleet):
     return 'player' if fleet.get('player_controlled') else f'background:{fleet["world"]}'
 
 
+def managed_by_player(game, fleet):
+    """Live authority; a captured organizational fleet is never a personal deed."""
+    from .enterprise_state import owner_allowed
+    kind, identity, world = fleet['owner_kind'], fleet['owner_id'], fleet['world']
+    member = False
+    if kind in {'sect', 'family'}:
+        entity = game.family if kind == 'family' else game.sects.get(identity)
+        if not entity or entity.id != identity or entity.world != world or entity.extinct:
+            return False
+        member = entity is game.family if kind == 'family' else game.player.faction_id == identity
+        # Frozen political records can retain an old controller after leaving.
+        if not member and not entity.founded_by_player:
+            return False
+    if owner_allowed(game, kind, identity, world):
+        return True
+    if not fleet.get('player_controlled'):
+        return False
+    if kind in {'independent', 'alliance'}:
+        return True
+    if not member:
+        return False
+    # Structure-10 captures formerly saved the current ruler as personally led.
+    # Their original peace receipt proves the distinction without changing saves.
+    return not any(fleet['id'] in receipt.get('fleets', ())
+                   for war in game.wars for receipt in war.get('economic_transfers', ())
+                   if receipt.get('winner') == identity)
+
+
 def fleet_limit(kind, alliance=None):
     return 3 * (1 + len(alliance['offices'])) if kind == 'alliance' and alliance else {'sect': 2, 'family': 1, 'independent': 1}.get(kind, 0)
 
@@ -43,6 +71,11 @@ def guard_required(world):
 
 def guard_cost(world):
     return max(100, round(guard_required(world) ** .5) * 5)
+
+
+def guard_wages(fleet, years):
+    power = fleet.get('guard_power', 0)
+    return max(1, round(power ** .5)) * years if power else 0
 
 
 def recruit_guard(game, fleet, source):

@@ -154,6 +154,8 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None, comba
                 authorized(game, fleet)
                 recruit_guard(game, fleet, 'player')
             else:
+                from .trade_orders import authorized
+                authorized(game, fleet)
                 if not fleet.get('player_controlled'):
                     raise ValueError('只能管理本人领办的商队')
                 transfer_value(game, 'player', f'caravan:{fleet["id"]}', capital, '商队追加周转金')

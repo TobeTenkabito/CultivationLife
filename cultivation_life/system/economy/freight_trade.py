@@ -3,6 +3,7 @@ import math
 from .ledger import balance, transfer_value
 from .state import ensure_regional_market, reprice
 from .local_market import quote
+from .fleet_network import guard_wages
 
 
 def market(game, maps, world, location):
@@ -10,8 +11,9 @@ def market(game, maps, world, location):
     return game.economy_v2['markets'][f'{world}:{location}']
 
 
-def buy(game, fleet, source, target, hops, order=None):
+def buy(game, fleet, source, target, hops, order=None, *, travel_years):
     cash = f'caravan:{fleet["id"]}'
+    wages = guard_wages(fleet, travel_years)
     best = None
     for item, row in source['commodities'].items():
         if row['stock'] < 1 or (row.get('imported') and not order) or (order and item != order['item']):
@@ -28,10 +30,10 @@ def buy(game, fleet, source, target, hops, order=None):
             tariff = max(10, math.ceil(purchase['total'] * .15))
             sale = quote(other, 'sell', quantity)
             total = purchase['total'] + tariff * hops
-            profit = sale['total'] - total
+            profit = sale['total'] - total - wages
             # Keep enough working cash to bring this cargo back if a later edge
             # closes before a sale. This is retained cash, never a second wallet.
-            if total + tariff * hops <= balance(game, cash) and (order or (profit > 0 and sale['gross'] <= balance(game, f'market:{target["id"]}'))):
+            if total + tariff * hops + wages <= balance(game, cash) and (order or (profit > 0 and sale['gross'] <= balance(game, f'market:{target["id"]}'))):
                 if best is None or profit > best['profit']:
                     best = dict(item=item, row=row, target=other, quantity=quantity, purchase=purchase, tariff=tariff, profit=profit)
     if best is None:

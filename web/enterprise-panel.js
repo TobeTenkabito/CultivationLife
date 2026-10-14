@@ -41,7 +41,7 @@
       card.append(e('p',`当前养护约 ${money(row.annual_maintenance)} 灵石 / 年（场地设施 ${money(row.maintenance?.site)}，库存及在制仓储 ${money(row.maintenance?.storage)}）；自动经营保留 ${money(row.operating_reserve)} 灵石。停产仍需养护；原料不足不会产生新成品或销售收入。欠费暂停进货与投产，经营中可销售已有库存清偿。收回委托会暂停自动经营，已付批次仍按期完工。`));
       const checks={};for(const [key,title] of [['enabled','持续经营'],['auto_buy','自动补足原料／进货'],['auto_sell','自动销售所选成品']]){const label=e('label',title),check=e('input');check.type='checkbox';check.checked=row[key];check.setAttribute('aria-label',title);label.append(check);production.append(label);checks[key]=check;}
       operation(production,'保存经营方案','configure',()=>({recipe:recipe.value,batches:Number(batches.value),buy_limit:Number(buyLimit.value),sell_limit:Number(sellLimit.value),sale_quota:Number(quota.value),reserve_cash:Number(reserve.value),expense_limit:Number(budget.value),...Object.fromEntries(Object.entries(checks).map(([k,v])=>[k,v.checked]))}),!recipes.length);
-      if(row.kind!=='shop')operation(production,'开始一批生产','start',{},!!row.job||!!row.arrears||!row.recipe);card.append(production);
+      if(row.kind!=='shop')operation(production,'开始一批生产','start',{},!!row.job||!!row.arrears||!row.recipe||!configured?.can_use);card.append(production);
       const storage=e('details');storage.append(e('summary','仓储与交易'),e('p',row.stock.map(s=>`${s.name} ×${s.quantity}`).join('、')||'仓库暂无库存'));
       const controls=e('div');controls.className='estate-controls';const goods=select(controls,'仓储商品',data.goods.map(g=>[g.id,`${g.name} · 市场 ${g.stock} / 背包 ${g.held}`]));
       const qty=select(controls,'仓储数量',[['1','1 件'],['10','10 件'],['100','100 件']]);

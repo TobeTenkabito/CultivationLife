@@ -88,6 +88,7 @@ def test_fee_distribution_only_new_earnings_and_policy_authority(economy):
     engine, game = economy
     register(game, 'sect', 'tianjian', 'human')
     game.sects['tianjian'].founded_by_player = True
+    game.player.faction_id = 'tianjian'
     market = local_market(game)
     source = 'operator:'+market['id']
     transfer_value(game, 'player', source, 10000, '旧有资本')

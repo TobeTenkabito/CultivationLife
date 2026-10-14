@@ -3,7 +3,7 @@ import math
 from .enterprise_market import market_at
 from .enterprise_rules import recipes, capacity
 from .enterprise_costs import annual_maintenance, operating_reserve, production_cost
-from .enterprise_state import estates, payer, cash_ready, put, take, used, log, owner_allowed
+from .enterprise_state import estates, payer, cash_ready, put, take, used, log, owner_allowed, operating_tier
 from .ledger import balance, transfer_value
 from .local_market import quote
 from .state import ensure_regional_market, commodity_catalog, reprice
@@ -15,6 +15,9 @@ def market_trade(game, row, market, item, number, side):
     product = market['commodities'].get(item)
     if not product:
         raise ValueError('本地市场尚无这件标准商品')
+    ceiling = operating_tier(game, row)
+    if side == 'buy' and ceiling is not None and product['tier'] > ceiling:
+        raise ValueError('当前经营资质不足，不能采购此阶原料或商品')
     bill = quote(product, side, number)
     key = cash_ready(game, row)
     dealer, operator = f'market:{market["id"]}', f'operator:{market["id"]}'
@@ -56,9 +59,13 @@ def start_job(game, maps, row, *, automatic=False):
         raise ValueError('已有在制批次，或该产业不从事生产')
     if row['arrears']:
         raise ValueError('尚有仓储欠费，暂停新投产')
-    recipe = recipes(row['world'], commodity_catalog(row['world'])).get(row['recipe'])
+    catalog = commodity_catalog(row['world'])
+    recipe = recipes(row['world'], catalog).get(row['recipe'])
     if not recipe or recipe['kind'] != row['kind']:
         raise ValueError('此产业尚未配置有效配方')
+    ceiling = operating_tier(game, row)
+    if ceiling is not None and catalog[recipe['output']]['tier'] > ceiling:
+        raise ValueError('当前经营资质不满足所选配方')
     from .resource_access import permits
     if not permits(row,recipe):
         raise ValueError('此地矿脉、药田或丹源不支持该材料；扩建不会提高天然品阶')
@@ -79,6 +86,8 @@ def start_job(game, maps, row, *, automatic=False):
         if not number:
             continue
         product = market['commodities'][item]
+        if ceiling is not None and product['tier'] > ceiling:
+            raise ValueError('当前经营资质不足，不能自动采购此阶原料')
         bill = quote(product, 'buy', number)
         if product['stock'] < number or bill['total'] > number * row['buy_limit']:
             raise ValueError('原料库存不足或采购均价超过设定上限')

@@ -50,6 +50,10 @@ def adopt(game,identity):
     game.economy_v2['organizations'].pop(finance.key('sect',identity))
     old['kind']='family';game.economy_v2['organizations'][finance.key('family',identity)]=old
     game.economy_v2.setdefault('organization_aliases',{})[finance.key('sect',identity)]=finance.key('family',identity)
+    for market in game.economy_v2.get('markets',{}).values():
+        claim=market.get('control')
+        if claim and (claim['kind'],claim['id'])==('sect',identity):
+            claim['kind']='family'  # Same rights, receipts and operator cash.
     for row in game.economy_v2.get('depots',{}).values():
         if row['owner']==identity: row['kind']='family'
     for row in game.economy_v2.get('estates',{}).values():

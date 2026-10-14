@@ -200,6 +200,8 @@ def validate_economy(value, merchants=None, document=None):
                     require(trip.get('item') in value['markets'][f"{trip['destination']}:{trip['location']}"]['commodities'])
                     for field in ('arrival', 'quantity', 'purchased', 'cost', 'revenue', 'remittance'):
                         require(type(trip.get(field)) is int and trip[field] >= 0)
+                    if 'running_costs' in trip:
+                        require(type(trip['running_costs']) is int and trip['running_costs'] >= 0)
                     require(trip['quantity'] <= trip['purchased'] <= fleet['capacity'])
                     if 'path' in trip:
                         path = trip['path']
@@ -240,6 +242,8 @@ def validate_economy(value, merchants=None, document=None):
                 if cargo is None:
                     continue
                 require(isinstance(cargo, dict))
+                if 'running_costs' in cargo:
+                    require(type(cargo['running_costs']) is int and cargo['running_costs'] >= 0)
                 for place in ('origin','destination'):
                     require(f"{world}:{cargo.get(place)}" in value['markets'])
                 require(cargo['origin'] != cargo['destination'])

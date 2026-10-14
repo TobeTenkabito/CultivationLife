@@ -8,6 +8,7 @@ from ...content_registry import REALMS
 from ...npc_custody import is_free
 
 def consume(game, market, entity, finance, years, budget):
+    before_turnover = market['turnover']
     stock = ensure(game, entity)
     source = treasury(game, entity)
     credits = finance.setdefault('demand_credit', {})
@@ -59,6 +60,7 @@ def consume(game, market, entity, finance, years, budget):
     finance['supply_coverage'] = fulfilled/due if due else 1.
     finance['supplies_consumed'] = finance.get('supplies_consumed', 0)+consumed
     finance['supply_expense'] = spent
+    finance['turnover'] = finance.get('turnover', 0) + market['turnover'] - before_turnover
     finance['cultivation_support']=growth
     finance['maintenance_support']=maintenance
     finance['breakthrough_support']=breakthrough
