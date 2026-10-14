@@ -29,7 +29,12 @@ def _npc_record(game, npc):
             return None
         rng = rng_for(game.seed, game.doctrine_state["version"], f"npc:{read(npc, 'id')}")
         definitions = game.doctrine_state["definitions"]
-        key = rng.choice(list(definitions))
+        # Personal foreign inheritances extend the shared lookup catalog, not
+        # the seeded native traditions available to an uninitialized NPC.
+        native = [key for key in definitions if key.startswith('celestial:')]
+        if not native:
+            return None
+        key = rng.choice(native)
         level = min(9, max(1, (read(npc, "realm_index") - 9) * 2 + rng.choice([1, 2, 3, 4, 4, 5])))
         level = min(level, max(s["level"] for s in definitions[key]["stages"] if s["realm"] <= read(npc, "realm_index")))
         level = min(level, limit)

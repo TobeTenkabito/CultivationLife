@@ -4123,6 +4123,9 @@ function renderButtons() {
   document.querySelectorAll('.owned-training-action').forEach(button => {
     button.disabled=busy||button.dataset.available!=='1'||!game?.player?.alive||!!game?.pending_event||!!game?.trial?.active||!!game?.imprisonment||!!game?.player?.sealed_cultivation||!!game?.player?.cultivation_suppression;
   });
+  document.querySelectorAll('[data-inheritance-action]').forEach(button => {
+    button.disabled = busy || button.dataset.available !== '1' || !game?.player?.alive || !!game.pending_event || !!game.trial?.active;
+  });
   document.querySelectorAll('.ghost-attachment-action').forEach(button => {
     button.disabled = busy || !game?.player?.alive || button.dataset.available !== '1';
   });

@@ -17,7 +17,9 @@ def catalog(game):
     ensure(game, celestial_context=True)
     worlds = [w for w in WORLD_SYSTEMS['world_profiles'] if secondary(w)]
     result = {}
-    for key, definition in game.doctrine_state['definitions'].items():
+    from .spirit_sources import identities, definition as source_definition
+    for key in identities(game):
+        definition = source_definition(game, key)
         base = definition['manuals'][0]
         book = Technique(id='spirit:' + key, name=base['name'] + '·灵域残解',
             path=base.get('path', 'dao'), element=base.get('element', 'neutral'), grade=6,
@@ -76,7 +78,8 @@ def player_source(game):
     if books:
         book = next((t for t in books if t.id == game.player.spirit_voisinage_manual), books[0])
         catalog(game)
-        definition = game.doctrine_state['definitions'].get(book.spirit_voisinage_id)
+        from .spirit_sources import definition as source_definition
+        definition = source_definition(game, book.spirit_voisinage_id)
         if definition:
             level = min(9, book.level)
             field = VoisinageDefinition(**definition['stages'][level - 1]['voisinage'])
@@ -102,7 +105,13 @@ def npc_source(game, npc):
     if state is None:
         state = dict(version=1, capacity=0, current=0, conversion=0, resource_link='independent')
         _write(npc, 'transcendence', state)
+    if 'spirit_manual' in state:
+        known = next((entry for entry in books if entry.id == state['spirit_manual']), None)
+        if known is None:
+            return CapabilitySource()
+        book = known
     state.setdefault('spirit_manual', book.id)
-    definition = game.doctrine_state['definitions'][book.spirit_voisinage_id]
+    from .spirit_sources import definition as source_definition
+    definition = source_definition(game, book.spirit_voisinage_id)
     field = VoisinageDefinition(**definition['stages'][3]['voisinage'])
     return diminished(CapabilitySource((field,), {book.spirit_voisinage_id: 4}))

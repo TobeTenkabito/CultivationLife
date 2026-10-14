@@ -93,6 +93,7 @@ def bind_immortal_body(host) -> ImmortalBodyDependencies:
 
 def bind_aperture(host) -> ApertureDependencies:
     return ApertureDependencies(
+        asura_action=lambda *args, **kwargs: host.asura_action(*args, **kwargs),
         _load=lambda *args, **kwargs: host._load(*args, **kwargs),
         present=lambda *args, **kwargs: host.present(*args, **kwargs),
         _get_store=lambda: host.store,

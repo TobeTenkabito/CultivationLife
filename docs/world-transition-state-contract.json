@@ -326,6 +326,14 @@
     "generated_event_state": "session",
     "trial_site_state": "scope"
   },
+  "spirit_inheritance_ownership_notes": {
+    "Player.immortal_aperture": "本人唯一元力账本；current 为保留的上界总储量，imitation_current 为下界仿元力。仙界与显圣修罗分别按本界转化阶段限制可用快照，未开放余量不随战斗回写丢失。战斗绑定原账本和池名，余量仅在临时绑定内保存，不新增持久池或补发储量。",
+    "GameState.doctrine_state.player.spirit_inheritances": "个人按原传承登记的一次仙界补全：来源界、残解编号、承接理解等级与有限规则快照；原功法、注解、道统等级、本源和温养仍各归原权威记录。离界保留，不在载入或返界重复发放。",
+    "GameState.doctrine_state.definitions.upper:*": "明确付费补全后登记的其它上界仙解定义，来源仍是原上界；共享本档单份查找目录，不参与 NPC 二十五门本土道统首次随机池，不重抽已记录传承，不自动赠送注解或道统进度。",
+    "Player.world_voisinages.*.spirit_inheritances": "本体适配领域的个人来源与有限模板；唯一培养和上阵仍归本界 levels/active，不持有第二元力池，未知版本保留且不投影。",
+    "Player.world_voisinages.*.spirit_bindings": "已确认本相或魂相的单份残解绑定，仅调整有限三维份额；不重写血脉、魂因、蓝图、辅权能或魂痕锁，不提升原等级。离界或关闭所属 DLC 保留沉寂。",
+    "Player.asura_cultivation.spirit_inheritance": "已完成八部融合的本命魔域单份来源模板；等级、滋养、精魂、路线和煞元仍沿原记录，离界或关闭 DLC 保留沉寂，不增加第二领域。"
+  },
   "true_form_ownership_notes": {
     "Player.world_voisinages.nether.true_form": "个人固定原始种属、祖谱编号与合法规则快照、主辅权能及阶段锁；仅幽冥界妖修九阶以上生效，离界或关闭 DLC 沉寂并保留。未知版本/错误编号保留原记录且禁止执行，不随机重建。levels/active 仍为唯一培养与上阵记录，元力只用既有仙窍。",
     "birth_dlc": "仅创建预设/自定义角色时一次配置已达境界血脉、族血、独立结契魂魄、往生、浩然气、愿力及八部状态；不复制世界 NPC，不伪造轮回印记，不在旧档载入时补发。"

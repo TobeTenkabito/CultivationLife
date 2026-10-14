@@ -110,7 +110,7 @@ def test_spirit_manual_only_restricted_sources_and_level4(prepared):
     engine, game, _=prepared
     p=game.player;p.world='spirit';p.realm_index=6;p.location_id=engine.maps.default_location('spirit')
     p.immortal_power_converted=False; p.immortal_conversion_stage=0
-    books=catalog(game);assert len(books)==25
+    books=catalog(game);assert len(books)==31
     assert not set(books)&set(TECHNIQUE_CATALOG)
     assert not set(books)&{row['content_id'] for row in MARKET_GOODS}
     book=grant(game,next(iter(books)),3)

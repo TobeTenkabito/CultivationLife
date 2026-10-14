@@ -13,7 +13,9 @@ from .doctrine.provider import config, ensure, player_record
 from .doctrine.cultivation import AXES, prerequisites, attempt, chance, training_cost
 from .doctrine.daomen import discover, mentor, public_peers, preview
 from .doctrine.fusion import manual_id as fusion_manual_id
+from .spirit_inheritance_rules import study_years
 from .cultivation_dependencies import DoctrineActionDependencies, DoctrineStudyDependencies, DoctrineViewDependencies
+from .cultivation_session import cultivation_blocked
 
 def _known(game, key):
     return any(t.doctrine_id == key for t in game.player.known_techniques)
@@ -101,7 +103,8 @@ def _finish_doctrine_action(deps: DoctrineStudyDependencies, game, action, elaps
         progress = record["progress"][key]
         prerequisites(record, key, max(t.level for t in game.player.known_techniques if t.doctrine_id == key))
         roll = rng_for(game.seed, game.doctrine_state["version"], f"study:{key}:{progress.get('attempts', 0)}").random()
-        result = attempt(progress, definition, elapsed, record.get("origin"), config()["cultivation"], roll)
+        result = attempt(progress, definition, elapsed, record.get("origin"), config()["cultivation"], roll,
+                         required_years=study_years(game, key, progress['level'] + 1))
         completed = [progress["level"]] if result == "success" else []
         message = f"参悟《{definition['name']}》{elapsed:g} 年，现为 Lv{record['progress'][key]['level']}。"
         if result == "failed":
@@ -253,7 +256,7 @@ def _public_doctrines(deps: DoctrineViewDependencies, game):
                 from .doctrine.fusion import project as project_fusion
                 voisinage = asdict(project_fusion(VoisinageDefinition(**voisinage),
                     min(stage['level'], record['fusion'][key]['level'])))
-            stages.append({"level": stage["level"], "title": stage["title"], "years": stage["years"],
+            stages.append({"level": stage["level"], "title": stage["title"], "years": study_years(game, key, stage['level']),
                            "realm_name": REALMS[stage["realm"]].name, "description": stage["description"],
                            "features": stage["features"], "ability_name": stage["ability_name"],
                            "voisinage": ({k: voisinage[k] for k in ("name", "stability", "incursion", "authority", "opening_cost",
@@ -298,7 +301,8 @@ def _public_doctrines(deps: DoctrineViewDependencies, game):
                            "axes": [{"id": axis, "value": getattr(definition, axis), "rank": training.get(axis, 0),
                                      "cost": training_cost(training.get(axis, 0), rules),
                                      "max": rules["voisinage_max_training"]} for axis in AXES]})
-    return dict(available=True, count=25, max_level=9, voisinage_level=4, origin_level=5,
+    return dict(available=True, cultivation_blocked=cultivation_blocked(game),
+                count=len(state['definitions']), max_level=9, voisinage_level=4, origin_level=5,
                 veins=deps._public_immortal(game), immortal_body=deps._public_immortal_body(game), voisinages=voisinages,
                 explore_price=rules["explore_price"], annotation_price=rules["annotation_price"],
                 unit_years=WORLD_SYSTEMS["time_units"][str(game.player.realm_index)], rows=rows,

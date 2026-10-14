@@ -23,6 +23,19 @@
     document.querySelector('#immortal-aperture-card').setAttribute('aria-label',title);
     const dock=document.querySelector('[data-panel-target="immortal-aperture"]');dock.title=title;dock.querySelector('small').textContent=({'煞元府':'煞元','幽元府':'幽元','轮回元府':'轮元'})[title]||title;
     const root=document.getElementById('immortal-aperture-content');root.replaceChildren();
+    if(data.inheritances?.length){
+      const section=el('details');section.append(el('summary','下界传承承接'));
+      section.append(el('p','保留原传承与残解等级，按本界规则补全或适配。不会直接兑换高阶培养或补充元力。','muted'));
+      for(const row of data.inheritances){
+        const card=el('section',null,'doctrine-chapter');card.dataset.inheritanceManual=row.manual_id;
+        card.append(el('b',row.name),el('p',`${row.source_name} · Lv${row.source_level}`));
+        if(row.cost){const names={stones:'灵石',opportunity:'机缘',traces:'仙痕',souls:'精魂'};card.append(el('p',Object.entries(names).filter(([key])=>row.cost[key]).map(([key,name])=>`${fmt(row.cost[key])} ${name}`).concat(row.cost.materials?[`${row.cost.material_name} ×${row.cost.materials}`]:[]).join(' · ')));}
+        if(row.reason)card.append(el('p',row.reason,'muted'));
+        const button=el('button',row.mode==='celestial'?'补全同门传承':'适配本界传承');button.dataset.inheritanceAction='inherit';button.dataset.available=row.can_inherit?'1':'0';button.disabled=options.pending||!options.alive||!row.can_inherit;
+        button.onclick=()=>act({action:'inherit',manual_id:row.manual_id});card.append(button);section.append(card);
+      }
+      root.append(section);
+    }
     const figure=el('figure',null,'aperture-reservoir');
     figure.style.setProperty('--reservoir-fill',`${Math.max(0,Math.min(100,data.current/Math.max(1,data.capacity)*100))}%`);
     const pool=el('div',null,'aperture-orb');pool.setAttribute('role','img');pool.setAttribute('aria-label',`${data.name} ${fmt(data.current)} / ${fmt(data.capacity)}`);

@@ -3,6 +3,8 @@
 Migration and resource writes retain their original timing; no presentation,
 action dispatch, doctrine catalog or institution dependencies belong here.
 """
+from dataclasses import dataclass
+
 from ..content_registry import WORLD_SYSTEMS
 from ..rules import max_mp
 
@@ -57,12 +59,21 @@ def energy_state(player):
     lower = lower_world(player)
     from .immortal_cultivation import golden_light
     from .asura import active as asura_active
-    asura_conversion = player.asura_cultivation.get('conversion', 0) if asura_active(player) else 0
+    asura = asura_active(player)
+    asura_conversion = player.asura_cultivation.get('conversion', 0) if asura else 0
     converted = player.immortal_power_converted or player.immortal_conversion_stage > 0 or asura_conversion > 0
+    if asura:
+        conversion = max(0, min(5, asura_conversion)) / 5
+        converted = conversion > 0
+    elif player.world == 'celestial':
+        conversion = 1 if player.immortal_power_converted else max(0, min(5, player.immortal_conversion_stage)) / 5
+        converted = conversion > 0
+    else:
+        conversion = 1
     return dict(version=1, resource_link='independent',
         capacity=ledger['imitation_capacity'] if lower else ledger['capacity'],
         current=ledger['imitation_current'] if lower else ledger['current'],
-        conversion=asura_conversion / 5 if asura_active(player) else 1,
+        conversion=conversion,
         force_tier=2 if converted and true_realm(player) >= 9 else 1,
         ward_tier=2 if golden_light(player) else 1,
         attack_cost=1 if lower else 10, ward_cost=0)
@@ -73,3 +84,21 @@ def commit_energy(player, current):
     ledger = player.immortal_aperture
     pool, capacity = ('imitation_current', 'imitation_capacity') if lower_world(player) else ('current', 'capacity')
     ledger[pool] = max(0, min(ledger[capacity], current))
+
+
+@dataclass(frozen=True)
+class ApertureResourceBinding:
+    """Battle-local access to the original pool, retaining inaccessible reserves."""
+    ledger: dict
+    pool: str
+    capacity: str
+    reserve: float
+
+    def commit(self, current):
+        self.ledger[self.pool] = max(0, min(self.ledger[self.capacity], self.reserve + current))
+
+
+def bind_energy(player, accessible):
+    ledger = player.immortal_aperture
+    pool, capacity = ('imitation_current', 'imitation_capacity') if lower_world(player) else ('current', 'capacity')
+    return ApertureResourceBinding(ledger, pool, capacity, max(0, ledger[pool] - accessible))
