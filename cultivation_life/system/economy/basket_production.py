@@ -72,7 +72,13 @@ def produce(game, market, owner, item, wanted, *, labor_credit=None, allow_loss=
     owner_funds = balance(game, owner)
     background_owner = owner == f'background:{market["world"]}'
     input_bills=None
-    if background_owner and len(inputs) <= 1:
+    if not inputs and owner_funds >= 0 and (background_owner or allow_loss or quote(row, 'sell', 1)['total'] >= 4):
+        # Dealer affordability and extraction quota already bound this order.
+        # Above the small-receipt rounding boundary, every positive midpoint
+        # passes the original 5% wage margin. Keep the original search for
+        # receipts below four stones; wage rounding there is not monotonic.
+        low = high = wanted
+    elif background_owner and len(inputs) <= 1:
         # Internal labour has no wage/profit constraint. A single raw input
         # reduces to its exact affordable quantity, avoiding nested quote
         # searches and output-price calculations for each midpoint.

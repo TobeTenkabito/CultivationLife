@@ -1,11 +1,18 @@
 """Fixed-site geological/ecological rights; no mirror resource inventories."""
 import hashlib
+from functools import lru_cache
 from ...content_registry import WORLD_SYSTEMS
 from ...economy_content import specification, ROLES, material_id
 
 
 def site_profile(world, location, kind):
     cap={1:5,2:8,3:12}[WORLD_SYSTEMS['world_profiles'][world]['tier']]
+    return _site_profile(world, location, kind, cap)
+
+
+@lru_cache(maxsize=256)
+def _site_profile(world, location, kind, cap):
+    """Only immutable material IDs; current world grade cap is part of the key."""
     seed=int.from_bytes(hashlib.blake2s(f'{world}:{location}:{kind}'.encode(),digest_size=4).digest(),'big')
     grade=1+seed%cap
     family=dict(mine='ore',farm='herb',hunt='core').get(kind)

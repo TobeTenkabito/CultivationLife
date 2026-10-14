@@ -186,6 +186,10 @@ def _maybe_founded_sect_pressure(deps: FactionDependencies, game: GameState, rng
 
 
 def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.Random) -> list[str]:
+    from ...system.economy.organization_consumption import apply_longevity, support
+    from ...system.organization_heritage import advance_member
+    from ...system.family_membership import resolve_line
+    from ...system.economy.estate_management import recruitment_ready
     news: list[str] = []
     player = game.player
     living_spirit_npcs = sum(
@@ -214,7 +218,6 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                 if not npc.alive:
                     continue
             death_reason: str | None = None
-            from ...system.economy.organization_consumption import apply_longevity
             apply_longevity(game,npc,'sect',sect.id)
             if npc.lifespan is not None and npc.age >= npc.lifespan:
                 death_reason = "寿元耗尽，坐化于宗门祖庭"
@@ -236,8 +239,7 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                 continue
             crossing_to_spirit = npc.world == "human" and npc.realm_index == 4 and npc.layer == REALMS[4].layers
             can_cross = not crossing_to_spirit or living_spirit_npcs < 1
-            old_title = deps._dynamic_sect_title(npc, sect)
-            from ...system.economy.organization_consumption import support
+            old_realm = npc.realm_index
             provision=support(game,'sect',sect.id,npc.realm_index)
             pill_bonus=(.05*support(game,'sect',sect.id,npc.realm_index,'breakthrough_support')
                         if npc.layer>=REALMS[npc.realm_index].layers else 0.)
@@ -245,6 +247,7 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                 **({'support':provision} if provision else {}),
                 **({'breakthrough_bonus':pill_bonus} if pill_bonus else {}))
             if breakthrough:
+                old_title = deps._dynamic_sect_title(npc, sect, realm_index=old_realm)
                 old_name, new_name = breakthrough["old"], breakthrough["new"]
                 new_title = deps._dynamic_sect_title(npc, sect)
                 title_change = f"，职衔由{old_title}晋为{new_title}" if new_title != old_title else ""
@@ -265,20 +268,17 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                     {"npc_id": npc.id, "realm": [old_name, new_name]},
                     ["system", "faction", "npc", "world_news", f"world:{sect.world}"],
                 ))
-            from ...system.organization_heritage import advance_member
             advance_member(game,sect,npc)
         if sect.kind == "family":
-            from ...system.family_membership import resolve_line
             resolve_line(game,sect)
         if sect.kind == "institution":
             continue
         if deps._check_sect_extinction(game, sect):
             continue
         deps._compact_sect_roster(game, sect)
-        from ...system.economy.estate_management import recruitment_ready
         if (
-            recruitment_ready(game, sect)
-            and player.age % int(FACTION_SYSTEMS["recruitment_interval_years"]) == 0
+            player.age % int(FACTION_SYSTEMS["recruitment_interval_years"]) == 0
+            and recruitment_ready(game, sect)
             and len([npc for npc in deps._sect_members(game, sect) if npc.alive])
             < int(FACTION_SYSTEMS.get("max_members", 36))
         ):
