@@ -27,7 +27,7 @@
     }
     management.append(tools);
     management.append(node('p', '组织执掌者可在驻地扩建产业，费用随当地原料价格变化，最高十级。战争会削弱产出，军需采购消耗真实库存与府库。'));
-    management.append(action('扩建家族产业', 'industry', {owner_kind:'family'}), action('扩建宗门产业', 'industry', {owner_kind:'sect'}));
+    management.append(action('扩建家族产业', 'industry', {owner_kind:'family'}, !system.can_industry?.family), action('扩建宗门产业', 'industry', {owner_kind:'sect'}, !system.can_industry?.sect));
     for (const a of system.alliances || []) management.append(node('p', `${a.name}：${a.count} / ${a.capacity} 支商队`));
     for (const f of system.fleets.filter(f => f.owner_kind !== 'alliance' || f.player_controlled || f.can_order || f.can_raid)) {
       const row = node('section', '', 'merchant-order'); row.dataset.fleetId = f.id;

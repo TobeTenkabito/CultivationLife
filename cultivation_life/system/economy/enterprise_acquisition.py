@@ -13,7 +13,7 @@ def price(game, maps, row, level=None):
     return max(1, round(title_cost(row['world'], row['kind'], level or row['level']) * multiplier))
 
 
-def acquire(game, maps, world, location, kind, owner_kind, identity, source, realm_index, expected_cost=None):
+def acquire(game, maps, world, location, kind, owner_kind, identity, source, realm_index, expected_cost=None, *, settling=False):
     key = f'{world}:{location}:{kind}'
     existing = estates(game).get(key)
     if existing and existing['owner_kind'] != 'background':
@@ -32,6 +32,8 @@ def acquire(game, maps, world, location, kind, owner_kind, identity, source, rea
     if expected_cost is not None and expected_cost != cost:
         raise ValueError('产权报价已变化，请刷新后重新办理')
     transfer_value(game, source, f'background:{world}', cost, '购入固定地点产业产权')
+    from .organization_accounts import prepare_ownership_change, book_expense
+    _, finance = prepare_ownership_change(game, row, owner_kind, identity)
     row.pop('trust_config', None)
     row.pop('trust_profit_base', None)
     row.update(owner_kind=owner_kind, owner_id=identity, last_year=game.player.age,
@@ -39,6 +41,13 @@ def acquire(game, maps, world, location, kind, owner_kind, identity, source, rea
                revision=row['revision'] + 1)
     game.economy_v2.setdefault('estates', {})[key] = row
     cash_ready(game, row)
+    if finance is not None:
+        # Capital outlay is a period expense, not another production-cost
+        # credit deducted from future sales. Personal deeds use inventory cash.
+        if settling:
+            finance['expense'] += cost  # Original autonomous settlement is in progress.
+        else:
+            book_expense(game, finance, cost)
     log(row, game.player.age, '产权登记完成；库存、储量与产业地点保持唯一')
     return row
 

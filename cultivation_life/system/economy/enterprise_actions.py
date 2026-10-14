@@ -159,6 +159,10 @@ def command(game, maps, payload):
         else:
             kind, identity, source = 'background', p.world, f'background:{p.world}'
         transfer_value(game, source, recipient, refund, '产业产权实付转让')
+        from .organization_accounts import prepare_ownership_change, book_expense
+        previous_finance, new_finance = prepare_ownership_change(game, row, kind, identity)
+        if new_finance is not None and new_finance is not previous_finance:
+            book_expense(game, new_finance, refund)
         if row['owner_kind'] == 'player':
             transfer_value(game, key, 'player', balance(game, key), '产权交接提回原经营现金')
         row.pop('trust_config', None)

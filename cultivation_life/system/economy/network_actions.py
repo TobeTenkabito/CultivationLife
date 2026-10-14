@@ -263,6 +263,7 @@ def public_network(game, maps):
     can_apply = bool(joined and p.location_id in {joined['hq'], *(o['location_id'] for o in joined['offices'])}
                      and len(active_fleets(game, p.world, 'alliance', joined['id'])) < fleet_limit('alliance', joined))
     from .fleet_network import route_path, leg_years
+    from .industry_actions import available as industry_available
     identity = home.get('network_id', home['id']) if home else None
     destinations = []
     for world in own['linked_worlds'] if own else []:
@@ -271,7 +272,8 @@ def public_network(game, maps):
         path = route_path(game, own, world)
         destinations.append(dict(world=world, name=WORLD_SYSTEMS['world_names'][world], open=bool(path),
             path=[WORLD_SYSTEMS['world_names'][w] for w in path], years=sum(leg_years(a, b) for a, b in zip(path, path[1:]))))
-    return dict(can_act=trade_available(game), fleets=fleets, owned=own['id'] if own else None,
+    return dict(can_act=trade_available(game), can_industry={kind: industry_available(game, kind) for kind in ('sect', 'family')},
+        fleets=fleets, owned=own['id'] if own else None,
         order_goods=[dict(id=k, name=v['name']) for k,v in commodity_catalog().items()],
         order_sites=[dict(id=k, name=v['name']) for k,v in maps._locations.get(p.world, {}).items()],
         order_estates=known_estates(game, maps),
