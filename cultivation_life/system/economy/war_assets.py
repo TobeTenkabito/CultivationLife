@@ -30,6 +30,8 @@ def transfer(game, maps, war, winner, loser, *, strict=False):
     receipt = dict(year=game.player.age, winner=winner, loser=loser, estates=[], markets=[], fleets=[], released=[])
     for row in game.economy_v2.get('estates', {}).values():
         if (row['world'], row['owner_kind'], row['owner_id']) == (war['world'], old_kind, loser):
+            from .organization_accounts import prepare_ownership_change
+            prepare_ownership_change(game, row, kind, winner)
             row.pop('trust_config', None)
             row.pop('trust_profit_base', None)
             row.update(owner_kind=kind, owner_id=winner, enabled=False, entrusted=False,

@@ -101,6 +101,18 @@ def estate_cost(game, estate, amount):
         row['estate_cost_credit']+=amount
 
 
+def prepare_ownership_change(game, estate, kind, identity):
+    """Adopt each treasury's own costs before the incoming deed changes owner.
+
+    The estate retains its full history, but those old payments are not costs
+    paid by the recipient. Canonical aliases still share the original credit.
+    Only actual ownership changes call this, never queries or annual scans.
+    """
+    previous = _estate_finance(game, estate) if estate.get('owner_kind') in {'sect', 'family'} else None
+    recipient = _estate_finance(game, dict(owner_kind=kind, owner_id=identity))
+    return previous, recipient
+
+
 def estate_sale(game, estate, receipt, gross=0):
     """Recover paid inputs/maintenance first, then service new operating profit."""
     row=_estate_finance(game,estate)

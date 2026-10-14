@@ -88,8 +88,8 @@ def grow(game, maps, row, market):
             transfer_value(game, source, payer(bought), capital, '经济托管拨付新产业周转金')
         # Capital investment is distinct from sales; it reduces retained profit
         # available for the next decision instead of creating another balance.
-        from .organization_accounts import estate_cost
-        estate_cost(game, row, cost)
+        # Acquisition already books organizational capital expense once.
+        # This source estate's net cash flow still bounds its next investment.
         row['expense'] += cost + capital
         log(row, game.player.age, '经济托管购入同地产权，真实扣款并拨付周转金')
         return

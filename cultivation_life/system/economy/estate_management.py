@@ -123,8 +123,7 @@ def invest_surplus(game, maps, entity, finance):
         if cost > (funds - reserve) // 3:
             continue
         row = acquire(game, maps, entity.world, location, asset, kind, entity.id, source,
-                      max((int(r) for r in finance.get('workforce', {})), default=1))
+                      max((int(r) for r in finance.get('workforce', {})), default=1), settling=True)
         row['entrusted'] = True
-        finance['expense'] += cost
         plan(game, maps, row)
         break

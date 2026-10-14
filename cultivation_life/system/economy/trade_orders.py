@@ -124,15 +124,16 @@ def candidate(game, maps, fleet, route_quote):
     plan = route_quote(game, maps, world, origin, destination, max(1, purchase['total']))
     if not plan:
         raise ValueError('当前地图没有可用运输路线')
-    from .fleet_network import guard_required
+    from .fleet_network import guard_required, guard_wages
     plan['risk'] = min(.95, plan['risk'] + .65 * max(0, 1 - fleet['guard_power'] / guard_required(world)))
     if any(w.get('status') in {'active','peace_ready'} and w.get('world') == world and w.get('location_id') in plan['route'] for w in game.wars):
         plan['risk'] = min(.95, plan['risk'] + .2)
     shipping = max(1, math.ceil(max(1, purchase['total'], count * (row['reference'] if row else 1)) * .003 * plan['normal_years']))
     plan.update(cost=shipping, array_fee=math.floor(shipping * plan['saved_ratio']))
     plan['transport_cost'] = shipping - plan['array_fee']
-    if balance(game, f'caravan:{fleet["id"]}') < purchase['total'] + shipping:
-        raise ValueError('商队周转金不足以执行订单')
+    wages = guard_wages(fleet, plan['years'])
+    if balance(game, f'caravan:{fleet["id"]}') < purchase['total'] + shipping + wages:
+        raise ValueError('商队周转金不足以支付购货、运输及本段航程护卫工资')
     return dict(item=item, quantity=count, purchase=purchase, transport=plan, expected=0, cost=purchase['total'] + shipping,
                 score=0, quoted_sale=0, sell_limit=order['sell_limit'], empty_return=returning,
                 source_estate=order.get('source_estate'), target_estate=order.get('target_estate'))
