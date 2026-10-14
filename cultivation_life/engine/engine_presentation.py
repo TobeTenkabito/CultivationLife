@@ -32,6 +32,8 @@ from ..system.combat_plan import public_plan
 from ..system.tutorial_system import public_tutorial
 from .dependencies import PresentationDependencies
 from ..relationship_records import RelationshipRecord
+from ..spatial_people import accessible
+from ..npc_custody import is_free
 
 
 def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
@@ -119,8 +121,10 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                     if game.player.divine_sense_technique else None
                 ),
             }
-    for relation in [player_data.get("master"), *player_data.get("disciples", [])]:
+    for relation in [player_data.get("master"), *player_data.get("disciples", []),
+                     *player_data.get("disciple_requests", [])]:
         if relation:
+            relation["can_interact"] = bool(game.player.alive and is_free(relation) and accessible(game, relation))
             relation["can_invite_faction"] = deps._relationship_can_join_faction(game, relation)
             relation["can_invite_guest"] = deps._intrigue_can_invite_guest(
                 game, str(relation.get("id", "")),
@@ -137,7 +141,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
     player_data['dao_ancestor'] = dao_ancestor(game)
     if player_data['dao_ancestor']:
         player_data['realm_name'] += ' · 道祖'
-    if sealed:
+    if sealed and not sealed.get('visit_only'):
         true_shell = SectNpc(
             "true-player", game.player.name, "", int(sealed["realm_index"]), int(sealed["layer"]),
             game.player.age, None,
@@ -221,7 +225,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         target_shell = SectNpc("arrival", "", "", *plan.target_rank, 0, None, world=destination)
         travel_routes.append({"destination": destination, "direction": plan.direction.value,
                               "mode": plan.mode.value, "label": label + WORLD_SYSTEMS["world_names"][destination],
-                              "hint": "循祖兽梦径往返；同阶界面不压制修为" if lateral else "解除界面压制，完整恢复封存道果" if restoring else
+                               "hint": "循祖兽梦径往返；同阶界面不压制修为" if lateral else "循原路返界；返界后可解除秘法压制" if restoring and (sealed or {}).get('visit_only') else "解除界面压制，完整恢复封存道果" if restoring else
                               f"修为将受当地法则压制至{deps._npc_realm_name(target_shell)}；可循原路返界"})
     eligible = {row["destination"] for row in travel_routes}
     from ..system.trial_sites import public as public_trial_sites

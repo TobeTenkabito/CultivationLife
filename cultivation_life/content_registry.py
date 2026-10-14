@@ -569,6 +569,15 @@ class ContentRegistry:
             raise ContentError("炼器配置必须完整声明十三境预算、八类属性与七档品质")
         if float(settings["stat_caps"]["breakthrough_bonus"]) != 0.05:
             raise ContentError("炼器法宝的单件突破属性硬上限必须为 5%")
+        plant_tiers = settings.get("plant_tiers_by_years")
+        if (not isinstance(plant_tiers, list) or not plant_tiers or len(plant_tiers) > 13
+                or any(not isinstance(row, list) or len(row) != 2
+                       or any(type(value) is not int for value in row)
+                       or row[0] < 0 or not 1 <= row[1] <= 12 for row in plant_tiers)
+                or plant_tiers[0][0] != 0
+                or any(left[0] >= right[0] or left[1] >= right[1]
+                       for left, right in zip(plant_tiers, plant_tiers[1:]))):
+            raise ContentError("灵植炼器品阶须按实生年份递增，起点为零年，品阶范围为 1–12")
         molds = document.get("molds", [])
         mold_ids = [str(row.get("id", "")) for row in molds]
         required_molds = {
@@ -591,6 +600,7 @@ class ContentRegistry:
             if (
                 not material_id or material_id in material_ids or not declared_roles
                 or not declared_roles <= roles or int(material.get("base_material_value", 0)) <= 0
+                or type(material.get("tier")) is not int or not 1 <= material["tier"] <= 12
                 or set(material.get("role_effects", {})) != declared_roles
             ):
                 raise ContentError(f"炼器材料定义不合法：{material_id or material}")

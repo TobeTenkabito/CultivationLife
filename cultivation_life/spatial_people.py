@@ -44,10 +44,13 @@ def accessible(game, person):
 
 
 def require_access(game, person):
+    if not person or accessible(game, person):
+        return
     identity = person.get('npc_id', person.get('id')) if isinstance(person, dict) else getattr(person, 'id', None)
     from .person_assignments import research_assignment
-    if person and research_assignment(game, identity) and not accessible(game, person):
+    if research_assignment(game, identity):
         raise ValueError('此人正在访学途中或不在当前接待地点')
     spatial = game.player.world in {'lost', 'rift'} or instance_of(game, identity)
-    if person and spatial and not accessible(game, person):
+    if spatial:
         raise ValueError('此人不在当前空间，无法与外界或其他失落界面交互')
+    raise ValueError('此人不在当前界面，无法当面往来或交付物品')

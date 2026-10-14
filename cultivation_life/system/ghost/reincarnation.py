@@ -11,7 +11,7 @@ from ..ghost_resources import GHOST_DLC_NAME as GHOST_DLC_NAME
 from ..ghost_resources import ghost_cultivation_active as ghost_cultivation_active
 from ..ghost_resources import ghost_cultivation_config as ghost_cultivation_config
 from .dependencies import GhostReincarnationDependencies
-from .progression import can_reincarnate, perform_reincarnation
+from .progression import can_reincarnate, perform_reincarnation, reincarnation_block_reason
 
 
 def prepare_ghost_reincarnation(deps: GhostReincarnationDependencies, game_id: str) -> dict[str, Any]:
@@ -19,6 +19,9 @@ def prepare_ghost_reincarnation(deps: GhostReincarnationDependencies, game_id: s
     player = game.player
     if not ghost_cultivation_active(player):
         raise ValueError(f"未启用【{GHOST_DLC_NAME}】或当前并非鬼修")
+    reason = reincarnation_block_reason(player)
+    if reason:
+        raise ValueError(reason)
     if not player.alive or game.pending_event or game.active_trial or player.imprisonment or player.sealed_cultivation:
         raise ValueError("当前状态无法进入轮回")
     if not can_reincarnate(player):
@@ -92,6 +95,9 @@ def reincarnate_ghost(deps: GhostReincarnationDependencies, game_id: str) -> dic
     player = game.player
     if not ghost_cultivation_active(player):
         raise ValueError(f"未启用【{GHOST_DLC_NAME}】或当前并非鬼修")
+    reason = reincarnation_block_reason(player)
+    if reason:
+        raise ValueError(reason)
     if not player.alive or game.pending_event or game.active_trial or player.imprisonment or player.sealed_cultivation:
         raise ValueError("当前状态无法进入轮回")
     deps._complete_ghost_reincarnation(game, record_history=True)

@@ -3,7 +3,29 @@ from typing import Any
 from ...models import Player
 import copy
 import math
+from functools import lru_cache
+from ...content_registry import CONTENT_DOCUMENTS, GUIXU_TIDE_CONTENT
 from .dependencies import CraftingMaterialsDependencies
+
+
+@lru_cache(maxsize=1)
+def _guixu_material_tiers() -> dict[str, tuple[int, str]]:
+    """Immutable content lookup, built once; never infer origin from the holder."""
+    ranks = {}
+    for dungeon in GUIXU_TIDE_CONTENT.get("dungeons", []):
+        tier = int(dungeon["max_entry_rank"][0])
+        for entry in dungeon["treasure_pool"]:
+            if entry["category"] in {"material", "plant"}:
+                identity = str(entry["content_id"])
+                previous = ranks.get(identity)
+                if previous is None or tier < previous[0]:
+                    ranks[identity] = (tier, str(dungeon["world"]))
+    return ranks
+
+
+def _plant_material_tier(years: int) -> int:
+    rows = CONTENT_DOCUMENTS["crafting.json"]["settings"]["plant_tiers_by_years"]
+    return next(tier for threshold, tier in reversed(rows) if years >= threshold)
 
 
 def _crafting_material_candidates(
@@ -20,10 +42,14 @@ def _crafting_material_candidates(
         )
         if not definition:
             continue
+        tier = definition.get("tier")
+        if type(tier) is not int or not 1 <= tier <= 12:
+            continue
         candidates.append(
             copy.deepcopy(instance)
             | {
                 "definition_id": str(definition["id"]),
+                "acquired_tier": tier,
                 "roles": list(definition.get("roles", [])),
                 "tags": list(definition.get("tags", [])),
                 "allow_duplicate_type": bool(
@@ -52,6 +78,7 @@ def _crafting_material_candidates(
                 "source": "洞府灵田采收",
                 "origin_world": player.world,
                 "material_value": int(item.plant_value or 1),
+                "acquired_tier": _plant_material_tier(max(0, int(item.plant_years or 0))),
                 "roles": list(definition.get("roles", [])),
                 "tags": ["spirit_plant", str(item.plant_id)],
                 "allow_duplicate_type": bool(
@@ -65,10 +92,12 @@ def _crafting_material_candidates(
         )
     for item in player.inventory:
         tags = set(item.tags)
+        source_rank = _guixu_material_tiers().get(item.id)
         if (
             item.quantity <= 0
             or "guixu_tide" not in tags
             or not tags.intersection({"crafting_material", "spirit_plant"})
+            or source_rank is None
         ):
             continue
         potency = max(
@@ -102,7 +131,9 @@ def _crafting_material_candidates(
             },
         }
         material_value = max(1, int(item.plant_value or max(10, item.combat_bonus)))
-        for index in range(int(item.quantity)):
+        # A recipe has four positions; stacked units share one definition and
+        # condition. Four selectable representatives retain all legal recipes.
+        for index in range(min(4, int(item.quantity))):
             candidates.append(
                 {
                     "id": f"guixu:{item.id}:{index}",
@@ -111,7 +142,8 @@ def _crafting_material_candidates(
                     "quality": float(item.plant_quality or 1.0),
                     "state": "归墟天成",
                     "source": "归墟之潮",
-                    "origin_world": player.world,
+                    "origin_world": source_rank[1],
+                    "acquired_tier": source_rank[0],
                     "material_value": material_value,
                     "roles": roles,
                     "tags": list(tags),

@@ -7,6 +7,7 @@ from ...models import GameState, HistoryRecord
 from .dependencies import EventsPreparationDependencies
 from ...system import generated_events
 from ...system import trial_sites
+from ...system.ghost.progression import reincarnation_block_reason
 
 
 def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool:
@@ -65,6 +66,13 @@ def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool
                     row['enabled'] = generated_events.choice_available(
                         game, game.generated_event_state['active'], original['id'])
                 row.setdefault('text', original['text'])
+                if any(effect.get('type') == 'ghost_reincarnate' for effect in original.get('effects', [])):
+                    reason = reincarnation_block_reason(game.player)
+                    row['enabled'] = not reason and deps._condition(original.get('conditions', {}), game)
+                    if reason:
+                        row['disabled_reason'] = reason
+                    else:
+                        row.pop('disabled_reason', None)
                 if original.get('disabled_reason'):
                     row['disabled_reason'] = original['disabled_reason']
                 choices.append(row)

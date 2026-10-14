@@ -13,6 +13,7 @@ from ...runtime import now_iso
 from ...rules import opportunity_multiplier
 from ...rules import remove_item
 from .dependencies import GuixuActionsDependencies
+from ...time_flow import advance_elapsed_year
 
 
 def guixu_action(deps: GuixuActionsDependencies, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -288,7 +289,7 @@ def guixu_action(deps: GuixuActionsDependencies, game_id: str, action: str, payl
             )
             era_news: list[str] = []
             advance_player_age(game.player)
-            deps._advance_world_year(game, rng, era_news, encounters=False)
+            advance_elapsed_year(deps, game, rng, era_news, encounters=False)
             if not game.player.alive and any(
                 record.event_id == "SYS_LIFESPAN" and record.age == game.player.age
                 for record in game.history[-3:]
@@ -298,7 +299,10 @@ def guixu_action(deps: GuixuActionsDependencies, game_id: str, action: str, payl
                     "dead", f"你被困于{dungeon['name']}期间寿尽坐化。", {},
                     ["system", "guixu", "death"],
                 ))
-            if game.player.alive and (game.player.realm_index, game.player.layer) >= tuple(dungeon["eject_rank"]):
+            if not game.player.alive:
+                result, summary = "dead", f"你在{layer['name']}静修一年期间陨落。"
+                history_event = "SYS_GUIXU_TRAPPED_CULTIVATE"
+            elif (game.player.realm_index, game.player.layer) >= tuple(dungeon["eject_rank"]):
                 game.player.location_id = dungeon["entry_location_id"]
                 game.guixu_state["player_session"] = None
                 result, summary, history_event = "breakthrough", "你突破归墟界限，被潮眼送回入口。", "SYS_GUIXU_EJECT"
@@ -379,11 +383,9 @@ def _guixu_trapped_training(
         elif action == "rest" and game.player.heart_demon > 0:
             game.player.heart_demon = max(0.0, game.player.heart_demon - .5)
         deps._apply_action_resources(game.player, action, elapsed == 0)
-        deps._advance_world_year(game, rng, [], encounters=False)
-        if game.player.alive:
-            deps._advance_soul_erosion_time(game, 1)
+        proceed = advance_elapsed_year(deps, game, rng, [], encounters=False)
         if (
-            not game.player.alive or game.pending_event
+            not proceed or game.pending_event
             or (action == 'body_train' and game.player.awaiting_body_breakthrough)
             or not (game.guixu_state.get("player_session") or {}).get("trapped")
         ):

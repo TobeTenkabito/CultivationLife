@@ -164,6 +164,10 @@ def plan_world_transition(game, request, systems, maps):
         ceiling = cultivation_ceiling(systems, request.destination, passage=mode == TransitionMode.PASSAGE)
         if ceiling and actual > ceiling:
             target, action = ceiling, "seal"
+        elif mode == TransitionMode.SEALED_DESCENT and player.cultivation_suppression and not seal:
+            # Suppression already lowered the body rank: record the journey,
+            # without replacing the secret art's separate true-rank snapshot.
+            action = "visit"
         elif seal:
             target, action = actual, "restore"
     location = request.arrival_location or maps.default_location(request.destination)
@@ -204,22 +208,25 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
             keep_companion, keep_ids = entourage.commit(game, plan.destination, move_npc=ports.move_npc)
         ports.permanent_departure(game, keep_companion=keep_companion, keep_friend_ids=keep_ids)
     seal = normalized_seal(player)
-    if plan.seal_action == "seal":
+    if plan.seal_action in {"seal", "visit"}:
         seal = seal or {"realm_index": player.realm_index, "layer": player.layer,
                         "lifespan": player.lifespan, "return_world": plan.source, "upper_world": plan.source,
                         "tribulation_remaining": max(0, player.next_tribulation_age - player.age)
                         if player.next_tribulation_age is not None else None}
         seal.update(suppressed_world=plan.destination, lower_world=plan.destination,
                     route_id=plan.route_id, reason=plan.reason, hp_ratio=hp, mp_ratio=mp)
+        if plan.seal_action == "visit":
+            seal['visit_only'] = True
         if plan.mode == TransitionMode.PASSAGE:
             seal["merchant_passage"] = True
         player.sealed_cultivation = seal
         player.realm_index, player.layer = plan.target_rank
     elif plan.seal_action == "restore":
         player.realm_index, player.layer = plan.target_rank
-        player.lifespan = seal.get("lifespan")
-        remaining = seal.get("tribulation_remaining")
-        player.next_tribulation_age = player.age + int(remaining) if remaining is not None else None
+        if not seal.get('visit_only'):
+            player.lifespan = seal.get("lifespan")
+            remaining = seal.get("tribulation_remaining")
+            player.next_tribulation_age = player.age + int(remaining) if remaining is not None else None
         player.sealed_cultivation = None
     player.world = plan.destination
     game.spatial_state['current'] = plan.destination_instance

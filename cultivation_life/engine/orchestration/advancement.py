@@ -85,13 +85,14 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         raise ValueError("灵根属性与五行功法不合，无法修炼")
     units = 1 if action == "generated_explore" else max(1, min(10, int(years)))
     from ...system.upper_institutions import begin_work, finish_work, advance_time
-    if action == "institution_work":
-        begin_work(game)
+    remaining_work = begin_work(game) if action == "institution_work" else None
     institution_world = player.world
     deps._begin_yaochi_action(game, action)
     deps._begin_doctrine_action(game, action, commit=True)
     time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
     years = units * time_unit
+    if remaining_work is not None:
+        years = min(years, remaining_work)
     rng = decode_rng(game.seed, game.rng_state)
     total_gain = 0.0
     total_body_gain = 0.0

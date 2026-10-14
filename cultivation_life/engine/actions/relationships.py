@@ -29,8 +29,15 @@ from ...runtime import decode_rng, encode_rng, now_iso
 from ..dependencies import RelationshipActionDependencies
 
 
-def dispatch_disciple(deps: RelationshipActionDependencies, game_id: str, target: str) -> dict[str, Any]:
+def _load_living_game(deps: RelationshipActionDependencies, game_id: str):
     game = deps._load(game_id)
+    if not game.player.alive:
+        raise ValueError("此生已经结束")
+    return game
+
+
+def dispatch_disciple(deps: RelationshipActionDependencies, game_id: str, target: str) -> dict[str, Any]:
+    game = _load_living_game(deps, game_id)
     player = game.player
     if game.pending_event:
         raise ValueError("请先处理当前事件")
@@ -84,7 +91,7 @@ def dispatch_disciple(deps: RelationshipActionDependencies, game_id: str, target
 
 
 def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: str, npc_id: str, role: str, *, known_target=False) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     from ...person_assignments import require_unassigned
     require_unassigned(game, npc_id)
     player = game.player
@@ -160,7 +167,7 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
 
 
 def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str, request_id: str, accept: bool) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     player = game.player
     if game.pending_event:
         raise ValueError("请先处理当前事件")
@@ -193,7 +200,7 @@ def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str,
 
 
 def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind: str) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     player = game.player
     if game.pending_event:
         raise ValueError("请先处理当前事件")
@@ -294,7 +301,7 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
 
 
 def gift_disciple(deps: RelationshipActionDependencies, game_id: str, disciple_id: str, kind: str, content_id: str) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     player = game.player
     if game.pending_event:
         raise ValueError("请先处理当前事件")
@@ -344,7 +351,7 @@ def gift_disciple(deps: RelationshipActionDependencies, game_id: str, disciple_i
 def manage_dao_companion(
     deps: RelationshipActionDependencies, game_id: str, action: str, npc_id: str = "", kind: str = "", content_id: str = "",
 ) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     player = game.player
     if game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法与道侣互动")
@@ -484,7 +491,7 @@ def manage_dao_companion(
 
 
 def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id: str, action: str) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     player = game.player
     if game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法与道友互动")
@@ -552,7 +559,7 @@ def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id
 
 
 def invite_relationship_to_faction(deps: RelationshipActionDependencies, game_id: str, npc_id: str) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     player = game.player
     sect = game.sects.get(player.faction_id or "")
     if game.pending_event or player.imprisonment:
@@ -586,7 +593,7 @@ def invite_relationship_to_faction(deps: RelationshipActionDependencies, game_id
 
 
 def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind: str, npc_id: str = "") -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     player = game.player
     if game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法了断人际关系")
@@ -642,7 +649,7 @@ def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind:
 
 
 def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str, action: str) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = _load_living_game(deps, game_id)
     if action == 'invite':
         from ...person_assignments import require_unassigned
         require_unassigned(game, npc_id)

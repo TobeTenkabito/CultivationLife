@@ -51,6 +51,14 @@ def main():
         current_code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{current_code}'" in metadata and f"versionName='{VERSION}-android.{current_code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+    if scoped.get('profile')=='bugfix':
+        required={f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('audit-fixes','economy-trust') for orientation in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Native bugfix scope incomplete')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        current_code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{current_code}'" in metadata and f"versionName='{VERSION}-android.{current_code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     dlcs={p.parent.name:json.loads(p.read_text(encoding='utf-8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],
               incompatible_save_schemas='1–9; no migration',dlc_versions=dlcs,

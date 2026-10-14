@@ -537,8 +537,8 @@ def max_mp(player: Player) -> int:
 def combat_power(player: Player) -> float:
     from .system.crafted_artifact_rules import effective_artifact_combat_bonus
     current = realm(player)
-    hp_ratio = max(0.0, min(1.0, player.hp / max_hp(player)))
-    mp_ratio = max(0.0, min(1.0, player.mp / max_mp(player)))
+    hp_ratio = max(0.0, min(1.0, player.hp / max(1.0, max_hp(player))))
+    mp_ratio = max(0.0, min(1.0, player.mp / max(1.0, max_mp(player))))
     status = 0.35 + 0.40 * hp_ratio + 0.25 * mp_ratio
     layer_factor = 1 + 0.08 * (player.layer - 1)
     progress = min(1.5, player.opportunity / max(1, opportunity_required(player)))

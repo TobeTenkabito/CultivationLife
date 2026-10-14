@@ -879,7 +879,7 @@ async function previewCrafting() {
       forge.onclick=()=>openGameConfirm({title:'确认神机目标炼制',body:`将永久消耗四份材料，炼成发挥度 ${percent(preview.replica_ratio)} 的${preview.forge_kind==='true_body'?'唯一真体':'仿品'}。`,confirmText:'开炉',onConfirm:()=>mutate(`/api/games/${game.id}/tianji-forge`,craftingPayload())});
       root.append(title,match,slots,power,forge); return;
     }
-    const title = document.createElement('h4'); title.textContent = `${preview.mold.rule.name} · 锚定价值 ${number(preview.anchor_value)}灵石`;
+    const title = document.createElement('h4'); title.textContent = `${preview.mold.rule.name} · 主材基准 ${preview.scaling_realm_name} · 锚定价值 ${number(preview.anchor_value)}灵石`;
     const effects = document.createElement('p'); effects.textContent = [preview.mold.rule.description, ...(preview.material_effects || []).map(row => `${row.name}：${row.description}`)].join(' ');
     const normal = document.createElement('p'); normal.textContent = `普通品质：${Object.entries(preview.theoretical_stats.normal || {}).filter(([,value]) => Number(value)).map(([key,value]) => craftingStatText(key,value,game.crafting_system.stat_names || {})).join(' · ')}`;
     const odds = document.createElement('p'); odds.className = 'muted'; odds.textContent = `品质概率：${Object.entries(preview.quality_probabilities).map(([key,value]) => `${preview.quality_names[key]} ${percent(value)}`).join(' · ')}`;
@@ -1467,8 +1467,9 @@ function renderSecretArts(system) {
   }
   $('#secret-conceal-activate').dataset.available = targets.length ? '1' : '0';
   $('#secret-conceal-cancel').dataset.available = concealment.active ? '1' : '0';
-  $('#secret-suppress-activate').dataset.available = targets.length && !suppression.active ? '1' : '0';
-  $('#secret-suppress-cancel').dataset.available = suppression.active ? '1' : '0';
+  $('#secret-suppress-activate').dataset.available = targets.length && !suppression.active && !system.suppression_block_reason ? '1' : '0';
+  $('#secret-suppress-cancel').dataset.available = suppression.active && !system.suppression_block_reason ? '1' : '0';
+  $('#secret-suppress-activate').title = $('#secret-suppress-cancel').title = system.suppression_block_reason || '';
 }
 
 function renderSageSystem(system) {
@@ -3200,7 +3201,7 @@ function renderDemonicSystem(system) {
     if (person.can_recruit_concubine) actions.push(['concubine','纳为侍妾']);
     actions.forEach(([action,label]) => {
       const button = document.createElement('button'); button.textContent = label; button.className = action === 'corpse' ? 'danger' : '';
-      if (action === 'possess') { button.disabled = busy || !person.can_possess; button.title = person.possession_reason || '夺舍失败将魂飞魄散'; }
+      if (action === 'possess') { button.dataset.unavailable = person.can_possess ? '0' : '1'; button.disabled = busy || !person.can_possess; button.title = person.possession_reason || '夺舍失败将魂飞魄散'; }
       button.onclick = () => mutate(`/api/games/${game.id}/${action === 'concubine' ? 'concubine-action' : 'captive-action'}`, {target_id:person.id, action:action === 'concubine' ? 'recruit' : action}); tools.appendChild(button);
     });
     tools.appendChild(violenceButton("captive", person, "处死"));
@@ -3275,8 +3276,9 @@ function renderDemonicSystem(system) {
     for(const [value,label] of [['cultivation','培养修为'],['body','培养炼体'],['sense','培养神识']]) { const o=new Option(label,value);axis.add(o); }
     const batch=document.createElement('select');batch.setAttribute('aria-label','培养轮数');
     for(const n of [1,5,10])batch.add(new Option(`${n} 轮`,n));
-    const preview=document.createElement('p');const button=document.createElement('button');button.type='button';
+    const preview=document.createElement('p');const button=document.createElement('button');button.type='button';button.className='owned-training-action';
     const refresh=()=>{const q=target.training?.[axis.value]?.find(q=>q.batches===Number(batch.value));
+      button.dataset.available=q?.can_train?'1':'0';
       if(!q){button.disabled=true;return;}
       preview.textContent=`${q.before} → ${q.after}。实际 ${q.rounds} 轮，消耗 ${number(q.opportunity)} 机缘 / ${number(q.mp)} 法力；自身战力 ${number(q.power_before)} → ${number(q.power_after)}。${q.reason||'即时培养，不推进年月。'}`;
       button.textContent=`${q.label} · ${q.rounds}轮`;button.disabled=busy||!q.can_train||!game.player.alive||!!game.pending_event||!!game.trial?.active||!!game.imprisonment||!!game.player.sealed_cultivation;
@@ -3538,7 +3540,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     const detail = document.createElement('small'); detail.textContent = `${person.realm_name} · ${person.spirit_root_name || '灵根未明'} · ${person.age} 岁 / 寿元 ${person.lifespan}`;
     const actions = document.createElement('div'); actions.className = 'relationship-tools';
     actions.append(
-      interactionButton('收入门下', isFreeRelationship(person) ? '1' : '0', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:true})),
+      interactionButton('收入门下', person.can_interact ? '1' : '0', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:true})),
       interactionButton('婉拒', '1', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:false})),
     );
     row.append(name, detail, actions); list.appendChild(row);
@@ -3549,9 +3551,9 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     const actions = document.createElement('div'); actions.className = 'relationship-tools';
     const requested = person.last_requests || {};
     actions.append(
-      interactionButton('请教修行', requested.consult === worldClock() || person.world !== game.player.world ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'consult'})),
-      interactionButton('索要物品', requested.item === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'item'})),
-      interactionButton('请教功法', requested.technique === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'technique'})),
+      interactionButton('请教修行', !person.can_interact || requested.consult === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'consult'})),
+      interactionButton('索要物品', !person.can_interact || requested.item === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'item'})),
+      interactionButton('请教功法', !person.can_interact || requested.technique === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'technique'})),
     );
     if (person.can_invite_faction) actions.appendChild(interactionButton('引荐入宗', '1', () => mutate(`/api/games/${game.id}/relationship-faction`, {npc_id:person.id})));
     if (person.can_invite_guest) actions.appendChild(interactionButton('邀请客卿', '1', () => mutate(`/api/games/${game.id}/intrigue-guest`, {kind:'sect', action:'invite', npc_id:person.id})));
@@ -3565,11 +3567,11 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
   function discipleActions(person) {
     const tools = document.createElement('div'); tools.className = 'disciple-gifts';
     const itemSelect = optionSelect(inventory.filter(item => item.quantity > 0), item => item.id, item => `${item.name} ×${item.quantity}`, '无物可赠');
-    const itemButton = interactionButton('赠物', itemSelect.dataset.available, () => mutate(`/api/games/${game.id}/disciple-gift`, {disciple_id:person.id, kind:'item', content_id:itemSelect.value}));
+    const itemButton = interactionButton('赠物', person.can_interact ? itemSelect.dataset.available : '0', () => mutate(`/api/games/${game.id}/disciple-gift`, {disciple_id:person.id, kind:'item', content_id:itemSelect.value}));
     const taught = new Set(person.techniques || []);
     const availableTechniques = techniques.filter(art => !taught.has(art.id));
     const techniqueSelect = optionSelect(availableTechniques, art => art.id, art => art.name, '无新法可传');
-    const techniqueButton = interactionButton('传功', techniqueSelect.dataset.available, () => mutate(`/api/games/${game.id}/disciple-gift`, {disciple_id:person.id, kind:'technique', content_id:techniqueSelect.value}));
+    const techniqueButton = interactionButton('传功', person.can_interact ? techniqueSelect.dataset.available : '0', () => mutate(`/api/games/${game.id}/disciple-gift`, {disciple_id:person.id, kind:'technique', content_id:techniqueSelect.value}));
     tools.append(itemSelect, itemButton, techniqueSelect, techniqueButton);
     if (game.player.path === 'demonic') {
       tools.append(
@@ -4116,7 +4118,10 @@ function renderButtons() {
   const senseBreakthrough = $('#sense-breakthrough-action');
   if (senseBreakthrough) senseBreakthrough.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (!!guixuSession && !trappedInGuixu) || !game?.player?.divine_sense?.breakthrough_ready;
   document.querySelectorAll('.captive-tools button, .puppet-tools button').forEach(button => {
-    button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment;
+    button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || button.dataset.unavailable === '1';
+  });
+  document.querySelectorAll('.owned-training-action').forEach(button => {
+    button.disabled=busy||button.dataset.available!=='1'||!game?.player?.alive||!!game?.pending_event||!!game?.trial?.active||!!game?.imprisonment||!!game?.player?.sealed_cultivation||!!game?.player?.cultivation_suppression;
   });
   document.querySelectorAll('.ghost-attachment-action').forEach(button => {
     button.disabled = busy || !game?.player?.alive || button.dataset.available !== '1';
