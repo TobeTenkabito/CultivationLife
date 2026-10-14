@@ -417,12 +417,15 @@ def cross_world(deps: WorldTravelDependencies, game_id: str, destination: str) -
     player = game.player
     plan = plan_public_crossing(game, destination, deps.maps)
     descending = plan.mode.value == "sealed_descent"
+    returning_visit = plan.mode.value == "sealed_return" and bool((player.sealed_cultivation or {}).get('visit_only'))
     deps._apply_world_transition(game, plan)
     world_name = WORLD_SYSTEMS['world_names'][destination]
     summary = (f"你凭秘法压制修为，逆穿界壁重返{world_name}，显露{REALMS[player.realm_index].name}{player.layer}层；解除秘法后按真实道果重新判断界面排斥。"
                if descending else f"你再入{world_name}，界面压制尽去，被封存的道果与法力层次完全复原。")
     if plan.mode.value == 'story':
         summary = f'你循祖兽梦径抵达{world_name}，同阶界面往返不压制修为。'
+    elif returning_visit:
+        summary = f'你循原路线重返{world_name}，宗门与人际关系保留；秘法压制仍生效，可在原界解除。'
     result = f"returned_{destination}"
     game.history.append(HistoryRecord(
         "SYS_CROSS_WORLD", 1, player.age, "跨界往返", destination, result, summary,

@@ -8,6 +8,7 @@
     "ordinary_sell_ratio": 0.55,
     "refining_experience_base": 100,
     "refining_experience_per_craft": 30,
+    "plant_tiers_by_years": [[0, 1], [100, 2], [1000, 3], [10000, 4]],
     "budget_by_realm": [
       40,
       50,

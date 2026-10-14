@@ -1,6 +1,6 @@
 """Deterministic, resource-funded training for owned bodies; independent of DLC."""
 import copy
-from ..content_registry import REALMS
+from ..content_registry import REALMS, WORLD_SYSTEMS
 from ..rules import max_mp, divine_sense_level
 from .cultivation_ranks import rank_for, describe
 
@@ -49,6 +49,7 @@ def quote(player, target, axis, batches=1):
         if axis == 'cultivation':
             for _ in range(min(3, 1 + max(0, player.realm_index - realm))):
                 r, l = int(row.get('realm_index', 0)), int(row.get('layer', 1))
+                previous_realm = r
                 if (r, l) >= (player.realm_index, player.layer):
                     break
                 if l >= REALMS[r].layers:
@@ -56,6 +57,16 @@ def quote(player, target, axis, batches=1):
                 else:
                     l += 1
                 row.update(realm_index=r, layer=l)
+                if 'lifespan' in row:
+                    multiplier = int(WORLD_SYSTEMS.get('monster_cultivation', {}).get('lifespan_multiplier', 3)) if row.get('path') == 'monster' else 1
+                    if r != previous_realm:
+                        span = REALMS[r].lifespan
+                        row['lifespan'] = max(int(row['lifespan']), int(row.get('age', 0)) + 1, span[0] * multiplier) if span and row['lifespan'] is not None else None
+                    elif l in (4, 7) and row['lifespan'] is not None:
+                        stage = 'middle' if l == 4 else 'late'
+                        bonus = WORLD_SYSTEMS.get('stage_lifespan_bonus', {}).get(REALMS[r].id, {}).get(stage)
+                        if bonus:
+                            row['lifespan'] += bonus[0] * multiplier
                 delta += 1
             factor = 1.12 ** delta
         elif axis == 'body':

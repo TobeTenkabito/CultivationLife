@@ -16,6 +16,7 @@ from ..ghost_resources import ghost_cultivation_config as ghost_cultivation_conf
 from ..ghost_resources import ghost_soul_pressure as ghost_soul_pressure
 from ..ghost_resources import hp_carry_ratio as hp_carry_ratio
 from ..ghost_resources import mp_carry_ratio as mp_carry_ratio
+from ..possession_system import is_possessed
 
 
 def grant_intrinsic_growth(player: Player, hp: float = 0.0, mp: float = 0.0) -> bool:
@@ -91,8 +92,19 @@ def reincarnation_breakthrough_bonus(player: Player, realm_index: int) -> float:
     )
 
 
+def reincarnation_block_reason(player: Player) -> str:
+    if player.cultivation_suppression:
+        return "压制修为期间不能轮回，请先解除压制"
+    if player.sealed_cultivation:
+        return "修为封印期间不能轮回，请先沿原通道返界解封"
+    if is_possessed(player):
+        return "寄身期间本魂修行冻结，请先离舍再进入轮回"
+    return ""
+
+
 def can_reincarnate(player: Player) -> bool:
-    if not ghost_cultivation_active(player) or not player.alive or player.realm_index < 1:
+    if (not ghost_cultivation_active(player) or not player.alive or player.realm_index < 1
+            or reincarnation_block_reason(player)):
         return False
     current_realm = REALMS[player.realm_index]
     from ...rules import opportunity_required
@@ -110,6 +122,9 @@ def perform_reincarnation(player: Player) -> dict[str, Any]:
     this state transition directly testable and reusable without duplicating
     the three distinct reincarnation records.
     """
+    reason = reincarnation_block_reason(player)
+    if reason:
+        raise ValueError(reason)
     if not can_reincarnate(player):
         raise ValueError("只有抵达大境界最终瓶颈并将机缘修至圆满，方可入轮回")
     ensure_ghost_cultivation_state(player)

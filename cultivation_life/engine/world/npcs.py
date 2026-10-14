@@ -666,6 +666,11 @@ def _roll_recruit_age_lifespan(
 
 
 def _recruit_sect_npc(deps: NpcDependencies, sect: SectState, world_age: int, rng: random.Random) -> SectNpc:
+    race_pool = ([race_id for race_id, definition in RACE_DEFINITIONS.items()
+                  if sect.world in definition.get("worlds", [])]
+                 if deps._world_supports(sect.world, "races") else None)
+    if race_pool == []:
+        return None
     realm_index = deps._recruit_realm_index(rng.random(), sect.world)
     name = person_name(rng, [n.name for n in sect.npcs])
     layer = rng.randint(1, REALMS[realm_index].layers)
@@ -673,11 +678,8 @@ def _recruit_sect_npc(deps: NpcDependencies, sect: SectState, world_age: int, rn
     path = deps._random_npc_path(sect.id, rng)
     age, lifespan = deps._roll_recruit_age_lifespan(realm_index, path, rng)
     race = "human"
-    if deps._world_supports(sect.world, "races"):
-        race = rng.choice([
-            race_id for race_id, definition in RACE_DEFINITIONS.items()
-            if sect.world in definition.get("worlds", [])
-        ])
+    if race_pool is not None:
+        race = rng.choice(race_pool)
     npc = SectNpc(
         id=f"{sect.id}_recruit_{world_age}_{len(sect.npcs)}", name=name, title=title,
         realm_index=realm_index, layer=layer, age=age, lifespan=lifespan,

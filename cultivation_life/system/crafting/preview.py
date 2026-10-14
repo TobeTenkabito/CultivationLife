@@ -39,7 +39,9 @@ def _crafting_preview(
         raise ValueError("至少为法宝分配一项属性")
     if used > budget + 1e-9:
         raise ValueError(f"属性预算超出上限：已用 {used:.1f} / {budget}")
-    primary_tier = int(selected[0][1].get("acquired_tier", player.realm_index))
+    primary_tier = selected[0][1].get("acquired_tier")
+    if type(primary_tier) is not int or not 1 <= primary_tier < len(REALMS):
+        raise ValueError("主材缺少合法的炼器品阶，不能按人物境界推定")
     scaling_realm_index = max(0, min(player.realm_index, primary_tier, len(REALMS) - 1))
     scaling_layer = (
         player.layer

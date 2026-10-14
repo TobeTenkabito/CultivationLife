@@ -13,10 +13,13 @@ from cultivation_life.version import BASE_GAME_VERSION
 def main():
     serial=sys.argv[1] if len(sys.argv)>1 else 'emulator-5580'
     economy = '--economy' in sys.argv[2:]
+    bugfix = '--bugfix' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
           if economy else [f'build/android-soul-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]+[f'build/android-upper-{tag}.log'])
+    if bugfix:
+        logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('audit-fixes','economy-trust') for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
@@ -37,6 +40,7 @@ def main():
                  sdk=command('shell','getprop','ro.build.version.sdk'),logs=logs,
                   log_hashes={name:file_digest(ROOT/name) for name in logs},
                   scope='Annual finance, original organizational guards, trust and real production; six native orientation phases' if economy else 'Legacy soul and upper scope')
+    if bugfix:receipt['scope']='Reversible descent preserving ties, trained captive lifespan, remaining work and economic trust; four native orientation phases'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 

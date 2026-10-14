@@ -107,6 +107,10 @@ def can_possess(player: Player, target: dict[str, Any]) -> tuple[bool, str]:
         return False, "目标已经陨落，无法夺舍"
     if not has_ghost_core(player) or is_possessed(player):
         return False, "只有未寄身的鬼修可以夺舍"
+    if player.cultivation_suppression:
+        return False, "请先解除压制修为，再进行夺舍"
+    if player.sealed_cultivation:
+        return False, "请先沿原通道解除下界封印，再进行夺舍"
     if str(target.get("race", "human")) not in {"human", "demon", "immortal"}:
         return False, "目标并非可夺舍的人形生灵"
     if int(target.get("realm_index", 0)) > int(player.realm_index):

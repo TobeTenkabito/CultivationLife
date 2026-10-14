@@ -345,6 +345,14 @@
   "trial_site_ownership_notes": {
     "GameState.trial_site_state": "万象试境 DLC 十一普通界面：入口固定原 world/location，按权威 tier 使用 7/14/22 层；五节点、守关有限资源、首次奖励收据按原遗迹保留，不随移动复制。活动指针为本地会话，不移动人物。无年度或行动时间钩子，正式提交沿原效果/战斗/奖励入口及原子保存。关闭 DLC 冻结数据，安全会话摘除活动指针，真实受控或封逃结果不得借开关解除；后续奖励保留。重新开启只恢复原记录，返访须亲至原入口；结构 10，不转换 1–9。"
   },
+  "non_economy_audit_ownership_notes": {
+    "Player.sealed_cultivation.visit_only": "已使用秘法压制的正式下界仅记录归路凭证；realm_index/layer 为原有效压制境界，真正修为仍独立归 cultivation_suppression。返界复用 sealed_return，只解除归路凭证；回原界后才能解除秘法。不得解除压制借界面排斥触发永久离宗，不新增人物或库存副本。",
+    "Player.prisoners/SectNpc.lifespan": "资源付费培养跨大境界时按原境界寿元下限确定性提升，进入无限寿元境界设 None；小境界中后期按原寿元奖励下限增加，既有无限寿元不降低。更新同一权威人物，释放后使用原年度生命结算，不自动复活或修正用户存档。",
+    "Player.cultivation_suppression/sealed_cultivation/ghost_core_state": "各自保留原修为、封印返界和寄身核心的权威归属；轮回在这些可恢复修为的状态下禁止提交，不通过清空保存记录来修正旧提示。旧轮回提示可放弃并保留原后续奖励。夺舍各入口拒绝压制或封印状态；寄身期间禁止启停压制，旧压制后寄身状态须先离舍再解除压制，避免将本魂原修为写到宿身或被离舍快照覆盖。",
+    "Player.master/disciples/disciple_requests": "关系保留不等于当面操作权限；玩家死亡后关系命令全部拒绝，赠物、师门请求与收徒校验权威人物所在界面及实例；不同普通界面不能即时交付。can_interact 仅为只读投影，不持久化、不迁移人物或创建运输路线。",
+    "Player.crafting_materials/inventory/crafted_artifacts": "材料唯一实例与既有成品不迁移、不复制、不自动重算；新炼器按普通/动态定义品阶、原归墟入场境界及灵田实生年份确认主材基准，不因持有者跨界或升阶改变主材品阶。归墟来源目录为纯只读有界缓存。",
+    "Player.ghost_soul_erosion_time_progress": "归墟旧按年修炼与主行动修炼复用公共年度收尾，保留实际经过年份的魂蚀分数；宿身死亡后即使本魂存活也停止后续年份。魂基归零只保护展示计算，不恢复本源。"
+  },
   "release_2130_ownership_notes": {
     "GameState.economy_v2.organizations.*.dividend_due/dividend_paid/dividend_rate": "原组织唯一府库年度分红的应付、实付及当期比例；沿 welfare_year 防重，本界在籍活着的玩家领取，跨界不追发。无新增现金或年度人物扫描。",
     "GameState.trial_site_state.sites.*.floors.*.rewards[].roll": "首次生成并持久绑定的不可执行遗宝配方；未领取时归原试境，关闭DLC冻结，已获物品通过原inventory/known_techniques/crafted_artifacts持有，不注册全局动态目录。",

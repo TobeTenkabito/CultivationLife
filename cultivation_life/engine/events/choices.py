@@ -7,6 +7,7 @@ from ...runtime import decode_rng, encode_rng, now_iso
 from ..dependencies import ChoiceDependencies
 from ...system import generated_events
 from ...system import trial_sites
+from ...system.ghost.progression import reincarnation_block_reason
 
 
 def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: str | None = None) -> dict[str, Any]:
@@ -65,6 +66,10 @@ def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: 
         raise ValueError("事件选项不存在")
     if choice.get("conditions") and not deps._condition(choice["conditions"], game):
         raise ValueError(choice.get("disabled_reason", "当前条件不满足"))
+    if any(effect.get('type') == 'ghost_reincarnate' for effect in choice.get('effects', [])):
+        reason = reincarnation_block_reason(game.player)
+        if reason:
+            raise ValueError(reason)
 
     rng = decode_rng(game.seed, game.rng_state)
     pending["_choice_id"] = choice_id

@@ -14,6 +14,7 @@ from ...rules import (
 )
 from ...runtime import decode_rng, encode_rng, now_iso
 from ...system.ghost_system import grant_intrinsic_growth
+from ...system.possession_system import is_possessed
 from ..dependencies import CultivationActionDependencies
 
 
@@ -43,6 +44,10 @@ def manage_secret_art(
         raise ValueError("此生已经结束")
     if art not in {"conceal", "suppress"} or action not in {"activate", "cancel"}:
         raise ValueError("未知秘法操作")
+    if art == "suppress" and is_possessed(player):
+        raise ValueError("寄身期间不能启停压制修为，请先离舍")
+    if art == "suppress" and action == "cancel" and (player.sealed_cultivation or {}).get('visit_only'):
+        raise ValueError("请先循原路返界，再解除压制修为")
 
     if art == "conceal" and action == "cancel":
         if not player.cultivation_concealment:
@@ -195,6 +200,9 @@ def _public_secret_arts(deps: CultivationActionDependencies, player: Player) -> 
         ),
         "current_realm_name": current_name,
         "true_realm_name": true_name,
+        "suppression_block_reason": (
+            "寄身期间不能启停压制修为，请先离舍" if is_possessed(player) else
+            "请先循原路返界，再解除压制修为" if (player.sealed_cultivation or {}).get('visit_only') else ""),
         "targets": targets,
         "concealment": {
             "active": bool(concealment),

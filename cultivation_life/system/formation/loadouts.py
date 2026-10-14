@@ -49,7 +49,9 @@ def _formation_candidates(
             or (row.get("plant_id") and row.get("plant_id") == item.plant_id)
         ]
         for definition in definitions:
-            for index in range(max(0, int(item.quantity))):
+            # Nine slots can consume at most nine identical stacked units.
+            # Inventory keeps the real total; bindings still extract one unit.
+            for index in range(max(0, min(9, int(item.quantity)))):
                 candidates.append(
                     deps._formation_candidate(
                         item.to_dict() | {"name": item.name},

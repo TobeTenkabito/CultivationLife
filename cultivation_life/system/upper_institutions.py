@@ -132,6 +132,7 @@ def begin_work(game):
     job=state['job']
     if not state['joined'] or not job or job['progress']>=job['years']:
         raise ValueError('须先接取尚未完成的机构委托')
+    return job['years'] - job['progress']
 
 
 def finish_work(game, action, elapsed):

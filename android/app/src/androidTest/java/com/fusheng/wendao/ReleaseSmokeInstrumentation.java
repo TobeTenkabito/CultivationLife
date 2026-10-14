@@ -1278,6 +1278,45 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("game.fleet_network.main_hq && game.fleet_network.fleets.some(f=>f.cross_trip?.phase==='return')")),"Expansion persistence");
                 }
                 result.putString("economy_expansion_scope","Four themes, native relocation, passage build, dispatch, recall, repair, layout and persistence");
+            } else if(phase.equals("audit-fixes")) {
+                for(String auditCase:new String[]{"return","training","work"}) {
+                    String world=auditCase.equals("work")?"nether":"spirit";
+                    int realm=auditCase.equals("work")?9:8;
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'边界修复原生验收',spirit_root:'supreme_metal',path:'dao',seed:8712,custom_start:{world:"+JSONObject.quote(world)+",realm_index:"+realm+",layer:1}})});return g.id;})()");
+                    String setup=assetText("audit_fixes_release.py")+"\nfrom cultivation_life import server\nprepare_audit_fixes(server.ENGINE,"+JSONObject.quote(id)+","+JSONObject.quote(auditCase)+")";
+                    if(auditCase.equals("return"))setup+="\nserver.ENGINE.manage_secret_art("+JSONObject.quote(id)+",'suppress','activate',1,1)";
+                    python(setup);
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    if(auditCase.equals("return")) {
+                        tapSelector("#cross-world-action");waitForJs("!busy && game.player.world==='human'","Native suppressed descent");
+                        tapSelector("[data-panel-target=secret-art]");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#secret-suppress-cancel').disabled")),"Cannot cancel before returning");
+                        tapSelector("#secret-art-toggle");tapSelector("#cross-world-action");
+                        waitForJs("!busy && game.player.world==='spirit'","Native original return");
+                        tapSelector("[data-panel-target=secret-art]");tapSelector("#secret-suppress-cancel");
+                        waitForJs("!busy && !game.player.cultivation_suppression","Native restore true rank");
+                        python(assetText("audit_fixes_release.py")+"\nfrom cultivation_life import server\ninspect_audit_fixes(server.ENGINE,"+JSONObject.quote(id)+",'return')");
+                        tapSelector("#secret-art-toggle");
+                    } else if(auditCase.equals("training")) {
+                        tapSelector("[data-panel-target=captive]");tapSelector("#captive-list .owned-training summary");tapSelector("#captive-list .owned-training button");
+                        waitForJs("!busy && game.demonic_system.prisoners[0].realm_index>=6","Native captive breakthrough");
+                        python(assetText("audit_fixes_release.py")+"\nfrom cultivation_life import server\ninspect_audit_fixes(server.ENGINE,"+JSONObject.quote(id)+",'training')");
+                        capture("audit-training-"+arguments.getString("orientation","portrait"));
+                        tapSelector("#captive-list .captive-tools button");
+                        waitForJs("!busy && game.demonic_system.prisoners.length===0","Native captive release");
+                        python(assetText("audit_fixes_release.py")+"\nfrom cultivation_life import server\ninspect_audit_fixes(server.ENGINE,"+JSONObject.quote(id)+",'training')");
+                        tapSelector("#captive-toggle");
+                    } else {
+                        js("window.__auditStartAge=game.player.age;true");tapSelector("[data-panel-target=upper-institution]");
+                        tapSelector("#upper-institution-card [data-section=jobs] summary");
+                        js("Array.from(document.querySelectorAll('#upper-institution-card button')).find(b=>b.textContent==='继续履约').id='audit-work-button';true");
+                        tapSelector("#audit-work-button");
+                        waitForJs("!busy && game.upper_institution.job.progress===100","Native remaining institution work",120000);
+                        check(Boolean.TRUE.equals(js("game.player.age-__auditStartAge===60")),"Only sixty remaining years consumed");
+                        capture("audit-work-"+arguments.getString("orientation","portrait"));
+                    }
+                }
+                result.putString("audit_fixes_scope","Real suppressed descent and return preserving ties, disabled cancellation, captive infinite lifespan and sixty-year resumed institution work");
             } else if(phase.equals("economy-trust")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'托管原生验收',preset_id:'core',seed:419})});return g.id;})()");
                 python(assetText("economy_trust_release.py")+"\nfrom cultivation_life import server\nprepare_economy_trust(server.ENGINE,"+JSONObject.quote(id)+")");
