@@ -5,12 +5,15 @@ from ...system.ghost_system import ensure_ghost_cultivation_state
 from ...system.ghost_system import ghost_cultivation_active
 from ...system.ghost_system import grant_intrinsic_progression_if_new_highwater
 from ...system.possession_system import migrate_possession_timeline
+from ...system.ghost_resources import reconcile_ghost_attachment
 from .dependencies import VitalityPreparationDependencies
 
 
 def prepare_vitality(deps: VitalityPreparationDependencies, game: GameState) -> bool:
     possession_timeline_migrated = migrate_possession_timeline(game.player)
     ghost_migrated = ensure_ghost_cultivation_state(game.player)
+    attachment_changed = reconcile_ghost_attachment(game.player)
+    ghost_migrated = ghost_migrated or attachment_changed
     if ghost_cultivation_active(game.player):
         old_intrinsic_state = (
             game.player.ghost_intrinsic_hp_reference,

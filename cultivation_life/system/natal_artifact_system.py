@@ -333,10 +333,8 @@ class NatalArtifactSystemMixin:
     ) -> dict[str, Any]:
         game = self._load(game_id)
         player = game.player
-        if not player.alive or game.pending_event or player.imprisonment:
-            raise ValueError("当前状态无法祭炼本命法宝")
-        if player.realm_index < int(self._natal_artifact_config()["minimum_realm"]):
-            raise ValueError("结丹期方可修炼本命法宝")
+        from .natal_binding import require_access
+        require_access(game)
         self._ensure_natal_artifact(game)
 
         if action == "bind":
@@ -438,9 +436,11 @@ class NatalArtifactSystemMixin:
 
     def _public_natal_artifact(self, game: GameState) -> dict[str, Any]:
         player = game.player
+        from .natal_binding import access_reason
+        operation_available = not access_reason(game)
         visible = player.realm_index >= int(self._natal_artifact_config()["minimum_realm"]) or bool(game.natal_artifact)
         if not visible:
-            return {"visible": False}
+            return {"visible": False, "operation_available": operation_available}
         self._ensure_natal_artifact(game)
         candidates = [
             {"id": item.id, "name": item.name, "quantity": item.quantity,
@@ -455,7 +455,7 @@ class NatalArtifactSystemMixin:
         ]
         artifact = game.natal_artifact
         if not artifact:
-            return {"visible": True, "bound": False, "candidates": candidates}
+            return {"visible": True, "bound": False, "candidates": candidates, "operation_available": operation_available}
         level = int(artifact["level"])
         unlocked = self._natal_slots_for_level(level)
         definitions = self._natal_artifact_material_definitions()
@@ -516,6 +516,7 @@ class NatalArtifactSystemMixin:
         slot_interval = max(1, int(self._natal_artifact_config().get("slot_interval", 10)))
         return {
             "visible": True, "bound": True, "item_id": artifact["item_id"], "name": artifact["name"],
+            "operation_available": operation_available,
             "crafted_artifact_id":artifact.get("crafted_artifact_id"),
             "description":description, "level": level, "max_level": None, "unbounded": True,
             "is_tianji":bool(crafted and crafted.get("tianji")),

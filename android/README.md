@@ -1,6 +1,6 @@
 # 浮生问道 · Android
 
-维护基线：2026-10-14，本体 **v2.13.5**。Gradle 配置的版本名为 **2.13.5-android.58**，versionCode **58**，沿用 `com.fusheng.wendao` 包名和正式签名。
+维护基线：2026-10-15，本体 **v2.13.6**。Gradle 配置的版本名为 **2.13.6-android.59**，versionCode **59**，沿用 `com.fusheng.wendao` 包名和正式签名。
 
 **当前源码存档结构为 10，旧结构 1–9 明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构 1–9 的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
 
@@ -36,7 +36,7 @@ Gradle 从仓库复制 Python、content、web、dlc；`app/src/main/mobile` 在�
 
 ## 发布证明与验收
 
-v2.13.5 按用户要求串行运行经济与系统修复相关回归，不运行全仓。发行入口为 `python scripts/verify_scoped_release.py --profile bugfix`、`python scripts/verify_android_scoped.py emulator-5580 --bugfix` 和 `python scripts/package_scoped_release.py`。原生阶段覆盖下界与返界、培养寿元、剩余履约和经济托管的横竖屏真实点击；Windows 同一 EXE 验证有／无 DLC。构建限制单工作进程，验收只运行一台专用模拟器；凭据对应最终代码及实际安装 APK，不沿用旧产物哈希。
+v2.13.6 按用户要求串行运行经济、传承及系统修复相关回归，不运行全仓。发行入口为 `python scripts/verify_scoped_release.py --profile bugfix`、`python scripts/verify_android_scoped.py emulator-5580 --bugfix` 和 `python scripts/package_scoped_release.py`。原生阶段覆盖下界与返界、培养寿元、剩余履约、传承承接、监禁、护山及经济托管的横竖屏真实点击；Windows 同一 EXE 验证有／无 DLC。构建限制单工作进程，验收只运行一台专用模拟器；凭据对应最终代码及实际安装 APK，不沿用旧产物哈希。
 
 `prepareGameAssets` 依赖 `copyGamePython`，核对暂存源码后生成 APK 内 `assets/game-build.json`。证明覆盖后端、内容、网页、DLC、Android 主源码与相关构建脚本。源码变动后旧 APK 证明失效，不能靠历史成功日志重新发布。
 

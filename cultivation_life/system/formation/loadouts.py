@@ -5,6 +5,7 @@ from ...models import Player
 import copy
 from ...runtime import now_iso
 from .dependencies import FormationLoadoutsDependencies
+from .access import require_access
 
 
 def _formation_candidates(
@@ -131,8 +132,7 @@ def save_formation(
     deps: FormationLoadoutsDependencies, game_id: str, payload: dict[str, Any]
 ) -> dict[str, Any]:
     game = deps._load(game_id)
-    if game.pending_event or not game.player.alive or game.player.imprisonment:
-        raise ValueError("当前状态无法重排九宫")
+    require_access(game)
     nodes, definitions = deps._nodes_from_candidate_ids(
         game.player, list(payload.get("slots", []))
     )
@@ -190,8 +190,7 @@ def activate_formation(
     deps: FormationLoadoutsDependencies, game_id: str, loadout_id: str
 ) -> dict[str, Any]:
     game = deps._load(game_id)
-    if game.pending_event or not game.player.alive or game.player.imprisonment:
-        raise ValueError("当前状态无法启阵")
+    require_access(game)
     loadout = next(
         (row for row in game.player.formation_loadouts if row["id"] == loadout_id), None
     )
@@ -221,6 +220,7 @@ def deactivate_formation(
     deps: FormationLoadoutsDependencies, game_id: str
 ) -> dict[str, Any]:
     game = deps._load(game_id)
+    require_access(game)
     name = deps.active_formation_profile(game.player).get("name", "当前阵法")
     deps._release_active_formation(game.player)
     game.history.append(
@@ -245,6 +245,7 @@ def delete_formation(
     deps: FormationLoadoutsDependencies, game_id: str, loadout_id: str
 ) -> dict[str, Any]:
     game = deps._load(game_id)
+    require_access(game)
     loadout = next(
         (row for row in game.player.formation_loadouts if row["id"] == loadout_id), None
     )

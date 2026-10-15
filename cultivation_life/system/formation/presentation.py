@@ -4,6 +4,7 @@ from ...models import GameState
 from ...content_registry import WORLD_SYSTEMS
 import copy
 from .dependencies import FormationPresentationDependencies
+from .access import operation_available
 
 
 def _public_formation_system(
@@ -27,6 +28,7 @@ def _public_formation_system(
             )
     return {
         "visible": bool(deps.formation_config()),
+        "operation_available": operation_available(game),
         "system_version": int(deps.formation_config().get("system_version", 1)),
         "grid_size": 9,
         "level": deps.formation_level(player),

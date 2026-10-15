@@ -47,19 +47,7 @@ def _advance_intrigue_unit(deps: IntrigueRuntimeDependencies, game: GameState, r
         faction_id = deps._intrigue_player_faction_id(game, kind)
         if faction_id:
             deps._ensure_intrigue_faction(game, kind, faction_id)
-    # Sentences share the existing action-unit clock and do not scan NPC pairs.
-    for record in state.get("factions", {}).values():
-        remaining = []
-        for prisoner in record.get("prison", []):
-            if prisoner.get("prisoner_id") == deps.PLAYER_ID:
-                remaining.append(prisoner)
-                continue
-            prisoner["sentence_remaining"] = max(0, int(prisoner.get("sentence_remaining", 0)) - 1)
-            if prisoner["sentence_remaining"] > 0:
-                remaining.append(prisoner)
-            else:
-                state["npc_prisons"].pop(str(prisoner.get("prisoner_id", "")), None)
-        record["prison"] = remaining
+    # NPC sentences are settled once per real year at the world-year boundary.
     deps._intrigue_sync_player_prison(game)
     news: list[str] = []
     if deps._world_supports(game.player.world, "races"):

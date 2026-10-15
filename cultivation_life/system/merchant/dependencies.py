@@ -171,6 +171,7 @@ class MerchantExecutionDependencies:
     _all_world_npcs: Callable[..., Any]
     _apply_world_transition: Callable[..., Any]
     _find_npc: Callable[..., Any]
+    _intrigue_is_imprisoned: Callable[..., Any]
     _merchant_alliance: Callable[..., Any]
     _merchant_deliver_order: Callable[..., Any]
     _merchant_failure_chance: Callable[..., Any]

@@ -5,6 +5,7 @@ from ...npc_custody import is_free
 from ...person_assignments import research_assignment
 from ...content_registry import WORLD_SYSTEMS
 from ..economy.basket_rules import REALM_WEIGHTS, purpose_candidates
+from ..intrigue.prison_state import is_imprisoned
 
 SHARES = dict(medical=.04, material=.064, energy=.03)
 
@@ -24,7 +25,7 @@ def refresh(game, war, side, *, persist=True):
     row = war.get('logistics', {}).get('sides', {}).get(side)
     source_world=(row or {}).get('world',war['world'])
     groups = Counter(n.realm_index for k,n in people.items() if k not in escaped and is_free(n) and n.world==source_world
-                     and not research_assignment(game, k))
+                     and not research_assignment(game, k) and not is_imprisoned(game, k))
     if game.player.alive and game.player.world==war['world'] and war.get('player_side')==side:
         groups[game.player.realm_index]+=1
     if row is not None and persist:

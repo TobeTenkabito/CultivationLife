@@ -20,6 +20,7 @@ from .system.ghost_resources import (
     intrinsic_hp_reference, intrinsic_mp_reference, mp_carry_ratio,
     ghost_external_hp_bonus, ghost_external_mp_bonus,
     ghost_opportunity_multiplier,
+    reconcile_ghost_attachment,
 )
 from .system.possession_system import current_body_age
 from .system.cultivation_ranks import public_ranks
@@ -849,6 +850,8 @@ def remove_item(player: Player, item_id: str, quantity: int = 1) -> bool:
             item.quantity -= quantity
             if item.quantity == 0:
                 player.inventory.remove(item)
+                if player.ghost_attachment and player.ghost_attachment.get('item_id') == item_id:
+                    reconcile_ghost_attachment(player)
             return True
     return False
 

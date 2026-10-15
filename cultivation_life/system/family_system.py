@@ -94,7 +94,8 @@ class FamilySystemMixin:
         rank = (npc.realm_index, npc.layer)
         target = (npc.realm_index, npc.layer + 1) if npc.layer < REALMS[npc.realm_index].layers else (npc.realm_index + 1, 1)
         cost = max(30, int((npc.realm_index + 1) ** 3 * 25 * (1 + npc.layer / 3)))
-        allowed = (is_free(npc) and npc.age >= 16 and npc.spirit_root != 'none' and npc.world == game.player.world
+        allowed = (is_free(npc) and not self._intrigue_is_imprisoned(game, npc.id)
+                   and npc.age >= 16 and npc.spirit_root != 'none' and npc.world == game.player.world
                    and rank < self._actual_player_realm(game.player) and target <= (cap, REALMS[cap].layers)
                    and game.player.opportunity >= cost)
         return {'cap_realm':cap, 'cap_name':f'{REALMS[cap].name}后期', 'cost':cost, 'allowed':bool(allowed), 'target':target}
@@ -146,8 +147,12 @@ class FamilySystemMixin:
         npc = next((n for n in family.npcs if n.id == payload.get('npc_id')), None) if family and not family.extinct else None
         if not npc and child:
             npc = self._family_child_npc(child)
+        if action in {'expel', 'send_sect'} and npc and self._intrigue_is_imprisoned(game, npc.id):
+            raise ValueError('请先释放该族人，再办理离册或任职')
         personal = action in {'teach', 'gift_equipment', 'invite', 'infuse'}
         if personal:
+            if npc and self._intrigue_is_imprisoned(game, npc.id):
+                raise ValueError('监禁中的后代不能参与自由家族互动')
             if not child and not (npc and self._family_is_kin(game, npc)):
                 raise ValueError('只能与有灵根的家族后代互动')
             if not npc or not npc.alive or npc.age < 16 or npc.spirit_root == 'none' or npc.world != player.world:
@@ -460,7 +465,9 @@ class FamilySystemMixin:
         for row in [*result.get('offspring',[]),*result.get('roster',[])]:
             npc = self._find_npc(game,str(row.get('id')))
             if not npc:continue
-            row['can_interact'] = bool(is_free(npc) and npc.age>=16 and npc.spirit_root!='none' and npc.world==game.player.world
+            row['imprisoned'] = self._intrigue_is_imprisoned(game, npc.id)
+            row['can_interact'] = bool(is_free(npc) and not self._intrigue_is_imprisoned(game, npc.id)
+                                       and npc.age>=16 and npc.spirit_root!='none' and npc.world==game.player.world
                                        and (self._family_is_kin(game,npc) or row in result.get('offspring',[])))
             row['combat_power'] = self._npc_power(npc) if npc.alive else 0
             row['infusion'] = self._family_infusion(game,npc)

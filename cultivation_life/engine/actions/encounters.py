@@ -143,6 +143,9 @@ def prison_action(deps: EncounterActionDependencies, game_id: str, action: str) 
                 result, summary = "failed", f"越狱失败，HP -{damage:.0f}，敌对值继续上升。"
     else:
         raise ValueError("未知牢狱行动")
+    if action in {'endure', 'wait', 'cultivate'}:
+        from ...system.intrigue.custody import advance_prison_year
+        advance_prison_year(game)
     if action in {"endure", "wait", "cultivate"} and player.alive and not deps._advance_soul_erosion_time(game, 1):
         result = "dead"
         summary = "刑狱岁月令魂蚀越过最后界限，你在出狱前魂飞魄散。"

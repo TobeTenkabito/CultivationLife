@@ -82,6 +82,10 @@ def _intrigue_resolve(
         from ..organization_relocation import validate as validate_relocation
         validate_relocation(game,deps.maps,kind,faction_id,target_id)
     record = deps._ensure_intrigue_faction(game, kind, faction_id)
+    if resolution_type == 'imprison_member':
+        from .custody import validate_imprisonment, prison_terms
+        validate_imprisonment(game, record, deps._intrigue_members(game, kind, faction_id), target_id)
+        prison_terms((context or {}).get('years', 10), (context or {}).get('reason', ''))
     if resolution_type == 'replace_leader':
         from .leadership import validate as validate_leader
         validate_leader(game, record, deps._intrigue_members(game, kind, faction_id), target_id)
@@ -114,6 +118,8 @@ def _intrigue_resolve(
         "proposer_id": proposer_id, "target_id": target_id, "votes": ballots,
         "yes": yes, "total": len(ballots), "result": "passed" if passed else "rejected", "age": game.player.age,
     }
+    if resolution_type == 'imprison_member':
+        resolution.update(years=(context or {}).get('years', 10), reason=(context or {}).get('reason', '').strip()[:40] or '违抗势力法令')
     if resolution_type == "declare_war" and proposer_id != deps.PLAYER_ID and not system_war_allowed(game, kind, faction_id, target_id):
         passed = False
     if passed:
@@ -150,6 +156,12 @@ def _intrigue_apply_resolution(
     target_id: str, rng: random.Random, *, context: dict[str, Any] | None = None,
 ) -> None:
     kind, faction_id = str(record["kind"]), str(record["id"])
+    if resolution_type == 'imprison_member':
+        from .custody import imprison
+        imprison(game, record, deps._intrigue_members(game, kind, faction_id), target_id,
+                 years=(context or {}).get('years', 10), reason=(context or {}).get('reason', ''),
+                 imprisoned_by=deps.PLAYER_ID if (context or {}).get('initiated_by_player') else record.get('controller_id'))
+        return
     if resolution_type == 'replace_leader':
         from .leadership import appoint
         appoint(game, record, deps._intrigue_members(game, kind, faction_id), target_id)
@@ -235,6 +247,7 @@ def _intrigue_apply_resolution(
 
 def intrigue_propose_resolution(
     deps: IntrigueResolutionsDependencies, game_id: str, kind: str, resolution_type: str, target_id: str = "", player_vote: bool = True,
+    *, years: int = 10, reason: str = '',
 ) -> dict[str, Any]:
     game = deps._load(game_id)
     if not deps._intrigue_enabled():
@@ -254,7 +267,8 @@ def intrigue_propose_resolution(
         if resolution_type == "make_peace" and deps._active_war(game, kind, faction_id, target_id):
             raise ValueError("战争已经进入征伐阶段，请在战争窗口提交和约；和约仍会先经过势力表决")
     rng = decode_rng(game.seed, game.rng_state)
-    deps._intrigue_resolve(game, kind, faction_id, resolution_type, target_id, bool(player_vote), deps.PLAYER_ID, rng)
+    deps._intrigue_resolve(game, kind, faction_id, resolution_type, target_id, bool(player_vote), deps.PLAYER_ID, rng,
+                          context={'years':years, 'reason':reason} if resolution_type == 'imprison_member' else None)
     game.rng_state = encode_rng(rng)
     game.updated_at = now_iso()
     deps.store.save(game)

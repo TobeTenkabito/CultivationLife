@@ -147,6 +147,9 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
         "source": str(target.get("source", "captive")),
         "path": target_path, "path_name": PATH_NAMES.get(target_path, target_path),
         "realm_index": realm_index, "layer": layer,
+        "immortal_body_level": max(0, int(target.get('immortal_body_level', 0))),
+        "body_training": max(0, int(target.get('body_training') if target.get('body_training') is not None else realm_index * 2)),
+        "golden_light_rank": max(1, min(5, int(target.get('golden_light_rank', 1)))),
     }
     player.name = f"{target_name}（{original_name}）"
     player.gender = str(target.get("gender", "male"))

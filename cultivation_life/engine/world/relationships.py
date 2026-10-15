@@ -707,8 +707,11 @@ def _sync_party_state(deps: RelationshipDependencies, game: GameState) -> bool:
     relationships_changed = deps._sync_relationship_records(game)
     valid: list[dict[str, Any]] = []
     seen: set[str] = set()
+    from ...system.intrigue.custody import is_imprisoned
     for reference in game.player.party:
         npc_id = str(reference.get("id", ""))
+        if is_imprisoned(game, npc_id):
+            continue
         companion = game.player.dao_companion
         if companion and companion.get("id") == npc_id:
             if npc_id and npc_id not in seen and is_free(companion) and companion.get("world") == game.player.world:

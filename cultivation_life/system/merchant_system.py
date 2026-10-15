@@ -26,7 +26,13 @@ def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=N
             alliance = deps._merchant_alliance(game, player.world, issuer.get('network_id', issuer['id']))
             if alliance:
                 alliance_id = alliance['id']
-    if action == "dismiss_notices":
+    if action == 'claim':
+        from .merchant.delivery import claim
+        order = next((row for row in state['posted'] if row['id'] == payload.get('order_id')), None)
+        if not order or order['status'] != 'completed':
+            raise ValueError('委托尚未完成或不存在')
+        deps._merchant_notice(game, claim(game, order))
+    elif action == "dismiss_notices":
         state["notices"] = []
     elif action == "leave":
         if state["active"]:
@@ -112,8 +118,8 @@ def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=N
 
 def _merchant_post(deps: MerchantActionDependencies, game, alliance, payload):
     state = game.merchant_state
-    if sum(row["status"] in {"open", "working"} for row in state["posted"]) >= 12:
-        raise ValueError("最多同时发布12个委托")
+    if sum(row["status"] in {"open", "working"} or bool(row.get('delivery_goods')) for row in state["posted"]) >= 12:
+        raise ValueError("执行中及待领取委托合计最多12个，请先领取已有产物")
     quote = deps._merchant_quote(game, alliance, payload)
     if payload.get("preview_token") and payload["preview_token"] != quote["preview_token"]:
         raise ValueError("委托条件或报价已变化，请重新预览")
@@ -124,10 +130,11 @@ def _merchant_post(deps: MerchantActionDependencies, game, alliance, payload):
     years = quote["years"]
     state["posted"].append(copy.deepcopy(quote) | {
         "id": state["sequence"], "world": game.player.world, "alliance_id": alliance["id"],
+        "delivery_location": game.player.location_id,
         "posted_age": game.player.age, "check_age": game.player.age + max(1, years // 3),
         "deadline": game.player.age + years * 4, "status": "open",
         "accept_chance": min(.85, .3 + .15 * quote["principal"] / quote["minimum"]),
     })
-    terminal = [row for row in state["posted"] if row["status"] not in {"open", "working"}]
+    terminal = [row for row in state["posted"] if row["status"] not in {"open", "working"} and not row.get('delivery_goods')]
     for old in terminal[:-30]:
         state["posted"].remove(old)

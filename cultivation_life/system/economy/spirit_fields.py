@@ -8,6 +8,17 @@ from ...rules import add_item, max_mp, remove_item
 from .dependencies import SpiritFieldsDependencies
 
 
+def field_operation_available(game):
+    p = game.player
+    return not (not p.alive or game.pending_event or game.active_trial or p.imprisonment
+                or p.ghost_captor or game.guixu_state.get('player_session'))
+
+
+def require_field_access(game):
+    if not field_operation_available(game):
+        raise ValueError('当前状态无法操持灵田或炼化灵植，请先处理事件或脱离拘束')
+
+
 def _plant_item_value(deps: SpiritFieldsDependencies, item_or_id: Item | str) -> int | None:
     if isinstance(item_or_id, Item) and item_or_id.plant_id:
         return int(item_or_id.plant_value or 1)
@@ -120,8 +131,7 @@ def _public_spirit_field(deps: SpiritFieldsDependencies, player: Player) -> dict
 def reclaim_spirit_field(deps: SpiritFieldsDependencies, game_id: str) -> dict[str, Any]:
     game = deps._load(game_id)
     player = game.player
-    if not player.alive or game.pending_event or player.imprisonment:
-        raise ValueError("当前状态无法开垦灵田")
+    require_field_access(game)
     if player.realm_index == 0:
         raise ValueError("凡人尚无能力布置灵田禁制")
     rules = deps._spirit_field_rules()
@@ -146,8 +156,7 @@ def reclaim_spirit_field(deps: SpiritFieldsDependencies, game_id: str) -> dict[s
 
 def plant_spirit_crop(deps: SpiritFieldsDependencies, game_id: str, plant_id: str, slot: int | None = None) -> dict[str, Any]:
     game = deps._load(game_id)
-    if game.pending_event or not game.player.alive:
-        raise ValueError("当前状态无法播种")
+    require_field_access(game)
     rules = deps._spirit_field_rules()
     plant = rules["plants"].get(plant_id)
     field = game.player.spirit_field
@@ -178,8 +187,7 @@ def irrigate_spirit_crop(
     deps: SpiritFieldsDependencies, game_id: str, plot_id: str, mp_amount: float = 0, booster_id: str = "",
 ) -> dict[str, Any]:
     game = deps._load(game_id)
-    if game.pending_event or not game.player.alive:
-        raise ValueError("当前状态无法灌溉")
+    require_field_access(game)
     plot = next((row for row in game.player.spirit_field.get("plots", []) if row.get("id") == plot_id), None)
     if not plot:
         raise ValueError("灵田中没有这株灵植")
@@ -226,6 +234,7 @@ def irrigate_spirit_crop(
 
 def harvest_spirit_crop(deps: SpiritFieldsDependencies, game_id: str, plot_id: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    require_field_access(game)
     plot = next((row for row in game.player.spirit_field.get("plots", []) if row.get("id") == plot_id), None)
     if not plot or float(plot.get("growth_years", 0)) <= 0:
         raise ValueError("这株灵植尚未形成可收获的药性")
@@ -247,6 +256,7 @@ def harvest_spirit_crop(deps: SpiritFieldsDependencies, game_id: str, plot_id: s
 
 def use_harvested_plant(deps: SpiritFieldsDependencies, game_id: str, item_id: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    require_field_access(game)
     player = game.player
     item = next((row for row in player.inventory if row.id == item_id and row.quantity > 0), None)
     if not item or not item.plant_id:
@@ -286,8 +296,8 @@ def sell_spirit_plant(deps: SpiritFieldsDependencies, game_id: str, item_id: str
         ratio = float(deps._spirit_field_rules()["black_market_sell_ratio"])
         title, venue = "黑市灵植交易", "黑市"
     else:
-        if game.pending_event or game.player.realm_index == 0:
-            raise ValueError("当前无法进入坊市出售灵植")
+        from .local_market import require_access
+        require_access(game)
         ratio = float(deps._spirit_field_rules()["market_sell_ratio"])
         title, venue = "坊市灵植交易", "坊市"
     if not remove_item(game.player, item_id):

@@ -48,8 +48,15 @@ def _public_merchant(deps: MerchantViewDependencies, game):
             for key in [alliance['hq'], *(o['location_id'] for o in alliance['offices'])]
             if owned and site and separated(deps.maps, game.player.world, game.player.location_id, key)]
         visible.append(row)
-    orders = copy.deepcopy(state["posted"])
-    for order in orders:
+    orders = [copy.deepcopy({key: value for key, value in order.items() if key != 'delivery_goods'})
+              for order in state['posted']]
+    for order, original in zip(orders, state['posted']):
+        from .delivery import local_delivery
+        order['delivery_pending'] = bool(original.get('delivery_goods'))
+        order['can_claim'] = order['delivery_pending'] and local_delivery(game, original)
+        location = order.get('delivery_location')
+        order['delivery_address'] = WORLD_SYSTEMS['world_names'][order['world']] + (
+            ' · ' + deps.maps.location(order['world'], location)['name'] if location else '')
         order.pop("will_finish", None)
         order.pop("failure_age", None)
         order.pop("accept_chance", None)

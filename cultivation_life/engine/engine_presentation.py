@@ -1,5 +1,6 @@
 from __future__ import annotations
 from ..system.economy.presentation import public_economy
+from ..system.economy.spirit_fields import field_operation_available
 from ..system.economy.caravans import public_caravans
 from ..system.economy.personal import public_personal
 from ..system.economy.network_actions import public_network
@@ -258,7 +259,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "merchant_system": deps._public_merchant(game),
         "personal_economy": public_personal(game),
         "fleet_network": public_network(game, deps.maps),
-        "spirit_field": deps._public_spirit_field(game.player),
+        "spirit_field": deps._public_spirit_field(game.player) | {'operation_available': field_operation_available(game)},
         "art_skills": deps._public_art_skills(game.player),
         "map": {**deps._public_map_with_ghost_parade(game, location_id), "economy": {
             **public_economy(game), "caravans": public_caravans(game, deps.maps, local=True),

@@ -42,6 +42,7 @@ STYLE_LABELS = {
     "military": "军事型",
 }
 RESOLUTION_LABELS = {
+    "imprison_member": "监禁在册成员",
     "replace_leader": "更换掌门",
     "expand_influence": "投放地方影响力",
     "build_outpost": "新建地方据点",
@@ -410,6 +411,7 @@ class IntrigueSystemMixin:
         resolution_type: str,
         target_id: str = "",
         player_vote: bool = True,
+        *, years: int = 10, reason: str = '',
     ) -> dict[str, Any]:
         return intrigue_resolutions.intrigue_propose_resolution(
             self._intrigue_dependencies.resolutions,
@@ -418,6 +420,7 @@ class IntrigueSystemMixin:
             resolution_type,
             target_id,
             player_vote,
+            years=years, reason=reason,
         )
 
     def _intrigue_record_player_prison(

@@ -1,5 +1,20 @@
 """One ownership transfer for a standard inventory artifact at birth or binding."""
 from ..rules import remove_item
+from ..content_registry import WORLD_SYSTEMS
+
+
+def access_reason(game):
+    if not game.player.alive or game.pending_event or game.player.imprisonment:
+        return '当前状态无法祭炼本命法宝'
+    if game.player.realm_index < int(WORLD_SYSTEMS['natal_artifact']['minimum_realm']):
+        return '结丹期方可修炼本命法宝'
+    return ''
+
+
+def require_access(game):
+    reason = access_reason(game)
+    if reason:
+        raise ValueError(reason)
 
 
 def bind_standard(game, item_id):

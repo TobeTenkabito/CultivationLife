@@ -27,6 +27,9 @@ def crafted_artifact_action(
     )
     if not artifact:
         raise ValueError("这件炼器法宝不存在")
+    if action in {'natal', 'unbind_natal'}:
+        from ..natal_binding import require_access
+        require_access(game)
     if action == "equip":
         if artifact.get("tianji"):
             tianji_ids = {
@@ -70,6 +73,8 @@ def crafted_artifact_action(
     elif action == "unbind_natal":
         deps._unbind_crafted_natal_artifact(game, artifact_id)
     elif action == "sell":
+        from ..economy.local_market import require_access
+        require_access(game)
         if artifact.get("tianji"):
             raise ValueError("神机法宝不能按普通成品出售")
         if artifact.get("is_natal"):

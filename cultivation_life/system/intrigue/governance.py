@@ -79,9 +79,8 @@ def _intrigue_auto_appoint_player(
 
 
 def _intrigue_is_imprisoned(deps: IntrigueGovernanceDependencies, game: GameState, npc_id: str) -> bool:
-    if not deps._intrigue_enabled():
-        return False
-    return npc_id in deps._intrigue_state(game).get("npc_prisons", {})
+    from .custody import is_imprisoned
+    return is_imprisoned(game, npc_id, enabled=deps._intrigue_enabled())
 
 
 def _intrigue_decision_threshold(deps: IntrigueGovernanceDependencies, kind: str) -> int:
@@ -133,9 +132,9 @@ def intrigue_personnel_action(
         return deps.present(game)
     npc = deps._intrigue_find_npc(game, npc_id)
     member_ids = {row.id for row in deps._intrigue_members(game, kind, faction_id)}
-    if not npc or npc.id not in member_ids or not npc.alive:
+    if action != 'release' and (not npc or npc.id not in member_ids or not npc.alive):
         raise ValueError("目标不是在册的存活成员")
-    if npc.id == record.get("controller_id"):
+    if action != 'release' and npc.id == record.get("controller_id"):
         raise ValueError("不能对当前控制顺位第一直接执行此操作")
     summary = ""
     if action == "appoint":
@@ -169,6 +168,8 @@ def intrigue_personnel_action(
         record["unrest"] = min(100.0, float(record.get("unrest", 0)) + 5)
         summary = f"你撤去了{npc.name}的{deps._intrigue_position_specs(kind).get(held, {}).get('name', '职位')}，此举引发不满。"
     elif action == "expel":
+        if deps._intrigue_is_imprisoned(game, npc.id):
+            raise ValueError('请先释放囚犯，再办理逐出')
         for pid, holder in list(record["positions"].items()):
             if holder == npc.id:
                 record["positions"][pid] = None
@@ -181,27 +182,15 @@ def intrigue_personnel_action(
         record["unrest"] = min(100.0, float(record.get("unrest", 0)) + 12)
         summary = f"你将{npc.name}逐出{deps._intrigue_faction_name(game, kind, faction_id)}；对方已心生怨恨。"
     elif action == "imprison":
-        if deps._intrigue_is_imprisoned(game, npc.id):
-            raise ValueError("目标已经被关押")
-        years = max(1, min(1000, int(years)))
-        entry = {"prisoner_id": npc.id, "name": npc.name, "faction_id": faction_id, "kind": kind,
-                 "sentence_remaining": years, "sentence_years": years,
-                 "reason": (reason.strip()[:40] or "违抗势力法令"), "imprisoned_by": deps.PLAYER_ID}
-        record["prison"].append(entry)
-        deps._intrigue_state(game)["npc_prisons"][npc.id] = deps._intrigue_key(kind, faction_id)
-        npc.affinity = float(npc.affinity or 0) - 25
-        record["fear"] = min(100.0, float(record.get("fear", 0)) + 12)
-        record["unrest"] = min(100.0, float(record.get("unrest", 0)) + 7)
+        from .custody import imprison
+        entry = imprison(game, record, deps._intrigue_members(game, kind, faction_id), npc.id,
+                         years=years, reason=reason, imprisoned_by=deps.PLAYER_ID)
         summary = f"你以“{entry['reason']}”为由，将{npc.name}关押 {years} 年。"
     elif action == "release":
-        before = len(record["prison"])
-        record["prison"] = [row for row in record["prison"] if row.get("prisoner_id") != npc.id]
-        if len(record["prison"]) == before:
-            raise ValueError("目标不在本势力监狱")
-        deps._intrigue_state(game)["npc_prisons"].pop(npc.id, None)
-        record["fear"] = max(0.0, float(record.get("fear", 0)) - 3)
-        emit(game, "captive.released", target_id=npc.id)
-        summary = f"你下令释放{npc.name}。"
+        from .custody import release
+        entry = release(game, record, npc_id)
+        emit(game, "captive.released", target_id=npc_id)
+        summary = f"你下令释放{entry.get('name', '该囚犯')}。"
     elif action in {"reward", "punish"}:
         delta = 10 if action == "reward" else -10
         record["member_contribution"][npc.id] = int(record["member_contribution"].get(npc.id, 0)) + delta
@@ -213,7 +202,7 @@ def intrigue_personnel_action(
         raise ValueError("未知人事操作")
     game.history.append(HistoryRecord(
         "SYS_INTRIGUE_PERSONNEL", 1, game.player.age, "势力人事", action, "executed", summary,
-        {"kind": kind, "faction_id": faction_id, "npc_id": npc.id}, ["system", "intrigue", kind, "faction"],
+        {"kind": kind, "faction_id": faction_id, "npc_id": npc_id}, ["system", "intrigue", kind, "faction"],
     ))
     game.updated_at = now_iso()
     deps.store.save(game)

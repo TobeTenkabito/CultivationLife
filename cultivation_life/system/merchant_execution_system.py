@@ -57,7 +57,8 @@ def _merchant_failure_chance(stars, worker_realm, required_realm):
 
 def _merchant_start_order(deps: MerchantExecutionDependencies, game, order, rng):
     workers = [npc for npc in deps._all_world_npcs(game)
-               if npc.alive and npc.world == order['source_world'] and npc.id != order.get('target_id')]
+               if npc.alive and npc.world == order['source_world'] and npc.id != order.get('target_id')
+               and not deps._intrigue_is_imprisoned(game, npc.id)]
     if not workers:
         return  # No cultivator is available; leave the commission posted.
     # Increasing stars monotonically tilts the pool toward senior cultivators.
@@ -81,6 +82,9 @@ def _merchant_start_order(deps: MerchantExecutionDependencies, game, order, rng)
 
 def _merchant_tick_order(deps: MerchantExecutionDependencies, game, order):
     worker = deps._find_npc(game, order['worker_id']) if order.get('worker_id') else None
+    if worker and deps._intrigue_is_imprisoned(game, worker.id):
+        deps._merchant_refund(game, order, 'failed', '承接修士被关押，执行中止', math.ceil(order['fee'] / 2))
+        return
     failure_age = order.get('failure_age', order['finish_age'])
     end_age = min(game.player.age, order['finish_age'], order['deadline'])
     if not order.get('will_finish', True):

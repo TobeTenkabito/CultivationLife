@@ -126,6 +126,7 @@
     if (!system.posted.length) root.append(element('p', '暂无发布记录。', 'muted'));
     [...system.posted].reverse().forEach(order => {
       const row = element('section', null, 'merchant-order');
+      row.dataset.orderId = order.id;
       row.dataset.status = order.status;
       row.append(element('strong', `${'★'.repeat(order.stars)} ${order.name} · ${{open:'等待接取',working:'执行中',completed:'已完成',failed:'执行失败 · 已退款',cancelled:'已取消并退款'}[order.status]}`));
       row.append(element('p', `本金 ${money(order.principal)} / 手续费 ${money(order.fee)} · 取消期限：第${order.deadline}年${order.cross_world ? ' · 跨界委托' : ''}`));
@@ -135,13 +136,17 @@
         row.append(element('p', `${order.worker}${order.worker_realm_name ? `（${order.worker_realm_name}）` : ''} · ${Math.floor(order.progress * 100)}%${order.status === 'working' ? ` · 预计第${order.finish_age}年完成` : ''}${order.failure_chance != null ? ` · 接单评估失败风险 ${Math.round(order.failure_chance * 100)}%` : ''}`));
       }
       if (order.refund_principal != null) row.append(element('p', `已退本金 ${money(order.refund_principal)} 灵石 + 手续费 ${money(order.refund_fee)} 灵石`, 'merchant-refund'));
+      if(order.delivery_pending){
+        row.append(element('p', `产物保存在 ${order.delivery_address}，请返回原发布地领取。`, 'muted'),
+          button('领取产物', 'claim', {order_id:order.id}, !order.can_claim));
+      }
       if (order.logs?.length) {
         const logs = element('details', null, 'merchant-progress-log'); logs.open = order.status === 'working' || order.status === 'failed';
         logs.append(element('summary', `执行日志 · ${order.logs.length}条`));
         order.logs.forEach(entry => logs.append(element('p', `第${entry.age}年 · ${entry.message}`)));
         row.append(logs);
       }
-      if (order.delivery) row.append(element('p', order.delivery)); root.append(row);
+      if (order.delivery) row.append(element('p', (order.delivery_pending ? '待领产物：' : '') + order.delivery)); root.append(row);
       if(order.service_description) row.append(element('p',order.service_description));
       if(order.spec?.maxima) row.append(element('p',Object.entries(system.metric_names).map(([key,name])=>`${name} ${order.spec.requirements[key]}–${order.spec.maxima[key]}`).join(' / ')));
       if(order.spec){const saved=element('details');saved.append(element('summary','已确认成品概览'));saved.append(element('p',`${order.spec.material_tier}阶原料 · ${order.spec.mold?.name || '九宫阵法'}`));saved.append(element('p',order.kind==='formation'?Object.entries(order.spec.profile.metrics).map(([key,value])=>`${system.metric_names[key]} ${value}`).join(' / '):`战斗力 ${money(order.spec.stats.combat_power)} · 气血 ${money(order.spec.stats.max_hp)} · 法力 ${money(order.spec.stats.max_mp)}`));row.append(saved);}

@@ -203,6 +203,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
             result = world_time._advance_world_year(self._dependencies.time.world_year, game, rng, era_news, encounters=encounters)
         if context:
             year_step(self._dependencies.heavens, game, context)
+        from ..system.intrigue.custody import advance_prison_year
+        advance_prison_year(game)
         return result
 
     def travel_map(self, game_id: str, destination: str) -> dict[str, Any]:
@@ -305,11 +307,11 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def preview_merchant_commission(self, game_id, payload):
         return merchant_commissions.preview_merchant_commission(self._dependencies.merchant.commissions, game_id, payload)
 
-    def _merchant_deliver_commission(self, game, order):
-        return merchant_settlement._merchant_deliver_commission(self._dependencies.merchant.settlement, game, order)
+    def _merchant_deliver_commission(self, game, order, recipient=None):
+        return merchant_settlement._merchant_deliver_commission(self._dependencies.merchant.settlement, game, order, recipient=recipient)
 
-    def _merchant_procurement_bonus(self, game, order, rng):
-        return merchant_settlement._merchant_procurement_bonus(self._dependencies.merchant.settlement, game, order, rng)
+    def _merchant_procurement_bonus(self, game, order, rng, recipient=None):
+        return merchant_settlement._merchant_procurement_bonus(self._dependencies.merchant.settlement, game, order, rng, recipient=recipient)
 
     def debug_merchant_hq(self, game_id, alliance_id):
         return merchant_commissions.debug_merchant_hq(self._dependencies.merchant.commissions, game_id, alliance_id)
@@ -2362,6 +2364,7 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         resolution_type: str,
         target_id: str = "",
         player_vote: bool = True,
+        *, years: int = 10, reason: str = '',
     ) -> dict[str, Any]:
         return intrigue_resolutions.intrigue_propose_resolution(
             self._dependencies.intrigue.resolutions,
@@ -2370,6 +2373,7 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
             resolution_type,
             target_id,
             player_vote,
+            years=years, reason=reason,
         )
 
     def _intrigue_record_player_prison(
@@ -2592,11 +2596,11 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _local_ground_formation(self, game: GameState) -> dict[str, Any] | None:
         return formation_ground._local_ground_formation(self._dependencies.formation.ground, game)
 
-    def _sect_guard_array(self, game: GameState, sect_id: str) -> dict[str, Any] | None:
-        return formation_ground._sect_guard_array(self._dependencies.formation.ground, game, sect_id)
+    def _sect_guard_array(self, game: GameState, sect_id: str, *, world: str | None = None, location_id: str | None = None) -> dict[str, Any] | None:
+        return formation_ground._sect_guard_array(self._dependencies.formation.ground, game, sect_id, world=world, location_id=location_id)
 
-    def _sect_guard_power(self, game: GameState, sect_id: str) -> float:
-        return formation_ground._sect_guard_power(self._dependencies.formation.ground, game, sect_id)
+    def _sect_guard_power(self, game: GameState, sect_id: str, *, world: str | None = None, location_id: str | None = None) -> float:
+        return formation_ground._sect_guard_power(self._dependencies.formation.ground, game, sect_id, world=world, location_id=location_id)
 
     def _wear_war_guard_arrays(self, game: GameState, war: dict[str, Any], amount: float | None = None) -> None:
         return formation_ground._wear_war_guard_arrays(self._dependencies.formation.ground, game, war, amount)
