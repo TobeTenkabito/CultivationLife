@@ -326,11 +326,10 @@ class WarPerformanceUpdateTests(unittest.TestCase):
         self.assertGreater(high_escape, low_escape)
 
     def test_true_demon_has_five_root_manuals_and_mozun_can_return_to_demon(self):
-        made = self.engine.create_game("魔尊", "none", "dao", 9902, preset_id="mahayana")
+        made = self.engine.create_game("魔尊", "none", "demonic", 9902,
+            custom_start=dict(world='true_demon', realm_index=8, layer=1))
         game = self.engine.store.load(made["id"])
-        game.player.path = "demonic"
-        game.player.world = "true_demon"
-        game.player.location_id = self.engine.maps.default_location("true_demon")
+        game.pending_event = None
         game.player.additional_roots = []
         for affinity in ("metal", "wood", "water", "fire", "earth"):
             add_item(game.player, f"moque_{affinity}")
@@ -340,7 +339,13 @@ class WarPerformanceUpdateTests(unittest.TestCase):
         self.engine.manage_secret_art(made["id"], "suppress", "activate", 5, 9)
         shown = self.engine.cross_world(made["id"], "demon")
         self.assertEqual(shown["player"]["world"], "demon")
-        self.assertFalse(shown["world_travel"]["can_return_true_demon"])
+        self.assertTrue(shown["world_travel"]["can_return_true_demon"])
+        # The registered descent keeps its return route; suppression is only
+        # cancelled after the actual sealed return, per the v2.13.5 rule.
+        with self.assertRaises(ValueError):
+            self.engine.manage_secret_art(made["id"], "suppress", "cancel")
+        shown = self.engine.cross_world(made["id"], "true_demon")
+        self.assertEqual(shown["player"]["world"], "true_demon")
         shown = self.engine.manage_secret_art(made["id"], "suppress", "cancel")
         self.assertEqual(shown["player"]["realm_index"], 8)
 

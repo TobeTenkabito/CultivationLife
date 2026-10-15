@@ -94,7 +94,7 @@ from cultivation_life.system.economy.state import ensure_regional_market
 
 ROOT=Path(__file__).resolve().parents[1]
 
-def test_remote_settlement_interval_preserves_member_control_and_war(scenario,monkeypatch):
+def test_remote_settlement_interval_preserves_membership_and_war_but_ignores_stale_control(scenario,monkeypatch):
     from cultivation_life.system.economy.organizations import settlement_interval
     engine,game,_=scenario
     entity=game.sects['remote_human_1']
@@ -104,7 +104,7 @@ def test_remote_settlement_interval_preserves_member_control_and_war(scenario,mo
     assert settlement_interval(game,row)==1
     game.player.faction_id=None
     game.intrigue_state['factions'][f'sect:{entity.id}']['controller_id']='player'
-    assert settlement_interval(game,row)==1
+    assert settlement_interval(game,row)==5  # A stale controller is not current membership or authority.
     game.intrigue_state['factions'][f'sect:{entity.id}']['controller_id']=None
     game.wars.append(dict(kind='sect',world='human',status='active',attacker_id=entity.id,defender_id='jade_cloud'))
     assert settlement_interval(game,row)==1

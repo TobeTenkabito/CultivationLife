@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from ...system.intrigue.custody import is_imprisoned
 from ...system.npc_social import social_hint
 from ...system.npc_contacts import availability, relation_kind
 from typing import Any
@@ -191,6 +192,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         entry["in_party"] = any(member.get("id") == npc.id for member in player.party)
         entry["can_invite_party"] = bool(
             not entry["in_party"]
+            and not is_imprisoned(game, npc.id)
             and len(player.party) < int(WORLD_SYSTEMS["party"]["max_companions"])
         )
         entry["can_propose_companion"] = bool(

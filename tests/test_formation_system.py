@@ -466,12 +466,14 @@ class FormationIntegrationTests(unittest.TestCase):
         self.assertLessEqual(wear, 26.0)
 
     def test_real_sect_guard_adds_independent_war_power_and_wears(self):
+        from cultivation_life.system.faction_geography import faction_site
         instances = self._give_array()
         self._save_active(instances, "天剑护山阵")
         game = self.engine.store.load(self.game_id)
         game.player.faction_id = "tianjian"
         game.sects["tianjian"].founded_by_player = True
         game.sects["tianjian"].founder_player_id = game.id
+        game.player.location_id = faction_site(game.sects['tianjian'], persist=False)['id']
         self.engine.store.save(game)
         shown = self.engine.deploy_ground_formation(self.game_id, "sect")
         guard_id = shown["formation_system"]["ground_arrays"][0]["id"]
@@ -479,6 +481,7 @@ class FormationIntegrationTests(unittest.TestCase):
         relation = self.engine._war_relation(game, "sect", "wanmo", "tianjian")
         self.engine._set_diplomatic_relation(game, relation, "war", "wanmo", "tianjian", "sect", -80)
         war = game.wars[-1]
+        war['location_id'] = game.player.location_id  # This battle actually takes place at the guarded mountain.
         with_guard = self.engine._war_total_power(game, war, "defender")
         guard = next(row for row in game.player.formation_ground_arrays if row["id"] == guard_id)
         before = guard["durability"]

@@ -645,6 +645,7 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.intrigue_propose_resolution(
                     game_id, payload.get("kind", ""), payload.get("resolution_type", ""),
                     payload.get("target_id", ""), bool(payload.get("player_vote", True)),
+                    years=payload.get('years', 10), reason=payload.get('reason', ''),
                 )
             elif operation == "intrigue-recruitment":
                 result = ENGINE.intrigue_recruitment_action(

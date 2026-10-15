@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ...npc_custody import is_free
+from ...system.intrigue.custody import is_imprisoned
 
 from ...system.monster_identity import identity
 
@@ -121,6 +122,7 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
             "in_party": any(entry.get("id") == npc.id for entry in game.player.party),
             "can_invite_party": bool(
                 same_world and npc.alive
+                and not is_imprisoned(game, npc.id)
                 and len(game.player.party) < int(WORLD_SYSTEMS["party"]["max_companions"])
                 and not any(entry.get("id") == npc.id for entry in game.player.party)
             ),

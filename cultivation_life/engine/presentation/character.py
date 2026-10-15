@@ -251,7 +251,10 @@ def _relationship_combat_power(deps: CharacterViewDependencies, relation: dict[s
 
 def _public_party(deps: CharacterViewDependencies, game: GameState) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
+    from ...system.intrigue.custody import is_imprisoned
     for reference in game.player.party:
+        if is_imprisoned(game, str(reference.get('id', ''))):
+            continue
         companion = game.player.dao_companion
         if companion and companion.get("id") == reference.get("id"):
             if is_free(companion) and companion.get("world") == game.player.world:

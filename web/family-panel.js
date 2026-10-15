@@ -16,8 +16,8 @@
     if(registered && family.can_manage && row.alive) {
       if(row.can_marry)acts.push(button('安排外聘婚配','marry',id));
       const sects=(family.diplomacy || []).filter(s=>s.kind!=='family' && ['alliance','vassal'].includes(s.status));
-      if(!row.sect_name && row.age>=16 && sects.length)acts.push(`<label>安排入宗<select data-family-sect>${sects.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')}</select>${button('入宗','send_sect',id)}</label>`);
-      if(family.intrigue_enabled)acts.push(button('移出族籍','expel',id));
+      if(!row.imprisoned && !row.sect_name && row.age>=16 && sects.length)acts.push(`<label>安排入宗<select data-family-sect>${sects.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')}</select>${button('入宗','send_sect',id)}</label>`);
+      if(family.intrigue_enabled && !row.imprisoned)acts.push(button('移出族籍','expel',id));
     }
     return `<article class="family-row family-member ${row.alive===false?'fallen':''}" data-family-member="${esc(row.id)}">
       <div class="family-member-heading"><b>${esc(row.name)}${registered?' · '+esc(row.member_type):''}</b><strong>${esc(row.realm_name)}</strong></div>

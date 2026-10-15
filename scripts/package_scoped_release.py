@@ -54,6 +54,8 @@ def main():
     if scoped.get('profile')=='bugfix':
         required={f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('audit-fixes','economy-trust') for orientation in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Native bugfix scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test artifact changed after acceptance')
+        require(all('followup_fixes_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in native['logs'] if 'audit-fixes' in name),'Current native followup coverage missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')

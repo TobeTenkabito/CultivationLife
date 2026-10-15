@@ -7,10 +7,17 @@ def rules():
 
 
 def golden_light(player):
+    from .possession_system import is_possessed
+    if is_possessed(player):
+        from .npc_cultivation import npc_golden_light
+        return npc_golden_light(player.ghost_host_body)
     return int(player.immortal_body.get('level', 0)) >= rules()['body']['golden_light_level']
 
 
 def golden_light_rank(player):
+    from .possession_system import is_possessed
+    if is_possessed(player):
+        return max(1, min(5, int(player.ghost_host_body.get('golden_light_rank', 1)))) if golden_light(player) else 0
     return max(1, min(5, int(player.immortal_body.get('golden_light_rank', 1)))) if golden_light(player) else 0
 
 

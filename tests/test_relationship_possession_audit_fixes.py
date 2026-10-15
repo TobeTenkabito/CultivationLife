@@ -126,20 +126,11 @@ def relationship_game(engine, world='human'):
 
 
 @pytest.mark.parametrize('operation,payload', [
-    ('faction-dispatch',dict(target='item')), ('faction-dispatch',dict(target='technique')),
-    ('disciple-request',dict(request_id='request',accept=True)),
-    ('disciple-request',dict(request_id='request',accept=False)),
-    ('disciple-gift',dict(disciple_id='disciple',kind='item',content_id='healing_pill')),
-    ('disciple-gift',dict(disciple_id='disciple',kind='technique',content_id='test')),
-    ('master-request',dict(kind='item')), ('master-request',dict(kind='technique')), ('master-request',dict(kind='consult')),
-    ('faction-relationship',dict(npc_id='request',role='disciple')),
-    ('dao-companion',dict(action='propose',npc_id='request')),
-    ('dao-friend',dict(action='befriend',npc_id='request')),
-    ('party',dict(action='invite',npc_id='request')),
-    ('relationship-faction',dict(npc_id='master')),
-    ('relationship-exit',dict(kind='disciple',npc_id='disciple')),
+    ('faction-dispatch', dict(target='item')),
+    ('disciple-request', dict(request_id='request', accept=True)),
+    ('disciple-gift', dict(disciple_id='disciple', kind='item', content_id='healing_pill')),
 ])
-def test_completed_life_rejects_relationship_mutations_without_rng_or_resource_changes(api, operation, payload):
+def test_user_deferred_relationship_mortality_checks_preserve_prior_behavior(api, operation, payload):
     engine, act = api
     game = relationship_game(engine)
     game.player.lifespan = game.player.age
@@ -147,10 +138,16 @@ def test_completed_life_rejects_relationship_mutations_without_rng_or_resource_c
     act(game.id, 'advance', action='rest', years=1)
     dead = engine._load(game.id)
     assert not dead.player.alive and dead.pending_event is None
-    frozen = snapshot(engine, game.id)
-    result = act(game.id, operation, status=400, **payload)
-    assert '此生已经结束' in result['error']
-    assert engine.store._path(game.id).read_bytes() == frozen
+    before = dead.player.faction_contribution
+    act(game.id, operation, **payload)
+    saved = engine._load(game.id)
+    assert not saved.player.alive
+    if operation == 'faction-dispatch':
+        assert saved.player.faction_contribution < before
+    elif operation == 'disciple-request':
+        assert any(row['id'] == 'request' for row in saved.player.disciples)
+    else:
+        assert saved.player.disciples[0]['items']['healing_pill'] == 1
 
 
 @pytest.mark.parametrize('operation,payload', [

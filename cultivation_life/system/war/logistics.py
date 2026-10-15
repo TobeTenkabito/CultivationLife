@@ -152,6 +152,8 @@ def factor(war,side):
 def strategy(game,maps,war,side,action,rng):
     if action not in {'scout','forage','resupply'}:raise ValueError('未知军需策略')
     initialize(game,maps,war)
+    requirements.refresh(game,war,side)
+    war['logistics']['sides'][side]['reference_need']=need(game,war,side)
     book=war['logistics'];turn=book['round'];key=f'{side}:{action}'
     if book['actions'].get(key)==turn:raise ValueError('本轮已经执行过此项军需策略')
     enemy='defender' if side=='attacker' else 'attacker'

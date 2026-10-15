@@ -1343,6 +1343,7 @@ function renderIntrigue(system) {
         [['reward','赏'],['punish','罚'],['dismiss','撤职'],['expel','逐出']].forEach(([action,label]) => {
           const button = document.createElement('button'); button.textContent = label;
           button.onclick = () => mutate(`/api/games/${game.id}/intrigue-personnel`, {kind:section.kind, action, npc_id:member.id});
+          button.dataset.intrigueUnavailable = member.imprisoned ? '1' : '0';
           button.disabled = locked() || member.imprisoned; tools.appendChild(button);
         });
         const prison = document.createElement('button'); prison.textContent = member.imprisoned ? '释放' : '关押';
@@ -1352,6 +1353,24 @@ function renderIntrigue(system) {
       memberList.appendChild(row);
     });
     memberDetails.appendChild(memberList); block.appendChild(memberDetails);
+
+    const memberIds = new Set((section.members || []).map(member => member.id));
+    const detachedPrisoners = (section.prison || []).filter(prisoner => prisoner.prisoner_id !== 'player' && !memberIds.has(prisoner.prisoner_id));
+    if (detachedPrisoners.length) {
+      const details = document.createElement('details'); details.className = 'intrigue-details intrigue-detached-prisoners';
+      const summary = document.createElement('summary'); summary.textContent = `离册囚犯（${detachedPrisoners.length}）`; details.appendChild(summary);
+      detachedPrisoners.forEach(prisoner => {
+        const row = document.createElement('div'); row.className = 'intrigue-member';
+        const text = document.createElement('span'); text.textContent = `${prisoner.name} · 剩余 ${number(prisoner.sentence_remaining)} 年 · ${prisoner.reason || '未注明事由'}`; row.appendChild(text);
+        if (section.control_authority) {
+          const release = document.createElement('button'); release.textContent = '释放'; release.disabled = locked();
+          release.onclick = () => mutate(`/api/games/${game.id}/intrigue-personnel`, {kind:section.kind, action:'release', npc_id:prisoner.prisoner_id});
+          row.appendChild(release);
+        }
+        details.appendChild(row);
+      });
+      block.appendChild(details);
+    }
 
     {
       const guests = document.createElement('details'); guests.className = 'intrigue-details';
@@ -1404,8 +1423,13 @@ function renderIntrigue(system) {
     const vote = document.createElement('form'); vote.className = 'intrigue-resolution-form';
     const voteTitle = document.createElement('b'); voteTitle.textContent = '发起重大决议';
     const type = document.createElement('select');
-    Object.entries(system.resolution_types || {}).filter(([id]) => (id !== 'replace_leader' || section.kind === 'sect') && !['expand_influence','build_outpost','territory_policy','territory_spar','territory_harass','relocate'].includes(id) && id !== 'disciple_recruitment' && !(section.kind === 'sect' && id === 'mass_recruitment') && (section.kind !== 'family' || ['mass_recruitment','investment','policy'].includes(id))).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
+    Object.entries(system.resolution_types || {}).filter(([id]) => (id !== 'replace_leader' || section.kind === 'sect') && (id !== 'imprison_member' || ['sect','family'].includes(section.kind)) && !['expand_influence','build_outpost','territory_policy','territory_spar','territory_harass','relocate'].includes(id) && id !== 'disciple_recruitment' && !(section.kind === 'sect' && id === 'mass_recruitment') && (section.kind !== 'family' || ['imprison_member','mass_recruitment','investment','policy'].includes(id))).forEach(([id,label])=>{const option=document.createElement('option');option.value=id;option.textContent=label;type.appendChild(option);});
+    type.setAttribute('aria-label', `${section.kind_name}决议类型`);
     const target = document.createElement('select');
+    target.setAttribute('aria-label', `${section.kind_name}决议目标`);
+    const sentence = document.createElement('input'); sentence.type='number'; sentence.min='1';sentence.max='1000';sentence.step='1';sentence.value='10';sentence.setAttribute('aria-label',`${section.kind_name}监禁年数`);
+    const reason = document.createElement('input');reason.type='text';reason.maxLength=40;reason.placeholder='监禁事由';reason.setAttribute('aria-label',`${section.kind_name}监禁事由`);
+    const prisonNote = document.createElement('small');prisonNote.textContent='仅可监禁本组织合法在册成员；外部人物请通过势力通缉令处理。表决通过后执行，刑期 1–1000 年。';
     const playerChoice = document.createElement('select'); [['1','投赞成票'],['0','投反对票']].forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;playerChoice.appendChild(option);});
     const refreshTargets = () => {
       target.innerHTML=''; let rows=[];
@@ -1414,13 +1438,21 @@ function renderIntrigue(system) {
       else if (type.value === 'policy') rows=Object.entries(system.styles || {}).map(([id,name])=>({id,name}));
       else if (type.value === 'relocate') rows=system.available_worlds || [];
       else if (type.value === 'intervene_war') rows=section.war_targets || [];
-      if (!rows.length) rows=[{id:'',name:'无需指定目标'}];
+      else if (type.value === 'imprison_member') rows=section.imprisonment_targets || [];
+      const imprisoning=type.value==='imprison_member';
+      sentence.hidden=reason.hidden=prisonNote.hidden=!imprisoning;
+      sentence.required=imprisoning;
+      sentence.dataset.intrigueUnavailable=reason.dataset.intrigueUnavailable=imprisoning?'0':'1';
+      sentence.disabled=reason.disabled=!imprisoning;
+      submit.dataset.intrigueUnavailable=section.decision_authority && (!imprisoning || rows.length) ? '0' : '1';
+      submit.disabled=locked() || submit.dataset.intrigueUnavailable==='1';
+      if (!rows.length) rows=[{id:'',name:imprisoning?'没有可监禁的在册成员':'无需指定目标'}];
       rows.forEach(row=>{const option=document.createElement('option');option.value=row.id;option.textContent=row.name;target.appendChild(option);});
     };
-    type.onchange=refreshTargets; refreshTargets();
     const submit=document.createElement('button');submit.textContent='提交议事';submit.className='primary';submit.dataset.intrigueUnavailable=section.decision_authority?'0':'1';submit.disabled=locked()||!section.decision_authority;
-    vote.onsubmit=event=>{event.preventDefault();mutate(`/api/games/${game.id}/intrigue-resolution`,{kind:section.kind,resolution_type:type.value,target_id:target.value,player_vote:playerChoice.value==='1'});};
-    vote.append(voteTitle,type,target,playerChoice,submit);block.appendChild(vote);
+    type.onchange=refreshTargets; refreshTargets();
+    vote.onsubmit=event=>{event.preventDefault();mutate(`/api/games/${game.id}/intrigue-resolution`,{kind:section.kind,resolution_type:type.value,target_id:target.value,player_vote:playerChoice.value==='1',...(type.value==='imprison_member'?{years:Number(sentence.value),reason:reason.value}:{})});};
+    vote.append(voteTitle,type,target,playerChoice,sentence,reason,prisonNote,submit);block.appendChild(vote);
     content.appendChild(block);
   });
 
@@ -3138,7 +3170,9 @@ function renderInventory(items) {
       const tools = document.createElement('div'); tools.className = 'crafted-artifact-tools';
       const natal = document.createElement('button'); natal.textContent = artifact.is_natal ? '解除本命' : '炼为本命';
       const natalOccupied = Boolean(game?.natal_artifact?.bound && !artifact.is_natal);
-      natal.disabled = natalOccupied; natal.dataset.craftingUnavailable = natalOccupied ? '1' : '0';
+      const natalUnavailable = natalOccupied || game?.natal_artifact?.operation_available === false;
+      natal.disabled = natalUnavailable; natal.dataset.craftingUnavailable = natalUnavailable ? '1' : '0';
+      if (!natalOccupied && natalUnavailable) natal.title = '结丹期且无待处理事件或监禁时方可操作本命法宝';
       if (natalOccupied) natal.title = `已有本命法宝“${game.natal_artifact.name}”，不能重复认主`;
       natal.onclick = () => openGameConfirm({title:artifact.is_natal ? '解除本命' : '本命认主', body:artifact.is_natal ? `确认解除“${artifact.name}”的本命关系？法宝仍会留在包裹并继续生效，已镶材料会全部退回，温养等级清除；损耗本源，下次修为突破概率降低10个百分点（重复移除累加）。` : `确认将“${artifact.name}”纳入本命法宝系统？认主后可在“本命”界面温养升级并镶嵌材料。`, confirmText:'确认', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:artifact.is_natal ? 'unbind_natal' : 'natal'})});
       tools.appendChild(natal);
@@ -3148,7 +3182,8 @@ function renderInventory(items) {
         tools.appendChild(active);
       } else {
         const sell = document.createElement('button'); sell.textContent = `坊市出售 · ${number(Math.round(artifact.anchor_value * .55))}`;
-        sell.disabled = Boolean(artifact.is_natal); sell.dataset.craftingUnavailable = artifact.is_natal ? '1' : '0';
+        sell.disabled = Boolean(artifact.is_natal) || game?.crafting_system?.market_available === false;
+        sell.dataset.marketSale = '1'; sell.dataset.craftingUnavailable = sell.disabled ? '1' : '0';
         sell.onclick = () => openGameConfirm({title:'出售唯一法宝实例', body:`确认出售“${artifact.name}”？成交后该实例将永久离开包裹，不能赎回。`, confirmText:'确认出售', onConfirm:()=>mutate(`/api/games/${game.id}/crafted-artifact`, {artifact_id:artifact.id, action:'sell'})});
         tools.appendChild(sell);
       }
@@ -3168,7 +3203,7 @@ function renderInventory(items) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
       if (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant')) use.textContent = '炼化';
       if (item.root_grant) use.textContent = '参悟';
-      if (specialPlantUse) { use.textContent = '使用'; use.onclick = () => mutate(`/api/games/${game.id}/spirit-plant-use`, {item_id:item.id}); }
+      if (specialPlantUse) { use.textContent = '使用'; use.dataset.fieldOperation = '1'; use.onclick = () => mutate(`/api/games/${game.id}/spirit-plant-use`, {item_id:item.id}); }
       const ghostBreakthroughPill = Boolean(game.ghost_system?.available && item.breakthrough_bonus > 0);
       if (ghostBreakthroughPill) {
         use.textContent = '鬼修不可用';
@@ -4021,7 +4056,7 @@ function renderButtons() {
     if (control.id !== 'auction-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.auctionUnavailable === '1';
   });
   document.querySelectorAll('#spirit-field-card button, #spirit-field-card select, #market-plant-sellables button').forEach(control => {
-    if (control.id !== 'spirit-field-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.actionUnavailable === '1';
+    if (control.id !== 'spirit-field-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || game?.spirit_field?.operation_available === false || (control.closest('#market-plant-sellables') && game?.crafting_system?.market_available === false) || control.dataset.actionUnavailable === '1';
   });
   document.querySelectorAll('.technique-equip').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || button.dataset.compatible !== '1';
@@ -4036,7 +4071,10 @@ function renderButtons() {
     button.disabled = button.dataset.available !== '1' || busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   });
   document.querySelectorAll('.item-use').forEach(button => {
-    button.disabled = button.dataset.itemUnavailable === '1' || busy || !game?.player.alive || (!!game?.pending_event && button.dataset.allowDuringTrial !== '1');
+    button.disabled = button.dataset.itemUnavailable === '1' || busy || !game?.player.alive || (!!game?.pending_event && button.dataset.allowDuringTrial !== '1') || (button.dataset.fieldOperation === '1' && game?.spirit_field?.operation_available === false);
+  });
+  document.querySelectorAll('[data-market-sale]').forEach(button => {
+    button.disabled = busy || button.dataset.craftingUnavailable === '1' || game?.crafting_system?.market_available === false;
   });
   document.querySelectorAll('.relationship-action').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event;
@@ -4090,7 +4128,7 @@ function renderButtons() {
     if (control.id !== 'crafting-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.craftingUnavailable === '1';
   });
   document.querySelectorAll('#formation-card button, #formation-card input, #formation-card select').forEach(control => {
-    if (control.id !== 'formation-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.formationUnavailable === '1';
+    if (control.id !== 'formation-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || game?.formation_system?.operation_available === false || control.dataset.formationUnavailable === '1';
   });
   document.querySelectorAll('#secret-art-card button, #secret-art-card select').forEach(control => {
     if (control.id === 'secret-art-toggle') return;

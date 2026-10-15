@@ -107,7 +107,12 @@ class GhostSystemTests(unittest.TestCase):
         self.engine.manage_secret_art(game.id, "suppress", "activate", 5, 9)
         descended = self.engine.cross_world(game.id, "human")
         self.assertEqual(descended["player"]["world"], "human")
-        self.assertFalse(descended["world_travel"]["can_return_hell"])
+        # The current seal exposes a return to its recorded origin, including hell.
+        self.assertTrue(descended["world_travel"]["can_return_hell"])
+        with self.assertRaisesRegex(ValueError, "先循原路返界"):
+            self.engine.manage_secret_art(game.id, "suppress", "cancel")
+        returned = self.engine.cross_world(game.id, "hell")
+        self.assertEqual(returned["player"]["world"], "hell")
         restored = self.engine.manage_secret_art(game.id, "suppress", "cancel")
         self.assertEqual((restored["player"]["world"], restored["player"]["realm_index"]), ("hell", 8))
         self.assertFalse(restored["world_travel"]["suppressed"])

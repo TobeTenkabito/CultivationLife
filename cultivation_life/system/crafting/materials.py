@@ -4,6 +4,7 @@ from ...models import Player
 import copy
 import math
 from functools import lru_cache
+from collections import Counter
 from ...content_registry import CONTENT_DOCUMENTS, GUIXU_TIDE_CONTENT
 from .dependencies import CraftingMaterialsDependencies
 
@@ -68,9 +69,11 @@ def _crafting_material_candidates(
         definition = plant_defs.get(str(item.plant_id or ""))
         if not definition or item.quantity <= 0:
             continue
-        candidates.append(
-            {
-                "id": f"plant:{item.id}",
+        # Four recipe positions need at most four representatives of a stack.
+        # Keep the first address for existing selections; these are not items.
+        for index in range(min(4, int(item.quantity))):
+            candidates.append({
+                "id": f"plant:{item.id}" + (f":{index}" if index else ''),
                 "definition_id": f"plant:{item.plant_id}",
                 "name": item.name,
                 "quality": float(item.plant_quality or 0.5),
@@ -88,8 +91,7 @@ def _crafting_material_candidates(
                 "source_kind": "plant",
                 "inventory_item_id": item.id,
                 "quantity": item.quantity,
-            }
-        )
+            })
     for item in player.inventory:
         tags = set(item.tags)
         source_rank = _guixu_material_tiers().get(item.id)
@@ -181,6 +183,10 @@ def _resolve_crafting_selection(
         if not candidate or role not in candidate.get("roles", []):
             raise ValueError("材料不存在，或不能用于所选炼器位置")
         selected.append((role, candidate))
+    inventory_costs = Counter(row['inventory_item_id'] for _, row in selected if row.get('inventory_item_id'))
+    holdings = {item.id: item.quantity for item in player.inventory}
+    if any(count > holdings.get(identity, 0) for identity, count in inventory_costs.items()):
+        raise ValueError('行囊材料数量不足，不能重复占用同一份材料')
     secondary_defs = [selected[1][1]["definition_id"], selected[2][1]["definition_id"]]
     if secondary_defs[0] == secondary_defs[1] and not all(
         bool(selected[index][1].get("allow_duplicate_type")) for index in (1, 2)

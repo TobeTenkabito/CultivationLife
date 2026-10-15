@@ -23,6 +23,8 @@ def main():
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
+        if bugfix and 'audit-fixes' in name:
+            require('followup_fixes_scope' in text,f'Missing current followup native coverage: {name}')
     sdk=Path('F:/CultivationLife-Android-Tools/sdk')
     signer=sorted(sdk.glob('build-tools/*/apksigner.bat'))[-1]
     apk=ROOT/'android/app/build/outputs/apk/release/app-release.apk'
@@ -35,12 +37,15 @@ def main():
     installed=command('shell','sha256sum',remote).split()[0]
     digest=file_digest(apk)
     require(installed==digest,'Installed APK differs from the artifact being packaged')
+    test_apk=ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'
+    test_remote=command('shell','pm','path','com.fusheng.wendao.test').removeprefix('package:')
+    require(command('shell','sha256sum',test_remote).split()[0]==file_digest(test_apk),'Installed native test APK differs from current test build')
     receipt=dict(version=BASE_GAME_VERSION,apk_sha256=digest,status='passed',signed=True,
                  device=serial,android=command('shell','getprop','ro.build.version.release'),
-                 sdk=command('shell','getprop','ro.build.version.sdk'),logs=logs,
+                  sdk=command('shell','getprop','ro.build.version.sdk'),logs=logs,test_apk_sha256=file_digest(test_apk),
                   log_hashes={name:file_digest(ROOT/name) for name in logs},
                   scope='Annual finance, original organizational guards, trust and real production; six native orientation phases' if economy else 'Legacy soul and upper scope')
-    if bugfix:receipt['scope']='Reversible descent preserving ties, trained captive lifespan, remaining work and economic trust; four native orientation phases'
+    if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 

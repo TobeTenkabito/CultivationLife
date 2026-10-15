@@ -5,6 +5,7 @@ from ...content_registry import WORLD_SYSTEMS
 from ..faction_geography import faction_site
 from .state import ensure_regional_market
 from .industry import supplier_delivery
+from ..intrigue.prison_state import is_imprisoned
 
 
 def workforce(entity):
@@ -36,7 +37,8 @@ def produce(game, maps, entity, row, *, years=1, extra=False):
     for npc in entity.npcs:
         if not is_free(npc) or npc.world != entity.world:continue
         groups[npc.realm_index]+=1
-        if (npc.world,npc.id) not in deployed and not research_assignment(game,npc.id):
+        if (not is_imprisoned(game,npc.id) and (npc.world,npc.id) not in deployed
+                and not research_assignment(game,npc.id)):
             working[npc.realm_index]+=1
             effective_elder=effective_elder or (npc.id in elder_ids and npc.realm_index>=3)
     p=game.player

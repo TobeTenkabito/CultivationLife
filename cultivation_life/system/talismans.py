@@ -135,6 +135,14 @@ def consume(player, dimension):
     return value
 
 
+def helper_available(game, helper):
+    from ..spatial_people import accessible
+    from .intrigue.custody import is_imprisoned
+    return bool(helper and is_free(helper) and helper.world == game.player.world
+                and helper.spirit_root in ROOT_DEFINITIONS and (helper.affinity or 0) >= 0
+                and not is_imprisoned(game, helper.id) and accessible(game, helper))
+
+
 def craft(game, payload):
     p = game.player
     definitions, methods = local_materials(game), local_catalog(game)[1]
@@ -153,24 +161,14 @@ def craft(game, payload):
     costs = Counter(ids)
     helper_id = payload.get("npc_id", "")
     helper = find_person(game, helper_id) if helper_id else None
-    from ..spatial_people import accessible
-    if helper and not accessible(game, helper):
-        helper = None
     needs_help = element not in player_affinities(p)
     if needs_help:
         if (
-            not helper
-            or not is_free(helper)
-            or helper.world != p.world
+            not helper_available(game, helper)
             or element
-            not in (
-                root_elements(helper.spirit_root)
-                if helper.spirit_root in ROOT_DEFINITIONS
-                else []
-            )
-            or (helper.affinity or 0) < 0
+            not in root_elements(helper.spirit_root)
         ):
-            raise ValueError("缺少对应灵根；须请同界、友善且拥有对应灵根的修士注灵")
+            raise ValueError("缺少对应灵根；须请同界可接触、未被关押且友善的对应灵根修士注灵")
         costs["spirit_stone"] += 100 * max(1, p.realm_index)
     if any(not has_item(p, key, quantity) for key, quantity in costs.items()):
         raise ValueError("符材或委托注灵的灵石不足")
@@ -271,9 +269,6 @@ def public(game):
         helpers=[
             dict(id=n.id, name=n.name, elements=root_elements(n.spirit_root))
             for n in people.values()
-            if is_free(n)
-            and n.world == p.world
-            and n.spirit_root in ROOT_DEFINITIONS
-            and (n.affinity or 0) >= 0
+            if helper_available(game, n)
         ],
     )

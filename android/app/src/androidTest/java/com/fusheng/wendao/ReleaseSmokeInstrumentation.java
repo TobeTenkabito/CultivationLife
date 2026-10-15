@@ -173,14 +173,15 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             android.view.MotionEvent event=android.view.MotionEvent.obtain(now,android.os.SystemClock.uptimeMillis(),action,x,y,0);
             try {
                 event.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);
-                check(getUiAutomation().injectInputEvent(event,false), "Native input injection failed: "+selector);
+                check(getUiAutomation().injectInputEvent(event,true), "Native input injection failed: "+selector);
             } finally { event.recycle(); }
+            if(action==android.view.MotionEvent.ACTION_DOWN)Thread.sleep(80);
         }
         // Android input injection returns before WebView dispatches the DOM click.
         // Let it arrive before a following tap scrolls a still-hidden panel.
         // Animated WebViews may never become idle. Wait for the actual click
         // with a deadline instead of blocking the instrumentation indefinitely.
-        waitForJs("window.__releaseNativeTap===true", "Native click missing: "+selector);
+        waitForJs("window.__releaseNativeTap===true", "Native click missing: "+selector+": "+point);
         Thread.sleep(250);
     }
 
@@ -1314,9 +1315,49 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                         waitForJs("!busy && game.upper_institution.job.progress===100","Native remaining institution work",120000);
                         check(Boolean.TRUE.equals(js("game.player.age-__auditStartAge===60")),"Only sixty remaining years consumed");
                         capture("audit-work-"+arguments.getString("orientation","portrait"));
+                        tapSelector("#upper-institution-toggle");
                     }
                 }
-                result.putString("audit_fixes_scope","Real suppressed descent and return preserving ties, disabled cancellation, captive infinite lifespan and sixty-year resumed institution work");
+                for(String followupCase:new String[]{"guard","production","supply"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'修复汇总原生验收',spirit_root:'supreme_metal',path:'dao',seed:888,custom_start:{world:'human',realm_index:4,layer:1}})});return g.id;})()");
+                    python(assetText("followup_fixes_release.py")+"\nfrom cultivation_life import server\nprepare_followup(server.ENGINE,"+JSONObject.quote(id)+","+JSONObject.quote(followupCase)+")");
+                    if(followupCase.equals("guard")) {
+                        async("(async()=>{const id="+JSONObject.quote(id)+";let g=await api('/api/games/'+id);const post=(op,p)=>api('/api/games/'+id+'/'+op,{method:'POST',body:JSON.stringify(p)});const slots=g.formation_system.materials.filter(r=>r.source_kind==='formation_material').slice(0,3).map(r=>r.id);await post('formation-save',{name:'原生护山',slots,activate:true});await post('formation-ground-deploy',{owner_kind:'sect'});g=await api('/api/games/'+id);const destination=g.map.organization_relocation.find(r=>r.kind==='sect').destinations[0].id;await post('organization-action',{kind:'sect',owner_id:'followup_org',action:'relocate',location_id:destination});await post('map-travel',{destination});return true;})()");
+                        python(assetText("followup_fixes_release.py")+"\nfrom cultivation_life import server\nprepare_guard_defense(server.ENGINE,"+JSONObject.quote(id)+")");
+                        async("loadGame("+JSONObject.quote(id)+")");
+                        tapSelector("#event-choices button:nth-child(2)");
+                        waitForJs("!busy && !game.pending_event","Native remote guard resolves without borrowing old materials");
+                    } else {
+                        if(followupCase.equals("supply"))async("api('/api/games/"+id+"/intrigue-resolution',{method:'POST',body:JSON.stringify({kind:'sect',resolution_type:'declare_war',target_id:'tianjian'})})");
+                        async("loadGame("+JSONObject.quote(id)+")");
+                        tapSelector("[data-panel-target=intrigue]");
+                        js("(()=>{const f=document.querySelector('.intrigue-sect .intrigue-resolution-form');f.querySelector('select').value='imprison_member';f.querySelector('select').dispatchEvent(new Event('change'));f.querySelector('input[type=number]').value='500';return true;})()");
+                        tapSelector(".intrigue-sect .intrigue-resolution-form button");
+                        waitForJs("!busy && game.intrigue_system.sections.some(s=>s.prison.some(p=>p.prisoner_id==='followup_member'))","Native legal imprisonment vote");
+                        tapSelector("#intrigue-toggle");
+                        if(followupCase.equals("production")) {
+                            tapSelector("[data-action=rest]");
+                            waitForJs("!busy && game.faction.finance.labor_capacity===0","Native jailed member has no production labor",120000);
+                        } else async("(async()=>{const g=await api('/api/games/"+id+"');const w=g.war_system.wars.find(w=>w.attacker_id==='followup_org');return api('/api/games/"+id+"/war-action',{method:'POST',body:JSON.stringify({war_id:w.id,action:'round'})});})()");
+                    }
+                    python(assetText("followup_fixes_release.py")+"\nfrom cultivation_life import server\ninspect_followup(server.ENGINE,"+JSONObject.quote(id)+","+JSONObject.quote(followupCase)+")");
+                    capture("audit-followup-"+followupCase+"-"+arguments.getString("orientation","portrait"));
+                }
+                for(String[] branch:new String[][]{{"celestial","dao"},{"asura","dao"},{"nether","dao"},{"reincarnation","dao"},{"asura","demonic"},{"nether","monster"},{"reincarnation","ghost"}}) {
+                    String id=(String)async("(async()=>{const path="+JSONObject.quote(branch[1])+";const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'传承原生验收',spirit_root:path==='ghost'?'mutated_yin':'supreme_metal',path,seed:591,monster_species_id:path==='monster'?'serpent':null,custom_start:{world:"+JSONObject.quote(branch[0])+",realm_index:9,layer:1}})});return g.id;})()");
+                    python(assetText("followup_fixes_release.py")+"\nfrom cultivation_life import server\nprepare_followup(server.ENGINE,"+JSONObject.quote(id)+",'inheritance')");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    tapSelector("[data-panel-target=immortal-aperture]");
+                    tapSelector("#immortal-aperture-content > details > summary");
+                    check(Boolean.TRUE.equals(js("!document.querySelector('[data-inheritance-action]').disabled")),"Native legal inheritance available");
+                    tapSelector("[data-inheritance-action]");
+                    waitForJs("!busy && Array.from(document.querySelectorAll('[data-inheritance-action]')).some(b=>b.disabled)","Native inherited branch persisted");
+                    python(assetText("followup_fixes_release.py")+"\nfrom cultivation_life import server\ninspect_followup(server.ENGINE,"+JSONObject.quote(id)+",'inheritance')");
+                    capture("audit-inheritance-"+branch[0]+"-"+branch[1]+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("#immortal-aperture-toggle");
+                }
+                result.putString("audit_fixes_scope","Original return, lifespan and remaining work; real imprisonment vote, jailed production and military consumption, fixed-site guard and seven inheritance branches");
+                result.putString("followup_fixes_scope","v2.13.6: production, supply, original guard materials and seven native inheritance branches");
             } else if(phase.equals("economy-trust")) {
                 String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'托管原生验收',preset_id:'core',seed:419})});return g.id;})()");
                 python(assetText("economy_trust_release.py")+"\nfrom cultivation_life import server\nprepare_economy_trust(server.ENGINE,"+JSONObject.quote(id)+")");
@@ -1811,6 +1852,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             android.util.Log.e("ReleaseVerification","Verification failed",failure);
             try {
                 result.putString("guide_debug", (String)js("JSON.stringify((()=>{const n=document.querySelector('[data-native-guide-target]'),r=n?.getBoundingClientRect();return {step:game?.tutorial?.guide?.step,target:n?.outerHTML?.slice(0,1200),rect:r,coach:document.querySelector('.tutorial-coach')?.getBoundingClientRect(),hit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML?.slice(0,1200):null,dialog:Array.from(document.querySelectorAll('dialog[open]')).map(d=>d.id)};})())"));
+                result.putString("action_debug",(String)js("JSON.stringify({world:game?.player?.world,busy,pending:game?.pending_event?.id,theme:document.documentElement.dataset.theme,viewport:[innerWidth,innerHeight],scroll:[scrollX,scrollY],cross:document.querySelector('#cross-world-action')?.getBoundingClientRect(),click:window.__releaseNativeTap})"));
                 capture("failure-1520");
             } catch(Throwable ignored) { /* Screenshot assertions must not mask the original failure. */ }
             result.putString("status","failed");result.putString("error",failure.toString().substring(0,Math.min(6000,failure.toString().length())));

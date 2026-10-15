@@ -118,6 +118,15 @@ def ghost_external_mp_bonus(player: Player) -> float:
     return intrinsic_mp_reference(player) * ghost_soul_effects(player)["external_mp"]
 
 
+def reconcile_ghost_attachment(player: Player) -> bool:
+    """End attachment when the last real vessel leaves the inventory."""
+    attachment = player.ghost_attachment
+    if attachment and not any(item.id == attachment.get('item_id') and item.quantity > 0 for item in player.inventory):
+        player.ghost_attachment = None
+        return True
+    return False
+
+
 def ghost_opportunity_multiplier(player: Player) -> float:
     multiplier = 1.0 + ghost_soul_effects(player)["opportunity"]
     if "宿慧" in active_soul_traits(player):

@@ -21,6 +21,7 @@ from .dependencies import CraftingPresentationDependencies
 def _public_crafting_system(
     deps: CraftingPresentationDependencies, game: GameState
 ) -> dict[str, Any]:
+    from ..economy.local_market import trade_available
     player = game.player
     rules = deps._crafting_rules()
     candidates = deps._crafting_material_candidates(player)
@@ -58,6 +59,7 @@ def _public_crafting_system(
         "artifacts": artifacts,
         "blueprints": copy.deepcopy(player.crafting_blueprints),
         "active_count": len(active_crafted_artifacts(player)),
+        "market_available": trade_available(game),
         "budget": int(
             rules.get("budget_by_realm", [40] * 13)[max(0, min(12, player.realm_index))]
         ),

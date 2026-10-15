@@ -35,7 +35,12 @@ BUGFIX_TESTS = list(dict.fromkeys(ECONOMY_TESTS + [
     'tests/test_relationship_records.py','tests/test_relationship_story_update.py','tests/test_demonic_system.py',
     'tests/test_concubine_system.py','tests/test_guixu_tide.py','tests/test_time_flow.py',
     'tests/test_crafting_system.py','tests/test_formation_system.py','tests/test_persistence_pipeline.py',
-    'tests/test_action_time_performance.py']))
+    'tests/test_action_time_performance.py',
+    'tests/test_spirit_inheritance.py','tests/test_inheritance_audit_fixes.py',
+    'tests/test_repository_followup_fixes.py','tests/test_crafting_field_audit_fixes.py',
+    'tests/test_ownership_prison_fixes.py','tests/test_custody_formation_fixes.py',
+    'tests/test_guard_workforce_fixes.py','tests/test_territory_system.py',
+    'tests/test_war_logistics.py','tests/test_war_performance_update.py']))
 
 
 def main():
@@ -52,7 +57,10 @@ def main():
     browsers=['browser_economy_trust','browser_economy_enterprises','browser_organization_economy','browser_events_212'] if profile=='economy' else ['browser_release_260','browser_release_251','browser_events_212']
     if profile=='bugfix':
         browsers=['browser_release_2135','browser_other_systems_audit_fixes','browser_relationship_possession_audit_fixes',
-                  'browser_economy_round2','browser_economy_audit_followup','browser_economy_trust','browser_events_212']
+                   'browser_economy_round2','browser_economy_audit_followup','browser_economy_trust','browser_events_212',
+                   'browser_spirit_inheritance','browser_inheritance_audit_fixes','browser_repository_followup_fixes',
+                   'browser_crafting_field_audit_fixes','browser_ownership_prison_fixes',
+                   'browser_custody_formation_fixes','browser_guard_workforce_fixes']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     for name,args in jobs:
         log=ROOT/f'build/{name}-{tag}.log'

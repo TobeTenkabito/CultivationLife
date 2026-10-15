@@ -19,6 +19,7 @@ from .aperture_resources import (
 from .cultivation_dependencies import ApertureDependencies
 
 def public_aperture(player, game=None):
+    from .possession_system import is_possessed
     # Owning a lower-world manual opens its study view before the Lv4 combat
     # gate. This projection does not grant energy or change learned levels.
     studies = [{'id': t.id, 'name': t.name, 'level': t.level}
@@ -47,7 +48,7 @@ def public_aperture(player, game=None):
             from dataclasses import asdict
             field = asdict(source.voisinages[0])
     from .spirit_inheritance import public as public_inheritance
-    return {'available': True, 'lower': lower, 'field': field,
+    return {'available': True, 'lower': lower, 'field': field, 'suspended': is_possessed(player),
             'inheritances': public_inheritance(game) if game is not None and not lower else [],
             'spirit_studies': studies,
             'name': upper['energy'] if upper else '仿仙灵力' if lower else '仙灵力',
@@ -80,6 +81,9 @@ def aperture_action(deps: ApertureDependencies, game_id, action, manual_id=None)
         return act(deps, game_id, manual_id)
     game = deps._load(game_id)
     p = game.player
+    from .possession_system import is_possessed
+    if is_possessed(p):
+        raise ValueError('寄身期间本魂元府沉寂，请先离舍')
     if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
         or (game.guixu_state.get('player_session') or {}).get('trapped')):
         raise ValueError('当前状态不能操持元府')

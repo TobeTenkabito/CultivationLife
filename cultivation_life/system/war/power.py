@@ -26,7 +26,7 @@ def _war_total_power(
     guard_power = 0.0
     if side == "defender" and war.get("kind") == "sect":
         for sect_id in deps._coalition_ids(war, side):
-            guard_power += deps._sect_guard_power(game, sect_id)
+            guard_power += deps._sect_guard_power(game, sect_id, world=war.get('world'), location_id=war.get('location_id', ''))
     # Guard arrays are anchored battlefield infrastructure, not a fourth
     # cultivator competing for one of the aggregate roster's three slots.
     power = (npc_team_combat_power(powers) if powers else 0.0) + guard_power
@@ -49,7 +49,7 @@ def _war_side_formation(deps: WarPowerDependencies, game: GameState, war: dict[s
             })
     if side == "defender" and war.get("kind") == "sect":
         for sect_id in deps._coalition_ids(war, side):
-            array = deps._sect_guard_array(game, sect_id)
+            array = deps._sect_guard_array(game, sect_id, world=war.get('world'), location_id=war.get('location_id', ''))
             if not array:
                 continue
             profile = deps._ground_profile(game.player, array)
@@ -181,7 +181,7 @@ def _war_entity_power(deps: WarPowerDependencies, game: GameState, war: dict[str
     if game.player.alive and game.player.world == war.get("world") and own_id == power_id:
         powers.append(deps._player_intrinsic_combat_power(game.player))
     guard_power = (
-        deps._sect_guard_power(game, power_id)
+        deps._sect_guard_power(game, power_id, world=war.get('world'), location_id=war.get('location_id', ''))
         if side == "defender" and war.get("kind") == "sect" else 0.0
     )
     return (npc_team_combat_power(powers) if powers else 0.0) + guard_power

@@ -5,6 +5,7 @@ from ...content_registry import PATH_NAMES, RACE_DEFINITIONS, REALMS, WORLD_SYST
 from ...models import GameState, SectNpc
 from ..npc_system import attitude_label
 from .dependencies import IntriguePresentationDependencies
+from .custody import imprisonment_error
 
 
 def _intrigue_public_member(deps: IntriguePresentationDependencies, game: GameState, npc: SectNpc, record: dict[str, Any]) -> dict[str, Any]:
@@ -185,6 +186,11 @@ def _public_intrigue_system(deps: IntriguePresentationDependencies, game: GameSt
             "player_office_id": record.get("player_auto_office"),
             "guest_candidates": candidates[:16], "prison": copy.deepcopy(record.get("prison", [])),
             "positionless_race": kind == "race",
+            "imprisonment_targets": [
+                {'id':npc.id, 'name':npc.name}
+                for npc in deps._intrigue_members(game, kind, faction_id)
+                if not imprisonment_error(game, record, npc)
+            ] if kind in {'sect', 'family'} else [],
             "resolution_targets": (
                 [{"id": row.id, "name": row.name} for row in game.sects.values()
                  if row.kind != "institution" and not row.extinct and row.id != faction_id and row.world == game.player.world]

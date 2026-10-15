@@ -1,6 +1,7 @@
 """Explicit operations for settlement."""
 
 from __future__ import annotations
+from dataclasses import asdict
 
 import copy
 import random
@@ -15,15 +16,29 @@ from .dependencies import MerchantSettlementDependencies
 
 
 def _merchant_deliver_order(deps: MerchantSettlementDependencies, game, order):
+    if order['kind'] not in PROCUREMENT_KINDS:
+        return _deliver_order(deps, game, order)
+    if order.get('delivery_goods') or order.get('delivery_claimed'):
+        return
+    from .delivery import CommissionParcel, local_delivery, claim
+    parcel = CommissionParcel()
+    _deliver_order(deps, game, order, recipient=parcel)
+    order['delivery_goods'] = parcel.freeze(game, order)
+    if local_delivery(game, order):
+        claim(game, order)
+
+
+def _deliver_order(deps: MerchantSettlementDependencies, game, order, recipient=None):
+    recipient = recipient if recipient is not None else game.player
     if order.get("commission_version", 1) >= 2 and order["kind"] in PROCUREMENT_KINDS:
-        order["delivery"] = deps._merchant_deliver_commission(game, order)
+        order["delivery"] = deps._merchant_deliver_commission(game, order, recipient=recipient)
         return
     rng = random.Random(f"merchant-delivery:{game.seed}:{order['id']}")
     kind, stars = order["kind"], order["stars"]
     if kind == "supply":
         definition = deps._crafting_material_defs()[order["definition_id"]]
         for _ in range(order["quantity"]):
-            game.player.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟委托", origin_world=order["source_world"]))
+            recipient.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟委托", origin_world=order["source_world"]))
         order["delivery"] = f"获得{definition['name']} ×{order['quantity']}"
     elif kind == "weapon":
         power = order["principal"] * .08
@@ -32,15 +47,15 @@ def _merchant_deliver_order(deps: MerchantSettlementDependencies, game, order):
                     "creator_name": order["worker"], "created_year": game.player.age,
                     "actual_stats": {"combat_power": power}, "designed_stats": {"combat_power": power},
                     "anchor_value": round(order["principal"] * .5), "materials": [], "combat_effects": [], "is_natal": False}
-        store_crafted_artifact(game.player, artifact)
+        store_crafted_artifact(recipient, artifact)
         order["delivery"] = f"获得订制灵刃，基础战力 {power:,.0f}"
     elif kind == "formation":
         definitions = [row for row in deps._formation_material_defs().values() if row.get("world") == order["source_world"]]
         definition = sorted(definitions, key=lambda row: row.get("base_value", 1))[min(len(definitions) - 1, stars - 1)]
         for _ in range(stars + 1):
-            game.player.formation_materials.append(make_formation_material_instance(definition, source="商盟炼阵委托", origin_world=order["source_world"]))
-        game.player.formation_sequence += 1
-        game.player.formation_loadouts.append({"id": f"formation-{game.id}-{game.player.formation_sequence}",
+            recipient.formation_materials.append(make_formation_material_instance(definition, source="商盟炼阵委托", origin_world=order["source_world"]))
+        recipient.formation_sequence += 1
+        recipient.formation_loadouts.append({"id": f"formation-{game.id}-{recipient.formation_sequence}",
             "name": f"商盟{stars}星护行阵", "slots": [definition["id"]] * (stars + 1) + [None] * (8 - stars),
             "created_year": game.player.age})
         order["delivery"] = f"获得{stars}星护行阵预设及{definition['name']}阵材套组 ×{stars + 1}，可在阵法面板启用"
@@ -55,8 +70,8 @@ def _merchant_deliver_order(deps: MerchantSettlementDependencies, game, order):
                 "realm_index": target.realm_index, "faction_id": target.faction_id, "race": target.race}, rng)
             target.death_reason = f"被{order['worker']}依商盟悬赏击杀"
             deps._tianji_handle_npc_kill(game, target.id)
-        deps._add_opportunity(game.player, stars * 20)
-        game.player.karma = max(0, game.player.karma - stars * 3)
+        deps._add_opportunity(recipient, stars * 20)
+        recipient.karma = max(0, recipient.karma - stars * 3)
         if kind == "intel":
             order["delivery"] = deps._merchant_intelligence(game, order["source_world"], stars, rng)
         else:
@@ -113,46 +128,51 @@ def _merchant_intelligence(deps: MerchantSettlementDependencies, game, world, st
     return f"{WORLD_SYSTEMS['world_names'][world]}修士关系：" + '；'.join(facts) + ('；神机榜线索：' + '；'.join(clues) if clues else '') + '；诸天战讯：' + report
 
 
-def _merchant_deliver_commission(deps: MerchantSettlementDependencies, game, order):
+def _merchant_deliver_commission(deps: MerchantSettlementDependencies, game, order, recipient=None):
+    recipient = recipient if recipient is not None else game.player
     kind, world = order["kind"], order["source_world"]
     rng = random.Random(f"merchant-delivery:{game.seed}:{order['id']}")
     if kind == "talisman":
         from ..talismans import receive
         for _ in range(order["quantity"]):
-            receive(game.player, order["spec"]["product"])
+            receive(recipient, order["spec"]["product"])
         return f"获得{order['spec']['quality_name']}{order['spec']['product']['name']} ×{order['quantity']}，四维符合验收概览"
     if kind == 'spirit_manual':
-        from ..spirit_voisinage import grant
-        for _ in range(order['quantity']):
-            book = grant(game, order['definition_id'])
+        from ..spirit_voisinage import grant, catalog
+        if recipient is game.player:
+            for _ in range(order['quantity']):
+                book = grant(game, order['definition_id'])
+        else:
+            book = catalog(game)[order['definition_id']]
+            recipient.techniques.extend(asdict(book) for _ in range(order['quantity']))
         return f"寻得{book.name}玉简 ×{order['quantity']}"
     if kind == "item":
-        add_item(game.player, order["definition_id"], order["quantity"])
-        return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}" + deps._merchant_procurement_bonus(game, order, rng)
+        add_item(recipient, order["definition_id"], order["quantity"])
+        return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}" + deps._merchant_procurement_bonus(game, order, rng, recipient=recipient)
     if kind == "supply":
         category = order["material_category"]
         if category == "talisman":
-            add_item(game.player, order["definition_id"], order["quantity"])
-            return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}" + deps._merchant_procurement_bonus(game, order, rng)
+            add_item(recipient, order["definition_id"], order["quantity"])
+            return f"获得{ITEM_CATALOG[order['definition_id']].name} ×{order['quantity']}" + deps._merchant_procurement_bonus(game, order, rng, recipient=recipient)
         definition = (deps._formation_material_defs() if category == "formation" else deps._crafting_material_defs())[order["definition_id"]]
         for _ in range(order["quantity"]):
             if category == "formation":
-                game.player.formation_materials.append(make_formation_material_instance(definition, source="商盟委托", origin_world=world))
+                recipient.formation_materials.append(make_formation_material_instance(definition, source="商盟委托", origin_world=world))
             else:
-                game.player.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟委托", origin_world=world))
-        return f"获得{definition['name']} ×{order['quantity']}" + deps._merchant_procurement_bonus(game, order, rng)
+                recipient.crafting_materials.append(make_crafting_material_instance(definition, rng, source="商盟委托", origin_world=world))
+        return f"获得{definition['name']} ×{order['quantity']}" + deps._merchant_procurement_bonus(game, order, rng, recipient=recipient)
     spec = order["spec"]
     if kind == "formation":
         for material_id in spec["slots"]:
             if material_id:
-                game.player.formation_materials.append(make_formation_material_instance(deps._formation_material_defs()[material_id], source="商盟炼阵委托", origin_world=world))
-        game.player.formation_sequence += 1
-        game.player.formation_loadouts.append({"id": f"formation-{game.id}-{game.player.formation_sequence}",
+                recipient.formation_materials.append(make_formation_material_instance(deps._formation_material_defs()[material_id], source="商盟炼阵委托", origin_world=world))
+        recipient.formation_sequence += 1
+        recipient.formation_loadouts.append({"id": f"formation-{game.id}-{recipient.formation_sequence}",
             "name": f"商盟{order['stars']}星护行阵", "slots": list(spec["slots"]), "created_year": game.player.age})
         spares = int(spec.get('spare_material_count', 0))
         for _ in range(spares):
             material_id = rng.choice([key for key in spec['slots'] if key])
-            game.player.formation_materials.append(make_formation_material_instance(deps._formation_material_defs()[material_id], source='商盟赠送备用阵材', origin_world=world))
+            recipient.formation_materials.append(make_formation_material_instance(deps._formation_material_defs()[material_id], source='商盟赠送备用阵材', origin_world=world))
         return f"获得{spec['material_tier']}阶原料定制阵法及全部独立阵材，可在阵法面板启用；另附{spares}份同阶备用阵材"
     artifact = {"id": f"merchant-weapon-{game.id}-{order['id']}", "name": f"商盟订制{spec['mold']['name']}",
         "mold_id": spec["mold"]["id"], "mold_name": spec["mold"]["name"], "quality": spec.get('quality', 'normal'), "quality_name": spec["quality_name"],
@@ -161,11 +181,12 @@ def _merchant_deliver_commission(deps: MerchantSettlementDependencies, game, ord
         "anchor_value": spec["anchor_value"], "materials": copy.deepcopy(spec["materials"]),
         "material_effects": copy.deepcopy(spec["material_effects"]), "combat_effects": copy.deepcopy(spec["combat_effects"]),
         "mold_rule_description": spec["mold"]["rule"].get("description", ""), "is_natal": False}
-    store_crafted_artifact(game.player, artifact)
+    store_crafted_artifact(recipient, artifact)
     return f"获得{artifact['quality_name']}品质{artifact['name']}，属性与委托验收概览一致"
 
 
-def _merchant_procurement_bonus(deps: MerchantSettlementDependencies, game, order, rng):
+def _merchant_procurement_bonus(deps: MerchantSettlementDependencies, game, order, rng, recipient=None):
+    recipient = recipient if recipient is not None else game.player
     if order.get('commission_version', 1) < 3 or order['stars'] <= 1:
         return ''
     formation = order['kind'] == 'supply' and order['material_category'] == 'formation'
@@ -182,11 +203,11 @@ def _merchant_procurement_bonus(deps: MerchantSettlementDependencies, game, orde
     for _ in range(order['stars'] - 1):
         row = rng.choice(candidates)
         if talisman:
-            add_item(game.player, row['id'])
+            add_item(recipient, row['id'])
         elif formation:
-            game.player.formation_materials.append(make_formation_material_instance(row, source='商盟星级附赠', origin_world=order['source_world']))
+            recipient.formation_materials.append(make_formation_material_instance(row, source='商盟星级附赠', origin_world=order['source_world']))
         else:
-            game.player.crafting_materials.append(make_crafting_material_instance(row, rng, source='商盟星级附赠', origin_world=order['source_world']))
+            recipient.crafting_materials.append(make_crafting_material_instance(row, rng, source='商盟星级附赠', origin_world=order['source_world']))
         rewards.append(row['name'])
     order['bonus_items'] = rewards
     return '；额外获得：' + '、'.join(rewards)

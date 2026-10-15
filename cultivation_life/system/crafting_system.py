@@ -95,6 +95,9 @@ def remove_crafted_artifact(player: Player, artifact: dict[str, Any]) -> None:
     player.inventory = [
         item for item in player.inventory if item.crafted_artifact_id != artifact_id
     ]
+    if player.ghost_attachment:
+        from .ghost_resources import reconcile_ghost_attachment
+        reconcile_ghost_attachment(player)
 
 
 def crafting_material_definitions() -> dict[str, dict[str, Any]]:

@@ -45,13 +45,14 @@
     if(data.lower)root.append(el('p',`封存${data.sealed_name || '元力'} ${fmt(data.sealed_reserve)}；回到三级界面才可使用。`,'muted'));
     root.append(el('p',`本源气血 ${fmt(data.origin_hp)} / ${fmt(data.max_hp)} · 本源法力 ${fmt(data.origin_mp)} / ${fmt(data.max_mp)}`),
       el('p',`每次凝练 ${fmt(data.refine_gain)} ${data.name}，消耗本源气血 ${fmt(data.hp_cost)}、本源法力 ${fmt(data.mp_cost)}。接近满储时按实际凝练量扣除。`));
-    const refine=el('button',`凝练${data.name}`);refine.type='button';refine.disabled=options.pending||!options.alive||data.current>=data.capacity||(!data.lower&&data.conversion<1)||data.origin_hp<=data.hp_cost||data.origin_mp<data.mp_cost;
+    const refine=el('button',`凝练${data.name}`);refine.type='button';refine.disabled=data.suspended||options.pending||!options.alive||data.current>=data.capacity||(!data.lower&&data.conversion<1)||data.origin_hp<=data.hp_cost||data.origin_mp<data.mp_cost;
+    if(data.suspended)root.append(el('p','寄身期间本魂元府沉寂，离舍后恢复操作。','muted'));
     refine.onclick=()=>act({action:'refine'});root.append(refine);
     root.append(el('p',data.asura_conversion?`煞元转化完成度 ${fmt(data.conversion*100)}%。请在八部面板完成五重转化，随后可凝练补充；战斗消耗不会倒退转化进度。`:data.native?`${data.name}可直接凝练。圆池显示实际储量；跨界不会凭空补充。`:`转化完成度 ${fmt(data.conversion*100)}%。仙窍圆池显示可消耗的储量，转化程度不会随战斗消耗降低。`,'muted'));
     if(!data.field)return;
     const f=data.field;fields.append(el('h3',f.name),el('p',`稳固 ${fmt(f.stability)} · 侵夺 ${fmt(f.incursion)} · 权能 ${fmt(f.authority)}`),
       el('p',`展开 ${fmt(f.opening_cost)} / 每轮维持 ${fmt(f.upkeep_cost)} / 施权 ${fmt(f.effect_cost)} 仿仙灵力。储量不足时领域消散。`));
-    for(const book of data.spirit_fields||[]){const b=el('button',`${book.name} · Lv${book.level}${(data.active_manual||data.spirit_fields[0]?.id)===book.id?'（当前）':''}`);b.disabled=options.pending||!options.alive;b.onclick=()=>act({action:'select',manual_id:book.id});fields.append(b);}
+    for(const book of data.spirit_fields||[]){const b=el('button',`${book.name} · Lv${book.level}${(data.active_manual||data.spirit_fields[0]?.id)===book.id?'（当前）':''}`);b.disabled=data.suspended||options.pending||!options.alive;b.onclick=()=>act({action:'select',manual_id:book.id});fields.append(b);}
     fields.append(el('p','灵域残解合参至 Lv4 即可运用，无需参悟道统。继续合参可强化灵域。下界残解仅在黑市、交换会、商盟寻访委托或修士遗物中出现。','muted'));
   }
   window.ImmortalAperturePanel={render};

@@ -7,6 +7,8 @@ from ...content_registry import WORLD_SYSTEMS
 import copy
 from ...runtime import now_iso
 from .dependencies import FormationGroundDependencies
+from .access import require_access
+from ..faction_geography import faction_site
 
 
 def _ground_array_public(
@@ -51,10 +53,9 @@ def deploy_ground_formation(
     deps: FormationGroundDependencies, game_id: str, owner_kind: str = "player"
 ) -> dict[str, Any]:
     game = deps._load(game_id)
+    require_access(game)
     player = game.player
     deps.ensure_formation_state(player)
-    if game.pending_event or not player.alive or player.imprisonment:
-        raise ValueError("当前状态无法镇下阵基")
     profile = deps.active_formation_profile(player)
     if not profile.get("active") or not player.formation_active_bindings:
         raise ValueError("请先启用一座有效的随身九宫阵")
@@ -132,6 +133,7 @@ def deploy_ground_formation(
 def _require_ground_array_access(
     deps: FormationGroundDependencies, game: GameState, ground_id: str
 ) -> dict[str, Any]:
+    require_access(game)
     deps.ensure_formation_state(game.player)
     array = next(
         (
@@ -270,13 +272,21 @@ def _local_ground_formation(
 
 
 def _sect_guard_array(
-    deps: FormationGroundDependencies, game: GameState, sect_id: str
+    deps: FormationGroundDependencies, game: GameState, sect_id: str, *,
+    world: str | None = None, location_id: str | None = None,
 ) -> dict[str, Any] | None:
+    sect = game.sects.get(sect_id)
+    if not sect or sect.extinct:
+        return None
+    world = sect.world if world is None else world
+    location_id = faction_site(sect, persist=False)['id'] if location_id is None else location_id
     candidates = [
         row
         for row in game.player.formation_ground_arrays
         if row.get("owner_kind") == "sect"
         and row.get("owner_id") == sect_id
+        and row.get("world") == world
+        and row.get("location_id") == location_id
         and float(row.get("durability", 0.0)) > 0
     ]
     return max(
@@ -289,9 +299,10 @@ def _sect_guard_array(
 
 
 def _sect_guard_power(
-    deps: FormationGroundDependencies, game: GameState, sect_id: str
+    deps: FormationGroundDependencies, game: GameState, sect_id: str, *,
+    world: str | None = None, location_id: str | None = None,
 ) -> float:
-    array = deps._sect_guard_array(game, sect_id)
+    array = deps._sect_guard_array(game, sect_id, world=world, location_id=location_id)
     if not array:
         return 0.0
     return deps.ground_formation_power(array, deps._ground_profile(game.player, array))
@@ -311,7 +322,7 @@ def _wear_war_guard_arrays(
         else deps._formation_rules().get("war_guard_wear_per_battle", 2.5)
     )
     for sect_id in deps._coalition_ids(war, "defender"):
-        array = deps._sect_guard_array(game, sect_id)
+        array = deps._sect_guard_array(game, sect_id, world=war.get('world'), location_id=war.get('location_id', ''))
         if array:
             array["durability"] = round(
                 max(0.0, float(array.get("durability", 0.0)) - wear), 4

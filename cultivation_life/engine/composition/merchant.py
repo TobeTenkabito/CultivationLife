@@ -161,6 +161,7 @@ def bind_merchant_execution(host) -> MerchantExecutionDependencies:
         _all_world_npcs=lambda *args, **kwargs: host._all_world_npcs(*args, **kwargs),
         _apply_world_transition=lambda *args, **kwargs: host._apply_world_transition(*args, **kwargs),
         _find_npc=lambda *args, **kwargs: host._find_npc(*args, **kwargs),
+        _intrigue_is_imprisoned=lambda *args, **kwargs: host._intrigue_is_imprisoned(*args, **kwargs),
         _merchant_alliance=lambda *args, **kwargs: host._merchant_alliance(*args, **kwargs),
         _merchant_deliver_order=lambda *args, **kwargs: host._merchant_deliver_order(*args, **kwargs),
         _merchant_failure_chance=lambda *args, **kwargs: host._merchant_failure_chance(*args, **kwargs),

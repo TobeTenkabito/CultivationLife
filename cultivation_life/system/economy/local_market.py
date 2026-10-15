@@ -160,6 +160,8 @@ def pay_shelf(game, offer, price):
 
 def legacy_sale(game, amount, reason, *, black_market=False):
     """Keep established independent-item valuations; book a real counterparty."""
+    if not black_market:
+        require_access(game)
     ensure_state(game)
     if black_market:
         source = f'background:{game.player.world}'

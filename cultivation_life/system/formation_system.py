@@ -917,11 +917,11 @@ class FormationSystemMixin:
     def _local_ground_formation(self, game: GameState) -> dict[str, Any] | None:
         return formation_ground._local_ground_formation(self._formation_dependencies.ground, game)
 
-    def _sect_guard_array(self, game: GameState, sect_id: str) -> dict[str, Any] | None:
-        return formation_ground._sect_guard_array(self._formation_dependencies.ground, game, sect_id)
+    def _sect_guard_array(self, game: GameState, sect_id: str, *, world: str | None = None, location_id: str | None = None) -> dict[str, Any] | None:
+        return formation_ground._sect_guard_array(self._formation_dependencies.ground, game, sect_id, world=world, location_id=location_id)
 
-    def _sect_guard_power(self, game: GameState, sect_id: str) -> float:
-        return formation_ground._sect_guard_power(self._formation_dependencies.ground, game, sect_id)
+    def _sect_guard_power(self, game: GameState, sect_id: str, *, world: str | None = None, location_id: str | None = None) -> float:
+        return formation_ground._sect_guard_power(self._formation_dependencies.ground, game, sect_id, world=world, location_id=location_id)
 
     def _wear_war_guard_arrays(self, game: GameState, war: dict[str, Any], amount: float | None = None) -> None:
         return formation_ground._wear_war_guard_arrays(self._formation_dependencies.ground, game, war, amount)
