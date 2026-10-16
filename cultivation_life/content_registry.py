@@ -1815,7 +1815,7 @@ def restricted_acquisition(kind: str, content_id: str) -> bool:
         return True
     if kind == "technique":
         return content_id in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
-    return content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "heroic_progeny_elixir"
+    return content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "qilin_blessing_elixir"
 
 
 MARKET_GOODS = tuple(row for row in CONTENT.market_goods

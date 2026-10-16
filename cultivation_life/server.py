@@ -25,6 +25,7 @@ from .content_registry import (
     TECHNIQUE_ELEMENT_NAMES,
     WORLD_SYSTEMS,
 )
+from .content_identifiers import normalize_content_references
 from .engine import GameEngine
 from .engine.transactions import request_scope
 from .errors import AccessDeniedError, NotFoundError
@@ -229,6 +230,7 @@ class Handler(BaseHTTPRequestHandler):
             if len(parts) != 4 or parts[:2] != ["api", "games"]:
                 raise NotFoundError("接口不存在")
             game_id, operation = parts[2], parts[3]
+            payload = normalize_content_references(payload)
             if operation in {'tianji-debug-reveal-all', 'merchant-debug-hq'} and not self.headers.get('X-Cultivation-Debug'):
                 raise NotFoundError('请先通过开发者控制台进入独立调试副本')
             # Heavens queries/settings/escrow cleanup remain usable while captive;

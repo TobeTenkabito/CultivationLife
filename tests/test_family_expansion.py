@@ -32,15 +32,15 @@ def family_game(engine,world='human',root='supreme_wood'):
 def test_all_starts_receive_one_elixir(engine,preset):
     shown=engine.create_game('初始药','supreme_metal','dao',11,preset_id=preset)
     g=engine.store.load(shown['id'])
-    assert sum(i.quantity for i in g.player.inventory if i.id=='heroic_progeny_elixir')==1
-    assert engine._catalog_price('item','heroic_progeny_elixir')==985
-    assert not any(r['content_id']=='heroic_progeny_elixir' for r in MARKET_GOODS)
+    assert sum(i.quantity for i in g.player.inventory if i.id=='qilin_blessing_elixir')==1
+    assert engine._catalog_price('item','qilin_blessing_elixir')==985
+    assert not any(r['content_id']=='qilin_blessing_elixir' for r in MARKET_GOODS)
 
 def test_elixir_persists_consumes_once_and_bypasses_infertility(engine):
     g=family_game(engine)
-    engine.use_item(g.id,'heroic_progeny_elixir')
+    engine.use_item(g.id,'qilin_blessing_elixir')
     g=engine.store.load(g.id);assert g.player.guaranteed_progeny
-    assert not has_item(g.player,'heroic_progeny_elixir')
+    assert not has_item(g.player,'qilin_blessing_elixir')
     assert engine._try_conceive_child(g,random.Random(1))==''
     assert g.player.guaranteed_progeny  # No valid partner must not spend the guarantee.
     g.player.dao_companion={'id':'mother','name':'顾清','alive':True,'realm_index':8,'world':g.player.world,'spirit_root':'none'}
@@ -52,10 +52,10 @@ def test_elixir_persists_consumes_once_and_bypasses_infertility(engine):
 
 def test_exclusive_sources_and_stale_market_shelf(engine):
     assert len(GUIXU_EXCLUSIVE_ITEM_IDS)>=440 and len(GUIXU_EXCLUSIVE_TECHNIQUE_IDS)>=110
-    banned=set(GUIXU_EXCLUSIVE_ITEM_IDS)|set(GUIXU_EXCLUSIVE_TECHNIQUE_IDS)|{'heroic_progeny_elixir'}
+    banned=set(GUIXU_EXCLUSIVE_ITEM_IDS)|set(GUIXU_EXCLUSIVE_TECHNIQUE_IDS)|{'qilin_blessing_elixir'}
     assert not banned.intersection(r['content_id'] for r in MARKET_GOODS)
     g=family_game(engine)
-    for cid in [next(iter(GUIXU_EXCLUSIVE_ITEM_IDS)),'heroic_progeny_elixir']:
+    for cid in [next(iter(GUIXU_EXCLUSIVE_ITEM_IDS)),'qilin_blessing_elixir']:
         g.market_offers.append({'id':'old','kind':'item','content_id':cid,'locked':True,'world':'human'})
         engine._ensure_market(g,random.Random(1))
         assert not any(o['content_id']==cid for o in g.market_offers)
@@ -209,12 +209,12 @@ def test_elixir_can_be_consigned_but_legacy_npc_lot_is_refunded(engine):
     g.auction_state={'id':'sale','status':'open','world':g.player.world,'location_id':g.player.location_id,
         'location_name':'坊市','round':0,'lots':[],'consignments':[],'attendees':[]}
     engine.store.save(g)
-    engine.consign_auction_item(g.id,'heroic_progeny_elixir',985)
+    engine.consign_auction_item(g.id,'qilin_blessing_elixir',985)
     g=engine.store.load(g.id);lot=g.auction_state['lots'][0]
     assert lot['seller']=='player' and lot['rated_price']==985
-    assert not has_item(g.player,'heroic_progeny_elixir')
-    legacy={'id':'old','seller':'npc','kind':'item','content_id':'heroic_progeny_elixir',
-        'name':'英姿神武口服液','current_bidder':'player','current_bid':985}
+    assert not has_item(g.player,'qilin_blessing_elixir')
+    legacy={'id':'old','seller':'npc','kind':'item','content_id':'qilin_blessing_elixir',
+        'name':'麟趾玉液','current_bidder':'player','current_bid':985}
     g.auction_state['lots']=[legacy];before=wallet(g)
     engine._finish_auction(g,random.Random(10))
-    assert wallet(g)==before+985 and not has_item(g.player,'heroic_progeny_elixir')
+    assert wallet(g)==before+985 and not has_item(g.player,'qilin_blessing_elixir')

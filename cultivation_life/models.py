@@ -8,6 +8,7 @@ from .generated_event_schema import decode_state as decode_generated_event_state
 from .trial_site_schema import decode_state as decode_trial_site_state
 from .version import BASE_GAME_VERSION
 from .save_schema import SAVE_SCHEMA_VERSION
+from .content_identifiers import normalize_content_references
 from .relationship_schema import normalize_relationship_document
 from .relationship_records import bind_relationship, bind_relationships
 from .npc_custody import bind_custody, detain_person
@@ -76,7 +77,7 @@ class Item:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Item:
-        return cls(**value)
+        return cls(**normalize_content_references(value))
 
 
 @dataclass
@@ -588,7 +589,7 @@ class Player:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Player:
-        data = dict(value)
+        data = dict(normalize_content_references(value))
         data['immortal_traces'] = max(0, int(data.get('immortal_traces', 0))) + sum(
             max(0, int(i.get('quantity', 0))) for i in data.get('inventory', []) if i.get('id') == 'immortal_trace')
         data['inventory'] = [i for i in data.get('inventory', []) if i.get('id') != 'immortal_trace']
@@ -1071,6 +1072,7 @@ class GameState:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> GameState:
+        value = normalize_content_references(value)
         from .economy_schema import validate_economy
         validate_economy(value.get('economy_v2', {}), value.get('merchant_state', {}), value)
         if not value.get("voisinage_schema"):

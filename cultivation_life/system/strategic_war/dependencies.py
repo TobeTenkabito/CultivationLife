@@ -8,6 +8,7 @@ class StrategicWarDependencies:
     start_campaign: Callable
     advance_campaigns: Callable
     find_person: Callable
+    player_side: Callable
     members: Callable
     has_sect_voice: Callable
     has_family_voice: Callable

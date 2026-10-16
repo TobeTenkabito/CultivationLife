@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...rules import public_catalog_entry
 from ..path_modifiers import adjusted_cost
 import copy
 from typing import Any
@@ -231,7 +232,7 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
     for offer in game.market_offers:
         if offer.get("world", "human") != player.world or offer.get("location_id", location_id) != location_id:
             continue
-        shown = dict(offer)
+        shown = public_catalog_entry(offer)
         shown["locked"] = bool(offer.get("locked", False))
         shown["base_price"] = offer["price"]
         shown["price"] = adjusted_cost(game, local_trade.shelf_price(game, offer), "market")

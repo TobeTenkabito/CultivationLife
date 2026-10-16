@@ -5,7 +5,7 @@ from typing import Any
 from ...content_registry import ITEM_CATALOG, MARKET_GOODS, REALMS, TECHNIQUE_CATALOG
 from ...models import GameState, HistoryRecord, Player
 from ...runtime import now_iso
-from ...rules import acquire_technique, add_item, remove_item
+from ...rules import acquire_technique, add_item, remove_item, public_catalog_entry
 from .dependencies import AuctionsDependencies
 
 
@@ -410,7 +410,7 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
     at_location = deps._auction_location_matches(game)
     lots = []
     for row in state.get("lots", []):
-        lot = dict(row)
+        lot = public_catalog_entry(row)
         lot["rated_price"] = int(row.get("rated_price", 0) or deps._catalog_price(str(row["kind"]), str(row["content_id"])))
         lot["maximum_bid"] = deps._auction_bid_ceiling(row)
         lot["minimum_increment"] = deps._auction_increment(row)
@@ -439,7 +439,9 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
     from ..talismans import sale_rows
     return {
         **state, "available":True, "at_location":at_location,
-        "black_market_results": [{**row, "base_price": row["price"], "price": adjusted_cost(game, row["price"], "black_market")} for row in state.get("black_market_results", [])],
+        "black_market_results": [{**public_catalog_entry(row), "base_price": row["price"], "price": adjusted_cost(game, row["price"], "black_market")} for row in state.get("black_market_results", [])],
+        "attendees": [{**row, 'trade_offers': [public_catalog_entry(offer) for offer in row.get('trade_offers', [])]}
+                      for row in state.get('attendees', [])],
         "spirit_stones":deps._spirit_stones(game.player), "lots":lots,
         "consignable_items":consignable_inventory, "black_market_sellable_items":inventory,
         "private_sellable_items":inventory,

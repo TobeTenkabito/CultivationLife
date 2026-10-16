@@ -183,7 +183,8 @@ def _intrigue_player_guest_side(deps: IntrigueGuestsDependencies, game: GameStat
     if not deps._intrigue_enabled() or game.player.world != war.get("world"):
         return None
     for faction_id in deps._coalition_ids(war, "defender"):
-        record = deps._ensure_intrigue_faction(game, str(war.get("kind")), faction_id)
+        key = deps._intrigue_key(str(war.get("kind")), faction_id)
+        record = game.intrigue_state.get('factions', {}).get(key, {})
         if any(row.get("npc_id") == deps.PLAYER_ID and row.get("defense_required", True) for row in record.get("guests", [])):
             return "defender"
     return None

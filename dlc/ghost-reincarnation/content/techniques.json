@@ -2,8 +2,8 @@
   "schema_version": 1,
   "techniques": [
     {
-      "id": "TECH_GHOST_BODY_THIEF",
-      "name": "无相夺舍经",
+      "id": "TECH_CICADA_METAMORPHOSIS",
+      "name": "蝉蜕玄章",
       "path": "ghost",
       "element": "yin",
       "grade": 5,
@@ -19,8 +19,8 @@
       "possession_limit_bonus": 1
     },
     {
-      "id": "TECH_GHOST_TEN_THOUSAND_HOSTS",
-      "name": "万相寄生天书",
+      "id": "TECH_BUTTERFLY_DREAM_CANON",
+      "name": "梦蝶游世经",
       "path": "ghost",
       "element": "yin",
       "grade": 8,

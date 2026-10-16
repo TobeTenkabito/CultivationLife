@@ -9,6 +9,7 @@ from .dependencies import WarPresentationDependencies
 
 def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> dict[str, Any]:
     wars = []
+    blocked = bool(game.pending_event or game.active_trial or not game.player.alive or game.player.imprisonment or game.player.ghost_captor)
     visible_wars = [
         war for war in game.wars
         if not war.get('strategic_war_id') and (game.debug_world_news or war.get("world") == game.player.world)
@@ -23,14 +24,15 @@ def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> di
         from .logistics import public as public_logistics, action_quotes
         public["supplies"] = public_logistics(game, war, public["player_side"])
         public["supply_actions"] = action_quotes(game, war, public["player_side"])
-        public["player_controls"] = war.get("status") in {"active", "peace_ready"} and deps._player_has_war_voice(game, war)
+        public["action_blocked"] = blocked
+        public["player_controls"] = not blocked and war.get("status") in {"active", "peace_ready"} and deps._player_has_war_voice(game, war)
         if war.get('kind') == 'race' and war.get('status') in {'active','peace_ready'}:
             public['player_controls'] = False
         public["can_participate"] = bool(
             war.get("kind") != 'race' and war.get("status") == "active" and public["player_side"]
-            and game.player.alive and not game.player.imprisonment and not game.pending_event
+            and not blocked
         )
-        public["can_negotiate"] = int(war.get("battles", 0)) >= 2 or war.get("status") == "peace_ready"
+        public["can_negotiate"] = not blocked and war.get("status") in {"active", "peace_ready"} and (int(war.get("battles", 0)) >= 2 or war.get("status") == "peace_ready")
         public["coalitions"] = {
             side: [{**row, "name": deps._war_side_name(game, war["kind"], row["id"])}
                    for row in war["coalitions"][side]]

@@ -107,7 +107,7 @@ def verify(with_dlc):
             assert preview['existing_hash']
             transfer('import', {'payload':exported['payload'], 'existing_hash':preview['existing_hash']})
             assert json.loads(snapshot_file.read_bytes()) == original
-            assert next(i for i in game['player']['inventory'] if i['id']=='heroic_progeny_elixir')['quantity']==1
+            assert next(i for i in game['player']['inventory'] if i['id']=='qilin_blessing_elixir')['quantity']==1
             assert game['family']['intrigue_enabled']==with_dlc
             assert game["tianji_artifacts"]["available"] == with_dlc
             assert len(game["merchant_system"]["alliances"]) == 3
@@ -122,7 +122,7 @@ def verify(with_dlc):
             owned = next(row for row in joined['merchant_system']['alliances'] if row['member'])
             assert [row['world'] for row in owned['catalog'] if not row.get('intel_only')] == ['human']
             assert 'guixu_canghai_equipment_01' not in {row['id'] for row in owned['catalog'][0]['items']}
-            assert 'heroic_progeny_elixir' not in {row['id'] for row in owned['catalog'][0]['items']}
+            assert 'qilin_blessing_elixir' not in {row['id'] for row in owned['catalog'][0]['items']}
             assert owned['catalog'][0]['weapon_tiers'] == [1,2,3,4,5]
             def post(operation, payload):
                 request = urllib.request.Request(base + f"/api/games/{game['id']}/{operation}", method="POST",
@@ -193,9 +193,9 @@ def verify(with_dlc):
             verify_war_logistics(base, folder)
             from scripts.verify_custom_start import verify_custom_start
             verify_custom_start(base, with_dlc)
-            consumed = post('use-item', {'item_id':'heroic_progeny_elixir'})
+            consumed = post('use-item', {'item_id':'qilin_blessing_elixir'})
             assert consumed['player']['guaranteed_progeny']
-            assert not any(i['id']=='heroic_progeny_elixir' for i in consumed['player']['inventory'])
+            assert not any(i['id']=='qilin_blessing_elixir' for i in consumed['player']['inventory'])
             quote = post("merchant-preview", {"alliance_id": local["id"], "kind": "weapon", "material_tier": 1, "mold_id": "mirror"})
             assert quote["spec"]["mold"]["id"] == "mirror" and quote["commission_version"] == 3
             quote = post("merchant-preview", {"alliance_id": local["id"], "kind": "formation", "material_tier": 1})

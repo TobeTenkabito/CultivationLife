@@ -229,8 +229,8 @@
       "growth_preference": "main"
     },
     {
-      "id": "TECH_HEAVEN_DEMON_VOID",
-      "name": "天魔炼虚录",
+      "id": "TECH_HEAVEN_DEMON_MYSTERIES",
+      "name": "天魔游玄录",
       "path": "demonic",
       "element": "neutral",
       "grade": 5,
@@ -482,8 +482,8 @@
       "growth_preference": "support"
     },
     {
-      "id": "TECH_COMMON_CORE",
-      "name": "混元抱丹书",
+      "id": "TECH_BAOPU_CANON",
+      "name": "抱朴玄经",
       "path": "dao",
       "element": "neutral",
       "grade": 3,
@@ -496,8 +496,8 @@
       "growth_preference": "support"
     },
     {
-      "id": "TECH_COMMON_LUO",
-      "name": "大罗玄经",
+      "id": "TECH_XUANDU_CANON",
+      "name": "玄都真解",
       "path": "dao",
       "element": "neutral",
       "grade": 3,
@@ -510,8 +510,8 @@
       "growth_preference": "main"
     },
     {
-      "id": "TECH_COMMON_NASCENT",
-      "name": "婴神太虚录",
+      "id": "TECH_YELLOW_COURT_INNER",
+      "name": "黄庭内景经",
       "path": "dao",
       "element": "neutral",
       "grade": 4,
@@ -538,8 +538,8 @@
       "growth_preference": "combat"
     },
     {
-      "id": "TECH_COMMON_SPIRIT",
-      "name": "化神观天卷",
+      "id": "TECH_MYSTIC_OBSERVATION",
+      "name": "玄览天机卷",
       "path": "dao",
       "element": "neutral",
       "grade": 5,
@@ -586,7 +586,7 @@
       "growth_preference": "main"
     },
     {
-      "id": "TECH_COMMON_VOID",
+      "id": "TECH_VOID_ORIGIN_CANON",
       "name": "虚界炼元篇",
       "path": "dao",
       "element": "neutral",
@@ -600,7 +600,7 @@
       "growth_preference": "support"
     },
     {
-      "id": "TECH_COMMON_INTEGRATION",
+      "id": "TECH_MYRIAD_LAW_UNITY",
       "name": "万法归一典",
       "path": "dao",
       "element": "neutral",
@@ -614,8 +614,8 @@
       "growth_preference": "main"
     },
     {
-      "id": "TECH_COMMON_MAHAYANA",
-      "name": "大乘渡世经",
+      "id": "TECH_SUPREME_SALVATION",
+      "name": "太上济世经",
       "path": "dao",
       "element": "neutral",
       "grade": 8,
@@ -800,8 +800,8 @@
       "growth_preference": "main"
     },
     {
-      "id": "TECH_EMPTY_VOID_CANON",
-      "name": "空明炼虚典",
+      "id": "TECH_LUCID_SUBTLETY_CANON",
+      "name": "空明洞微典",
       "path": "dao",
       "element": "neutral",
       "grade": 6,
@@ -1206,8 +1206,8 @@
       "transformation_space": 5
     },
     {
-      "id": "TECH_CELESTIAL_BREATHING",
-      "name": "真仙引灵经",
+      "id": "TECH_ROSY_CLOUD_BREATH",
+      "name": "餐霞承露经",
       "path": "dao",
       "element": "neutral",
       "grade": 8,
@@ -1705,8 +1705,8 @@
       "growth_preference": "main"
     },
     {
-      "id": "TECH_MONSTER_DEMON_CORE",
-      "name": "妖丹烘炉法",
+      "id": "TECH_CRIMSON_FURNACE",
+      "name": "赤炉养元篇",
       "path": "monster",
       "element": "neutral",
       "grade": 3,
@@ -1819,8 +1819,8 @@
       "body_bonus_max_layer": 30
     },
     {
-      "id": "TECH_MONSTER_GREAT_STRENGTH_BODY",
-      "name": "搬山大力妖身",
+      "id": "TECH_MOUNTAIN_BEARING_BODY",
+      "name": "担岳真形篇",
       "path": "monster",
       "element": "neutral",
       "grade": 3,
@@ -2751,7 +2751,7 @@
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_03",
-      "name": "无底阴身篇",
+      "name": "九泉藏形篇",
       "path": "ghost",
       "element": "earth",
       "grade": 5,
@@ -2807,7 +2807,7 @@
     },
     {
       "id": "TECH_GUIXU_YELLOW_SPRING_07",
-      "name": "生死簿遁法",
+      "name": "冥关无迹法",
       "path": "ghost",
       "element": "wind",
       "grade": 6,
@@ -2863,7 +2863,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_01",
-      "name": "祖灵归潮经",
+      "name": "荒原纳息经",
       "path": "monster",
       "element": "neutral",
       "grade": 6,
@@ -2877,7 +2877,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_02",
-      "name": "祖灵定界录",
+      "name": "群山载灵录",
       "path": "monster",
       "element": "fire",
       "grade": 6,
@@ -2891,7 +2891,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_03",
-      "name": "祖灵炼身篇",
+      "name": "百骸鸣岳篇",
       "path": "monster",
       "element": "earth",
       "grade": 6,
@@ -2905,7 +2905,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_04",
-      "name": "祖灵照神法",
+      "name": "烛野观神法",
       "path": "monster",
       "element": "neutral",
       "grade": 6,
@@ -2919,7 +2919,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_05",
-      "name": "祖灵渡厄诀",
+      "name": "苍虬蜕鳞诀",
       "path": "monster",
       "element": "metal",
       "grade": 7,
@@ -2933,7 +2933,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_06",
-      "name": "祖灵不灭典",
+      "name": "万木同春典",
       "path": "monster",
       "element": "water",
       "grade": 7,
@@ -2947,7 +2947,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_07",
-      "name": "祖灵隐虚术",
+      "name": "伏草藏真术",
       "path": "monster",
       "element": "thunder",
       "grade": 7,
@@ -2961,7 +2961,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_08",
-      "name": "祖灵遁空篇",
+      "name": "乘飙御云篇",
       "path": "monster",
       "element": "yin",
       "grade": 7,
@@ -2975,7 +2975,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_09",
-      "name": "祖灵溯源经",
+      "name": "祖庭归藏经",
       "path": "monster",
       "element": "wood",
       "grade": 8,
@@ -2989,7 +2989,7 @@
     },
     {
       "id": "TECH_GUIXU_MONSTER_REALM_10",
-      "name": "祖灵太初书",
+      "name": "太古山海书",
       "path": "monster",
       "element": "neutral",
       "grade": 8,
@@ -3003,7 +3003,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_01",
-      "name": "天律归潮经",
+      "name": "云笈归真经",
       "path": "dao",
       "element": "fire",
       "grade": 8,
@@ -3017,7 +3017,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_02",
-      "name": "天律定界录",
+      "name": "天衡定序录",
       "path": "dao",
       "element": "yin",
       "grade": 8,
@@ -3031,7 +3031,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_03",
-      "name": "天律炼身篇",
+      "name": "金阙炼形篇",
       "path": "dao",
       "element": "earth",
       "grade": 8,
@@ -3045,7 +3045,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_04",
-      "name": "天律照神法",
+      "name": "玉宸照微法",
       "path": "dao",
       "element": "neutral",
       "grade": 8,
@@ -3059,7 +3059,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_05",
-      "name": "天律渡厄诀",
+      "name": "星槎济厄诀",
       "path": "dao",
       "element": "yin",
       "grade": 8,
@@ -3073,7 +3073,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_06",
-      "name": "天律不灭典",
+      "name": "清都长生典",
       "path": "dao",
       "element": "water",
       "grade": 8,
@@ -3087,7 +3087,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_07",
-      "name": "天律隐虚术",
+      "name": "烟霞敛迹术",
       "path": "dao",
       "element": "neutral",
       "grade": 8,
@@ -3101,7 +3101,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_08",
-      "name": "天律遁空篇",
+      "name": "蹑景乘虚篇",
       "path": "dao",
       "element": "wind",
       "grade": 8,
@@ -3115,7 +3115,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_09",
-      "name": "天律溯源经",
+      "name": "河图溯道经",
       "path": "dao",
       "element": "yin",
       "grade": 8,
@@ -3129,7 +3129,7 @@
     },
     {
       "id": "TECH_GUIXU_CELESTIAL_10",
-      "name": "天律太初书",
+      "name": "先天无极书",
       "path": "dao",
       "element": "neutral",
       "grade": 8,
@@ -3143,7 +3143,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_01",
-      "name": "劫刃归潮经",
+      "name": "烬海纳煞经",
       "path": "demonic",
       "element": "fire",
       "grade": 8,
@@ -3157,7 +3157,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_02",
-      "name": "劫刃定界录",
+      "name": "铁狱镇疆录",
       "path": "demonic",
       "element": "yin",
       "grade": 8,
@@ -3171,7 +3171,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_03",
-      "name": "劫刃炼身篇",
+      "name": "赤铜铸骨篇",
       "path": "demonic",
       "element": "earth",
       "grade": 8,
@@ -3185,7 +3185,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_04",
-      "name": "劫刃照神法",
+      "name": "血月窥心法",
       "path": "demonic",
       "element": "neutral",
       "grade": 8,
@@ -3199,7 +3199,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_05",
-      "name": "劫刃渡厄诀",
+      "name": "断劫无回诀",
       "path": "demonic",
       "element": "yin",
       "grade": 8,
@@ -3213,7 +3213,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_06",
-      "name": "劫刃不灭典",
+      "name": "修罗百战典",
       "path": "demonic",
       "element": "water",
       "grade": 8,
@@ -3227,7 +3227,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_07",
-      "name": "劫刃隐虚术",
+      "name": "暗尘匿锋术",
       "path": "demonic",
       "element": "neutral",
       "grade": 8,
@@ -3241,7 +3241,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_08",
-      "name": "劫刃遁空篇",
+      "name": "掠火逐日篇",
       "path": "demonic",
       "element": "wind",
       "grade": 8,
@@ -3255,7 +3255,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_09",
-      "name": "劫刃溯源经",
+      "name": "兵主归藏经",
       "path": "demonic",
       "element": "yin",
       "grade": 8,
@@ -3269,7 +3269,7 @@
     },
     {
       "id": "TECH_GUIXU_ASURA_10",
-      "name": "劫刃太初书",
+      "name": "无间玄枢书",
       "path": "demonic",
       "element": "neutral",
       "grade": 8,
@@ -3283,7 +3283,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_01",
-      "name": "龙源归潮经",
+      "name": "苍溟吐息经",
       "path": "monster",
       "element": "neutral",
       "grade": 8,
@@ -3297,7 +3297,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_02",
-      "name": "龙源定界录",
+      "name": "龙庭镇域录",
       "path": "monster",
       "element": "fire",
       "grade": 8,
@@ -3311,7 +3311,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_03",
-      "name": "龙源炼身篇",
+      "name": "玄鳞铸身篇",
       "path": "monster",
       "element": "earth",
       "grade": 8,
@@ -3325,7 +3325,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_04",
-      "name": "龙源照神法",
+      "name": "渊龙照夜法",
       "path": "monster",
       "element": "neutral",
       "grade": 8,
@@ -3339,7 +3339,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_05",
-      "name": "龙源渡厄诀",
+      "name": "游渊御厄诀",
       "path": "monster",
       "element": "metal",
       "grade": 8,
@@ -3353,7 +3353,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_06",
-      "name": "龙源不灭典",
+      "name": "蟠天长生典",
       "path": "monster",
       "element": "water",
       "grade": 8,
@@ -3367,7 +3367,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_07",
-      "name": "龙源隐虚术",
+      "name": "蜃影藏真术",
       "path": "monster",
       "element": "thunder",
       "grade": 8,
@@ -3381,7 +3381,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_08",
-      "name": "龙源遁空篇",
+      "name": "御霆巡天篇",
       "path": "monster",
       "element": "yin",
       "grade": 8,
@@ -3395,7 +3395,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_09",
-      "name": "龙源溯源经",
+      "name": "九渊归祖经",
       "path": "monster",
       "element": "wood",
       "grade": 8,
@@ -3409,7 +3409,7 @@
     },
     {
       "id": "TECH_GUIXU_NETHER_10",
-      "name": "龙源太初书",
+      "name": "烛龙开曜书",
       "path": "monster",
       "element": "neutral",
       "grade": 8,
@@ -3423,7 +3423,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_01",
-      "name": "溯魂归潮经",
+      "name": "忘川归寂经",
       "path": "ghost",
       "element": "yin",
       "grade": 8,
@@ -3437,7 +3437,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_02",
-      "name": "溯魂定界录",
+      "name": "冥衡定业录",
       "path": "ghost",
       "element": "water",
       "grade": 8,
@@ -3451,7 +3451,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_03",
-      "name": "溯魂炼身篇",
+      "name": "幽莲塑魄篇",
       "path": "ghost",
       "element": "earth",
       "grade": 8,
@@ -3465,7 +3465,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_04",
-      "name": "溯魂照神法",
+      "name": "三生返照法",
       "path": "ghost",
       "element": "yin",
       "grade": 8,
@@ -3479,7 +3479,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_05",
-      "name": "溯魂渡厄诀",
+      "name": "彼岸渡厄诀",
       "path": "ghost",
       "element": "fire",
       "grade": 8,
@@ -3493,7 +3493,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_06",
-      "name": "溯魂不灭典",
+      "name": "长夜长明典",
       "path": "ghost",
       "element": "wood",
       "grade": 8,
@@ -3507,7 +3507,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_07",
-      "name": "溯魂隐虚术",
+      "name": "残梦匿魂术",
       "path": "ghost",
       "element": "wind",
       "grade": 8,
@@ -3521,7 +3521,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_08",
-      "name": "溯魂遁空篇",
+      "name": "履影渡川篇",
       "path": "ghost",
       "element": "neutral",
       "grade": 8,
@@ -3535,7 +3535,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_09",
-      "name": "溯魂溯源经",
+      "name": "宿世归藏经",
       "path": "ghost",
       "element": "metal",
       "grade": 8,
@@ -3549,7 +3549,7 @@
     },
     {
       "id": "TECH_GUIXU_REINCARNATION_10",
-      "name": "溯魂太初书",
+      "name": "无始玄冥书",
       "path": "ghost",
       "element": "yin",
       "grade": 8,
@@ -3644,7 +3644,7 @@
     },
     {
       "id": "TECH_ASURA_9_MAIN",
-      "name": "血海归元魔典",
+      "name": "血海玄枢经",
       "path": "demonic",
       "element": "neutral",
       "grade": 9,
@@ -3672,7 +3672,7 @@
     },
     {
       "id": "TECH_ASURA_9_COMBAT",
-      "name": "血海破军戮神诀",
+      "name": "赤锋裂阵诀",
       "path": "demonic",
       "element": "neutral",
       "grade": 9,
@@ -3700,7 +3700,7 @@
     },
     {
       "id": "TECH_ASURA_9_BODY",
-      "name": "血海不灭战躯经",
+      "name": "铜骨烬身经",
       "path": "demonic",
       "element": "neutral",
       "grade": 9,
@@ -3730,7 +3730,7 @@
     },
     {
       "id": "TECH_ASURA_9_SENSE",
-      "name": "血海照狱观心法",
+      "name": "照狱明心法",
       "path": "demonic",
       "element": "neutral",
       "grade": 9,
@@ -3759,7 +3759,7 @@
     },
     {
       "id": "TECH_ASURA_10_MAIN",
-      "name": "无间归元魔典",
+      "name": "无间藏元典",
       "path": "demonic",
       "element": "neutral",
       "grade": 10,
@@ -3787,7 +3787,7 @@
     },
     {
       "id": "TECH_ASURA_10_COMBAT",
-      "name": "无间破军戮神诀",
+      "name": "断岳摧城录",
       "path": "demonic",
       "element": "neutral",
       "grade": 10,
@@ -3815,7 +3815,7 @@
     },
     {
       "id": "TECH_ASURA_10_BODY",
-      "name": "无间不灭战躯经",
+      "name": "铁狱金身篇",
       "path": "demonic",
       "element": "neutral",
       "grade": 10,
@@ -3845,7 +3845,7 @@
     },
     {
       "id": "TECH_ASURA_10_SENSE",
-      "name": "无间照狱观心法",
+      "name": "寒灯烛念法",
       "path": "demonic",
       "element": "neutral",
       "grade": 10,
@@ -3874,7 +3874,7 @@
     },
     {
       "id": "TECH_ASURA_11_MAIN",
-      "name": "焚天归元魔典",
+      "name": "焚天炼日经",
       "path": "demonic",
       "element": "neutral",
       "grade": 11,
@@ -3902,7 +3902,7 @@
     },
     {
       "id": "TECH_ASURA_11_COMBAT",
-      "name": "焚天破军戮神诀",
+      "name": "烬海戮星诀",
       "path": "demonic",
       "element": "neutral",
       "grade": 11,
@@ -3930,7 +3930,7 @@
     },
     {
       "id": "TECH_ASURA_11_BODY",
-      "name": "焚天不灭战躯经",
+      "name": "赤霄百劫躯",
       "path": "demonic",
       "element": "neutral",
       "grade": 11,
@@ -3960,7 +3960,7 @@
     },
     {
       "id": "TECH_ASURA_11_SENSE",
-      "name": "焚天照狱观心法",
+      "name": "寂照窥玄录",
       "path": "demonic",
       "element": "neutral",
       "grade": 11,
@@ -3989,7 +3989,7 @@
     },
     {
       "id": "TECH_ASURA_12_MAIN",
-      "name": "寂灭归元魔典",
+      "name": "寂灭归藏典",
       "path": "demonic",
       "element": "neutral",
       "grade": 12,
@@ -4017,7 +4017,7 @@
     },
     {
       "id": "TECH_ASURA_12_COMBAT",
-      "name": "寂灭破军戮神诀",
+      "name": "无回断劫书",
       "path": "demonic",
       "element": "neutral",
       "grade": 12,
@@ -4045,7 +4045,7 @@
     },
     {
       "id": "TECH_ASURA_12_BODY",
-      "name": "寂灭不灭战躯经",
+      "name": "兵主不坏身",
       "path": "demonic",
       "element": "neutral",
       "grade": 12,
@@ -4075,7 +4075,7 @@
     },
     {
       "id": "TECH_ASURA_12_SENSE",
-      "name": "寂灭照狱观心法",
+      "name": "玄冥独照经",
       "path": "demonic",
       "element": "neutral",
       "grade": 12,
@@ -4104,7 +4104,7 @@
     },
     {
       "id": "TECH_NETHER_9_MAIN",
-      "name": "太荒纳元真经",
+      "name": "太荒吐息经",
       "path": "monster",
       "element": "neutral",
       "grade": 9,
@@ -4132,7 +4132,7 @@
     },
     {
       "id": "TECH_NETHER_9_COMBAT",
-      "name": "太荒裂穹战诀",
+      "name": "龙爪裂穹诀",
       "path": "monster",
       "element": "neutral",
       "grade": 9,
@@ -4160,7 +4160,7 @@
     },
     {
       "id": "TECH_NETHER_9_BODY",
-      "name": "太荒镇岳锻骨经",
+      "name": "玄鳞镇岳经",
       "path": "monster",
       "element": "neutral",
       "grade": 9,
@@ -4190,7 +4190,7 @@
     },
     {
       "id": "TECH_NETHER_9_SENSE",
-      "name": "太荒万象观神法",
+      "name": "烛夜观神法",
       "path": "monster",
       "element": "neutral",
       "grade": 9,
@@ -4219,7 +4219,7 @@
     },
     {
       "id": "TECH_NETHER_10_MAIN",
-      "name": "万灵纳元真经",
+      "name": "万灵朝元典",
       "path": "monster",
       "element": "neutral",
       "grade": 10,
@@ -4247,7 +4247,7 @@
     },
     {
       "id": "TECH_NETHER_10_COMBAT",
-      "name": "万灵裂穹战诀",
+      "name": "沧溟掣浪录",
       "path": "monster",
       "element": "neutral",
       "grade": 10,
@@ -4275,7 +4275,7 @@
     },
     {
       "id": "TECH_NETHER_10_BODY",
-      "name": "万灵镇岳锻骨经",
+      "name": "盘岳龙骨篇",
       "path": "monster",
       "element": "neutral",
       "grade": 10,
@@ -4305,7 +4305,7 @@
     },
     {
       "id": "TECH_NETHER_10_SENSE",
-      "name": "万灵万象观神法",
+      "name": "蜃楼照影法",
       "path": "monster",
       "element": "neutral",
       "grade": 10,
@@ -4334,7 +4334,7 @@
     },
     {
       "id": "TECH_NETHER_11_MAIN",
-      "name": "混沌纳元真经",
+      "name": "浑天养真经",
       "path": "monster",
       "element": "neutral",
       "grade": 11,
@@ -4362,7 +4362,7 @@
     },
     {
       "id": "TECH_NETHER_11_COMBAT",
-      "name": "混沌裂穹战诀",
+      "name": "九渊断界诀",
       "path": "monster",
       "element": "neutral",
       "grade": 11,
@@ -4390,7 +4390,7 @@
     },
     {
       "id": "TECH_NETHER_11_BODY",
-      "name": "混沌镇岳锻骨经",
+      "name": "蟠天不坏躯",
       "path": "monster",
       "element": "neutral",
       "grade": 11,
@@ -4420,7 +4420,7 @@
     },
     {
       "id": "TECH_NETHER_11_SENSE",
-      "name": "混沌万象观神法",
+      "name": "玄瞳烛微录",
       "path": "monster",
       "element": "neutral",
       "grade": 11,
@@ -4449,7 +4449,7 @@
     },
     {
       "id": "TECH_NETHER_12_MAIN",
-      "name": "太初纳元真经",
+      "name": "太初归藏经",
       "path": "monster",
       "element": "neutral",
       "grade": 12,
@@ -4477,7 +4477,7 @@
     },
     {
       "id": "TECH_NETHER_12_COMBAT",
-      "name": "太初裂穹战诀",
+      "name": "烛龙开天书",
       "path": "monster",
       "element": "neutral",
       "grade": 12,
@@ -4505,7 +4505,7 @@
     },
     {
       "id": "TECH_NETHER_12_BODY",
-      "name": "太初镇岳锻骨经",
+      "name": "山海无量身",
       "path": "monster",
       "element": "neutral",
       "grade": 12,
@@ -4535,7 +4535,7 @@
     },
     {
       "id": "TECH_NETHER_12_SENSE",
-      "name": "太初万象观神法",
+      "name": "万象澄明典",
       "path": "monster",
       "element": "neutral",
       "grade": 12,
@@ -4564,7 +4564,7 @@
     },
     {
       "id": "TECH_REINCARNATION_9_MAIN",
-      "name": "三生归藏魂经",
+      "name": "三生归藏经",
       "path": "ghost",
       "element": "neutral",
       "grade": 9,
@@ -4592,7 +4592,7 @@
     },
     {
       "id": "TECH_REINCARNATION_9_COMBAT",
-      "name": "三生断业斩魂诀",
+      "name": "忘川断业诀",
       "path": "ghost",
       "element": "neutral",
       "grade": 9,
@@ -4620,7 +4620,7 @@
     },
     {
       "id": "TECH_REINCARNATION_9_BODY",
-      "name": "三生凝魄法身经",
+      "name": "幽莲凝魄篇",
       "path": "ghost",
       "element": "neutral",
       "grade": 9,
@@ -4650,7 +4650,7 @@
     },
     {
       "id": "TECH_REINCARNATION_9_SENSE",
-      "name": "三生照见前尘法",
+      "name": "前尘返照录",
       "path": "ghost",
       "element": "neutral",
       "grade": 9,
@@ -4679,7 +4679,7 @@
     },
     {
       "id": "TECH_REINCARNATION_10_MAIN",
-      "name": "六道归藏魂经",
+      "name": "六道玄枢典",
       "path": "ghost",
       "element": "neutral",
       "grade": 10,
@@ -4707,7 +4707,7 @@
     },
     {
       "id": "TECH_REINCARNATION_10_COMBAT",
-      "name": "六道断业斩魂诀",
+      "name": "冥河裁劫书",
       "path": "ghost",
       "element": "neutral",
       "grade": 10,
@@ -4735,7 +4735,7 @@
     },
     {
       "id": "TECH_REINCARNATION_10_BODY",
-      "name": "六道凝魄法身经",
+      "name": "彼岸无漏身",
       "path": "ghost",
       "element": "neutral",
       "grade": 10,
@@ -4765,7 +4765,7 @@
     },
     {
       "id": "TECH_REINCARNATION_10_SENSE",
-      "name": "六道照见前尘法",
+      "name": "宿世明灯法",
       "path": "ghost",
       "element": "neutral",
       "grade": 10,
@@ -4794,7 +4794,7 @@
     },
     {
       "id": "TECH_REINCARNATION_11_MAIN",
-      "name": "无生归藏魂经",
+      "name": "无生寂照经",
       "path": "ghost",
       "element": "neutral",
       "grade": 11,
@@ -4822,7 +4822,7 @@
     },
     {
       "id": "TECH_REINCARNATION_11_COMBAT",
-      "name": "无生断业斩魂诀",
+      "name": "寒照斩缘诀",
       "path": "ghost",
       "element": "neutral",
       "grade": 11,
@@ -4850,7 +4850,7 @@
     },
     {
       "id": "TECH_REINCARNATION_11_BODY",
-      "name": "无生凝魄法身经",
+      "name": "空华不坏身",
       "path": "ghost",
       "element": "neutral",
       "grade": 11,
@@ -4880,7 +4880,7 @@
     },
     {
       "id": "TECH_REINCARNATION_11_SENSE",
-      "name": "无生照见前尘法",
+      "name": "长夜观心录",
       "path": "ghost",
       "element": "neutral",
       "grade": 11,
@@ -4909,7 +4909,7 @@
     },
     {
       "id": "TECH_REINCARNATION_12_MAIN",
-      "name": "太始归藏魂经",
+      "name": "太始藏真典",
       "path": "ghost",
       "element": "neutral",
       "grade": 12,
@@ -4937,7 +4937,7 @@
     },
     {
       "id": "TECH_REINCARNATION_12_COMBAT",
-      "name": "太始断业斩魂诀",
+      "name": "无始断轮经",
       "path": "ghost",
       "element": "neutral",
       "grade": 12,
@@ -4965,7 +4965,7 @@
     },
     {
       "id": "TECH_REINCARNATION_12_BODY",
-      "name": "太始凝魄法身经",
+      "name": "大寂琉璃身",
       "path": "ghost",
       "element": "neutral",
       "grade": 12,
@@ -4995,7 +4995,7 @@
     },
     {
       "id": "TECH_REINCARNATION_12_SENSE",
-      "name": "太始照见前尘法",
+      "name": "一念照玄书",
       "path": "ghost",
       "element": "neutral",
       "grade": 12,

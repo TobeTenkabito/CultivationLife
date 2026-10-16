@@ -606,7 +606,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         game.player.layer = 3
         game.player.awaiting_minor_breakthrough = True
         game.player.opportunity = opportunity_required(game.player)
-        aid = copy.deepcopy(ITEM_CATALOG["infant_soul_dew"])
+        aid = copy.deepcopy(ITEM_CATALOG["moon_soul_dew"])
         game.player.inventory.append(aid)
         self.engine.store.save(game)
 

@@ -38,6 +38,22 @@ TEMPLATES = {
     'energy': ('阵能灵珠', 'energy', ('ore_conduct', 'ore_store', 'core_energy'), 7),
 }
 
+# Names describe a world's craft tradition; use and grade remain explicit in
+# the specification, tags and market. Keep this separate from recipe roles.
+PRODUCT_NAMES = {
+    'human': ('青囊丹', '松风丹', '松龄丹', '启玄丹', '霜华剑', '青岚佩', '续纹玉膏', '涵光珠'),
+    'demon': ('血芝丹', '赤髓丹', '续烛丹', '开幽丹', '赤煞刃', '玄鳞护符', '血炼金泥', '凝煞珠'),
+    'spirit': ('玉泉丹', '清虚丹', '鹤龄丹', '洞微丹', '流霞剑', '碧落环', '补阙灵膏', '澄虚珠'),
+    'true_demon': ('渊泉丹', '冥火丹', '长烬丹', '叩渊丹', '烬渊戈', '黑莲护印', '蚀纹玄膏', '藏渊珠'),
+    'monster_realm': ('百草丹', '月华丹', '古木丹', '鸣山丹', '苍牙刃', '青兕甲', '龙脂骨胶', '地脉明珠'),
+    'phantom_underworld': ('聚形丹', '蜃露丹', '梦华丹', '醒梦丹', '掠影刃', '蜃华镜', '织影灵胶', '映魂珠'),
+    'hell': ('冥泉丹', '幽灯丹', '长明丹', '开冥丹', '镇狱尺', '幽关护符', '续魄玄膏', '照狱珠'),
+    'celestial': ('琼华丹', '餐霞丹', '椿龄丹', '叩天丹', '天衡剑', '云笈宝衣', '琼玉续纹膏', '太清涵光珠'),
+    'asura': ('赤泉丹', '战血丹', '余烬丹', '断劫丹', '无回刀', '铜狱战甲', '赤铜血髓胶', '烬海玄珠'),
+    'nether': ('还阳丹', '玄夜丹', '冥椿丹', '叩幽丹', '烛夜剑', '玄鳞宝甲', '蜃纹玉膏', '渡魂珠'),
+    'reincarnation': ('返生丹', '三生丹', '续灯丹', '明因丹', '断缘剑', '彼岸莲台', '三生续纹膏', '照心珠'),
+}
+
 
 def material_id(world, grade, role):
     return f'econ_{world}_{grade}_{role}'
@@ -91,14 +107,14 @@ def build(profiles, realms):
                     tags=['material', 'economic_raw', f'economic_role:{role}', f'native_world:{world}'],
                     description=f'{THEMES[world]}本界{grade}阶{dict(ore="矿石",herb="草药",core="内丹")[family]}，用于同阶有限加工配方；内丹是原料，不能作为成品丹药服用。'))
                 goods.append(dict(world=world, kind='item', content_id=item, tier=grade, price=base))
-            for template, (name, category, roles, multiplier) in TEMPLATES.items():
+            for (template, (name, category, roles, multiplier)), product_name in zip(TEMPLATES.items(), PRODUCT_NAMES[world], strict=True):
                 item = product_id(world, grade, template)
                 use = 'artifact' if template.startswith('artifact_') else template
                 tags = [f'economic_use:{use}', f'native_world:{world}', 'economic_product']
                 tags += ['pill'] if category in {'medical', 'training'} else ['artifact'] if category == 'arms' else ['material']
                 # Commercial grade lives in the specification and market good.
                 # Combat force is a separate mortal/upper qualification.
-                row = dict(id=item, name=f'{THEMES[world]}{name}（{grade}阶）',
+                row = dict(id=item, name=f'{product_name}（{grade}阶）',
                     force_tier=2 if use == 'artifact' and grade >= 9 else 1, tags=tags,
                     description=f'本界同阶原料加工的标准{ name }；居民供养按用途消费，军需仅接受适用用途及品阶。')
                 if use == 'artifact':

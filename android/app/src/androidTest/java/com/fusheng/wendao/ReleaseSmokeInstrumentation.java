@@ -1827,9 +1827,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(before.equals(js("JSON.stringify(game)")),"World rendering changed game state");
             } else if(phase.equals("family")) {
                 async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'家族归墟验收',spirit_root:'supreme_metal',path:'dao',seed:1400,preset_id:'core'})});render(g);return g.id;})()");
-                check(Boolean.TRUE.equals(js("game.player.inventory.some(i=>i.id==='heroic_progeny_elixir' && i.quantity===1)")),"Missing starter elixir");
-                async("(async()=>{await mutate('/api/games/'+game.id+'/use-item',{item_id:'heroic_progeny_elixir'});return true})()");
-                check(Boolean.TRUE.equals(js("game.player.guaranteed_progeny && !game.player.inventory.some(i=>i.id==='heroic_progeny_elixir')")),"Elixir consumption failed");
+                check(Boolean.TRUE.equals(js("game.player.inventory.some(i=>i.id==='qilin_blessing_elixir' && i.quantity===1)")),"Missing starter elixir");
+                async("(async()=>{await mutate('/api/games/'+game.id+'/use-item',{item_id:'qilin_blessing_elixir'});return true})()");
+                check(Boolean.TRUE.equals(js("game.player.guaranteed_progeny && !game.player.inventory.some(i=>i.id==='qilin_blessing_elixir')")),"Elixir consumption failed");
                 try(java.io.InputStream input=getContext().getAssets().open("family_guixu_layout.js")) {
                     java.io.ByteArrayOutputStream buffer=new java.io.ByteArrayOutputStream();
                     byte[] chunk=new byte[4096];int length;

@@ -49,6 +49,11 @@ def build():
 
     # Keep the six existing dungeons and their unique treasures unchanged.
     import expand_guixu_catalog as catalog
+    # Names are curated in the base catalogs. Rebuilding a dungeon must not
+    # replace them with a shared prefix plus a repeated functional suffix.
+    canonical_names = {row['id']: row['name'] for document, key in (
+        ('content/items.json', 'items'), ('content/techniques.json', 'techniques'),
+    ) for row in read(document)[key]}
     themes = []
     additions = [
         ("monster_realm", "ancestral_mountain", "妖祖沉庭", "monster", "祖灵", 6, 42000,
@@ -69,15 +74,10 @@ def build():
                      path=path, max_rank=[rank, world["realms"][rank]["layers"]], eject_rank=[rank + 1, 1],
                      period=300 if rank > 8 else 180, first=300 if rank > 8 else 180,
                      grade=min(8, rank), base_value=value, layer_names=layers)
-        for category, nouns in {
-            "techniques": ["归潮经", "定界录", "炼身篇", "照神法", "渡厄诀", "不灭典", "隐虚术", "遁空篇", "溯源经", "太初书"],
-            "equipment": ["镇海珠", "归潮旗", "裂界剑", "定天甲", "照魂鼎", "渡劫轮", "天心镜", "流光舟", "界尺", "镇源碑", "无相钟", "太初印"],
-            "consumable": ["还元丹", "定魂露", "续命丸", "洗脉丹", "回天散", "养神液", "生肌膏", "渡厄丹"],
-            "plant": ["九叶莲", "灵芝", "玉参", "长生藤", "归元草", "照神花", "太初果", "镇魂苔", "天葵", "万年桑"],
-            "material": ["母金", "源晶", "法砂", "玄钢", "界石", "玉髓", "神铜", "天银", "灵玉", "太初核"],
-            "currency": [f"灵匣·{i}" for i in range(1, 11)],
-        }.items():
-            theme[category] = [prefix + noun for noun in nouns]
+        for category, count in dict(techniques=10, equipment=12, consumable=8, plant=10, material=10).items():
+            content_prefix = f'TECH_GUIXU_{name.upper()}' if category == 'techniques' else f'guixu_{name}_{category}'
+            theme[category] = [canonical_names[f'{content_prefix}_{i:02d}'] for i in range(1, count + 1)]
+        theme['currency'] = [f'{prefix}灵匣·{i}' for i in range(1, 11)]
         environment = world["systems"]["world_profiles"][name]["qi_concentrations"]
         theme["concentrations"] = [[round(environment[q] * (1.1 + i * .15), 2) for q in ("spirit", "demon", "monster", "yin")] for i in range(5)]
         theme["efficiencies"] = copy.deepcopy(theme["concentrations"])
