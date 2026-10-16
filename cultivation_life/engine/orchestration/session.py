@@ -182,7 +182,7 @@ def create_game(
     # section, including mortal creation and every quick-start preset.
     if not has_item(player, "spirit_sword"):
         add_item(player, "spirit_sword")
-    add_item(player, "heroic_progeny_elixir")
+    add_item(player, "qilin_blessing_elixir")
     player.lineage_race = player.race
     player.allegiance_race = player.race
     player.location_id = deps.maps.default_location(player.world)

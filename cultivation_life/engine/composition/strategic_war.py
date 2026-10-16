@@ -1,6 +1,7 @@
 """The sole bridge between strategic decisions and ordinary campaign execution."""
 from ...system.strategic_war.dependencies import StrategicWarDependencies
 from ...system.war.lifecycle import _advance_wars_unit
+from ...system.war.diplomacy import player_side
 from ...relationship_records import find_person
 
 
@@ -11,6 +12,7 @@ def bind(host):
         advance_campaigns=lambda game, rng, wars: _advance_wars_unit(
             host._dependencies.war.lifecycle, game, rng, campaigns=wars),
         find_person=find_person,
+        player_side=lambda *a: player_side(host._dependencies.war.diplomacy, *a),
         members=lambda *a: host._sect_members(*a),
         has_sect_voice=lambda *a: host._has_sect_voice(*a),
         has_family_voice=lambda *a: host._has_family_voice(*a),

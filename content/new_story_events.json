@@ -23,11 +23,11 @@
       ]
     },
     {
-      "id":"EVT_XUTIAN_003","version":1,"title":"丹火同炉","body":"丹殿中央悬着一枚尚未开炉的归婴丹，炉下玄潮冷焰历经万年仍未熄灭。沧海宫主人当年在丹成前遭逢强敌，只来得及把控火法诀刻在炉壁；想取丹药，便必须先驯服这团能冻结神识的异火。",
+      "id":"EVT_XUTIAN_003","version":1,"title":"丹火同炉","body":"丹殿中央悬着一枚尚未开炉的九还凝真丹，炉下玄潮冷焰历经万年仍未熄灭。沧海宫主人当年在丹成前遭逢强敌，只来得及把控火法诀刻在炉壁；想取丹药，便必须先驯服这团能冻结神识的异火。",
       "tags":["realm:core","world:human","story_chain","xutian","manual_only"],"weight":0,
       "choices":[
-        {"id":"banner","text":"依炉壁法诀收服冷焰，再开炉取丹","effects":[{"type":"add_item","item_id":"repair_sky_pill"},{"type":"set_flag","flag":"xutian_blue_flame"},{"type":"queue_event","event_id":"EVT_XUTIAN_004"}]},
-        {"id":"study","text":"舍弃归婴丹，专心参悟控火法诀","effects":[{"type":"set_flag","flag":"xutian_blue_flame"},{"type":"add_opportunity","value":12},{"type":"queue_event","event_id":"EVT_XUTIAN_004"}]},
+        {"id":"banner","text":"依炉壁法诀收服冷焰，再开炉取丹","effects":[{"type":"add_item","item_id":"nine_return_truth_pill"},{"type":"set_flag","flag":"xutian_blue_flame"},{"type":"queue_event","event_id":"EVT_XUTIAN_004"}]},
+        {"id":"study","text":"舍弃九还凝真丹，专心参悟控火法诀","effects":[{"type":"set_flag","flag":"xutian_blue_flame"},{"type":"add_opportunity","value":12},{"type":"queue_event","event_id":"EVT_XUTIAN_004"}]},
         {"id":"grab","text":"无视寒焰，直接抓取古丹","effects":[{"type":"damage","value":1.5,"reason":"被玄潮冷焰冻碎金丹与神魂"}]}
       ]
     },

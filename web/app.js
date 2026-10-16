@@ -1936,7 +1936,7 @@ function renderWars(system) {
       if (war.peace_offer?.recipient_side === war.player_side) body.appendChild(warPeaceOffer(war));
       else if (war.can_negotiate) body.appendChild(warPeaceForm(war, system.terms || {}));
     } else if (war.status !== 'ended' && war.player_side) {
-      const hint = document.createElement('p'); hint.className = 'muted'; hint.textContent = '你属于参战方，可以随时亲自参加下一场会战；但尚无势力话语权，不能调度主力、召集盟友或签署和约。'; body.appendChild(hint);
+      const hint = document.createElement('p'); hint.className = 'muted'; hint.textContent = war.action_blocked ? '当前事件或人物状态限制战争操作，恢复后可继续处理。' : '你属于参战方，可以随时亲自参加下一场会战；但尚无势力话语权，不能调度主力、召集盟友或签署和约。'; body.appendChild(hint);
     }
     if (actions.children.length) body.appendChild(actions);
     if (war.logs?.length) {
@@ -3204,7 +3204,7 @@ function renderInventory(items) {
     const specialPlantUse = (item.plant_id === 'mystic_heaven_vine' && item.plant_years >= 10000) || (item.plant_id === 'nebula_manjushaka' && item.plant_years >= 5000);
     const guixuUse = item.tags?.includes('guixu_consumable') || (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant'));
     const economicMedicine = (item.tags || []).some(tag => ['economic_use:healing','economic_use:cultivation','economic_use:longevity'].includes(tag));
-    const normalUse = economicMedicine || item.id === 'heroic_progeny_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
+    const normalUse = economicMedicine || item.id === 'qilin_blessing_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
     if (!artifact && (trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
       if (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant')) use.textContent = '炼化';
@@ -3353,6 +3353,10 @@ function renderTechniques(slots) {
     const name = document.createElement('b'); name.textContent = `${role} · ${technique.name} Lv.${technique.level} · ${technique.growth_name || "均衡"}倾向`;
     const effect = document.createElement('small'); effect.textContent = activeText(technique);
     row.append(name, effect); list.appendChild(row);
+    if (technique.special_effect_description) {
+      const specialty = document.createElement('small'); specialty.textContent = technique.special_effect_description;
+      row.appendChild(specialty);
+    }
   };
   const source = art => `${art.source_display || '灵源'}${art.environment_multiplier == null ? '' : ` · 环境 ×${Number(art.environment_multiplier).toFixed(3)}`}`;
   add('主修', slots.main, art => `${source(art)} · 启用机缘 +${percent(art.opportunity_bonus)}${art.effective_karma_multiplier !== 1 ? `，因果倍率 ×${Number(art.effective_karma_multiplier).toFixed(3)}` : ''}`);
@@ -3390,6 +3394,10 @@ function renderKnownTechniques(techniques) {
         ? `变身容量 ${art.transformation_capacity} · 战斗空间 ${art.transformation_space} · 形态由真灵素材独立解锁`
       : `${sourceText} · 战斗门槛 ${art.combat_requirement_display}${art.required_body_training ? ` · 炼体门槛 ${art.required_body_training} 层${art.body_requirement_met ? '' : '（未满足）'}` : ''}${art.requires_immortal_power ? ` · 仙灵力消耗 ${percent(art.immortal_power_cost)}` : ''} · 机缘 +${percent(art.opportunity_bonus)} · HP +${percent(art.hp_bonus)} · MP +${percent(art.mp_bonus)} · 战力 +${number(art.combat_bonus)}`;
     info.append(name, detail);
+    if (art.special_effect_description) {
+      const specialty = document.createElement('small'); specialty.textContent = art.special_effect_description;
+      info.appendChild(specialty);
+    }
     if (art.next_level_gains) {
       const gains = art.next_level_gains;
       const growth = document.createElement('small'); growth.className = 'technique-growth';

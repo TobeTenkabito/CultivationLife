@@ -305,7 +305,7 @@ def test_invalid_numeric_save_does_not_replace_existing_file(engine):
     assert not list(engine.store.directory.glob('*.tmp'))
 
 
-@pytest.mark.parametrize('item_id', ['true_immortal_breakthrough_1', 'guixu_canghai_consumable_01', 'heroic_progeny_elixir'])
+@pytest.mark.parametrize('item_id', ['clear_void_origin_pill', 'guixu_canghai_consumable_01', 'qilin_blessing_elixir'])
 def test_special_pills_cannot_bypass_recipe_whitelist(engine, item_id):
     game = create(engine, realm=8)
     herb = engine._add_harvested_plant(game.player, 'purple_cloud_ginseng', 100)

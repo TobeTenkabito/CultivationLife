@@ -58,7 +58,7 @@ def public(deps, game):
                     dispatch_choices.append(dict(**ref(org),name=org.name,cost=cost,years=route.years))
             from .willingness import personal_side
             from ..war.supply import turns
-            own_side=next((s for s in SIDES if own and own.id in {r['id'] for r in child['coalitions'][s]}),None)
+            own_side=deps.player_side(game,child)
             children.append(dict(id=child['id'], attacker=names.get(child['attacker_id'], '原组织'),
                 defender=names.get(child['defender_id'], '原组织'), phase=child['campaign_phase'],
                 location=place.get('name', '原战场'), remaining=remaining, battles=child.get('battles', 0),

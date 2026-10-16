@@ -858,7 +858,7 @@
           }
         },
         "nine_curve_herb": {
-          "name": "抱婴参",
+          "name": "九曲灵参",
           "seed_id": "nine_curve_herb_seed",
           "kind": "medicinal",
           "optimal_years": 3000,
@@ -1059,8 +1059,8 @@
           "description": "元婴期罕见金行精粹，令本命法宝战斗力 +1,800。"
         },
         {
-          "item_id": "nascent_flame_crystal",
-          "name": "婴火玄晶",
+          "item_id": "radiant_flame_crystal",
+          "name": "离照玄晶",
           "minimum_realm": 4,
           "effect": {
             "combat_bonus": 3200,
@@ -1369,7 +1369,7 @@
         },
         {
           "item_id": "houtu_clay",
-          "name": "后土之土",
+          "name": "后土息壤",
           "minimum_realm": 10,
           "combat_effect": {
             "player_stat_multipliers": {
@@ -2670,11 +2670,11 @@
         "story_flags": [
           "wind_wings_completed"
         ],
-        "main_technique": "TECH_COMMON_CORE",
+        "main_technique": "TECH_BAOPU_CANON",
         "support_technique": "TECH_COMMON_FOUNDATION",
         "combat_techniques": [
-          "TECH_COMMON_CORE",
-          "TECH_COMMON_LUO",
+          "TECH_BAOPU_CANON",
+          "TECH_XUANDU_CANON",
           "TECH_TIANJIAN"
         ],
         "inventory": [
@@ -2712,12 +2712,12 @@
         "fame": 8,
         "body_training": 8,
         "story_flags": [],
-        "main_technique": "TECH_COMMON_CORE",
+        "main_technique": "TECH_BAOPU_CANON",
         "support_technique": "TECH_COMMON_FOUNDATION",
         "body_technique": "TECH_BODY_HUNDRED_REFINEMENT",
         "combat_techniques": [
-          "TECH_COMMON_CORE",
-          "TECH_COMMON_LUO",
+          "TECH_BAOPU_CANON",
+          "TECH_XUANDU_CANON",
           "TECH_TIANJIAN"
         ],
         "inventory": [
@@ -2804,11 +2804,11 @@
         "sha_qi": 0,
         "fame": 12,
         "story_flags": [],
-        "main_technique": "TECH_COMMON_CORE",
+        "main_technique": "TECH_BAOPU_CANON",
         "support_technique": "TECH_COMMON_FOUNDATION",
         "combat_techniques": [
-          "TECH_COMMON_CORE",
-          "TECH_COMMON_LUO",
+          "TECH_BAOPU_CANON",
+          "TECH_XUANDU_CANON",
           "TECH_TIANJIAN"
         ],
         "inventory": [
@@ -2884,8 +2884,8 @@
           "xutian_completed",
           "kunwu_completed"
         ],
-        "main_technique": "TECH_COMMON_NASCENT",
-        "support_technique": "TECH_COMMON_CORE",
+        "main_technique": "TECH_YELLOW_COURT_INNER",
+        "support_technique": "TECH_BAOPU_CANON",
         "combat_techniques": [
           "TECH_COMMON_GUI"
         ],
@@ -2952,8 +2952,8 @@
           "north_night_completed",
           "star_palace_completed"
         ],
-        "main_technique": "TECH_COMMON_SPIRIT",
-        "support_technique": "TECH_COMMON_NASCENT",
+        "main_technique": "TECH_MYSTIC_OBSERVATION",
+        "support_technique": "TECH_YELLOW_COURT_INNER",
         "combat_techniques": [
           "TECH_COMMON_GUI",
           "TECH_DAGENG_SWORD_ARRAY",
@@ -3035,12 +3035,12 @@
         "karma": 22,
         "sha_qi": 45,
         "fame": 48,
-        "main_technique": "TECH_COMMON_VOID",
-        "support_technique": "TECH_COMMON_SPIRIT",
+        "main_technique": "TECH_VOID_ORIGIN_CANON",
+        "support_technique": "TECH_MYSTIC_OBSERVATION",
         "combat_techniques": [
-          "TECH_EMPTY_VOID_CANON",
+          "TECH_LUCID_SUBTLETY_CANON",
           "TECH_SPIRIT_REFINING_ART",
-          "TECH_COMMON_VOID",
+          "TECH_VOID_ORIGIN_CANON",
           "TECH_Hexagram",
           "TECH_TAIYI_LIGHT"
         ],
@@ -3105,13 +3105,13 @@
         "sha_qi": 65,
         "fame": 52,
         "body_training": 28,
-        "main_technique": "TECH_COMMON_VOID",
-        "support_technique": "TECH_COMMON_SPIRIT",
+        "main_technique": "TECH_VOID_ORIGIN_CANON",
+        "support_technique": "TECH_MYSTIC_OBSERVATION",
         "body_technique": "TECH_BODY_HUNDRED_REFINEMENT",
         "combat_techniques": [
-          "TECH_EMPTY_VOID_CANON",
+          "TECH_LUCID_SUBTLETY_CANON",
           "TECH_SPIRIT_REFINING_ART",
-          "TECH_COMMON_VOID"
+          "TECH_VOID_ORIGIN_CANON"
         ],
         "inventory": [
           {
@@ -3240,12 +3240,12 @@
         "karma": 16,
         "sha_qi": 0,
         "fame": 72,
-        "main_technique": "TECH_COMMON_VOID",
-        "support_technique": "TECH_COMMON_SPIRIT",
+        "main_technique": "TECH_VOID_ORIGIN_CANON",
+        "support_technique": "TECH_MYSTIC_OBSERVATION",
         "combat_techniques": [
-          "TECH_EMPTY_VOID_CANON",
+          "TECH_LUCID_SUBTLETY_CANON",
           "TECH_SPIRIT_REFINING_ART",
-          "TECH_COMMON_VOID"
+          "TECH_VOID_ORIGIN_CANON"
         ],
         "inventory": [
           {
@@ -3307,12 +3307,12 @@
         "karma": 8,
         "sha_qi": 0,
         "fame": 64,
-        "main_technique": "TECH_COMMON_VOID",
+        "main_technique": "TECH_VOID_ORIGIN_CANON",
         "support_technique": "TECH_PUTI",
         "combat_techniques": [
-          "TECH_EMPTY_VOID_CANON",
+          "TECH_LUCID_SUBTLETY_CANON",
           "TECH_SPIRIT_REFINING_ART",
-          "TECH_COMMON_VOID"
+          "TECH_VOID_ORIGIN_CANON"
         ],
         "inventory": [
           {
@@ -3352,7 +3352,7 @@
       {
         "id": "demonic_void",
         "name": "魔修·炼虚初期",
-        "description": "本体高阶魔修开局：自真魔界起步，以天魔炼虚录和黑日焚心典承接炼虚道途。",
+        "description": "本体高阶魔修开局：自真魔界起步，以天魔游玄录和黑日焚心典承接炼虚道途。",
         "category": "异道炼虚",
         "variant_label": "本体",
         "enabled": true,
@@ -3374,11 +3374,11 @@
         "karma": 45,
         "sha_qi": 120,
         "fame": 38,
-        "main_technique": "TECH_HEAVEN_DEMON_VOID",
+        "main_technique": "TECH_HEAVEN_DEMON_MYSTERIES",
         "support_technique": "TECH_FOUR_SOURCE_DEVOURING",
         "combat_techniques": [
           "TECH_BLACK_SUN_TRUE_FLAME",
-          "TECH_HEAVEN_DEMON_VOID",
+          "TECH_HEAVEN_DEMON_MYSTERIES",
           "TECH_CORPSE_YIN_CANON"
         ],
         "inventory": [
@@ -3438,13 +3438,13 @@
         "karma": 28,
         "sha_qi": 70,
         "fame": 96,
-        "main_technique": "TECH_COMMON_INTEGRATION",
-        "support_technique": "TECH_COMMON_VOID",
+        "main_technique": "TECH_MYRIAD_LAW_UNITY",
+        "support_technique": "TECH_VOID_ORIGIN_CANON",
         "combat_techniques": [
           "TECH_QINGPAN_SWORD_ARRAY",
           "TECH_NINE_TURN_UNITY",
-          "TECH_COMMON_INTEGRATION",
-          "TECH_EMPTY_VOID_CANON",
+          "TECH_MYRIAD_LAW_UNITY",
+          "TECH_LUCID_SUBTLETY_CANON",
           "TECH_SPIRIT_REFINING_ART",
           "TECH_TAIYI_LIGHT"
         ],
@@ -3501,15 +3501,15 @@
         "karma": 35,
         "sha_qi": 110,
         "fame": 160,
-        "main_technique": "TECH_COMMON_MAHAYANA",
-        "support_technique": "TECH_COMMON_INTEGRATION",
+        "main_technique": "TECH_SUPREME_SALVATION",
+        "support_technique": "TECH_MYRIAD_LAW_UNITY",
         "combat_techniques": [
           "TECH_CHAOS_OPENING",
           "TECH_ORIGIN_GANG_SHIELD",
           "TECH_QINGPAN_SWORD_ARRAY",
           "TECH_CHUNLI_SWORD_ARRAY",
           "TECH_NINE_TURN_UNITY",
-          "TECH_EMPTY_VOID_CANON",
+          "TECH_LUCID_SUBTLETY_CANON",
           "TECH_SPIRIT_REFINING_ART"
         ],
         "inventory": [
@@ -3538,7 +3538,7 @@
             "quantity": 1
           },
           {
-            "id": "mahayana_spirit_pill",
+            "id": "mystic_firmament_pill",
             "quantity": 1
           },
           {
@@ -3574,7 +3574,7 @@
         "sha_qi": 120,
         "fame": 0,
         "immortal_power_converted": true,
-        "main_technique": "TECH_CELESTIAL_BREATHING",
+        "main_technique": "TECH_ROSY_CLOUD_BREATH",
         "support_technique": "TECH_PRIMORDIAL_IMMORTAL_LIGHT",
         "combat_techniques": [
           "TECH_TAIYI_SWORD_CANON"
@@ -3869,11 +3869,11 @@
         "story_flags": [
           "wind_wings_completed"
         ],
-        "main_technique": "TECH_COMMON_CORE",
+        "main_technique": "TECH_BAOPU_CANON",
         "support_technique": "TECH_COMMON_FOUNDATION",
         "combat_techniques": [
-          "TECH_COMMON_CORE",
-          "TECH_COMMON_LUO",
+          "TECH_BAOPU_CANON",
+          "TECH_XUANDU_CANON",
           "TECH_TIANJIAN"
         ],
         "inventory": [
@@ -4298,73 +4298,73 @@
     "yaochi": {
       "breakthrough_pills": [
         {
-          "id": "true_immortal_breakthrough_1",
+          "id": "clear_void_origin_pill",
           "price": 100,
           "quantity": 1,
           "realm": 9
         },
         {
-          "id": "true_immortal_breakthrough_2",
+          "id": "nine_turn_meridian_pill",
           "price": 140,
           "quantity": 1,
           "realm": 9
         },
         {
-          "id": "true_immortal_breakthrough_3",
+          "id": "supreme_clarity_barrier_pill",
           "price": 160,
           "quantity": 1,
           "realm": 9
         },
         {
-          "id": "golden_immortal_breakthrough_1",
+          "id": "golden_flower_dao_pill",
           "price": 300,
           "quantity": 1,
           "realm": 10
         },
         {
-          "id": "golden_immortal_breakthrough_2",
+          "id": "imperishable_truth_pill",
           "price": 420,
           "quantity": 1,
           "realm": 10
         },
         {
-          "id": "golden_immortal_breakthrough_3",
+          "id": "purple_heaven_mystery_pill",
           "price": 480,
           "quantity": 1,
           "realm": 10
         },
         {
-          "id": "taiyi_breakthrough_1",
+          "id": "supreme_unity_pill",
           "price": 600,
           "quantity": 1,
           "realm": 11
         },
         {
-          "id": "taiyi_breakthrough_2",
+          "id": "three_flower_dao_pill",
           "price": 840,
           "quantity": 1,
           "realm": 11
         },
         {
-          "id": "taiyi_breakthrough_3",
+          "id": "five_breath_truth_pill",
           "price": 960,
           "quantity": 1,
           "realm": 11
         },
         {
-          "id": "daluo_breakthrough_1",
+          "id": "boundless_perfection_pill",
           "price": 1000,
           "quantity": 1,
           "realm": 12
         },
         {
-          "id": "daluo_breakthrough_2",
+          "id": "primordial_harmony_pill",
           "price": 1400,
           "quantity": 1,
           "realm": 12
         },
         {
-          "id": "daluo_breakthrough_3",
+          "id": "myriad_lucid_pill",
           "price": 1600,
           "quantity": 1,
           "realm": 12

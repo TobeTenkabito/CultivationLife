@@ -107,6 +107,13 @@ def _player_war_side(deps: WarDiplomacyDependencies, game: GameState, war: dict[
     if game.player.world != war.get("world"):
         return None
     deps._ensure_war_shape(game, war)
+    return player_side(deps, game, war)
+
+
+def player_side(deps: WarDiplomacyDependencies, game: GameState, war: dict[str, Any]) -> str | None:
+    """Read original membership/guest obligations without preparing faction state."""
+    if game.player.world != war.get("world"):
+        return None
     own_id = deps._war_player_identity(game, war)
     return deps._participant_side(war, own_id) or deps._intrigue_player_guest_side(game, war)
 

@@ -261,11 +261,11 @@ class AuctionUpdateTests(unittest.TestCase):
         game = self._open_local_auction(made["id"])
         lot = game.auction_state["lots"][0]
         lot.update({"current_bidder": "player", "current_bidder_name": game.player.name})
-        game.auction_state["consignments"] = [{"content_id": "mahayana_spirit_pill", "start_price": 100, "tier": 8}]
+        game.auction_state["consignments"] = [{"content_id": "mystic_firmament_pill", "start_price": 100, "tier": 8}]
         self.engine._finish_auction(game, random.Random(9))
         stones_after_settlement = self.engine._spirit_stones(game.player)
         item_after_settlement = next(
-            (item.quantity for item in game.player.inventory if item.id == "mahayana_spirit_pill"), 0
+            (item.quantity for item in game.player.inventory if item.id == "mystic_firmament_pill"), 0
         )
         self.engine.store.save(game)
         self.engine.manage_secret_art(made["id"], "suppress", "activate", 5, 9)
@@ -273,7 +273,7 @@ class AuctionUpdateTests(unittest.TestCase):
         crossed = self.engine.store.load(made["id"])
         self.assertEqual(self.engine._spirit_stones(crossed.player), stones_after_settlement)
         self.assertEqual(
-            next((item.quantity for item in crossed.player.inventory if item.id == "mahayana_spirit_pill"), 0),
+            next((item.quantity for item in crossed.player.inventory if item.id == "mystic_firmament_pill"), 0),
             item_after_settlement,
         )
 

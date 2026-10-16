@@ -386,13 +386,13 @@ def _complete_immortal_conversion_stage(deps: TrialDependencies, game: GameState
                else "可在左侧仙元面板消耗机缘继续推进。")
         )
     player.immortal_power_converted = True
-    learn_technique(player, copy.deepcopy(TECHNIQUE_CATALOG["TECH_CELESTIAL_BREATHING"]))
+    learn_technique(player, copy.deepcopy(TECHNIQUE_CATALOG["TECH_ROSY_CLOUD_BREATH"]))
     add_item(player, "immortal_origin_stone", 3)
     player.hp = max_hp(player)
     player.mp = max_mp(player)
     game.history.append(HistoryRecord(
         "SYS_IMMORTAL_POWER_CONVERTED", 1, player.age, "仙元初成", None, "completed",
-        "五个转化阶段全部完成：原有 MP 基准已整体蜕变为仙灵力。你获得《真仙引灵经》与三枚仙元石。",
+        "五个转化阶段全部完成：原有 MP 基准已整体蜕变为仙灵力。你获得《餐霞承露经》与三枚仙元石。",
         {"immortal_power_converted":[False, True], "conversion_stage":5},
         ["system", "celestial", "immortal_power", "milestone"],
     ))

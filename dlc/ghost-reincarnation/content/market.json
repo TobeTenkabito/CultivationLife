@@ -32,14 +32,14 @@
     {
       "world": "hell",
       "kind": "technique",
-      "content_id": "TECH_GHOST_BODY_THIEF",
+      "content_id": "TECH_CICADA_METAMORPHOSIS",
       "tier": 5,
       "price": 19000
     },
     {
       "world": "hell",
       "kind": "technique",
-      "content_id": "TECH_GHOST_TEN_THOUSAND_HOSTS",
+      "content_id": "TECH_BUTTERFLY_DREAM_CANON",
       "tier": 8,
       "price": 7600000
     }

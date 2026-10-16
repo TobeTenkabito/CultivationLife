@@ -619,7 +619,7 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
     def test_monster_worlds_sell_minor_breakthrough_pills_for_every_realm(self):
         expected = {
             "monster_meridian_pill":"minor:2", "blood_core_pill":"minor:3",
-            "beast_infant_pill":"minor:4", "ancestral_soul_marrow":"minor:5",
+            "moon_howl_pill":"minor:4", "ancestral_soul_marrow":"minor:5",
             "void_molt_pill":"minor:6", "unity_blood_pill":"minor:7",
             "myriad_ancestor_pill":"minor:8",
         }

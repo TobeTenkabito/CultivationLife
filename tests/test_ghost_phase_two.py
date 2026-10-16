@@ -185,9 +185,9 @@ class GhostPhaseTwoTests(unittest.TestCase):
 
     def test_advanced_techniques_extend_or_remove_possession_limit(self):
         player = Player("夺形", "mutated_yin", path="ghost", possession_count=1)
-        player.known_techniques = [copy.deepcopy(TECHNIQUE_CATALOG["TECH_GHOST_BODY_THIEF"])]
+        player.known_techniques = [copy.deepcopy(TECHNIQUE_CATALOG["TECH_CICADA_METAMORPHOSIS"])]
         self.assertEqual(possession_limit(player), 2)
-        player.known_techniques.append(copy.deepcopy(TECHNIQUE_CATALOG["TECH_GHOST_TEN_THOUSAND_HOSTS"]))
+        player.known_techniques.append(copy.deepcopy(TECHNIQUE_CATALOG["TECH_BUTTERFLY_DREAM_CANON"]))
         self.assertIsNone(possession_limit(player))
 
     def test_controlled_ghost_cannot_use_free_actions_or_travel(self):

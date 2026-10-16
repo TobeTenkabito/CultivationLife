@@ -1515,7 +1515,7 @@
         },
         {
           "id": "weir_equipment_10",
-          "name": "归孔法环",
+          "name": "尾闾法环",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -1627,7 +1627,7 @@
         },
         {
           "id": "weir_consumable_05",
-          "name": "万流归孔阵盘",
+          "name": "万流归渊阵盘",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -1819,7 +1819,7 @@
         },
         {
           "id": "weir_plant_09",
-          "name": "归孔法则藤",
+          "name": "归渊玄藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -4715,7 +4715,7 @@
         },
         {
           "id": "beast_vortex_equipment_09",
-          "name": "混沌卵舟",
+          "name": "鲲胎云舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -5531,7 +5531,7 @@
         },
         {
           "id": "yellow_spring_technique_03",
-          "name": "无底阴身篇",
+          "name": "九泉藏形篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -5595,7 +5595,7 @@
         },
         {
           "id": "yellow_spring_technique_07",
-          "name": "生死簿遁法",
+          "name": "冥关无迹法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6011,7 +6011,7 @@
         },
         {
           "id": "yellow_spring_plant_03",
-          "name": "无底阴芝",
+          "name": "九泉阴芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6075,7 +6075,7 @@
         },
         {
           "id": "yellow_spring_plant_07",
-          "name": "生死簿藤",
+          "name": "玄牒藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6235,7 +6235,7 @@
         },
         {
           "id": "yellow_spring_material_07",
-          "name": "生死簿银",
+          "name": "冥契银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6571,7 +6571,7 @@
       "treasure_pool": [
         {
           "id": "monster_realm_technique_01",
-          "name": "祖灵归潮经",
+          "name": "荒原纳息经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6587,7 +6587,7 @@
         },
         {
           "id": "monster_realm_technique_02",
-          "name": "祖灵定界录",
+          "name": "群山载灵录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6603,7 +6603,7 @@
         },
         {
           "id": "monster_realm_technique_03",
-          "name": "祖灵炼身篇",
+          "name": "百骸鸣岳篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6619,7 +6619,7 @@
         },
         {
           "id": "monster_realm_technique_04",
-          "name": "祖灵照神法",
+          "name": "烛野观神法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6635,7 +6635,7 @@
         },
         {
           "id": "monster_realm_technique_05",
-          "name": "祖灵渡厄诀",
+          "name": "苍虬蜕鳞诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6651,7 +6651,7 @@
         },
         {
           "id": "monster_realm_technique_06",
-          "name": "祖灵不灭典",
+          "name": "万木同春典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6667,7 +6667,7 @@
         },
         {
           "id": "monster_realm_technique_07",
-          "name": "祖灵隐虚术",
+          "name": "伏草藏真术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6683,7 +6683,7 @@
         },
         {
           "id": "monster_realm_technique_08",
-          "name": "祖灵遁空篇",
+          "name": "乘飙御云篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6699,7 +6699,7 @@
         },
         {
           "id": "monster_realm_technique_09",
-          "name": "祖灵溯源经",
+          "name": "祖庭归藏经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6715,7 +6715,7 @@
         },
         {
           "id": "monster_realm_technique_10",
-          "name": "祖灵太初书",
+          "name": "太古山海书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -6731,7 +6731,7 @@
         },
         {
           "id": "monster_realm_equipment_01",
-          "name": "祖灵镇海珠",
+          "name": "苍山镇海珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6747,7 +6747,7 @@
         },
         {
           "id": "monster_realm_equipment_02",
-          "name": "祖灵归潮旗",
+          "name": "万木招灵旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6763,7 +6763,7 @@
         },
         {
           "id": "monster_realm_equipment_03",
-          "name": "祖灵裂界剑",
+          "name": "獠月裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6779,7 +6779,7 @@
         },
         {
           "id": "monster_realm_equipment_04",
-          "name": "祖灵定天甲",
+          "name": "玄兕负天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6795,7 +6795,7 @@
         },
         {
           "id": "monster_realm_equipment_05",
-          "name": "祖灵照魂鼎",
+          "name": "百兽照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6811,7 +6811,7 @@
         },
         {
           "id": "monster_realm_equipment_06",
-          "name": "祖灵渡劫轮",
+          "name": "回山渡劫轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6827,7 +6827,7 @@
         },
         {
           "id": "monster_realm_equipment_07",
-          "name": "祖灵天心镜",
+          "name": "灵犀照心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6843,7 +6843,7 @@
         },
         {
           "id": "monster_realm_equipment_08",
-          "name": "祖灵流光舟",
+          "name": "青鸾流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6859,7 +6859,7 @@
         },
         {
           "id": "monster_realm_equipment_09",
-          "name": "祖灵界尺",
+          "name": "量天骨尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6875,7 +6875,7 @@
         },
         {
           "id": "monster_realm_equipment_10",
-          "name": "祖灵镇源碑",
+          "name": "祖庭镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6891,7 +6891,7 @@
         },
         {
           "id": "monster_realm_equipment_11",
-          "name": "祖灵无相钟",
+          "name": "空山无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6907,7 +6907,7 @@
         },
         {
           "id": "monster_realm_equipment_12",
-          "name": "祖灵太初印",
+          "name": "洪荒初文印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6923,7 +6923,7 @@
         },
         {
           "id": "monster_realm_consumable_01",
-          "name": "祖灵还元丹",
+          "name": "青岚还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6939,7 +6939,7 @@
         },
         {
           "id": "monster_realm_consumable_02",
-          "name": "祖灵定魂露",
+          "name": "鹿鸣定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6955,7 +6955,7 @@
         },
         {
           "id": "monster_realm_consumable_03",
-          "name": "祖灵续命丸",
+          "name": "松龄续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6971,7 +6971,7 @@
         },
         {
           "id": "monster_realm_consumable_04",
-          "name": "祖灵洗脉丹",
+          "name": "碧涧洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -6987,7 +6987,7 @@
         },
         {
           "id": "monster_realm_consumable_05",
-          "name": "祖灵回天散",
+          "name": "回阳百草散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7003,7 +7003,7 @@
         },
         {
           "id": "monster_realm_consumable_06",
-          "name": "祖灵养神液",
+          "name": "月华养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7019,7 +7019,7 @@
         },
         {
           "id": "monster_realm_consumable_07",
-          "name": "祖灵生肌膏",
+          "name": "玉脂生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7035,7 +7035,7 @@
         },
         {
           "id": "monster_realm_consumable_08",
-          "name": "祖灵渡厄丹",
+          "name": "古木渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7051,7 +7051,7 @@
         },
         {
           "id": "monster_realm_plant_01",
-          "name": "祖灵九叶莲",
+          "name": "碧潭九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7067,7 +7067,7 @@
         },
         {
           "id": "monster_realm_plant_02",
-          "name": "祖灵灵芝",
+          "name": "鹿角灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7083,7 +7083,7 @@
         },
         {
           "id": "monster_realm_plant_03",
-          "name": "祖灵玉参",
+          "name": "雪岭玉参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7099,7 +7099,7 @@
         },
         {
           "id": "monster_realm_plant_04",
-          "name": "祖灵长生藤",
+          "name": "盘山长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7115,7 +7115,7 @@
         },
         {
           "id": "monster_realm_plant_05",
-          "name": "祖灵归元草",
+          "name": "晨露归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7131,7 +7131,7 @@
         },
         {
           "id": "monster_realm_plant_06",
-          "name": "祖灵照神花",
+          "name": "灵犀照神花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7147,7 +7147,7 @@
         },
         {
           "id": "monster_realm_plant_07",
-          "name": "祖灵太初果",
+          "name": "洪荒初阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7163,7 +7163,7 @@
         },
         {
           "id": "monster_realm_plant_08",
-          "name": "祖灵镇魂苔",
+          "name": "青丘镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7179,7 +7179,7 @@
         },
         {
           "id": "monster_realm_plant_09",
-          "name": "祖灵天葵",
+          "name": "朝露天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7195,7 +7195,7 @@
         },
         {
           "id": "monster_realm_plant_10",
-          "name": "祖灵万年桑",
+          "name": "万年青桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7211,7 +7211,7 @@
         },
         {
           "id": "monster_realm_material_01",
-          "name": "祖灵母金",
+          "name": "苍山母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7227,7 +7227,7 @@
         },
         {
           "id": "monster_realm_material_02",
-          "name": "祖灵源晶",
+          "name": "祖庭玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7243,7 +7243,7 @@
         },
         {
           "id": "monster_realm_material_03",
-          "name": "祖灵法砂",
+          "name": "山海法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7259,7 +7259,7 @@
         },
         {
           "id": "monster_realm_material_04",
-          "name": "祖灵玄钢",
+          "name": "兽纹玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7275,7 +7275,7 @@
         },
         {
           "id": "monster_realm_material_05",
-          "name": "祖灵界石",
+          "name": "荒原界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7291,7 +7291,7 @@
         },
         {
           "id": "monster_realm_material_06",
-          "name": "祖灵玉髓",
+          "name": "地脉玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7307,7 +7307,7 @@
         },
         {
           "id": "monster_realm_material_07",
-          "name": "祖灵神铜",
+          "name": "青犀神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7323,7 +7323,7 @@
         },
         {
           "id": "monster_realm_material_08",
-          "name": "祖灵天银",
+          "name": "月魄天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7339,7 +7339,7 @@
         },
         {
           "id": "monster_realm_material_09",
-          "name": "祖灵灵玉",
+          "name": "鹿鸣灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7355,7 +7355,7 @@
         },
         {
           "id": "monster_realm_material_10",
-          "name": "祖灵太初核",
+          "name": "祖庭混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7643,7 +7643,7 @@
       "treasure_pool": [
         {
           "id": "celestial_technique_01",
-          "name": "天律归潮经",
+          "name": "云笈归真经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7659,7 +7659,7 @@
         },
         {
           "id": "celestial_technique_02",
-          "name": "天律定界录",
+          "name": "天衡定序录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7675,7 +7675,7 @@
         },
         {
           "id": "celestial_technique_03",
-          "name": "天律炼身篇",
+          "name": "金阙炼形篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7691,7 +7691,7 @@
         },
         {
           "id": "celestial_technique_04",
-          "name": "天律照神法",
+          "name": "玉宸照微法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7707,7 +7707,7 @@
         },
         {
           "id": "celestial_technique_05",
-          "name": "天律渡厄诀",
+          "name": "星槎济厄诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7723,7 +7723,7 @@
         },
         {
           "id": "celestial_technique_06",
-          "name": "天律不灭典",
+          "name": "清都长生典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7739,7 +7739,7 @@
         },
         {
           "id": "celestial_technique_07",
-          "name": "天律隐虚术",
+          "name": "烟霞敛迹术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7755,7 +7755,7 @@
         },
         {
           "id": "celestial_technique_08",
-          "name": "天律遁空篇",
+          "name": "蹑景乘虚篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7771,7 +7771,7 @@
         },
         {
           "id": "celestial_technique_09",
-          "name": "天律溯源经",
+          "name": "河图溯道经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7787,7 +7787,7 @@
         },
         {
           "id": "celestial_technique_10",
-          "name": "天律太初书",
+          "name": "先天无极书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -7803,7 +7803,7 @@
         },
         {
           "id": "celestial_equipment_01",
-          "name": "天律镇海珠",
+          "name": "玉宸镇海珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7819,7 +7819,7 @@
         },
         {
           "id": "celestial_equipment_02",
-          "name": "天律归潮旗",
+          "name": "云笈归潮旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7835,7 +7835,7 @@
         },
         {
           "id": "celestial_equipment_03",
-          "name": "天律裂界剑",
+          "name": "天衡裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7851,7 +7851,7 @@
         },
         {
           "id": "celestial_equipment_04",
-          "name": "天律定天甲",
+          "name": "金阙定天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7867,7 +7867,7 @@
         },
         {
           "id": "celestial_equipment_05",
-          "name": "天律照魂鼎",
+          "name": "紫微照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7883,7 +7883,7 @@
         },
         {
           "id": "celestial_equipment_06",
-          "name": "天律渡劫轮",
+          "name": "星槎渡劫轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7899,7 +7899,7 @@
         },
         {
           "id": "celestial_equipment_07",
-          "name": "天律天心镜",
+          "name": "太清天心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7915,7 +7915,7 @@
         },
         {
           "id": "celestial_equipment_08",
-          "name": "天律流光舟",
+          "name": "蹑景流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7931,7 +7931,7 @@
         },
         {
           "id": "celestial_equipment_09",
-          "name": "天律界尺",
+          "name": "河洛量界尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7947,7 +7947,7 @@
         },
         {
           "id": "celestial_equipment_10",
-          "name": "天律镇源碑",
+          "name": "玄都镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7963,7 +7963,7 @@
         },
         {
           "id": "celestial_equipment_11",
-          "name": "天律无相钟",
+          "name": "清都无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7979,7 +7979,7 @@
         },
         {
           "id": "celestial_equipment_12",
-          "name": "天律太初印",
+          "name": "先天河图印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -7995,7 +7995,7 @@
         },
         {
           "id": "celestial_consumable_01",
-          "name": "天律还元丹",
+          "name": "餐霞还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8011,7 +8011,7 @@
         },
         {
           "id": "celestial_consumable_02",
-          "name": "天律定魂露",
+          "name": "玉清定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8027,7 +8027,7 @@
         },
         {
           "id": "celestial_consumable_03",
-          "name": "天律续命丸",
+          "name": "丹霞续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8043,7 +8043,7 @@
         },
         {
           "id": "celestial_consumable_04",
-          "name": "天律洗脉丹",
+          "name": "琼华洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8059,7 +8059,7 @@
         },
         {
           "id": "celestial_consumable_05",
-          "name": "天律回天散",
+          "name": "青霄回天散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8075,7 +8075,7 @@
         },
         {
           "id": "celestial_consumable_06",
-          "name": "天律养神液",
+          "name": "紫宸养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8091,7 +8091,7 @@
         },
         {
           "id": "celestial_consumable_07",
-          "name": "天律生肌膏",
+          "name": "云母生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8107,7 +8107,7 @@
         },
         {
           "id": "celestial_consumable_08",
-          "name": "天律渡厄丹",
+          "name": "玄都渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8123,7 +8123,7 @@
         },
         {
           "id": "celestial_plant_01",
-          "name": "天律九叶莲",
+          "name": "瑶池九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8139,7 +8139,7 @@
         },
         {
           "id": "celestial_plant_02",
-          "name": "天律灵芝",
+          "name": "紫盖灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8155,7 +8155,7 @@
         },
         {
           "id": "celestial_plant_03",
-          "name": "天律玉参",
+          "name": "玉京雪参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8171,7 +8171,7 @@
         },
         {
           "id": "celestial_plant_04",
-          "name": "天律长生藤",
+          "name": "云台长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8187,7 +8187,7 @@
         },
         {
           "id": "celestial_plant_05",
-          "name": "天律归元草",
+          "name": "清露归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8203,7 +8203,7 @@
         },
         {
           "id": "celestial_plant_06",
-          "name": "天律照神花",
+          "name": "丹阙照神花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8219,7 +8219,7 @@
         },
         {
           "id": "celestial_plant_07",
-          "name": "天律太初果",
+          "name": "先天玄阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8235,7 +8235,7 @@
         },
         {
           "id": "celestial_plant_08",
-          "name": "天律镇魂苔",
+          "name": "太清镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8251,7 +8251,7 @@
         },
         {
           "id": "celestial_plant_09",
-          "name": "天律天葵",
+          "name": "朝阳天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8267,7 +8267,7 @@
         },
         {
           "id": "celestial_plant_10",
-          "name": "天律万年桑",
+          "name": "万年扶桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8283,7 +8283,7 @@
         },
         {
           "id": "celestial_material_01",
-          "name": "天律母金",
+          "name": "金阙母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8299,7 +8299,7 @@
         },
         {
           "id": "celestial_material_02",
-          "name": "天律源晶",
+          "name": "玉京玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8315,7 +8315,7 @@
         },
         {
           "id": "celestial_material_03",
-          "name": "天律法砂",
+          "name": "河图法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8331,7 +8331,7 @@
         },
         {
           "id": "celestial_material_04",
-          "name": "天律玄钢",
+          "name": "天衡玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8347,7 +8347,7 @@
         },
         {
           "id": "celestial_material_05",
-          "name": "天律界石",
+          "name": "云台界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8363,7 +8363,7 @@
         },
         {
           "id": "celestial_material_06",
-          "name": "天律玉髓",
+          "name": "琼华玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8379,7 +8379,7 @@
         },
         {
           "id": "celestial_material_07",
-          "name": "天律神铜",
+          "name": "丹霞神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8395,7 +8395,7 @@
         },
         {
           "id": "celestial_material_08",
-          "name": "天律天银",
+          "name": "星河天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8411,7 +8411,7 @@
         },
         {
           "id": "celestial_material_09",
-          "name": "天律灵玉",
+          "name": "紫宸灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8427,7 +8427,7 @@
         },
         {
           "id": "celestial_material_10",
-          "name": "天律太初核",
+          "name": "先天混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8715,7 +8715,7 @@
       "treasure_pool": [
         {
           "id": "asura_technique_01",
-          "name": "劫刃归潮经",
+          "name": "烬海纳煞经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8731,7 +8731,7 @@
         },
         {
           "id": "asura_technique_02",
-          "name": "劫刃定界录",
+          "name": "铁狱镇疆录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8747,7 +8747,7 @@
         },
         {
           "id": "asura_technique_03",
-          "name": "劫刃炼身篇",
+          "name": "赤铜铸骨篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8763,7 +8763,7 @@
         },
         {
           "id": "asura_technique_04",
-          "name": "劫刃照神法",
+          "name": "血月窥心法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8779,7 +8779,7 @@
         },
         {
           "id": "asura_technique_05",
-          "name": "劫刃渡厄诀",
+          "name": "断劫无回诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8795,7 +8795,7 @@
         },
         {
           "id": "asura_technique_06",
-          "name": "劫刃不灭典",
+          "name": "修罗百战典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8811,7 +8811,7 @@
         },
         {
           "id": "asura_technique_07",
-          "name": "劫刃隐虚术",
+          "name": "暗尘匿锋术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8827,7 +8827,7 @@
         },
         {
           "id": "asura_technique_08",
-          "name": "劫刃遁空篇",
+          "name": "掠火逐日篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8843,7 +8843,7 @@
         },
         {
           "id": "asura_technique_09",
-          "name": "劫刃溯源经",
+          "name": "兵主归藏经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8859,7 +8859,7 @@
         },
         {
           "id": "asura_technique_10",
-          "name": "劫刃太初书",
+          "name": "无间玄枢书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -8875,7 +8875,7 @@
         },
         {
           "id": "asura_equipment_01",
-          "name": "劫刃镇海珠",
+          "name": "烬海镇潮珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8891,7 +8891,7 @@
         },
         {
           "id": "asura_equipment_02",
-          "name": "劫刃归潮旗",
+          "name": "血月归潮旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8907,7 +8907,7 @@
         },
         {
           "id": "asura_equipment_03",
-          "name": "劫刃裂界剑",
+          "name": "无回裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8923,7 +8923,7 @@
         },
         {
           "id": "asura_equipment_04",
-          "name": "劫刃定天甲",
+          "name": "铜狱定天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8939,7 +8939,7 @@
         },
         {
           "id": "asura_equipment_05",
-          "name": "劫刃照魂鼎",
+          "name": "寒灯照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8955,7 +8955,7 @@
         },
         {
           "id": "asura_equipment_06",
-          "name": "劫刃渡劫轮",
+          "name": "断劫玄轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8971,7 +8971,7 @@
         },
         {
           "id": "asura_equipment_07",
-          "name": "劫刃天心镜",
+          "name": "赤瞳天心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8987,7 +8987,7 @@
         },
         {
           "id": "asura_equipment_08",
-          "name": "劫刃流光舟",
+          "name": "掠火流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9003,7 +9003,7 @@
         },
         {
           "id": "asura_equipment_09",
-          "name": "劫刃界尺",
+          "name": "裁疆铁尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9019,7 +9019,7 @@
         },
         {
           "id": "asura_equipment_10",
-          "name": "劫刃镇源碑",
+          "name": "兵主镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9035,7 +9035,7 @@
         },
         {
           "id": "asura_equipment_11",
-          "name": "劫刃无相钟",
+          "name": "寂照无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9051,7 +9051,7 @@
         },
         {
           "id": "asura_equipment_12",
-          "name": "劫刃太初印",
+          "name": "无间玄枢印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9067,7 +9067,7 @@
         },
         {
           "id": "asura_consumable_01",
-          "name": "劫刃还元丹",
+          "name": "赤霞还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9083,7 +9083,7 @@
         },
         {
           "id": "asura_consumable_02",
-          "name": "劫刃定魂露",
+          "name": "寒灯定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9099,7 +9099,7 @@
         },
         {
           "id": "asura_consumable_03",
-          "name": "劫刃续命丸",
+          "name": "余烬续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9115,7 +9115,7 @@
         },
         {
           "id": "asura_consumable_04",
-          "name": "劫刃洗脉丹",
+          "name": "血泉洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9131,7 +9131,7 @@
         },
         {
           "id": "asura_consumable_05",
-          "name": "劫刃回天散",
+          "name": "烬海回天散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9147,7 +9147,7 @@
         },
         {
           "id": "asura_consumable_06",
-          "name": "劫刃养神液",
+          "name": "夜火养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9163,7 +9163,7 @@
         },
         {
           "id": "asura_consumable_07",
-          "name": "劫刃生肌膏",
+          "name": "赤铜生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9179,7 +9179,7 @@
         },
         {
           "id": "asura_consumable_08",
-          "name": "劫刃渡厄丹",
+          "name": "止戈渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9195,7 +9195,7 @@
         },
         {
           "id": "asura_plant_01",
-          "name": "劫刃九叶莲",
+          "name": "血池九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9211,7 +9211,7 @@
         },
         {
           "id": "asura_plant_02",
-          "name": "劫刃灵芝",
+          "name": "赤盖灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9227,7 +9227,7 @@
         },
         {
           "id": "asura_plant_03",
-          "name": "劫刃玉参",
+          "name": "烬原玉参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9243,7 +9243,7 @@
         },
         {
           "id": "asura_plant_04",
-          "name": "劫刃长生藤",
+          "name": "铁壁长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9259,7 +9259,7 @@
         },
         {
           "id": "asura_plant_05",
-          "name": "劫刃归元草",
+          "name": "断刃归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9275,7 +9275,7 @@
         },
         {
           "id": "asura_plant_06",
-          "name": "劫刃照神花",
+          "name": "夜火照神花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9291,7 +9291,7 @@
         },
         {
           "id": "asura_plant_07",
-          "name": "劫刃太初果",
+          "name": "兵主玄阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9307,7 +9307,7 @@
         },
         {
           "id": "asura_plant_08",
-          "name": "劫刃镇魂苔",
+          "name": "铜狱镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9323,7 +9323,7 @@
         },
         {
           "id": "asura_plant_09",
-          "name": "劫刃天葵",
+          "name": "烈阳天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9339,7 +9339,7 @@
         },
         {
           "id": "asura_plant_10",
-          "name": "劫刃万年桑",
+          "name": "万年赤桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9355,7 +9355,7 @@
         },
         {
           "id": "asura_material_01",
-          "name": "劫刃母金",
+          "name": "兵主母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9371,7 +9371,7 @@
         },
         {
           "id": "asura_material_02",
-          "name": "劫刃源晶",
+          "name": "血月玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9387,7 +9387,7 @@
         },
         {
           "id": "asura_material_03",
-          "name": "劫刃法砂",
+          "name": "断劫法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9403,7 +9403,7 @@
         },
         {
           "id": "asura_material_04",
-          "name": "劫刃玄钢",
+          "name": "铁狱玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9419,7 +9419,7 @@
         },
         {
           "id": "asura_material_05",
-          "name": "劫刃界石",
+          "name": "烬原界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9435,7 +9435,7 @@
         },
         {
           "id": "asura_material_06",
-          "name": "劫刃玉髓",
+          "name": "赤霞玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9451,7 +9451,7 @@
         },
         {
           "id": "asura_material_07",
-          "name": "劫刃神铜",
+          "name": "血纹神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9467,7 +9467,7 @@
         },
         {
           "id": "asura_material_08",
-          "name": "劫刃天银",
+          "name": "冷月天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9483,7 +9483,7 @@
         },
         {
           "id": "asura_material_09",
-          "name": "劫刃灵玉",
+          "name": "寒灯灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9499,7 +9499,7 @@
         },
         {
           "id": "asura_material_10",
-          "name": "劫刃太初核",
+          "name": "无间混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9787,7 +9787,7 @@
       "treasure_pool": [
         {
           "id": "nether_technique_01",
-          "name": "龙源归潮经",
+          "name": "苍溟吐息经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9803,7 +9803,7 @@
         },
         {
           "id": "nether_technique_02",
-          "name": "龙源定界录",
+          "name": "龙庭镇域录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9819,7 +9819,7 @@
         },
         {
           "id": "nether_technique_03",
-          "name": "龙源炼身篇",
+          "name": "玄鳞铸身篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9835,7 +9835,7 @@
         },
         {
           "id": "nether_technique_04",
-          "name": "龙源照神法",
+          "name": "渊龙照夜法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9851,7 +9851,7 @@
         },
         {
           "id": "nether_technique_05",
-          "name": "龙源渡厄诀",
+          "name": "游渊御厄诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9867,7 +9867,7 @@
         },
         {
           "id": "nether_technique_06",
-          "name": "龙源不灭典",
+          "name": "蟠天长生典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9883,7 +9883,7 @@
         },
         {
           "id": "nether_technique_07",
-          "name": "龙源隐虚术",
+          "name": "蜃影藏真术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9899,7 +9899,7 @@
         },
         {
           "id": "nether_technique_08",
-          "name": "龙源遁空篇",
+          "name": "御霆巡天篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9915,7 +9915,7 @@
         },
         {
           "id": "nether_technique_09",
-          "name": "龙源溯源经",
+          "name": "九渊归祖经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9931,7 +9931,7 @@
         },
         {
           "id": "nether_technique_10",
-          "name": "龙源太初书",
+          "name": "烛龙开曜书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -9947,7 +9947,7 @@
         },
         {
           "id": "nether_equipment_01",
-          "name": "龙源镇海珠",
+          "name": "沧溟镇海珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9963,7 +9963,7 @@
         },
         {
           "id": "nether_equipment_02",
-          "name": "龙源归潮旗",
+          "name": "御霆归潮旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9979,7 +9979,7 @@
         },
         {
           "id": "nether_equipment_03",
-          "name": "龙源裂界剑",
+          "name": "龙牙裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -9995,7 +9995,7 @@
         },
         {
           "id": "nether_equipment_04",
-          "name": "龙源定天甲",
+          "name": "玄鳞定天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10011,7 +10011,7 @@
         },
         {
           "id": "nether_equipment_05",
-          "name": "龙源照魂鼎",
+          "name": "烛夜照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10027,7 +10027,7 @@
         },
         {
           "id": "nether_equipment_06",
-          "name": "龙源渡劫轮",
+          "name": "游渊渡劫轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10043,7 +10043,7 @@
         },
         {
           "id": "nether_equipment_07",
-          "name": "龙源天心镜",
+          "name": "明渊天心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10059,7 +10059,7 @@
         },
         {
           "id": "nether_equipment_08",
-          "name": "龙源流光舟",
+          "name": "蜃影流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10075,7 +10075,7 @@
         },
         {
           "id": "nether_equipment_09",
-          "name": "龙源界尺",
+          "name": "盘天龙尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10091,7 +10091,7 @@
         },
         {
           "id": "nether_equipment_10",
-          "name": "龙源镇源碑",
+          "name": "九渊镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10107,7 +10107,7 @@
         },
         {
           "id": "nether_equipment_11",
-          "name": "龙源无相钟",
+          "name": "潜龙无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10123,7 +10123,7 @@
         },
         {
           "id": "nether_equipment_12",
-          "name": "龙源太初印",
+          "name": "烛龙初曜印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10139,7 +10139,7 @@
         },
         {
           "id": "nether_consumable_01",
-          "name": "龙源还元丹",
+          "name": "龙涎还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10155,7 +10155,7 @@
         },
         {
           "id": "nether_consumable_02",
-          "name": "龙源定魂露",
+          "name": "明渊定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10171,7 +10171,7 @@
         },
         {
           "id": "nether_consumable_03",
-          "name": "龙源续命丸",
+          "name": "玄鳞续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10187,7 +10187,7 @@
         },
         {
           "id": "nether_consumable_04",
-          "name": "龙源洗脉丹",
+          "name": "渊泉洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10203,7 +10203,7 @@
         },
         {
           "id": "nether_consumable_05",
-          "name": "龙源回天散",
+          "name": "沧溟回天散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10219,7 +10219,7 @@
         },
         {
           "id": "nether_consumable_06",
-          "name": "龙源养神液",
+          "name": "烛夜养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10235,7 +10235,7 @@
         },
         {
           "id": "nether_consumable_07",
-          "name": "龙源生肌膏",
+          "name": "龙脂生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10251,7 +10251,7 @@
         },
         {
           "id": "nether_consumable_08",
-          "name": "龙源渡厄丹",
+          "name": "御霆渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10267,7 +10267,7 @@
         },
         {
           "id": "nether_plant_01",
-          "name": "龙源九叶莲",
+          "name": "渊池九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10283,7 +10283,7 @@
         },
         {
           "id": "nether_plant_02",
-          "name": "龙源灵芝",
+          "name": "龙角灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10299,7 +10299,7 @@
         },
         {
           "id": "nether_plant_03",
-          "name": "龙源玉参",
+          "name": "沧溟玉参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10315,7 +10315,7 @@
         },
         {
           "id": "nether_plant_04",
-          "name": "龙源长生藤",
+          "name": "蟠天长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10331,7 +10331,7 @@
         },
         {
           "id": "nether_plant_05",
-          "name": "龙源归元草",
+          "name": "蜃露归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10347,7 +10347,7 @@
         },
         {
           "id": "nether_plant_06",
-          "name": "龙源照神花",
+          "name": "烛夜照神花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10363,7 +10363,7 @@
         },
         {
           "id": "nether_plant_07",
-          "name": "龙源太初果",
+          "name": "龙庭玄阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10379,7 +10379,7 @@
         },
         {
           "id": "nether_plant_08",
-          "name": "龙源镇魂苔",
+          "name": "深渊镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10395,7 +10395,7 @@
         },
         {
           "id": "nether_plant_09",
-          "name": "龙源天葵",
+          "name": "明曜天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10411,7 +10411,7 @@
         },
         {
           "id": "nether_plant_10",
-          "name": "龙源万年桑",
+          "name": "万年龙桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10427,7 +10427,7 @@
         },
         {
           "id": "nether_material_01",
-          "name": "龙源母金",
+          "name": "龙庭母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10443,7 +10443,7 @@
         },
         {
           "id": "nether_material_02",
-          "name": "龙源源晶",
+          "name": "九渊玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10459,7 +10459,7 @@
         },
         {
           "id": "nether_material_03",
-          "name": "龙源法砂",
+          "name": "烛龙法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10475,7 +10475,7 @@
         },
         {
           "id": "nether_material_04",
-          "name": "龙源玄钢",
+          "name": "鳞纹玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10491,7 +10491,7 @@
         },
         {
           "id": "nether_material_05",
-          "name": "龙源界石",
+          "name": "蜃海界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10507,7 +10507,7 @@
         },
         {
           "id": "nether_material_06",
-          "name": "龙源玉髓",
+          "name": "苍溟玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10523,7 +10523,7 @@
         },
         {
           "id": "nether_material_07",
-          "name": "龙源神铜",
+          "name": "盘龙神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10539,7 +10539,7 @@
         },
         {
           "id": "nether_material_08",
-          "name": "龙源天银",
+          "name": "烛夜天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10555,7 +10555,7 @@
         },
         {
           "id": "nether_material_09",
-          "name": "龙源灵玉",
+          "name": "明渊灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10571,7 +10571,7 @@
         },
         {
           "id": "nether_material_10",
-          "name": "龙源太初核",
+          "name": "龙庭混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -10859,7 +10859,7 @@
       "treasure_pool": [
         {
           "id": "reincarnation_technique_01",
-          "name": "溯魂归潮经",
+          "name": "忘川归寂经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10875,7 +10875,7 @@
         },
         {
           "id": "reincarnation_technique_02",
-          "name": "溯魂定界录",
+          "name": "冥衡定业录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10891,7 +10891,7 @@
         },
         {
           "id": "reincarnation_technique_03",
-          "name": "溯魂炼身篇",
+          "name": "幽莲塑魄篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10907,7 +10907,7 @@
         },
         {
           "id": "reincarnation_technique_04",
-          "name": "溯魂照神法",
+          "name": "三生返照法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10923,7 +10923,7 @@
         },
         {
           "id": "reincarnation_technique_05",
-          "name": "溯魂渡厄诀",
+          "name": "彼岸渡厄诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10939,7 +10939,7 @@
         },
         {
           "id": "reincarnation_technique_06",
-          "name": "溯魂不灭典",
+          "name": "长夜长明典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10955,7 +10955,7 @@
         },
         {
           "id": "reincarnation_technique_07",
-          "name": "溯魂隐虚术",
+          "name": "残梦匿魂术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10971,7 +10971,7 @@
         },
         {
           "id": "reincarnation_technique_08",
-          "name": "溯魂遁空篇",
+          "name": "履影渡川篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10987,7 +10987,7 @@
         },
         {
           "id": "reincarnation_technique_09",
-          "name": "溯魂溯源经",
+          "name": "宿世归藏经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -11003,7 +11003,7 @@
         },
         {
           "id": "reincarnation_technique_10",
-          "name": "溯魂太初书",
+          "name": "无始玄冥书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -11019,7 +11019,7 @@
         },
         {
           "id": "reincarnation_equipment_01",
-          "name": "溯魂镇海珠",
+          "name": "忘川镇海珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11035,7 +11035,7 @@
         },
         {
           "id": "reincarnation_equipment_02",
-          "name": "溯魂归潮旗",
+          "name": "残梦归潮旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11051,7 +11051,7 @@
         },
         {
           "id": "reincarnation_equipment_03",
-          "name": "溯魂裂界剑",
+          "name": "断缘裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11067,7 +11067,7 @@
         },
         {
           "id": "reincarnation_equipment_04",
-          "name": "溯魂定天甲",
+          "name": "幽莲定天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11083,7 +11083,7 @@
         },
         {
           "id": "reincarnation_equipment_05",
-          "name": "溯魂照魂鼎",
+          "name": "宿世照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11099,7 +11099,7 @@
         },
         {
           "id": "reincarnation_equipment_06",
-          "name": "溯魂渡劫轮",
+          "name": "彼岸渡劫轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11115,7 +11115,7 @@
         },
         {
           "id": "reincarnation_equipment_07",
-          "name": "溯魂天心镜",
+          "name": "返照天心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11131,7 +11131,7 @@
         },
         {
           "id": "reincarnation_equipment_08",
-          "name": "溯魂流光舟",
+          "name": "渡影流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11147,7 +11147,7 @@
         },
         {
           "id": "reincarnation_equipment_09",
-          "name": "溯魂界尺",
+          "name": "冥衡界尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11163,7 +11163,7 @@
         },
         {
           "id": "reincarnation_equipment_10",
-          "name": "溯魂镇源碑",
+          "name": "无始镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11179,7 +11179,7 @@
         },
         {
           "id": "reincarnation_equipment_11",
-          "name": "溯魂无相钟",
+          "name": "长夜无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11195,7 +11195,7 @@
         },
         {
           "id": "reincarnation_equipment_12",
-          "name": "溯魂太初印",
+          "name": "三生玄牒印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11211,7 +11211,7 @@
         },
         {
           "id": "reincarnation_consumable_01",
-          "name": "溯魂还元丹",
+          "name": "长明还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11227,7 +11227,7 @@
         },
         {
           "id": "reincarnation_consumable_02",
-          "name": "溯魂定魂露",
+          "name": "宿世定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11243,7 +11243,7 @@
         },
         {
           "id": "reincarnation_consumable_03",
-          "name": "溯魂续命丸",
+          "name": "彼岸续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11259,7 +11259,7 @@
         },
         {
           "id": "reincarnation_consumable_04",
-          "name": "溯魂洗脉丹",
+          "name": "忘川洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11275,7 +11275,7 @@
         },
         {
           "id": "reincarnation_consumable_05",
-          "name": "溯魂回天散",
+          "name": "幽莲回天散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11291,7 +11291,7 @@
         },
         {
           "id": "reincarnation_consumable_06",
-          "name": "溯魂养神液",
+          "name": "残梦养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11307,7 +11307,7 @@
         },
         {
           "id": "reincarnation_consumable_07",
-          "name": "溯魂生肌膏",
+          "name": "月魄生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11323,7 +11323,7 @@
         },
         {
           "id": "reincarnation_consumable_08",
-          "name": "溯魂渡厄丹",
+          "name": "无生渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11339,7 +11339,7 @@
         },
         {
           "id": "reincarnation_plant_01",
-          "name": "溯魂九叶莲",
+          "name": "彼岸九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11355,7 +11355,7 @@
         },
         {
           "id": "reincarnation_plant_02",
-          "name": "溯魂灵芝",
+          "name": "幽盖灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11371,7 +11371,7 @@
         },
         {
           "id": "reincarnation_plant_03",
-          "name": "溯魂玉参",
+          "name": "月魄玉参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11387,7 +11387,7 @@
         },
         {
           "id": "reincarnation_plant_04",
-          "name": "溯魂长生藤",
+          "name": "三生长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11403,7 +11403,7 @@
         },
         {
           "id": "reincarnation_plant_05",
-          "name": "溯魂归元草",
+          "name": "残梦归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11419,7 +11419,7 @@
         },
         {
           "id": "reincarnation_plant_06",
-          "name": "溯魂照神花",
+          "name": "返照幽华",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11435,7 +11435,7 @@
         },
         {
           "id": "reincarnation_plant_07",
-          "name": "溯魂太初果",
+          "name": "宿世玄阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11451,7 +11451,7 @@
         },
         {
           "id": "reincarnation_plant_08",
-          "name": "溯魂镇魂苔",
+          "name": "长夜镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11467,7 +11467,7 @@
         },
         {
           "id": "reincarnation_plant_09",
-          "name": "溯魂天葵",
+          "name": "幽光天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11483,7 +11483,7 @@
         },
         {
           "id": "reincarnation_plant_10",
-          "name": "溯魂万年桑",
+          "name": "万年冥桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11499,7 +11499,7 @@
         },
         {
           "id": "reincarnation_material_01",
-          "name": "溯魂母金",
+          "name": "冥衡母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11515,7 +11515,7 @@
         },
         {
           "id": "reincarnation_material_02",
-          "name": "溯魂源晶",
+          "name": "宿世玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11531,7 +11531,7 @@
         },
         {
           "id": "reincarnation_material_03",
-          "name": "溯魂法砂",
+          "name": "三生法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11547,7 +11547,7 @@
         },
         {
           "id": "reincarnation_material_04",
-          "name": "溯魂玄钢",
+          "name": "幽纹玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11563,7 +11563,7 @@
         },
         {
           "id": "reincarnation_material_05",
-          "name": "溯魂界石",
+          "name": "彼岸界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11579,7 +11579,7 @@
         },
         {
           "id": "reincarnation_material_06",
-          "name": "溯魂玉髓",
+          "name": "月魄玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11595,7 +11595,7 @@
         },
         {
           "id": "reincarnation_material_07",
-          "name": "溯魂神铜",
+          "name": "忘川神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11611,7 +11611,7 @@
         },
         {
           "id": "reincarnation_material_08",
-          "name": "溯魂天银",
+          "name": "长夜天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11627,7 +11627,7 @@
         },
         {
           "id": "reincarnation_material_09",
-          "name": "溯魂灵玉",
+          "name": "残梦灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11643,7 +11643,7 @@
         },
         {
           "id": "reincarnation_material_10",
-          "name": "溯魂太初核",
+          "name": "无始混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -13308,7 +13308,7 @@
         },
         {
           "id": "guixu_spirit_second_treasure_20",
-          "name": "归孔法环",
+          "name": "尾闾法环",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -13420,7 +13420,7 @@
         },
         {
           "id": "guixu_spirit_second_treasure_27",
-          "name": "万流归孔阵盘",
+          "name": "万流归渊阵盘",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -13612,7 +13612,7 @@
         },
         {
           "id": "guixu_spirit_second_treasure_39",
-          "name": "归孔法则藤",
+          "name": "归渊玄藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -16511,7 +16511,7 @@
         },
         {
           "id": "guixu_phantom_underworld_second_treasure_19",
-          "name": "混沌卵舟",
+          "name": "鲲胎云舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -17328,7 +17328,7 @@
         },
         {
           "id": "guixu_hell_second_treasure_3",
-          "name": "无底阴身篇",
+          "name": "九泉藏形篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -17392,7 +17392,7 @@
         },
         {
           "id": "guixu_hell_second_treasure_7",
-          "name": "生死簿遁法",
+          "name": "冥关无迹法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -17808,7 +17808,7 @@
         },
         {
           "id": "guixu_hell_second_treasure_33",
-          "name": "无底阴芝",
+          "name": "九泉阴芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -17872,7 +17872,7 @@
         },
         {
           "id": "guixu_hell_second_treasure_37",
-          "name": "生死簿藤",
+          "name": "玄牒藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18032,7 +18032,7 @@
         },
         {
           "id": "guixu_hell_second_treasure_47",
-          "name": "生死簿银",
+          "name": "冥契银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18369,7 +18369,7 @@
       "treasure_pool": [
         {
           "id": "guixu_monster_realm_second_treasure_1",
-          "name": "祖灵归潮经",
+          "name": "荒原纳息经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18385,7 +18385,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_2",
-          "name": "祖灵定界录",
+          "name": "群山载灵录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18401,7 +18401,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_3",
-          "name": "祖灵炼身篇",
+          "name": "百骸鸣岳篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18417,7 +18417,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_4",
-          "name": "祖灵照神法",
+          "name": "烛野观神法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18433,7 +18433,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_5",
-          "name": "祖灵渡厄诀",
+          "name": "苍虬蜕鳞诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18449,7 +18449,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_6",
-          "name": "祖灵不灭典",
+          "name": "万木同春典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18465,7 +18465,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_7",
-          "name": "祖灵隐虚术",
+          "name": "伏草藏真术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18481,7 +18481,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_8",
-          "name": "祖灵遁空篇",
+          "name": "乘飙御云篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18497,7 +18497,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_9",
-          "name": "祖灵溯源经",
+          "name": "祖庭归藏经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18513,7 +18513,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_10",
-          "name": "祖灵太初书",
+          "name": "太古山海书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -18529,7 +18529,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_11",
-          "name": "祖灵镇海珠",
+          "name": "苍山镇海珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18545,7 +18545,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_12",
-          "name": "祖灵归潮旗",
+          "name": "万木招灵旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18561,7 +18561,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_13",
-          "name": "祖灵裂界剑",
+          "name": "獠月裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18577,7 +18577,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_14",
-          "name": "祖灵定天甲",
+          "name": "玄兕负天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18593,7 +18593,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_15",
-          "name": "祖灵照魂鼎",
+          "name": "百兽照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18609,7 +18609,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_16",
-          "name": "祖灵渡劫轮",
+          "name": "回山渡劫轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18625,7 +18625,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_17",
-          "name": "祖灵天心镜",
+          "name": "灵犀照心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18641,7 +18641,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_18",
-          "name": "祖灵流光舟",
+          "name": "青鸾流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18657,7 +18657,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_19",
-          "name": "祖灵界尺",
+          "name": "量天骨尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18673,7 +18673,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_20",
-          "name": "祖灵镇源碑",
+          "name": "祖庭镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18689,7 +18689,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_21",
-          "name": "祖灵无相钟",
+          "name": "空山无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18705,7 +18705,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_22",
-          "name": "祖灵太初印",
+          "name": "洪荒初文印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18721,7 +18721,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_23",
-          "name": "祖灵还元丹",
+          "name": "青岚还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18737,7 +18737,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_24",
-          "name": "祖灵定魂露",
+          "name": "鹿鸣定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18753,7 +18753,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_25",
-          "name": "祖灵续命丸",
+          "name": "松龄续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18769,7 +18769,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_26",
-          "name": "祖灵洗脉丹",
+          "name": "碧涧洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18785,7 +18785,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_27",
-          "name": "祖灵回天散",
+          "name": "回阳百草散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18801,7 +18801,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_28",
-          "name": "祖灵养神液",
+          "name": "月华养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18817,7 +18817,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_29",
-          "name": "祖灵生肌膏",
+          "name": "玉脂生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18833,7 +18833,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_30",
-          "name": "祖灵渡厄丹",
+          "name": "古木渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18849,7 +18849,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_31",
-          "name": "祖灵九叶莲",
+          "name": "碧潭九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18865,7 +18865,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_32",
-          "name": "祖灵灵芝",
+          "name": "鹿角灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18881,7 +18881,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_33",
-          "name": "祖灵玉参",
+          "name": "雪岭玉参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18897,7 +18897,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_34",
-          "name": "祖灵长生藤",
+          "name": "盘山长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18913,7 +18913,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_35",
-          "name": "祖灵归元草",
+          "name": "晨露归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18929,7 +18929,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_36",
-          "name": "祖灵照神花",
+          "name": "灵犀照神花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18945,7 +18945,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_37",
-          "name": "祖灵太初果",
+          "name": "洪荒初阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18961,7 +18961,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_38",
-          "name": "祖灵镇魂苔",
+          "name": "青丘镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18977,7 +18977,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_39",
-          "name": "祖灵天葵",
+          "name": "朝露天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -18993,7 +18993,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_40",
-          "name": "祖灵万年桑",
+          "name": "万年青桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19009,7 +19009,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_41",
-          "name": "祖灵母金",
+          "name": "苍山母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19025,7 +19025,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_42",
-          "name": "祖灵源晶",
+          "name": "祖庭玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19041,7 +19041,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_43",
-          "name": "祖灵法砂",
+          "name": "山海法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19057,7 +19057,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_44",
-          "name": "祖灵玄钢",
+          "name": "兽纹玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19073,7 +19073,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_45",
-          "name": "祖灵界石",
+          "name": "荒原界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19089,7 +19089,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_46",
-          "name": "祖灵玉髓",
+          "name": "地脉玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19105,7 +19105,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_47",
-          "name": "祖灵神铜",
+          "name": "青犀神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19121,7 +19121,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_48",
-          "name": "祖灵天银",
+          "name": "月魄天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19137,7 +19137,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_49",
-          "name": "祖灵灵玉",
+          "name": "鹿鸣灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19153,7 +19153,7 @@
         },
         {
           "id": "guixu_monster_realm_second_treasure_50",
-          "name": "祖灵太初核",
+          "name": "祖庭混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19442,7 +19442,7 @@
       "treasure_pool": [
         {
           "id": "guixu_celestial_second_treasure_1",
-          "name": "天律归潮经",
+          "name": "云笈归真经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19458,7 +19458,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_2",
-          "name": "天律定界录",
+          "name": "天衡定序录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19474,7 +19474,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_3",
-          "name": "天律炼身篇",
+          "name": "金阙炼形篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19490,7 +19490,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_4",
-          "name": "天律照神法",
+          "name": "玉宸照微法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19506,7 +19506,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_5",
-          "name": "天律渡厄诀",
+          "name": "星槎济厄诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19522,7 +19522,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_6",
-          "name": "天律不灭典",
+          "name": "清都长生典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19538,7 +19538,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_7",
-          "name": "天律隐虚术",
+          "name": "烟霞敛迹术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19554,7 +19554,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_8",
-          "name": "天律遁空篇",
+          "name": "蹑景乘虚篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19570,7 +19570,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_9",
-          "name": "天律溯源经",
+          "name": "河图溯道经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19586,7 +19586,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_10",
-          "name": "天律太初书",
+          "name": "先天无极书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -19602,7 +19602,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_11",
-          "name": "天律镇海珠",
+          "name": "玉宸镇海珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19618,7 +19618,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_12",
-          "name": "天律归潮旗",
+          "name": "云笈归潮旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19634,7 +19634,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_13",
-          "name": "天律裂界剑",
+          "name": "天衡裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19650,7 +19650,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_14",
-          "name": "天律定天甲",
+          "name": "金阙定天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19666,7 +19666,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_15",
-          "name": "天律照魂鼎",
+          "name": "紫微照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19682,7 +19682,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_16",
-          "name": "天律渡劫轮",
+          "name": "星槎渡劫轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19698,7 +19698,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_17",
-          "name": "天律天心镜",
+          "name": "太清天心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19714,7 +19714,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_18",
-          "name": "天律流光舟",
+          "name": "蹑景流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19730,7 +19730,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_19",
-          "name": "天律界尺",
+          "name": "河洛量界尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19746,7 +19746,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_20",
-          "name": "天律镇源碑",
+          "name": "玄都镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19762,7 +19762,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_21",
-          "name": "天律无相钟",
+          "name": "清都无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19778,7 +19778,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_22",
-          "name": "天律太初印",
+          "name": "先天河图印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19794,7 +19794,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_23",
-          "name": "天律还元丹",
+          "name": "餐霞还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19810,7 +19810,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_24",
-          "name": "天律定魂露",
+          "name": "玉清定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19826,7 +19826,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_25",
-          "name": "天律续命丸",
+          "name": "丹霞续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19842,7 +19842,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_26",
-          "name": "天律洗脉丹",
+          "name": "琼华洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19858,7 +19858,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_27",
-          "name": "天律回天散",
+          "name": "青霄回天散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19874,7 +19874,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_28",
-          "name": "天律养神液",
+          "name": "紫宸养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19890,7 +19890,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_29",
-          "name": "天律生肌膏",
+          "name": "云母生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19906,7 +19906,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_30",
-          "name": "天律渡厄丹",
+          "name": "玄都渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19922,7 +19922,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_31",
-          "name": "天律九叶莲",
+          "name": "瑶池九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19938,7 +19938,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_32",
-          "name": "天律灵芝",
+          "name": "紫盖灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19954,7 +19954,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_33",
-          "name": "天律玉参",
+          "name": "玉京雪参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19970,7 +19970,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_34",
-          "name": "天律长生藤",
+          "name": "云台长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19986,7 +19986,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_35",
-          "name": "天律归元草",
+          "name": "清露归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20002,7 +20002,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_36",
-          "name": "天律照神花",
+          "name": "丹阙照神花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20018,7 +20018,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_37",
-          "name": "天律太初果",
+          "name": "先天玄阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20034,7 +20034,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_38",
-          "name": "天律镇魂苔",
+          "name": "太清镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20050,7 +20050,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_39",
-          "name": "天律天葵",
+          "name": "朝阳天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20066,7 +20066,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_40",
-          "name": "天律万年桑",
+          "name": "万年扶桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20082,7 +20082,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_41",
-          "name": "天律母金",
+          "name": "金阙母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20098,7 +20098,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_42",
-          "name": "天律源晶",
+          "name": "玉京玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20114,7 +20114,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_43",
-          "name": "天律法砂",
+          "name": "河图法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20130,7 +20130,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_44",
-          "name": "天律玄钢",
+          "name": "天衡玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20146,7 +20146,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_45",
-          "name": "天律界石",
+          "name": "云台界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20162,7 +20162,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_46",
-          "name": "天律玉髓",
+          "name": "琼华玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20178,7 +20178,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_47",
-          "name": "天律神铜",
+          "name": "丹霞神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20194,7 +20194,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_48",
-          "name": "天律天银",
+          "name": "星河天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20210,7 +20210,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_49",
-          "name": "天律灵玉",
+          "name": "紫宸灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20226,7 +20226,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_50",
-          "name": "天律太初核",
+          "name": "先天混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20515,7 +20515,7 @@
       "treasure_pool": [
         {
           "id": "guixu_asura_second_treasure_1",
-          "name": "劫刃归潮经",
+          "name": "烬海纳煞经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20531,7 +20531,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_2",
-          "name": "劫刃定界录",
+          "name": "铁狱镇疆录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20547,7 +20547,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_3",
-          "name": "劫刃炼身篇",
+          "name": "赤铜铸骨篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20563,7 +20563,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_4",
-          "name": "劫刃照神法",
+          "name": "血月窥心法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20579,7 +20579,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_5",
-          "name": "劫刃渡厄诀",
+          "name": "断劫无回诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20595,7 +20595,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_6",
-          "name": "劫刃不灭典",
+          "name": "修罗百战典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20611,7 +20611,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_7",
-          "name": "劫刃隐虚术",
+          "name": "暗尘匿锋术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20627,7 +20627,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_8",
-          "name": "劫刃遁空篇",
+          "name": "掠火逐日篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20643,7 +20643,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_9",
-          "name": "劫刃溯源经",
+          "name": "兵主归藏经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20659,7 +20659,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_10",
-          "name": "劫刃太初书",
+          "name": "无间玄枢书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -20675,7 +20675,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_11",
-          "name": "劫刃镇海珠",
+          "name": "烬海镇潮珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20691,7 +20691,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_12",
-          "name": "劫刃归潮旗",
+          "name": "血月归潮旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20707,7 +20707,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_13",
-          "name": "劫刃裂界剑",
+          "name": "无回裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20723,7 +20723,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_14",
-          "name": "劫刃定天甲",
+          "name": "铜狱定天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20739,7 +20739,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_15",
-          "name": "劫刃照魂鼎",
+          "name": "寒灯照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20755,7 +20755,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_16",
-          "name": "劫刃渡劫轮",
+          "name": "断劫玄轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20771,7 +20771,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_17",
-          "name": "劫刃天心镜",
+          "name": "赤瞳天心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20787,7 +20787,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_18",
-          "name": "劫刃流光舟",
+          "name": "掠火流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20803,7 +20803,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_19",
-          "name": "劫刃界尺",
+          "name": "裁疆铁尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20819,7 +20819,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_20",
-          "name": "劫刃镇源碑",
+          "name": "兵主镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20835,7 +20835,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_21",
-          "name": "劫刃无相钟",
+          "name": "寂照无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20851,7 +20851,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_22",
-          "name": "劫刃太初印",
+          "name": "无间玄枢印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20867,7 +20867,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_23",
-          "name": "劫刃还元丹",
+          "name": "赤霞还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20883,7 +20883,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_24",
-          "name": "劫刃定魂露",
+          "name": "寒灯定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20899,7 +20899,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_25",
-          "name": "劫刃续命丸",
+          "name": "余烬续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20915,7 +20915,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_26",
-          "name": "劫刃洗脉丹",
+          "name": "血泉洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20931,7 +20931,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_27",
-          "name": "劫刃回天散",
+          "name": "烬海回天散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20947,7 +20947,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_28",
-          "name": "劫刃养神液",
+          "name": "夜火养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20963,7 +20963,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_29",
-          "name": "劫刃生肌膏",
+          "name": "赤铜生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20979,7 +20979,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_30",
-          "name": "劫刃渡厄丹",
+          "name": "止戈渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20995,7 +20995,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_31",
-          "name": "劫刃九叶莲",
+          "name": "血池九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21011,7 +21011,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_32",
-          "name": "劫刃灵芝",
+          "name": "赤盖灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21027,7 +21027,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_33",
-          "name": "劫刃玉参",
+          "name": "烬原玉参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21043,7 +21043,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_34",
-          "name": "劫刃长生藤",
+          "name": "铁壁长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21059,7 +21059,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_35",
-          "name": "劫刃归元草",
+          "name": "断刃归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21075,7 +21075,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_36",
-          "name": "劫刃照神花",
+          "name": "夜火照神花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21091,7 +21091,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_37",
-          "name": "劫刃太初果",
+          "name": "兵主玄阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21107,7 +21107,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_38",
-          "name": "劫刃镇魂苔",
+          "name": "铜狱镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21123,7 +21123,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_39",
-          "name": "劫刃天葵",
+          "name": "烈阳天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21139,7 +21139,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_40",
-          "name": "劫刃万年桑",
+          "name": "万年赤桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21155,7 +21155,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_41",
-          "name": "劫刃母金",
+          "name": "兵主母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21171,7 +21171,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_42",
-          "name": "劫刃源晶",
+          "name": "血月玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21187,7 +21187,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_43",
-          "name": "劫刃法砂",
+          "name": "断劫法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21203,7 +21203,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_44",
-          "name": "劫刃玄钢",
+          "name": "铁狱玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21219,7 +21219,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_45",
-          "name": "劫刃界石",
+          "name": "烬原界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21235,7 +21235,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_46",
-          "name": "劫刃玉髓",
+          "name": "赤霞玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21251,7 +21251,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_47",
-          "name": "劫刃神铜",
+          "name": "血纹神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21267,7 +21267,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_48",
-          "name": "劫刃天银",
+          "name": "冷月天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21283,7 +21283,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_49",
-          "name": "劫刃灵玉",
+          "name": "寒灯灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21299,7 +21299,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_50",
-          "name": "劫刃太初核",
+          "name": "无间混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21588,7 +21588,7 @@
       "treasure_pool": [
         {
           "id": "guixu_nether_second_treasure_1",
-          "name": "龙源归潮经",
+          "name": "苍溟吐息经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21604,7 +21604,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_2",
-          "name": "龙源定界录",
+          "name": "龙庭镇域录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21620,7 +21620,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_3",
-          "name": "龙源炼身篇",
+          "name": "玄鳞铸身篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21636,7 +21636,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_4",
-          "name": "龙源照神法",
+          "name": "渊龙照夜法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21652,7 +21652,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_5",
-          "name": "龙源渡厄诀",
+          "name": "游渊御厄诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21668,7 +21668,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_6",
-          "name": "龙源不灭典",
+          "name": "蟠天长生典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21684,7 +21684,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_7",
-          "name": "龙源隐虚术",
+          "name": "蜃影藏真术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21700,7 +21700,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_8",
-          "name": "龙源遁空篇",
+          "name": "御霆巡天篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21716,7 +21716,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_9",
-          "name": "龙源溯源经",
+          "name": "九渊归祖经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21732,7 +21732,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_10",
-          "name": "龙源太初书",
+          "name": "烛龙开曜书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -21748,7 +21748,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_11",
-          "name": "龙源镇海珠",
+          "name": "沧溟镇海珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21764,7 +21764,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_12",
-          "name": "龙源归潮旗",
+          "name": "御霆归潮旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21780,7 +21780,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_13",
-          "name": "龙源裂界剑",
+          "name": "龙牙裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21796,7 +21796,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_14",
-          "name": "龙源定天甲",
+          "name": "玄鳞定天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21812,7 +21812,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_15",
-          "name": "龙源照魂鼎",
+          "name": "烛夜照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21828,7 +21828,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_16",
-          "name": "龙源渡劫轮",
+          "name": "游渊渡劫轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21844,7 +21844,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_17",
-          "name": "龙源天心镜",
+          "name": "明渊天心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21860,7 +21860,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_18",
-          "name": "龙源流光舟",
+          "name": "蜃影流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21876,7 +21876,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_19",
-          "name": "龙源界尺",
+          "name": "盘天龙尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21892,7 +21892,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_20",
-          "name": "龙源镇源碑",
+          "name": "九渊镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21908,7 +21908,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_21",
-          "name": "龙源无相钟",
+          "name": "潜龙无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21924,7 +21924,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_22",
-          "name": "龙源太初印",
+          "name": "烛龙初曜印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21940,7 +21940,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_23",
-          "name": "龙源还元丹",
+          "name": "龙涎还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21956,7 +21956,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_24",
-          "name": "龙源定魂露",
+          "name": "明渊定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21972,7 +21972,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_25",
-          "name": "龙源续命丸",
+          "name": "玄鳞续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -21988,7 +21988,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_26",
-          "name": "龙源洗脉丹",
+          "name": "渊泉洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22004,7 +22004,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_27",
-          "name": "龙源回天散",
+          "name": "沧溟回天散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22020,7 +22020,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_28",
-          "name": "龙源养神液",
+          "name": "烛夜养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22036,7 +22036,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_29",
-          "name": "龙源生肌膏",
+          "name": "龙脂生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22052,7 +22052,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_30",
-          "name": "龙源渡厄丹",
+          "name": "御霆渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22068,7 +22068,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_31",
-          "name": "龙源九叶莲",
+          "name": "渊池九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22084,7 +22084,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_32",
-          "name": "龙源灵芝",
+          "name": "龙角灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22100,7 +22100,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_33",
-          "name": "龙源玉参",
+          "name": "沧溟玉参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22116,7 +22116,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_34",
-          "name": "龙源长生藤",
+          "name": "蟠天长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22132,7 +22132,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_35",
-          "name": "龙源归元草",
+          "name": "蜃露归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22148,7 +22148,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_36",
-          "name": "龙源照神花",
+          "name": "烛夜照神花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22164,7 +22164,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_37",
-          "name": "龙源太初果",
+          "name": "龙庭玄阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22180,7 +22180,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_38",
-          "name": "龙源镇魂苔",
+          "name": "深渊镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22196,7 +22196,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_39",
-          "name": "龙源天葵",
+          "name": "明曜天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22212,7 +22212,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_40",
-          "name": "龙源万年桑",
+          "name": "万年龙桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22228,7 +22228,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_41",
-          "name": "龙源母金",
+          "name": "龙庭母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22244,7 +22244,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_42",
-          "name": "龙源源晶",
+          "name": "九渊玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22260,7 +22260,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_43",
-          "name": "龙源法砂",
+          "name": "烛龙法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22276,7 +22276,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_44",
-          "name": "龙源玄钢",
+          "name": "鳞纹玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22292,7 +22292,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_45",
-          "name": "龙源界石",
+          "name": "蜃海界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22308,7 +22308,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_46",
-          "name": "龙源玉髓",
+          "name": "苍溟玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22324,7 +22324,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_47",
-          "name": "龙源神铜",
+          "name": "盘龙神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22340,7 +22340,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_48",
-          "name": "龙源天银",
+          "name": "烛夜天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22356,7 +22356,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_49",
-          "name": "龙源灵玉",
+          "name": "明渊灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22372,7 +22372,7 @@
         },
         {
           "id": "guixu_nether_second_treasure_50",
-          "name": "龙源太初核",
+          "name": "龙庭混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22661,7 +22661,7 @@
       "treasure_pool": [
         {
           "id": "guixu_reincarnation_second_treasure_1",
-          "name": "溯魂归潮经",
+          "name": "忘川归寂经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22677,7 +22677,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_2",
-          "name": "溯魂定界录",
+          "name": "冥衡定业录",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22693,7 +22693,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_3",
-          "name": "溯魂炼身篇",
+          "name": "幽莲塑魄篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22709,7 +22709,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_4",
-          "name": "溯魂照神法",
+          "name": "三生返照法",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22725,7 +22725,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_5",
-          "name": "溯魂渡厄诀",
+          "name": "彼岸渡厄诀",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22741,7 +22741,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_6",
-          "name": "溯魂不灭典",
+          "name": "长夜长明典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22757,7 +22757,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_7",
-          "name": "溯魂隐虚术",
+          "name": "残梦匿魂术",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22773,7 +22773,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_8",
-          "name": "溯魂遁空篇",
+          "name": "履影渡川篇",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22789,7 +22789,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_9",
-          "name": "溯魂溯源经",
+          "name": "宿世归藏经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22805,7 +22805,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_10",
-          "name": "溯魂太初书",
+          "name": "无始玄冥书",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22821,7 +22821,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_11",
-          "name": "溯魂镇海珠",
+          "name": "忘川镇海珠",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22837,7 +22837,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_12",
-          "name": "溯魂归潮旗",
+          "name": "残梦归潮旗",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22853,7 +22853,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_13",
-          "name": "溯魂裂界剑",
+          "name": "断缘裂界剑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22869,7 +22869,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_14",
-          "name": "溯魂定天甲",
+          "name": "幽莲定天甲",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22885,7 +22885,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_15",
-          "name": "溯魂照魂鼎",
+          "name": "宿世照魂鼎",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22901,7 +22901,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_16",
-          "name": "溯魂渡劫轮",
+          "name": "彼岸渡劫轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22917,7 +22917,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_17",
-          "name": "溯魂天心镜",
+          "name": "返照天心镜",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22933,7 +22933,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_18",
-          "name": "溯魂流光舟",
+          "name": "渡影流光舟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22949,7 +22949,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_19",
-          "name": "溯魂界尺",
+          "name": "冥衡界尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22965,7 +22965,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_20",
-          "name": "溯魂镇源碑",
+          "name": "无始镇源碑",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22981,7 +22981,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_21",
-          "name": "溯魂无相钟",
+          "name": "长夜无相钟",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -22997,7 +22997,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_22",
-          "name": "溯魂太初印",
+          "name": "三生玄牒印",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23013,7 +23013,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_23",
-          "name": "溯魂还元丹",
+          "name": "长明还元丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23029,7 +23029,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_24",
-          "name": "溯魂定魂露",
+          "name": "宿世定魂露",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23045,7 +23045,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_25",
-          "name": "溯魂续命丸",
+          "name": "彼岸续命丸",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23061,7 +23061,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_26",
-          "name": "溯魂洗脉丹",
+          "name": "忘川洗脉丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23077,7 +23077,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_27",
-          "name": "溯魂回天散",
+          "name": "幽莲回天散",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23093,7 +23093,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_28",
-          "name": "溯魂养神液",
+          "name": "残梦养神液",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23109,7 +23109,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_29",
-          "name": "溯魂生肌膏",
+          "name": "月魄生肌膏",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23125,7 +23125,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_30",
-          "name": "溯魂渡厄丹",
+          "name": "无生渡厄丹",
           "category": "consumable",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23141,7 +23141,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_31",
-          "name": "溯魂九叶莲",
+          "name": "彼岸九叶莲",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23157,7 +23157,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_32",
-          "name": "溯魂灵芝",
+          "name": "幽盖灵芝",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23173,7 +23173,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_33",
-          "name": "溯魂玉参",
+          "name": "月魄玉参",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23189,7 +23189,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_34",
-          "name": "溯魂长生藤",
+          "name": "三生长生藤",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23205,7 +23205,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_35",
-          "name": "溯魂归元草",
+          "name": "残梦归元草",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23221,7 +23221,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_36",
-          "name": "溯魂照神花",
+          "name": "返照幽华",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23237,7 +23237,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_37",
-          "name": "溯魂太初果",
+          "name": "宿世玄阳果",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23253,7 +23253,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_38",
-          "name": "溯魂镇魂苔",
+          "name": "长夜镇魂苔",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23269,7 +23269,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_39",
-          "name": "溯魂天葵",
+          "name": "幽光天葵",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23285,7 +23285,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_40",
-          "name": "溯魂万年桑",
+          "name": "万年冥桑",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23301,7 +23301,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_41",
-          "name": "溯魂母金",
+          "name": "冥衡母金",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23317,7 +23317,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_42",
-          "name": "溯魂源晶",
+          "name": "宿世玄晶",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23333,7 +23333,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_43",
-          "name": "溯魂法砂",
+          "name": "三生法砂",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23349,7 +23349,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_44",
-          "name": "溯魂玄钢",
+          "name": "幽纹玄钢",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23365,7 +23365,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_45",
-          "name": "溯魂界石",
+          "name": "彼岸界石",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23381,7 +23381,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_46",
-          "name": "溯魂玉髓",
+          "name": "月魄玉髓",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23397,7 +23397,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_47",
-          "name": "溯魂神铜",
+          "name": "忘川神铜",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23413,7 +23413,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_48",
-          "name": "溯魂天银",
+          "name": "长夜天银",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23429,7 +23429,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_49",
-          "name": "溯魂灵玉",
+          "name": "残梦灵玉",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23445,7 +23445,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_50",
-          "name": "溯魂太初核",
+          "name": "无始混元核",
           "category": "material",
           "kind": "item",
           "exclusive_source": "guixu_tide",

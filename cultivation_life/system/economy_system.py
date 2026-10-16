@@ -13,7 +13,7 @@ from ..content_registry import (
     WORLD_SYSTEMS,
 )
 from ..models import GameState, Item, Player
-from ..rules import add_item
+from ..rules import add_item, technique_special_effect
 from ..runtime import now_iso
 from .economy import arts as economy_arts
 from .economy import auctions as economy_auctions
@@ -77,7 +77,7 @@ def _auction_rng(game: GameState, purpose: str) -> random.Random:
 def _auction_content(kind: str, content_id: str) -> tuple[str, str]:
     if kind == "technique":
         content = TECHNIQUE_CATALOG[content_id]
-        return content.name, f"{content.grade}阶功法；战斗力 +{content.combat_bonus:.0f}"
+        return content.name, (f"{content.grade}阶功法；战斗力 +{content.combat_bonus:.0f} " + technique_special_effect(content)).strip()
     content = ITEM_CATALOG[content_id]
     return content.name, content.description
 
@@ -122,7 +122,7 @@ def _catalog_price(kind: str, content_id: str) -> int:
         material = catalog()[0].get(content_id)
         if material:
             return material["base_value"]
-    if content_id == "heroic_progeny_elixir":
+    if content_id == "qilin_blessing_elixir":
         return 985
     prices = sorted(
         int(row["price"]) for row in MARKET_GOODS

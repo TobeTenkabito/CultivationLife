@@ -257,6 +257,8 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
 def war_peace(deps: WarPeaceDependencies, game_id: str, war_id: str, term: str, *, target_id: str = "", target_power_id: str = "",
               third_party_id: str = "", third_status: str = "neutral", concede: bool = False) -> dict[str, Any]:
     game = copy.deepcopy(deps._load(game_id))
+    if game.pending_event or game.active_trial or not game.player.alive or game.player.imprisonment or game.player.ghost_captor:
+        raise ValueError("当前状态无法处理征伐")
     war = next((row for row in game.wars if row.get("id") == war_id), None)
     if not war or war.get("status") not in {"active", "peace_ready"}:
         raise ValueError("当前没有可供和谈的战争")

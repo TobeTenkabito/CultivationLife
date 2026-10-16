@@ -47,10 +47,10 @@ class ContentRegistryTests(unittest.TestCase):
         expected = {
             "筑基丹": "major:1", "真元丹": "minor:2",
             "凝神丹": "major:2", "洗髓丹": "minor:3",
-            "抱婴参": "major:3", "天元丹": "minor:4",
+            "九曲灵参": "major:3", "天元丹": "minor:4",
             "回天草": "major:4", "生生造化丸": "minor:5",
             "昊天散": "major:5", "灵虚五散": "minor:6",
-            "先天砂": "major:6", "明心多莲": "minor:7",
+            "先天砂": "major:6", "澄心莲": "minor:7",
             "三七神果": "major:7",
         }
         actual = {
@@ -193,7 +193,7 @@ class ContentRegistryTests(unittest.TestCase):
     def test_rules_module_contains_logic_not_catalog_rows(self):
         source = (SOURCE_ROOT / "cultivation_life" / "rules.py").read_text(encoding="utf-8")
         self.assertNotIn('"qi_gathering_bead"', source)
-        self.assertNotIn('"TECH_COMMON_NASCENT"', source)
+        self.assertNotIn('"TECH_YELLOW_COURT_INNER"', source)
         self.assertNotIn('"裴问锋"', source)
 
 

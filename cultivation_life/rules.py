@@ -164,6 +164,32 @@ def technique_manual_item_id(technique_id: str, level: int = 1) -> str:
     return f"{TECHNIQUE_MANUAL_PREFIX}{technique_id}::lv{manual_level}"
 
 
+def technique_special_effect(technique: Technique) -> str:
+    if technique.ignore_possession_limit:
+        return '习得后不受成功夺舍次数上限限制；仍须满足原有夺舍资格。'
+    if technique.possession_limit_bonus:
+        return f'习得后成功夺舍次数上限 +{technique.possession_limit_bonus}；同类加成取最高值。'
+    return ''
+
+
+def public_catalog_entry(row: dict[str, Any]) -> dict[str, Any]:
+    """Refresh a cached listing's label without rerolling its offer or price."""
+    result = dict(row)
+    kind, identity = row.get('kind'), row.get('content_id')
+    template = (TECHNIQUE_CATALOG.get(identity) if kind == 'technique' else
+                ITEM_CATALOG.get(identity) if kind in {'item', 'puppet_material', 'talisman_material'} else None)
+    if template is not None:
+        old_name = str(row.get('name', ''))
+        result['name'] = template.name
+        if old_name and old_name != template.name and isinstance(row.get('description'), str):
+            result['description'] = row['description'].replace(old_name, template.name)
+        if kind == 'technique' and (special := technique_special_effect(template)):
+            description = str(result.get('description', ''))
+            if special not in description:
+                result['description'] = (description + ' ' + special).strip()
+    return result
+
+
 def technique_manual_description(technique_name: str, level: int) -> str:
     if level >= TECHNIQUE_MAX_LEVEL:
         return f"可用于同名 Lv.{level} 功法的最终合参；此玉简已达最高等级，不能继续合成。"
@@ -199,7 +225,7 @@ def _normalize_technique_manuals(player: Player) -> None:
             manuals[key].quantity += max(0, int(item.quantity))
             continue
         template = TECHNIQUE_CATALOG.get(technique_id)
-        technique_name = known_names.get(technique_id) or (template.name if template else item.name)
+        technique_name = template.name if template else known_names.get(technique_id) or item.name
         technique_name = technique_name.removeprefix("《").split("》", 1)[0]
         origin_realm_index = max(1, min(
             len(REALMS) - 1,
@@ -337,6 +363,7 @@ def ensure_technique_set(player: Player) -> None:
         if technique and not technique.combat_requirements and technique.id in TECHNIQUE_CATALOG:
             technique.combat_requirements = copy.deepcopy(TECHNIQUE_CATALOG[technique.id].combat_requirements)
         if technique and technique.id in TECHNIQUE_CATALOG:
+            technique.name = TECHNIQUE_CATALOG[technique.id].name
             technique.growth_preference = TECHNIQUE_CATALOG[technique.id].growth_preference
             if technique.id == "TECH_COMMON_GUI":
                 technique.combat_bonus = 5000
@@ -911,6 +938,7 @@ def public_player(player: Player) -> dict[str, Any]:
         if technique is None:
             return None
         result = dict(technique.__dict__)
+        result['special_effect_description'] = technique_special_effect(technique)
         level_multiplier = technique.level_multiplier
         effect_multiplier = technique_scale(technique)
         for field_name in (

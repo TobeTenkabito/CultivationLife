@@ -5,6 +5,7 @@ from ...system.path_modifiers import adjusted_cost
 import copy
 import math
 from typing import Any
+from ...content_identifiers import canonical_content_id
 from ...content_registry import (
     restricted_acquisition,
     ITEM_CATALOG,
@@ -44,6 +45,7 @@ from ..dependencies import InventoryDependencies
 
 
 def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[str, Any]:
+    item_id = canonical_content_id(item_id)
     game = deps._load(game_id)
     if not game.player.alive:
         raise ValueError("此生已经结束")
@@ -92,14 +94,14 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             f"你在劫隙中使用{item.name}，恢复 HP {hp_gain:.0f}、MP {mp_gain:.0f}。",
             {"hp_gain": hp_gain, "mp_gain": mp_gain}, ["system", "item", "tribulation"],
         ))
-    elif item.id == "heroic_progeny_elixir":
+    elif item.id == "qilin_blessing_elixir":
         if game.player.guaranteed_progeny:
-            raise ValueError("口服液的药力仍在，等待下一次有效缠绵即可")
+            raise ValueError("玉液的药力仍在，等待下一次有效缠绵即可")
         remove_item(game.player, item_id)
         game.player.guaranteed_progeny = True
         game.history.append(HistoryRecord(
             "SYS_GUARANTEED_PROGENY", 1, game.player.age, "英姿神武", item_id, "activated",
-            "你服下英姿神武口服液：下一次有效缠绵必定诞下后代，无视境界不育，后代必为单灵根或变异灵根。",
+            "你服下麟趾玉液：下一次有效缠绵必定诞下后代，无视境界不育，后代必为单灵根或变异灵根。",
             {}, ["system", "item", "family", "offspring"],
         ))
     elif item.conception_bonus > 0:
@@ -306,6 +308,7 @@ def buy_market_offer(deps: InventoryDependencies, game_id: str, offer_id: str) -
 
 
 def equip_known_technique(deps: InventoryDependencies, game_id: str, technique_id: str, slot: str) -> dict[str, Any]:
+    technique_id = canonical_content_id(technique_id)
     game = deps._load(game_id)
     if game.pending_event:
         raise ValueError("请先处理当前事件")
@@ -330,6 +333,7 @@ def equip_known_technique(deps: InventoryDependencies, game_id: str, technique_i
 
 
 def upgrade_technique(deps: InventoryDependencies, game_id: str, technique_id: str) -> dict[str, Any]:
+    technique_id = canonical_content_id(technique_id)
     game = deps._load(game_id)
     if game.pending_event or not game.player.alive or game.player.imprisonment:
         raise ValueError("当前状态无法升级功法")
@@ -355,6 +359,7 @@ def upgrade_technique(deps: InventoryDependencies, game_id: str, technique_id: s
 def merge_technique_manuals(
     deps: InventoryDependencies, game_id: str, technique_id: str, level: int,
 ) -> dict[str, Any]:
+    technique_id = canonical_content_id(technique_id)
     game = deps._load(game_id)
     if game.pending_event or not game.player.alive or game.player.imprisonment:
         raise ValueError("当前状态无法合成传承玉简")

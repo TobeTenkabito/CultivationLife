@@ -135,7 +135,7 @@ def test_generic_dlc_content_is_available_without_any_dlc(tmp_path):
         assert not any(row['content_id']=='guixu_canghai_equipment_01' for row in base.market_goods)
         assert 'TECH_GUIXU_CANGHAI_01' in base.techniques and 'TECH_MONSTER_BREATHING' in base.techniques
         assert 'people_annals_bamboo' not in base.items and 'ghost_nurturing_casket' not in base.items
-        assert 'TECH_GHOST_BODY_THIEF' not in base.techniques
+        assert 'TECH_CICADA_METAMORPHOSIS' not in base.techniques
         assert len(base.items) < len(CONTENT.items)
     finally:
         ContentRegistry.loaded_documents, ContentRegistry.extension_report = docs, report

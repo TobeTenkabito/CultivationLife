@@ -134,8 +134,7 @@ def _maybe_map_war_encounter(deps: WarActionsDependencies, game, rng):
     deps._ensure_war_shape(game, war)
     own = deps._participant_side(war, deps._war_player_identity(game, war))
     sides = ["defender" if own == "attacker" else "attacker"] if own else ["attacker", "defender"]
-    candidates = [deps._find_npc(game, npc_id) for side in sides for npc_id in war.get("roster", {}).get(side, [])]
-    candidates = [npc for npc in candidates if npc and npc.alive and npc.world == player.world]
+    candidates = [npc for side in sides for npc in deps._available_warriors(game, war, side)]
     if not candidates:
         return False
     npc = rng.choice(candidates)

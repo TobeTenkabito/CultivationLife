@@ -84,7 +84,7 @@ class CelestialSystemTests(unittest.TestCase):
         self.assertTrue(shown["player"]["immortal_power_converted"])
         self.assertEqual(shown["player"]["resource_name"], "仙灵力")
         self.assertEqual(shown["player"]["immortal_conversion_stage"], 5)
-        self.assertIn("TECH_CELESTIAL_BREATHING", [entry["id"] for entry in shown["player"]["known_techniques"]])
+        self.assertIn("TECH_ROSY_CLOUD_BREATH", [entry["id"] for entry in shown["player"]["known_techniques"]])
 
         self.engine.manage_secret_art(game_id, "suppress", "activate", 8, 9)
         descended = self.engine.cross_world(game_id, "spirit")
@@ -172,7 +172,7 @@ class CelestialSystemTests(unittest.TestCase):
     def test_immortal_technique_requires_completed_conversion(self):
         shown = self.engine.create_game("求仙者", "otherworld", "dao", 915)
         game = self.engine.store.load(shown["id"])
-        technique = TECHNIQUE_CATALOG["TECH_CELESTIAL_BREATHING"]
+        technique = TECHNIQUE_CATALOG["TECH_ROSY_CLOUD_BREATH"]
         with self.assertRaisesRegex(ValueError, "仙灵力转化"):
             assign_technique(game.player, technique, "main")
         game.player.immortal_power_converted = True
