@@ -158,6 +158,35 @@ def player_reply(deps, game, row, proposal):
                  for c in row['commitments'])))
 
 
+def reply_vote(deps, game, row, proposal, *, player_accept=False):
+    """Organization consent never replaces the opposing political majority."""
+    side = proposal['side']
+    enemy = 'defender' if side == 'attacker' else 'attacker'
+    support = row['score'] * (1 if side == 'attacker' else -1)
+    fought = sum(w.get('battles', 0) for w in game.wars if w.get('strategic_war_id') == row['id'])
+    completed = bool(row['objectives']) and all(o['status'] == 'completed' for o in row['objectives'])
+    accepts = (support >= 50 or (fought > 0 and game.player.age - row['start_age'] >= 100)
+               or (completed and proposal['term'] == 'white_peace'))
+    vote = opposing_reply(deps, game, row, enemy, accepts)
+    if (player_accept and game.player.world == row['world'] and deps.has_race_voice(game)
+            and game.player.allegiance_race == row[enemy]):
+        vote['yes'] += 1
+        vote['total'] += 1
+    return vote
+
+
+def accept(deps, game, row, proposal):
+    if not terms_valid(deps, game, row, proposal):
+        raise ValueError('和约原付款或资产条件已变化，请重新议和')
+    vote = reply_vote(deps, game, row, proposal, player_accept=True)
+    row['opposing_peace_vote'] = vote
+    if vote['total'] and vote['yes'] > vote['total'] / 2:
+        settle(deps, game, row, proposal)
+    else:
+        proposal['status'] = 'rejected'
+        note(game, row, '和谈未获批准', f"你已同意条件，但本方有效代表仅 {vote['yes']}/{vote['total']} 票赞成，未能签订总和约。")
+
+
 def terms_valid(deps, game, row, proposal):
     try:
         current = quote(deps, game, row, proposal['side'], proposal['term'])
@@ -212,17 +241,11 @@ def propose(deps, game, row, side, term, *, player=False, expected_total=None, e
     total = sum(d['amount'] for d in demands)
     if expected_total is not None and (type(expected_total) is not int or expected_total != total):
         raise ValueError('赔款报价已变化，请刷新核对实际付款组织与金额')
-    enemy = 'defender' if side == 'attacker' else 'attacker'
     proposal = dict(side=side, term=term, **bundle, total=total, age=game.player.age,
                     expires=game.player.age + 20, status='pending')
     row['peace_proposal'] = proposal
     row['peace_proposal_age'] = game.player.age
-    support = row['score'] * (1 if side == 'attacker' else -1)
-    fought = sum(w.get('battles', 0) for w in game.wars if w.get('strategic_war_id') == row['id'])
-    completed = bool(row['objectives']) and all(o['status'] == 'completed' for o in row['objectives'])
-    accepts = (support >= 50 or (fought > 0 and game.player.age - row['start_age'] >= 100)
-               or (completed and term == 'white_peace'))
-    vote = opposing_reply(deps, game, row, enemy, accepts)
+    vote = reply_vote(deps, game, row, proposal)
     row['opposing_peace_vote'] = vote
     if player_reply(deps, game, row, proposal):
         note(game, row, '和谈待复', f"对方提出{TERMS[term]}，请在二十年内确认；交战不会因此暂停。")
@@ -251,8 +274,7 @@ def advance(deps, game, row):
         return
     side = 'attacker' if row['score'] >= 0 else 'defender'
     # The player's own political side retains the decision to demand/waive terms.
-    if ((deps.has_race_voice(game) and game.player.world == row['world'] and game.player.allegiance_race == row[side])
-            or any(c['side'] == side and (org := committed_org(game, row, c)) and owns(deps, game, org) for c in row['commitments'])):
+    if deps.has_race_voice(game) and game.player.world == row['world'] and game.player.allegiance_race == row[side]:
         return
     term = 'heavy_reparations' if abs(row['score']) >= 100 else 'reparations' if abs(row['score']) >= 50 else 'white_peace'
     try:

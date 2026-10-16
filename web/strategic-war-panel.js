@@ -15,7 +15,7 @@
     else {
       const offer=row.peace_proposal;
       if(offer){const states={pending:'待答复',accepted:'已签订',rejected:'已拒绝',expired:'已失效'};box.append(el('p',`${labels[offer.term]} · ${states[offer.status]} · ${number(offer.total)} 灵石`,'strategy-caption'),terms(offer));
-        if(row.can_reply){box.append(el('small',`剩余 ${offer.remaining} 年内答复`,'strategy-caption'));const reply=el('div',undefined,'strategy-commands');reply.append(command('接受和约',{action:'reply_peace',reply:'accept'}),command('拒绝条件',{action:'reply_peace',reply:'reject'}));box.append(reply);}
+        if(row.can_reply){box.append(el('small',`剩余 ${offer.remaining} 年内答复；接受条件仍须本方有效代表多数通过。`,'strategy-caption'));const reply=el('div',undefined,'strategy-commands');reply.append(command('接受和约',{action:'reply_peace',reply:'accept'}),command('拒绝条件',{action:'reply_peace',reply:'reject'}));box.append(reply);}
       }
       const choices=row.peace_options||[];
       const cards=el('div',undefined,'strategy-terms');cards.setAttribute('role','radiogroup');cards.setAttribute('aria-label','选择和谈条件');

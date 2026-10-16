@@ -5,7 +5,7 @@ from ...content_registry import REALMS
 from ...content_registry import WORLD_SYSTEMS
 from ..doctrine.provider import battle_sources
 import copy
-from . import logistics
+from . import logistics, requirements
 from ..npc_system import npc_team_combat_power
 import random
 from ..combat.npc_battle import resolve_npc_engagement
@@ -52,6 +52,8 @@ def _resolve_field_attack(
     deps: WarCombatDependencies, game: GameState, war: dict[str, Any], attacking: str, rng: random.Random,
     formation_contexts: dict[str, dict[str, Any]] | None = None,
 ) -> str:
+    if deps._finish_war_by_morale(game, war):
+        return '士气已溃，双方停止新增交锋。'
     defending = "defender" if attacking == "attacker" else "attacker"
     attackers = deps._available_warriors(game, war, attacking)
     defenders = deps._available_warriors(game, war, defending)
@@ -130,6 +132,19 @@ def _resolve_field_attack(
 def _resolve_player_war_round(
     deps: WarCombatDependencies, game: GameState, war: dict[str, Any], side: str, rng: random.Random,
 ) -> None:
+    try:
+        _resolve_personal_round(deps, game, war, side, rng)
+    finally:
+        if war.get('strategic_war_id') and war.get('logistics'):
+            # The player joins this round only, never the next AI battle or upkeep.
+            for supply_side, book in war['logistics']['sides'].items():
+                requirements.refresh(game, war, supply_side)
+                book['reference_need'] = logistics.need(game, war, supply_side)
+
+
+def _resolve_personal_round(
+    deps: WarCombatDependencies, game: GameState, war: dict[str, Any], side: str, rng: random.Random,
+) -> None:
     enemy = "defender" if side == "attacker" else "attacker"
     candidates = deps._available_warriors(game, war, enemy)
     if not candidates:
@@ -143,7 +158,11 @@ def _resolve_player_war_round(
             game, war, "转入主力会战",
             "你越过单独先锋战，选择直接在本轮主力会战中亲自出阵。",
         )
-    logistics.begin_round(game, deps.maps, war, rng, side if deps._player_has_war_voice(game, war) else None)
+    logistics.begin_round(game, deps.maps, war, rng, side if deps._player_has_war_voice(game, war) else None,
+                          participating_player_side=side)
+    if deps._finish_war_by_morale(game, war):
+        war['battles'] = int(war.get('battles', 0)) + 1
+        return
     contexts = deps._war_formation_contexts(game, war)
     pool = candidates[:min(12, len(candidates))]
     team_size = min(len(pool), rng.randint(1, 3))

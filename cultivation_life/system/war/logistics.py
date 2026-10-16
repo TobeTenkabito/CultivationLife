@@ -161,10 +161,10 @@ def factor(war,side):
     return 1. if ratio>=1 else .95 if ratio>=.75 else .8 if ratio>=.5 else .55 if ratio>=.25 else .25
 
 
-def strategy(game,maps,war,side,action,rng):
+def strategy(game,maps,war,side,action,rng,*,participating_player_side=None):
     if action not in {'scout','forage','resupply'}:raise ValueError('未知军需策略')
     initialize(game,maps,war)
-    requirements.refresh(game,war,side)
+    requirements.refresh(game,war,side,participating_player_side=participating_player_side)
     war['logistics']['sides'][side]['reference_need']=need(game,war,side)
     book=war['logistics'];turn=book['round'];key=f'{side}:{action}'
     if book['actions'].get(key)==turn:raise ValueError('本轮已经执行过此项军需策略')
@@ -193,16 +193,17 @@ def strategy(game,maps,war,side,action,rng):
     return message
 
 
-def begin_round(game,maps,war,rng,player_side=None):
+def begin_round(game,maps,war,rng,player_side=None,*,participating_player_side=None):
     initialize(game,maps,war)
     book=war['logistics']
     if player_side is not None:war['player_side']=player_side
     for side in SIDES:
-        requirements.refresh(game, war, side)
+        requirements.refresh(game, war, side, participating_player_side=participating_player_side)
         if side!=player_side:
             if supply.turns(game,war,side)<2:replenish(game,maps,war,side)
             if supply.turns(game,war,side)<1 and book['actions'].get(f'{side}:forage')!=book['round']:
-                if balance(game,wallet(war,side))>=ceil(need(game,war,side)*.08):strategy(game,maps,war,side,'forage',rng)
+                if balance(game,wallet(war,side))>=ceil(need(game,war,side)*.08):
+                    strategy(game,maps,war,side,'forage',rng,participating_player_side=participating_player_side)
         required=need(game,war,side)
         row=book['sides'][side]
         row['reference_need']=required
