@@ -202,6 +202,27 @@ def test_surviving_companion_attacked_through_party_loses_both_relationships(set
     assert saved.history[-1].result == "victory_escape"
 
 
+@pytest.mark.parametrize("elsewhere", ["world", "instance"])
+def test_party_violence_still_rejects_inaccessible_original(setup, elsewhere):
+    engine, game, _ = setup
+    game.player.dao_friends = [{"id":"away", "name":"远方同行", "world":"human", "alive":True,
+                               "realm_index":1, "layer":1}]
+    game.player.party = [{"id":"away", "name":"远方同行"}]
+    engine.store.save(game)
+    game = engine._load(game.id)
+    if elsewhere == "world":
+        game.player.dao_friends[0]["world"] = "spirit"
+    else:
+        game.spatial_state["instances"] = {"remote": {"npc_ids":["away"]}}
+    engine.store.save(game)
+    engine._load(game.id)  # Reconcile the departed party member before command atomicity.
+    before = engine.store._path(game.id).read_bytes()
+    with patch.object(engine, "_combat", side_effect=AssertionError("inaccessible person must not fight")):
+        with pytest.raises(ValueError):
+            engine.relationship_violence(game.id, "party", "away")
+    assert engine.store._path(game.id).read_bytes() == before
+
+
 def test_base_execution_without_dlc_does_not_create_wish_state(setup):
     engine, game, _ = setup
     game.player.path = "dao"

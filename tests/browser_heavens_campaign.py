@@ -15,7 +15,7 @@ from cultivation_life.rules import max_hp, max_mp
 from test_heavens_campaign import local, site, ready, military, construction, load
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, set_theme
 
 def main():
     output = ROOT/'build/heavens-m3-r2-browser'
@@ -42,7 +42,8 @@ def main():
                     page.evaluate('async id=>{await loadGame(id)}',key)
                     navigation_locator(page,'[data-panel-target=heavens]').click()
                     page.get_by_role('tab',name='战局',exact=True).click()
-                    assert page.locator('#heavens-content .heavens-destination').count() == 2
+                    expected=page.evaluate("Number(game.heavens.conflicts.some(r=>r.world==='human'))+Number(!!game.heavens.frontier)+Number(!!game.heavens.campaign?.known)")
+                    assert page.locator('#heavens-content .heavens-destination').count() == expected
                     assert page.get_by_role('button',name='击退当地守卫',exact=True).count() == 0
                     page.get_by_role('button',name='查看岚疆界门',exact=True).click()
                     page.get_by_role('tab',name='界门',exact=True).click()
@@ -57,9 +58,7 @@ def main():
                     page.wait_for_function('!busy && game.heavens.campaign.gate')
                     snapshot = engine.store._path(key).read_bytes()
                     for theme in 'abdf':
-                        page.locator('#theme-open').click()
-                        page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
-                        page.locator('[data-close-dialog=theme-dialog]').click()
+                        set_theme(page,theme)
                         for width in (1440,393,320):
                             page.set_viewport_size({'width':width,'height':1050 if width==1440 else 852})
                             page.get_by_role('tab',name='战局',exact=True).click()

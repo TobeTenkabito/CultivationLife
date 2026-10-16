@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from ...race_diplomacy import relations_for
 from typing import Any
 from ...models import GameState
 from ...content_registry import RACE_DEFINITIONS
@@ -19,7 +21,7 @@ def _war_player_identity(deps: WarStateDependencies, game, war):
 
 
 def _war_relation(deps: WarStateDependencies, game: GameState, kind: str, first: str, second: str) -> dict[str, Any]:
-    relations = game.race_relations if kind == "race" else game.sect_relations
+    relations = relations_for(game) if kind == "race" else game.sect_relations
     return relations.setdefault(race_pair(first, second), {
         "affinity": 0.0, "status": "neutral", "since_age": game.player.age,
     })
@@ -158,11 +160,14 @@ def _available_warriors(deps: WarStateDependencies, game: GameState, war: dict[s
     from .requirements import deployed_ids
     from ...npc_custody import is_free
     from ...person_assignments import research_assignment
+    from ...relationship_records import find_person
     source_world=war.get('logistics',{}).get('sides',{}).get(side,{}).get('world',war['world'])
     return [npc for npc_id in deployed_ids(war,side)
             if npc_id not in escaped and (not power_id or war["roster_owner"].get(npc_id) == power_id)
-            and (npc := deps._war_npc(game, npc_id)) and is_free(npc) and npc.world==source_world
-            and not research_assignment(game,npc.id)
+            and (npc := (find_person(game, npc_id) if war.get('strategic_war_id') else deps._war_npc(game, npc_id))) and is_free(npc) and npc.world==source_world
+            and not research_assignment(game,npc.id, exclude_war=war["id"])
+            and (not war.get("strategic_war_id") or (war.get("campaign_phase") == "engaged" and npc.location_id == war.get("location_id")
+                 and any(j['person_id']==npc_id and j['phase']=='stationed' for j in war.get('journeys',{}).get(side,[]))))
             and not deps._intrigue_is_imprisoned(game, npc.id)]
 
 
@@ -172,11 +177,16 @@ def _ensure_wars(deps: WarStateDependencies, game: GameState) -> bool:
     changed = False
     for war in game.wars:
         changed = deps._ensure_war_shape(game, war) or changed
-    for kind, relations in (("race", game.race_relations), ("sect", game.sect_relations)):
+    for kind, relations in (("sect", game.sect_relations),):
         for key, relation in relations.items():
+            if relation.get('strategic_war_id'):
+                continue
             if relation.get("status") != "war":
                 continue
             first, second = key.split("|") if "|" in key else key.split(":")
+            from .occupancy import organization, busy
+            if any((org:=organization(game,i)) and busy(game,org,managed_only=True) for i in (first,second)):
+                continue
             if not deps._active_war(game, kind, first, second) and system_war_allowed(game, kind, first, second):
                 deps._start_war(game, kind, first, second, prepare_supplies=False)
     return changed or len(game.wars) != before

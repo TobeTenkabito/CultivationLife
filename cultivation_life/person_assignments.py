@@ -11,7 +11,14 @@ def assignment_person(echo, row):
     return row.get('person_id', echo['visitor_id'])
 
 
-def deployment_assignment(game, identity):
+def deployment_assignment(game, identity, *, exclude_war=None):
+    for war in game.wars:
+        if war.get("id") == exclude_war or not war.get("strategic_war_id") or war.get("status") not in {"active", "peace_ready", "withdrawing"}:
+            continue
+        for journeys in war.get("journeys", {}).values():
+            for row in journeys:
+                if row["person_id"] == identity and row["phase"] not in {"home", "lost"}:
+                    return {**row, "war_id": war["id"]}
     campaign = game.heavens_state.get('runtime', {}).get('campaign')
     if campaign:
         unit = next((u for u in campaign['units'] if u['person_id'] == identity and u['phase'] not in {'home', 'lost'}), None)
@@ -21,9 +28,9 @@ def deployment_assignment(game, identity):
     return row if row and row['status'] == 'active' and row['person_id'] == identity else None
 
 
-def research_assignment(game, identity):
+def research_assignment(game, identity, *, exclude_war=None):
     # Compatibility accessor: old consumers must also respect military occupancy.
-    deployment = deployment_assignment(game, identity)
+    deployment = deployment_assignment(game, identity, exclude_war=exclude_war)
     if deployment:
         return deployment
     for key in ('ruins', 'mirror'):

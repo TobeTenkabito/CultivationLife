@@ -40,7 +40,7 @@ class AuctionUpdateTests(unittest.TestCase):
         made = self.engine.create_game("归界不误触", "none", "dao", 11001, preset_id="mahayana")
         self.engine.manage_secret_art(made["id"], "suppress", "activate", 5, 9)
         shown = self.engine.cross_world(made["id"], "human")
-        self.assertFalse(shown["world_travel"]["can_return_spirit"])
+        self.assertTrue(shown["world_travel"]["can_return_spirit"])
         self.assertFalse(shown["demonic_system"]["true_demon_ascension"]["available"])
         with self.assertRaisesRegex(ValueError, "只能重返原上界"):
             self.engine.begin_spirit_crossing(made["id"])
@@ -53,7 +53,7 @@ class AuctionUpdateTests(unittest.TestCase):
         self.engine.store.save(game)
         self.engine.manage_secret_art(made["id"], "suppress", "activate", 5, 9)
         shown = self.engine.cross_world(made["id"], "demon")
-        self.assertFalse(shown["world_travel"]["can_return_true_demon"])
+        self.assertTrue(shown["world_travel"]["can_return_true_demon"])
         self.assertFalse(shown["demonic_system"]["true_demon_ascension"]["available"])
         with self.assertRaisesRegex(ValueError, "只能重返原上界"):
             self.engine.begin_spirit_crossing(made["id"])

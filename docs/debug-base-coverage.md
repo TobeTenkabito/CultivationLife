@@ -31,8 +31,11 @@
 
 <!-- The reviewed command mapping below is checked against server routes by tests. -->
 
+种族战争使用 `strategic war`，复用正式命令的修订号、唯一命令编号、单调序号与报价校验；先从副本的 `/war_system/strategic` 获取当前状态，再按 `help strategic war` 的参数提交。不会绕过统帅授权、闲置组织、真实行军或托管清算。
+
 | 控制台指令 | 正式操作入口 | 类型 |
 | --- | --- | --- |
+| `strategic war <action> <command_id> <command_seq> ...` | `strategic-war` | simulation |
 | `action advance <action> <units>` | `advance` | simulation |
 | `organization action <action> <kind> <owner_id> <location_id> [policy] [rival_id] [goal]` | `organization-action` | simulation |
 | `event choose <choice_id>` | `choice` | simulation |

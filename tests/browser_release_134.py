@@ -27,6 +27,7 @@ def main():
         game.player.location_id = game.exchange_state["location_id"]
         engine.store.save(game)
         server_module.ENGINE = engine
+        server_module.PERSISTENCE_ROOT = Path(directory)
         httpd = ThreadingHTTPServer(("127.0.0.1", 0), server_module.Handler)
         threading.Thread(target=httpd.serve_forever, daemon=True).start()
         errors = []

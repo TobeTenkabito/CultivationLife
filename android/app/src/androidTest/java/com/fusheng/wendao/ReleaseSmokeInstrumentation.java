@@ -140,6 +140,23 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         }
     }
 
+    private void waitForPanelReady(String selector) throws Exception {
+        String quoted=JSONObject.quote(selector);
+        waitForJs("(()=>{const panel=document.querySelector("+quoted+");if(!panel||!panel.classList.contains('panel-open')||panel.classList.contains('hidden')||panel.classList.contains('theme-feedback-active'))return false;const style=getComputedStyle(panel);return style.visibility==='visible'&&Number(style.opacity)===1&&panel.clientWidth>0;})()",
+                  "Native panel did not settle: "+selector,60000);
+    }
+
+    private void waitForNativeFrame() throws Exception {
+        CountDownLatch frame=new CountDownLatch(1);
+        runOnMainSync(()->web.postVisualStateCallback(System.nanoTime(),new WebView.VisualStateCallback(){
+            @Override public void onComplete(long id) {
+                web.invalidate();
+                web.postOnAnimation(()->web.postOnAnimation(frame::countDown));
+            }
+        }));
+        check(frame.await(30,TimeUnit.SECONDS),"Native input frame did not settle");
+    }
+
     private void tapSelector(String selector) throws Exception {
         String quoted=JSONObject.quote(selector);
         if(selector.contains("data-panel-target")) {
@@ -153,35 +170,48 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             }
         }
         revealSubpage(selector);
+        waitForJs("!document.documentElement.classList.contains('theme-switching')","Native theme did not settle",60000);
+        String owner=(String)js("document.querySelector("+quoted+")?.closest('.utility-panel')?.id||''");
+        if(!owner.isEmpty())waitForPanelReady("#"+owner);
         // Active parallel details are already expanded by the user's tab selection.
         if (selector.contains("summary") && Boolean.TRUE.equals(js("(()=>{const n=document.querySelector("+quoted+");return n?.tagName==='SUMMARY'&&n.parentElement.hasAttribute('data-page-name')&&n.parentElement.open;})()"))) return;
         // Observe before tutorial capture handlers intercept the intended click.
-        js("window.__releaseNativeTap=false;window.__releaseNativeDownId='';window.addEventListener('pointerdown',event=>{window.__releaseNativeDownId=event.target.closest('[data-atlas-location]')?.dataset.atlasLocation||'';},{once:true,capture:true});window.addEventListener('click',event=>{const target=document.querySelector("+quoted+"),node=target?.closest('[data-atlas-location]');window.__releaseNativeTap=!!target&&(target.contains(event.target)||(node&&node.dataset.atlasLocation===window.__releaseNativeDownId&&event.target.closest('svg')===target.closest('svg')));},{once:true,capture:true});document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
+        js("window.__releaseNativeTap=false;window.__releaseNativeDownId='';window.__releaseNativeEvents=[];window.__releaseNativeRecord=e=>__releaseNativeEvents.push({type:e.type,time:performance.now(),x:e.clientX,y:e.clientY,target:e.target.outerHTML?.slice(0,300)});window.addEventListener('pointerdown',event=>{window.__releaseNativeRecord(event);window.__releaseNativeDownId=event.target.closest('[data-atlas-location]')?.dataset.atlasLocation||'';},{once:true,capture:true});window.addEventListener('pointerup',window.__releaseNativeRecord,{once:true,capture:true});window.addEventListener('click',event=>{window.__releaseNativeRecord(event);const target=document.querySelector("+quoted+"),node=target?.closest('[data-atlas-location]');window.__releaseNativeTap=!!target&&(target.contains(event.target)||(node&&node.dataset.atlasLocation===window.__releaseNativeDownId&&event.target.closest('svg')===target.closest('svg')));},{once:true,capture:true});document.querySelector("+quoted+").scrollIntoView({block:'center'});true");
         Thread.sleep(300);
         // Center within the panel's usable content, below its sticky heading.
         // Window centering can put controls underneath that heading in landscape.
         js("(()=>{const target=document.querySelector("+quoted+"),panel=target.closest('.utility-panel.panel-open');if(!panel)return;const box=panel.getBoundingClientRect(),heading=panel.querySelector(':scope > .section-title')?.getBoundingClientRect(),r=target.getBoundingClientRect(),top=Math.max(box.top,heading?.bottom||box.top)+8,bottom=Math.min(box.bottom,innerHeight)-8;if(bottom>top+20)panel.scrollTop+=(r.top+r.bottom)/2-(top+bottom)/2;})();true");
         Thread.sleep(150);
+        waitForNativeFrame();
         String locate="(()=>{const target=document.querySelector("+quoted+");if(!target)return {ready:false};const r=target.getBoundingClientRect();for(const [fx,fy] of [[.5,.5],[.25,.25],[.75,.25],[.25,.75],[.75,.75]]){const x=r.left+r.width*fx,y=r.top+r.height*fy,hit=document.elementFromPoint(x,y);if(!target.disabled&&hit&&target.contains(hit))return {ready:true,x,y,width:innerWidth};}return {ready:false,rect:r.toJSON(),panel:target.closest('.utility-panel')?.className,hit:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML?.slice(0,1200)};})()";
         waitForJs("("+locate+").ready===true", "Native target not clickable: "+selector+": "+js("JSON.stringify("+locate+")"));
         JSONObject point=new JSONObject((String)js("JSON.stringify("+locate+")"));
         int[] origin=new int[2];runOnMainSync(()->web.getLocationOnScreen(origin));
         float scale=web.getWidth()/(float)point.getDouble("width");
         float x=origin[0]+(float)point.getDouble("x")*scale,y=origin[1]+(float)point.getDouble("y")*scale;
+        // Android's input command uses InputManager directly. UiAutomation's
+        // synchronous DOWN first flushes window transactions, which can change
+        // cold-start insets after these screen coordinates have been measured.
         long now=android.os.SystemClock.uptimeMillis();
-        for(int action:new int[]{android.view.MotionEvent.ACTION_DOWN,android.view.MotionEvent.ACTION_UP}) {
-            android.view.MotionEvent event=android.view.MotionEvent.obtain(now,android.os.SystemClock.uptimeMillis(),action,x,y,0);
-            try {
-                event.setSource(android.view.InputDevice.SOURCE_TOUCHSCREEN);
-                check(getUiAutomation().injectInputEvent(event,true), "Native input injection failed: "+selector);
-            } finally { event.recycle(); }
-            if(action==android.view.MotionEvent.ACTION_DOWN)Thread.sleep(80);
+        String nativeOutput;
+        try(java.io.InputStream input=new android.os.ParcelFileDescriptor.AutoCloseInputStream(
+                getUiAutomation().executeShellCommand("input touchscreen -d 0 tap "+Float.toString(x)+" "+Float.toString(y)))) {
+            java.io.ByteArrayOutputStream output=new java.io.ByteArrayOutputStream();
+            byte[] chunk=new byte[1024];int count;
+            while((count=input.read(chunk))!=-1)output.write(chunk,0,count);
+            nativeOutput=new String(output.toByteArray(),StandardCharsets.UTF_8);
         }
+        long nativeTapMs=android.os.SystemClock.uptimeMillis()-now;
+        check(!nativeOutput.contains("Error"),"Native input command failed: "+nativeOutput);
         // Android input injection returns before WebView dispatches the DOM click.
         // Let it arrive before a following tap scrolls a still-hidden panel.
         // Animated WebViews may never become idle. Wait for the actual click
         // with a deadline instead of blocking the instrumentation indefinitely.
-        waitForJs("window.__releaseNativeTap===true", "Native click missing: "+selector+": "+point);
+        try {
+            waitForJs("window.__releaseNativeTap===true", "Native click missing: "+selector+": "+point);
+        } catch (AssertionError failure) {
+            throw new AssertionError(failure.getMessage()+" native="+x+","+y+" web="+web.getWidth()+"x"+web.getHeight()+" origin="+origin[0]+","+origin[1]+" nativeTapMs="+nativeTapMs+" nativeScroll="+web.getScrollY()+" windowFocus="+web.hasWindowFocus()+" viewport="+js("JSON.stringify({width:visualViewport.width,height:visualViewport.height,scale:visualViewport.scale,offsetTop:visualViewport.offsetTop,offsetLeft:visualViewport.offsetLeft,scrollY,events:window.__releaseNativeEvents,rect:document.querySelector("+quoted+")?.getBoundingClientRect(),active:document.activeElement?.outerHTML?.slice(0,300)})"),failure);
+        }
         Thread.sleep(250);
     }
 
@@ -262,7 +292,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
 
     private void capture(String name) throws Exception {
         android.util.Log.i("ReleaseSmoke", "Capture start: " + name);
-        if(!Boolean.TRUE.equals(js("!!window.TutorialGuide && TutorialGuide.isGuiding()"))) js("scrollTo(0,0)");
+        if(!name.startsWith("failure-")&&!Boolean.TRUE.equals(js("!!window.TutorialGuide && TutorialGuide.isGuiding()"))) js("scrollTo(0,0)");
         async("document.fonts.ready");
         CountDownLatch frame=new CountDownLatch(1);
         runOnMainSync(()->web.postVisualStateCallback(System.nanoTime(),new WebView.VisualStateCallback(){
@@ -305,6 +335,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 JSONObject document=new JSONObject();document.put("schema_version",1);document.put("enabled",enabled);
                 java.nio.file.Files.write(dlcPreferences.toPath(),document.toString().getBytes(StandardCharsets.UTF_8));
             }
+            // Establish the native input connection before measuring the page.
+            // Its first connection can resize SystemUI insets in a cold emulator.
+            check(getUiAutomation()!=null,"Native automation connection unavailable");
             activity=startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             if("portrait".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
             if("landscape".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
@@ -750,7 +783,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 }
                 js("document.querySelector('[data-preset-id=buddhist_void]').closest('details').open=true;true");
                 tapSelector("[data-preset-id=buddhist_void]");
-                waitForJs("!busy && game?.player.path==='buddhist' && !document.querySelector('#game-screen').classList.contains('hidden')", "Native Buddhist quick start");
+                waitForJs("!busy && game?.player.path==='buddhist' && !document.querySelector('#game-screen').classList.contains('hidden')", "Native Buddhist quick start",60000);
                 check(Boolean.TRUE.equals(js("document.querySelector('#action-card [data-tutorial-open] svg')!==null")), "Tutorial icon survives game rendering");
                 capture("start-layout");
                 js("document.querySelector('#new-game-button').click();document.querySelector('[data-preset-id=lost_world]').closest('details').open=true;true");
@@ -759,7 +792,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(Boolean.TRUE.equals(js("document.querySelector('[data-preset-id=lost_world]').disabled && !document.querySelector('[data-quick-species]').hidden")), "Lost monster start requires species");
                 js("(()=>{const s=document.querySelector('[data-quick-species]');s.value='serpent';s.dispatchEvent(new Event('change'));})()");
                 tapSelector("[data-preset-id=lost_world]");
-                waitForJs("!busy && game?.player.world==='lost' && game.player.path==='monster'", "Native lost monster start");
+                waitForJs("!busy && game?.player.world==='lost' && game.player.path==='monster'", "Native lost monster start",60000);
                 tapSelector("[data-panel-target=map]");
                 check(Boolean.TRUE.equals(js("game.map.locations.length===4 && game.map.locations.every(l=>Object.values(l.qi_concentrations).every(v=>Number.isFinite(v)&&v>0)) && document.querySelectorAll('#map-locations .map-location').length===4")), "Generated lost maps and finite qi");
                 capture("lost-quick-start");
@@ -1001,6 +1034,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                         js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
                         for(String panel:new String[]{"upper-voisinage","immortal-aperture","upper-institution"}) {
                             js("UtilityPanels.open('"+panel+"');true");
+                            waitForPanelReady("#"+panel+"-card");
                             check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector('#"+panel+"-card');return !e.classList.contains('hidden')&&e.scrollWidth<=e.clientWidth+1})()")),"Upper voisinage panel overflow "+world+theme);
                         }
                         js("UtilityPanels.open('upper-voisinage');true");capture("upper-voisinage-"+world+"-"+theme+"-1562");
@@ -1088,6 +1122,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     js("UtilityPanels.open('map');Array.from(document.querySelectorAll('#map-view-tabs button')).find(b=>b.textContent==='活动与据点').click();Array.from(document.querySelectorAll('.map-directory-filters button')).find(b=>b.textContent==='势力驻地').click();true");
                     check(Boolean.TRUE.equals(js("['天庭','瑶池'].every(name=>Array.from(document.querySelectorAll('.map-directory-entry')).some(r=>r.querySelector('strong').textContent===name && r.textContent.includes('机构驻地')))")),"Institution map classification "+theme);
                     js("UtilityPanels.open('relationship');Array.from(document.querySelectorAll('.contact-filters button')).find(b=>b.textContent==='机构人物').click();true");
+                    waitForPanelReady("#relationship-card");
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('.contact-person').length===6 && document.querySelector('.contact-detail').textContent.includes('机构往来') && document.querySelector('#relationship-card').scrollWidth<=document.querySelector('#relationship-card').clientWidth+1")),"Institution contacts layout "+theme);
                     capture("institutions-"+theme+"-1520");
                     js("UtilityPanels.open('yaochi');true");
@@ -1279,6 +1314,32 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("game.fleet_network.main_hq && game.fleet_network.fleets.some(f=>f.cross_trip?.phase==='return')")),"Expansion persistence");
                 }
                 result.putString("economy_expansion_scope","Four themes, native relocation, passage build, dispatch, recall, repair, layout and persistence");
+            } else if(phase.equals("strategic-war")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'联军调度原生验收',spirit_root:'supreme_metal',path:'dao',seed:641,custom_start:{world:'spirit',realm_index:8,layer:1}})});return g.id;})()");
+                    python(assetText("strategic_war_release.py")+"\nfrom cultivation_life import server\nprepare_strategic_release(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.documentElement.dataset.theme="+JSONObject.quote(theme)+";true");
+                    tapSelector("[data-panel-target=war]");
+                    js("Array.from(document.querySelectorAll('#strategic-war-panel [role=tab]')).find(b=>b.textContent==='战役').id='release-strategy-tab';window.__strategyCampaign=game.war_system.strategic.wars[0].campaigns.find(c=>c.org?.id==='taixuan'&&c.dispatch_choices.length);true");
+                    check(Boolean.TRUE.equals(js("!!__strategyCampaign")),"Actual idle reserve available");
+                    tapSelector("#release-strategy-tab");
+                    String campaign=(String)js("__strategyCampaign.id");
+                    tapSelector("[data-campaign-id='"+campaign+"']");
+                    js("window.__strategyReserve=document.querySelector('#strategic-war-panel select[aria-label=选择闲置宗门]').value;true");
+                    tapSelector("#strategic-war-panel .strategy-dispatch button");
+                    waitForJs("!busy && game.war_system.strategic.wars[0].campaigns.find(c=>c.id==="+JSONObject.quote(campaign)+").coalitions.attacker.some(o=>o.id===__strategyReserve)","Native original reserve dispatched");
+                    python(assetText("strategic_war_release.py")+"\nfrom cultivation_life import server\ninspect_strategic_release(server.ENGINE,"+JSONObject.quote(id)+")");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('#strategic-war-panel .strategy-army').length===2 && document.querySelector('#strategic-war-panel').scrollWidth<=document.querySelector('#strategic-war-panel').clientWidth+2")),"Native coalition cards and layout");
+                    capture("strategic-war-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    js("Array.from(document.querySelectorAll('#strategic-war-panel button')).find(b=>b.textContent==='本部固守').id='release-strategy-hold';true");
+                    tapSelector("#release-strategy-hold");waitForJs("!busy","Native local stance command");
+                    js("Array.from(document.querySelectorAll('#strategic-war-panel button')).find(b=>b.textContent==='撤回本组织').id='release-strategy-withdraw';true");
+                    tapSelector("#release-strategy-withdraw");waitForJs("!busy","Native original organization recall");
+                    python(assetText("strategic_war_release.py")+"\nfrom cultivation_life import server\ninspect_strategic_release(server.ENGINE,"+JSONObject.quote(id)+")\ng=server.ENGINE._load("+JSONObject.quote(id)+")\nw=next(w for w in g.wars if w['id']==server.ENGINE._strategic_release_info['campaign'])\nassert 'taixuan' in w['withdrawn_orgs'] and w['org_stances']['taixuan']=='hold'");
+                    tapSelector("#war-toggle");
+                }
+                result.putString("strategic_war_scope","Four themes; actual native idle dispatch, original escrow, multi-organization campaign, local hold/recall and ally continuation");
             } else if(phase.equals("audit-fixes")) {
                 for(String auditCase:new String[]{"return","training","work"}) {
                     String world=auditCase.equals("work")?"nether":"spirit";

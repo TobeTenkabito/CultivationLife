@@ -44,6 +44,9 @@ class GovernanceFamilyUpdateTests(unittest.TestCase):
         human = self.engine.cross_world(created["id"], "human")
         self.assertEqual((human["player"]["world"], human["player"]["realm_index"], human["player"]["layer"]), ("human", 5, 9))
         self.assertTrue(human["player"]["cultivation_suppressed"])
+        with self.assertRaisesRegex(ValueError, "循原路返界"):
+            self.engine.manage_secret_art(created["id"], "suppress", "cancel")
+        self.engine.cross_world(created["id"], "spirit")
         spirit = self.engine.manage_secret_art(created["id"], "suppress", "cancel")
         self.assertEqual((spirit["player"]["world"], spirit["player"]["realm_index"], spirit["player"]["layer"]), ("spirit", 8, original_layer))
         self.assertFalse(spirit["player"]["cultivation_suppressed"])

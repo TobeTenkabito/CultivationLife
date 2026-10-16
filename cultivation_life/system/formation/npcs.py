@@ -64,6 +64,18 @@ def _ensure_npc_formations(deps: FormationNpcsDependencies, game: GameState) -> 
         for npc in deps._all_world_npcs(game)
         if npc.alive and npc.realm_index >= minimum
     }
+    # Calendar armies are absent from free-world encounter queries, but their
+    # unique carried arrays must survive loading a page during the journey.
+    from ...relationship_records import find_person
+    from ...person_assignments import deployment_assignment
+    for war in game.wars:
+        if not war.get('strategic_war_id') or war.get('status') not in {'active','peace_ready','withdrawing'}:
+            continue
+        for journeys in war.get('journeys',{}).values():
+            for journey in journeys:
+                npc=find_person(game,journey['person_id'])
+                if npc and npc.alive and npc.realm_index>=minimum:
+                    living.setdefault(npc.id,npc)
     for npc_id in list(game.npc_formations):
         if npc_id not in living:
             game.npc_formations.pop(npc_id, None)
@@ -76,6 +88,9 @@ def _ensure_npc_formations(deps: FormationNpcsDependencies, game: GameState) -> 
     family_ids={n.id for n in game.family.npcs} if game.family else set()
     for npc_id, npc in living.items():
         existing = game.npc_formations.get(npc_id)
+        assignment=deployment_assignment(game,npc_id)
+        if assignment and assignment.get('war_id'):
+            continue  # No free repairs or replacement of a deployed array.
         if (
             existing
             and existing.get("world") == npc.world

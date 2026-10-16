@@ -254,6 +254,8 @@ def war_peace(deps: WarPeaceDependencies, game_id: str, war_id: str, term: str, 
         raise ValueError("当前没有可供和谈的战争")
     if war.get("controller") != "player" or not deps._player_has_war_voice(game, war):
         raise ValueError("你没有代表势力签署和约的权力")
+    if war.get("strategic_war_id"):
+        raise ValueError("组织战役不能单独代表整个种族签约，请使用战争统筹页")
     if term not in deps.WAR_TERM_DEFS:
         raise ValueError("未知战争条款")
     if int(war.get("battles", 0)) < 2 and war.get("status") != "peace_ready" and term != "white_peace":

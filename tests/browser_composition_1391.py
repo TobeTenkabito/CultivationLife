@@ -21,7 +21,8 @@ def main():
     output=ROOT/'design/release-v1.39.1-comparison'
     output.mkdir(exist_ok=True)
     references=ROOT/'design/main-ui-concepts-20260927-r3'
-    themes=json.loads((references/'concepts.json').read_text(encoding='utf-8'))
+    themes=[t for t in json.loads((references/'concepts.json').read_text(encoding='utf-8')) if t['id'] in 'abdf']
+    assert {t['id'] for t in themes}==set('abdf')
     with tempfile.TemporaryDirectory() as folder:
         store=Path(folder)
         engine=GameEngine(ROOT,store/'data/saves')

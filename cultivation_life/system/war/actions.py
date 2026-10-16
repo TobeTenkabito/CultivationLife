@@ -23,6 +23,10 @@ def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: 
         war.get("controller") != "player" or not deps._player_has_war_voice(game, war)
     ):
         raise ValueError("你尚未取得本势力的战争指挥权")
+    if war.get("strategic_war_id"):
+        raise ValueError("此战役按日历执行，请通过战争统筹页下达组织命令")
+    if war.get("kind") == "race" and action != "accept_ai_peace":
+        raise ValueError("旧族战待接续，请先在战争统筹页处理原案")
     rng = deps.decode_rng(game.seed, game.rng_state)
     if action in {'deploy_half','deploy_all'}:
         if war.get('status') != 'active':
@@ -121,6 +125,7 @@ def _maybe_map_war_encounter(deps: WarActionsDependencies, game, rng):
     if game.diplomacy_unit - last < 2:
         return False
     fronts = [war for war in game.wars if war.get("kind") == "sect"
+              and (not war.get('strategic_war_id') or war.get('campaign_phase') == 'engaged')
               and war.get("status") == "active" and war.get("world") == player.world
               and war_site(deps.maps, war)["id"] == player.location_id]
     if not fronts or rng.random() >= .42:

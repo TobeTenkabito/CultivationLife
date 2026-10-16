@@ -108,6 +108,13 @@ def initialize(game,maps,war):
 
 def replenish(game,maps,war,side,amount=None):
     state=war['logistics']['sides'][side]
+    if war.get('strategic_war_id') and (war.get('campaign_phase') != 'marching' or war.get('logistics_initialized')):
+        # The initial convoy is carried with the real expedition. Once it has
+        # arrived, only its remaining cash can buy goods at that actual front;
+        # an ordinary war levy must not teleport fresh cargo from headquarters.
+        if war.get('campaign_phase') == 'engaged':
+            supply.purchase(game,maps,war,side,war['world'],war['location_id'],balance(game,wallet(war,side)))
+        return 0
     world,location,distance=front(game,maps,war,side)
     # A newly joined ally or relocated headquarters never teleports an existing pool.
     state['distance']=distance
@@ -129,6 +136,11 @@ def replenish(game,maps,war,side,amount=None):
                 shipping=distance+plan.base_years
             else:shipping=distance
             share=min(remaining,max(1,ceil(target*weights[entity.id]/total)))
+            if war.get("strategic_war_id"):
+                cap = war.get('org_budget_caps', {}).get(entity.id, war['budget_caps'].get(side,0) if entity.id==war[f'{side}_id'] else 0)
+                share = min(share, max(0, cap - state['contributions'].get(entity.id, 0)))
+                if not share:
+                    continue
             take=supply.mobilize(game,maps,war,side,entity,share,shipping)
             contributions=state['contributions'];contributions[entity.id]=contributions.get(entity.id,0)+take
             remaining-=take;progress+=take;paid+=take
@@ -251,8 +263,14 @@ def refund(game,war):
     if not war.get('logistics') or war['logistics'].get('refunded'):return
     for side in SIDES:
         source=wallet(war,side);remaining=opening=balance(game,source)
-        pool=entities(game,war,side);contributions=war['logistics']['sides'][side]['contributions']
+        pool=entities(game,war,side);row=war['logistics']['sides'][side];contributions=row['contributions']
+        if war.get('strategic_war_id') and war.get('campaign_phase')=='returning' and row.get('return_location'):
+            paths=list(war.get('cargo_journeys',{}).values())+[r['cargo'] for r in war.get('reinforcements',[])]
+            if all(c['phase']=='home' for c in paths):
+                row['location']=row['return_location']
         supply.return_items(game,war,side,pool)
+        if war.get('strategic_war_id'):
+            pool=[e for e in pool if contributions.get(e.id,0)>0]
         total=sum(contributions.get(e.id,0) for e in pool)
         for i,entity in enumerate(pool):
             amount=remaining if i==len(pool)-1 else min(remaining,int(opening*contributions.get(entity.id,0)/max(1,total)))

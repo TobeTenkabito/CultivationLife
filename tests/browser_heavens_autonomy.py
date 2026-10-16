@@ -47,7 +47,9 @@ def main():
                     browser=pw.chromium.launch(headless=True)
                     page=browser.new_page(viewport={'width':1440,'height':1050})
                     errors=[]
+                    requests=[]
                     page.on('pageerror',lambda error:errors.append(str(error)))
+                    page.on('request',lambda request:requests.append((request.method,request.url.rsplit('/',1)[-1],request.post_data)))
                     page.goto(f'http://127.0.0.1:{httpd.server_port}')
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('async id=>{await loadGame(id)}',key)
@@ -57,14 +59,26 @@ def main():
                     page.get_by_role('tab',name='异象',exact=True).click()
                     page.get_by_role('button',name='查看因果遗址',exact=True).click()
                     def act(label,years):
+                        page.locator('#game-confirm-backdrop').wait_for(state='hidden')
                         disk=engine.store._path(key).read_bytes()
                         seq=page.evaluate('game.heavens.next_command_seq')
-                        page.get_by_role('button',name=label,exact=True).click()
-                        page.locator('#game-confirm-backdrop:not(.hidden)').wait_for()
-                        assert f'{years} 年' in page.locator('#game-confirm-body').inner_text()
-                        assert engine.store._path(key).read_bytes()==disk
-                        page.locator('#game-confirm-accept').click()
-                        page.wait_for_function('seq=>!busy && game.heavens.next_command_seq===seq+1',arg=seq)
+                        try:
+                            with page.expect_response(lambda response:response.url.endswith('/heavens-preview')) as quoted:
+                                page.get_by_role('button',name=label,exact=True).click()
+                            assert quoted.value.ok,(label,quoted.value.text())
+                            page.locator('#game-confirm-backdrop:not(.hidden)').wait_for()
+                            assert f'{years} 年' in page.locator('#game-confirm-body').inner_text()
+                            assert engine.store._path(key).read_bytes()==disk
+                            with page.expect_response(lambda response:response.url.endswith('/heavens-command')) as submitted:
+                                page.locator('#game-confirm-accept').click()
+                            assert submitted.value.ok,(label,submitted.value.text())
+                            page.wait_for_function('seq=>!busy && game.heavens.next_command_seq===seq+1',arg=seq)
+                        except Exception:
+                            print(json.dumps(dict(label=label,seq=seq,requests=requests[-12:],errors=errors,
+                                state=page.evaluate("({busy,next:game.heavens.next_command_seq,toast:document.querySelector('#toast').textContent,confirm:!document.querySelector('#game-confirm-backdrop').classList.contains('hidden')})")),ensure_ascii=False),flush=True)
+                            (output/'failed-save.json').write_bytes(engine.store._path(key).read_bytes())
+                            page.screenshot(path=str(output/'failure.png'))
+                            raise
                     act('进入因果遗址',0)
                     page.get_by_role('tab',name='同勘',exact=True).click()
                     assert '自行探访' in page.locator('[data-survey]').inner_text()

@@ -1,6 +1,6 @@
 # 浮生问道 · Android
 
-维护基线：2026-10-15，本体 **v2.13.6**。Gradle 配置的版本名为 **2.13.6-android.59**，versionCode **59**，沿用 `com.fusheng.wendao` 包名和正式签名。
+维护基线：2026-10-16，本体 **v2.14.0**。Gradle 配置的版本名为 **2.14.0-android.60**，versionCode **60**，沿用 `com.fusheng.wendao` 包名和正式签名。
 
 **当前源码存档结构为 10，旧结构 1–9 明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构 1–9 的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
 
@@ -35,6 +35,8 @@
 Gradle 从仓库复制 Python、content、web、dlc；`app/src/main/mobile` 在准备阶段注入移动端资源，不维护另一套玩法逻辑。CSS 混色由 `scripts/android_css.py` 转换，以兼容旧 WebView。Lint 仅排除面向商店目标 SDK 政策的 `ExpiredTargetSdkVersion`。
 
 ## 发布证明与验收
+
+v2.14.0 按用户要求执行全仓回归和完整发行验收，后端单进程、浏览器单实例；内存余量充足时二者有界重叠，Windows 与 Gradle 构建、专用只读 Android 12 模拟器分阶段单独运行。新战争的 `strategic-war` 原生阶段覆盖四主题横竖屏的真实闲置调度、原军费托管、本部固守和本宗撤回；不操作用户已在运行的其他模拟器。最终成品版本、范围及哈希以 `dist/release-2.14.0*.json` 为准。
 
 v2.13.6 按用户要求串行运行经济、传承及系统修复相关回归，不运行全仓。发行入口为 `python scripts/verify_scoped_release.py --profile bugfix`、`python scripts/verify_android_scoped.py emulator-5580 --bugfix` 和 `python scripts/package_scoped_release.py`。原生阶段覆盖下界与返界、培养寿元、剩余履约、传承承接、监禁、护山及经济托管的横竖屏真实点击；Windows 同一 EXE 验证有／无 DLC。构建限制单工作进程，验收只运行一台专用模拟器；凭据对应最终代码及实际安装 APK，不沿用旧产物哈希。
 

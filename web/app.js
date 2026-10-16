@@ -1867,8 +1867,12 @@ function renderFaction(faction) {
 
 function renderWars(system) {
   const list = $('#war-list'); list.innerHTML = '';
-  $('#war-status').textContent = system.active_count ? `${system.active_count} 场战争进行中` : '当前无战事';
+  window.StrategicWarPanel?.render(system.strategic, game.id, payload=>mutate(`/api/games/${game.id}/strategic-war`,payload));
+  const strategicCount=(system.strategic?.wars||[]).filter(w=>w.status!=='ended').length;
+  const independentCount=(system.wars||[]).filter(w=>['active','peace_ready'].includes(w.status)).length;
+  $('#war-status').textContent = strategicCount||independentCount ? `战争 ${strategicCount} · 独立战役 ${independentCount}` : '当前无战事';
   if (!system.wars?.length) {
+    if(system.strategic?.wars?.length)return;
     list.innerHTML = '<p class="empty">尚无战争记录。外交宣战通过后，真正的征伐会在这里展开。</p>';
     return;
   }
@@ -1876,7 +1880,7 @@ function renderWars(system) {
     const card = document.createElement('details'); card.className = `war-card ${war.status}`;
     card.open = ['active', 'peace_ready'].includes(war.status);
     const summary = document.createElement('summary');
-    const state = war.status === 'ended' ? '已结束' : war.status === 'peace_ready' ? '胜负已定' : war.controller === 'player' ? '由你指挥' : 'AI 演算中';
+    const state = war.status === 'ended' ? '已结束' : war.kind==='race' ? '旧族战待接续' : war.status === 'peace_ready' ? '胜负已定' : war.controller === 'player' ? '由你指挥' : 'AI 演算中';
     summary.innerHTML = htmlText`<b>${war.attacker_name || '未知进攻方'} vs ${war.defender_name || '未知防御方'}</b><span>${state} · 战争分数 ${number(war.war_score || 0)}</span>`;
     const body = document.createElement('div'); body.className = 'war-body';
     const morale = document.createElement('div'); morale.className = 'war-morale';
@@ -2023,7 +2027,7 @@ function namedCreationForm(title, placeholder, buttonLabel, onSubmit) {
   return form;
 }
 
-function diplomacyForm(targets, endpoint, title) {
+function diplomacyForm(targets, endpoint, title, excluded=[]) {
   const form = document.createElement('form'); form.className = 'governance-form diplomacy-form';
   const heading = document.createElement('b'); heading.textContent = title;
   const target = document.createElement('select');
@@ -2033,6 +2037,7 @@ function diplomacyForm(targets, endpoint, title) {
   });
   const status = document.createElement('select');
   Object.entries(game?.governance?.diplomacy_statuses || {}).forEach(([value, label]) => {
+    if(excluded.includes(value))return;
     const option = document.createElement('option'); option.value = value; option.textContent = label; status.appendChild(option);
   });
   const button = document.createElement('button'); button.type = 'submit'; button.textContent = '提交表决';
@@ -2255,7 +2260,7 @@ function renderRaceSystem(system) {
       const ownRelation = (race.relations || []).find(entry => entry.race === system.player_race) || {status_name:'中立'};
       detail.appendChild(diplomacyForm(
         [{target_id:race.id, target_name:race.name, status_name:ownRelation.status_name}],
-        `/api/games/${game.id}/race-diplomacy`, `发起${system.player_race_name}大乘议会`
+        `/api/games/${game.id}/race-diplomacy`, `发起${system.player_race_name}大乘议会`,system.strategic_available?[]:['war']
       ));
       const transfer = (system.vassal_transfers || []).find(entry => entry.target_id === race.id);
       if (transfer) detail.appendChild(vassalTransferForm('race', transfer.target_id, transfer.target_name, transfer.candidates));
@@ -4002,6 +4007,7 @@ function renderEvent() {
 }
 
 function renderButtons() {
+  window.StrategicWarPanel?.syncBusy();
   window.MapAtlas?.syncBusy();
   window.TrialSitePanel?.syncBusy();
   document.querySelectorAll('.exploration-action').forEach(b=>b.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.trial?.active||!!game?.imprisonment||b.dataset.unavailable==='1');

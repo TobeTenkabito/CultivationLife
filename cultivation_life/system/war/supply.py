@@ -207,6 +207,7 @@ def raid(game,war,side,value):
 
 def return_items(game,war,side,entities):
     row=war['logistics']['sides'][side]
+    received=0
     # Keep goods at their actual battlefield. Returning money is not permission
     # to teleport stock to a former headquarters.
     owner=next((e for e in entities if e.world==row['world'] and e.location_id==row['location']),None)
@@ -215,7 +216,11 @@ def return_items(game,war,side,entities):
         for item,n in row['items'].items():
             room=max(0,10000-depot.occupied(stock))
             retained=min(n,room)
-            stock['stock']['item:'+item]=stock['stock'].get('item:'+item,0)+retained
-            row['items'][item]-=retained
-        depot.record(stock,game,'停战接收本地未消耗军需；异地物资未遥移')
+            if retained:
+                stock['stock']['item:'+item]=stock['stock'].get('item:'+item,0)+retained
+                row['items'][item]-=retained
+                received+=retained
+        if received:
+            depot.record(stock,game,'停战接收本地未消耗军需；异地物资未遥移')
     # Unreturned goods remain in the original war pool as demobilized stores.
+    return received

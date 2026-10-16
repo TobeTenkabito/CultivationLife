@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from ...race_diplomacy import relations_for
+
 from ...npc_custody import is_free
+from ...system.intrigue.prison_state import is_imprisoned
 from copy import deepcopy
 from ...system.combat.npc_lifecycle import initialize_native
 
@@ -160,24 +163,25 @@ def propose_race_diplomacy(deps: FactionActionDependencies, game_id: str, target
         resolution_type = {"war": "declare_war", "alliance": "form_alliance", "truce": "make_peace", "neutral": "break_alliance"}.get(status)
         if resolution_type:
             return deps.intrigue_propose_resolution(game_id, "race", resolution_type, target_race, True)
-    game = deps._load(game_id)
+    game = deepcopy(deps._load(game_id))
     player = game.player
-    if game.pending_event or player.imprisonment:
+    if game.pending_event or not player.alive or player.imprisonment or player.ghost_captor:
         raise ValueError("当前状态无法召开族议")
     if not deps._has_race_voice(game):
-        raise ValueError("只有身处种族上界的人族大乘才能发起人族外交表决")
+        raise ValueError("尚未取得本界所属种族的外交议席")
     current_world = player.world
-    if target_race == "human" or target_race not in RACE_DEFINITIONS or current_world not in RACE_DEFINITIONS[target_race].get("worlds", []):
+    own_race = deps._player_allegiance_race(player)
+    if target_race == own_race or target_race not in RACE_DEFINITIONS or current_world not in RACE_DEFINITIONS[target_race].get("worlds", []):
         raise ValueError("目标种族无效")
     if status not in {"war", "alliance", "truce", "neutral", "vassal"}:
         raise ValueError("未知外交决议")
-    key = race_pair("human", target_race)
-    relation = game.race_relations.setdefault(key, {"affinity": 0.0, "status": "neutral", "since_age": player.age})
+    key = race_pair(own_race, target_race)
+    relation = relations_for(game).setdefault(key, {"affinity": 0.0, "status": "neutral", "since_age": player.age})
     if relation.get("status") == "war" and status != "war":
         raise ValueError("战争已经进入征伐阶段，请在战争窗口依据战果进行和谈")
     voters: dict[str, SectNpc] = {}
-    for npc in [*game.world_npcs.values(), *game.notable_npcs.values(), *(n for s in game.sects.values() for n in s.npcs)]:
-        if npc.alive and npc.world == current_world and npc.race == "human" and npc.realm_index >= 8:
+    for npc in [*game.world_npcs.values(), *game.notable_npcs.values(), *(n for s in game.sects.values() for n in s.npcs), *([] if not game.family else game.family.npcs)]:
+        if is_free(npc) and npc.world == current_world and npc.race == own_race and npc.realm_index >= 8 and not is_imprisoned(game, npc.id):
             voters[npc.id] = npc
     rng = decode_rng(game.seed, game.rng_state)
     ballots = [{"name": player.name, "vote": True, "player": True}]
@@ -190,14 +194,15 @@ def propose_race_diplomacy(deps: FactionActionDependencies, game_id: str, target
     if passed:
         emit(game, "diplomacy.proposal_passed", status=status)
         affinity = {"war": -75, "alliance": 80, "truce": -5, "neutral": 0, "vassal": 65}[status]
-        deps._set_diplomatic_relation(game, relation, status, "human", target_race, "race", affinity, initiated_by_player=True)
+        deps._set_diplomatic_relation(game, relation, status, own_race, target_race, "race", affinity, initiated_by_player=True)
     relation["last_vote"] = {"age": player.age, "proposal": status, "yes": yes, "total": len(ballots), "passed": passed, "ballots": ballots}
     action_name = {"war":"宣战","alliance":"结盟","truce":"停战","neutral":"恢复中立","vassal":"确立依附"}[status]
     target_name = RACE_DEFINITIONS[target_race]["name"]
-    summary = f"你提议人族与{target_name}{action_name}；{yes}/{len(ballots)}票赞成，决议{'通过' if passed else '未通过'}。"
+    own_name=RACE_DEFINITIONS.get(own_race,{}).get('name',own_race)
+    summary = f"你提议{own_name}与{target_name}{action_name}；{yes}/{len(ballots)}票赞成，决议{'通过' if passed else '未通过'}。"
     game.history.append(HistoryRecord(
-        "SYS_PLAYER_RACE_VOTE", 1, player.age, "人族大乘议会", status, "passed" if passed else "rejected",
-        summary, {"races":["human", target_race], "status":[old_status, relation.get("status")], "vote":relation["last_vote"]},
+        "SYS_PLAYER_RACE_VOTE", 1, player.age, f"{own_name}议会", status, "passed" if passed else "rejected",
+        summary, {"races":[own_race, target_race], "status":[old_status, relation.get("status")], "vote":relation["last_vote"]},
         ["system", "diplomacy", "race", "vote", "world_news", f"world:{current_world}"],
     ))
     game.rng_state = encode_rng(rng)
@@ -270,7 +275,7 @@ def transfer_vassal_personnel(
     own_id = deps._player_allegiance_race(player) if kind == "race" else player.faction_id
     if not own_id or (kind == "race" and not deps._has_race_voice(game)) or (kind == "sect" and not deps._has_sect_voice(game)):
         raise ValueError("你尚未取得该势力的话语权")
-    relations = game.race_relations if kind == "race" else game.sect_relations
+    relations = relations_for(game) if kind == "race" else game.sect_relations
     relation = relations.get(race_pair(str(own_id), target_id), {})
     if relation.get("status") != "vassal" or relation.get("overlord") != own_id or relation.get("subject") != target_id:
         raise ValueError("只有被依附方可以从附庸势力调动同级以下人事")

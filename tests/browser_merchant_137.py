@@ -16,7 +16,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, reveal_subpage
 
 def main():
     with tempfile.TemporaryDirectory() as directory:
@@ -37,7 +37,7 @@ def main():
         game.player.age += 5
         engine._advance_merchant_year(game)
         engine.store.save(game)
-        with patch.object(server_module, 'ENGINE', engine):
+        with patch.object(server_module, 'ENGINE', engine),patch.object(server_module,'PERSISTENCE_ROOT',Path(directory)):
             httpd = ThreadingHTTPServer(('127.0.0.1', 0), server_module.Handler)
             threading.Thread(target=httpd.serve_forever, daemon=True).start()
             try:
@@ -53,6 +53,7 @@ def main():
                     failed = page.locator('.merchant-order[data-status="failed"]')
                     working = page.locator('.merchant-order[data-status="working"]')
                     assert failed.count() == working.count() == 1
+                    reveal_subpage(page,failed)
                     failed.locator('.merchant-refund').wait_for(state='visible')
                     assert '已退本金' in failed.text_content() and '手续费' in failed.text_content()
                     assert failed.locator('.merchant-progress-log p').count() >= 3
@@ -70,21 +71,26 @@ def main():
                       const b=document.createElement('button');b.textContent='临时操作';document.body.append(b);
                       b.focus();const c=getComputedStyle(b);
                       const result={bg:c.backgroundImage,fg:c.color,radius:c.borderRadius,focus:c.outlineStyle};
+                       const reference=getComputedStyle(document.querySelector('.merchant-order button')||document.querySelector('#merchant-toggle'));
+                       result.reference={bg:reference.backgroundImage,radius:reference.borderRadius};
                       b.disabled=true;result.disabled=getComputedStyle(b).opacity;b.remove();return result;
                     }''')
-                    assert 'gradient' in appearance['bg'] and appearance['radius']=='5px'
+                    assert appearance['bg']==appearance['reference']['bg']
+                    assert appearance['radius']==appearance['reference']['radius']
                     assert appearance['fg'] != 'rgb(0, 0, 0)' and float(appearance['disabled']) < 1
                     # Open representative systems that generate temporary buttons.
+                    page.locator('#merchant-toggle').click()
                     for panel in ('crafting', 'formation', 'natal-artifact', 'map', 'auction'):
                         dock = page.locator(f'[data-panel-target="{panel}"]')
-                        if not dock.count() or not dock.is_visible():
+                        if not dock.count() or dock.is_disabled() or dock.evaluate("n=>n.classList.contains('hidden')"):
                             continue
-                        dock.click()
+                        navigation_locator(page,f'[data-panel-target="{panel}"]').click()
                         card = page.locator(f'#{panel}-card.panel-open')
                         card.wait_for(state='visible')
                         assert card.evaluate('e=>e.scrollWidth<=e.clientWidth+2')
                         assert card.locator('button').count()
                         page.screenshot(path=str(ROOT/f'build/buttons-137-{panel}.png'), animations='disabled')
+                        page.locator(f'#{panel}-toggle').click()
                     assert not errors, errors
                     browser.close()
             finally:

@@ -675,9 +675,12 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
                 self.engine.manage_secret_art(game.id, "suppress", "activate", 8, 9)
                 descended = self.engine.cross_world(game.id, lower_world)
                 self.assertEqual((descended["player"]["world"], descended["player"]["realm_index"]), (lower_world, 8))
-                self.assertFalse(descended["world_travel"]["can_return_nether"])
-                with self.assertRaisesRegex(ValueError, "秘法压制"):
+                self.assertTrue(descended["world_travel"]["can_return_nether"])
+                with self.assertRaisesRegex(ValueError, "封印状态"):
                     self.engine.breakthrough(game.id)
+                with self.assertRaisesRegex(ValueError, "循原路返界"):
+                    self.engine.manage_secret_art(game.id, "suppress", "cancel")
+                self.engine.cross_world(game.id, "nether")
                 restored = self.engine.manage_secret_art(game.id, "suppress", "cancel")
                 self.assertEqual((restored["player"]["world"], restored["player"]["realm_index"]), ("nether", 9))
                 self.assertFalse(restored["world_travel"]["suppressed"])
@@ -726,6 +729,9 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
         self.engine.manage_secret_art(game.id, "suppress", "activate", 8, 9)
         descended = self.engine.cross_world(game.id, "phantom_underworld")
         self.assertEqual((descended["player"]["world"], descended["player"]["realm_index"]), ("phantom_underworld", 8))
+        with self.assertRaisesRegex(ValueError, "循原路返界"):
+            self.engine.manage_secret_art(game.id, "suppress", "cancel")
+        self.engine.cross_world(game.id, "nether")
         restored = self.engine.manage_secret_art(game.id, "suppress", "cancel")
         self.assertEqual((restored["player"]["world"], restored["player"]["realm_index"]), ("nether", 9))
 

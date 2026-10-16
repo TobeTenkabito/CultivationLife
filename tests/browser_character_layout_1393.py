@@ -10,6 +10,7 @@ sys.path.insert(0,str(ROOT))
 from playwright.sync_api import sync_playwright
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
+from scripts.browser_navigation import reveal_subpage
 
 def main():
     with tempfile.TemporaryDirectory() as folder:
@@ -38,6 +39,9 @@ def main():
                             for panel in ('faction','world-npc','family','relationship','sage'):
                                 page.evaluate('p=>CharacterLayoutProbe.mount(p)',panel)
                                 page.wait_for_function("p=>getComputedStyle(document.getElementById(p+'-card')).visibility==='visible'",arg=panel)
+                                rows={'faction':'.roster-row','world-npc':'.world-npc-row','family':'.family-row',
+                                      'relationship':'.party-row','sage':'.sage-member-row'}
+                                reveal_subpage(page,page.locator(f'#{panel}-card {rows[panel]}').first)
                                 page.wait_for_timeout(1000 if theme=='f' else 250)
                                 failures=page.evaluate('p=>CharacterLayoutProbe.check(p)',panel)
                                 assert not failures,(width,theme,panel,failures)
@@ -49,6 +53,6 @@ def main():
                     assert not errors,errors
                     browser.close()
             finally:httpd.shutdown();httpd.server_close()
-    print('Six themes x four widths x five populated character lists: layout and state isolation passed')
+    print('Four themes x four widths x five populated character lists: layout and state isolation passed')
 
 if __name__=='__main__':main()

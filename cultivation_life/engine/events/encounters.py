@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from ...race_diplomacy import relations_for
 from ...npc_names import person_name
 
 import random
@@ -50,7 +52,7 @@ def _generate_cultivator_target(
     if deps._world_supports(player.world, "races"):
         race_pool = [race_id for race_id, definition in RACE_DEFINITIONS.items() if player.world in definition.get("worlds", [])]
         target_race = forced_race or choose_weighted_race(
-            race_pool, deps._player_allegiance_race(player), game.race_relations if game else {}, rng,
+            race_pool, deps._player_allegiance_race(player), relations_for(game) if game else {}, rng,
         )
         target_name = f"{RACE_DEFINITIONS[target_race]['name']}{target_name}"
     target = {

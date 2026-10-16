@@ -609,6 +609,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.transfer_vassal_personnel(
                     game_id, payload.get("kind", ""), payload.get("target_id", ""), payload.get("npc_id", "")
                 )
+            elif operation == "strategic-war":
+                result = ENGINE.strategic_war_action(game_id, payload)
             elif operation == "war-action":
                 result = ENGINE.war_action(
                     game_id, payload.get("war_id", ""), payload.get("action", ""),

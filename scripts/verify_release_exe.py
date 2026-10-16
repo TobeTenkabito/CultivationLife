@@ -62,6 +62,9 @@ def verify(with_dlc):
             for theme in 'abdf':
                 with urllib.request.urlopen(base + f'/themes/{theme}.css', timeout=5) as response:
                     assert f'data-theme={theme}'.encode() in response.read()
+            for asset in ('strategic-war-panel.js','strategic-war-panel.css'):
+                with urllib.request.urlopen(base+'/'+asset,timeout=5) as response:
+                    assert response.read()==(ROOT/'web'/asset).read_bytes()
             with urllib.request.urlopen(base + '/theme-manager.js', timeout=5) as response:
                 assert b'window.GameThemes' in response.read()
             for asset in ['upper-institution-panel.js', 'upper-voisinage-panel.js', 'immortal-economy-panel.js', 'handbook-content.js', 'tutorial-steps.js', 'tutorial.js', 'tutorial-content.js', 'tutorial.css', 'combat-plan-panel.js', 'doctrine-panel.js', 'doctrine-panel.css', 'theme-manager.js', 'index.html', 'ui-panels.js', 'save-transfer.js', 'save-transfer.css', 'theme-composition.js', 'themes/composition.css', 'themes/landscape.svg', 'family-panel.js', 'guixu-panel.js', 'app.js', 'map-directory.js', 'panels.css', 'buddhist-panel.js', 'buddhist-panel.css', 'buddhist-wish.js']:
@@ -411,6 +414,8 @@ def verify(with_dlc):
             assert len(quiet['market']['puppet_material_offers'])==12
             from scripts.verify_organizations import verify_organizations
             verify_organizations(base,folder)
+            from scripts.verify_strategic_war import verify_strategic_war
+            verify_strategic_war(base,folder,with_dlc)
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds={len(config['worlds'])}")
             return {'with_dlc': with_dlc, 'exe_sha256': verified_digest,
                     'base_version': config['base_game']['version']}

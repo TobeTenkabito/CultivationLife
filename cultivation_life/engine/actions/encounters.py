@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...race_diplomacy import relations_for
+
 import copy
 import random
 from typing import Any
@@ -373,8 +375,8 @@ def _known_npc_encounter_target(
         return None
     weights = [
         (3.5 if npc.notorious else 1.0) * encounter_weight(
-            str(game.race_relations.get(race_pair(deps._player_allegiance_race(player), npc.race), {}).get("status", "neutral")),
-            float(game.race_relations.get(race_pair(deps._player_allegiance_race(player), npc.race), {}).get("affinity", 0)),
+            str(relations_for(game).get(race_pair(deps._player_allegiance_race(player), npc.race), {}).get("status", "neutral")),
+            float(relations_for(game).get(race_pair(deps._player_allegiance_race(player), npc.race), {}).get("affinity", 0)),
         ) if deps._world_supports(player.world, "races") and npc.race != deps._player_allegiance_race(player) else 1.25
         for npc, _, _ in candidates
     ]

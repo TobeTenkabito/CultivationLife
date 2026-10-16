@@ -55,11 +55,25 @@ def _resolve_field_attack(
     defending = "defender" if attacking == "attacker" else "attacker"
     attackers = deps._available_warriors(game, war, attacking)
     defenders = deps._available_warriors(game, war, defending)
+    if war.get('strategic_war_id'):
+        present=bool(attackers)
+        attackers=[n for n in attackers if war.get('org_stances',{}).get(war['roster_owner'].get(n.id))!='hold']
+        if present and not attackers:
+            return '本方在场部众固守原阵，未主动出击。'
     if not attackers or not defenders:
         war["morale"][defending if not defenders else attacking] = 0.0
         return "一方已经无可出阵之人。"
-    striker = rng.choice(attackers[:min(8, len(attackers))])
-    target = rng.choice(defenders[:min(12, len(defenders))])
+    if war.get('strategic_war_id'):
+        def contingent(people,limit):
+            groups={}
+            for person in people:
+                groups.setdefault(war['roster_owner'][person.id],[]).append(person)
+            members=rng.choice(list(groups.values()))
+            return rng.choice(members[:limit])
+        striker,target=contingent(attackers,8),contingent(defenders,12)
+    else:
+        striker = rng.choice(attackers[:min(8, len(attackers))])
+        target = rng.choice(defenders[:min(12, len(defenders))])
     defense_bonus = 1 + float(deps._war_rules().get("defender_power_bonus", 0.10))
     attack_power = deps._npc_power(striker) * deps._npc_formation_power_multiplier(game, striker.id)
     defend_power = deps._npc_power(target) * deps._npc_formation_power_multiplier(game, target.id)

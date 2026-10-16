@@ -251,7 +251,8 @@ class NpcSystemTests(unittest.TestCase):
         game.player.race = "human"
         game.player.faction_id = "taixuan"
         game.sect_relations["taixuan|wanlingshan"] = {"status":"war", "affinity":-80}
-        game.race_relations["human|stoneborn"] = {"status":"war", "affinity":-80}
+        from cultivation_life.race_diplomacy import relations_for
+        relations_for(game, "spirit")["human|stoneborn"] = {"status":"war", "affinity":-80}
 
         self.assertFalse(self.engine._kill_generates_hostility(game, "race", "stoneborn", 3))
         self.assertFalse(self.engine._kill_generates_hostility(game, "race", "stoneborn", 6))

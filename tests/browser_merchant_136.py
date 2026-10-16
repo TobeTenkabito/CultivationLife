@@ -26,8 +26,10 @@ def main():
         game.player.location_id=alliance['hq']
         add_item(game.player,'spirit_stone',10**12)
         engine.store.save(game)
+        # Fresh isolated HQ quote fixture; ordinary UI has no debug grant button.
+        engine.debug_merchant_hq(game_id,alliance['id'])
         runtime={'debug':True,'mode':'debug'}
-        with patch.object(server_module,'ENGINE',engine),patch.object(server_module,'load_runtime_config',return_value=runtime):
+        with patch.object(server_module,'ENGINE',engine),patch.object(server_module,'PERSISTENCE_ROOT',Path(directory)),patch.object(server_module,'load_runtime_config',return_value=runtime):
             httpd=ThreadingHTTPServer(('127.0.0.1',0),server_module.Handler)
             threading.Thread(target=httpd.serve_forever,daemon=True).start()
             try:
@@ -40,13 +42,13 @@ def main():
                     page.wait_for_function('configData?.debug===true')
                     page.evaluate('async id=>{await loadGame(id);render(game);}',game_id)
                     navigation_locator(page,'[data-panel-target="merchant"]').click()
-                    click_control(page.locator('.merchant-debug-hq').first)
+                    assert page.locator('.merchant-debug-hq').count()==0
                     page.wait_for_function('game.merchant_system.membership?.rank===2')
                     assert '总部 特使' in page.locator('.merchant-membership').text_content()
                     panel=page.locator('.merchant-alliance').first
 
                     def open_form():
-                        panel.get_by_text('发布委托',exact=True).click()
+                        click_control(panel.get_by_text('发布委托',exact=True))
                         return panel.locator('form')
 
                     def wait_quote(form):
