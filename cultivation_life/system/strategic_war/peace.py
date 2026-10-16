@@ -34,6 +34,19 @@ def war_losses(game,row,side):
                for book in [child.get('logistics',{}).get('sides',{}).get(side,{})])
 
 
+def coalition_organizations(game, row, child, side):
+    """A campaign belongs to its real coalition, even after its first sect falls."""
+    commitments = {c['org']['id']:c for c in row['commitments'] if c['side'] == side}
+    result = {}
+    for participant in child['coalitions'][side]:
+        c = commitments.get(participant['id'])
+        org = committed_org(game, row, c) if c else None
+        if org:
+            result[org.id] = org
+    contributions = child.get('logistics', {}).get('sides', {}).get(side, {}).get('contributions', {})
+    return sorted(result.values(), key=lambda o: (o.id != child[f'{side}_id'], -contributions.get(o.id, 0), o.id))
+
+
 def effects(deps, game, row, side, term):
     if term not in {'destroy_outpost', 'remove_influence', 'economic_rights'}:
         return []
@@ -47,7 +60,7 @@ def effects(deps, game, row, side, term):
                 or not child.get('battles') or not row['receipts'].get(child['id'], {}).get('terminal')):
             continue
         loser = committed_org(game, row, commitments[child[f'{enemy}_id']])
-        winner = committed_org(game, row, commitments[child[f'{side}_id']])
+        winner = next(iter(coalition_organizations(game, row, child, side)), None)
         if not loser or not winner:
             continue
         effect = dict(term=term, payer=ref(loser), receiver=ref(winner), payer_name=loser.name,
@@ -104,6 +117,7 @@ def quote(deps, game, row, side, term):
     commitments = {c['org']['id']: c for c in row['commitments']}
     liable = {}
     beneficiaries = {}
+    winners = set()
     for c in row['commitments']:
         if c['side']!=side:continue
         org=committed_org(game,row,c)
@@ -115,8 +129,10 @@ def quote(deps, game, row, side, term):
         if (child.get('strategic_war_id') != row['id'] or child.get('winner') != side
                 or child.get('battles', 0) < 1 or not row['receipts'].get(child['id'], {}).get('terminal')):
             continue
-        if not committed_org(game, row, commitments[child[f'{side}_id']]):
+        surviving = coalition_organizations(game, row, child, side)
+        if not surviving:
             continue
+        winners.update(o.id for o in surviving)
         for participant in child['coalitions'][enemy]:
             c = commitments.get(participant['id'])
             loser = committed_org(game, row, c) if c else None
@@ -131,8 +147,9 @@ def quote(deps, game, row, side, term):
     compensation=divide(losses*(2 if heavy else 1),funds)
     weights={key:weight for key,(_,weight) in beneficiaries.items() if weight>0}
     if not weights:
-        winners={w[f'{side}_id'] for w in game.wars if w.get('strategic_war_id')==row['id'] and w.get('winner')==side}
         weights={key:1 for key in beneficiaries if key in winners}
+    if not weights:
+        raise ValueError('没有存续且实际获胜的合法收款组织')
     demands=[]
     for key,loser in liable.items():
         claimed=compensation.get(key,0)+funds[key]*(50 if heavy else 25)//100
