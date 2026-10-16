@@ -7931,7 +7931,7 @@
         },
         {
           "id": "celestial_equipment_09",
-          "name": "河洛量界尺",
+          "name": "河洛界尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -8955,7 +8955,7 @@
         },
         {
           "id": "asura_equipment_06",
-          "name": "断劫玄轮",
+          "name": "断劫无回轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -11419,7 +11419,7 @@
         },
         {
           "id": "reincarnation_plant_06",
-          "name": "返照幽华",
+          "name": "返照幽昙花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -19730,7 +19730,7 @@
         },
         {
           "id": "guixu_celestial_second_treasure_19",
-          "name": "河洛量界尺",
+          "name": "河洛界尺",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -20755,7 +20755,7 @@
         },
         {
           "id": "guixu_asura_second_treasure_16",
-          "name": "断劫玄轮",
+          "name": "断劫无回轮",
           "category": "equipment",
           "kind": "item",
           "exclusive_source": "guixu_tide",
@@ -23221,7 +23221,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_36",
-          "name": "返照幽华",
+          "name": "返照幽昙花",
           "category": "plant",
           "kind": "item",
           "exclusive_source": "guixu_tide",

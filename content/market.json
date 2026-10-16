@@ -4647,6 +4647,894 @@
       "content_id": "TECH_REINCARNATION_HERITAGE_7",
       "tier": 11,
       "price": 4500000000
+    },
+    {
+      "id": "natal_human_pine_metal",
+      "kind": "item",
+      "content_id": "natal_human_pine_metal",
+      "tier": 3,
+      "price": 300,
+      "world": "human"
+    },
+    {
+      "id": "natal_human_pine_jade",
+      "kind": "item",
+      "content_id": "natal_human_pine_jade",
+      "tier": 3,
+      "price": 330,
+      "world": "human"
+    },
+    {
+      "id": "natal_human_pine_crystal",
+      "kind": "item",
+      "content_id": "natal_human_pine_crystal",
+      "tier": 3,
+      "price": 360,
+      "world": "human"
+    },
+    {
+      "id": "natal_human_sunfire_metal",
+      "kind": "item",
+      "content_id": "natal_human_sunfire_metal",
+      "tier": 4,
+      "price": 1500,
+      "world": "human"
+    },
+    {
+      "id": "natal_human_sunfire_jade",
+      "kind": "item",
+      "content_id": "natal_human_sunfire_jade",
+      "tier": 4,
+      "price": 1650,
+      "world": "human"
+    },
+    {
+      "id": "natal_human_sunfire_crystal",
+      "kind": "item",
+      "content_id": "natal_human_sunfire_crystal",
+      "tier": 4,
+      "price": 1800,
+      "world": "human"
+    },
+    {
+      "id": "natal_human_thunder_metal",
+      "kind": "item",
+      "content_id": "natal_human_thunder_metal",
+      "tier": 5,
+      "price": 7000,
+      "world": "human"
+    },
+    {
+      "id": "natal_human_thunder_jade",
+      "kind": "item",
+      "content_id": "natal_human_thunder_jade",
+      "tier": 5,
+      "price": 7700,
+      "world": "human"
+    },
+    {
+      "id": "natal_human_thunder_crystal",
+      "kind": "item",
+      "content_id": "natal_human_thunder_crystal",
+      "tier": 5,
+      "price": 8400,
+      "world": "human"
+    },
+    {
+      "id": "natal_demon_bloodmoon_metal",
+      "kind": "item",
+      "content_id": "natal_demon_bloodmoon_metal",
+      "tier": 3,
+      "price": 300,
+      "world": "demon"
+    },
+    {
+      "id": "natal_demon_bloodmoon_jade",
+      "kind": "item",
+      "content_id": "natal_demon_bloodmoon_jade",
+      "tier": 3,
+      "price": 330,
+      "world": "demon"
+    },
+    {
+      "id": "natal_demon_bloodmoon_crystal",
+      "kind": "item",
+      "content_id": "natal_demon_bloodmoon_crystal",
+      "tier": 3,
+      "price": 360,
+      "world": "demon"
+    },
+    {
+      "id": "natal_demon_ember_metal",
+      "kind": "item",
+      "content_id": "natal_demon_ember_metal",
+      "tier": 4,
+      "price": 1500,
+      "world": "demon"
+    },
+    {
+      "id": "natal_demon_ember_jade",
+      "kind": "item",
+      "content_id": "natal_demon_ember_jade",
+      "tier": 4,
+      "price": 1650,
+      "world": "demon"
+    },
+    {
+      "id": "natal_demon_ember_crystal",
+      "kind": "item",
+      "content_id": "natal_demon_ember_crystal",
+      "tier": 4,
+      "price": 1800,
+      "world": "demon"
+    },
+    {
+      "id": "natal_demon_abyssfire_metal",
+      "kind": "item",
+      "content_id": "natal_demon_abyssfire_metal",
+      "tier": 5,
+      "price": 7000,
+      "world": "demon"
+    },
+    {
+      "id": "natal_demon_abyssfire_jade",
+      "kind": "item",
+      "content_id": "natal_demon_abyssfire_jade",
+      "tier": 5,
+      "price": 7700,
+      "world": "demon"
+    },
+    {
+      "id": "natal_demon_abyssfire_crystal",
+      "kind": "item",
+      "content_id": "natal_demon_abyssfire_crystal",
+      "tier": 5,
+      "price": 8400,
+      "world": "demon"
+    },
+    {
+      "id": "natal_spirit_cloud_metal",
+      "kind": "item",
+      "content_id": "natal_spirit_cloud_metal",
+      "tier": 6,
+      "price": 80000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_spirit_cloud_jade",
+      "kind": "item",
+      "content_id": "natal_spirit_cloud_jade",
+      "tier": 6,
+      "price": 88000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_spirit_cloud_crystal",
+      "kind": "item",
+      "content_id": "natal_spirit_cloud_crystal",
+      "tier": 6,
+      "price": 96000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_spirit_ocean_metal",
+      "kind": "item",
+      "content_id": "natal_spirit_ocean_metal",
+      "tier": 7,
+      "price": 270000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_spirit_ocean_jade",
+      "kind": "item",
+      "content_id": "natal_spirit_ocean_jade",
+      "tier": 7,
+      "price": 297000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_spirit_ocean_crystal",
+      "kind": "item",
+      "content_id": "natal_spirit_ocean_crystal",
+      "tier": 7,
+      "price": 324000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_spirit_jadecourt_metal",
+      "kind": "item",
+      "content_id": "natal_spirit_jadecourt_metal",
+      "tier": 8,
+      "price": 1800000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_spirit_jadecourt_jade",
+      "kind": "item",
+      "content_id": "natal_spirit_jadecourt_jade",
+      "tier": 8,
+      "price": 1980000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_spirit_jadecourt_crystal",
+      "kind": "item",
+      "content_id": "natal_spirit_jadecourt_crystal",
+      "tier": 8,
+      "price": 2160000,
+      "world": "spirit"
+    },
+    {
+      "id": "natal_true_demon_night_metal",
+      "kind": "item",
+      "content_id": "natal_true_demon_night_metal",
+      "tier": 6,
+      "price": 80000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_true_demon_night_jade",
+      "kind": "item",
+      "content_id": "natal_true_demon_night_jade",
+      "tier": 6,
+      "price": 88000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_true_demon_night_crystal",
+      "kind": "item",
+      "content_id": "natal_true_demon_night_crystal",
+      "tier": 6,
+      "price": 96000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_true_demon_blackflame_metal",
+      "kind": "item",
+      "content_id": "natal_true_demon_blackflame_metal",
+      "tier": 7,
+      "price": 270000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_true_demon_blackflame_jade",
+      "kind": "item",
+      "content_id": "natal_true_demon_blackflame_jade",
+      "tier": 7,
+      "price": 297000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_true_demon_blackflame_crystal",
+      "kind": "item",
+      "content_id": "natal_true_demon_blackflame_crystal",
+      "tier": 7,
+      "price": 324000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_true_demon_primordial_metal",
+      "kind": "item",
+      "content_id": "natal_true_demon_primordial_metal",
+      "tier": 8,
+      "price": 1800000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_true_demon_primordial_jade",
+      "kind": "item",
+      "content_id": "natal_true_demon_primordial_jade",
+      "tier": 8,
+      "price": 1980000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_true_demon_primordial_crystal",
+      "kind": "item",
+      "content_id": "natal_true_demon_primordial_crystal",
+      "tier": 8,
+      "price": 2160000,
+      "world": "true_demon"
+    },
+    {
+      "id": "natal_monster_realm_moonfang_metal",
+      "kind": "item",
+      "content_id": "natal_monster_realm_moonfang_metal",
+      "tier": 6,
+      "price": 80000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_monster_realm_moonfang_jade",
+      "kind": "item",
+      "content_id": "natal_monster_realm_moonfang_jade",
+      "tier": 6,
+      "price": 88000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_monster_realm_moonfang_crystal",
+      "kind": "item",
+      "content_id": "natal_monster_realm_moonfang_crystal",
+      "tier": 6,
+      "price": 96000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_monster_realm_mountain_metal",
+      "kind": "item",
+      "content_id": "natal_monster_realm_mountain_metal",
+      "tier": 7,
+      "price": 270000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_monster_realm_mountain_jade",
+      "kind": "item",
+      "content_id": "natal_monster_realm_mountain_jade",
+      "tier": 7,
+      "price": 297000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_monster_realm_mountain_crystal",
+      "kind": "item",
+      "content_id": "natal_monster_realm_mountain_crystal",
+      "tier": 7,
+      "price": 324000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_monster_realm_ancestral_metal",
+      "kind": "item",
+      "content_id": "natal_monster_realm_ancestral_metal",
+      "tier": 8,
+      "price": 1800000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_monster_realm_ancestral_jade",
+      "kind": "item",
+      "content_id": "natal_monster_realm_ancestral_jade",
+      "tier": 8,
+      "price": 1980000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_monster_realm_ancestral_crystal",
+      "kind": "item",
+      "content_id": "natal_monster_realm_ancestral_crystal",
+      "tier": 8,
+      "price": 2160000,
+      "world": "monster_realm"
+    },
+    {
+      "id": "natal_phantom_underworld_mirage_metal",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_mirage_metal",
+      "tier": 6,
+      "price": 80000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_phantom_underworld_mirage_jade",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_mirage_jade",
+      "tier": 6,
+      "price": 88000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_phantom_underworld_mirage_crystal",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_mirage_crystal",
+      "tier": 6,
+      "price": 96000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_phantom_underworld_moonshadow_metal",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_moonshadow_metal",
+      "tier": 7,
+      "price": 270000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_phantom_underworld_moonshadow_jade",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_moonshadow_jade",
+      "tier": 7,
+      "price": 297000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_phantom_underworld_moonshadow_crystal",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_moonshadow_crystal",
+      "tier": 7,
+      "price": 324000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_phantom_underworld_lucid_metal",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_lucid_metal",
+      "tier": 8,
+      "price": 1800000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_phantom_underworld_lucid_jade",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_lucid_jade",
+      "tier": 8,
+      "price": 1980000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_phantom_underworld_lucid_crystal",
+      "kind": "item",
+      "content_id": "natal_phantom_underworld_lucid_crystal",
+      "tier": 8,
+      "price": 2160000,
+      "world": "phantom_underworld"
+    },
+    {
+      "id": "natal_hell_spring_metal",
+      "kind": "item",
+      "content_id": "natal_hell_spring_metal",
+      "tier": 6,
+      "price": 80000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_hell_spring_jade",
+      "kind": "item",
+      "content_id": "natal_hell_spring_jade",
+      "tier": 6,
+      "price": 88000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_hell_spring_crystal",
+      "kind": "item",
+      "content_id": "natal_hell_spring_crystal",
+      "tier": 6,
+      "price": 96000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_hell_prison_metal",
+      "kind": "item",
+      "content_id": "natal_hell_prison_metal",
+      "tier": 7,
+      "price": 270000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_hell_prison_jade",
+      "kind": "item",
+      "content_id": "natal_hell_prison_jade",
+      "tier": 7,
+      "price": 297000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_hell_prison_crystal",
+      "kind": "item",
+      "content_id": "natal_hell_prison_crystal",
+      "tier": 7,
+      "price": 324000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_hell_yellowriver_metal",
+      "kind": "item",
+      "content_id": "natal_hell_yellowriver_metal",
+      "tier": 8,
+      "price": 1800000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_hell_yellowriver_jade",
+      "kind": "item",
+      "content_id": "natal_hell_yellowriver_jade",
+      "tier": 8,
+      "price": 1980000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_hell_yellowriver_crystal",
+      "kind": "item",
+      "content_id": "natal_hell_yellowriver_crystal",
+      "tier": 8,
+      "price": 2160000,
+      "world": "hell"
+    },
+    {
+      "id": "natal_celestial_purplecloud_metal",
+      "kind": "item",
+      "content_id": "natal_celestial_purplecloud_metal",
+      "tier": 9,
+      "price": 100000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_purplecloud_jade",
+      "kind": "item",
+      "content_id": "natal_celestial_purplecloud_jade",
+      "tier": 9,
+      "price": 110000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_purplecloud_crystal",
+      "kind": "item",
+      "content_id": "natal_celestial_purplecloud_crystal",
+      "tier": 9,
+      "price": 120000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_star_metal",
+      "kind": "item",
+      "content_id": "natal_celestial_star_metal",
+      "tier": 10,
+      "price": 1000000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_star_jade",
+      "kind": "item",
+      "content_id": "natal_celestial_star_jade",
+      "tier": 10,
+      "price": 1100000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_star_crystal",
+      "kind": "item",
+      "content_id": "natal_celestial_star_crystal",
+      "tier": 10,
+      "price": 1200000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_clarity_metal",
+      "kind": "item",
+      "content_id": "natal_celestial_clarity_metal",
+      "tier": 11,
+      "price": 7200000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_clarity_jade",
+      "kind": "item",
+      "content_id": "natal_celestial_clarity_jade",
+      "tier": 11,
+      "price": 7920000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_clarity_crystal",
+      "kind": "item",
+      "content_id": "natal_celestial_clarity_crystal",
+      "tier": 11,
+      "price": 8640000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_primordial_metal",
+      "kind": "item",
+      "content_id": "natal_celestial_primordial_metal",
+      "tier": 12,
+      "price": 36000000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_primordial_jade",
+      "kind": "item",
+      "content_id": "natal_celestial_primordial_jade",
+      "tier": 12,
+      "price": 39600000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_celestial_primordial_crystal",
+      "kind": "item",
+      "content_id": "natal_celestial_primordial_crystal",
+      "tier": 12,
+      "price": 43200000000,
+      "world": "celestial"
+    },
+    {
+      "id": "natal_asura_crimson_metal",
+      "kind": "item",
+      "content_id": "natal_asura_crimson_metal",
+      "tier": 9,
+      "price": 100000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_crimson_jade",
+      "kind": "item",
+      "content_id": "natal_asura_crimson_jade",
+      "tier": 9,
+      "price": 110000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_crimson_crystal",
+      "kind": "item",
+      "content_id": "natal_asura_crimson_crystal",
+      "tier": 9,
+      "price": 120000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_battle_metal",
+      "kind": "item",
+      "content_id": "natal_asura_battle_metal",
+      "tier": 10,
+      "price": 1000000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_battle_jade",
+      "kind": "item",
+      "content_id": "natal_asura_battle_jade",
+      "tier": 10,
+      "price": 1100000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_battle_crystal",
+      "kind": "item",
+      "content_id": "natal_asura_battle_crystal",
+      "tier": 10,
+      "price": 1200000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_calamity_metal",
+      "kind": "item",
+      "content_id": "natal_asura_calamity_metal",
+      "tier": 11,
+      "price": 7200000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_calamity_jade",
+      "kind": "item",
+      "content_id": "natal_asura_calamity_jade",
+      "tier": 11,
+      "price": 7920000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_calamity_crystal",
+      "kind": "item",
+      "content_id": "natal_asura_calamity_crystal",
+      "tier": 11,
+      "price": 8640000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_warlord_metal",
+      "kind": "item",
+      "content_id": "natal_asura_warlord_metal",
+      "tier": 12,
+      "price": 36000000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_warlord_jade",
+      "kind": "item",
+      "content_id": "natal_asura_warlord_jade",
+      "tier": 12,
+      "price": 39600000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_asura_warlord_crystal",
+      "kind": "item",
+      "content_id": "natal_asura_warlord_crystal",
+      "tier": 12,
+      "price": 43200000000,
+      "world": "asura"
+    },
+    {
+      "id": "natal_nether_dragon_metal",
+      "kind": "item",
+      "content_id": "natal_nether_dragon_metal",
+      "tier": 9,
+      "price": 100000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_dragon_jade",
+      "kind": "item",
+      "content_id": "natal_nether_dragon_jade",
+      "tier": 9,
+      "price": 110000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_dragon_crystal",
+      "kind": "item",
+      "content_id": "natal_nether_dragon_crystal",
+      "tier": 9,
+      "price": 120000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_thunder_metal",
+      "kind": "item",
+      "content_id": "natal_nether_thunder_metal",
+      "tier": 10,
+      "price": 1000000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_thunder_jade",
+      "kind": "item",
+      "content_id": "natal_nether_thunder_jade",
+      "tier": 10,
+      "price": 1100000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_thunder_crystal",
+      "kind": "item",
+      "content_id": "natal_nether_thunder_crystal",
+      "tier": 10,
+      "price": 1200000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_sky_metal",
+      "kind": "item",
+      "content_id": "natal_nether_sky_metal",
+      "tier": 11,
+      "price": 7200000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_sky_jade",
+      "kind": "item",
+      "content_id": "natal_nether_sky_jade",
+      "tier": 11,
+      "price": 7920000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_sky_crystal",
+      "kind": "item",
+      "content_id": "natal_nether_sky_crystal",
+      "tier": 11,
+      "price": 8640000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_origin_metal",
+      "kind": "item",
+      "content_id": "natal_nether_origin_metal",
+      "tier": 12,
+      "price": 36000000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_origin_jade",
+      "kind": "item",
+      "content_id": "natal_nether_origin_jade",
+      "tier": 12,
+      "price": 39600000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_nether_origin_crystal",
+      "kind": "item",
+      "content_id": "natal_nether_origin_crystal",
+      "tier": 12,
+      "price": 43200000000,
+      "world": "nether"
+    },
+    {
+      "id": "natal_reincarnation_river_metal",
+      "kind": "item",
+      "content_id": "natal_reincarnation_river_metal",
+      "tier": 9,
+      "price": 100000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_river_jade",
+      "kind": "item",
+      "content_id": "natal_reincarnation_river_jade",
+      "tier": 9,
+      "price": 110000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_river_crystal",
+      "kind": "item",
+      "content_id": "natal_reincarnation_river_crystal",
+      "tier": 9,
+      "price": 120000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_karma_metal",
+      "kind": "item",
+      "content_id": "natal_reincarnation_karma_metal",
+      "tier": 10,
+      "price": 1000000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_karma_jade",
+      "kind": "item",
+      "content_id": "natal_reincarnation_karma_jade",
+      "tier": 10,
+      "price": 1100000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_karma_crystal",
+      "kind": "item",
+      "content_id": "natal_reincarnation_karma_crystal",
+      "tier": 10,
+      "price": 1200000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_night_metal",
+      "kind": "item",
+      "content_id": "natal_reincarnation_night_metal",
+      "tier": 11,
+      "price": 7200000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_night_jade",
+      "kind": "item",
+      "content_id": "natal_reincarnation_night_jade",
+      "tier": 11,
+      "price": 7920000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_night_crystal",
+      "kind": "item",
+      "content_id": "natal_reincarnation_night_crystal",
+      "tier": 11,
+      "price": 8640000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_eternal_metal",
+      "kind": "item",
+      "content_id": "natal_reincarnation_eternal_metal",
+      "tier": 12,
+      "price": 36000000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_eternal_jade",
+      "kind": "item",
+      "content_id": "natal_reincarnation_eternal_jade",
+      "tier": 12,
+      "price": 39600000000,
+      "world": "reincarnation"
+    },
+    {
+      "id": "natal_reincarnation_eternal_crystal",
+      "kind": "item",
+      "content_id": "natal_reincarnation_eternal_crystal",
+      "tier": 12,
+      "price": 43200000000,
+      "world": "reincarnation"
     }
   ]
 }

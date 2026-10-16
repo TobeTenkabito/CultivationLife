@@ -27,6 +27,7 @@
 - [势力收支与本地市场检索](organization-balance-and-market.md)：境界维护、盈余养护、三年储备、坊市双入口与正则搜索。
 - [商品供给审计](economy-supply-catalog.md)：权威商品目录的用途、品阶、供给来源与实物投入表。
 - [物品与功法命名](content-naming.md)：固定目录更名、批量生成名称、标识兼容与数值边界。
+- [十一界本命镶材](natal-materials.md)：111 种原生镶材、37 阶段选择、产地获取、材料图鉴与镶嵌返还。
 - [三级界面成就](upper-achievements-270.md)：境界、邻域、实际机构身份与 DLC 专属修持的判定和验收。
 
 | 文档 | 用途 |

@@ -238,7 +238,7 @@ def test_lost_world_thunder_and_dormant_instances(ready):
     assert result["spatial"]["scene"]["id"] == scene["id"]
 
 
-def test_lost_descend_revisit_requires_actual_suppression(ready):
+def test_lost_descend_revisit_requires_actual_suppression(ready, monkeypatch):
     e, g = ready
     p = g.player
     p.world = "celestial"
@@ -253,7 +253,16 @@ def test_lost_descend_revisit_requires_actual_suppression(ready):
     p.layer = 9
     p.cultivation_suppression = {"realm_index": 9, "layer": 1, "opportunity": 0}
     e.store.save(g)
+    # Revisit authority needs the full-capacity variant, as occupy() does above.
+    # A lower random ceiling correctly expels this 大乘九层 visitor immediately.
+    create_instance = spatial.create_instance
+    def full_capacity(*args, **kwargs):
+        scene = create_instance(*args, **kwargs)
+        scene['power_ceiling'] = 8
+        return scene
+    monkeypatch.setattr(spatial, 'create_instance', full_capacity)
     first = e.spatial_action(g.id, "descend")["spatial"]["scene"]
+    assert first['power_ceiling'] == 8
     g = e.store.load(g.id)
     g.player.world = "celestial"
     g.player.location_id = e.maps.default_location("celestial")

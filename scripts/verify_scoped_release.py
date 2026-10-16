@@ -60,13 +60,27 @@ NAMING_TESTS = [
     'tests/test_strategic_dispatch.py', 'tests/test_strategic_peace.py',
 ]
 
+NATAL_TESTS = [
+    'tests/test_natal_materials_expansion.py', 'tests/test_natal_artifact_system.py',
+    'tests/test_content_naming.py', 'tests/test_content_registry.py',
+    'tests/test_auction_update.py', 'tests/test_merchant_commissions.py',
+    'tests/test_merchant_execution.py', 'tests/test_family_expansion.py',
+    'tests/test_voisinage_effects.py', 'tests/test_guixu_tide.py',
+    'tests/test_crafting_system.py', 'tests/test_tianji_artifacts.py',
+    'tests/test_ownership_prison_fixes.py', 'tests/test_repository_followup_fixes.py',
+    'tests/test_world_transition_system.py', 'tests/test_spatial_talismans.py',
+    'tests/test_release_211.py', 'tests/test_release_212.py',
+    'tests/test_base_game_version.py', 'tests/test_android_packaging.py',
+    'tests/test_windows_release_evidence.py', 'tests/test_android_release_checks.py',
+]
+
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal'],default='legacy')
     profile=parser.parse_args().profile
     tag=BASE_GAME_VERSION.replace('.','');before=inputs_digest(ROOT);runs=[]
-    selected=NAMING_TESTS if profile=='naming' else BUGFIX_TESTS if profile=='bugfix' else ECONOMY_TESTS if profile=='economy' else TESTS
-    if profile in {'economy','bugfix','naming'}:
+    selected=NATAL_TESTS if profile=='natal' else NAMING_TESTS if profile=='naming' else BUGFIX_TESTS if profile=='bugfix' else ECONOMY_TESTS if profile=='economy' else TESTS
+    if profile in {'economy','bugfix','naming','natal'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',module,'-q','--tb=short',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
     else:
@@ -82,6 +96,8 @@ def main():
     if profile=='naming':
         browsers=['browser_content_naming','browser_strategic_war','browser_war_coalition_fixes',
                   'browser_war_presence_fixes','browser_events_212','browser_strategic_peace']
+    if profile=='natal':
+        browsers=['browser_natal_materials','browser_content_naming','browser_events_212']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     for name,args in jobs:
         log=ROOT/f'build/{name}-{tag}.log'
@@ -92,7 +108,7 @@ def main():
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         runs.append(dict(name=name,log=str(log.relative_to(ROOT)),status='passed'))
         print(name+' passed',flush=True)
-    if profile in {'economy','bugfix','naming'}:
+    if profile in {'economy','bugfix','naming','natal'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

@@ -11,6 +11,7 @@ from cultivation_life.content_registry import ITEM_CATALOG, TECHNIQUE_CATALOG
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState, Item
 from cultivation_life.rules import add_item, public_catalog_entry, breakthrough_opportunity_required
+from test_other_systems_audit_fixes import api
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -184,6 +185,82 @@ class ContentNamingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '不能自动覆盖'):
             normalize_content_references(source)
         self.assertEqual(source, original)
+
+    def test_legacy_procurement_order_completes_once_after_load(self):
+        game = self.engine._load(legacy_fixture(self.engine).id)
+        alliance = game.merchant_state['worlds']['human'][0]
+        game.player.location_id = alliance['hq']
+        add_item(game.player, 'spirit_stone', 10**8)
+        self.engine._merchant_post(game, alliance, dict(
+            kind='item', definition_id='jade_pivot_pill', quantity=2))
+        order = game.merchant_state['posted'][-1]
+        order.update(definition_id='infant_transformation_pill',
+                     status='working', worker='验收承接人', will_finish=True,
+                     started_age=game.player.age, finish_age=game.player.age + 1)
+        self.engine.store.save(game)
+        path = self.engine.store._path(game.id)
+        original = path.read_bytes()
+        loaded = self.engine._load(game.id)
+        self.assertEqual(path.read_bytes(), original)
+        loaded.player.age += 1
+        self.engine._advance_merchant_year(loaded)
+        completed = loaded.merchant_state['posted'][-1]
+        self.assertEqual(completed['status'], 'completed')
+        self.assertEqual(completed['definition_id'], 'jade_pivot_pill')
+        self.assertTrue(completed['delivery_claimed'])
+        self.assertEqual(next(i.quantity for i in loaded.player.inventory if i.id == 'jade_pivot_pill'), 2)
+        inventory = copy.deepcopy(loaded.player.inventory)
+        self.engine._advance_merchant_year(loaded)
+        self.assertEqual(loaded.player.inventory, inventory)
+
+    def test_legacy_npc_combat_artifact_survives_loading(self):
+        from cultivation_life.system.combat_loadout import public_loadout
+        game = self.engine._load(legacy_fixture(self.engine).id)
+        npc = next(n for n in self.engine._all_world_npcs(game) if n.world == 'human')
+        npc.combat_artifact_id = 'heaven_reaching_treasure'
+        npc.treasure_item_id = 'heaven_reaching_treasure'
+        self.engine.store.save(game)
+        path = self.engine.store._path(game.id)
+        original = path.read_bytes()
+        loaded = self.engine.store.load(game.id)
+        saved = self.engine._find_npc(loaded, npc.id)
+        self.assertEqual(public_loadout(loaded, saved)['combat_artifact_name'], '承天如意')
+        self.assertEqual(saved.combat_artifact_id, 'heaven_bearing_scepter')
+        self.assertEqual(saved.treasure_item_id, 'heaven_bearing_scepter')
+        self.assertEqual(path.read_bytes(), original)
+
+
+def test_stale_procurement_request_keeps_qualification_and_delivers_once(api):
+    engine, act = api
+    game = engine._load(legacy_fixture(engine).id)
+    alliance = game.merchant_state['worlds']['human'][0]
+    game.player.location_id = alliance['hq']
+    game.player.next_tribulation_age = None
+    game.settings['silent_events'] = True
+    add_item(game.player, 'spirit_stone', 10**8)
+    engine.store.save(game)
+    act(game.id, 'merchant-action', action='join', alliance_id=alliance['id'])
+    payload = dict(kind='item', definition_id='infant_transformation_pill',
+                   quantity=2, alliance_id=alliance['id'])
+    quote = act(game.id, 'merchant-preview', **payload)
+    assert quote['definition_id'] == 'jade_pivot_pill'
+    act(game.id, 'merchant-action', action='post', preview_token=quote['preview_token'], **payload)
+    saved = engine._load(game.id)
+    order = saved.merchant_state['posted'][-1]
+    assert order['definition_id'] == 'jade_pivot_pill'
+    order.update(status='working', worker='验收承接人', will_finish=True,
+                 started_age=saved.player.age, finish_age=saved.player.age + 1)
+    engine.store.save(saved)
+    original = engine.store._path(game.id).read_bytes()
+    act(game.id, 'merchant-preview', kind='item', definition_id='heroic_progeny_elixir',
+        alliance_id=alliance['id'], status=400)
+    assert engine.store._path(game.id).read_bytes() == original
+    act(game.id, 'advance', action='rest', years=1)
+    finished = engine.store.load(game.id)
+    assert finished.merchant_state['posted'][-1]['status'] == 'completed'
+    assert next(i.quantity for i in finished.player.inventory if i.id == 'jade_pivot_pill') == 2
+    act(game.id, 'advance', action='rest', years=1)
+    assert next(i.quantity for i in engine.store.load(game.id).player.inventory if i.id == 'jade_pivot_pill') == 2
 
 
 if __name__ == '__main__':

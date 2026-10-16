@@ -75,7 +75,7 @@
     },
     {
       "id": "supreme_unity_pill",
-      "name": "抱一丹",
+      "name": "太素抱一丹",
       "breakthrough_bonus": 0.1,
       "breakthrough_scope": "minor:11",
       "description": "供太乙境内各层冲关使用，成功率增加 10 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
@@ -111,7 +111,7 @@
     },
     {
       "id": "boundless_perfection_pill",
-      "name": "无漏丹",
+      "name": "玄元无漏丹",
       "breakthrough_bonus": 0.1,
       "breakthrough_scope": "minor:12",
       "description": "供大罗境内各层冲关使用，成功率增加 10 个百分点。不同丹药可搭配，同种不可重复叠加，生效于下一次本境小层冲关；不替代仙脉条件，不用于跨大境界劫战。",
@@ -156,7 +156,7 @@
     },
     {
       "id": "qilin_blessing_elixir",
-      "name": "麟趾玉液",
+      "name": "英姿神武口服液",
       "description": "价值985灵石。服用后，下一次有效缠绵100%诞下后代，无视化神及以上境界的不育限制；后代必定获得单灵根或变异灵根。每个新角色仅赠一瓶，也可寄拍拍卖会换取灵石。无法购买或索取。",
       "tags": [
         "consumable",
@@ -8005,8 +8005,8 @@
     },
     {
       "id": "guixu_celestial_equipment_09",
-      "name": "河洛量界尺",
-      "description": "河洛量界尺出自天律沉宫，无法从归墟之外的途径获得。",
+      "name": "河洛界尺",
+      "description": "河洛界尺出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
         "guixu_tide",
         "celestial",
@@ -8527,8 +8527,8 @@
     },
     {
       "id": "guixu_asura_equipment_06",
-      "name": "断劫玄轮",
-      "description": "断劫玄轮出自修罗劫海，无法从归墟之外的途径获得。",
+      "name": "断劫无回轮",
+      "description": "断劫无回轮出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
         "guixu_tide",
         "asura",
@@ -9939,8 +9939,8 @@
     },
     {
       "id": "guixu_reincarnation_plant_06",
-      "name": "返照幽华",
-      "description": "返照幽华出自无时轮回墟，无法从归墟之外的途径获得。",
+      "name": "返照幽昙花",
+      "description": "返照幽昙花出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
         "guixu_tide",
         "reincarnation",
@@ -10764,6 +10764,1227 @@
         "talisman_material"
       ],
       "description": "制符时消耗的基础符材。"
+    },
+    {
+      "id": "natal_human_pine_metal",
+      "name": "松纹青铜",
+      "description": "人界原生攻伐镶材，结丹起可用。嵌入本命后战斗力 +300；战斗开始时破法 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_human_pine_jade",
+      "name": "月泉玉髓",
+      "description": "人界原生护持镶材，结丹起可用。嵌入本命后最大 HP +600、最大 MP +150；战斗开始时防护 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_human_pine_crystal",
+      "name": "听雨青珀",
+      "description": "人界原生养灵镶材，结丹起可用。嵌入本命后最大 MP +300、机缘效率 +1.0%；战斗开始时神识 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_human_sunfire_metal",
+      "name": "离火赤金",
+      "description": "人界原生攻伐镶材，元婴起可用。嵌入本命后战斗力 +2,400；战斗开始时破法 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_human_sunfire_jade",
+      "name": "澄渊灵璧",
+      "description": "人界原生护持镶材，元婴起可用。嵌入本命后最大 HP +4,800、最大 MP +1,200；战斗开始时防护 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_human_sunfire_crystal",
+      "name": "凝霞朱晶",
+      "description": "人界原生养灵镶材，元婴起可用。嵌入本命后最大 MP +2,400、机缘效率 +1.5%；战斗开始时神识 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_human_thunder_metal",
+      "name": "震雷紫铜",
+      "description": "人界原生攻伐镶材，化神起可用。嵌入本命后战斗力 +12,000；战斗开始时破法 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_human_thunder_jade",
+      "name": "云海玄璧",
+      "description": "人界原生护持镶材，化神起可用。嵌入本命后最大 HP +24,000、最大 MP +6,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_human_thunder_crystal",
+      "name": "观澜心晶",
+      "description": "人界原生养灵镶材，化神起可用。嵌入本命后最大 MP +12,000、机缘效率 +2.0%；战斗开始时神识 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:human"
+      ]
+    },
+    {
+      "id": "natal_demon_bloodmoon_metal",
+      "name": "血月寒铁",
+      "description": "魔界原生攻伐镶材，结丹起可用。嵌入本命后战斗力 +300；战斗开始时威能 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_demon_bloodmoon_jade",
+      "name": "烬纹骨玉",
+      "description": "魔界原生护持镶材，结丹起可用。嵌入本命后最大 HP +600、最大 MP +150；战斗开始时防护 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_demon_bloodmoon_crystal",
+      "name": "夜泉幽晶",
+      "description": "魔界原生养灵镶材，结丹起可用。嵌入本命后最大 MP +300、机缘效率 +1.0%；战斗开始时破法 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_demon_ember_metal",
+      "name": "幽焰玄钢",
+      "description": "魔界原生攻伐镶材，元婴起可用。嵌入本命后战斗力 +2,400；战斗开始时威能 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_demon_ember_jade",
+      "name": "赤鳞骨璧",
+      "description": "魔界原生护持镶材，元婴起可用。嵌入本命后最大 HP +4,800、最大 MP +1,200；战斗开始时防护 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_demon_ember_crystal",
+      "name": "黑莲髓晶",
+      "description": "魔界原生养灵镶材，元婴起可用。嵌入本命后最大 MP +2,400、机缘效率 +1.5%；战斗开始时破法 +2%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_demon_abyssfire_metal",
+      "name": "渊火乌金",
+      "description": "魔界原生攻伐镶材，化神起可用。嵌入本命后战斗力 +12,000；战斗开始时威能 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_demon_abyssfire_jade",
+      "name": "镇煞魔玉",
+      "description": "魔界原生护持镶材，化神起可用。嵌入本命后最大 HP +24,000、最大 MP +6,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_demon_abyssfire_crystal",
+      "name": "照夜玄珀",
+      "description": "魔界原生养灵镶材，化神起可用。嵌入本命后最大 MP +12,000、机缘效率 +2.0%；战斗开始时破法 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:demon"
+      ]
+    },
+    {
+      "id": "natal_spirit_cloud_metal",
+      "name": "流云星银",
+      "description": "灵界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时破法 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_spirit_cloud_jade",
+      "name": "碧霄天璧",
+      "description": "灵界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时续航 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_spirit_cloud_crystal",
+      "name": "清微灵晶",
+      "description": "灵界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时神识 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_spirit_ocean_metal",
+      "name": "沧浪月金",
+      "description": "灵界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时破法 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_spirit_ocean_jade",
+      "name": "镇岳苍玉",
+      "description": "灵界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时续航 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_spirit_ocean_crystal",
+      "name": "玄泉心珀",
+      "description": "灵界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时神识 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_spirit_jadecourt_metal",
+      "name": "玉京道金",
+      "description": "灵界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时破法 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_spirit_jadecourt_jade",
+      "name": "承露玄璧",
+      "description": "灵界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时续航 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_spirit_jadecourt_crystal",
+      "name": "太素灵晶",
+      "description": "灵界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时神识 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:spirit"
+      ]
+    },
+    {
+      "id": "natal_true_demon_night_metal",
+      "name": "冥夜魔银",
+      "description": "真魔界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时破法 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_true_demon_night_jade",
+      "name": "玄狱骨璧",
+      "description": "真魔界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_true_demon_night_crystal",
+      "name": "藏渊魂晶",
+      "description": "真魔界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时威能 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_true_demon_blackflame_metal",
+      "name": "黑焰乌金",
+      "description": "真魔界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时破法 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_true_demon_blackflame_jade",
+      "name": "万仞骨玉",
+      "description": "真魔界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_true_demon_blackflame_crystal",
+      "name": "赤泉魔珀",
+      "description": "真魔界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时威能 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_true_demon_primordial_metal",
+      "name": "太古渊金",
+      "description": "真魔界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时破法 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_true_demon_primordial_jade",
+      "name": "无相玄璧",
+      "description": "真魔界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_true_demon_primordial_crystal",
+      "name": "九幽心晶",
+      "description": "真魔界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时威能 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:true_demon"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_moonfang_metal",
+      "name": "苍牙月金",
+      "description": "妖界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时威能 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_moonfang_jade",
+      "name": "青兕骨玉",
+      "description": "妖界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_moonfang_crystal",
+      "name": "鹿鸣灵珀",
+      "description": "妖界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时续航 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_mountain_metal",
+      "name": "百岳玄金",
+      "description": "妖界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时威能 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_mountain_jade",
+      "name": "盘山龙璧",
+      "description": "妖界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_mountain_crystal",
+      "name": "灵犀心晶",
+      "description": "妖界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时续航 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_ancestral_metal",
+      "name": "祖庭道金",
+      "description": "妖界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时威能 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_ancestral_jade",
+      "name": "洪荒骨玉",
+      "description": "妖界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_monster_realm_ancestral_crystal",
+      "name": "万木生珀",
+      "description": "妖界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时续航 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:monster_realm"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_mirage_metal",
+      "name": "蜃楼幻银",
+      "description": "幻冥界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时身法 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_mirage_jade",
+      "name": "空蝉影璧",
+      "description": "幻冥界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时神识 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_mirage_crystal",
+      "name": "梦泉幽晶",
+      "description": "幻冥界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时破法 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_moonshadow_metal",
+      "name": "映月流金",
+      "description": "幻冥界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时身法 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_moonshadow_jade",
+      "name": "千重幻玉",
+      "description": "幻冥界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时神识 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_moonshadow_crystal",
+      "name": "照影心珀",
+      "description": "幻冥界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时破法 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_lucid_metal",
+      "name": "无相梦金",
+      "description": "幻冥界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时身法 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_lucid_jade",
+      "name": "太虚蜃璧",
+      "description": "幻冥界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时神识 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_phantom_underworld_lucid_crystal",
+      "name": "明觉魂晶",
+      "description": "幻冥界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时破法 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:phantom_underworld"
+      ]
+    },
+    {
+      "id": "natal_hell_spring_metal",
+      "name": "寒泉冥银",
+      "description": "地狱界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时神识 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_hell_spring_jade",
+      "name": "幽关墨玉",
+      "description": "地狱界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_hell_spring_crystal",
+      "name": "引魂灯珀",
+      "description": "地狱界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时续航 +3%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_hell_prison_metal",
+      "name": "镇狱玄金",
+      "description": "地狱界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时神识 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_hell_prison_jade",
+      "name": "轮台冥璧",
+      "description": "地狱界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_hell_prison_crystal",
+      "name": "无岸魂晶",
+      "description": "地狱界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时续航 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_hell_yellowriver_metal",
+      "name": "黄泉道金",
+      "description": "地狱界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时神识 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_hell_yellowriver_jade",
+      "name": "九幽玄璧",
+      "description": "地狱界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_hell_yellowriver_crystal",
+      "name": "长明心珀",
+      "description": "地狱界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时续航 +4%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:hell"
+      ]
+    },
+    {
+      "id": "natal_celestial_purplecloud_metal",
+      "name": "紫宸云金",
+      "description": "仙界原生攻伐镶材，真仙起可用。嵌入本命后战斗力 +9,000,000；战斗开始时破法 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_purplecloud_jade",
+      "name": "琼华仙璧",
+      "description": "仙界原生护持镶材，真仙起可用。嵌入本命后最大 HP +18,000,000、最大 MP +4,500,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_purplecloud_crystal",
+      "name": "餐霞露晶",
+      "description": "仙界原生养灵镶材，真仙起可用。嵌入本命后最大 MP +9,000,000、机缘效率 +4.0%；战斗开始时续航 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_star_metal",
+      "name": "天衡星金",
+      "description": "仙界原生攻伐镶材，金仙起可用。嵌入本命后战斗力 +90,000,000；战斗开始时破法 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_star_jade",
+      "name": "金阙道璧",
+      "description": "仙界原生护持镶材，金仙起可用。嵌入本命后最大 HP +180,000,000、最大 MP +45,000,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_star_crystal",
+      "name": "玉清心珀",
+      "description": "仙界原生养灵镶材，金仙起可用。嵌入本命后最大 MP +90,000,000、机缘效率 +4.5%；战斗开始时续航 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_clarity_metal",
+      "name": "太清元金",
+      "description": "仙界原生攻伐镶材，太乙起可用。嵌入本命后战斗力 +700,000,000；战斗开始时破法 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_clarity_jade",
+      "name": "河图玄璧",
+      "description": "仙界原生护持镶材，太乙起可用。嵌入本命后最大 HP +1,400,000,000、最大 MP +350,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_clarity_crystal",
+      "name": "混元露晶",
+      "description": "仙界原生养灵镶材，太乙起可用。嵌入本命后最大 MP +700,000,000、机缘效率 +5.0%；战斗开始时续航 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_primordial_metal",
+      "name": "先天母金",
+      "description": "仙界原生攻伐镶材，大罗起可用。嵌入本命后战斗力 +5,000,000,000；战斗开始时破法 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_primordial_jade",
+      "name": "无极道璧",
+      "description": "仙界原生护持镶材，大罗起可用。嵌入本命后最大 HP +10,000,000,000、最大 MP +2,500,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_celestial_primordial_crystal",
+      "name": "清都源珀",
+      "description": "仙界原生养灵镶材，大罗起可用。嵌入本命后最大 MP +5,000,000,000、机缘效率 +5.5%；战斗开始时续航 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:celestial"
+      ]
+    },
+    {
+      "id": "natal_asura_crimson_metal",
+      "name": "赤霄血金",
+      "description": "修罗界原生攻伐镶材，真仙起可用。嵌入本命后战斗力 +9,000,000；战斗开始时威能 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_crimson_jade",
+      "name": "铜狱玄璧",
+      "description": "修罗界原生护持镶材，真仙起可用。嵌入本命后最大 HP +18,000,000、最大 MP +4,500,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_crimson_crystal",
+      "name": "战泉煞晶",
+      "description": "修罗界原生养灵镶材，真仙起可用。嵌入本命后最大 MP +9,000,000、机缘效率 +4.0%；战斗开始时身法 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_battle_metal",
+      "name": "百战乌金",
+      "description": "修罗界原生攻伐镶材，金仙起可用。嵌入本命后战斗力 +90,000,000；战斗开始时威能 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_battle_jade",
+      "name": "寂照骨玉",
+      "description": "修罗界原生护持镶材，金仙起可用。嵌入本命后最大 HP +180,000,000、最大 MP +45,000,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_battle_crystal",
+      "name": "血海心珀",
+      "description": "修罗界原生养灵镶材，金仙起可用。嵌入本命后最大 MP +90,000,000、机缘效率 +4.5%；战斗开始时身法 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_calamity_metal",
+      "name": "断劫玄金",
+      "description": "修罗界原生攻伐镶材，太乙起可用。嵌入本命后战斗力 +700,000,000；战斗开始时威能 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_calamity_jade",
+      "name": "无回战璧",
+      "description": "修罗界原生护持镶材，太乙起可用。嵌入本命后最大 HP +1,400,000,000、最大 MP +350,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_calamity_crystal",
+      "name": "烬海源晶",
+      "description": "修罗界原生养灵镶材，太乙起可用。嵌入本命后最大 MP +700,000,000、机缘效率 +5.0%；战斗开始时身法 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_warlord_metal",
+      "name": "兵主母金",
+      "description": "修罗界原生攻伐镶材，大罗起可用。嵌入本命后战斗力 +5,000,000,000；战斗开始时威能 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_warlord_jade",
+      "name": "无间道璧",
+      "description": "修罗界原生护持镶材，大罗起可用。嵌入本命后最大 HP +10,000,000,000、最大 MP +2,500,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_asura_warlord_crystal",
+      "name": "止戈劫珀",
+      "description": "修罗界原生养灵镶材，大罗起可用。嵌入本命后最大 MP +5,000,000,000、机缘效率 +5.5%；战斗开始时身法 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:asura"
+      ]
+    },
+    {
+      "id": "natal_nether_dragon_metal",
+      "name": "龙庭玄金",
+      "description": "幽冥界原生攻伐镶材，真仙起可用。嵌入本命后战斗力 +9,000,000；战斗开始时威能 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_dragon_jade",
+      "name": "潜渊鳞玉",
+      "description": "幽冥界原生护持镶材，真仙起可用。嵌入本命后最大 HP +18,000,000、最大 MP +4,500,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_dragon_crystal",
+      "name": "烛夜明晶",
+      "description": "幽冥界原生养灵镶材，真仙起可用。嵌入本命后最大 MP +9,000,000、机缘效率 +4.0%；战斗开始时神识 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_thunder_metal",
+      "name": "御霆苍金",
+      "description": "幽冥界原生攻伐镶材，金仙起可用。嵌入本命后战斗力 +90,000,000；战斗开始时威能 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_thunder_jade",
+      "name": "镇海龙璧",
+      "description": "幽冥界原生护持镶材，金仙起可用。嵌入本命后最大 HP +180,000,000、最大 MP +45,000,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_thunder_crystal",
+      "name": "明渊心珀",
+      "description": "幽冥界原生养灵镶材，金仙起可用。嵌入本命后最大 MP +90,000,000、机缘效率 +4.5%；战斗开始时神识 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_sky_metal",
+      "name": "盘天道金",
+      "description": "幽冥界原生攻伐镶材，太乙起可用。嵌入本命后战斗力 +700,000,000；战斗开始时威能 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_sky_jade",
+      "name": "九渊玄璧",
+      "description": "幽冥界原生护持镶材，太乙起可用。嵌入本命后最大 HP +1,400,000,000、最大 MP +350,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_sky_crystal",
+      "name": "苍溟源晶",
+      "description": "幽冥界原生养灵镶材，太乙起可用。嵌入本命后最大 MP +700,000,000、机缘效率 +5.0%；战斗开始时神识 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_origin_metal",
+      "name": "烛龙母金",
+      "description": "幽冥界原生攻伐镶材，大罗起可用。嵌入本命后战斗力 +5,000,000,000；战斗开始时威能 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_origin_jade",
+      "name": "万灵道璧",
+      "description": "幽冥界原生护持镶材，大罗起可用。嵌入本命后最大 HP +10,000,000,000、最大 MP +2,500,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_nether_origin_crystal",
+      "name": "初曜龙珀",
+      "description": "幽冥界原生养灵镶材，大罗起可用。嵌入本命后最大 MP +5,000,000,000、机缘效率 +5.5%；战斗开始时神识 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:nether"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_river_metal",
+      "name": "忘川冥金",
+      "description": "轮回界原生攻伐镶材，真仙起可用。嵌入本命后战斗力 +9,000,000；战斗开始时神识 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_river_jade",
+      "name": "幽莲魂璧",
+      "description": "轮回界原生护持镶材，真仙起可用。嵌入本命后最大 HP +18,000,000、最大 MP +4,500,000；战斗开始时续航 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_river_crystal",
+      "name": "三生心晶",
+      "description": "轮回界原生养灵镶材，真仙起可用。嵌入本命后最大 MP +9,000,000、机缘效率 +4.0%；战斗开始时身法 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_karma_metal",
+      "name": "断缘玄金",
+      "description": "轮回界原生攻伐镶材，金仙起可用。嵌入本命后战斗力 +90,000,000；战斗开始时神识 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_karma_jade",
+      "name": "宿世墨玉",
+      "description": "轮回界原生护持镶材，金仙起可用。嵌入本命后最大 HP +180,000,000、最大 MP +45,000,000；战斗开始时续航 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_karma_crystal",
+      "name": "返照魂珀",
+      "description": "轮回界原生养灵镶材，金仙起可用。嵌入本命后最大 MP +90,000,000、机缘效率 +4.5%；战斗开始时身法 +5%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_night_metal",
+      "name": "长夜道金",
+      "description": "轮回界原生攻伐镶材，太乙起可用。嵌入本命后战斗力 +700,000,000；战斗开始时神识 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_night_jade",
+      "name": "无始玄璧",
+      "description": "轮回界原生护持镶材，太乙起可用。嵌入本命后最大 HP +1,400,000,000、最大 MP +350,000,000；战斗开始时续航 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_night_crystal",
+      "name": "彼岸源晶",
+      "description": "轮回界原生养灵镶材，太乙起可用。嵌入本命后最大 MP +700,000,000、机缘效率 +5.0%；战斗开始时身法 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_eternal_metal",
+      "name": "太始母金",
+      "description": "轮回界原生攻伐镶材，大罗起可用。嵌入本命后战斗力 +5,000,000,000；战斗开始时神识 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_eternal_jade",
+      "name": "大寂道璧",
+      "description": "轮回界原生护持镶材，大罗起可用。嵌入本命后最大 HP +10,000,000,000、最大 MP +2,500,000,000；战斗开始时续航 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
+    },
+    {
+      "id": "natal_reincarnation_eternal_crystal",
+      "name": "明因轮珀",
+      "description": "轮回界原生养灵镶材，大罗起可用。嵌入本命后最大 MP +5,000,000,000、机缘效率 +5.5%；战斗开始时身法 +6%。随身持有不生效，取下完整返还。",
+      "tags": [
+        "material",
+        "natal_material",
+        "market",
+        "native_world:reincarnation"
+      ]
     }
   ]
 }

@@ -416,6 +416,8 @@ def verify(with_dlc):
             verify_organizations(base,folder)
             from scripts.verify_strategic_war import verify_strategic_war
             verify_strategic_war(base,folder,with_dlc)
+            from scripts.verify_natal_materials import verify_natal_materials
+            verify_natal_materials(base,folder)
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds={len(config['worlds'])}")
             return {'with_dlc': with_dlc, 'exe_sha256': verified_digest,
                     'base_version': config['base_game']['version']}
