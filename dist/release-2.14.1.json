@@ -1,0 +1,255 @@
+{
+  "base_version": "2.14.1",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.0.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.0",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.4.0",
+    "tianji-artifacts": "2.2.0",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 736,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-6",
+      "log": "build\\related-tests-6-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-7",
+      "log": "build\\related-tests-7-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-8",
+      "log": "build\\related-tests-8-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-9",
+      "log": "build\\related-tests-9-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-10",
+      "log": "build\\related-tests-10-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-11",
+      "log": "build\\related-tests-11-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-12",
+      "log": "build\\related-tests-12-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-13",
+      "log": "build\\related-tests-13-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-14",
+      "log": "build\\related-tests-14-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-15",
+      "log": "build\\related-tests-15-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-16",
+      "log": "build\\related-tests-16-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-17",
+      "log": "build\\related-tests-17-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-18",
+      "log": "build\\related-tests-18-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-19",
+      "log": "build\\related-tests-19-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-20",
+      "log": "build\\related-tests-20-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-21",
+      "log": "build\\related-tests-21-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-22",
+      "log": "build\\related-tests-22-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-23",
+      "log": "build\\related-tests-23-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-24",
+      "log": "build\\related-tests-24-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-25",
+      "log": "build\\related-tests-25-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-26",
+      "log": "build\\related-tests-26-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-27",
+      "log": "build\\related-tests-27-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-28",
+      "log": "build\\related-tests-28-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-29",
+      "log": "build\\related-tests-29-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-30",
+      "log": "build\\related-tests-30-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-31",
+      "log": "build\\related-tests-31-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-32",
+      "log": "build\\related-tests-32-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-33",
+      "log": "build\\related-tests-33-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_content_naming",
+      "log": "build\\browser_content_naming-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_strategic_war",
+      "log": "build\\browser_strategic_war-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_war_coalition_fixes",
+      "log": "build\\browser_war_coalition_fixes-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_war_presence_fixes",
+      "log": "build\\browser_war_presence_fixes-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-34",
+      "log": "build/related-tests-34-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-35",
+      "log": "build/related-tests-35-2141.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_strategic_peace",
+      "log": "build/browser_strategic_peace-2141.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-2141.log",
+  "inputs_sha256": "11c938131c116c02d02a87fed4477319bcd4aa0864a77b1874fb4679c62ca15c",
+  "platform": "Windows",
+  "exe_sha256": "3e694a800217224174778b41ddce10e7470e555ff24dcf7fe41949489321ecbb",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

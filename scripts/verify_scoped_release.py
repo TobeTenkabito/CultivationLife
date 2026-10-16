@@ -1,5 +1,6 @@
 """Explicit user-requested domain/upstream scope, bound to final release inputs."""
 import json
+import os
 import argparse
 import xml.etree.ElementTree as ET
 import subprocess
@@ -42,13 +43,30 @@ BUGFIX_TESTS = list(dict.fromkeys(ECONOMY_TESTS + [
     'tests/test_guard_workforce_fixes.py','tests/test_territory_system.py',
     'tests/test_war_logistics.py','tests/test_war_performance_update.py']))
 
+NAMING_TESTS = [
+    'tests/test_content_naming.py', 'tests/test_content_registry.py', 'tests/test_technique_leveling.py',
+    'tests/test_puppet_crafting.py', 'tests/test_auction_update.py', 'tests/test_ghost_reincarnation_dlc.py',
+    'tests/test_monster_bloodline_system.py', 'tests/test_celestial_system.py', 'tests/test_family_expansion.py',
+    'tests/test_extension_system.py', 'tests/test_economy_diversity.py', 'tests/test_economy_rebalance.py',
+    'tests/test_crafting_system.py', 'tests/test_talisman_economy.py', 'tests/test_tianji_artifacts.py',
+    'tests/test_tianji_theme_rules.py', 'tests/test_ghost_phase_two.py', 'tests/test_audit_regressions.py',
+    'tests/test_merchant_138.py', 'tests/test_world_transition_system.py', 'tests/test_spatial_talismans.py',
+    'tests/test_release_211.py', 'tests/test_release_212.py',
+    'tests/test_strategic_war.py', 'tests/test_strategic_war_audit.py',
+    'tests/test_war_negotiation_fixes.py', 'tests/test_war_coalition_fixes.py', 'tests/test_war_presence_fixes.py',
+    'tests/test_war_logistics.py', 'tests/test_war_performance_update.py',
+    'tests/test_base_game_version.py', 'tests/test_android_packaging.py',
+    'tests/test_windows_release_evidence.py', 'tests/test_android_release_checks.py',
+    'tests/test_strategic_dispatch.py', 'tests/test_strategic_peace.py',
+]
+
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming'],default='legacy')
     profile=parser.parse_args().profile
     tag=BASE_GAME_VERSION.replace('.','');before=inputs_digest(ROOT);runs=[]
-    selected=BUGFIX_TESTS if profile=='bugfix' else ECONOMY_TESTS if profile=='economy' else TESTS
-    if profile in {'economy','bugfix'}:
+    selected=NAMING_TESTS if profile=='naming' else BUGFIX_TESTS if profile=='bugfix' else ECONOMY_TESTS if profile=='economy' else TESTS
+    if profile in {'economy','bugfix','naming'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',module,'-q','--tb=short',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
     else:
@@ -61,16 +79,20 @@ def main():
                    'browser_spirit_inheritance','browser_inheritance_audit_fixes','browser_repository_followup_fixes',
                    'browser_crafting_field_audit_fixes','browser_ownership_prison_fixes',
                    'browser_custody_formation_fixes','browser_guard_workforce_fixes']
+    if profile=='naming':
+        browsers=['browser_content_naming','browser_strategic_war','browser_war_coalition_fixes',
+                  'browser_war_presence_fixes','browser_events_212','browser_strategic_peace']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     for name,args in jobs:
         log=ROOT/f'build/{name}-{tag}.log'
         with log.open('w',encoding='utf-8') as stream:
-            code=subprocess.call([sys.executable,'-X','utf8',*args],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT)
+            code=subprocess.call([sys.executable,'-X','utf8',*args],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT,
+                                 env=os.environ | {'CULTIVATION_BROWSER_LOW_MEMORY':'1'})
         require(code==0,f'{name} failed; see {log}')
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         runs.append(dict(name=name,log=str(log.relative_to(ROOT)),status='passed'))
         print(name+' passed',flush=True)
-    if profile in {'economy','bugfix'}:
+    if profile in {'economy','bugfix','naming'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

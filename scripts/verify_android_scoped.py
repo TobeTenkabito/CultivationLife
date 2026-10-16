@@ -14,17 +14,23 @@ def main():
     serial=sys.argv[1] if len(sys.argv)>1 else 'emulator-5580'
     economy = '--economy' in sys.argv[2:]
     bugfix = '--bugfix' in sys.argv[2:]
+    naming = '--naming' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
           if economy else [f'build/android-soul-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]+[f'build/android-upper-{tag}.log'])
     if bugfix:
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('audit-fixes','economy-trust') for orientation in ('portrait','landscape')]
+    if naming:
+        logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('content-naming','strategic-war') for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if bugfix and 'audit-fixes' in name:
             require('followup_fixes_scope' in text,f'Missing current followup native coverage: {name}')
+        if naming:
+            marker='content_naming_scope' if 'content-naming' in name else 'strategic_war_scope'
+            require(marker in text,f'Missing current naming/war native coverage: {name}')
     sdk=Path('F:/CultivationLife-Android-Tools/sdk')
     signer=sorted(sdk.glob('build-tools/*/apksigner.bat'))[-1]
     apk=ROOT/'android/app/build/outputs/apk/release/app-release.apk'
@@ -46,6 +52,7 @@ def main():
                   log_hashes={name:file_digest(ROOT/name) for name in logs},
                   scope='Annual finance, original organizational guards, trust and real production; six native orientation phases' if economy else 'Legacy soul and upper scope')
     if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
+    if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 

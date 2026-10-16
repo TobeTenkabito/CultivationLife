@@ -1314,6 +1314,32 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     check(Boolean.TRUE.equals(js("game.fleet_network.main_hq && game.fleet_network.fleets.some(f=>f.cross_trip?.phase==='return')")),"Expansion persistence");
                 }
                 result.putString("economy_expansion_scope","Four themes, native relocation, passage build, dispatch, recall, repair, layout and persistence");
+            } else if(phase.equals("content-naming")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'命名兼容原生验收',spirit_root:'supreme_metal',path:'dao',seed:61983,preset_id:'nascent'})});return g.id;})()");
+                    python(assetText("content_naming_release.py")+"\nfrom cultivation_life import server\nprepare_content_naming_release(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.documentElement.dataset.theme="+JSONObject.quote(theme)+";true");
+                    tapSelector(".hud-identity");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('.technique-library').open"))) tapSelector(".technique-library > summary");
+                    check(Boolean.TRUE.equals(js("game.player.known_techniques.some(t=>t.id==='TECH_YELLOW_COURT_INNER'&&t.name==='黄庭内景经'&&t.level===5)")),"Legacy technique identity and level");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#known-technique-list').textContent.includes('成功夺舍次数上限 +1')")),"Special effect remains readable under new title");
+                    js("Array.from(document.querySelectorAll('#known-technique-list .known-technique')).find(n=>n.textContent.includes('黄庭内景经')).querySelector('.technique-upgrade').id='release-naming-upgrade';true");
+                    tapSelector("#release-naming-upgrade");
+                    waitForJs("!busy && game.player.known_techniques.some(t=>t.id==='TECH_YELLOW_COURT_INNER'&&t.level===6)","Original manual consumed by native upgrade");
+                    capture("content-naming-technique-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("[data-close-dialog=player-details-dialog]");
+                    tapSelector("[data-panel-target=inventory]");
+                    waitForJs("document.querySelector('#inventory-list').textContent.includes('离照玄晶')","Renamed inventory rendered");
+                    check(Boolean.TRUE.equals(js("game.player.inventory.some(i=>i.id==='radiant_flame_crystal'&&i.quantity===7) && game.player.inventory.some(i=>i.id==='custom-naming-sword'&&i.name==='婴神太虚录')")),"Original stock and custom name preserved");
+                    js("Array.from(document.querySelectorAll('#inventory-list .item')).find(n=>n.textContent.includes('麟趾玉液')).querySelector('.item-use').id='release-naming-use';true");
+                    tapSelector("#release-naming-use");
+                    waitForJs("!busy && game.player.guaranteed_progeny && !game.player.inventory.some(i=>i.id==='qilin_blessing_elixir')","Renamed starter medicine native use");
+                    capture("content-naming-inventory-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    python(assetText("content_naming_release.py")+"\nfrom cultivation_life import server\ninspect_content_naming_release(server.ENGINE,"+JSONObject.quote(id)+")");
+                    tapSelector("#inventory-toggle");
+                }
+                result.putString("content_naming_scope","Four themes; original saved IDs, fixed catalog labels, custom names, native manual upgrade and starter use, exact stock and no time charge");
             } else if(phase.equals("strategic-war")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'联军调度原生验收',spirit_root:'supreme_metal',path:'dao',seed:641,custom_start:{world:'spirit',realm_index:8,layer:1}})});return g.id;})()");

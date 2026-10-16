@@ -45,6 +45,10 @@ def prepare_followup(engine, identity, case):
     organizations.register(game,'sect','followup_org','human')
     transfer_value(game,'background:human',organizations.key('sect','followup_org'),1000000,'隔离发行验收预算')
     if case=='guard':
+        # Real relocation/travel advances years. Exclude this guard-only
+        # caretaker from the stochastic murder victim pool without changing
+        # its rank or political power; production/supply retain normal traits.
+        member.notorious=True
         from cultivation_life.system.formation_system import formation_material_definitions, make_formation_material_instance
         definitions=formation_material_definitions()
         for key in ('human_greenwood_stake','human_red_sun_sand','human_xuanyin_stone'):
@@ -55,6 +59,7 @@ def prepare_followup(engine, identity, case):
 def prepare_guard_defense(engine,identity):
     from cultivation_life.content_registry import CONTENT_DOCUMENTS
     game=engine._load(identity)
+    assert not game.sects['followup_org'].extinct and game.player.faction_id=='followup_org'
     assert game.player.formation_ground_arrays[0]['location_id']!=game.sects['followup_org'].location_id
     event=copy.deepcopy(CONTENT_DOCUMENTS['player_faction_events.json']['events'][0])
     event['runtime']=dict(sect_id='followup_org',required_power=1,stage=1)
@@ -68,7 +73,10 @@ def inspect_followup(engine,identity,case):
         array=game.player.formation_ground_arrays[0]
         assert array['battles']==0 and array['durability']==100
         assert array['location_id']!=game.sects['followup_org'].location_id
-        assert game.sects['followup_org'].pressure==1
+        assert game.sects['followup_org'].pressure==1, {
+            'pressure':game.sects['followup_org'].pressure,
+            'events':[(e.event_id,e.result,e.summary) for e in game.history[-8:]],
+        }
     elif case=='production':
         assert 'followup_member' in game.intrigue_state['npc_prisons']
         row=game.economy_v2['organizations']['organization:sect:followup_org']
