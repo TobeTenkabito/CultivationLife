@@ -18,6 +18,10 @@ from .dependencies import WarPeaceDependencies
 
 def _generate_ai_peace_offer(deps: WarPeaceDependencies, game: GameState, war: dict[str, Any], proposer: str) -> dict[str, Any]:
     """Build a score-priced demand package instead of always asking for one execution."""
+    if proposer not in {'attacker', 'defender'}:
+        return dict(proposer_side='attacker', recipient_side='defender', budget=0, total_cost=0,
+                    demands=[dict(term='white_peace', label=deps.WAR_TERM_DEFS['white_peace'][0], cost=0,
+                                  target_power_id=war['defender_id'], target_id='')], created_unit=game.diplomacy_unit)
     recipient = "defender" if proposer == "attacker" else "attacker"
     target_power_id = war[f"{recipient}_id"]
     budget = int(min(100, max(0, round(abs(float(war.get("war_score", 0)))))))
@@ -85,6 +89,10 @@ def _generate_ai_peace_offer(deps: WarPeaceDependencies, game: GameState, war: d
 
 def _conclude_war_bundle(deps: WarPeaceDependencies, game: GameState, war: dict[str, Any], demands: list[dict[str, Any]],
                          beneficiary: str, *, automatic: bool = False) -> str:
+    if beneficiary not in {'attacker', 'defender'}:
+        if any(d.get('term') != 'white_peace' for d in demands):
+            raise ValueError('没有获胜方的战役只能无条件停战')
+        beneficiary = 'attacker'  # White peace assigns neither victory nor assets.
     if not demands:
         demands = [{"term": "white_peace", "target_power_id": war[f"{'defender' if beneficiary == 'attacker' else 'attacker'}_id"]}]
     details: list[str] = []

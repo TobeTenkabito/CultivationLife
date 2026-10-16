@@ -16,7 +16,7 @@ def deployed_ids(war,side):
     return roster[:max(1,math.ceil(len(roster)*ratio))]
 
 
-def refresh(game, war, side, *, persist=True):
+def refresh(game, war, side, *, persist=True, participating_player_side=None):
     ids = set(deployed_ids(war,side))
     if war.get('strategic_war_id') and war.get('campaign_phase')=='engaged':
         ids.intersection_update(j['person_id'] for j in war.get('journeys',{}).get(side,[]) if j['phase']=='stationed')
@@ -28,7 +28,9 @@ def refresh(game, war, side, *, persist=True):
     source_world=(row or {}).get('world',war['world'])
     groups = Counter(n.realm_index for k,n in people.items() if k not in escaped and is_free(n) and n.world==source_world
                      and not research_assignment(game, k, exclude_war=war.get("id")) and not is_imprisoned(game, k))
-    if not war.get('strategic_war_id') and game.player.alive and game.player.world==war['world'] and war.get('player_side')==side:
+    player_present = (participating_player_side == side if war.get('strategic_war_id')
+                      else participating_player_side == side or war.get('player_side') == side)
+    if player_present and game.player.alive and game.player.world==war['world']:
         groups[game.player.realm_index]+=1
     if row is not None and persist:
         row['realm_groups'] = {str(k):n for k,n in groups.items()}

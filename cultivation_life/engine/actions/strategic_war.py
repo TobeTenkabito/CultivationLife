@@ -164,14 +164,14 @@ def act(host, game_id, payload):
             from ...system.strategic_war.lifecycle import receipt
             receipt(game, row, child)
         elif action == 'reply_peace':
-            from ...system.strategic_war.peace import player_reply, settle
+            from ...system.strategic_war.peace import player_reply, accept
             proposal = row.get('peace_proposal')
             if (row['status'] not in {'mobilizing', 'active'} or not proposal or proposal['status'] != 'pending'
                     or p.age >= proposal['expires'] or not player_reply(deps, game, row, proposal)
                     or payload.get('reply') not in {'accept', 'reject'}):
                 raise ValueError('没有当前可由你答复的和谈')
             if payload['reply'] == 'accept':
-                settle(deps, game, row, proposal)
+                accept(deps, game, row, proposal)
             else:
                 proposal['status'] = 'rejected'
                 note(game, row, '拒绝和谈', '本方拒绝此项和约条件，原战役与战时授权继续。')

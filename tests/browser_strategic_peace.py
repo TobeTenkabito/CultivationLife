@@ -74,6 +74,28 @@ def main():
                         page.evaluate('async id=>loadGame(id)',g.id);root.get_by_role('tab',name='议事',exact=True).click()
                         post(page,root.get_by_role('button',name='接受和约'))
                         assert engine._load(g.id).strategic_war_state['wars'][0]['treaty']['total']>0
+                        # Organization consent alone cannot sign for the whole race,
+                        # including when every current NPC representative votes no.
+                        g,row,c=own_campaign(engine);g.player.realm_index=4;g.player.layer=1
+                        assert engine._has_sect_voice(g) and not engine._has_race_voice(g)
+                        peace.propose(bind(engine),g,row,'defender','white_peace');engine.store.save(g)
+                        page.evaluate('async id=>loadGame(id)',g.id);root.get_by_role('tab',name='议事',exact=True).click()
+                        assert '有效代表多数通过' in root.locator('.strategy-peace').inner_text()
+                        post(page,root.get_by_role('button',name='接受和约'))
+                        rejected=engine._load(g.id).strategic_war_state['wars'][0]
+                        assert rejected['status']=='active' and not rejected.get('treaty')
+                        assert rejected['peace_proposal']['status']=='rejected'
+                        assert root.get_by_role('button',name='接受和约').count()==0
+                        assert root.get_by_role('button',name='提出总停战').is_disabled()
+                        assert not page.locator('body').evaluate('(n)=>n.classList.contains("busy")')
+                        # A victorious local owner without a race seat retains the
+                        # real proceeds while NPC representatives conduct diplomacy.
+                        g,row,c=finished(engine);g.player.realm_index=4;g.player.layer=1
+                        row['objectives_done_age']=g.player.age;g.player.age+=25
+                        peace.advance(bind(engine),g,row);engine.store.save(g)
+                        page.evaluate('async id=>loadGame(id)',g.id);root.get_by_role('tab',name='议事',exact=True).click()
+                        assert '已履约' in root.locator('.strategy-peace').inner_text()
+                        assert engine._load(g.id).strategic_war_state['wars'][0]['treaty']['total']>0
                         # Campaign markers survive all phases and both projections.
                         g,row,c=own_campaign(engine);engine.store.save(g)
                         for phase,status,text in [('marching','active','集结'),('engaged','active','交锋'),('returning','withdrawing','撤军')]:
@@ -109,7 +131,7 @@ def main():
                         assert actual['battles']==1 and any('玩家参战' in l['title'] for l in actual['logs'])
                         assert root.get_by_role('button',name='亲自参加会战').is_disabled()
                         assert not errors,errors
-                        print('Strategic peace browser passed: seven real term cards; four themes x three sizes; stale quote recovery; original title transfer; explicit consent; both map projections and three campaign phases; actual personal battle and cooldown',flush=True)
+                        print('Strategic peace browser passed: seven real term cards; four themes x three sizes; stale quote recovery; original title transfer; explicit consent with representative majority; NPC diplomacy for owners without a race seat; both map projections and three campaign phases; actual personal battle and cooldown',flush=True)
                     finally:browser.close()
             finally:http.shutdown();http.server_close();thread.join(timeout=2)
 

@@ -72,6 +72,16 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
             deps._append_war_log(game,war,'无人可战','双方已无实际出阵成员，本战役相持收束，不增发战果。')
             continue
         logistics.begin_round(game, deps.maps, war, rng)
+        if deps._finish_war_by_morale(game, war):
+            war['battles'] = int(war.get('battles', 0)) + 1
+            if not managed:
+                winner = war.get('winner')
+                if winner in {'attacker', 'defender'}:
+                    offer = deps._generate_ai_peace_offer(game, war, winner)
+                    deps._conclude_war_bundle(game, war, offer['demands'], winner, automatic=True)
+                else:
+                    deps._conclude_war(game, war, 'white_peace', 'attacker', automatic=True)
+            continue
         if managed:
             contexts = deps._war_formation_contexts(game, war)
             lines = []
@@ -178,6 +188,11 @@ def _finish_war_by_morale(deps: WarLifecycleDependencies, game: GameState, war: 
         return True
     if war["morale"]["attacker"] > 0 and war["morale"]["defender"] > 0:
         return False
+    if war['morale']['attacker'] <= 0 and war['morale']['defender'] <= 0:
+        war.update(status='peace_ready', winner=None, loser=None, war_score=0.)
+        war.pop('peace_offer', None)
+        deps._append_war_log(game, war, '双方溃阵', '双方士气同时归零，本战役相持收束，无获胜方与可索赔战果。')
+        return True
     winner = "defender" if war["morale"]["attacker"] <= 0 else "attacker"
     loser = "attacker" if winner == "defender" else "defender"
     war["status"] = "peace_ready"
