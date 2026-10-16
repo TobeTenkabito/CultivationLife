@@ -360,6 +360,8 @@ class GhostSystemMixin:
         from .faction_geography import ensure_faction_sites, war_site
         ensure_faction_sites(game)
         factions = [*game.sects.values(), *([game.family] if game.family else [])]
+        from .war.map_markers import markers
+        campaigns = markers(game,{f.id:f.name for f in factions})
         from ..content_registry import RACE_DEFINITIONS
         safe = [row for row in data.get("locations", []) if not row.get("min_realm_index", 0)]
         race_sites = {}
@@ -374,11 +376,7 @@ class GhostSystemMixin:
                                      for f in factions if not f.extinct and f.world == game.player.world
                                      and f.location_id == location["id"]]
             location["factions"].extend(race_sites.get(location["id"], []))
-            location["wars"] = [{"id": w["id"], "attacker": self._war_side_name(game, "sect", w["attacker_id"]),
-                                  "defender": self._war_side_name(game, "sect", w["defender_id"])}
-                                 for w in game.wars if w.get("status") == "active" and w.get("kind") == "sect"
-                                 and w.get("world") == game.player.world
-                                 and war_site(self.maps, w)["id"] == location["id"]]
+            location["wars"] = campaigns.get(location['id'],[])
         parade = game.ghost_parade
         if parade and parade.get("announced") and parade.get("world") == game.player.world:
             for location in data.get("locations", []):

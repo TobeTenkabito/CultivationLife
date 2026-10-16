@@ -201,6 +201,7 @@ def raid(game,war,side,value):
     cash=min(balance(game,wallet(war,enemy)),max(0,int(value-lost)))
     kept=int(cash*.6)
     transfer_value(game,wallet(war,enemy),wallet(war,side),kept,'因粮于敌：缴获原军需灵石')
+    source['captured_loss']=source.get('captured_loss',0)+round(received)+kept
     consume(game,war,enemy,cash-kept,'劫粮中损毁',cash_only=True)
     return round(received)+kept
 

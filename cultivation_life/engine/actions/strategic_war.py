@@ -152,6 +152,29 @@ def act(host, game_id, payload):
                     from ...system.strategic_war.lifecycle import receipt
                     receipt(game,row,child)
                 note(game,row,'本部撤回',f'{org.name}沿原路撤回，其他参战宗门继续执行军令。')
+        elif action == 'participate_round':
+            from ...system.strategic_war.willingness import personal_side
+            child = next((w for w in game.wars if w.get('strategic_war_id') == row['id'] and w['id'] == payload.get('campaign_id')), None)
+            side = personal_side(deps, game, row, child) if child else None
+            if not side:
+                raise ValueError('须本人在实际战场、属于唯一合法参战方，且距上次亲征至少十年')
+            host._resolve_player_war_round(game, child, side, rng)
+            child['last_personal_age'] = p.age
+            child['next_battle_age'] = p.age + 10
+            from ...system.strategic_war.lifecycle import receipt
+            receipt(game, row, child)
+        elif action == 'reply_peace':
+            from ...system.strategic_war.peace import player_reply, settle
+            proposal = row.get('peace_proposal')
+            if (row['status'] not in {'mobilizing', 'active'} or not proposal or proposal['status'] != 'pending'
+                    or p.age >= proposal['expires'] or not player_reply(deps, game, row, proposal)
+                    or payload.get('reply') not in {'accept', 'reject'}):
+                raise ValueError('没有当前可由你答复的和谈')
+            if payload['reply'] == 'accept':
+                settle(deps, game, row, proposal)
+            else:
+                proposal['status'] = 'rejected'
+                note(game, row, '拒绝和谈', '本方拒绝此项和约条件，原战役与战时授权继续。')
         elif action == 'offer_peace':
             if not deps.has_race_voice(game) or host._player_allegiance_race(p) not in {row['attacker'], row['defender']}:
                 raise ValueError('没有本案种族的和谈提案资格')
@@ -161,18 +184,24 @@ def act(host, game_id, payload):
             if p.age - prior < 10:
                 raise ValueError('十年内只能提出一次总和谈')
             side = 'attacker' if host._player_allegiance_race(p) == row['attacker'] else 'defender'
-            support = row['score'] * (1 if side == 'attacker' else -1)
-            # Actual opposing representatives accept when losing or exhausted;
-            # no unilateral player's button can freeze an advancing enemy.
+            from ...system.strategic_war.peace import propose, package
+            term = payload.get('term', 'white_peace')
+            bundle = package(deps, game, row, side, term)
+            demands = bundle['demands']
+            if term != 'white_peace' and payload.get('expected_quote') != bundle['quote_key']:
+                raise ValueError('和约涉及的组织、资产或报价已变化，请刷新后重新审阅')
+            if demands and type(payload.get('expected_total')) is not int:
+                raise ValueError('请核对本次赔款报价')
+            old = row.get('peace_proposal')
+            if old and old['status'] == 'pending' and p.age < old['expires']:
+                raise ValueError('请先答复现有和谈')
             vote=council(deps,game,host._player_allegiance_race(p),rng)
             row['peace_vote']=vote
-            opposing=opposing_reply(deps,game,row,'defender' if side=='attacker' else 'attacker',support>=50 or p.age-row['start_age']>=80)
-            row['opposing_peace_vote']=opposing
-            accepted = vote['yes']>vote['total']/2 and opposing['yes']>opposing['total']/2
             row['peace_proposal_age'] = p.age
-            note(game, row, '和谈答复', '双方接受停战，各战役进入撤回。' if accepted else '对方代表拒绝停战；现有战役继续。')
-            if accepted:
-                armistice(game, row, '族议和谈得到对方代表确认。')
+            if vote['yes'] > vote['total']/2:
+                propose(deps, game, row, side, term, player=True, expected_total=payload.get('expected_total'),expected_quote=payload.get('expected_quote'))
+            else:
+                note(game, row, '和谈未获批准', '本方族议未通过提案，继续执行原战时授权。')
         else:
             raise ValueError('未知战争命令')
         row['revision'] += 1

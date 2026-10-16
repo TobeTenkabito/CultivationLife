@@ -7,7 +7,7 @@ from ...models import HistoryRecord
 import random
 import uuid
 from .dependencies import WarDiplomacyDependencies
-from .policy import system_war_allowed
+from .policy import system_war_allowed, strategic_conflicts
 
 
 def _allied_powers(deps: WarDiplomacyDependencies, game: GameState, war: dict[str, Any], side: str) -> list[dict[str, Any]]:
@@ -29,6 +29,11 @@ def _allied_powers(deps: WarDiplomacyDependencies, game: GameState, war: dict[st
             org = organization(game,candidate) if war['kind']=='sect' else None
             if org and busy(game,org,managed_only=True):
                 continue
+            from ...world_state import race_pair
+            if war['kind']=='sect' and any(game.player.age < game.sect_relations.get(race_pair(candidate,e),{}).get('truce_until_age',0) for e in enemy):
+                continue
+            if not war.get('strategic_war_id') and any(strategic_conflicts(game,candidate,e) for e in enemy):
+                continue
             base = float(deps._war_rules().get("ally_call_base_chance", 0.68))
             chance = base + max(-0.18, min(0.18, float(relation.get("affinity", 0)) / 400.0))
             own_power = deps._war_total_power(game, war, side)
@@ -46,6 +51,12 @@ def _allied_powers(deps: WarDiplomacyDependencies, game: GameState, war: dict[st
 
 
 def _add_war_participant(deps: WarDiplomacyDependencies, game: GameState, war: dict[str, Any], side: str, power_id: str, caller_id: str) -> None:
+    from ...world_state import race_pair
+    enemy='defender' if side=='attacker' else 'attacker'
+    if war['kind']=='sect' and any(game.player.age < game.sect_relations.get(race_pair(power_id,e),{}).get('truce_until_age',0) for e in deps._coalition_ids(war,enemy)):
+        raise ValueError('仍受和约停战约束的宗门不能借盟军身份参战')
+    if not war.get('strategic_war_id') and any(strategic_conflicts(game,power_id,e) for e in deps._coalition_ids(war,enemy)):
+        raise ValueError('种族战争尚未收束，不能借独立盟军身份另开同案交锋')
     war["coalitions"][side].append({"id": power_id, "role": "ally", "joined_unit": game.diplomacy_unit, "called_by": caller_id})
     side_roster = war["roster"][side]
     total_cap = int(deps._war_rules().get("coalition_roster_cap", 48))
@@ -112,10 +123,20 @@ def _player_has_war_voice(deps: WarDiplomacyDependencies, game: GameState, war: 
     return deps._has_race_voice(game) if war["kind"] == "race" else deps._has_sect_voice(game)
 
 
-def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False, prepare_supplies=True) -> dict[str, Any]:
+def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False, prepare_supplies=True, strategic_war_id='') -> dict[str, Any]:
     if kind == 'race':
         raise ValueError('种族宣战须通过族议建立战略战争，不能直接生成种族军队')
+    conflicts=strategic_conflicts(game,attacker,defender)
+    authorization=next((row for row in conflicts if row['id']==strategic_war_id and row['status']=='mobilizing'
+        and len(row['campaigns'])<2 and any(c['org']['id']==attacker and c['side']=='attacker' for c in row['commitments'])
+        and any(c['org']['id']==defender and c['side']=='defender' for c in row['commitments'])),None)
+    if (conflicts and not authorization) or (strategic_war_id and not authorization):
+        raise ValueError('种族战争尚未收束，组织只能执行原案授权战役，不能另开独立交锋')
     from .occupancy import busy, organization
+    if authorization and (prepare_supplies or any(
+            not (org:=organization(game,identity)) or org.extinct or org.world!=authorization['world']
+            or org.allegiance_race!=authorization[side] for side,identity in [('attacker',attacker),('defender',defender)])):
+        raise ValueError('原种族战争承诺已失效，或未由日历部署入口建立战役')
     if any((org:=organization(game,identity)) and busy(game,org,managed_only=True) for identity in (attacker,defender)):
         raise ValueError('宗门仍在战略战役中，行军、交战与撤军结束前不能另开战役')
     if any(w.get('strategic_war_id') and w.get('status')=='withdrawing'
@@ -127,6 +148,8 @@ def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attac
     if not initiated_by_player and not system_war_allowed(game, kind, attacker, defender):
         raise ValueError('系统势力只能在同层级界面之间发起战争')
     relation = deps._war_relation(game, kind, attacker, defender)
+    if game.player.age < int(relation.get('truce_until_age',0)):
+        raise ValueError(f"和约停战期尚余 {int(relation['truce_until_age'])-game.player.age} 年，不能另开战役")
     truce_until = max(int(relation.get("truce_until_unit", 0)), int(relation.get("war_truce_until_unit", 0)))
     if game.diplomacy_unit < truce_until:
         raise ValueError(f"系统停战期尚余 {truce_until - game.diplomacy_unit} 个行动单位，不能宣战")
@@ -157,6 +180,8 @@ def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attac
         "escaped": {"attacker": [], "defender": []}, "logs": [],
     }
     war["player_side"] = deps._player_war_side(game, war)
+    if authorization:
+        war['strategic_war_id']=authorization['id']
     war["controller"] = "player" if deps._player_has_war_voice(game, war) else "ai"
     from .logistics import initialize
     if prepare_supplies:

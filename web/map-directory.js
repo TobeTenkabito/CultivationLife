@@ -45,7 +45,8 @@
       }));
       (place.wars || []).forEach(war => add(place.id, {
         kind:'event', theme:'war', title:`${war.attacker} · ${war.defender}`, seal:'战', live:true,
-        detail:'两军交战 · 此地截杀风险提高；两次战区遭遇之间至少休整一个行动单位',
+        detail:`${({marching:'正在集结 · 尚未交锋',engaged:'两军交战',returning:'已停火 · 正在撤军'})[war.phase]||'两军交战'} · ${war.attacker_orgs}宗 对 ${war.defender_orgs}宗 · 已交锋${war.battles}场`,
+        campaign:war,
       }));
       if (place.ghost_parade) add(place.id, {
         kind:'event', theme:'ghost', title:'百鬼夜行', seal:'夜', live:place.ghost_parade.status === 'active',
@@ -115,6 +116,7 @@
           const copy = node('div');
           copy.append(node('strong', entry.title), node('p', entry.detail));
           row.append(node('span', entry.seal, 'map-directory-seal'), copy);
+           if(entry.campaign)row.append(button('查看战役',()=>window.StrategicWarPanel?.openCampaign(entry.campaign.strategic_war_id,entry.campaign.id)));
           if(entry.kind==='estate'&&place.current)row.append(button('管理产业',()=>{
             switchMode('economy');const panel=document.querySelector('#local-market-content #enterprise-panel');if(panel){panel.closest('.economy-overview').open=true;panel.open=true;}
             const target=[...document.querySelectorAll('[data-estate-id]')].find(n=>n.dataset.estateId===entry.estateId);

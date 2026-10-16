@@ -1878,6 +1878,7 @@ function renderWars(system) {
   }
   system.wars.forEach(war => {
     const card = document.createElement('details'); card.className = `war-card ${war.status}`;
+    card.dataset.warId=war.id;
     card.open = ['active', 'peace_ready'].includes(war.status);
     const summary = document.createElement('summary');
     const state = war.status === 'ended' ? '已结束' : war.kind==='race' ? '旧族战待接续' : war.status === 'peace_ready' ? '胜负已定' : war.controller === 'player' ? '由你指挥' : 'AI 演算中';

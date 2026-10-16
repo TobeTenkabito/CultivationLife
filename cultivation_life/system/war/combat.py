@@ -57,7 +57,8 @@ def _resolve_field_attack(
     defenders = deps._available_warriors(game, war, defending)
     if war.get('strategic_war_id'):
         present=bool(attackers)
-        attackers=[n for n in attackers if war.get('org_stances',{}).get(war['roster_owner'].get(n.id))!='hold']
+        attackers=[n for n in attackers if war.get('org_stances',{}).get(war['roster_owner'].get(n.id))!='hold'
+                   and war['roster_owner'].get(n.id) not in war.get('passive_orgs', [])]
         if present and not attackers:
             return '本方在场部众固守原阵，未主动出击。'
     if not attackers or not defenders:
