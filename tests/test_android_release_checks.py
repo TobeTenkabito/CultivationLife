@@ -34,7 +34,7 @@ def release_inputs(tmp_path):
             f'true-form-ui-{rid}.log': 'Release 251 UI passed:',
             f'world-life-ui-{rid}.log': 'Release 250 UI passed:', f'civilizations-ui-{rid}.log':'passed',
             f'territory-ui-{rid}.log':'Territory UI passed:',
-            f'trial-sites-ui-{rid}.log':'Trial sites UI passed: 44'}
+            f'trial-sites-ui-{rid}.log':'Trial sites UI passed: 44', f'strategic-war-ui-{rid}.log':'passed'}
     phases = ('trial-sites-disabled','civilizations-i-only','civilizations-ii-only','civilizations-neither','heavens-portrait', 'heavens-landscape', 'experience', 'institutions', 'governance', 'economy', 'upper', 'trials',
               'save-transfer', 'initial', 'immortal', 'minor', 'tutorial', 'bulk',
               'upper-voisinage', 'fusion', 'asura-portrait', 'asura-landscape',
@@ -42,7 +42,7 @@ def release_inputs(tmp_path):
               'start-layout-portrait', 'start-layout-landscape', 'spatial-talisman-portrait', 'spatial-talisman-landscape')
     logs.update({f'android-{phase}-{rid}.log': 'status=passed' for phase in phases})
     logs.update({f'android-{phase}-{orientation}-{rid}.log': 'status=passed'
-                 for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'trial-sites', 'release-2130')
+                 for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'trial-sites', 'release-2130', 'strategic-war')
                  for orientation in ('portrait', 'landscape')})
     for name, content in logs.items():
         (build / name).write_text(content, encoding='utf-8')
@@ -68,6 +68,8 @@ def release_inputs(tmp_path):
 @pytest.mark.parametrize('optimization', ['', '-O', '-OO'])
 @pytest.mark.parametrize('failure,expected', [
     ('release-2130', 'Android release-2130 portrait must pass'),
+    ('strategic-war', 'Android strategic-war portrait must pass'),
+    ('strategic-browser', 'Strategic war browser acceptance must pass'),
     ('trial-sites', 'Android trial-sites portrait must pass'),
     ('trial-disabled', 'Android independent DLC check must pass: trial-sites-disabled'),
     ('trial-browser', 'Trial DLC browser acceptance must pass'),
@@ -93,6 +95,8 @@ def test_bad_release_inputs_cannot_publish(release_inputs, optimization, failure
     root = release_inputs
     rid = package_android.RELEASE_ID
     corruptions = {
+        'strategic-war': (f'android-strategic-war-portrait-{rid}.log', 'status=failed'),
+        'strategic-browser': (f'strategic-war-ui-{rid}.log', 'passed\nTraceback'),
         'release-2130': (f'android-release-2130-portrait-{rid}.log', 'status=failed'),
         'trial-sites': (f'android-trial-sites-portrait-{rid}.log', 'status=failed'),
         'trial-disabled': (f'android-trial-sites-disabled-{rid}.log', 'status=failed'),

@@ -40,7 +40,7 @@ def main():
         result=log(f'android-{phase}-{RELEASE_ID}.log')
         require('status=passed' in result and 'status=failed' not in result, f'Android independent DLC check must pass: {phase}')
     for orientation in ('portrait', 'landscape'):
-        for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'trial-sites', 'release-2130'):
+        for phase in ('territory', 'civilizations', 'organizations', 'custom-start', 'war-logistics', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'trial-sites', 'release-2130', 'strategic-war'):
             result = log(f'android-{phase}-{orientation}-{RELEASE_ID}.log')
             require('status=passed' in result and 'status=failed' not in result, f'Android {phase} {orientation} must pass')
         result = log(f'android-heavens-{orientation}-{RELEASE_ID}.log')
@@ -56,6 +56,8 @@ def main():
     require('passed' in log(f'civilizations-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'civilizations-ui-{RELEASE_ID}.log'), 'Civilizations browser checks must pass')
     require('Territory UI passed:' in log(f'territory-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'territory-ui-{RELEASE_ID}.log'), 'Territory browser checks must pass')
     require('Trial sites UI passed: 44' in log(f'trial-sites-ui-{RELEASE_ID}.log') and 'Traceback' not in log(f'trial-sites-ui-{RELEASE_ID}.log'), 'Trial DLC browser acceptance must pass')
+    strategic = log(f'strategic-war-ui-{RELEASE_ID}.log')
+    require('passed' in strategic and 'Traceback' not in strategic, 'Strategic war browser acceptance must pass')
     require('Verifies' in log(f'android-signature-{RELEASE_ID}.log'), 'Android APK signature must verify')
     metadata = log(f'android-metadata-{RELEASE_ID}.log')
     require(f"versionCode='{VERSION_CODE}'" in metadata and f"versionName='{ANDROID_VERSION}'" in metadata, 'Android version metadata must match the release')
@@ -75,6 +77,8 @@ def main():
             require(f'lib/{abi}/libpython3.13.so' in apk.namelist(), f'Missing Python library for {abi}')
         with zipfile.ZipFile(io.BytesIO(apk.read('assets/game-assets.zip'))) as assets:
             require(assets.read('web/app.js') == (ROOT/'web/app.js').read_bytes(), 'Packaged web/app.js differs from source')
+            require(assets.read('web/strategic-war-panel.js')==(ROOT/'web/strategic-war-panel.js').read_bytes(),'Packaged strategic war script differs from source')
+            require(assets.read('web/strategic-war-panel.css')==compile_css((ROOT/'web/strategic-war-panel.css').read_text(encoding='utf-8')).encode('utf-8'),'Packaged strategic war style differs from source')
             require(assets.read('web/npc-contacts.js') == (ROOT/'web/npc-contacts.js').read_bytes(), 'Packaged web/npc-contacts.js differs from source')
             require(assets.read('web/map-directory.js') == (ROOT/'web/map-directory.js').read_bytes(), 'Packaged web/map-directory.js differs from source')
             require(assets.read('web/npc-contacts.css') == compile_css((ROOT/'web/npc-contacts.css').read_text(encoding='utf-8')).encode('utf-8'), 'Packaged NPC stylesheet differs from compiled source')
@@ -107,6 +111,7 @@ def main():
         'themes': list('abdf'), 'save_schema': SAVE_SCHEMA_VERSION,
         'save_import_export': True, 'offline': True, 'release_debuggable': False,
         'validation': [
+            'Same-world racial war, idle-only coalition dispatch, original escrow and organization-only recall verified through native controls in four themes and both orientations',
             'Four-theme native military logistics, delayed depot approval/collection and paid immortal/Asura conversion verified in both orientations',
             'Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified',
             'Organization inheritance, contribution-backed requisitions, outsider clan succession, owner-funded local teleport arrays and temporary activity navigation verified',
@@ -131,6 +136,7 @@ def main():
                            (ROOT/'docs/upper-voisinages-1522.md','三界邻域说明.md'), (ROOT/'docs/experience-1520.md','修行与天庭体验更新.md'), (ROOT/'docs/institutions-1513.md','机构势力说明.md'), (ROOT/'CHANGELOG.md','CHANGELOG.md'), (ROOT/'android/app/src/main/mobile/NOTICE.txt','NOTICE.txt')]:
             package.write(path, name)
         for name in ('debug-development.md', 'debug-base-coverage.md', 'debug-dlc-coverage.md',
+                      'strategic-war-implementation.md', 'racial-war-design.md',
                      'territory-development.md', 'war-logistics.md', 'organizations-290.md', 'monster-civilizations-development.md',
                      'spatial-talismans.md', 'asura-court-1530.md', 'heavens-implementation.md',
                      'world-transition-development.md', 'world-transition-audit.md', 'world-transition-state-contract.json'):

@@ -47,12 +47,14 @@ def main():
                     page.locator('.save-entry button').first.click()
                     page.wait_for_function('game && !busy')
                     page.evaluate('showStart()')
-                    assert page.locator('.save-entry').count() == 1
+                    remaining=set(ids[len('abdf'):])
+                    page.wait_for_function('count=>document.querySelectorAll(".save-entry").length===count',arg=len(remaining))
+                    assert set(page.locator('.save-entry').evaluate_all('nodes=>nodes.map(n=>n.dataset.saveId)'))==remaining
                     assert not errors, errors
                     browser.close()
             finally:
                 httpd.shutdown(); httpd.server_close()
-    print('Six-theme save deletion, cancellation, full list and surviving save checks passed')
+    print('Four-theme save deletion, cancellation, full list and surviving saves passed')
 
 
 if __name__ == '__main__': main()

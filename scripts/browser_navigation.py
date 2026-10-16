@@ -29,3 +29,19 @@ def click_control(target, **kwargs):
     reveal_subpage(target.page, target)
     expanded=target.evaluate("n=>n.tagName==='SUMMARY'&&n.parentElement.hasAttribute('data-page-name')&&n.parentElement.open")
     if not expanded:target.click(**kwargs)
+
+
+def set_theme(page, theme):
+    """Switch through the real dialog while respecting full-screen panels."""
+    opened=[]
+    for panel in page.locator('.utility-panel.panel-open').all():
+        if panel.is_visible():
+            name=panel.get_attribute('id').removesuffix('-card')
+            opened.append(name)
+            page.locator(f'#{name}-toggle').click()
+    page.locator('#theme-open').click()
+    page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
+    page.evaluate('GameThemes.saved')
+    page.locator('[data-close-dialog=theme-dialog]').click()
+    for name in opened:
+        navigation_locator(page,f'[data-panel-target={name}]').click()

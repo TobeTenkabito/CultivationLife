@@ -346,6 +346,7 @@ class DemonicSystemTests(unittest.TestCase):
         ))
 
     def test_v8_save_migrates_shared_true_demon_races_and_loads_new_roster(self):
+        from cultivation_life.race_diplomacy import relations_for
         game_id, game = self.demonic_game()
         game.world_rules_version = 8
         game.player.world = "true_demon"
@@ -358,8 +359,8 @@ class DemonicSystemTests(unittest.TestCase):
         legacy_npc.world = "true_demon"
         legacy_npc.race = "stoneborn"
         game.notable_npcs[legacy_npc.id] = legacy_npc
-        game.race_relations.pop("blood_demon|soul_demon", None)
-        old_spirit_relation = copy.deepcopy(game.race_relations["human|monster"])
+        relations_for(game, "true_demon").pop("blood_demon|soul_demon", None)
+        old_spirit_relation = copy.deepcopy(relations_for(game, "spirit")["human|monster"])
         self.engine.store.save(game)
 
         shown = self.engine.get_game(game_id)
@@ -371,27 +372,30 @@ class DemonicSystemTests(unittest.TestCase):
         self.assertEqual(migrated.player.allegiance_race, "soul_demon")
         self.assertEqual(migrated.sects["myriad_soul_abyss"].npcs[0].race, "soul_demon")
         self.assertEqual(migrated.notable_npcs[legacy_npc.id].race, "rock_demon")
-        self.assertEqual(migrated.race_relations["human|monster"], old_spirit_relation)
-        self.assertEqual(migrated.race_relations["blood_demon|soul_demon"]["status"], "alliance")
+        self.assertEqual(relations_for(migrated, "spirit")["human|monster"], old_spirit_relation)
+        self.assertEqual(relations_for(migrated, "true_demon")["blood_demon|soul_demon"]["status"], "alliance")
         self.assertEqual(len(shown["race_system"]["races"]), 20)
         self.assertNotIn("moonfolk", shown["race_system"]["races"])
         self.assertTrue(any(record.event_id == "SYS_TRUE_DEMON_RACE_MIGRATION" for record in migrated.history))
 
     def test_true_demon_diplomacy_ignores_spirit_race_relations(self):
+        from cultivation_life.race_diplomacy import relations_for
         _, game = self.demonic_game()
         game.player.world = "true_demon"
         self.engine._ensure_race_relations(game)
-        game.race_relations[race_pair("human", "heaven_demon")]["status"] = "neutral"
-        game.race_relations[race_pair("human", "monster")]["status"] = "war"
+        local = relations_for(game, "true_demon")
+        spirit = relations_for(game, "spirit")
+        local[race_pair("human", "heaven_demon")]["status"] = "neutral"
+        spirit[race_pair("human", "monster")]["status"] = "war"
         self.assertFalse(self.engine._maybe_race_war_ambush(game, random.Random(8302)))
 
-        game.race_relations[race_pair("human", "monster")]["status"] = "alliance"
+        spirit[race_pair("human", "monster")]["status"] = "alliance"
         before = game.player.opportunity
         self.engine._advance_diplomacy_unit(game, Mock(random=lambda: 0.99))
         self.assertEqual(game.player.opportunity, before)
 
-        game.race_relations[race_pair("human", "monster")]["status"] = "neutral"
-        game.race_relations[race_pair("human", "heaven_demon")]["status"] = "alliance"
+        spirit[race_pair("human", "monster")]["status"] = "neutral"
+        local[race_pair("human", "heaven_demon")]["status"] = "alliance"
         before = game.player.opportunity
         self.engine._advance_diplomacy_unit(game, Mock(random=lambda: 0.99))
         from cultivation_life.rules import opportunity_multiplier

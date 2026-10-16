@@ -15,7 +15,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item, max_hp, max_mp
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, reveal_subpage, set_theme
 
 def main():
     output = ROOT / 'build/heavens-m1-browser'
@@ -71,10 +71,7 @@ def main():
                     assert page.locator('#heavens-content').get_by_text('法则天海 · 潮汐回响',exact=True).is_visible()
                     snapshot=engine.store._path(key).read_bytes()
                     for theme in 'abdf':
-                        page.locator('#theme-open').click()
-                        page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
-                        page.evaluate('GameThemes.saved')
-                        page.locator('[data-close-dialog=theme-dialog]').click()
+                        set_theme(page,theme)
                         for width in (1440,393):
                             page.set_viewport_size({'width':width,'height':1050 if width==1440 else 852})
                             page.wait_for_timeout(120)
@@ -88,16 +85,19 @@ def main():
                     # from the business rejection and obtain the next sequence.
                     state=engine.store.load(key).heavens_state
                     engine.heavens_command(key,state['command_seq']+1,state['revision'],'configure',options={'watch':False})
-                    page.get_by_role('button',name='诸天偏好',exact=True).click()
-                    page.locator('#heavens-content input').first.uncheck()
+                    page.locator('#heavens-toggle').click()
+                    navigation_locator(page,'[data-panel-target=settings]').click()
+                    preferences=page.locator('#settings-heavens input')
+                    reveal_subpage(page,preferences.first)
+                    preferences.first.uncheck()
                     page.wait_for_function('!busy && game.heavens.next_command_seq === 3')
-                    assert page.locator('#heavens-content input').first.is_checked()
-                    assert not page.locator('#heavens-content input').nth(1).is_checked()
-                    page.locator('#heavens-content input').nth(1).check()
+                    assert preferences.first.is_checked()
+                    assert not preferences.nth(1).is_checked()
+                    preferences.nth(1).check()
                     page.wait_for_function('!busy && game.heavens.next_command_seq === 4')
                     assert engine.store.load(key).player.age == age
                     assert not errors, errors
-                    (output / 'report.json').write_text(json.dumps(dict(themes=6,widths=[1440,393],
+                    (output / 'report.json').write_text(json.dumps(dict(themes=4,widths=[1440,393],
                         lost_response_retry=True,stale_view_recovered=True,duplicate_years=0,errors=errors),indent=2),encoding='utf-8')
                     browser.close()
             finally:

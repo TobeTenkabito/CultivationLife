@@ -64,7 +64,8 @@ def _ensure_sects(deps: WorldRuntimeDependencies, game: GameState) -> None:
             known_ids.update(npc.id for npc in new_sect.npcs)
             continue
         game.sects[sect_id].world = new_sect.world
-        game.sects[sect_id].allegiance_race = new_sect.allegiance_race
+        if not game.sects[sect_id].allegiance_race:
+            game.sects[sect_id].allegiance_race = new_sect.allegiance_race
         # Repair template copies produced by older loaders after expulsion or
         # transfer. The relocated record carries the authoritative mutable state.
         template_ids = {npc.id for npc in new_sect.npcs}

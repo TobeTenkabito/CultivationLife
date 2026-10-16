@@ -9,21 +9,26 @@ from ..combat.npc_battle import resolve_npc_engagement
 from .dependencies import WarLifecycleDependencies
 
 
-def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: random.Random) -> list[str]:
+def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: random.Random, *, campaigns=None) -> list[str]:
     news: list[str] = []
-    for war in game.wars:
+    for war in (game.wars if campaigns is None else campaigns):
+        managed = bool(war.get("strategic_war_id"))
+        if campaigns is None and (managed or war.get("kind") == "race"):
+            continue
         if war.get("status") != "active":
             continue
         deps._ensure_war_shape(game, war)
         if deps._finish_war_by_morale(game, war):
             if war.get("controller") == "ai":
                 winner = str(war["winner"])
+                if managed:
+                    continue
                 offer = deps._generate_ai_peace_offer(game, war, winner)
                 war["peace_offer"] = offer
                 deps._conclude_war_bundle(game, war, offer["demands"], winner, automatic=True)
             continue
         player_side = deps._player_war_side(game, war)
-        if player_side and deps._player_has_war_voice(game, war) and war.get("controller") != "player":
+        if not managed and player_side and deps._player_has_war_voice(game, war) and war.get("controller") != "player":
             war["controller"] = "player"
             war["player_side"] = player_side
             deps._append_war_log(game, war, "指挥权移交", f"你取得势力话语权，接管战争；此前 {war.get('abstract_rounds', 0)} 个行动单位的战报已经补录。")
@@ -56,13 +61,33 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
                     war["exhaustion"][side] = min(100.0, float(war["exhaustion"][side]) + 2.0)
             continue
         threshold = float(deps._war_rules().get("ai_call_ally_score_threshold", -25))
-        if float(war.get("war_score", 0)) < threshold:
+        if not managed and float(war.get("war_score", 0)) < threshold:
             deps._call_war_allies(game, war, "attacker", rng, limit=1)
-        if -float(war.get("war_score", 0)) < threshold:
+        if not managed and -float(war.get("war_score", 0)) < threshold:
             deps._call_war_allies(game, war, "defender", rng, limit=1)
         # The player contributes personal combat power only after choosing
         # to participate through the detailed battle action.
+        if managed and not any(deps._available_warriors(game,war,s) for s in ('attacker','defender')):
+            war.update(status='peace_ready',winner=None)
+            deps._append_war_log(game,war,'无人可战','双方已无实际出阵成员，本战役相持收束，不增发战果。')
+            continue
         logistics.begin_round(game, deps.maps, war, rng)
+        if managed:
+            contexts = deps._war_formation_contexts(game, war)
+            lines = []
+            for side in ('attacker','defender'):
+                if war.get('stances',{}).get(side) != 'hold':
+                    lines.append(deps._resolve_field_attack(game,war,side,rng,contexts))
+                if deps._finish_war_by_morale(game,war):
+                    break
+            war['battles'] = int(war.get('battles',0))+1
+            deps._wear_war_guard_arrays(game,war)
+            for side in ('attacker','defender'):
+                war['exhaustion'][side] = min(100.,war['exhaustion'][side]+7.)
+            if not deps._finish_war_by_morale(game,war) and min(war['exhaustion'].values())>=78:
+                war.update(status='peace_ready',winner=None)
+            deps._append_war_log(game,war,f"第{war['battles']}场会战",' '.join(lines) or '双方固守原阵，仍支付真实驻军与战备成本。')
+            continue
         attack_profile = deps._war_power_profile(game, war, "attacker", include_player=False)
         defend_profile = deps._war_power_profile(game, war, "defender", include_player=False)
         contexts = deps._war_formation_contexts(game, war)
@@ -99,10 +124,12 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
                                  + "；保留实际资源消耗和伤亡。")
             if deps._finish_war_by_morale(game, war):
                 winner = str(war["winner"])
+                if managed:
+                    continue
                 offer = deps._generate_ai_peace_offer(game, war, winner)
                 war["peace_offer"] = offer
                 deps._conclude_war_bundle(game, war, offer["demands"], winner, automatic=True)
-            elif min(war["exhaustion"].values()) >= float(deps._war_rules().get("white_peace_exhaustion", 78)):
+            elif not managed and min(war["exhaustion"].values()) >= float(deps._war_rules().get("white_peace_exhaustion", 78)):
                 deps._conclude_war(game, war, "white_peace", "attacker", automatic=True)
             continue
         ratio = attack_power * rng.uniform(0.86, 1.16) / defend_power
@@ -128,13 +155,18 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
             + (f" {outcome}" if outcome else "")
         )
         deps._append_war_log(game, war, "AI 战报", text)
-        finished = deps._finish_war_by_morale(game, war)
+        if managed and min(war["exhaustion"].values()) >= 78:
+            war["status"] = "peace_ready"
+            war["winner"] = None
+        finished = war.get("status") == "peace_ready" or deps._finish_war_by_morale(game, war)
         if finished:
             winner = str(war["winner"])
+            if managed:
+                continue
             offer = deps._generate_ai_peace_offer(game, war, winner)
             war["peace_offer"] = offer
             deps._conclude_war_bundle(game, war, offer["demands"], winner, automatic=True)
-        elif min(war["exhaustion"].values()) >= float(deps._war_rules().get("white_peace_exhaustion", 78)):
+        elif not managed and min(war["exhaustion"].values()) >= float(deps._war_rules().get("white_peace_exhaustion", 78)):
             deps._conclude_war(game, war, "white_peace", "attacker", automatic=True)
         if game.player.world == war.get("world"):
             news.append(f"{game.player.age}岁：{text}")

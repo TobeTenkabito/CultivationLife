@@ -31,6 +31,10 @@ def relationship_violence(deps: RelationshipViolenceDependencies, game_id, kind,
     if kind not in rows:
         raise ValueError("未知处置对象")
     person = next((row for row in rows[kind] if str(row.get("id")) == str(target_id)), None)
+    if kind == "party" and person:
+        # Party cards omit address fields; validate the original person instead.
+        original = find_person(game, str(person.get("npc_id") or person["id"]))
+        person = original.to_dict() if original else None
     from ...spatial_people import require_access
     require_access(game, person)
     if not person or not person.get("alive", True) or person.get("world", player.world) != player.world:

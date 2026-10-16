@@ -32,7 +32,7 @@ def main():
     exe_log = log(f'exe-{RELEASE_ID}-verification.log')
     require(exe_log.count('EXE verified:') == 2 and 'Traceback' not in exe_log, 'Both EXE checks must pass')
     for check in ('true-form', 'world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
-                  'territory', 'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events', 'trial-sites', 'generated-events', 'local-market-search', 'release-2130'):
+                  'territory', 'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console', 'economy-governance', 'economy-enterprises', 'economy-expansion', 'events', 'trial-sites', 'generated-events', 'local-market-search', 'release-2130', 'strategic-war'):
         result = log(f'{check}-ui-{RELEASE_ID}.log')
         require('passed' in result and 'Traceback' not in result, f'UI check must pass: {check}')
     evidence_file = ROOT / f'build/exe-{RELEASE_ID}-verification.json'
@@ -54,6 +54,7 @@ def main():
         'themes': list('abdf'),
         'save_schema': SAVE_SCHEMA_VERSION,
         'validation': [
+            'Same-world racial war and coalition dispatch: actual EXE commands, original escrow, replay rejection, local recall and idle-only roster occupancy',
             'Planar road display, unique faction colors, file presets, parallel panels, generated trial loot and independent sect leadership verified',
             'Commodity-backed military supplies, delayed depot requisitions, caravan atlas, estate locating and opportunity conversions verified',
             'Observer-relative intelligence, merchant snapshots, same-tier system wars and four named themes verified',

@@ -18,7 +18,7 @@ from cultivation_life.system.heavens.definitions import CONTACT_SITES
 from cultivation_life.system.heavens.state import create_echo, get_echo
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, set_theme
 
 def main():
     output = ROOT / 'build/heavens-upkeep-browser'
@@ -64,7 +64,7 @@ def main():
                         page.get_by_role('tab',name='护持',exact=True).click()
                         back = page.get_by_role('button',name='‹ 返回护持目录',exact=True)
                         if back.count(): back.click()
-                        assert page.locator('#heavens-content .heavens-destination').count() == 4
+                        assert page.locator('#heavens-content .heavens-destination').count() == page.evaluate('game.heavens.upkeeps.length')
                         page.get_by_role('button',name='查看'+site.name,exact=True).click()
                         page.locator('[data-upkeep]').wait_for()
                     def act(label):
@@ -92,9 +92,7 @@ def main():
                         disk = engine.store._path(key).read_bytes()
                         if index == 0:
                             for theme in 'abdf':
-                                page.locator('#theme-open').click()
-                                page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
-                                page.locator('[data-close-dialog=theme-dialog]').click()
+                                set_theme(page,theme)
                                 for width in (1440,393):
                                     page.set_viewport_size({'width':width,'height':1050 if width==1440 else 852})
                                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')

@@ -1,6 +1,12 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "wars.*.logistics.sides.*.return_location": "global：本宗或联军最后实际承运辎重的原归返地址，不含库存副本。全案辎重归返后才用于原库存交付；原仓容量不足或原组织已迁离时物资保留在原战役实际归返地址，不删除、不遥移。父战争退出历史不影响原年度入口按实际容量重试已归返的原地交付，不再次退款或计入收入；无交付不刷府库修订号。历史裁剪还必须确认原实物和各托管余额均为零。原政治承诺不替代当前组织支持及原成员代表资格，预设仅填缺失支持，不在加载时重置实际外交；关押与独立空间会令原出征身份失效，不把原囚犯搬到战场。",
+    "wars.*.journeys.*.last_age / cargo_journeys.*.last_age / reinforcements.*.cargo.last_age": "global：原人物和原军需运输的最近实际结算年，仅防止同年重复回调多走一年，不存第二份行程或资源。出发当年不扣年份，按原日历年度推进；撤军保留已经走过的时长，不把中途转身当作重新满路出发。",
+    "wars.*.reinforcements / org_budget_caps / org_stances / withdrawn_orgs / logistics_initialized / journeys.*.reinforcement / departed_age / strategic_war_state.wars.*.dispatch_ages": "global：同界原战役增援，只调遣整宗闲置且已批准本案的组织；原战役行军、交战、待结算或撤军均占用全宗，不能用留守修士绕过。reinforcements每个子战役最多10条，引用原组织、side、实际cargo道路与唯一wallet，paid/delivered/refunded均为回执；灵石从原组织实扣入war-supply:{campaign}:{side}:reserve:{org}在途托管，不在父层复制余额。抵达才实转原前线账户并登记原贡献；中途停战原路返还后原府库收回一次，不记经营收入。已交付款沿原联军贡献账结清。org_budget_caps和两边budget_caps仅批准额度，跨战役累计已拨及在途预留不得超原承诺；org_stances和withdrawn_orgs只影响本组织原名册，不撤走盟宗。departed_age约束每次真实出发，援军在途不暂停原战场；dispatch_ages按side最多两项，每十年每个NPC统帅至多派遣一家，不在读档补结。每边最多6宗、48名原修士、同时2战役，不重开已结算目标。清理历史仅删已结清零余额的附属托管，不删人物。",
+    "GameState.strategic_war_state": "global：按显式world保存战争、原组织承诺、真实统帅任期、日历游标、定额目标和单调战果回执，不持现金、NPC或物资副本。最多2场进行中与20场完结；日志80条、命令64条且command_seq高水位不回退，真实动员不走旧单位调度。旧裸约明确采用一次，原记录保留adopted_world；旧族战经原条款结清后登记legacy_settlement，不变造原战果。materialized最多12条有限本地出资凭证，不是可花余额，不随玩家跨界。",
+    "wars.*.strategic_war_id / objective_id / scheduler / journeys / cargo_journeys / deployment_age / campaign_phase / next_battle_age / budget_caps / stances": "原组织战役的唯一日历部署：journeys只引用原人物、实际源与目的、道路及剩余年份；行军/驻扎/返乡占用同一身份，抵达才贡献战力，监禁和死亡不移动。deployment_age禁止出发当年免费走一年；cargo_journeys只登记原logistics唯一辎重的实际运输时钟，不持货物副本，人员全灭也不瞬时退货。初始辎重随军，抵达后仅用剩余军资在原战场当地采购，不从山门瞬时追加实物。budget_caps为已批准原库折值上限，不持钱；父层不发奖励或重复扣伤亡。返乡后沿原贡献账只退款一次；仅裁去已全额结清且超出20案历史窗的战役和零余额托管，保留单调编号及近期史册，不删除人物。",
+    "GameState.race_relations": "global：新关系键按world:race|world:race排序，所有普通读取均用显式世界投影；宗门关系键不变。旧裸约不猜世界或复制到各界，未确认时不给盟约权益；明确采用只登记一个界面。新战争停战用truce_until_age真实日历，原单位停战字段保持原义。",
     "auction_state.lots.*.unsold / seller_net / history SYS_AUCTION_FINISH.unsold": "session：买方原世界背景账户不足以支付完整拍定价（含手续费）时，在原拍卖结清入口标记流拍，seller_net 为零；标准商品或炼器法宝原实例退回同一玩家一次，占位费不退。流拍名单仅为非现金结算历史，不是第二份可领取库存。结清后 economy_settled 阻止重复退货、收入与费用，跨界取消仅退回尚未结清的拍品。",
     "economy_v2.organizations.*.pending_expense / pending_turnover": "global：尚未到原年度结算点的实际支出与采购销售成交额，只是非现金收据；与 pending_income 一起在下次真实区间结算消费一次，不能覆盖丢失、不混入上一期折年值。组织产权购置或有偿受让实付款为资本支出，由产权入口统一登记一次，不增加商品成交额，也不再加入生产成本抵扣；NPC 年度购置记当前正在结算的区间，托管不重复登记。初始手工经营或五年聚合间隙的产业盈余先归待结算收入，额外养护到本期结算只支付一次。家族还欠费、宗门上供和奉赠在原实际付款时留支出记录。",
     "economy_v2.estates.*.trust_profit_base": "global：开始本轮托管时原产业净收支基线，仅一个有符号整数，非现金；投资预算只使用托管后新实现盈余，不能拿前任或旧账利润重复扩张。收回授权或产权交接删除，重新托管重新取当前基线。",
@@ -324,7 +330,8 @@
     "map_war_last_encounter_unit": "clock",
     "monster_civilization_state": "global",
     "generated_event_state": "session",
-    "trial_site_state": "scope"
+    "trial_site_state": "scope",
+    "strategic_war_state": "global"
   },
   "spirit_inheritance_ownership_notes": {
     "Player.immortal_aperture": "本人唯一元力账本；current 为保留的上界总储量，imitation_current 为下界仿元力。仙界与显圣修罗分别按本界转化阶段限制可用快照，未开放余量不随战斗回写丢失。战斗绑定原账本和池名，余量仅在临时绑定内保存，不新增持久池或补发储量。",

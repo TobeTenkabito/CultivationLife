@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from ...race_diplomacy import relations_for
 from ..semantic_events import emit
 from ..faction_geography import can_enter_faction, faction_site
 import copy
@@ -34,7 +36,7 @@ def _intrigue_vote_chance(
         chance += style_bias[style].get(resolution_type, 0)
         reasons.append(deps.STYLE_LABELS[str(style)])
     if target_id and kind in {"sect", "race"} and resolution_type in {"declare_war", "form_alliance", "break_alliance"}:
-        relations = game.sect_relations if kind == "sect" else game.race_relations
+        relations = game.sect_relations if kind == "sect" else relations_for(game)
         relation_affinity = float(relations.get(race_pair(faction_id, target_id), {}).get("affinity", 0))
         relation_bias = max(-.22, min(.22, relation_affinity / 320.0))
         if resolution_type == "form_alliance":
@@ -176,7 +178,7 @@ def _intrigue_apply_resolution(
         return
     if resolution_type in {"declare_war", "make_peace", "form_alliance", "break_alliance"}:
         status = {"declare_war": "war", "make_peace": "truce", "form_alliance": "alliance", "break_alliance": "neutral"}[resolution_type]
-        relations = game.race_relations if kind == "race" else game.sect_relations
+        relations = relations_for(game) if kind == "race" else game.sect_relations
         if kind not in {"sect", "race"} or not target_id:
             return
         relation = relations.setdefault(race_pair(faction_id, target_id), {"affinity": 0.0, "status": "neutral", "since_age": game.player.age})
@@ -254,6 +256,8 @@ def intrigue_propose_resolution(
         raise ValueError("《明争暗斗：合纵连横》DLC 尚未启用")
     if game.pending_event or game.player.imprisonment:
         raise ValueError("当前状态无法召开势力议事")
+    if kind=='race' and (not game.player.alive or game.player.ghost_captor):
+        raise ValueError('当前不能代表种族处理外交')
     faction_id = deps._intrigue_player_faction_id(game, kind)
     if not faction_id or not deps._intrigue_has_decision_authority(game, kind, faction_id):
         raise ValueError("你没有该势力的决策权")
@@ -264,6 +268,9 @@ def intrigue_propose_resolution(
             raise ValueError("目标宗门无效")
         if kind == "race" and (target_id not in RACE_DEFINITIONS or target_id == faction_id):
             raise ValueError("目标种族无效")
+        if kind=='race' and any(w['world']==game.player.world and w['status']!='ended'
+            and {w['attacker'],w['defender']}=={faction_id,target_id} for w in game.strategic_war_state.get('wars',[])):
+            raise ValueError('此案已进入战争统筹，请在战争页办理军令或总和谈')
         if resolution_type == "make_peace" and deps._active_war(game, kind, faction_id, target_id):
             raise ValueError("战争已经进入征伐阶段，请在战争窗口提交和约；和约仍会先经过势力表决")
     rng = decode_rng(game.seed, game.rng_state)

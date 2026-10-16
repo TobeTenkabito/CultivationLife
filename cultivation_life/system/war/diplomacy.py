@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+from ...race_diplomacy import relations_for
 from typing import Any
 from ...models import GameState
 from ...models import HistoryRecord
@@ -9,7 +11,7 @@ from .policy import system_war_allowed
 
 
 def _allied_powers(deps: WarDiplomacyDependencies, game: GameState, war: dict[str, Any], side: str) -> list[dict[str, Any]]:
-    relations = game.race_relations if war["kind"] == "race" else game.sect_relations
+    relations = relations_for(game) if war["kind"] == "race" else game.sect_relations
     own = set(deps._coalition_ids(war, side))
     enemy = set(deps._coalition_ids(war, "defender" if side == "attacker" else "attacker"))
     candidates: dict[str, dict[str, Any]] = {}
@@ -22,6 +24,10 @@ def _allied_powers(deps: WarDiplomacyDependencies, game: GameState, war: dict[st
                 continue
             candidate = second if caller == first else first
             if candidate in own or candidate in enemy or not deps._power_exists_in_world(game, war["kind"], candidate, war["world"]):
+                continue
+            from .occupancy import busy, organization
+            org = organization(game,candidate) if war['kind']=='sect' else None
+            if org and busy(game,org,managed_only=True):
                 continue
             base = float(deps._war_rules().get("ally_call_base_chance", 0.68))
             chance = base + max(-0.18, min(0.18, float(relation.get("affinity", 0)) / 400.0))
@@ -107,6 +113,14 @@ def _player_has_war_voice(deps: WarDiplomacyDependencies, game: GameState, war: 
 
 
 def _start_war(deps: WarDiplomacyDependencies, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False, prepare_supplies=True) -> dict[str, Any]:
+    if kind == 'race':
+        raise ValueError('种族宣战须通过族议建立战略战争，不能直接生成种族军队')
+    from .occupancy import busy, organization
+    if any((org:=organization(game,identity)) and busy(game,org,managed_only=True) for identity in (attacker,defender)):
+        raise ValueError('宗门仍在战略战役中，行军、交战与撤军结束前不能另开战役')
+    if any(w.get('strategic_war_id') and w.get('status')=='withdrawing'
+           and {w.get('attacker_id'),w.get('defender_id')}=={attacker,defender} for w in game.wars):
+        raise ValueError('原战役仍在撤回，不能重开同一战场')
     current = deps._active_war(game, kind, attacker, defender)
     if current:
         return current

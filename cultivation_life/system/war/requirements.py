@@ -18,6 +18,8 @@ def deployed_ids(war,side):
 
 def refresh(game, war, side, *, persist=True):
     ids = set(deployed_ids(war,side))
+    if war.get('strategic_war_id') and war.get('campaign_phase')=='engaged':
+        ids.intersection_update(j['person_id'] for j in war.get('journeys',{}).get(side,[]) if j['phase']=='stationed')
     escaped = set(war.get('escaped', {}).get(side, ())) | set(war.get('voisinage_suppressed', ()))
     pool = [*game.sects.values(), *([game.family] if game.family else [])]
     people = {n.id:n for e in pool for n in e.npcs if n.id in ids}
@@ -25,8 +27,8 @@ def refresh(game, war, side, *, persist=True):
     row = war.get('logistics', {}).get('sides', {}).get(side)
     source_world=(row or {}).get('world',war['world'])
     groups = Counter(n.realm_index for k,n in people.items() if k not in escaped and is_free(n) and n.world==source_world
-                     and not research_assignment(game, k) and not is_imprisoned(game, k))
-    if game.player.alive and game.player.world==war['world'] and war.get('player_side')==side:
+                     and not research_assignment(game, k, exclude_war=war.get("id")) and not is_imprisoned(game, k))
+    if not war.get('strategic_war_id') and game.player.alive and game.player.world==war['world'] and war.get('player_side')==side:
         groups[game.player.realm_index]+=1
     if row is not None and persist:
         row['realm_groups'] = {str(k):n for k,n in groups.items()}

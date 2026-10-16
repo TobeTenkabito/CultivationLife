@@ -922,6 +922,7 @@ class GameState:
     active_trial: dict[str, Any] | None = None
     diplomacy_unit: int = 0
     wars: list[dict[str, Any]] = field(default_factory=list)
+    strategic_war_state: dict[str, Any] = field(default_factory=dict)
     upper_institutions: dict[str, Any] = field(default_factory=dict)
     spatial_state: dict[str, Any] = field(default_factory=dict)
     heavenly_court: dict[str, Any] = field(default_factory=dict)
@@ -967,6 +968,8 @@ class GameState:
 
     def __post_init__(self):
         validate_heavens_state(self.heavens_state)
+        from .strategic_war_schema import validate_state as validate_strategic_war
+        validate_strategic_war(self.strategic_war_state, self.wars)
         from .monster_civilization_content import validate_state
         validate_state(self.monster_civilization_state)
         # Runtime-only reference: no duplicated derived bonuses enter save data.
@@ -985,6 +988,8 @@ class GameState:
 
     def to_dict(self) -> dict[str, Any]:
         validate_heavens_state(self.heavens_state)
+        from .strategic_war_schema import validate_state as validate_strategic_war
+        validate_strategic_war(self.strategic_war_state, self.wars)
         validate_heavens_references(self)
         document = {
             "id": self.id,
@@ -1027,6 +1032,7 @@ class GameState:
             "active_trial": self.active_trial,
             "diplomacy_unit": self.diplomacy_unit,
             "wars": self.wars,
+            "strategic_war_state": copy.deepcopy(self.strategic_war_state),
             "upper_institutions": self.upper_institutions,
             "spatial_state": self.spatial_state,
             "heavenly_court": self.heavenly_court,
@@ -1110,6 +1116,7 @@ class GameState:
             active_trial=value.get("active_trial"),
             diplomacy_unit=int(value.get("diplomacy_unit", 0)),
             wars=list(value.get("wars", [])),
+            strategic_war_state=copy.deepcopy(value.get("strategic_war_state", {})),
             upper_institutions=copy.deepcopy(value.get("upper_institutions", {})),
             spatial_state=copy.deepcopy(value.get("spatial_state", {})),
             heavenly_court=dict(value.get("heavenly_court", {})),

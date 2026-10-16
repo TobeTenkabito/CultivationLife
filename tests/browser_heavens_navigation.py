@@ -16,7 +16,7 @@ from cultivation_life.rules import max_hp, max_mp
 from cultivation_life.system.heavens.calendar import year_step, YearContext
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, reveal_subpage, set_theme
 
 def main():
     output=ROOT/'build/heavens-navigation-browser'
@@ -74,10 +74,22 @@ def main():
                     no_other_details()
                     assert page.locator('.heavens-destination').count()==3
                     nav('诸界')
-                    assert page.get_by_label('选择界域',exact=True).locator('option').count()==11
+                    visible_worlds=page.evaluate("[...new Set([...game.heavens.incidents,...game.heavens.sites].map(r=>r.world))]")
+                    assert set(page.get_by_label('选择界域',exact=True).locator('option').evaluate_all('nodes=>nodes.map(n=>n.value)'))==set(visible_worlds)
                     assert page.locator('.heavens-destination').count()==1
                     assert page.locator('[data-heavens-action]').count()==0
+                    # Upper contact details need a real upper-world observer.
+                    upper=engine.create_game('高界情报导航','supreme_metal','dao',928,
+                                             custom_start=dict(world='celestial',realm_index=9,layer=1))
+                    page.locator('#heavens-toggle').click()
+                    page.evaluate('async id=>{await loadGame(id)}',upper['id'])
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
+                    nav('诸界')
                     # Only a newly selected target may publish its read-only projection.
+                    page.get_by_label('选择界域',exact=True).select_option('asura')
+                    page.get_by_role('button',name='查看寂灭海 · 战律余响',exact=True).click()
+                    page.wait_for_function("game.heavens.target_id==='asura_echo'")
+                    nav('诸界')
                     held=[]
                     def delay_first(route):
                         if route.request.post_data_json.get('target_id')=='sea_echo' and not held:
@@ -102,13 +114,14 @@ def main():
                     page.keyboard.press('ArrowRight')
                     assert page.locator('#heavens-primary-anomalies').evaluate('el=>el===document.activeElement')
                     assert page.locator('#heavens-body').get_attribute('data-heavens-view')=='anomalies'
+                    page.locator('#heavens-toggle').click()
+                    page.evaluate('async id=>{await loadGame(id)}',key)
+                    navigation_locator(page,'[data-panel-target=heavens]').click()
+                    nav('异象')
                     assert engine.store.load(key).player.age==after.player.age
                     snapshot=engine.store._path(key).read_bytes()
                     for theme in 'abdf':
-                        page.locator('#theme-open').click()
-                        page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
-                        page.evaluate('GameThemes.saved')
-                        page.locator('[data-close-dialog=theme-dialog]').click()
+                        set_theme(page,theme)
                         for width in (1440,393):
                             page.set_viewport_size({'width':width,'height':1050 if width==1440 else 852})
                             for label,slug in [('见闻','home'),('诸界','worlds'),('异象','anomalies'),('行程','journey'),('战局','frontier')]:
@@ -118,7 +131,9 @@ def main():
                                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
                                 assert page.locator('#heavens-content').evaluate('el=>el.scrollWidth<=el.clientWidth+1')
                                 assert page.locator('#heavens-body').evaluate('el=>el.scrollWidth<=el.clientWidth+1')
-                                assert page.locator('#heavens-card').evaluate('el=>el.scrollHeight<=el.clientHeight+1')
+                                assert page.locator('#heavens-body').evaluate("el=>el.clientHeight>0&&(el.scrollHeight<=el.clientHeight+1||['auto','scroll'].includes(getComputedStyle(el).overflowY))")
+                                assert page.evaluate("document.querySelector('#heavens-body').getBoundingClientRect().bottom<=document.querySelector('#heavens-card').getBoundingClientRect().bottom")
+                                assert page.locator('#heavens-card').evaluate('el=>el.getBoundingClientRect().bottom<=innerHeight+1')
                                 if width==393:
                                     card=page.locator('#heavens-card').bounding_box()
                                     dock=page.locator('#navigation-bar').bounding_box()
@@ -128,9 +143,13 @@ def main():
                             page.get_by_role('tab',name='纪要',exact=True).click()
                             assert page.locator('.heavens-timeline li').count()>0
                             assert page.locator('.heavens-timeline li').count()<=12
-                            page.get_by_role('button',name='诸天偏好',exact=True).click()
-                            assert page.locator('#heavens-content input').count()==3
-                            assert page.locator('[data-heavens-action]').count()==0
+                            page.locator('#heavens-toggle').click()
+                            navigation_locator(page,'[data-panel-target=settings]').click()
+                            reveal_subpage(page,page.locator('#settings-heavens input').first)
+                            assert page.locator('#settings-heavens input').count()==3
+                            assert page.locator('#settings-heavens [data-heavens-action]').count()==0
+                            page.locator('#settings-toggle').click()
+                            navigation_locator(page,'[data-panel-target=heavens]').click()
                             assert page.locator('.heavens-primary [tabindex="0"]').count()==1
                         page.set_viewport_size({'width':1440,'height':1050})
                     assert engine.store._path(key).read_bytes()==snapshot
@@ -143,7 +162,7 @@ def main():
                     page.get_by_role('button',name='查看旧石回声',exact=True).wait_for()
                     assert page.get_by_role('button',name='查看旧石回声',exact=True).count()==1
                     assert not errors,errors
-                    (output/'report.json').write_text(json.dumps(dict(themes=6,widths=[1440,393],
+                    (output/'report.json').write_text(json.dumps(dict(themes=4,widths=[1440,393],
                         separate_pages=True,keyboard_tabs=True,stale_target_response_ignored=True,
                         local_study=True,no_entry_bypass=True,navigation_read_only=True,
                         mobile_docks_unobstructed=True,errors=errors),indent=2),encoding='utf-8')

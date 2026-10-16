@@ -724,6 +724,7 @@
 .merchant-panel [hidden] { display: none !important; }
 .merchant-metrics, .merchant-product-preview { grid-column: 1 / -1; min-width: 0; }
 .merchant-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; border: 1px solid var(--tone-gold); }
+.merchant-post fieldset.merchant-metrics { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
 .merchant-metrics p { grid-column: 1 / -1; }
 .merchant-product-preview { overflow-x: auto; }
 .merchant-product-preview table { width: 100%; border-collapse: collapse; }

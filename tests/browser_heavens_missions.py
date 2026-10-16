@@ -17,7 +17,7 @@ from cultivation_life.system.heavens.definitions import CONTACT_SITES, VISIT_DES
 from cultivation_life.system.heavens.state import create_echo, get_echo
 
 
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, set_theme
 
 def main():
     output = ROOT / 'build/heavens-missions-browser'
@@ -67,6 +67,7 @@ def main():
                         if not page.locator('#heavens-card').is_visible():
                             navigation_locator(page,'[data-panel-target=heavens]').click()
                         page.get_by_role('tab',name='诸界',exact=True).click()
+                        page.get_by_label('选择界域',exact=True).select_option(site.world)
                         page.get_by_role('button',name='查看'+site.name,exact=True).click()
                         page.get_by_role('tab',name='同道',exact=True).click()
                         page.get_by_role('button',name='约请同道回访',exact=True).wait_for()
@@ -74,10 +75,7 @@ def main():
                         disk = engine.store._path(key).read_bytes()
                         if index == 0:
                             for theme in 'abdf':
-                                page.locator('#theme-open').click()
-                                page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
-                                page.evaluate('GameThemes.saved')
-                                page.locator('[data-close-dialog=theme-dialog]').click()
+                                set_theme(page,theme)
                                 for width in (1440,393):
                                     page.set_viewport_size({'width':width,'height':1050 if width==1440 else 852})
                                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')

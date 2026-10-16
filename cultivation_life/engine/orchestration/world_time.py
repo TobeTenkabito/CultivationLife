@@ -73,6 +73,8 @@ def _advance_world_year(
         return False
     era_news.extend(deps._annual_sect_update(game, rng))
     era_news.extend(deps._annual_world_npc_update(game, rng))
+    if deps.advance_strategic_wars:
+        deps.advance_strategic_wars(game, rng)
     if deps.advance_civilizations:
         deps.advance_civilizations(game)
     if deps.advance_researchers:

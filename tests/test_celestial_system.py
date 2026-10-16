@@ -88,8 +88,11 @@ class CelestialSystemTests(unittest.TestCase):
 
         self.engine.manage_secret_art(game_id, "suppress", "activate", 8, 9)
         descended = self.engine.cross_world(game_id, "spirit")
-        self.assertFalse(descended["world_travel"]["can_return_celestial"])
+        self.assertTrue(descended["world_travel"]["can_return_celestial"])
         self.assertFalse(descended["world_travel"]["can_ascend_celestial"])
+        with self.assertRaisesRegex(ValueError, "循原路返界"):
+            self.engine.manage_secret_art(game_id, "suppress", "cancel")
+        self.engine.cross_world(game_id, "celestial")
         restored = self.engine.manage_secret_art(game_id, "suppress", "cancel")
         self.assertEqual(restored["player"]["realm_index"], 9)
 

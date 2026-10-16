@@ -62,7 +62,7 @@ def write_success_logs(root):
     logs.update({f'{check}-ui-{rid}.log': 'passed'
                  for check in ('true-form', 'world-life', 'custom-start', 'war-logistics', 'asura-court', 'asura', 'handbook', 'quick-start', 'puppet',
                                'territory', 'civilizations', 'organizations', 'start-layout', 'tutorial', 'spatial', 'debug-console',
-                               'economy-governance', 'economy-enterprises', 'economy-expansion', 'events', 'trial-sites', 'generated-events', 'local-market-search', 'release-2130')})
+                               'economy-governance', 'economy-enterprises', 'economy-expansion', 'events', 'trial-sites', 'generated-events', 'local-market-search', 'release-2130', 'strategic-war')})
     for name, text in logs.items():
         (root / 'build' / name).write_text(text)
 
@@ -101,7 +101,7 @@ def test_packaging_uses_the_verified_binary(release, monkeypatch):
     assert not (target/'cultivation_life/engine').exists()
 
 
-@pytest.mark.parametrize('check',['organizations','territory'])
+@pytest.mark.parametrize('check',['organizations','territory','strategic-war'])
 def test_required_ui_failure_cannot_publish(release, monkeypatch,check):
     root, receipt = release
     write_success_logs(root)

@@ -51,10 +51,15 @@ def main():
                           for (const theme of 'abdf') {
                             document.querySelector(`[data-theme-choice="${theme}"]`).click();
                             for (const button of document.querySelectorAll('[data-panel-target]')) {
-                              if (button.classList.contains('hidden')) continue;
+                              if (button.classList.contains('hidden') || button.disabled || button.getAttribute('aria-disabled')==='true') continue;
                               const name = button.dataset.panelTarget;
+                               const card = document.getElementById(`${name}-card`);
                               UtilityPanels.open(name);
-                              if (!document.getElementById(`${name}-card`)?.classList.contains('panel-open')) {
+                               if (card?.classList.contains('hidden')) {
+                                 if (card.classList.contains('panel-open')) throw new Error(`Unavailable panel opened: ${name}`);
+                                 continue;
+                               }
+                               if (!card?.classList.contains('panel-open')) {
                                 throw new Error(`Panel failed to open: ${name}`);
                               }
                               count++;

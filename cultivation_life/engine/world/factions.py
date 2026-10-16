@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...race_diplomacy import relations_for
+
 import random
 from typing import Any
 from ...content_registry import (
@@ -26,8 +28,11 @@ def _ensure_race_relations(game: GameState) -> bool:
         if len(members) != 2:
             continue
         key = race_pair(str(members[0]), str(members[1]))
-        if key not in game.race_relations:
-            game.race_relations[key] = {
+        world = row.get("world")
+        if not world or key in game.race_relations:
+            continue
+        if key not in relations_for(game, world):
+            relations_for(game, world)[key] = {
                 "affinity": float(row.get("affinity", 0)),
                 "status": str(row.get("status", "neutral")),
                 "since_age": game.player.age,
@@ -80,7 +85,8 @@ def _has_race_voice(deps: FactionDependencies, game: GameState) -> bool:
         return deps._world_supports(game.player.world, "races") and deps._intrigue_has_decision_authority(game, "race", race_id)
     realm_index, _ = deps._actual_player_realm(game.player)
     required = int(WORLD_SYSTEMS["world_travel"]["required_realm"])
-    return deps._world_supports(game.player.world, "races") and deps._player_allegiance_race(game.player) == "human" and realm_index >= required
+    return (game.player.alive and not game.player.imprisonment and not game.player.ghost_captor
+            and deps._world_supports(game.player.world, "races") and realm_index >= required)
 
 
 def _has_sect_voice(deps: FactionDependencies, game: GameState) -> bool:
@@ -237,6 +243,10 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                     ["system", "faction", "npc", "world_news", f"world:{sect.world}"],
                 ))
                 continue
+            from ...person_assignments import deployment_assignment
+            assignment=deployment_assignment(game,npc.id)
+            if assignment and assignment.get('war_id'):
+                continue
             crossing_to_spirit = npc.world == "human" and npc.realm_index == 4 and npc.layer == REALMS[4].layers
             can_cross = not crossing_to_spirit or living_spirit_npcs < 1
             old_realm = npc.realm_index
@@ -362,9 +372,10 @@ def _advance_diplomacy_unit(deps: FactionDependencies, game: GameState, rng: ran
     news: list[str] = []
     config = RACE_SYSTEMS.get("diplomacy", {})
 
-    for kind, relations in (("race", game.race_relations), ("sect", game.sect_relations)):
+    for kind, relations in (("race", relations_for(game)), ("sect", game.sect_relations)):
         for key, relation in relations.items():
-            if relation.get("status") != "truce" or game.diplomacy_unit < int(relation.get("truce_until_unit", 0)):
+            if (relation.get("status") != "truce" or game.diplomacy_unit < int(relation.get("truce_until_unit", 0))
+                    or game.player.age < int(relation.get('truce_until_age', 0))):
                 continue
             first, second = split_race_pair(key)
             if kind == "race" and not all(
@@ -393,7 +404,7 @@ def _advance_diplomacy_unit(deps: FactionDependencies, game: GameState, rng: ran
             game.player.world in RACE_DEFINITIONS.get(side, {}).get("worlds", [])
             for side in split_race_pair(key)
         )
-        for key, relation in game.race_relations.items()
+        for key, relation in relations_for(game).items()
     )
     allied_sect = bool(game.player.faction_id) and any(
         relation.get("status") in {"alliance", "vassal"} and game.player.faction_id in split_race_pair(key)
@@ -424,9 +435,11 @@ def _advance_diplomacy_unit(deps: FactionDependencies, game: GameState, rng: ran
 def _random_race_diplomacy_event(deps: FactionDependencies, game: GameState, rng: random.Random, news: list[str]) -> None:
     world = game.player.world if deps._world_supports(game.player.world, "races") else "spirit"
     race_ids = [race_id for race_id, row in RACE_DEFINITIONS.items() if world in row.get("worlds", [])]
+    if world != game.player.world or len(race_ids) < 2:
+        return
     first, second = rng.sample(race_ids, 2)
     key = race_pair(first, second)
-    relation = game.race_relations.setdefault(key, {"affinity": 0.0, "status": "neutral", "since_age": game.player.age})
+    relation = relations_for(game).setdefault(key, {"affinity": 0.0, "status": "neutral", "since_age": game.player.age})
     old_status = str(relation.get("status", "neutral"))
     if game.diplomacy_unit < max(int(relation.get("truce_until_unit", 0)), int(relation.get("war_truce_until_unit", 0))):
         return
@@ -445,7 +458,10 @@ def _random_race_diplomacy_event(deps: FactionDependencies, game: GameState, rng
     from ...system.war.logistics import ready_to_attack
     if new_status == 'war' and not ready_to_attack(game, 'race', first, world):
         return
-    deps._set_diplomatic_relation(game, relation, new_status, first, second, "race", affinity)
+    try:
+        deps._set_diplomatic_relation(game, relation, new_status, first, second, "race", affinity)
+    except ValueError:
+        return
     first_name, second_name = RACE_DEFINITIONS[first]["name"], RACE_DEFINITIONS[second]["name"]
     summary = f"{first_name}与{second_name}{action}，双方关系转为{RELATION_LABELS[new_status]}（好感 {affinity:.0f}）。"
     game.history.append(HistoryRecord(
@@ -625,7 +641,7 @@ def _sect_power(deps: FactionDependencies, game: GameState, sect_id: str) -> flo
 
 
 def _simulate_war_casualties(deps: FactionDependencies, game: GameState, rng: random.Random, kind: str) -> list[str]:
-    relations = game.race_relations if kind == "race" else game.sect_relations
+    relations = relations_for(game) if kind == "race" else game.sect_relations
     chance = float(RACE_SYSTEMS.get("diplomacy", {}).get("war_casualty_chance", 0.42))
     news: list[str] = []
     protected_ids = {
@@ -684,7 +700,7 @@ def _maybe_race_war_ambush(deps: FactionDependencies, game: GameState, rng: rand
         return False
     enemies = []
     player_race = deps._player_allegiance_race(player)
-    for key, relation in game.race_relations.items():
+    for key, relation in relations_for(game).items():
         first, second = split_race_pair(key)
         if player_race not in {first, second} or relation.get("status") != "war":
             continue

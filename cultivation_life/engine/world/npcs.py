@@ -229,6 +229,10 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
                 ["system", "world_npc", "world_news", f"world:{event_world}"],
             ))
             continue
+        from ...person_assignments import deployment_assignment
+        assignment=deployment_assignment(game,npc.id)
+        if assignment and assignment.get('war_id'):
+            continue
         crossing_to_spirit = npc.world == "human" and npc.realm_index == 4 and npc.layer == REALMS[4].layers
         event_world = npc.world
         result = deps._advance_npc_cultivation(npc, rng, not crossing_to_spirit or living_human_spirits < 1, world_age=game.player.age)
@@ -327,9 +331,16 @@ def _scale_npc_lifespan(deps: NpcClassDependencies, lifespan: int | None, path: 
 
 
 def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.Random, news: list[str]) -> None:
-    if rng.random() >= 0.012 or sum(sect.founded_by_npc and not sect.extinct for sect in game.sects.values()) >= 8:
-        return
     world = game.player.world
+    race_pool = [race_id for race_id, definition in RACE_DEFINITIONS.items()
+                 if world in definition.get("worlds", [])]
+    if not race_pool and deps._world_supports(world, "races"):
+        return
+    # Worlds without a race catalog retain the ordinary NPC native default.
+    # A missing DLC race catalog must never create substitute human factions.
+    if (rng.random() >= 0.012 or sum(sect.founded_by_npc and not sect.extinct for sect in game.sects.values()) >= 8
+            or sum(sect.founded_by_npc for sect in game.sects.values()) >= 12):
+        return
     realm_cap = deps._world_realm_cap(world)
     realm_index = (
         (5 if rng.random() < 0.02 else 4)
@@ -342,11 +353,12 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
     sect_id = f"npc_{kind}_{game.diplomacy_unit}_{serial}"
     layer = rng.randint(1, REALMS[realm_index].layers)
     age = rng.randint(500, 1200) if realm_cap <= 5 else rng.randint(8000, 30000)
+    race = rng.choice(race_pool) if race_pool else "human"
     founder = SectNpc(
         f"{sect_id}_founder", founder_name, "开山祖师" if kind == "sect" else "始祖",
         realm_index, layer, age, None if realm_index >= 6 else max(age + 1, REALMS[realm_index].lifespan[1]),
         spirit_root=deps._random_npc_root(realm_index, rng), path=rng.choice(list(PATH_NAMES)),
-        race="human", world=world, faction_id=sect_id, affinity=0,
+        race=race, world=world, faction_id=sect_id, affinity=0,
     )
     founder.lifespan = deps._scale_npc_lifespan(founder.lifespan, founder.path, founder.age)
     sect = SectState(

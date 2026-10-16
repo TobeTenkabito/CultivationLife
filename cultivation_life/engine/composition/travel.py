@@ -20,6 +20,7 @@ def bind_world_year(host) -> WorldYearDependencies:
         advance_caravans=lambda game: advance_caravans(game, host.maps),
         advance_organizations=lambda game: advance_organizations(game, host.maps),
         advance_war_finance=advance_stationing,
+        advance_strategic_wars=lambda game, rng: host._advance_strategic_wars(game, rng),
         _advance_buddhist_year=lambda *args, **kwargs: host._advance_buddhist_year(*args, **kwargs),
         _advance_ghost_phase_two_year=lambda *args, **kwargs: host._advance_ghost_phase_two_year(*args, **kwargs),
         _advance_guixu_calendar=lambda *args, **kwargs: host._advance_guixu_calendar(*args, **kwargs),

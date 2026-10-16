@@ -12,10 +12,9 @@ window.WorldUpdateProbe = (() => {
       ];
       place.wars = [{id:'war', attacker:'太元归墟九霄剑宗', defender:'玄海长生万象宫'}];
       place.ghost_parade = {status:'active', start_age:game.player.age};
-      renderMap(map, {available:true, location_id:place.id, status:'scheduled', actions_until_open:2});
+      UtilityPanels.schedule('map',()=>renderMap(map, {available:true, location_id:place.id, status:'scheduled', actions_until_open:2}));
       UtilityPanels.open('map');
-      const tabs = document.querySelectorAll('#map-view-tabs button');
-      tabs[1].click();
+      document.querySelector('#map-view-tabs button[aria-controls=map-directory]').click();
       document.querySelector('#map-directory-filters');
       document.querySelectorAll('.map-directory-filters button')[0].click();
       document.querySelector('#map-card').scrollTop=0;
@@ -36,7 +35,7 @@ window.WorldUpdateProbe = (() => {
     if(panel==='map') {
       expect(card.querySelectorAll('.map-directory-entry.faction').length>=3,'faction rows missing');
       expect(card.querySelectorAll('.map-directory-entry.war').length>=1,'war notice missing');
-      expect(card.querySelectorAll('select').length===0,'native dropdown introduced');
+      expect(card.querySelectorAll('#map-directory select').length===0,'native dropdown introduced in directory');
     } else {
       expect(card.querySelectorAll('.technique-growth').length>=4,'growth previews missing');
       expect(card.textContent.includes('战斗倾向'),'combat preference missing');

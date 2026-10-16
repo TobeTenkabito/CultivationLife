@@ -12,6 +12,7 @@ from playwright.sync_api import sync_playwright
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from test_family_expansion import family_game
+from scripts.browser_navigation import click_control, reveal_subpage
 
 def main():
     with tempfile.TemporaryDirectory() as folder:
@@ -29,7 +30,7 @@ def main():
                     page.evaluate("UtilityPanels.open('family')")
                     def click(action):
                         with page.expect_response(lambda r:'/family-action' in r.url) as response:
-                            page.locator(f'[data-family-member="family_heir"] button[data-family*="{action}"]').click()
+                            click_control(page.locator(f'[data-family-member="family_heir"] button[data-family*="{action}"]'))
                         assert response.value.status==200,response.value.text()
                         page.wait_for_timeout(150)
                     click('teach');click('gift_equipment');click('invite');click('infuse');click('marry')
@@ -47,6 +48,8 @@ def main():
                             page.evaluate('GameThemes.saved')
                             for panel in ('family','offer','guixu'):
                                 page.evaluate('p=>FamilyGuixuProbe.mount(p)',panel)
+                                if panel=='family':
+                                    reveal_subpage(page,page.locator('#family-card .family-member').first)
                                 page.wait_for_timeout(1100 if theme=='f' else 300)
                                 failures=page.evaluate('p=>FamilyGuixuProbe.check(p)',panel)
                                 assert not failures,(width,theme,panel,failures)

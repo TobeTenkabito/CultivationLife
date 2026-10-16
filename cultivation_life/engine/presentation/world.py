@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ...race_diplomacy import relations_for
+
 from ...npc_custody import is_free
 from ...system.intrigue.custody import is_imprisoned
 
@@ -247,7 +249,7 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
         for other_id, other_definition in RACE_DEFINITIONS.items():
             if other_id == race_id or race_world not in other_definition.get("worlds", []):
                 continue
-            relation = game.race_relations.get(race_pair(race_id, other_id), {})
+            relation = relations_for(game).get(race_pair(race_id, other_id), {})
             relations.append({
                 "race": other_id, "race_name": other_definition["name"],
                 "affinity": round(float(relation.get("affinity", 0)), 1),
@@ -264,7 +266,7 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
         ][:12]
         supported_factions: list[dict[str, Any]] = []
         seen_factions: set[str] = set()
-        for sect in game.sects.values():
+        for sect in [*game.sects.values(), *([game.family] if game.family else [])]:
             allegiance = sect.allegiance_race or (sect.npcs[0].race if sect.npcs else "human")
             if sect.world != race_world or allegiance != race_id or sect.extinct:
                 continue
@@ -289,7 +291,7 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
         }
     alliances = []
     races_in_world = set(races)
-    for key, relation in game.race_relations.items():
+    for key, relation in relations_for(game).items():
         if relation.get("status") not in {"alliance", "vassal"}:
             continue
         first, second = split_race_pair(key)
@@ -303,6 +305,7 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
         })
     return {
         "available": available, "implemented": True,
+        "strategic_available": race_world in {'spirit','true_demon'},
         "player_race": player_race,
         "player_race_name": RACE_DEFINITIONS.get(player_race, {"name": player_race})["name"],
         "lineage_race": lineage_race,
@@ -313,7 +316,7 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
         "has_diplomatic_voice": deps._has_race_voice(game),
         "vassal_transfers": [
             {"target_id": other_id, "target_name": RACE_DEFINITIONS[other_id]["name"], "candidates": deps._vassal_transfer_candidates(game, "race", player_race, other_id, relation)}
-            for key, relation in game.race_relations.items()
+            for key, relation in relations_for(game).items()
             for first, second in [split_race_pair(key)]
             for other_id in [second if first == player_race else first]
             if (

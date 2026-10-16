@@ -11,7 +11,7 @@ def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> di
     wars = []
     visible_wars = [
         war for war in game.wars
-        if game.debug_world_news or war.get("world") == game.player.world
+        if not war.get('strategic_war_id') and (game.debug_world_news or war.get("world") == game.player.world)
     ]
     for war in reversed(visible_wars[-20:]):
         deps._ensure_war_shape(game, war)
@@ -24,8 +24,10 @@ def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> di
         public["supplies"] = public_logistics(game, war, public["player_side"])
         public["supply_actions"] = action_quotes(game, war, public["player_side"])
         public["player_controls"] = war.get("status") in {"active", "peace_ready"} and deps._player_has_war_voice(game, war)
+        if war.get('kind') == 'race' and war.get('status') in {'active','peace_ready'}:
+            public['player_controls'] = False
         public["can_participate"] = bool(
-            war.get("status") == "active" and public["player_side"]
+            war.get("kind") != 'race' and war.get("status") == "active" and public["player_side"]
             and game.player.alive and not game.player.imprisonment and not game.pending_event
         )
         public["can_negotiate"] = int(war.get("battles", 0)) >= 2 or war.get("status") == "peace_ready"

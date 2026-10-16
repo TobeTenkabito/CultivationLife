@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from ..race_diplomacy import relations_for
+
 from ..npc_custody import kill_person, settle_puppet_person
 from ..relationship_records import find_person
 
@@ -612,7 +614,7 @@ def _kill_generates_hostility(deps: CombatDependencies, game: GameState, kind: s
     if victim_realm < minimum:
         return False
     if kind == "race":
-        relation = game.race_relations.get(race_pair(deps._player_allegiance_race(player), target_id), {})
+        relation = relations_for(game).get(race_pair(deps._player_allegiance_race(player), target_id), {})
         return relation.get("status") != "war"
     if kind == "sect" and player.faction_id and target_id in game.sects:
         relation = game.sect_relations.get(race_pair(player.faction_id, target_id), {})
@@ -633,7 +635,7 @@ def _is_wartime_opponent(deps: CombatDependencies, game: GameState, faction_id: 
         target_side = deps._participant_side(war, target_id)
         if own_side and target_side and own_side != target_side:
             return True
-    if race_id != player_race and game.race_relations.get(race_pair(player_race, race_id), {}).get("status") == "war":
+    if race_id != player_race and relations_for(game).get(race_pair(player_race, race_id), {}).get("status") == "war":
         return True
     return bool(
         faction_id and player.faction_id and faction_id != player.faction_id
@@ -681,7 +683,10 @@ def _handle_same_sect_kill(deps: CombatDependencies, game: GameState, faction_id
 def _race_alliance(game: GameState, world: str, first: str, second: str) -> dict[str, Any] | None:
     if first == second:
         return None
-    dynamic = game.race_relations.get(race_pair(first, second))
+    legacy=game.race_relations.get(race_pair(first,second))
+    if legacy is not None and not legacy.get('adopted_world'):
+        return None
+    dynamic = relations_for(game, world).get(race_pair(first, second))
     if "races" in WORLD_SYSTEMS.get("world_profiles", {}).get(world, {}).get("supports", []) and dynamic is not None:
         if dynamic.get("status") in {"alliance", "vassal"}:
             return {

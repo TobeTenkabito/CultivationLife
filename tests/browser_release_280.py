@@ -32,6 +32,7 @@ def main():
                             errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
                             page.goto(f'http://127.0.0.1:{http.server_port}')
                             page.wait_for_selector('#custom-start')
+                            page.wait_for_function("window.GameNavigation && typeof configData!=='undefined' && configData")
                             page.evaluate('GameNavigation.ready')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
                             for rank in (1,4):

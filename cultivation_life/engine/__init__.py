@@ -1614,6 +1614,18 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return world_factions._simulate_cultivator_duel(self._dependencies.world_factions, game, rng, news)
 
     def _set_diplomatic_relation(self, game: GameState, relation: dict[str, Any], status: str, first: str, second: str, kind: str, affinity: float, *, initiated_by_player=False) -> None:
+        if kind == 'race' and status != 'war' and any(
+            w['world']==game.player.world and w['status']!='ended'
+            and {w['attacker'],w['defender']}=={first,second}
+            for w in game.strategic_war_state.get('wars',[])
+        ):
+            raise ValueError('当前战争尚未完成总和谈与撤军，不能直接改写外交关系')
+        if kind == "race" and status == "war":
+            from .composition.strategic_war import bind
+            from ..system.strategic_war.lifecycle import start
+            start(bind(self), game, first, second)
+            relation.update(status="war", affinity=affinity, since_age=game.player.age)
+            return
         return world_factions._set_diplomatic_relation(self._dependencies.world_factions, game, relation, status, first, second, kind, affinity, initiated_by_player=initiated_by_player)
 
     def _race_power(self, game: GameState, race_id: str) -> float:
@@ -3181,6 +3193,17 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _resolve_war_vanguard(self, game: GameState, pending: dict[str, Any], mode: str, rng: random.Random) -> tuple[str, str]:
         return war_combat._resolve_war_vanguard(self._dependencies.war.combat, game, pending, mode, rng)
 
+    def _advance_strategic_wars(self, game, rng):
+        if not game.strategic_war_state or not any(w['status']!='ended' for w in game.strategic_war_state.get('wars',[])):
+            return
+        from .composition.strategic_war import bind
+        from ..system.strategic_war.lifecycle import advance
+        return advance(bind(self), game, rng)
+
+    def strategic_war_action(self, game_id, payload):
+        from .actions.strategic_war import act
+        return act(self, game_id, payload)
+
     def _advance_wars_unit(self, game: GameState, rng: random.Random) -> list[str]:
         return war_lifecycle._advance_wars_unit(self._dependencies.war.lifecycle, game, rng)
 
@@ -3210,7 +3233,9 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return war_actions._maybe_map_war_encounter(self._dependencies.war.actions, game, rng)
 
     def _public_war_system(self, game: GameState) -> dict[str, Any]:
-        return war_presentation._public_war_system(self._dependencies.war.presentation, game)
+        from .composition.strategic_war import bind
+        from ..system.strategic_war.presentation import public
+        return {**war_presentation._public_war_system(self._dependencies.war.presentation, game), "strategic": public(bind(self), game)}
 
     @staticmethod
     def _war_sect(game, power_id):

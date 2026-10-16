@@ -8,6 +8,7 @@ from cultivation_life.models import HistoryRecord
 from cultivation_life.rules import max_hp, max_mp
 from cultivation_life.simulation import ActionUnitLedger
 from cultivation_life.world_state import choose_weighted_race, race_pair
+from cultivation_life.race_diplomacy import relations_for
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -91,7 +92,7 @@ class WorldStateUpdateTests(unittest.TestCase):
         created = self.engine.create_game("观万族", "none", "dao", 705, preset_id="mahayana")
         game = self.engine.store.load(created["id"])
         key = race_pair("human", "starborn")
-        game.race_relations[key] = {"affinity": -70, "status": "war", "since_age": game.player.age}
+        relations_for(game, "spirit")[key] = {"affinity": -70, "status": "war", "since_age": game.player.age}
         game.history.append(HistoryRecord(
             "SYS_RACE_DIPLOMACY", 1, game.player.age, "灵界族群大事", "宣战", "war",
             "人族与星裔族宣战。", {"races": ["human", "starborn"]},
@@ -104,7 +105,7 @@ class WorldStateUpdateTests(unittest.TestCase):
 
         counts = {"starborn": 0, "moonfolk": 0}
         for seed in range(300):
-            race = choose_weighted_race(counts, "human", game.race_relations, random.Random(seed))
+            race = choose_weighted_race(counts, "human", relations_for(game, "spirit"), random.Random(seed))
             counts[race] += 1
         self.assertGreater(counts["starborn"], counts["moonfolk"] * 2)
 
