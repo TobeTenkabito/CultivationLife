@@ -1332,7 +1332,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("[data-panel-target=inventory]");
                     waitForJs("document.querySelector('#inventory-list').textContent.includes('离照玄晶')","Renamed inventory rendered");
                     check(Boolean.TRUE.equals(js("game.player.inventory.some(i=>i.id==='radiant_flame_crystal'&&i.quantity===7) && game.player.inventory.some(i=>i.id==='custom-naming-sword'&&i.name==='婴神太虚录')")),"Original stock and custom name preserved");
-                    js("Array.from(document.querySelectorAll('#inventory-list .item')).find(n=>n.textContent.includes('麟趾玉液')).querySelector('.item-use').id='release-naming-use';true");
+                    js("Array.from(document.querySelectorAll('#inventory-list .item')).find(n=>n.textContent.includes('英姿神武口服液')).querySelector('.item-use').id='release-naming-use';true");
                     tapSelector("#release-naming-use");
                     waitForJs("!busy && game.player.guaranteed_progeny && !game.player.inventory.some(i=>i.id==='qilin_blessing_elixir')","Renamed starter medicine native use");
                     capture("content-naming-inventory-"+theme+"-"+arguments.getString("orientation","portrait"));
@@ -1340,6 +1340,33 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("#inventory-toggle");
                 }
                 result.putString("content_naming_scope","Four themes; original saved IDs, fixed catalog labels, custom names, native manual upgrade and starter use, exact stock and no time charge");
+            } else if(phase.equals("natal-materials")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'十一界镶材原生验收',spirit_root:'supreme_metal',path:'dao',seed:2142,preset_id:'core'})});return g.id;})()");
+                    python(assetText("natal_materials_release.py")+"\nfrom cultivation_life import server\nprepare_natal_materials_release(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.documentElement.dataset.theme="+JSONObject.quote(theme)+";true");
+                    tapSelector("[data-panel-target=natal-artifact]");
+                    tapSelector(".natal-slot.slot-0");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.natal-material-choice').length===3")),"Owned materials only");
+                    tapSelector("[data-material-id=natal_human_pine_metal]");
+                    waitForJs("!busy && game.natal_artifact.slots[0].material_id==='natal_human_pine_metal'","Native socket ownership transfer");
+                    capture("natal-materials-socket-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector(".natal-slot.slot-0");
+                    waitForJs("!busy && !game.natal_artifact.slots[0].material_id","Native exact material return");
+                    tapSelector(".natal-slot.slot-0");
+                    js("(()=>{const s=document.querySelector('[aria-label=镶材范围]');s.value='all';s.dispatchEvent(new Event('change'));return true;})()");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.natal-material-choice').length===24 && document.querySelector('.natal-material-pages button').disabled")),"Bounded catalog page");
+                    tapSelector(".natal-material-pages button:last-child");
+                    check(Boolean.TRUE.equals(js("document.querySelector('.natal-material-pages span').textContent.startsWith('2 /')")),"Native catalog paging");
+                    js("(()=>{const s=document.querySelector('[aria-label=搜索镶材]');s.value='烛龙母金';s.dispatchEvent(new Event('input'));return true;})()");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('.natal-material-choice').length===1 && document.querySelector('.natal-material-choice').disabled && document.querySelector('.natal-material-choice').textContent.includes('幽冥界')")),"Origin shown and high tier unavailable");
+                    check(Boolean.TRUE.equals(js("Array.from(document.querySelectorAll('.natal-material-grid')).every(e=>e.scrollWidth<=e.clientWidth+1)")),"Material picker width");
+                    capture("natal-materials-catalog-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    python(assetText("natal_materials_release.py")+"\nfrom cultivation_life import server\ninspect_natal_materials_release(server.ENGINE,"+JSONObject.quote(id)+")");
+                    tapSelector("#natal-artifact-toggle");
+                }
+                result.putString("natal_materials_scope","Eleven-world catalog, four themes, native socket and exact unsocket, owned source filtering, bounded pages and higher-tier rejection");
             } else if(phase.equals("strategic-war")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'联军调度原生验收',spirit_root:'supreme_metal',path:'dao',seed:641,custom_start:{world:'spirit',realm_index:8,layer:1}})});return g.id;})()");

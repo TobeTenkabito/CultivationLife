@@ -1155,6 +1155,50 @@ function loadFormationPreset(loadout, system) {
 
 window.addEventListener('resize', () => drawFormationLines(formationDraftProfile));
 
+function renderNatalMaterialPicker(picker, system, slotIndex, closePicker) {
+  picker.replaceChildren(); picker.classList.remove('hidden');
+  const heading=document.createElement('b'); heading.textContent=`第 ${slotIndex+1} 槽 · 选择镶材`;
+  const close=document.createElement('button'); close.textContent='×';close.setAttribute('aria-label','关闭镶材选择');close.onclick=closePicker;
+  const tools=document.createElement('div');tools.className='natal-material-filters';
+  const scope=document.createElement('select');scope.setAttribute('aria-label','镶材范围');
+  [['owned','随身镶材'],['local','本界图鉴'],['all','十一界图鉴']].forEach(([value,text])=>scope.add(new Option(text,value)));
+  const search=document.createElement('input');search.type='search';search.placeholder='查找器名、产地或效果';search.setAttribute('aria-label','搜索镶材');
+  tools.append(scope,search);
+  const choices=document.createElement('div');choices.className='natal-material-grid';
+  const pager=document.createElement('div');pager.className='natal-material-pages';
+  const previous=document.createElement('button'),next=document.createElement('button'),count=document.createElement('span');
+  previous.textContent='上一页';next.textContent='下一页';pager.append(previous,count,next);
+  let page=0;
+  const draw=()=>{
+    const query=search.value.trim().toLocaleLowerCase();
+    const rows=(system.materials||[]).filter(material=>
+      (scope.value==='all'||(scope.value==='owned'?material.quantity>0:material.world===game.player.world))&&
+      (!query||`${material.name} ${material.world_name} ${material.description}`.toLocaleLowerCase().includes(query)))
+      .sort((a,b)=>Number(b.available)-Number(a.available)||a.minimum_realm-b.minimum_realm||a.name.localeCompare(b.name,'zh-CN'));
+    const pages=Math.max(1,Math.ceil(rows.length/24));page=Math.min(page,pages-1);
+    choices.replaceChildren();
+    rows.slice(page*24,(page+1)*24).forEach(material=>{
+      const option=document.createElement('button');option.className='natal-material-choice';option.dataset.materialId=material.item_id;
+      option.dataset.natalUnavailable=material.available?'0':'1';option.title=material.description;
+      const title=document.createElement('b'),detail=document.createElement('small'),effect=document.createElement('span');
+      title.textContent=`${material.name} ×${material.quantity}`;
+      detail.textContent=`${material.world_name} · ${material.minimum_realm_name}起${material.specialization?' · '+material.specialization:''}`;
+      effect.textContent=material.description;
+      option.append(title,detail,effect);
+      option.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'socket',item_id:material.item_id,slot_index:slotIndex});
+      choices.appendChild(option);
+    });
+    if(!rows.length){const empty=document.createElement('p');empty.className='empty';empty.textContent=scope.value==='owned'?'暂无符合条件的随身镶材，可切换图鉴查看产地。':'没有符合条件的镶材。';choices.appendChild(empty);}
+    count.textContent=`${page+1} / ${pages} · ${rows.length} 种`;
+    previous.dataset.natalUnavailable=page===0?'1':'0';next.dataset.natalUnavailable=page===pages-1?'1':'0';
+    renderButtons();
+    picker.scrollTop=0;
+  };
+  scope.onchange=search.oninput=()=>{page=0;draw();};
+  previous.onclick=()=>{page--;draw();};next.onclick=()=>{page++;draw();};
+  picker.append(heading,close,tools,choices,pager);draw();
+}
+
 function renderNatalArtifact(system) {
   const panel=$('#natal-artifact-card'), dock=document.querySelector('[data-panel-target="natal-artifact"]');
   panel.classList.toggle('hidden',!system.visible); dock?.classList.toggle('hidden',!system.visible);
@@ -1187,7 +1231,7 @@ function renderNatalArtifact(system) {
   const closePicker=()=>picker.classList.add('hidden');
   (system.slots||[]).forEach(slot=>{const button=document.createElement('button');button.className=`natal-slot slot-${slot.index} ${slot.unlocked?'':'locked'} ${slot.material_id?'filled':''}`;button.dataset.natalUnavailable=slot.unlocked?'0':'1';button.innerHTML=slot.material_id?'<span>◆</span>':'<span>＋</span>';const caption=document.createElement('small');caption.textContent=slot.unlocked?(slot.name||'空槽'):`${slot.index+1}槽·未解锁`;button.appendChild(caption);button.title=slot.description||caption.textContent;
     if(slot.unlocked&&slot.material_id){button.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'unsocket',slot_index:slot.index});}
-    else if(slot.unlocked){button.onclick=()=>{picker.innerHTML='';picker.classList.remove('hidden');const heading=document.createElement('b');heading.textContent=`第 ${slot.index+1} 槽 · 选择材料`;const close=document.createElement('button');close.textContent='×';close.onclick=closePicker;picker.append(heading,close);const choices=document.createElement('div');(system.materials||[]).forEach(material=>{const option=document.createElement('button');option.className='natal-material-choice';option.dataset.natalUnavailable=material.available?'0':'1';option.textContent=`${material.name} ×${material.quantity}`;option.title=material.description;option.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'socket',item_id:material.item_id,slot_index:slot.index});choices.appendChild(option);});picker.appendChild(choices);renderButtons();};}
+    else if(slot.unlocked){button.onclick=()=>renderNatalMaterialPicker(picker,system,slot.index,closePicker);}
     slotLayer.appendChild(button);});
   root.appendChild(visual);
   const hint=document.createElement('p');hint.className='natal-hint';hint.textContent=`已解锁 ${system.unlocked_slots} 槽，下一个槽位于 ${system.next_slot_level} 级开放。槽位与祭炼等级均无上限；修炼时本命法宝会随周天自动积累祭炼经验。`;root.appendChild(hint);

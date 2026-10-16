@@ -214,7 +214,7 @@ def test_elixir_can_be_consigned_but_legacy_npc_lot_is_refunded(engine):
     assert lot['seller']=='player' and lot['rated_price']==985
     assert not has_item(g.player,'qilin_blessing_elixir')
     legacy={'id':'old','seller':'npc','kind':'item','content_id':'qilin_blessing_elixir',
-        'name':'麟趾玉液','current_bidder':'player','current_bid':985}
+        'name':'英姿神武口服液','current_bidder':'player','current_bid':985}
     g.auction_state['lots']=[legacy];before=wallet(g)
     engine._finish_auction(g,random.Random(10))
     assert wallet(g)==before+985 and not has_item(g.player,'qilin_blessing_elixir')

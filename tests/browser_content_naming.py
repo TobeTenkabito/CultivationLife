@@ -66,7 +66,7 @@ def main():
                         assert '离照玄晶' in page.locator('#inventory-list').inner_text()
                         custom = page.locator('#inventory-list .item').filter(has_text='婴神太虚录')
                         assert custom.count() == 1
-                        bottle = page.locator('#inventory-list .item').filter(has_text='麟趾玉液')
+                        bottle = page.locator('#inventory-list .item').filter(has_text='英姿神武口服液')
                         # Fixture inventory is deliberately old; add the new starter bottle
                         # in a second ordinary save so its renamed ID is also clickable.
                         fresh = engine._load(game.id)
@@ -87,6 +87,8 @@ def main():
                         page.wait_for_function('!busy && game.player.guaranteed_progeny')
                         assert bottle.count() == 0
                         saved = engine.store.load(game.id)
+                        assert any(row.event_id == 'SYS_GUARANTEED_PROGENY' and '英姿神武口服液' in row.summary
+                                   for row in saved.history)
                         assert saved.player.technique.level == 6
                         assert next(i.quantity for i in saved.player.inventory if i.id == 'radiant_flame_crystal') == 7
                         assert next(i.quantity for i in saved.player.inventory if i.technique_id == 'TECH_YELLOW_COURT_INNER') == 1

@@ -390,7 +390,15 @@
 .natal-material-picker>b { display:inline-block; margin-bottom:14px; }
 .natal-material-picker>button { float:right; padding:3px 8px; }
 .natal-material-picker>div { display:grid; grid-template-columns:1fr 1fr; gap:8px; clear:both; }
-.natal-material-choice { min-height:54px; padding:8px; }
+.natal-material-choice { min-height:54px; padding:10px; display:grid; gap:5px; text-align:left; min-width:0; }
+.natal-material-choice small { color:var(--muted); }
+.natal-material-choice span { font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+.natal-material-picker>.natal-material-filters { display:flex; flex-wrap:wrap; margin-bottom:12px; gap:8px; }
+.natal-material-filters select { flex:0 1 140px; min-width:0; }
+.natal-material-filters input { flex:1 1 150px; width:0; min-width:0; }
+.natal-material-picker>.natal-material-pages { display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:8px; }
+.natal-material-pages span { font-size:12px; color:var(--muted); }
+@media(max-width:600px) { .natal-material-picker>.natal-material-grid { grid-template-columns:1fr; } }
 .natal-hint { margin:8px 0 0; color:var(--muted); text-align:center; font-size:11px; }
 .natal-candidates { display:grid; gap:8px; margin-top:16px; }
 .natal-candidates>div { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px; border-left:3px solid var(--gold); background:color-mix(in srgb, var(--tone-gold) 8%, transparent); }

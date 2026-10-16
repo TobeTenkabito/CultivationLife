@@ -59,8 +59,9 @@ LEGACY_CONTENT_IDS = {
 # containing an old spelling are never interpreted as catalog references.
 _REFERENCE_FIELDS = frozenset({
     'id', 'item', 'item_id', 'content_id', 'technique_id', 'main_technique_id',
-    'support_technique_id', 'treasure_item_id', 'material_id', 'plant_id',
+    'support_technique_id', 'treasure_item_id', 'combat_artifact_id', 'material_id', 'plant_id',
     'target_item_id', 'source_item_id', 'product_id', 'output_item_id', 'manual_id',
+    'definition_id', 'reward_definition_id',
     'active_breakthrough_aids', 'technique_ids', 'material_ids', 'item_ids',
     'main_technique', 'support_technique', 'starting_techniques',
     'materials', 'inputs', 'outputs',

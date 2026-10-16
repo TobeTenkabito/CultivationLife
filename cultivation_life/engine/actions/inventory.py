@@ -96,12 +96,12 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         ))
     elif item.id == "qilin_blessing_elixir":
         if game.player.guaranteed_progeny:
-            raise ValueError("玉液的药力仍在，等待下一次有效缠绵即可")
+            raise ValueError("口服液的药力仍在，等待下一次有效缠绵即可")
         remove_item(game.player, item_id)
         game.player.guaranteed_progeny = True
         game.history.append(HistoryRecord(
             "SYS_GUARANTEED_PROGENY", 1, game.player.age, "英姿神武", item_id, "activated",
-            "你服下麟趾玉液：下一次有效缠绵必定诞下后代，无视境界不育，后代必为单灵根或变异灵根。",
+            f"你服下{item.name}：下一次有效缠绵必定诞下后代，无视境界不育，后代必为单灵根或变异灵根。",
             {}, ["system", "item", "family", "offspring"],
         ))
     elif item.conception_bonus > 0:

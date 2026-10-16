@@ -57,7 +57,10 @@
     },
     "generated_explore": {
       "name": "勘察异闻",
-      "opportunity": [0, 0],
+      "opportunity": [
+        0,
+        0
+      ],
       "hp": 0,
       "mp": 0
     },
@@ -1037,7 +1040,8 @@
             "combat_bonus": 220,
             "hp_bonus": 300
           },
-          "description": "结丹真火反复锻出的星纹灵铜，战斗力 +220、最大 HP +300。"
+          "description": "结丹真火反复锻出的星纹灵铜，战斗力 +220、最大 HP +300。",
+          "world": "human"
         },
         {
           "item_id": "spirit_jade_sand",
@@ -1047,7 +1051,8 @@
             "mp_bonus": 500,
             "opportunity_bonus": 0.02
           },
-          "description": "能温养金丹与器灵的细碎玉髓，最大 MP +500、机缘效率 +2%。"
+          "description": "能温养金丹与器灵的细碎玉髓，最大 MP +500、机缘效率 +2%。",
+          "world": "human"
         },
         {
           "item_id": "geng_essence",
@@ -1056,7 +1061,8 @@
           "effect": {
             "combat_bonus": 1800
           },
-          "description": "元婴期罕见金行精粹，令本命法宝战斗力 +1,800。"
+          "description": "元婴期罕见金行精粹，令本命法宝战斗力 +1,800。",
+          "world": "human"
         },
         {
           "item_id": "radiant_flame_crystal",
@@ -1066,7 +1072,8 @@
             "combat_bonus": 3200,
             "hp_bonus": 2200
           },
-          "description": "由元婴真火凝成的玄晶，战斗力 +3,200、最大 HP +2,200。"
+          "description": "由元婴真火凝成的玄晶，战斗力 +3,200、最大 HP +2,200。",
+          "world": "human"
         },
         {
           "item_id": "thunder_calamity_jade",
@@ -1075,7 +1082,8 @@
           "effect": {
             "tribulation_reduction": 0.03
           },
-          "description": "分导劫雷，雷劫与天劫伤害减免 +3%。"
+          "description": "分导劫雷，雷劫与天劫伤害减免 +3%。",
+          "world": "human"
         },
         {
           "item_id": "mind_settling_heartwood",
@@ -1086,7 +1094,8 @@
               "sense": 1.08
             }
           },
-          "description": "生于养魂古木中心，可使战斗开始时神识提高 8%。"
+          "description": "生于养魂古木中心，可使战斗开始时神识提高 8%。",
+          "world": "human"
         },
         {
           "item_id": "void_spirit_silver",
@@ -1096,7 +1105,8 @@
             "combat_bonus": 42000,
             "mp_bonus": 18000
           },
-          "description": "随空间流转的灵银，战斗力 +42,000、最大 MP +18,000。"
+          "description": "随空间流转的灵银，战斗力 +42,000、最大 MP +18,000。",
+          "world": "spirit"
         },
         {
           "item_id": "mystic_gang_marrow",
@@ -1107,7 +1117,8 @@
               "guard": 1.08
             }
           },
-          "description": "凝结于虚空罡层深处，使战斗开始时防护提高 8%。"
+          "description": "凝结于虚空罡层深处，使战斗开始时防护提高 8%。",
+          "world": "spirit"
         },
         {
           "item_id": "star_marrow_crystal",
@@ -1117,7 +1128,8 @@
             "hp_bonus": 120000,
             "combat_bonus": 160000
           },
-          "description": "星辰重压凝成的晶核，最大 HP +120,000、战斗力 +160,000。"
+          "description": "星辰重压凝成的晶核，最大 HP +120,000、战斗力 +160,000。",
+          "world": "spirit"
         },
         {
           "item_id": "wind_thunder_plume",
@@ -1128,7 +1140,8 @@
               "mobility": 1.08
             }
           },
-          "description": "久经风雷淬炼的灵禽翎羽，使战斗开始时身法提高 8%。"
+          "description": "久经风雷淬炼的灵禽翎羽，使战斗开始时身法提高 8%。",
+          "world": "spirit"
         },
         {
           "item_id": "dao_pattern_gold",
@@ -1138,7 +1151,8 @@
             "combat_bonus": 1200000,
             "opportunity_bonus": 0.08
           },
-          "description": "可自行生长道纹的仙金，战斗力 +1,200,000、机缘效率 +8%。"
+          "description": "可自行生长道纹的仙金，战斗力 +1,200,000、机缘效率 +8%。",
+          "world": "spirit"
         },
         {
           "item_id": "myriad_law_glass",
@@ -1149,7 +1163,8 @@
               "breach": 1.1
             }
           },
-          "description": "万种灵力熔合而成的琉璃，使战斗开始时破法提高 10%。"
+          "description": "万种灵力熔合而成的琉璃，使战斗开始时破法提高 10%。",
+          "world": "spirit"
         },
         {
           "item_id": "demon_bloodsteel_core",
@@ -1158,7 +1173,8 @@
           "effect": {
             "combat_bonus": 420
           },
-          "description": "魔界结丹层次本命镶材，战斗力 +420。"
+          "description": "魔界结丹层次本命镶材，战斗力 +420。",
+          "world": "demon"
         },
         {
           "item_id": "demon_soulflame_crystal",
@@ -1167,7 +1183,8 @@
           "effect": {
             "combat_bonus": 14500
           },
-          "description": "魔界化神层次本命镶材，战斗力 +14,500。"
+          "description": "魔界化神层次本命镶材，战斗力 +14,500。",
+          "world": "demon"
         },
         {
           "item_id": "true_demon_voidbone_jade",
@@ -1176,7 +1193,8 @@
           "effect": {
             "combat_bonus": 88000
           },
-          "description": "真魔界炼虚层次本命镶材，战斗力 +88,000。"
+          "description": "真魔界炼虚层次本命镶材，战斗力 +88,000。",
+          "world": "true_demon"
         },
         {
           "item_id": "true_demon_primordial_heart_iron",
@@ -1185,7 +1203,8 @@
           "effect": {
             "combat_bonus": 2600000
           },
-          "description": "真魔界大乘层次本命镶材，战斗力 +2,600,000。"
+          "description": "真魔界大乘层次本命镶材，战斗力 +2,600,000。",
+          "world": "true_demon"
         },
         {
           "item_id": "hell_forgetful_soul_jade",
@@ -1195,7 +1214,8 @@
             "combat_bonus": 380,
             "mp_bonus": 520
           },
-          "description": "地狱界结丹层次本命镶材，战斗力 +380、最大 MP +520。"
+          "description": "地狱界结丹层次本命镶材，战斗力 +380、最大 MP +520。",
+          "world": "hell"
         },
         {
           "item_id": "hell_yellow_spring_dark_iron",
@@ -1205,7 +1225,8 @@
             "combat_bonus": 76000,
             "hp_bonus": 24000
           },
-          "description": "地狱界炼虚层次本命镶材，战斗力 +76,000、最大 HP +24,000。"
+          "description": "地狱界炼虚层次本命镶材，战斗力 +76,000、最大 HP +24,000。",
+          "world": "hell"
         },
         {
           "item_id": "asura_warsoul_crystal",
@@ -1214,7 +1235,8 @@
           "effect": {
             "combat_bonus": 12000000
           },
-          "description": "修罗界仙阶本命镶材，战斗力 +12,000,000。"
+          "description": "修罗界仙阶本命镶材，战斗力 +12,000,000。",
+          "world": "asura"
         },
         {
           "item_id": "asura_annihilation_bone_gold",
@@ -1223,7 +1245,8 @@
           "effect": {
             "combat_bonus": 850000000
           },
-          "description": "修罗界太乙层次本命镶材，战斗力 +850,000,000。"
+          "description": "修罗界太乙层次本命镶材，战斗力 +850,000,000。",
+          "world": "asura"
         },
         {
           "item_id": "immortal_aperture_jade",
@@ -1233,7 +1256,8 @@
             "combat_bonus": 8000000,
             "mp_bonus": 420000
           },
-          "description": "从真仙仙窍中孕生的温润灵玉，战斗力 +8,000,000、最大仙灵力 +420,000。"
+          "description": "从真仙仙窍中孕生的温润灵玉，战斗力 +8,000,000、最大仙灵力 +420,000。",
+          "world": "celestial"
         },
         {
           "item_id": "boundary_river_silver",
@@ -1244,7 +1268,8 @@
               "sustain": 1.1
             }
           },
-          "description": "界河潮落时析出的法则灵银，使战斗开始时续航提高 10%。"
+          "description": "界河潮落时析出的法则灵银，使战斗开始时续航提高 10%。",
+          "world": "celestial"
         },
         {
           "item_id": "dijiang_tear",
@@ -1255,7 +1280,8 @@
               "enemy_escape_lock"
             ]
           },
-          "description": "上古真神帝江的一滴泪水，蕴含强力空间法则；参与战斗的对方必定无法逃脱。"
+          "description": "上古真神帝江的一滴泪水，蕴含强力空间法则；参与战斗的对方必定无法逃脱。",
+          "world": "celestial"
         },
         {
           "item_id": "zhulong_breath",
@@ -1266,7 +1292,8 @@
               "player_debuff_immunity"
             ]
           },
-          "description": "上古真神烛龙的一点吐息，蕴含强力时间法则；不会受到对方削弱属性的影响。"
+          "description": "上古真神烛龙的一点吐息，蕴含强力时间法则；不会受到对方削弱属性的影响。",
+          "world": "celestial"
         },
         {
           "item_id": "jumang_feather",
@@ -1277,7 +1304,8 @@
               "sense": 1.2
             }
           },
-          "description": "上古真神句芒的一片羽毛，蕴含强力木法则；战斗开始时神识提高 20%。"
+          "description": "上古真神句芒的一片羽毛，蕴含强力木法则；战斗开始时神识提高 20%。",
+          "world": "celestial"
         },
         {
           "item_id": "rushou_scale",
@@ -1288,7 +1316,8 @@
               "might": 0.8
             }
           },
-          "description": "上古真神蓐收的一枚鳞片，蕴含强力金法则；战斗开始时敌方威能降低 20%。"
+          "description": "上古真神蓐收的一枚鳞片，蕴含强力金法则；战斗开始时敌方威能降低 20%。",
+          "world": "celestial"
         },
         {
           "item_id": "gonggong_water",
@@ -1299,7 +1328,8 @@
               "sustain": 1.2
             }
           },
-          "description": "上古真神共工的一分神水，蕴含强力水法则；战斗开始时续航提高 20%。"
+          "description": "上古真神共工的一分神水，蕴含强力水法则；战斗开始时续航提高 20%。",
+          "world": "celestial"
         },
         {
           "item_id": "zhurong_flame",
@@ -1310,7 +1340,8 @@
               "guard": 0.8
             }
           },
-          "description": "上古真神祝融的一点火苗，蕴含强力火法则；战斗开始时敌方防护降低 20%。"
+          "description": "上古真神祝融的一点火苗，蕴含强力火法则；战斗开始时敌方防护降低 20%。",
+          "world": "celestial"
         },
         {
           "item_id": "qiangliang_thunder",
@@ -1321,7 +1352,8 @@
               "even_round_might_40"
             ]
           },
-          "description": "上古真神强良的一份天雷，蕴含强力雷法则；偶数轮己方威能提高 40%。"
+          "description": "上古真神强良的一份天雷，蕴含强力雷法则；偶数轮己方威能提高 40%。",
+          "world": "celestial"
         },
         {
           "item_id": "xizi_lightning",
@@ -1332,7 +1364,8 @@
               "odd_round_enemy_might_down_40"
             ]
           },
-          "description": "上古真神翕兹的一道神电，蕴含强力电法则；奇数轮敌方威能降低 40%。"
+          "description": "上古真神翕兹的一道神电，蕴含强力电法则；奇数轮敌方威能降低 40%。",
+          "world": "celestial"
         },
         {
           "item_id": "xuanming_rain",
@@ -1343,7 +1376,8 @@
               "mobility": 0.8
             }
           },
-          "description": "上古真神玄冥的一场玄雨，蕴含强力雨法则；战斗开始时敌方身法降低 20%。"
+          "description": "上古真神玄冥的一场玄雨，蕴含强力雨法则；战斗开始时敌方身法降低 20%。",
+          "world": "celestial"
         },
         {
           "item_id": "feilian_wind",
@@ -1354,7 +1388,8 @@
               "mobility": 1.2
             }
           },
-          "description": "上古真神飞廉的一缕罡风，蕴含强力风法则；战斗开始时己方身法提高 20%。"
+          "description": "上古真神飞廉的一缕罡风，蕴含强力风法则；战斗开始时己方身法提高 20%。",
+          "world": "celestial"
         },
         {
           "item_id": "shebishi_orb",
@@ -1365,7 +1400,8 @@
               "enemy_buff_dispel"
             ]
           },
-          "description": "上古真神奢比尸的一枚眼珠，蕴含强力天气法则；每轮开始时消除敌方一个增益。"
+          "description": "上古真神奢比尸的一枚眼珠，蕴含强力天气法则；每轮开始时消除敌方一个增益。",
+          "world": "celestial"
         },
         {
           "item_id": "houtu_clay",
@@ -1376,7 +1412,8 @@
               "guard": 1.2
             }
           },
-          "description": "上古真神后土的一抔黄泥，蕴含强力土法则；战斗开始时己方防护提高 20%。"
+          "description": "上古真神后土的一抔黄泥，蕴含强力土法则；战斗开始时己方防护提高 20%。",
+          "world": "celestial"
         },
         {
           "item_id": "taiyi_dao_marrow",
@@ -1392,7 +1429,8 @@
               "breach": 1.08
             }
           },
-          "description": "太乙修士以三花道韵温养的法则髓质，战斗六项属性提高 8%。"
+          "description": "太乙修士以三花道韵温养的法则髓质，战斗六项属性提高 8%。",
+          "world": "celestial"
         },
         {
           "item_id": "primordial_mother_qi",
@@ -1408,7 +1446,1858 @@
               "breach": 1.12
             }
           },
-          "description": "大罗道果附近偶尔凝结的一缕混元母气，战斗六项属性提高 12%。"
+          "description": "大罗道果附近偶尔凝结的一缕混元母气，战斗六项属性提高 12%。",
+          "world": "celestial"
+        },
+        {
+          "item_id": "natal_human_pine_metal",
+          "name": "松纹青铜",
+          "minimum_realm": 3,
+          "world": "human",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 300
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.02
+            }
+          },
+          "description": "人界原生攻伐镶材，结丹起可用。嵌入本命后战斗力 +300；战斗开始时破法 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_human_pine_jade",
+          "name": "月泉玉髓",
+          "minimum_realm": 3,
+          "world": "human",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 600,
+            "mp_bonus": 150
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.02
+            }
+          },
+          "description": "人界原生护持镶材，结丹起可用。嵌入本命后最大 HP +600、最大 MP +150；战斗开始时防护 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_human_pine_crystal",
+          "name": "听雨青珀",
+          "minimum_realm": 3,
+          "world": "human",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 300,
+            "opportunity_bonus": 0.01
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.02
+            }
+          },
+          "description": "人界原生养灵镶材，结丹起可用。嵌入本命后最大 MP +300、机缘效率 +1.0%；战斗开始时神识 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_human_sunfire_metal",
+          "name": "离火赤金",
+          "minimum_realm": 4,
+          "world": "human",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 2400
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.02
+            }
+          },
+          "description": "人界原生攻伐镶材，元婴起可用。嵌入本命后战斗力 +2,400；战斗开始时破法 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_human_sunfire_jade",
+          "name": "澄渊灵璧",
+          "minimum_realm": 4,
+          "world": "human",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 4800,
+            "mp_bonus": 1200
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.02
+            }
+          },
+          "description": "人界原生护持镶材，元婴起可用。嵌入本命后最大 HP +4,800、最大 MP +1,200；战斗开始时防护 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_human_sunfire_crystal",
+          "name": "凝霞朱晶",
+          "minimum_realm": 4,
+          "world": "human",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 2400,
+            "opportunity_bonus": 0.015
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.02
+            }
+          },
+          "description": "人界原生养灵镶材，元婴起可用。嵌入本命后最大 MP +2,400、机缘效率 +1.5%；战斗开始时神识 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_human_thunder_metal",
+          "name": "震雷紫铜",
+          "minimum_realm": 5,
+          "world": "human",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 12000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.03
+            }
+          },
+          "description": "人界原生攻伐镶材，化神起可用。嵌入本命后战斗力 +12,000；战斗开始时破法 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_human_thunder_jade",
+          "name": "云海玄璧",
+          "minimum_realm": 5,
+          "world": "human",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 24000,
+            "mp_bonus": 6000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.03
+            }
+          },
+          "description": "人界原生护持镶材，化神起可用。嵌入本命后最大 HP +24,000、最大 MP +6,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_human_thunder_crystal",
+          "name": "观澜心晶",
+          "minimum_realm": 5,
+          "world": "human",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 12000,
+            "opportunity_bonus": 0.02
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.03
+            }
+          },
+          "description": "人界原生养灵镶材，化神起可用。嵌入本命后最大 MP +12,000、机缘效率 +2.0%；战斗开始时神识 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_bloodmoon_metal",
+          "name": "血月寒铁",
+          "minimum_realm": 3,
+          "world": "demon",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 300
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.02
+            }
+          },
+          "description": "魔界原生攻伐镶材，结丹起可用。嵌入本命后战斗力 +300；战斗开始时威能 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_bloodmoon_jade",
+          "name": "烬纹骨玉",
+          "minimum_realm": 3,
+          "world": "demon",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 600,
+            "mp_bonus": 150
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.02
+            }
+          },
+          "description": "魔界原生护持镶材，结丹起可用。嵌入本命后最大 HP +600、最大 MP +150；战斗开始时防护 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_bloodmoon_crystal",
+          "name": "夜泉幽晶",
+          "minimum_realm": 3,
+          "world": "demon",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 300,
+            "opportunity_bonus": 0.01
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.02
+            }
+          },
+          "description": "魔界原生养灵镶材，结丹起可用。嵌入本命后最大 MP +300、机缘效率 +1.0%；战斗开始时破法 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_ember_metal",
+          "name": "幽焰玄钢",
+          "minimum_realm": 4,
+          "world": "demon",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 2400
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.02
+            }
+          },
+          "description": "魔界原生攻伐镶材，元婴起可用。嵌入本命后战斗力 +2,400；战斗开始时威能 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_ember_jade",
+          "name": "赤鳞骨璧",
+          "minimum_realm": 4,
+          "world": "demon",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 4800,
+            "mp_bonus": 1200
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.02
+            }
+          },
+          "description": "魔界原生护持镶材，元婴起可用。嵌入本命后最大 HP +4,800、最大 MP +1,200；战斗开始时防护 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_ember_crystal",
+          "name": "黑莲髓晶",
+          "minimum_realm": 4,
+          "world": "demon",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 2400,
+            "opportunity_bonus": 0.015
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.02
+            }
+          },
+          "description": "魔界原生养灵镶材，元婴起可用。嵌入本命后最大 MP +2,400、机缘效率 +1.5%；战斗开始时破法 +2%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_abyssfire_metal",
+          "name": "渊火乌金",
+          "minimum_realm": 5,
+          "world": "demon",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 12000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.03
+            }
+          },
+          "description": "魔界原生攻伐镶材，化神起可用。嵌入本命后战斗力 +12,000；战斗开始时威能 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_abyssfire_jade",
+          "name": "镇煞魔玉",
+          "minimum_realm": 5,
+          "world": "demon",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 24000,
+            "mp_bonus": 6000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.03
+            }
+          },
+          "description": "魔界原生护持镶材，化神起可用。嵌入本命后最大 HP +24,000、最大 MP +6,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_demon_abyssfire_crystal",
+          "name": "照夜玄珀",
+          "minimum_realm": 5,
+          "world": "demon",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 12000,
+            "opportunity_bonus": 0.02
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.03
+            }
+          },
+          "description": "魔界原生养灵镶材，化神起可用。嵌入本命后最大 MP +12,000、机缘效率 +2.0%；战斗开始时破法 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_cloud_metal",
+          "name": "流云星银",
+          "minimum_realm": 6,
+          "world": "spirit",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 60000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.03
+            }
+          },
+          "description": "灵界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时破法 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_cloud_jade",
+          "name": "碧霄天璧",
+          "minimum_realm": 6,
+          "world": "spirit",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 120000,
+            "mp_bonus": 30000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.03
+            }
+          },
+          "description": "灵界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时续航 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_cloud_crystal",
+          "name": "清微灵晶",
+          "minimum_realm": 6,
+          "world": "spirit",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 60000,
+            "opportunity_bonus": 0.025
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.03
+            }
+          },
+          "description": "灵界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时神识 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_ocean_metal",
+          "name": "沧浪月金",
+          "minimum_realm": 7,
+          "world": "spirit",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 200000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.04
+            }
+          },
+          "description": "灵界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时破法 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_ocean_jade",
+          "name": "镇岳苍玉",
+          "minimum_realm": 7,
+          "world": "spirit",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 400000,
+            "mp_bonus": 100000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "灵界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时续航 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_ocean_crystal",
+          "name": "玄泉心珀",
+          "minimum_realm": 7,
+          "world": "spirit",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 200000,
+            "opportunity_bonus": 0.03
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.04
+            }
+          },
+          "description": "灵界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时神识 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_jadecourt_metal",
+          "name": "玉京道金",
+          "minimum_realm": 8,
+          "world": "spirit",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 1400000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.04
+            }
+          },
+          "description": "灵界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时破法 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_jadecourt_jade",
+          "name": "承露玄璧",
+          "minimum_realm": 8,
+          "world": "spirit",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 2800000,
+            "mp_bonus": 700000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "灵界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时续航 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_spirit_jadecourt_crystal",
+          "name": "太素灵晶",
+          "minimum_realm": 8,
+          "world": "spirit",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 1400000,
+            "opportunity_bonus": 0.035
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.04
+            }
+          },
+          "description": "灵界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时神识 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_night_metal",
+          "name": "冥夜魔银",
+          "minimum_realm": 6,
+          "world": "true_demon",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 60000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.03
+            }
+          },
+          "description": "真魔界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时破法 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_night_jade",
+          "name": "玄狱骨璧",
+          "minimum_realm": 6,
+          "world": "true_demon",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 120000,
+            "mp_bonus": 30000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.03
+            }
+          },
+          "description": "真魔界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_night_crystal",
+          "name": "藏渊魂晶",
+          "minimum_realm": 6,
+          "world": "true_demon",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 60000,
+            "opportunity_bonus": 0.025
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.03
+            }
+          },
+          "description": "真魔界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时威能 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_blackflame_metal",
+          "name": "黑焰乌金",
+          "minimum_realm": 7,
+          "world": "true_demon",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 200000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.04
+            }
+          },
+          "description": "真魔界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时破法 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_blackflame_jade",
+          "name": "万仞骨玉",
+          "minimum_realm": 7,
+          "world": "true_demon",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 400000,
+            "mp_bonus": 100000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.04
+            }
+          },
+          "description": "真魔界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_blackflame_crystal",
+          "name": "赤泉魔珀",
+          "minimum_realm": 7,
+          "world": "true_demon",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 200000,
+            "opportunity_bonus": 0.03
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.04
+            }
+          },
+          "description": "真魔界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时威能 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_primordial_metal",
+          "name": "太古渊金",
+          "minimum_realm": 8,
+          "world": "true_demon",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 1400000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.04
+            }
+          },
+          "description": "真魔界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时破法 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_primordial_jade",
+          "name": "无相玄璧",
+          "minimum_realm": 8,
+          "world": "true_demon",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 2800000,
+            "mp_bonus": 700000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.04
+            }
+          },
+          "description": "真魔界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_true_demon_primordial_crystal",
+          "name": "九幽心晶",
+          "minimum_realm": 8,
+          "world": "true_demon",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 1400000,
+            "opportunity_bonus": 0.035
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.04
+            }
+          },
+          "description": "真魔界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时威能 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_moonfang_metal",
+          "name": "苍牙月金",
+          "minimum_realm": 6,
+          "world": "monster_realm",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 60000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.03
+            }
+          },
+          "description": "妖界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时威能 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_moonfang_jade",
+          "name": "青兕骨玉",
+          "minimum_realm": 6,
+          "world": "monster_realm",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 120000,
+            "mp_bonus": 30000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.03
+            }
+          },
+          "description": "妖界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_moonfang_crystal",
+          "name": "鹿鸣灵珀",
+          "minimum_realm": 6,
+          "world": "monster_realm",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 60000,
+            "opportunity_bonus": 0.025
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.03
+            }
+          },
+          "description": "妖界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时续航 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_mountain_metal",
+          "name": "百岳玄金",
+          "minimum_realm": 7,
+          "world": "monster_realm",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 200000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.04
+            }
+          },
+          "description": "妖界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时威能 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_mountain_jade",
+          "name": "盘山龙璧",
+          "minimum_realm": 7,
+          "world": "monster_realm",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 400000,
+            "mp_bonus": 100000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.04
+            }
+          },
+          "description": "妖界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_mountain_crystal",
+          "name": "灵犀心晶",
+          "minimum_realm": 7,
+          "world": "monster_realm",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 200000,
+            "opportunity_bonus": 0.03
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "妖界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时续航 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_ancestral_metal",
+          "name": "祖庭道金",
+          "minimum_realm": 8,
+          "world": "monster_realm",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 1400000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.04
+            }
+          },
+          "description": "妖界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时威能 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_ancestral_jade",
+          "name": "洪荒骨玉",
+          "minimum_realm": 8,
+          "world": "monster_realm",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 2800000,
+            "mp_bonus": 700000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.04
+            }
+          },
+          "description": "妖界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_monster_realm_ancestral_crystal",
+          "name": "万木生珀",
+          "minimum_realm": 8,
+          "world": "monster_realm",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 1400000,
+            "opportunity_bonus": 0.035
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "妖界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时续航 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_mirage_metal",
+          "name": "蜃楼幻银",
+          "minimum_realm": 6,
+          "world": "phantom_underworld",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 60000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.03
+            }
+          },
+          "description": "幻冥界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时身法 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_mirage_jade",
+          "name": "空蝉影璧",
+          "minimum_realm": 6,
+          "world": "phantom_underworld",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 120000,
+            "mp_bonus": 30000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.03
+            }
+          },
+          "description": "幻冥界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时神识 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_mirage_crystal",
+          "name": "梦泉幽晶",
+          "minimum_realm": 6,
+          "world": "phantom_underworld",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 60000,
+            "opportunity_bonus": 0.025
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.03
+            }
+          },
+          "description": "幻冥界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时破法 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_moonshadow_metal",
+          "name": "映月流金",
+          "minimum_realm": 7,
+          "world": "phantom_underworld",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 200000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.04
+            }
+          },
+          "description": "幻冥界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时身法 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_moonshadow_jade",
+          "name": "千重幻玉",
+          "minimum_realm": 7,
+          "world": "phantom_underworld",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 400000,
+            "mp_bonus": 100000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.04
+            }
+          },
+          "description": "幻冥界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时神识 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_moonshadow_crystal",
+          "name": "照影心珀",
+          "minimum_realm": 7,
+          "world": "phantom_underworld",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 200000,
+            "opportunity_bonus": 0.03
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.04
+            }
+          },
+          "description": "幻冥界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时破法 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_lucid_metal",
+          "name": "无相梦金",
+          "minimum_realm": 8,
+          "world": "phantom_underworld",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 1400000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.04
+            }
+          },
+          "description": "幻冥界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时身法 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_lucid_jade",
+          "name": "太虚蜃璧",
+          "minimum_realm": 8,
+          "world": "phantom_underworld",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 2800000,
+            "mp_bonus": 700000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.04
+            }
+          },
+          "description": "幻冥界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时神识 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_phantom_underworld_lucid_crystal",
+          "name": "明觉魂晶",
+          "minimum_realm": 8,
+          "world": "phantom_underworld",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 1400000,
+            "opportunity_bonus": 0.035
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.04
+            }
+          },
+          "description": "幻冥界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时破法 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_spring_metal",
+          "name": "寒泉冥银",
+          "minimum_realm": 6,
+          "world": "hell",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 60000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.03
+            }
+          },
+          "description": "地狱界原生攻伐镶材，炼虚起可用。嵌入本命后战斗力 +60,000；战斗开始时神识 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_spring_jade",
+          "name": "幽关墨玉",
+          "minimum_realm": 6,
+          "world": "hell",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 120000,
+            "mp_bonus": 30000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.03
+            }
+          },
+          "description": "地狱界原生护持镶材，炼虚起可用。嵌入本命后最大 HP +120,000、最大 MP +30,000；战斗开始时防护 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_spring_crystal",
+          "name": "引魂灯珀",
+          "minimum_realm": 6,
+          "world": "hell",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 60000,
+            "opportunity_bonus": 0.025
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.03
+            }
+          },
+          "description": "地狱界原生养灵镶材，炼虚起可用。嵌入本命后最大 MP +60,000、机缘效率 +2.5%；战斗开始时续航 +3%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_prison_metal",
+          "name": "镇狱玄金",
+          "minimum_realm": 7,
+          "world": "hell",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 200000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.04
+            }
+          },
+          "description": "地狱界原生攻伐镶材，合体起可用。嵌入本命后战斗力 +200,000；战斗开始时神识 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_prison_jade",
+          "name": "轮台冥璧",
+          "minimum_realm": 7,
+          "world": "hell",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 400000,
+            "mp_bonus": 100000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.04
+            }
+          },
+          "description": "地狱界原生护持镶材，合体起可用。嵌入本命后最大 HP +400,000、最大 MP +100,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_prison_crystal",
+          "name": "无岸魂晶",
+          "minimum_realm": 7,
+          "world": "hell",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 200000,
+            "opportunity_bonus": 0.03
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "地狱界原生养灵镶材，合体起可用。嵌入本命后最大 MP +200,000、机缘效率 +3.0%；战斗开始时续航 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_yellowriver_metal",
+          "name": "黄泉道金",
+          "minimum_realm": 8,
+          "world": "hell",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 1400000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.04
+            }
+          },
+          "description": "地狱界原生攻伐镶材，大乘起可用。嵌入本命后战斗力 +1,400,000；战斗开始时神识 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_yellowriver_jade",
+          "name": "九幽玄璧",
+          "minimum_realm": 8,
+          "world": "hell",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 2800000,
+            "mp_bonus": 700000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.04
+            }
+          },
+          "description": "地狱界原生护持镶材，大乘起可用。嵌入本命后最大 HP +2,800,000、最大 MP +700,000；战斗开始时防护 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_hell_yellowriver_crystal",
+          "name": "长明心珀",
+          "minimum_realm": 8,
+          "world": "hell",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 1400000,
+            "opportunity_bonus": 0.035
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.04
+            }
+          },
+          "description": "地狱界原生养灵镶材，大乘起可用。嵌入本命后最大 MP +1,400,000、机缘效率 +3.5%；战斗开始时续航 +4%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_purplecloud_metal",
+          "name": "紫宸云金",
+          "minimum_realm": 9,
+          "world": "celestial",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 9000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.05
+            }
+          },
+          "description": "仙界原生攻伐镶材，真仙起可用。嵌入本命后战斗力 +9,000,000；战斗开始时破法 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_purplecloud_jade",
+          "name": "琼华仙璧",
+          "minimum_realm": 9,
+          "world": "celestial",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 18000000,
+            "mp_bonus": 4500000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.05
+            }
+          },
+          "description": "仙界原生护持镶材，真仙起可用。嵌入本命后最大 HP +18,000,000、最大 MP +4,500,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_purplecloud_crystal",
+          "name": "餐霞露晶",
+          "minimum_realm": 9,
+          "world": "celestial",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 9000000,
+            "opportunity_bonus": 0.04
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.05
+            }
+          },
+          "description": "仙界原生养灵镶材，真仙起可用。嵌入本命后最大 MP +9,000,000、机缘效率 +4.0%；战斗开始时续航 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_star_metal",
+          "name": "天衡星金",
+          "minimum_realm": 10,
+          "world": "celestial",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 90000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.05
+            }
+          },
+          "description": "仙界原生攻伐镶材，金仙起可用。嵌入本命后战斗力 +90,000,000；战斗开始时破法 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_star_jade",
+          "name": "金阙道璧",
+          "minimum_realm": 10,
+          "world": "celestial",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 180000000,
+            "mp_bonus": 45000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.05
+            }
+          },
+          "description": "仙界原生护持镶材，金仙起可用。嵌入本命后最大 HP +180,000,000、最大 MP +45,000,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_star_crystal",
+          "name": "玉清心珀",
+          "minimum_realm": 10,
+          "world": "celestial",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 90000000,
+            "opportunity_bonus": 0.045000000000000005
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.05
+            }
+          },
+          "description": "仙界原生养灵镶材，金仙起可用。嵌入本命后最大 MP +90,000,000、机缘效率 +4.5%；战斗开始时续航 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_clarity_metal",
+          "name": "太清元金",
+          "minimum_realm": 11,
+          "world": "celestial",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 700000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.06
+            }
+          },
+          "description": "仙界原生攻伐镶材，太乙起可用。嵌入本命后战斗力 +700,000,000；战斗开始时破法 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_clarity_jade",
+          "name": "河图玄璧",
+          "minimum_realm": 11,
+          "world": "celestial",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 1400000000,
+            "mp_bonus": 350000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.06
+            }
+          },
+          "description": "仙界原生护持镶材，太乙起可用。嵌入本命后最大 HP +1,400,000,000、最大 MP +350,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_clarity_crystal",
+          "name": "混元露晶",
+          "minimum_realm": 11,
+          "world": "celestial",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 700000000,
+            "opportunity_bonus": 0.05
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.06
+            }
+          },
+          "description": "仙界原生养灵镶材，太乙起可用。嵌入本命后最大 MP +700,000,000、机缘效率 +5.0%；战斗开始时续航 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_primordial_metal",
+          "name": "先天母金",
+          "minimum_realm": 12,
+          "world": "celestial",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 5000000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "breach": 1.06
+            }
+          },
+          "description": "仙界原生攻伐镶材，大罗起可用。嵌入本命后战斗力 +5,000,000,000；战斗开始时破法 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_primordial_jade",
+          "name": "无极道璧",
+          "minimum_realm": 12,
+          "world": "celestial",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 10000000000,
+            "mp_bonus": 2500000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.06
+            }
+          },
+          "description": "仙界原生护持镶材，大罗起可用。嵌入本命后最大 HP +10,000,000,000、最大 MP +2,500,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_celestial_primordial_crystal",
+          "name": "清都源珀",
+          "minimum_realm": 12,
+          "world": "celestial",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 5000000000,
+            "opportunity_bonus": 0.055
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.06
+            }
+          },
+          "description": "仙界原生养灵镶材，大罗起可用。嵌入本命后最大 MP +5,000,000,000、机缘效率 +5.5%；战斗开始时续航 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_crimson_metal",
+          "name": "赤霄血金",
+          "minimum_realm": 9,
+          "world": "asura",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 9000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.05
+            }
+          },
+          "description": "修罗界原生攻伐镶材，真仙起可用。嵌入本命后战斗力 +9,000,000；战斗开始时威能 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_crimson_jade",
+          "name": "铜狱玄璧",
+          "minimum_realm": 9,
+          "world": "asura",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 18000000,
+            "mp_bonus": 4500000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.05
+            }
+          },
+          "description": "修罗界原生护持镶材，真仙起可用。嵌入本命后最大 HP +18,000,000、最大 MP +4,500,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_crimson_crystal",
+          "name": "战泉煞晶",
+          "minimum_realm": 9,
+          "world": "asura",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 9000000,
+            "opportunity_bonus": 0.04
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.05
+            }
+          },
+          "description": "修罗界原生养灵镶材，真仙起可用。嵌入本命后最大 MP +9,000,000、机缘效率 +4.0%；战斗开始时身法 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_battle_metal",
+          "name": "百战乌金",
+          "minimum_realm": 10,
+          "world": "asura",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 90000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.05
+            }
+          },
+          "description": "修罗界原生攻伐镶材，金仙起可用。嵌入本命后战斗力 +90,000,000；战斗开始时威能 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_battle_jade",
+          "name": "寂照骨玉",
+          "minimum_realm": 10,
+          "world": "asura",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 180000000,
+            "mp_bonus": 45000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.05
+            }
+          },
+          "description": "修罗界原生护持镶材，金仙起可用。嵌入本命后最大 HP +180,000,000、最大 MP +45,000,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_battle_crystal",
+          "name": "血海心珀",
+          "minimum_realm": 10,
+          "world": "asura",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 90000000,
+            "opportunity_bonus": 0.045000000000000005
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.05
+            }
+          },
+          "description": "修罗界原生养灵镶材，金仙起可用。嵌入本命后最大 MP +90,000,000、机缘效率 +4.5%；战斗开始时身法 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_calamity_metal",
+          "name": "断劫玄金",
+          "minimum_realm": 11,
+          "world": "asura",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 700000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.06
+            }
+          },
+          "description": "修罗界原生攻伐镶材，太乙起可用。嵌入本命后战斗力 +700,000,000；战斗开始时威能 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_calamity_jade",
+          "name": "无回战璧",
+          "minimum_realm": 11,
+          "world": "asura",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 1400000000,
+            "mp_bonus": 350000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.06
+            }
+          },
+          "description": "修罗界原生护持镶材，太乙起可用。嵌入本命后最大 HP +1,400,000,000、最大 MP +350,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_calamity_crystal",
+          "name": "烬海源晶",
+          "minimum_realm": 11,
+          "world": "asura",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 700000000,
+            "opportunity_bonus": 0.05
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.06
+            }
+          },
+          "description": "修罗界原生养灵镶材，太乙起可用。嵌入本命后最大 MP +700,000,000、机缘效率 +5.0%；战斗开始时身法 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_warlord_metal",
+          "name": "兵主母金",
+          "minimum_realm": 12,
+          "world": "asura",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 5000000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.06
+            }
+          },
+          "description": "修罗界原生攻伐镶材，大罗起可用。嵌入本命后战斗力 +5,000,000,000；战斗开始时威能 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_warlord_jade",
+          "name": "无间道璧",
+          "minimum_realm": 12,
+          "world": "asura",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 10000000000,
+            "mp_bonus": 2500000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.06
+            }
+          },
+          "description": "修罗界原生护持镶材，大罗起可用。嵌入本命后最大 HP +10,000,000,000、最大 MP +2,500,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_asura_warlord_crystal",
+          "name": "止戈劫珀",
+          "minimum_realm": 12,
+          "world": "asura",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 5000000000,
+            "opportunity_bonus": 0.055
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.06
+            }
+          },
+          "description": "修罗界原生养灵镶材，大罗起可用。嵌入本命后最大 MP +5,000,000,000、机缘效率 +5.5%；战斗开始时身法 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_dragon_metal",
+          "name": "龙庭玄金",
+          "minimum_realm": 9,
+          "world": "nether",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 9000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.05
+            }
+          },
+          "description": "幽冥界原生攻伐镶材，真仙起可用。嵌入本命后战斗力 +9,000,000；战斗开始时威能 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_dragon_jade",
+          "name": "潜渊鳞玉",
+          "minimum_realm": 9,
+          "world": "nether",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 18000000,
+            "mp_bonus": 4500000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.05
+            }
+          },
+          "description": "幽冥界原生护持镶材，真仙起可用。嵌入本命后最大 HP +18,000,000、最大 MP +4,500,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_dragon_crystal",
+          "name": "烛夜明晶",
+          "minimum_realm": 9,
+          "world": "nether",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 9000000,
+            "opportunity_bonus": 0.04
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.05
+            }
+          },
+          "description": "幽冥界原生养灵镶材，真仙起可用。嵌入本命后最大 MP +9,000,000、机缘效率 +4.0%；战斗开始时神识 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_thunder_metal",
+          "name": "御霆苍金",
+          "minimum_realm": 10,
+          "world": "nether",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 90000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.05
+            }
+          },
+          "description": "幽冥界原生攻伐镶材，金仙起可用。嵌入本命后战斗力 +90,000,000；战斗开始时威能 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_thunder_jade",
+          "name": "镇海龙璧",
+          "minimum_realm": 10,
+          "world": "nether",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 180000000,
+            "mp_bonus": 45000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.05
+            }
+          },
+          "description": "幽冥界原生护持镶材，金仙起可用。嵌入本命后最大 HP +180,000,000、最大 MP +45,000,000；战斗开始时防护 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_thunder_crystal",
+          "name": "明渊心珀",
+          "minimum_realm": 10,
+          "world": "nether",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 90000000,
+            "opportunity_bonus": 0.045000000000000005
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.05
+            }
+          },
+          "description": "幽冥界原生养灵镶材，金仙起可用。嵌入本命后最大 MP +90,000,000、机缘效率 +4.5%；战斗开始时神识 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_sky_metal",
+          "name": "盘天道金",
+          "minimum_realm": 11,
+          "world": "nether",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 700000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.06
+            }
+          },
+          "description": "幽冥界原生攻伐镶材，太乙起可用。嵌入本命后战斗力 +700,000,000；战斗开始时威能 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_sky_jade",
+          "name": "九渊玄璧",
+          "minimum_realm": 11,
+          "world": "nether",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 1400000000,
+            "mp_bonus": 350000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.06
+            }
+          },
+          "description": "幽冥界原生护持镶材，太乙起可用。嵌入本命后最大 HP +1,400,000,000、最大 MP +350,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_sky_crystal",
+          "name": "苍溟源晶",
+          "minimum_realm": 11,
+          "world": "nether",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 700000000,
+            "opportunity_bonus": 0.05
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.06
+            }
+          },
+          "description": "幽冥界原生养灵镶材，太乙起可用。嵌入本命后最大 MP +700,000,000、机缘效率 +5.0%；战斗开始时神识 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_origin_metal",
+          "name": "烛龙母金",
+          "minimum_realm": 12,
+          "world": "nether",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 5000000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "might": 1.06
+            }
+          },
+          "description": "幽冥界原生攻伐镶材，大罗起可用。嵌入本命后战斗力 +5,000,000,000；战斗开始时威能 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_origin_jade",
+          "name": "万灵道璧",
+          "minimum_realm": 12,
+          "world": "nether",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 10000000000,
+            "mp_bonus": 2500000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "guard": 1.06
+            }
+          },
+          "description": "幽冥界原生护持镶材，大罗起可用。嵌入本命后最大 HP +10,000,000,000、最大 MP +2,500,000,000；战斗开始时防护 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_nether_origin_crystal",
+          "name": "初曜龙珀",
+          "minimum_realm": 12,
+          "world": "nether",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 5000000000,
+            "opportunity_bonus": 0.055
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.06
+            }
+          },
+          "description": "幽冥界原生养灵镶材，大罗起可用。嵌入本命后最大 MP +5,000,000,000、机缘效率 +5.5%；战斗开始时神识 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_river_metal",
+          "name": "忘川冥金",
+          "minimum_realm": 9,
+          "world": "reincarnation",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 9000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.05
+            }
+          },
+          "description": "轮回界原生攻伐镶材，真仙起可用。嵌入本命后战斗力 +9,000,000；战斗开始时神识 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_river_jade",
+          "name": "幽莲魂璧",
+          "minimum_realm": 9,
+          "world": "reincarnation",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 18000000,
+            "mp_bonus": 4500000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.05
+            }
+          },
+          "description": "轮回界原生护持镶材，真仙起可用。嵌入本命后最大 HP +18,000,000、最大 MP +4,500,000；战斗开始时续航 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_river_crystal",
+          "name": "三生心晶",
+          "minimum_realm": 9,
+          "world": "reincarnation",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 9000000,
+            "opportunity_bonus": 0.04
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.05
+            }
+          },
+          "description": "轮回界原生养灵镶材，真仙起可用。嵌入本命后最大 MP +9,000,000、机缘效率 +4.0%；战斗开始时身法 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_karma_metal",
+          "name": "断缘玄金",
+          "minimum_realm": 10,
+          "world": "reincarnation",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 90000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.05
+            }
+          },
+          "description": "轮回界原生攻伐镶材，金仙起可用。嵌入本命后战斗力 +90,000,000；战斗开始时神识 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_karma_jade",
+          "name": "宿世墨玉",
+          "minimum_realm": 10,
+          "world": "reincarnation",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 180000000,
+            "mp_bonus": 45000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.05
+            }
+          },
+          "description": "轮回界原生护持镶材，金仙起可用。嵌入本命后最大 HP +180,000,000、最大 MP +45,000,000；战斗开始时续航 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_karma_crystal",
+          "name": "返照魂珀",
+          "minimum_realm": 10,
+          "world": "reincarnation",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 90000000,
+            "opportunity_bonus": 0.045000000000000005
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.05
+            }
+          },
+          "description": "轮回界原生养灵镶材，金仙起可用。嵌入本命后最大 MP +90,000,000、机缘效率 +4.5%；战斗开始时身法 +5%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_night_metal",
+          "name": "长夜道金",
+          "minimum_realm": 11,
+          "world": "reincarnation",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 700000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.06
+            }
+          },
+          "description": "轮回界原生攻伐镶材，太乙起可用。嵌入本命后战斗力 +700,000,000；战斗开始时神识 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_night_jade",
+          "name": "无始玄璧",
+          "minimum_realm": 11,
+          "world": "reincarnation",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 1400000000,
+            "mp_bonus": 350000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.06
+            }
+          },
+          "description": "轮回界原生护持镶材，太乙起可用。嵌入本命后最大 HP +1,400,000,000、最大 MP +350,000,000；战斗开始时续航 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_night_crystal",
+          "name": "彼岸源晶",
+          "minimum_realm": 11,
+          "world": "reincarnation",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 700000000,
+            "opportunity_bonus": 0.05
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.06
+            }
+          },
+          "description": "轮回界原生养灵镶材，太乙起可用。嵌入本命后最大 MP +700,000,000、机缘效率 +5.0%；战斗开始时身法 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_eternal_metal",
+          "name": "太始母金",
+          "minimum_realm": 12,
+          "world": "reincarnation",
+          "specialization": "攻伐",
+          "effect": {
+            "combat_bonus": 5000000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sense": 1.06
+            }
+          },
+          "description": "轮回界原生攻伐镶材，大罗起可用。嵌入本命后战斗力 +5,000,000,000；战斗开始时神识 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_eternal_jade",
+          "name": "大寂道璧",
+          "minimum_realm": 12,
+          "world": "reincarnation",
+          "specialization": "护持",
+          "effect": {
+            "hp_bonus": 10000000000,
+            "mp_bonus": 2500000000
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "sustain": 1.06
+            }
+          },
+          "description": "轮回界原生护持镶材，大罗起可用。嵌入本命后最大 HP +10,000,000,000、最大 MP +2,500,000,000；战斗开始时续航 +6%。随身持有不生效，取下完整返还。"
+        },
+        {
+          "item_id": "natal_reincarnation_eternal_crystal",
+          "name": "明因轮珀",
+          "minimum_realm": 12,
+          "world": "reincarnation",
+          "specialization": "养灵",
+          "effect": {
+            "mp_bonus": 5000000000,
+            "opportunity_bonus": 0.055
+          },
+          "combat_effect": {
+            "player_stat_multipliers": {
+              "mobility": 1.06
+            }
+          },
+          "description": "轮回界原生养灵镶材，大罗起可用。嵌入本命后最大 MP +5,000,000,000、机缘效率 +5.5%；战斗开始时身法 +6%。随身持有不生效，取下完整返还。"
         }
       ]
     },

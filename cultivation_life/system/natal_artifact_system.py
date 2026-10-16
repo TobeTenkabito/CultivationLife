@@ -5,7 +5,7 @@ from .path_modifiers import adjusted_cost
 import math
 from typing import Any
 
-from ..content_registry import ITEM_CATALOG, WORLD_SYSTEMS
+from ..content_registry import ITEM_CATALOG, REALMS, WORLD_SYSTEMS
 from ..models import GameState, HistoryRecord
 from ..rules import add_item, has_item, remove_item
 from ..runtime import now_iso
@@ -37,6 +37,9 @@ class NatalArtifactSystemMixin:
             socket_power = max(1.0, float(item.combat_bonus) * 2.0)
             definitions[item.id] = {
                 "item_id": item.id, "name": item.name,
+                "world": {"canghai": "human", "bloodriver": "demon", "weir": "spirit",
+                          "demon_grave": "true_demon", "beast_vortex": "monster_realm",
+                          "yellow_spring": "hell"}.get(source, source),
                 "minimum_realm": realm_by_source[source],
                 "effect": {"combat_bonus": socket_power},
                 "description": (
@@ -460,11 +463,14 @@ class NatalArtifactSystemMixin:
         unlocked = self._natal_slots_for_level(level)
         definitions = self._natal_artifact_material_definitions()
         materials = []
+        quantities = {item.id: max(0, int(item.quantity)) for item in player.inventory}
         for definition in definitions.values():
-            item = next((row for row in player.inventory if row.id == definition["item_id"]), None)
+            quantity = quantities.get(definition['item_id'], 0)
             materials.append({
-                **definition, "quantity": int(item.quantity) if item else 0,
-                "available": bool(item) and player.realm_index >= int(definition["minimum_realm"])
+                **definition, "quantity": quantity,
+                "world_name": WORLD_SYSTEMS['world_names'].get(definition.get('world'), '通用镶材'),
+                "minimum_realm_name": REALMS[int(definition['minimum_realm'])].name,
+                "available": quantity > 0 and player.realm_index >= int(definition["minimum_realm"])
                 and definition["item_id"] not in artifact["slots"],
             })
         slots = []
