@@ -156,18 +156,19 @@ def _war_npc(deps: WarStateDependencies, game: GameState, npc_id: str) -> SectNp
 
 def _available_warriors(deps: WarStateDependencies, game: GameState, war: dict[str, Any], side: str, power_id: str = "") -> list[SectNpc]:
     deps._ensure_war_shape(game, war)
+    if war.get('strategic_war_id'):
+        from .requirements import deployed_people
+        return [npc for npc in deployed_people(game, war, side, arrived_only=True)
+                if not power_id or war['roster_owner'].get(npc.id) == power_id]
     escaped = set(war.get("escaped", {}).get(side, [])) | set(war.get("voisinage_suppressed", []))
     from .requirements import deployed_ids
     from ...npc_custody import is_free
     from ...person_assignments import research_assignment
-    from ...relationship_records import find_person
     source_world=war.get('logistics',{}).get('sides',{}).get(side,{}).get('world',war['world'])
     return [npc for npc_id in deployed_ids(war,side)
             if npc_id not in escaped and (not power_id or war["roster_owner"].get(npc_id) == power_id)
-            and (npc := (find_person(game, npc_id) if war.get('strategic_war_id') else deps._war_npc(game, npc_id))) and is_free(npc) and npc.world==source_world
+            and (npc := deps._war_npc(game, npc_id)) and is_free(npc) and npc.world==source_world
             and not research_assignment(game,npc.id, exclude_war=war["id"])
-            and (not war.get("strategic_war_id") or (war.get("campaign_phase") == "engaged" and npc.location_id == war.get("location_id")
-                 and any(j['person_id']==npc_id and j['phase']=='stationed' for j in war.get('journeys',{}).get(side,[]))))
             and not deps._intrigue_is_imprisoned(game, npc.id)]
 
 

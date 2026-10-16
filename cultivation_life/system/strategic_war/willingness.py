@@ -4,6 +4,7 @@ from ...spatial_people import instance_of
 from .rules import SIDES, ref, committed_org, owns
 from .records import note
 from ..war.logistics import cash
+from ..war.requirements import deployed_people
 
 
 def baseline(people):
@@ -13,14 +14,14 @@ def baseline(people):
 def evaluate(deps, game, row):
     children = [w for w in game.wars if w.get('strategic_war_id') == row['id']]
     forces = {}
-    members = {}
     for c in row['commitments']:
         org = committed_org(game, row, c)
         people = {n.id: n for n in deps.members(game, org)} if org else {}
-        members[c['org']['id']] = people
         forces[c['org']['id']] = sum(deps.power(n) for n in people.values() if is_free(n)
             and n.world == row['world'] and not instance_of(game, n.id) and not deps.imprisoned(game, n.id))
     totals = {s: sum(forces[c['org']['id']] for c in row['commitments'] if c['side'] == s) for s in SIDES}
+    task_forces = {w['id']: {s: sum(deps.power(n) for n in deployed_people(game, w, s)) for s in SIDES}
+                   for w in children if w.get('status') == 'active'}
     result = {}
     for c in row['commitments']:
         identity = c['org']['id']; side = c['side']; enemy = 'defender' if side == 'attacker' else 'attacker'
@@ -29,8 +30,7 @@ def evaluate(deps, game, row):
                       and w.get('status') == 'active' and identity not in w.get('withdrawn_orgs', [])), None)
         def balance(own, other):
             return round(100 * own / max(1, own + other))
-        task = balance(sum(forces.get(r['id'], 0) for r in child['coalitions'][side]),
-                       sum(forces.get(r['id'], 0) for r in child['coalitions'][enemy])) if child else 60
+        task = balance(task_forces[child['id']][side], task_forces[child['id']][enemy]) if child else 60
         alliance = balance(totals[side], totals[enemy])
         reserves = min(100, round(100 * cash(game, org) / max(1, c['budget']))) if org else 0
         supply = reserves

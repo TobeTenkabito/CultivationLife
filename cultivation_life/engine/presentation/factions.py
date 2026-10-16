@@ -356,16 +356,19 @@ def _vassal_transfer_candidates(
     if relation.get("status") != "vassal" or relation.get("overlord") != own_id or relation.get("subject") != target_id:
         return []
     player_rank = deps._actual_player_realm(game.player)
+    from ...system.organization_transfer import refusal
+    destination = game.sects.get(own_id) if kind == 'sect' else None
     if kind == "sect":
         source = game.sects.get(target_id)
-        members = list(source.npcs) if source else []
+        members = [(npc, source) for npc in source.npcs] if source else []
     else:
         members = [
-            npc for sect in game.sects.values() for npc in sect.npcs
+            (npc, sect) for sect in game.sects.values() for npc in sect.npcs
             if npc.race == target_id
         ]
     return [
         {"id":npc.id,"name":npc.name,"realm_name":deps._npc_realm_name(npc)}
-        for npc in members
+        for npc, source in members
         if npc.alive and npc.world == game.player.world and (npc.realm_index, npc.layer) <= player_rank
+        and not refusal(game, npc, source, destination)
     ]

@@ -266,7 +266,7 @@ def propose_sect_diplomacy(deps: FactionActionDependencies, game_id: str, target
 def transfer_vassal_personnel(
     deps: FactionActionDependencies, game_id: str, kind: str, target_id: str, npc_id: str,
 ) -> dict[str, Any]:
-    game = deps._load(game_id)
+    game = deepcopy(deps._load(game_id))
     player = game.player
     if game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法调动人事")
@@ -295,13 +295,17 @@ def transfer_vassal_personnel(
     player_rank = deps._actual_player_realm(player)
     if not npc or (npc.realm_index, npc.layer) > player_rank:
         raise ValueError("只能调动当前界面内、修为不高于你的附庸修士")
+    destination = game.sects.get(str(own_id)) if kind == 'sect' else None
+    from ...system.organization_transfer import refusal
+    reason = refusal(game, npc, source_sect, destination)
+    if reason:
+        raise ValueError(reason)
+    if destination:
+        require_faction_admission(destination, npc)
     if source_sect:
         source_sect.npcs = [row for row in source_sect.npcs if row.id != npc.id]
-        deps._check_sect_extinction(game, source_sect)
     npc.title = "附庸外援"
     if kind == "sect":
-        destination = game.sects[str(own_id)]
-        require_faction_admission(destination, npc)
         npc.faction_id = destination.id
         destination.npcs.append(npc)
         destination_name = destination.name
@@ -309,6 +313,8 @@ def transfer_vassal_personnel(
         npc.faction_id = f"race_support:{own_id}"
         game.notable_npcs[npc.id] = npc
         destination_name = RACE_DEFINITIONS[str(own_id)]["name"]
+    if source_sect:
+        deps._check_sect_extinction(game, source_sect)
     summary = f"你以被依附方的名义，将{npc.name}从{deps._power_name(game, kind, target_id)}调为{destination_name}外援。"
     game.history.append(HistoryRecord(
         "SYS_VASSAL_TRANSFER", 1, player.age, "附庸人事调动", npc.id, "transferred", summary,

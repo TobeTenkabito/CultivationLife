@@ -6,6 +6,8 @@ from ...person_assignments import research_assignment
 from ...content_registry import WORLD_SYSTEMS
 from ..economy.basket_rules import REALM_WEIGHTS, purpose_candidates
 from ..intrigue.prison_state import is_imprisoned
+from ...relationship_records import find_person
+from ...spatial_people import instance_of
 
 SHARES = dict(medical=.04, material=.064, energy=.03)
 
@@ -16,18 +18,38 @@ def deployed_ids(war,side):
     return roster[:max(1,math.ceil(len(roster)*ratio))]
 
 
-def refresh(game, war, side, *, persist=True, participating_player_side=None):
-    ids = set(deployed_ids(war,side))
-    if war.get('strategic_war_id') and war.get('campaign_phase')=='engaged':
-        ids.intersection_update(j['person_id'] for j in war.get('journeys',{}).get(side,[]) if j['phase']=='stationed')
+def deployed_people(game, war, side, *, arrived_only=False):
+    """Resolve only original roster IDs, independent of their registry container."""
+    managed = bool(war.get('strategic_war_id'))
+    if managed and arrived_only and war.get('campaign_phase') != 'engaged':
+        return []
     escaped = set(war.get('escaped', {}).get(side, ())) | set(war.get('voisinage_suppressed', ()))
-    pool = [*game.sects.values(), *([game.family] if game.family else [])]
-    people = {n.id:n for e in pool for n in e.npcs if n.id in ids}
-    people.update({k:n for k,n in game.world_npcs.items() if k in ids})
     row = war.get('logistics', {}).get('sides', {}).get(side)
     source_world=(row or {}).get('world',war['world'])
-    groups = Counter(n.realm_index for k,n in people.items() if k not in escaped and is_free(n) and n.world==source_world
-                     and not research_assignment(game, k, exclude_war=war.get("id")) and not is_imprisoned(game, k))
+    journeys = {j['person_id']:j for j in war.get('journeys', {}).get(side, [])} if managed else {}
+    withdrawn = set(war.get('withdrawn_orgs', []))
+    result = []
+    for identity in dict.fromkeys(deployed_ids(war, side)):
+        if identity in escaped or war.get('roster_owner', {}).get(identity) in withdrawn:
+            continue
+        npc = find_person(game, identity)
+        if (not npc or not is_free(npc) or npc.world != source_world or instance_of(game, identity)
+                or research_assignment(game, identity, exclude_war=war.get('id')) or is_imprisoned(game, identity)):
+            continue
+        if managed:
+            journey = journeys.get(identity, {})
+            if journey.get('phase') not in ({'stationed'} if arrived_only else {'outbound', 'stationed'}):
+                continue
+            if arrived_only and npc.location_id != war.get('location_id'):
+                continue
+        result.append(npc)
+    return result
+
+
+def refresh(game, war, side, *, persist=True, participating_player_side=None):
+    people = deployed_people(game, war, side, arrived_only=bool(war.get('strategic_war_id') and war.get('campaign_phase')=='engaged'))
+    groups = Counter(n.realm_index for n in people)
+    row = war.get('logistics', {}).get('sides', {}).get(side)
     player_present = (participating_player_side == side if war.get('strategic_war_id')
                       else participating_player_side == side or war.get('player_side') == side)
     if player_present and game.player.alive and game.player.world==war['world']:
