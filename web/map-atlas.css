@@ -39,3 +39,4 @@
 @media(orientation:landscape) and (max-height:600px){.atlas-viewport{height:clamp(200px,60vh,360px)}}
 
 .atlas-scene .atlas-node > rect{pointer-events:none}
+ .atlas-war-marker{pointer-events:none}.atlas-war-marker rect{fill:var(--paper);stroke:var(--danger,#a95445);stroke-width:1.2}.atlas-war-marker text{fill:var(--danger,#a95445);font-size:12px;font-weight:600;paint-order:stroke;stroke:none}.atlas-battles{display:grid;gap:10px;margin:18px 0}.atlas-battles h4{margin:0;font-size:13px}.atlas-battle{display:grid;gap:8px;padding:14px;border:1px solid var(--line);border-left:3px solid var(--danger,#a95445);border-radius:5px;min-width:0}.atlas-battle small,.atlas-battle span{font-size:11px;color:var(--muted)}.atlas-battle strong{font-size:13px;overflow-wrap:anywhere}.atlas-battle button{justify-self:start;min-height:40px;font-size:11px}

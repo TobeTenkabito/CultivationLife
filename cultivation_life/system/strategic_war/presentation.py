@@ -1,6 +1,7 @@
 """Small, read-only whitelisted theatre projection, scoped to the current world."""
 from ...content_registry import RACE_DEFINITIONS, WORLD_SYSTEMS
 from ...race_diplomacy import relations_for
+from ...world_state import race_pair
 from .rules import OPEN, WORLDS, SIDES, organizations, owns, ref
 from .politics import player_commander, player_eligible
 from ..war.logistics import cash
@@ -20,6 +21,9 @@ def public(deps, game):
         for c in commitments:
             org=next((o for o in pool if o.id==c['id']),None)
             c['idle']=bool(org and not busy(game,org))
+            original=next(r for r in row['commitments'] if r['org']['id']==c['id'])
+            c['willingness']=original.get('willingness',70)
+            c['will_factors']=dict(original.get('will_factors',{}))
         children = []
         for child in game.wars:
             if child.get('strategic_war_id') != row['id']:
@@ -37,7 +41,8 @@ def public(deps, game):
                     living=[j for j in people if (n:=deps.find_person(game,j['person_id'])) and is_free(n) and not deps.imprisoned(game,n.id)]
                     phase='lost' if not living else 'returning' if any(j['phase']=='returning' for j in living) else 'marching' if any(j['phase']=='outbound' for j in living) else 'home' if all(j['phase'] in {'home','lost'} for j in living) else 'engaged'
                     coalitions[side].append(dict(id=participant['id'],name=names.get(participant['id'],'原组织'),phase=phase,
-                                                count=len(living),remaining=max((j['remaining'] for j in living if j['phase'] in {'outbound','returning'}),default=0)))
+                                                count=len(living),remaining=max((j['remaining'] for j in living if j['phase'] in {'outbound','returning'}),default=0),
+                                                willingness=next((c['willingness'] for c in commitments if c['id']==participant['id']),70)))
             dispatch_choices=[]
             commander=player_commander(deps,game,row) if not blocked else None
             if commander and row['status']=='active' and child['status']=='active':
@@ -51,27 +56,52 @@ def public(deps, game):
                     except ValueError:
                         continue
                     dispatch_choices.append(dict(**ref(org),name=org.name,cost=cost,years=route.years))
+            from .willingness import personal_side
+            from ..war.supply import turns
+            own_side=next((s for s in SIDES if own and own.id in {r['id'] for r in child['coalitions'][s]}),None)
             children.append(dict(id=child['id'], attacker=names.get(child['attacker_id'], '原组织'),
                 defender=names.get(child['defender_id'], '原组织'), phase=child['campaign_phase'],
                 location=place.get('name', '原战场'), remaining=remaining, battles=child.get('battles', 0),
                 next_in=max(0, child.get('next_battle_age', 0)-game.player.age),
                 can_withdraw=bool(own and not blocked and child['status'] == 'active'),
+                can_participate=bool(not blocked and personal_side(deps,game,row,child)),
+                participation_reason='本人须到达实际战场；亲征每十年一次，沿用普通详细会战与敌方反击。',
                 org=ref(own) if own else None,
                 coalitions=coalitions,dispatch_choices=dispatch_choices,
+                field={s:dict(morale=round(child['morale'][s]),exhaustion=round(child['exhaustion'][s]),
+                    supplies=round(turns(game,child,s),1) if own_side in {None,s} else None) for s in SIDES},
                 reports=[dict(log) for log in child.get('logs',[])[-6:]],
                 # Receipts only. Enemy treasuries and personnel are never projected here.
                 paid=sum(r.get('mobilized', 0) for r in child.get('logistics', {}).get('sides', {}).values())))
+        from .peace import package, TERMS, DESCRIPTIONS, player_reply
+        side=next((s for s in SIDES if game.player.allegiance_race==row[s]),None)
+        peace_options=[]
+        if side and not blocked and deps.has_race_voice(game) and row['status'] in {'active','mobilizing'}:
+            for term,label in TERMS.items():
+                try:
+                    bundle=package(deps,game,row,side,term)
+                except ValueError:
+                    continue
+                peace_options.append(dict(term=term,label=label,description=DESCRIPTIONS[term],
+                                          total=sum(d['amount'] for d in bundle['demands']),**bundle))
+        proposal=row.get('peace_proposal')
+        pending=bool(proposal and proposal['status']=='pending' and game.player.age<proposal['expires'])
         result.append(dict(id=row['id'], revision=row['revision'], status=row['status'], score=row['score'],
             attacker=RACE_DEFINITIONS.get(row['attacker'], {}).get('name', row['attacker']),
             defender=RACE_DEFINITIONS.get(row['defender'], {}).get('name', row['defender']),
-            elapsed=max(0,game.player.age-row['start_age']), commanders={s: row['commanders'].get(s, {}).get('name', '待推举') for s in SIDES},
+            elapsed=max(0,row.get('end_age',game.player.age)-row['start_age']),
+            truce_remaining=max(0,relations_for(game,row['world']).get(race_pair(row['attacker'],row['defender']),{}).get('truce_until_age',0)-game.player.age),
+            commanders={s: row['commanders'].get(s, {}).get('name', '待推举') for s in SIDES},
             player_commander=player_commander(deps,game,row) if not blocked else None,
             nomination_choices=[s for s in SIDES if not blocked and row['status'] in {'active','mobilizing'}
                                 and player_eligible(deps,game,row,s) and game.player.age-row.get('nomination_age',-1000)>=10],
             commitments=commitments, campaigns=children, objectives=[{k:o[k] for k in ('id','name','status','result')} for o in row['objectives']],
             can_peace=bool(not blocked and row['status'] in {'active','mobilizing'} and deps.has_race_voice(game)
                            and game.player.allegiance_race in {row['attacker'],row['defender']}
-                           and game.player.age-row.get('peace_proposal_age',-1000)>=10),
+                            and not pending and game.player.age-row.get('peace_proposal_age',-1000)>=10),
+            peace_options=peace_options, peace_proposal={**proposal,'remaining':max(0,proposal['expires']-game.player.age)} if proposal else None,
+            treaty=dict(row['treaty']) if row.get('treaty') else None,
+            can_reply=bool(not blocked and row['status'] in {'active','mobilizing'} and pending and player_reply(deps,game,row,proposal)),
             peace_reason='本案十年内已提和谈' if game.player.age-row.get('peace_proposal_age',-1000)<10 else '需本界参战种族议席，且本案尚未停战',
             commit_choices=[{**ref(o), 'name':o.name, 'budget':int(cash(game,o)*.2)} for o in pool if not blocked and row['status'] in {'mobilizing','active'}
                             and o.allegiance_race in {row['attacker'],row['defender']} and owns(deps,game,o)

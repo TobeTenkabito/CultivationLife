@@ -2,6 +2,17 @@
 from ...content_registry import WORLD_SYSTEMS, RACE_DEFINITIONS
 
 
+def strategic_conflicts(game, first, second):
+    """Original opposite commitments remain binding through total settlement."""
+    result=[]
+    for row in game.strategic_war_state.get('wars',[]):
+        if row['status']=='ended':continue
+        sides={c['org']['id']:c['side'] for c in row['commitments']}
+        if first in sides and second in sides and sides[first]!=sides[second]:
+            result.append(row)
+    return result
+
+
 def system_war_allowed(game, kind, attacker, defender):
     def tiers(identity):
         if kind == 'race':

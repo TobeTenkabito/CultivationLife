@@ -39,7 +39,8 @@ def plan(deps, game, row, child, org):
     enemies = [r['id'] for r in child['coalitions']['defender' if side == 'attacker' else 'attacker']]
     for enemy in enemies:
         relation = game.sect_relations.get(race_pair(org.id, enemy), {})
-        if game.diplomacy_unit < max(relation.get('truce_until_unit', 0), relation.get('war_truce_until_unit', 0)):
+        if (game.diplomacy_unit < max(relation.get('truce_until_unit', 0), relation.get('war_truce_until_unit', 0))
+                or game.player.age < relation.get('truce_until_age',0)):
             raise ValueError('此组织与战场敌宗仍在停战期')
     capacity = 48 - len(child['roster'][side])
     people = army(deps, game, org)[:min(12, capacity)]
@@ -164,6 +165,8 @@ def auto_dispatch(deps, game, row):
             sent = False
             for org in organizations(game, row['world']):
                 if org.allegiance_race != row[side]:
+                    continue
+                if any(c['org']==ref(org) and c.get('willingness',70)<35 for c in row['commitments']):
                     continue
                 try:
                     send(deps, game, row, child, org)

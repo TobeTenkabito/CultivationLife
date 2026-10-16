@@ -6,6 +6,7 @@ from ...npc_custody import is_free
 from .rules import SIDES, WORLDS, OPEN, organizations, army, ref, site, owns, local_races
 from .rules import routes as _routes
 from .records import note
+from .settlement import withdraw, receipt, armistice
 from .rules import representatives as eligible_representatives, committed_org
 
 
@@ -86,8 +87,10 @@ def commit(deps, game, row, org):
     if not people:
         raise ValueError('组织没有可合法出征的自由修士')
     budget = int(cash(game, org) * .2)
+    from .willingness import baseline
     row['commitments'].append(dict(org=ref(org), side=side, budget=budget,
-                                   representative=people[0].id, approved_age=game.player.age))
+                                   representative=people[0].id, approved_age=game.player.age,
+                                   willingness=70, will_baseline=baseline(people)))
     note(game, row, '组织承诺', f'{org.name}批准本案动员；军费上限 {budget} 灵石折值，原库实际支付。')
 
 
@@ -126,14 +129,21 @@ def _launch(deps, game, row):
     from ..war.occupancy import busy
     sides = {s: [c for c in row['commitments'] if c['side'] == s
                  and (org:=committed_org(game,row,c)) and not busy(game,org) and army(deps,game,org)] for s in SIDES}
-    # Two genuine organization objectives, at most two simultaneous campaigns.
-    if min(map(len, sides.values())) < 2:
+    # Search bounded actual pairs, instead of requiring exactly two indexed pairs.
+    if min(map(len, sides.values())) < 1:
         return
     plans=[]
     reserved=set()
     reserved_members=set()
-    for index in range(2):
-        a, d = (pool[sides[s][index]['org']['id']] for s in SIDES)
+    reserved_orgs=set()
+    commitments={c['org']['id']:c for c in row['commitments']}
+    for ca,cd in ((a,d) for a in sides['attacker'] for d in sides['defender']):
+        if len(plans)==2:
+            break
+        index=len(plans)
+        a,d=pool[ca['org']['id']],pool[cd['org']['id']]
+        if {a.id,d.id} & reserved_orgs:
+            continue
         from ..war.occupancy import busy
         if busy(game, a) or busy(game, d):
             continue
@@ -144,7 +154,8 @@ def _launch(deps, game, row):
         if not all(people.values()):
             continue
         relation=game.sect_relations.get(race_pair(a.id,d.id),{})
-        if game.diplomacy_unit < max(relation.get('truce_until_unit',0),relation.get('war_truce_until_unit',0)):
+        if (game.diplomacy_unit < max(relation.get('truce_until_unit',0),relation.get('war_truce_until_unit',0))
+                or game.player.age < relation.get('truce_until_age',0)):
             continue
         target = site(d)
         if deps.maps.location(row['world'],target).get('min_realm_index',0):
@@ -169,17 +180,22 @@ def _launch(deps, game, row):
         for s,org in [('attacker',a),('defender',d)]:
             origin=site(org)
             plan=deps.maps.travel_plan(row['world'],origin,target,min(n.realm_index for n in people[s])) if origin!=target else None
+            if plan and plan.status != 'ok':
+                break
             years=plan.years if plan else 0
             cargo[s]=dict(origin=origin,destination=target,route=list(plan.route) if plan else [origin],
                           years=years,remaining=years,phase='outbound' if years else 'stationed')
+        if len(cargo) != 2:
+            continue
         reserved.update(selected)
         reserved_members.update(members)
+        reserved_orgs.update((a.id,d.id))
         plans.append((index,a,d,people,journeys,cargo,target))
-    if len(plans)!=2:
+    if not plans:
         return
     deps.prepare_formations(game)
     for index,a,d,people,journeys,cargo,target in plans:
-        child = deps.start_campaign(game, 'sect', a.id, d.id, initiated_by_player=True, prepare_supplies=False)
+        child = deps.start_campaign(game, 'sect', a.id, d.id, initiated_by_player=True, prepare_supplies=False, strategic_war_id=row['id'])
         objective = dict(id=f"{row['id']}-objective-{index}", name=f'牵制{d.name}', location_id=target,
                          status='active', campaign_id=child['id'], result=0)
         child.update(strategic_war_id=row['id'], objective_id=objective['id'], scheduler='calendar',
@@ -187,8 +203,8 @@ def _launch(deps, game, row):
                      deployment_age=game.player.age,
                      cargo_journeys=cargo,
                      next_battle_age=game.player.age + max([j['years'] for js in journeys.values() for j in js]+[c['years'] for c in cargo.values()]) + 10,
-                     budget_caps={s: sides[s][index]['budget'] for s in SIDES}, controller='ai',
-                      org_budget_caps={org.id: sides[s][index]['budget'] for s,org in [('attacker',a),('defender',d)]},
+                      budget_caps={s: commitments[org.id]['budget'] for s,org in [('attacker',a),('defender',d)]}, controller='ai',
+                       org_budget_caps={org.id: commitments[org.id]['budget'] for org in (a,d)},
                      roster={s: [n.id for n in people[s]] for s in SIDES}, player_side=None)
         child['roster_owner'] = {n.id: org.id for s, org in [('attacker', a), ('defender', d)] for n in people[s]}
         row['objectives'].append(objective)
@@ -201,7 +217,7 @@ def _launch(deps, game, row):
         child['logistics_initialized']=True
     if row['campaigns']:
         row['status'] = 'active'
-        row['deadline_age'] = max(w['next_battle_age'] for w in game.wars if w.get('strategic_war_id') == row['id']) + 120
+        row['deadline_age'] = max(w['next_battle_age'] for w in game.wars if w.get('strategic_war_id') == row['id']) + 200
         note(game, row, '联军开拔', f"已建立 {len(row['campaigns'])} 场组织战役，沿原地图道路行军。")
 
 
@@ -240,59 +256,10 @@ def _journey(deps, game, child):
     return ready
 
 
-def withdraw(game, child):
-    if child.get('campaign_phase') == 'returning':
-        return
-    for side in SIDES:
-        carriers=[(child[f'{side}_id'],child['cargo_journeys'][side])]+[
-            (r['org']['id'],r['cargo']) for r in child.get('reinforcements',[]) if r['side']==side and r['delivered']]
-        carrier=next((cargo for identity,cargo in carriers if identity not in child.get('withdrawn_orgs',[])
-                      and cargo['phase'] in {'stationed','outbound'}),None)
-        if carrier:
-            child['logistics']['sides'][side]['return_location']=carrier['origin']
-    child.update(status='withdrawing', campaign_phase='returning')
-    for journeys in child.get('journeys', {}).values():
-        for j in journeys:
-            if j['phase'] in {'home', 'lost', 'returning'}:
-                continue
-            elapsed = j['years'] - j['remaining'] if j['phase'] == 'outbound' else j['years']
-            j.update(destination=j['origin'], remaining=elapsed, phase='returning')
-    for cargo in list(child.get('cargo_journeys',{}).values())+[r['cargo'] for r in child.get('reinforcements',[])]:
-        if cargo['phase'] not in {'home','lost','returning'}:
-            elapsed=cargo['years']-cargo['remaining'] if cargo['phase']=='outbound' else cargo['years']
-            cargo.update(destination=cargo['origin'],remaining=elapsed,phase='returning')
 
 
-def receipt(game, row, child):
-    # Monotonic cumulative receipts: duplicate reads/callbacks cannot farm score.
-    revision = int(child.get('battles', 0))
-    previous = row['receipts'].get(child['id'], {})
-    terminal = child.get('status') in {'peace_ready', 'ended', 'withdrawing'}
-    if revision <= previous.get('revision', -1) and (not terminal or previous.get('terminal')):
-        return
-    row['receipts'][child['id']] = dict(revision=revision, terminal=terminal)
-    objective = next(o for o in row['objectives'] if o['campaign_id'] == child['id'])
-    if terminal and objective['status'] != 'completed':
-        objective.update(status='completed', result={'attacker': 1, 'defender': -1}.get(child.get('winner'), 0))
-        note(game, row, '战役结算', f"{objective['name']}结束，共 {revision} 次交锋；伤亡与军需已由原战役结算。")
-        withdraw(game, child)
-    row['score'] = round(sum(o['result'] for o in row['objectives']) * 50)
 
 
-def armistice(game, row, reason):
-    if row['status'] in {'armistice', 'settling', 'ended'}:
-        return
-    row['status'] = 'armistice'
-    row['outcome'] = 'attacker' if row['score'] > 0 else 'defender' if row['score'] < 0 else 'draw'
-    for child in game.wars:
-        if child.get('strategic_war_id') == row['id'] and child.get('status') != 'ended':
-            withdraw(game, child)
-    for objective in row['objectives']:
-        if objective['status']=='active':
-            objective['status']='cancelled'
-    relation = relations_for(game, row['world']).setdefault(race_pair(row['attacker'], row['defender']), {})
-    relation.update(status='truce', affinity=-10, since_age=game.player.age, truce_until_age=game.player.age + 50)
-    note(game, row, '总停战', reason)
 
 
 def advance(deps, game, rng):
@@ -329,6 +296,8 @@ def advance(deps, game, rng):
             _elect(deps, game, row)
             from .dispatch import auto_dispatch
             auto_dispatch(deps, game, row)
+        from .willingness import advance as advance_willingness
+        advance_willingness(deps, game, row)
         for child in [w for w in game.wars if w.get('strategic_war_id') == row['id'] and w.get('status') != 'ended']:
             ready = _journey(deps, game, child)
             if child['campaign_phase'] == 'returning':
@@ -356,10 +325,14 @@ def advance(deps, game, rng):
                     child['next_battle_age'] = game.player.age + 10
                     receipt(game, row, child)
         if row['status'] == 'active' and row['objectives'] and all(o['status'] == 'completed' for o in row['objectives']):
-            armistice(game, row, '既定战役均已完成，双方确认本案战果并撤回原部众。')
-        if ((row['status'] == 'mobilizing' and game.player.age-row['start_age'] >= 30)
+            if 'objectives_done_age' not in row:
+                row['objectives_done_age'] = game.player.age
+                note(game, row, '战果待议', '既定战役已结束，进入和谈窗口；可据实际战果要求赔款，战争尚未自动白和。')
+        from .peace import advance as advance_peace
+        advance_peace(deps, game, row)
+        if ((row['status'] == 'mobilizing' and game.player.age-row['start_age'] >= 60)
                 or (row['status'] == 'active' and game.player.age >= row['deadline_age'])):
-            armistice(game, row, '动员或战事旷日持久，双方接受无新增赔付的安全停战。')
+            armistice(game, row, '长期无法组成合法出征计划或达到战时授权期限，停止新增攻势并安全撤军，无未批准赔款。')
         if row['status'] in {'armistice', 'settling'}:
             row['status'] = 'settling'
             if all(w.get('status') == 'ended' for w in game.wars if w.get('strategic_war_id') == row['id']):

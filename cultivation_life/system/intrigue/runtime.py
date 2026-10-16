@@ -105,9 +105,15 @@ def _advance_intrigue_unit(deps: IntrigueRuntimeDependencies, game: GameState, r
                 if resolution_type in {"form_alliance", "declare_war"}:
                     possible = [row.id for row in candidates if row.id != sect.id and row.world == sect.world]
                     if resolution_type == "declare_war":
+                        from ..war.policy import strategic_conflicts
+                        from ..war.occupancy import busy, organization
                         possible = [target for target in possible if game.diplomacy_unit >= max(
                             int(deps._war_relation(game, "sect", sect.id, target).get("truce_until_unit", 0)),
-                            int(deps._war_relation(game, "sect", sect.id, target).get("war_truce_until_unit", 0)))]
+                            int(deps._war_relation(game, "sect", sect.id, target).get("war_truce_until_unit", 0)))
+                            and game.player.age >= int(deps._war_relation(game,"sect",sect.id,target).get('truce_until_age',0))
+                            and not strategic_conflicts(game,sect.id,target)
+                            and not busy(game,sect,managed_only=True)
+                            and (not (org:=organization(game,target)) or not busy(game,org,managed_only=True))]
                     if not possible:
                         resolution_type = "investment"
                     else:

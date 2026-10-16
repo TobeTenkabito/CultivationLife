@@ -441,7 +441,8 @@ def _random_race_diplomacy_event(deps: FactionDependencies, game: GameState, rng
     key = race_pair(first, second)
     relation = relations_for(game).setdefault(key, {"affinity": 0.0, "status": "neutral", "since_age": game.player.age})
     old_status = str(relation.get("status", "neutral"))
-    if game.diplomacy_unit < max(int(relation.get("truce_until_unit", 0)), int(relation.get("war_truce_until_unit", 0))):
+    if (game.diplomacy_unit < max(int(relation.get("truce_until_unit", 0)), int(relation.get("war_truce_until_unit", 0)))
+            or game.player.age < int(relation.get('truce_until_age',0))):
         return
     if old_status == "war":
         return  # 战争由士气、厌战和和谈系统决定，不再被普通外交骰直接终止。
@@ -483,7 +484,8 @@ def _random_sect_diplomacy_event(deps: FactionDependencies, game: GameState, rng
     key = race_pair(first.id, second.id)
     relation = game.sect_relations.setdefault(key, {"affinity":0.0,"status":"neutral","since_age":game.player.age})
     old_status = str(relation.get("status", "neutral"))
-    if game.diplomacy_unit < max(int(relation.get("truce_until_unit", 0)), int(relation.get("war_truce_until_unit", 0))):
+    if (game.diplomacy_unit < max(int(relation.get("truce_until_unit", 0)), int(relation.get("war_truce_until_unit", 0)))
+            or game.player.age < int(relation.get('truce_until_age',0))):
         return
     if old_status == "war":
         return
@@ -500,6 +502,11 @@ def _random_sect_diplomacy_event(deps: FactionDependencies, game: GameState, rng
     from ...system.war.logistics import ready_to_attack
     if new_status == 'war' and not ready_to_attack(game, 'sect', first.id, world):
         return
+    if new_status=='war':
+        from ...system.war.occupancy import busy
+        from ...system.war.policy import strategic_conflicts
+        if busy(game,first,managed_only=True) or busy(game,second,managed_only=True) or strategic_conflicts(game,first.id,second.id):
+            return
     deps._set_diplomatic_relation(game, relation, new_status, first.id, second.id, "sect", affinity)
     summary = f"{first.name}与{second.name}{action}，宗门关系转为{RELATION_LABELS[new_status]}（好感 {affinity:.0f}）。"
     game.history.append(HistoryRecord(

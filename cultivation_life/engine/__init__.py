@@ -3146,8 +3146,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _player_has_war_voice(self, game: GameState, war: dict[str, Any]) -> bool:
         return war_diplomacy._player_has_war_voice(self._dependencies.war.diplomacy, game, war)
 
-    def _start_war(self, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False, prepare_supplies=True) -> dict[str, Any]:
-        return war_diplomacy._start_war(self._dependencies.war.diplomacy, game, kind, attacker, defender, initiated_by_player=initiated_by_player, prepare_supplies=prepare_supplies)
+    def _start_war(self, game: GameState, kind: str, attacker: str, defender: str, *, initiated_by_player=False, prepare_supplies=True, strategic_war_id='') -> dict[str, Any]:
+        return war_diplomacy._start_war(self._dependencies.war.diplomacy, game, kind, attacker, defender, initiated_by_player=initiated_by_player, prepare_supplies=prepare_supplies, strategic_war_id=strategic_war_id)
 
     def _war_total_power(
         self, game: GameState, war: dict[str, Any], side: str, *, include_player: bool = True,
