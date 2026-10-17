@@ -1,6 +1,6 @@
 """Paid workshops share actual raw inputs; extraction is explicitly classified."""
 import math
-from ...content_registry import ITEM_CATALOG
+from ...content_registry import ITEM_CATALOG, restricted_acquisition
 from ...economy_content import specification, inputs as native_inputs, material_id
 from .basket_rules import kind, index, candidates, is_raw, raw_candidates
 from .basket_trade import quote, affordable, purchase, reprice, _commit_purchase
@@ -9,7 +9,7 @@ from .ledger import balance, transfer_value
 
 def recipe(market, item):
     definition = ITEM_CATALOG.get(item)
-    if definition is None:
+    if definition is None or restricted_acquisition('item', item):
         return None
     tags = set(definition.tags)
     # Seeds/herbs/ordinary mineral supplies are the extraction stage. Puppet

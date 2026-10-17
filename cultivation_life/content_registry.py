@@ -1250,6 +1250,9 @@ class ContentRegistry:
         if not all(bool(entry.get("enabled")) for entry in presets):
             raise ContentError("九项快速开局预设均应处于开放状态")
         for entry in presets:
+            level = entry.get("combat_technique_level", 1)
+            if type(level) is not int or not 1 <= level <= 9:
+                raise ContentError("快速开局斗法功法等级必须为1至9的整数")
             if entry.get("select_path"):
                 variants = entry.get("path_presets", {})
                 if set(variants) != set(paths) or any(
@@ -1275,6 +1278,7 @@ class ContentRegistry:
             technique_ids = [
                 entry.get("main_technique"), entry.get("support_technique"),
                 *entry.get("combat_techniques", []),
+                *entry.get("supplementary_combat_techniques", []),
                 *([entry.get("body_technique")] if entry.get("body_technique") else []),
                 *([entry.get("divine_sense_technique")] if entry.get("divine_sense_technique") else []),
             ]
@@ -1540,6 +1544,19 @@ class ContentRegistry:
         if recommendations != expectations:
             raise ContentError("NPC 世界战力与玩家推荐战力必须使用同一套境界基准")
         auction = world.get("auction_system", {})
+        for key in ('class_weights', 'rarity_multipliers'):
+            values = auction.get(key, [])
+            if not isinstance(values, list) or len(values) != 3 or any(type(v) not in (int,float) or not math.isfinite(v) or v <= 0 for v in values):
+                raise ContentError(f'拍卖分档配置 {key} 必须为三个正数')
+        fees = auction.get('high_entry_fees_by_world_tier', {})
+        if set(fees) != {'1','2','3'} or any(type(v) is not int or v <= 0 for v in fees.values()):
+            raise ContentError('高级拍卖入场费须覆盖三个界面层级且为正整数')
+        effects = world.get('common_core_effects', {})
+        if set(effects) != {'opportunity','hp','mp'} or any(
+            not isinstance(values, list) or len(values) != 12 or any(
+                type(v) not in (int,float) or not math.isfinite(v) or v <= 0 for v in values)
+            for values in effects.values()):
+            raise ContentError('通用内丹固定药效须覆盖十二阶机缘、HP和MP')
         required_auction_fields = {
             "trigger_chance_per_action", "notice_actions", "cooldown_actions", "npc_lot_count",
             "auction_rounds", "commission_rate", "starting_price_multiplier",
@@ -1818,15 +1835,19 @@ ITEM_CATALOG = CONTENT.items
 TECHNIQUE_CATALOG = CONTENT.techniques
 TRANSFORMATION_CATALOG = CONTENT.transformations
 
+def limited_trade_item(content_id: str) -> bool:
+    item = ITEM_CATALOG.get(content_id)
+    return bool(item and (item.root_grant or 'secret_art_core' in item.tags or 'secret_art_soul' in item.tags))
+
+
 def restricted_acquisition(kind: str, content_id: str) -> bool:
     """Definitions may live in the base game without becoming generic loot."""
     if content_id.startswith('SPATIAL_'):
         return True
     if kind == "technique":
         return content_id in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
-    definition = ITEM_CATALOG.get(content_id)
     return (content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "qilin_blessing_elixir"
-            or bool(definition and definition.root_grant))
+            or limited_trade_item(content_id))
 
 
 def natural_market_acquisition_allowed(kind: str, content_id: str) -> bool:
@@ -1849,6 +1870,9 @@ ROOT_BOOK_GOODS = tuple(row for row in CONTENT.market_goods
                         if row['kind'] == 'item' and ITEM_CATALOG[row['content_id']].root_grant) + tuple(
     dict(world='human', kind='item', content_id=identity, tier=4, price=12000)
     for identity, item in ITEM_CATALOG.items() if item.root_grant and identity.startswith('jinque_'))
+SECRET_MATERIAL_GOODS = tuple(row for row in CONTENT.market_goods if row['kind'] == 'item'
+    and set(ITEM_CATALOG[row['content_id']].tags) & {'secret_art_core', 'secret_art_soul'})
+LIMITED_TRADE_GOODS = ROOT_BOOK_GOODS + SECRET_MATERIAL_GOODS
 REALMS = CONTENT.realms
 PATH_NAMES = CONTENT.path_names
 KARMA_FACTORS = CONTENT.karma_factors

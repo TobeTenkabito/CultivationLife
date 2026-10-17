@@ -78,7 +78,7 @@ def validate_economy(value, merchants=None, document=None):
         require(type(row.get('last_year')) is int and type(row.get('revision')) is int and row['revision'] >= 0)
         require(f'market:{key}' in value['accounts'] and f'operator:{key}' in value['accounts'])
         require(isinstance(row.get('commodities'), dict))
-        require(row.get('goods_policy',1)==1)
+        require(type(row.get('goods_policy',1)) is int and row.get('goods_policy',1) in {1,2})
         require(row.get('household_year') is None or type(row.get('household_year')) is int and value['base_year']<=row['household_year']<=row['last_year'])
         credits=row.get('basket_credit',{})
         require(isinstance(credits,dict) and len(credits)<=96)

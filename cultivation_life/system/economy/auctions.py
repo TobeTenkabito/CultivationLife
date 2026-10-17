@@ -2,7 +2,7 @@ from __future__ import annotations
 from ..path_modifiers import adjusted_cost
 import math
 from typing import Any
-from ...content_registry import ITEM_CATALOG, MARKET_GOODS, REALMS, TECHNIQUE_CATALOG
+from ...content_registry import ITEM_CATALOG, MARKET_GOODS, REALMS, TECHNIQUE_CATALOG, WORLD_SYSTEMS, limited_trade_item
 from ...models import GameState, HistoryRecord, Player
 from ...runtime import now_iso
 from ...rules import acquire_technique, add_item, remove_item, public_catalog_entry
@@ -20,15 +20,52 @@ def _auction_location_matches(deps: AuctionsDependencies, game: GameState) -> bo
     )
 
 
-def _require_auction_access(deps: AuctionsDependencies, game: GameState, statuses: set[str]) -> dict[str, Any]:
-    if not game.player.alive or game.pending_event or game.player.imprisonment:
+def _require_auction_access(deps: AuctionsDependencies, game: GameState, statuses: set[str], *, allow_unpaid: bool = False) -> dict[str, Any]:
+    if not game.player.alive or game.pending_event or game.active_trial or game.player.imprisonment or game.player.ghost_captor:
         raise ValueError("当前状态无法参加交易集会")
     state = game.auction_state
     if state.get("status") not in statuses:
         raise ValueError("当前没有可参与的拍卖或黑市")
     if not deps._auction_location_matches(game):
         raise ValueError(f"交易集会位于{state.get('location_name', '另一处地图')}，你尚未抵达")
+    if state.get('status') == 'open' and not allow_unpaid and _entry_due(state):
+        raise ValueError(f"请先选择匿名身份并支付高级拍卖会入场费 {_entry_due(state)} 灵石")
     return state
+
+
+def auction_bands(world: str) -> list[list[int]]:
+    profile = WORLD_SYSTEMS['world_profiles'][world]
+    cap = {1: 5, 2: 8, 3: 12}[int(profile['tier'])]
+    size, remainder = divmod(cap, 3)
+    start = 1
+    result = []
+    for index in range(3):
+        stop = start + size + (index < remainder)
+        result.append(list(range(start, stop)))
+        start = stop
+    return result
+
+
+def _entry_due(state: dict[str, Any]) -> int:
+    return 0 if state.get('entry_paid') else int(state.get('entry_fee', 0))
+
+
+def _class_pool(deps: AuctionsDependencies, state: dict[str, Any]) -> list[dict[str, Any]]:
+    pool = deps._auction_goods_pool(state['world'])
+    ranks = state.get('rank_band')
+    return [row for row in pool if int(row['tier']) in ranks] if ranks else pool
+
+
+def _class_weight(deps: AuctionsDependencies, state: dict[str, Any], row: dict[str, Any]) -> float:
+    if 'auction_class' not in state:
+        return deps._auction_good_weight(state['world'], int(row['tier']))
+    # Complex elemental arts and non-standard wares become likelier at richer fairs.
+    if row['kind'] == 'technique':
+        rare = len(TECHNIQUE_CATALOG[row['content_id']].required_affinities) >= 2
+    else:
+        rare = not set(ITEM_CATALOG[row['content_id']].tags).intersection({'economic_raw','economic_product'})
+    factor = float(deps._auction_rules()['rarity_multipliers'][state['auction_class']-1]) if rare else 1
+    return max(1, int(row['tier'])) * factor
 
 
 def _schedule_auction(deps: AuctionsDependencies, game: GameState, rng: Any) -> None:
@@ -36,15 +73,23 @@ def _schedule_auction(deps: AuctionsDependencies, game: GameState, rng: Any) -> 
     location = rng.choice(locations)
     game.auction_sequence += 1
     notice = int(deps._auction_rules()["notice_actions"])
+    auction_class = rng.choices([1, 2, 3], weights=deps._auction_rules()['class_weights'], k=1)[0]
+    rank_band = auction_bands(game.player.world)[auction_class-1]
+    world_tier = str(WORLD_SYSTEMS['world_profiles'][game.player.world]['tier'])
+    fee = int(deps._auction_rules()['high_entry_fees_by_world_tier'][world_tier]) if auction_class == 3 else 0
+    class_name = ['初级', '中级', '高级'][auction_class-1]
     game.auction_state = {
         "id":f"auction-{game.auction_sequence}", "status":"scheduled",
         "world":game.player.world, "location_id":location["id"], "location_name":location["name"],
         "announced_age":game.player.age, "actions_until_open":notice,
         "round":0, "lots":[], "consignments":[], "attendees":[], "black_market_results":[],
+        "auction_class":auction_class, "class_name":class_name, "rank_band":rank_band,
+        "entry_fee":fee, "entry_paid":False,
     }
     game.history.append(HistoryRecord(
         "SYS_AUCTION_NOTICE", 1, game.player.age, "拍卖会预告", location["id"], "scheduled",
-        f"{location['name']}将在两个有时间消耗的操作节点后举行拍卖会。主办方已提前放出消息，受地图境界禁制阻隔者仍无法强行入场。",
+        f"{location['name']}将在{notice}个有时间消耗的操作节点后举行{class_name}拍卖会；拍品为{REALMS[rank_band[0]].name}至{REALMS[rank_band[-1]].name}档。"
+        + (f"高级场入场费固定为 {fee} 灵石。" if fee else '无需入场费。') + '地图境界禁制仍然有效。',
         {"location_id":location["id"], "actions_until_open":notice},
         ["system", "auction", f"world:{game.player.world}"],
     ))
@@ -93,11 +138,11 @@ def _make_auction_lot(
 
 def _open_auction(deps: AuctionsDependencies, game: GameState, rng: Any) -> None:
     state = game.auction_state
-    pool = deps._auction_goods_pool(game.player.world)
+    pool = _class_pool(deps, state)
     lots: list[dict[str, Any]] = []
     count = min(int(deps._auction_rules()["npc_lot_count"]), len(pool))
     for index in range(count):
-        weights = [deps._auction_good_weight(game.player.world, int(row["tier"])) for row in pool]
+        weights = [_class_weight(deps, state, row) for row in pool]
         selected = rng.choices(pool, weights=weights, k=1)[0]
         pool.remove(selected)
         base_price = deps._catalog_price(str(selected["kind"]), str(selected["content_id"]))
@@ -120,7 +165,7 @@ def _open_auction(deps: AuctionsDependencies, game: GameState, rng: Any) -> None
         if npc.alive and npc.world == game.player.world
     ]
     rng.shuffle(candidates)
-    trade_pool = deps._auction_goods_pool(game.player.world)
+    trade_pool = _class_pool(deps, state)
     trade_count = int(deps._auction_rules()["private_trade_offer_count"])
     state.update({
         "status":"open", "round":0, "lots":lots,
@@ -190,10 +235,13 @@ def consign_auction_item(deps: AuctionsDependencies, game_id: str, item_id: str,
     game = deps._load(game_id)
     state = deps._require_auction_access(game, {"scheduled", "open"})
     item = next((entry for entry in game.player.inventory if entry.id == item_id and entry.quantity > 0), None)
-    if not item or item_id == "spirit_stone" or (ITEM_CATALOG.get(item_id) and ITEM_CATALOG[item_id].root_grant):
+    if not item or item_id == "spirit_stone" or limited_trade_item(item_id):
         raise ValueError("该物品无法送拍")
     if item.crafted_artifact_id:
         raise ValueError("组合炼器法宝请使用包裹内该物品自己的寄拍按钮")
+    tier = max((int(row['tier']) for row in MARKET_GOODS if row['kind'] == 'item' and row['content_id'] == item_id), default=1)
+    if state.get('rank_band') and tier not in state['rank_band']:
+        raise ValueError('该物品品阶不在本场拍卖的境界档内')
     base_price = deps._plant_item_value(item) or deps._catalog_price("item", item_id)
     rules = deps._auction_rules()
     minimum = max(1, math.ceil(base_price * float(rules["consignment_min_price_ratio"])))
@@ -207,7 +255,6 @@ def consign_auction_item(deps: AuctionsDependencies, game_id: str, item_id: str,
     if not remove_item(game.player, item_id):
         add_item(game.player, "spirit_stone", listing_fee)
         raise ValueError("行囊中没有该物品")
-    tier = max((int(row["tier"]) for row in MARKET_GOODS if row["kind"] == "item" and row["content_id"] == item_id), default=1)
     from .local_market import auction_fee
     auction_fee(game, listing_fee, '拍卖占位费')
     consignment = {
@@ -391,9 +438,19 @@ def negotiate_at_auction(deps: AuctionsDependencies, game_id: str, npc_id: str) 
 
 def choose_auction_identity(deps: AuctionsDependencies, game_id: str, alias: str) -> dict[str, Any]:
     game = deps._load(game_id)
-    state = deps._require_auction_access(game, {"open"})
+    state = deps._require_auction_access(game, {"open"}, allow_unpaid=True)
     if alias not in deps._auction_rules()["player_aliases"]:
         raise ValueError("拍卖行不承认这个匿名身份")
+    fee = _entry_due(state)
+    if fee:
+        if not remove_item(game.player, 'spirit_stone', fee):
+            raise ValueError(f'高级拍卖会入场需支付固定 {fee} 灵石')
+        from .local_market import auction_fee
+        auction_fee(game, fee, '高级拍卖会入场费')
+        game.history.append(HistoryRecord('SYS_AUCTION_ENTRY', 1, game.player.age, '高级拍卖会入场',
+            state['id'], 'paid', f'支付固定入场费 {fee} 灵石，本场不再重复收取。',
+            {'fee':fee}, ['system','auction']))
+    state['entry_paid'] = True
     state["player_alias"] = alias
     state.setdefault("bid_logs", []).append(f"你以“{alias}”的身份入席。")
     state["bid_logs"] = state["bid_logs"][-18:]
@@ -430,7 +487,9 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
         for item in game.player.inventory
         if item.id != "spirit_stone" and item.quantity > 0 and not item.crafted_artifact_id
     ]
-    consignable_inventory = [row for row in inventory if row["id"] in ITEM_CATALOG and not ITEM_CATALOG[row['id']].root_grant]
+    allowed_ids = {row['content_id'] for row in _class_pool(deps, state) if row['kind'] == 'item'}
+    consignable_inventory = [row for row in inventory if row["id"] in ITEM_CATALOG and not limited_trade_item(row['id'])
+                            and (not state.get('rank_band') or row['id'] in allowed_ids)]
     sellable_puppets = [
         {"id":str(row.get("id")), "name":str(row.get("name", "无名傀儡")),
          "type":str(row.get("type")), "combat_power":round(float(row.get("combat_power", 0)), 1)}
@@ -439,6 +498,7 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
     from ..talismans import sale_rows
     return {
         **state, "available":True, "at_location":at_location,
+        "entry_due":_entry_due(state),
         "black_market_results": [{**public_catalog_entry(row), "base_price": row["price"], "price": adjusted_cost(game, row["price"], "black_market")} for row in state.get("black_market_results", [])],
         "attendees": [{**row, 'trade_offers': [public_catalog_entry(offer) for offer in row.get('trade_offers', [])]}
                       for row in state.get('attendees', [])],

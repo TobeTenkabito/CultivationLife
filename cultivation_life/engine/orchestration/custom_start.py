@@ -111,7 +111,8 @@ def preset(data, root, path):
                     divine_sense_rank=data['divine_sense_rank'], immortal_body={'level': data['immortal_body_level']},
                     world_voisinages={}, immortal_aperture={}, story_flags=['custom_start'],
                     immortal_power_converted=realm >= 9, opportunity_reserve=0, opportunity_fraction=0)
-    for key in ('location_id', 'doctrine_starter', 'combat_techniques', 'body_technique', 'divine_sense_technique'):
+    for key in ('location_id', 'doctrine_starter', 'combat_techniques', 'combat_technique_level',
+                'supplementary_combat_techniques', 'body_technique', 'divine_sense_technique'):
         template.pop(key, None)
     # Starting manuals match the selected path and rank. Player-selected books
     # remain independent inventory grants, with ordinary equip rules thereafter.

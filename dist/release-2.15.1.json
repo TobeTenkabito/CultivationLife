@@ -1,0 +1,188 @@
+{
+  "base_version": "2.15.1",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.1.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.0",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.5.0",
+    "tianji-artifacts": "2.2.0",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 938,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_common_goods",
+      "log": "build\\browser_common_goods-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_secret_art_training",
+      "log": "build\\browser_secret_art_training-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_quick_start_1411",
+      "log": "build\\browser_quick_start_1411-2151.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-2151.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-2151.log",
+  "inputs_sha256": "e6e5443809e7a0a5d8bd1ff0e9abc631c29db9605413b7573fb5450429d07a50",
+  "combat_upstream": {
+    "version": "2.15.1",
+    "inputs_sha256": "e6e5443809e7a0a5d8bd1ff0e9abc631c29db9605413b7573fb5450429d07a50",
+    "tests": 6,
+    "status": "passed",
+    "test_source_sha256": "3a4966ab65bbf497ee77a67b04780e3ed317bc177b9911b1283fbef2ee332bb4",
+    "log_sha256": "7e18e4daa11cb02879f5c50fdbfe4b3e583f1a85e08bb7538dd970d714eecc54",
+    "xml_sha256": "8d0251fc762dcd0eb4304f3c8bec80f44f3b5cff088bc23fb544db3e6db7cd3f"
+  },
+  "performance": {
+    "version": "2.15.1",
+    "source_sha256": "e6e5443809e7a0a5d8bd1ff0e9abc631c29db9605413b7573fb5450429d07a50",
+    "baseline_source_sha256": "ce4203b5bd4efbde605978101010f8d60ecb5b8dcc381ba360f3326d5e9b48c8",
+    "runs": 3,
+    "scenarios": [
+      {
+        "world": "human",
+        "action": "rest",
+        "years": 5,
+        "baseline_ms": 734.52,
+        "uncached_ms": 725.1,
+        "final_ms": 681.81,
+        "update_percent": -7.18,
+        "cache_reduction_percent": 5.97,
+        "baseline_cpu_ms": 687.5,
+        "final_cpu_ms": 593.75,
+        "baseline_rows": 4905,
+        "final_rows": 3870,
+        "original_markets_retained": true,
+        "cache_full_state_equal": true,
+        "final_max_sample_rss_mib": 135.72,
+        "baseline_economy_profile": {
+          "calls": 141607,
+          "self_ms": 217.2
+        },
+        "final_economy_profile": {
+          "calls": 126155,
+          "self_ms": 198.21
+        }
+      },
+      {
+        "world": "spirit",
+        "action": "cultivate",
+        "years": 100,
+        "baseline_ms": 7622.56,
+        "uncached_ms": 7346.88,
+        "final_ms": 7410.33,
+        "update_percent": -2.78,
+        "cache_reduction_percent": -0.86,
+        "baseline_cpu_ms": 7359.38,
+        "final_cpu_ms": 7062.5,
+        "baseline_rows": 5929,
+        "final_rows": 4357,
+        "original_markets_retained": true,
+        "cache_full_state_equal": true,
+        "final_max_sample_rss_mib": 163.5,
+        "baseline_economy_profile": {
+          "calls": 7208012,
+          "self_ms": 9433.09
+        },
+        "final_economy_profile": {
+          "calls": 6123078,
+          "self_ms": 8893.12
+        }
+      },
+      {
+        "world": "celestial",
+        "action": "rest",
+        "years": 100,
+        "baseline_ms": 9369.05,
+        "uncached_ms": 9114.3,
+        "final_ms": 9177.34,
+        "update_percent": -2.05,
+        "cache_reduction_percent": -0.69,
+        "baseline_cpu_ms": 8843.75,
+        "final_cpu_ms": 8843.75,
+        "baseline_rows": 7447,
+        "final_rows": 4807,
+        "original_markets_retained": true,
+        "cache_full_state_equal": true,
+        "final_max_sample_rss_mib": 176.38,
+        "baseline_economy_profile": {
+          "calls": 10919354,
+          "self_ms": 12183.16
+        },
+        "final_economy_profile": {
+          "calls": 9904468,
+          "self_ms": 11674.64
+        }
+      }
+    ],
+    "environment": {
+      "os": "Windows-11-10.0.26200-SP0",
+      "python": "3.13.9",
+      "logical_cpus": 16,
+      "host_memory_mib": 16088
+    },
+    "caveats": "Wall time is noisy. Fixed original saves retain old restricted stocks and adopt new zero-stock definitions. 2.15.0 and 2.15.1 intentionally differ in goods and auction rules; only cache-on/off is required to match full simulated state. Profiles are not timing samples. No physical Android timing claim."
+  },
+  "combat_calibration": {
+    "source_sha256": "e6e5443809e7a0a5d8bd1ff0e9abc631c29db9605413b7573fb5450429d07a50",
+    "battles": {
+      "base": 47952,
+      "dlc": 47952
+    },
+    "story_choices": 53,
+    "changed_story_choices": 42
+  },
+  "platform": "Windows",
+  "exe_sha256": "b978ab6178b5259310b81cae180c001acda05394764e063437fa78af7499faeb",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

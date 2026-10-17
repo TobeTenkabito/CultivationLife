@@ -2891,13 +2891,15 @@ function renderAuction(system) {
   if(dock) dock.dataset.activityState=system.available?(system.status==='scheduled'?`${system.actions_until_open}个时间单位后开幕`:system.status==='open'?'正在举行': '散场黑市 · 推进岁月后关闭'):'';
   if (!system.available) return;
   const statusNames = {scheduled:'拍卖会预告', open:'拍卖会', black_market:'散场黑市'};
-  $('#auction-title').textContent = `${system.location_name}·${statusNames[system.status] || '交易集会'}`;
+  $('#auction-title').textContent = `${system.location_name}·${system.status === 'black_market' ? '' : (system.class_name || '')}${statusNames[system.status] || '交易集会'}`;
   $('#auction-wallet').textContent = `灵石 ${number(system.spirit_stones || 0)}`;
   $('#auction-description').textContent = system.status === 'scheduled'
     ? `将在 ${system.actions_until_open} 个有时间消耗的操作节点后开幕；公告期可提前赶路和寄拍。`
     : system.status === 'open'
       ? `第 ${Number(system.round || 0) + 1}/${system.max_rounds} 轮；所有会内操作均不消耗时间。单次最低加价同时受起拍价和当前价约束。`
       : `拍卖散场后立即形成的临时黑市；检索、买卖均不消耗时间，开始新的岁月行动后黑市关闭。`;
+  if(system.entry_fee && system.status !== 'black_market') $('#auction-description').textContent += ` 入场费 ${number(system.entry_fee)} 灵石${system.entry_paid ? '（本场已缴）' : '（选择身份入场时缴纳）'}。`;
+  const entryBlocked = system.status === 'open' && Number(system.entry_due || 0) > 0;
   const warning = $('#auction-travel-warning');
   warning.classList.toggle('hidden', system.at_location);
   warning.textContent = system.at_location ? '' : `你当前不在${system.location_name}，只能查看公告，无法交易。请从地图赶往会场；若地图有境界禁制，拍卖方不会为你解除。`;
@@ -2907,16 +2909,16 @@ function renderAuction(system) {
   const identities = $('#auction-identities'); identities.innerHTML = '';
   (system.player_aliases || []).forEach(alias => {
     const button = document.createElement('button');
-    button.textContent = alias === system.player_alias ? `${alias} · 当前身份` : alias;
+    button.textContent = entryBlocked ? `${alias} · 入场` : alias === system.player_alias ? `${alias} · 当前身份` : alias;
     button.classList.toggle('selected', alias === system.player_alias);
-    button.dataset.auctionUnavailable = alias === system.player_alias ? '1' : '0';
-    button.disabled = alias === system.player_alias;
+    button.dataset.auctionUnavailable = (entryBlocked ? system.spirit_stones < system.entry_due : alias === system.player_alias) ? '1' : '0';
+    button.disabled = button.dataset.auctionUnavailable === '1';
     button.onclick = () => mutate(`/api/games/${game.id}/auction-identity`, {alias});
     identities.appendChild(button);
   });
 
   const consignSection = $('#auction-consign-section');
-  consignSection.classList.toggle('hidden', !system.at_location || !['scheduled', 'open'].includes(system.status));
+  consignSection.classList.toggle('hidden', !system.at_location || entryBlocked || !['scheduled', 'open'].includes(system.status));
   const consignSelect = $('#auction-consign-item'); consignSelect.innerHTML = '';
   (system.consignable_items || []).forEach(item => {
     const option = document.createElement('option'); option.value = item.id;
@@ -2945,7 +2947,7 @@ function renderAuction(system) {
   };
 
   const lotsSection = $('#auction-lots-section');
-  lotsSection.classList.toggle('hidden', system.status !== 'open' || !system.at_location);
+  lotsSection.classList.toggle('hidden', system.status !== 'open' || !system.at_location || entryBlocked);
   const lots = $('#auction-lots'); lots.innerHTML = '';
   (system.lots || []).forEach(lot => {
     const row = document.createElement('div'); row.className = 'auction-lot';
@@ -2968,7 +2970,7 @@ function renderAuction(system) {
   advance.onclick = () => mutate(`/api/games/${game.id}/auction-advance`, {});
 
   const attendeeSection = $('#auction-attendees-section');
-  attendeeSection.classList.toggle('hidden', system.status !== 'open' || !system.at_location);
+  attendeeSection.classList.toggle('hidden', system.status !== 'open' || !system.at_location || entryBlocked);
   const attendees = $('#auction-attendees'); attendees.innerHTML = '';
   (system.attendees || []).forEach(npc => {
     const wrapper = document.createElement('div'); wrapper.className = 'auction-attendee-wrap';
@@ -3250,7 +3252,9 @@ function renderInventory(items) {
     const specialPlantUse = (item.plant_id === 'mystic_heaven_vine' && item.plant_years >= 10000) || (item.plant_id === 'nebula_manjushaka' && item.plant_years >= 5000);
     const guixuUse = item.tags?.includes('guixu_consumable') || (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant'));
     const economicMedicine = (item.tags || []).some(tag => ['economic_use:healing','economic_use:cultivation','economic_use:longevity'].includes(tag));
-    const normalUse = economicMedicine || item.id === 'qilin_blessing_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
+    const economicCore = item.tags?.includes('economic_raw') && (item.tags || []).some(t=>t.startsWith('economic_role:core_'));
+    const economicTalisman = item.tags?.includes('economic_use:talisman');
+    const normalUse = economicMedicine || economicCore || economicTalisman || item.id === 'qilin_blessing_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
     if (item.tags?.includes('secret_art_manual')) {
       const browse=document.createElement('button');browse.textContent='参阅秘法';
       browse.onclick=()=>{window.SecretArtPanel?.select(item.tags.find(t=>t.startsWith('secret_art:')).slice(11));window.UtilityPanels?.open('secret-art');};
@@ -3258,6 +3262,7 @@ function renderInventory(items) {
     }
     if (!artifact && (trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
+      if (economicTalisman) use.textContent = '收入符箓';
       if (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant')) use.textContent = '炼化';
       if (item.root_grant) use.textContent = '参悟';
       if (specialPlantUse) { use.textContent = '使用'; use.dataset.fieldOperation = '1'; use.onclick = () => mutate(`/api/games/${game.id}/spirit-plant-use`, {item_id:item.id}); }

@@ -12,7 +12,7 @@ from ..system.path_modifiers import modifier
 import copy
 import random
 from typing import Any
-from ..content_registry import ITEM_CATALOG, REALMS, RACE_DEFINITIONS, RACE_SYSTEMS, WORLD_SYSTEMS
+from ..content_registry import ITEM_CATALOG, REALMS, RACE_DEFINITIONS, RACE_SYSTEMS, WORLD_SYSTEMS, limited_trade_item
 from ..system.combat_system import BattleUnit, PlayerCombatSystem, stat_comparison
 from ..models import GameState, HistoryRecord, Player
 from ..rules import (
@@ -503,7 +503,7 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
     demonic_gain = deps._grant_demonic_kill_opportunity(player, int(victim["realm_index"]))
     spoils = (
         f" 你夺得{ITEM_CATALOG[treasure_id].name}。"
-        if treasure_id in ITEM_CATALOG and not ITEM_CATALOG[treasure_id].root_grant and victim.get("npc_id") else ""
+        if treasure_id in ITEM_CATALOG and not limited_trade_item(treasure_id) and victim.get("npc_id") else ""
     )
     spoils += tianji_spoils
     if target.get('non_story_combat') and not target.get('player_defending'):
@@ -588,7 +588,7 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
         if npc.combat_artifact_id in ITEM_CATALOG:
             add_item(player, npc.combat_artifact_id)
             npc.combat_artifact_id = None
-        if treasure_id in ITEM_CATALOG and not ITEM_CATALOG[treasure_id].root_grant:
+        if treasure_id in ITEM_CATALOG and not limited_trade_item(treasure_id):
             add_item(player, treasure_id)
             npc.treasure_item_id = None
             npc.treasure_looted = True
@@ -599,7 +599,7 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
             if artifact_id in ITEM_CATALOG:
                 add_item(player, artifact_id)
             treasure_id = cached.get("npc", {}).get("treasure_item_id")
-            if treasure_id in ITEM_CATALOG and not ITEM_CATALOG[treasure_id].root_grant:
+            if treasure_id in ITEM_CATALOG and not limited_trade_item(treasure_id):
                 add_item(player, str(treasure_id))
             game.encounter_npc_cache = [row for row in game.encounter_npc_cache if row.get("id") != npc_id]
     faction_id = victim.get("faction_id")

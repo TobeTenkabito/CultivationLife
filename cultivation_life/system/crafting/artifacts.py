@@ -121,6 +121,8 @@ def _consign_crafted_artifact(
 ) -> None:
     state = deps._require_auction_access(game, {"scheduled", "open"})
     artifact_id = str(artifact["id"])
+    if state.get('rank_band') and int(artifact.get('scaling_realm_index', game.player.realm_index)) not in state['rank_band']:
+        raise ValueError('该法宝品阶不在本场拍卖的境界档内')
     if artifact.get("is_natal"):
         raise ValueError("已设为本命的法宝不能送拍")
     base_price = max(1, int(artifact["anchor_value"]))

@@ -53,6 +53,11 @@ def economic_value(row):
     """Remaining charges, all three effects, quality and paid materials matter."""
     if row["uses"] <= 0:
         return 0
+    from ..economy_content import specification
+    standard = specification(row.get('method_id', ''))
+    if standard and standard['use'] == 'talisman':
+        from ..common_talisman_content import price
+        return max(1, math.floor(price(standard['grade']) * row['uses'] / max(1, row['max_uses'])))
     factor = QUALITIES.get(row.get("quality"), QUALITIES["normal"])[1]
     tier = max(1, row.get("tier", 1))
     material_value = row.get("material_value", 12 * 3.2 ** (tier - 1))
@@ -66,10 +71,11 @@ def economic_value(row):
 
 
 def sale_rows(player, ratio=.55):
+    from ..economy_content import specification
     return [dict(id=r["id"], name=r["name"], tier=r.get("tier", 1),
                  quality_name=QUALITIES.get(r.get("quality"), QUALITIES["normal"])[0],
                  uses=r["uses"], value=economic_value(r),
-                 price=max(1, round(economic_value(r) * ratio)))
+                 price=max(1, math.floor(economic_value(r) * min(ratio, .25)) if specification(r.get('method_id', '')) else round(economic_value(r) * ratio)))
             for r in player.talismans if r["uses"] > 0]
 
 

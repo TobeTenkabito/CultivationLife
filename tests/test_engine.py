@@ -1135,11 +1135,11 @@ class EngineTests(unittest.TestCase):
     def test_fixed_story_combat_floors_use_the_rebased_world_standard(self):
         expected = {
             ("EVT_XUTIAN_004", "fight"): 6100,
-            ("EVT_NORTH_NIGHT_PALACE_001", "suppress"): 49000,
-            ("EVT_GUANGHAN_004", "break_array"): 720000,
-            ("EVT_TWO_REALMS_003", "fight_six"): 6750000,
-            ("EVT_MOTHER_BORER_007", "solo"): 68500000,
-            ("EVT_MA_LIANG_008", "solo_finish"): 73500000,
+            ("EVT_NORTH_NIGHT_PALACE_001", "suppress"): 55000,
+            ("EVT_GUANGHAN_004", "break_array"): 1160000,
+            ("EVT_TWO_REALMS_003", "fight_six"): 10400000,
+            ("EVT_MOTHER_BORER_007", "solo"): 80600000,
+            ("EVT_MA_LIANG_008", "solo_finish"): 86400000,
         }
         for (event_id, choice_id), floor in expected.items():
             event = self.engine.events_by_id[event_id]
@@ -1298,6 +1298,10 @@ class EngineTests(unittest.TestCase):
                 sword_art = next(t for t in player["technique_slots"]["combat"] if t["id"] == "TECH_COMMON_GUI")
                 self.assertEqual(sword_art["base_combat_bonus"], 5000)
                 self.assertGreater(player["combat_power"], player["expected_combat_power"])
+            elif preset_id == "spirit":
+                # The minimum sufficient integer book level is nine; level
+                # eight is below the measured birth target, so allow its overshoot.
+                self.assertLessEqual(power_ratio, 1.16, preset_id)
             else:
                 self.assertLessEqual(power_ratio, 1.1, preset_id)
             rewarded_story_flags = {

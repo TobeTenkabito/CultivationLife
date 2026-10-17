@@ -156,16 +156,25 @@ def create_game(
             for affinity in ("metal", "wood", "water", "fire", "earth"):
                 if affinity not in deps._base_affinities(player) and affinity not in player.additional_roots:
                     player.additional_roots.append(affinity)
-        assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[preset["main_technique"]]), "main")
-        assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[preset["support_technique"]]), "support")
+        combat_ids = list(dict.fromkeys([*preset.get("combat_techniques", []),
+                                       *preset.get("supplementary_combat_techniques", [])]))
+
+        def starting_book(identity):
+            book = copy.deepcopy(TECHNIQUE_CATALOG[identity])
+            if identity in combat_ids:
+                book.level = int(preset.get("combat_technique_level", 1))
+            return book
+
+        assign_technique(player, starting_book(preset["main_technique"]), "main")
+        assign_technique(player, starting_book(preset["support_technique"]), "support")
         if preset.get("body_technique"):
             assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[preset["body_technique"]]), "body")
         if preset.get("divine_sense_technique"):
             assign_technique(
                 player, copy.deepcopy(TECHNIQUE_CATALOG[preset["divine_sense_technique"]]), "divine_sense",
             )
-        for technique_id in preset.get("combat_techniques", []):
-            assign_technique(player, copy.deepcopy(TECHNIQUE_CATALOG[technique_id]), "combat")
+        for technique_id in combat_ids:
+            assign_technique(player, starting_book(technique_id), "combat")
         for item in preset.get("inventory", []):
             add_item(player, item["id"], int(item["quantity"]))
         from . import dlc_birth

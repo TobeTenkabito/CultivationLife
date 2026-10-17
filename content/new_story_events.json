@@ -44,7 +44,7 @@
       "tags":["realm:nascent","world:human","story_chain","north_night","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"north_night_eligible","base_chance":0.18,"unit_increment":0.02},
       "conditions":{"all":[{"path":"player.world","op":"eq","value":"human"},{"path":"player.realm_index","op":"eq","value":4},{"path":"player.layer","op":"gte","value":4},{"path":"player.layer","op":"lte","value":6}]},
       "choices":[
-        {"id":"suppress","text":"深入冰窟斩去煞根（战力至少 49,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":49000},{"stat":"mp_ratio","op":"gte","value":0.65}],"failure_reason":"煞根侵入元婴，你被永远封在冰脉之中","success_text":"煞根尽断，寒魄山髓恢复清明，寒月宫依约将其相赠。"},{"type":"add_item","item_id":"north_pole_origin_mountain","if_result":["check_success"]},{"type":"set_flag","flag":"north_night_completed","if_result":["check_success"]}]},
+        {"id":"suppress","text":"深入冰窟斩去煞根（战力至少 55,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":55000},{"stat":"mp_ratio","op":"gte","value":0.65}],"failure_reason":"煞根侵入元婴，你被永远封在冰脉之中","success_text":"煞根尽断，寒魄山髓恢复清明，寒月宫依约将其相赠。"},{"type":"add_item","item_id":"north_pole_origin_mountain","if_result":["check_success"]},{"type":"set_flag","flag":"north_night_completed","if_result":["check_success"]}]},
         {"id":"withdraw","text":"冰脉过于凶险，婉拒寒月宫","effects":[]}
       ]
     },
@@ -81,14 +81,14 @@
       "tags":["realm:void","world:spirit","story_chain","guanghan","manual_only"],"weight":0,
       "choices":[
         {"id":"study","text":"静心参悟后再取拓本","effects":[{"type":"add_opportunity","value":30},{"type":"set_flag","flag":"guanghan_spirit_art"},{"type":"queue_event","event_id":"EVT_GUANGHAN_004"}]},
-        {"id":"seize","text":"击碎傀儡强取拓本（战力至少 675,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":675000}],"failure_reason":"被守碑傀儡围杀于古碑之下","success_text":"你击碎傀儡，取得太虚分神篇全篇。"},{"type":"set_flag","flag":"guanghan_spirit_art","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_GUANGHAN_004","if_result":["check_success"]}]}
+        {"id":"seize","text":"击碎傀儡强取拓本（战力至少 1,090,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":1090000}],"failure_reason":"被守碑傀儡围杀于古碑之下","success_text":"你击碎傀儡，取得太虚分神篇全篇。"},{"type":"set_flag","flag":"guanghan_spirit_art","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_GUANGHAN_004","if_result":["check_success"]}]}
       ]
     },
     {
       "id":"EVT_GUANGHAN_004","version":1,"title":"山灵择主","body":"洞天中央的青岳灵胚已经生出朦胧灵智。它若留下，便会随洞天一同崩灭；若被带走，失去镇压的界树也会立刻枯死。数名炼虚后期修士已经布阵争夺，谁都没有耐心等山灵自己选择。",
       "tags":["realm:void","world:spirit","story_chain","guanghan","manual_only"],"weight":0,
       "choices":[
-        {"id":"break_array","text":"破阵夺取灵胚（HP 20,000；战力 720,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":20000},{"stat":"combat_power","op":"gte","value":720000}],"failure_reason":"在青冥洞天的群修战阵中陨落","success_text":"你击穿战阵，以法力护住青岳灵胚。"},{"type":"set_flag","flag":"guanghan_mountain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_GUANGHAN_005","if_result":["check_success"]}]},
+        {"id":"break_array","text":"破阵夺取灵胚（HP 20,000；战力 1,160,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":20000},{"stat":"combat_power","op":"gte","value":1160000}],"failure_reason":"在青冥洞天的群修战阵中陨落","success_text":"你击穿战阵，以法力护住青岳灵胚。"},{"type":"set_flag","flag":"guanghan_mountain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_GUANGHAN_005","if_result":["check_success"]}]},
         {"id":"negotiate","text":"以分神之法护住界树，换众修让山灵自行择主","conditions":{"has_flag":"guanghan_spirit_art"},"disabled_reason":"你尚未悟得太虚分神篇","effects":[{"type":"add_karma","value":-5},{"type":"set_flag","flag":"guanghan_mountain"},{"type":"queue_event","event_id":"EVT_GUANGHAN_005"}]}
       ]
     },

@@ -97,17 +97,36 @@ COMMON_TECHNIQUES_TESTS = [
     'tests/test_android_release_checks.py', 'tests/test_module_dependencies.py',
 ]
 
+COMMON_GOODS_TESTS = [
+    'tests/test_combat_calibration_2151.py', 'tests/test_rules.py', 'tests/test_npc_system.py',
+    'tests/test_release_240.py', 'tests/test_luo_spirit_story.py', 'tests/test_demon_world_story_expansion.py',
+    'tests/test_core_dependencies.py',
+    'tests/test_common_goods_2151.py', 'tests/test_secret_art_training.py',
+    'tests/test_economy_v2.py', 'tests/test_economy_diversity.py', 'tests/test_economy_rebalance.py',
+    'tests/test_action_time_performance.py', 'tests/test_economy_network.py',
+    'tests/test_talisman_economy.py', 'tests/test_crafting_system.py',
+    'tests/test_auction_update.py', 'tests/test_merchant_commissions.py',
+    'tests/test_player_combat_system.py', 'tests/test_combat_semantics.py',
+    'tests/test_content_registry.py', 'tests/test_common_elemental_techniques.py',
+    'tests/test_world_transition_system.py', 'tests/test_spatial_talismans.py',
+    'tests/test_release_211.py', 'tests/test_release_212.py', 'tests/test_base_game_version.py',
+    'tests/test_android_packaging.py', 'tests/test_windows_release_evidence.py',
+    'tests/test_android_release_checks.py', 'tests/test_module_dependencies.py',
+    'tests/test_persistence_pipeline.py', 'tests/test_content_naming.py',
+]
+
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods'],default='legacy')
     profile=parser.parse_args().profile
     tag=BASE_GAME_VERSION.replace('.','');before=inputs_digest(ROOT);runs=[]
     selected=TEACHINGS_TESTS if profile=='teachings' else NATAL_TESTS if profile=='natal' else NAMING_TESTS if profile=='naming' else BUGFIX_TESTS if profile=='bugfix' else ECONOMY_TESTS if profile=='economy' else TESTS
     if profile=='common-techniques':selected=COMMON_TECHNIQUES_TESTS
+    if profile=='common-goods':selected=[COMMON_GOODS_TESTS[i::3] for i in range(3)]
     if profile=='secret-arts':
         modules=[str(p.relative_to(ROOT)).replace('\\','/') for p in sorted((ROOT/'tests').rglob('test_*.py'))]
         selected=[modules[i::4] for i in range(4)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
     else:
@@ -131,7 +150,11 @@ def main():
         browsers=['browser_common_elemental_techniques','browser_events_212']
     if profile=='secret-arts':
         browsers=['browser_secret_art_training','browser_common_elemental_techniques','browser_merchant_138','browser_events_212']
+    if profile=='common-goods':
+        browsers=['browser_common_goods','browser_secret_art_training','browser_quick_start_1411','browser_events_212']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
+    if profile=='common-goods':
+        jobs.append(('combat-upstream',['tools/verify_combat_upstream_2151.py']))
     def run(job):
         name,args=job
         log=ROOT/f'build/{name}-{tag}.log'
@@ -142,14 +165,14 @@ def main():
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         print(name+' passed',flush=True)
         return dict(name=name,log=str(log.relative_to(ROOT)),status='passed')
-    if profile=='secret-arts':
-        # Isolated processes retain every repository test while bounding host memory.
+    if profile in {'secret-arts','common-goods'}:
+        # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=4) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

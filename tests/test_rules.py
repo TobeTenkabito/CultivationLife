@@ -83,16 +83,16 @@ class RuleTests(unittest.TestCase):
         self.assertEqual(expected_combat_power(3, 2), 3250)
         self.assertEqual(expected_combat_power(3, 5), 7930)
         self.assertEqual(expected_combat_power(3, 8), 11440)
-        self.assertEqual(expected_combat_power(4, 2), 26650)
+        self.assertEqual(expected_combat_power(4, 2), 45760)
         values = [expected_combat_power(index, 1) for index in range(len(REALMS))]
         self.assertTrue(all(left < right for left, right in zip(values, values[1:])))
 
     def test_npc_expectations_and_player_recommendations_share_the_content_benchmark(self):
-        self.assertEqual(recommended_combat_power(1, 1), 130)
-        self.assertEqual(recommended_combat_power(1, 13), 364)
-        self.assertEqual(recommended_combat_power(4, 2), 26650)
-        self.assertEqual(recommended_combat_power(8, 2), 42900000)
-        self.assertEqual(recommended_combat_power(8, 9), 81900000)
+        self.assertEqual(recommended_combat_power(1, 1), 182)
+        self.assertAlmostEqual(recommended_combat_power(1, 13), 369.2)
+        self.assertEqual(recommended_combat_power(4, 2), 45760)
+        self.assertEqual(recommended_combat_power(8, 2), 60580000)
+        self.assertEqual(recommended_combat_power(8, 9), 96330000)
         for realm_index, realm in enumerate(REALMS):
             for layer in range(1, realm.layers + 1):
                 self.assertEqual(

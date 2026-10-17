@@ -20,6 +20,7 @@ from .content_registry import (
     EXTENSION_REPORT,
     PATH_NAMES,
     RACE_DEFINITIONS,
+    REALMS,
     ROOT_DEFINITIONS,
     ROOT_NAMES,
     TECHNIQUE_ELEMENT_NAMES,
@@ -31,7 +32,7 @@ from .engine.transactions import request_scope
 from .errors import AccessDeniedError, NotFoundError
 from .error_reporting import report_internal_error
 from .system.extension_system import write_extension_preference
-from .rules import QI_SOURCE_NAMES
+from .rules import QI_SOURCE_NAMES, expected_combat_power
 from .runtime import persistence_root
 from .runtime_config import load_runtime_config
 from .version import BASE_GAME_VERSION, base_game_metadata
@@ -147,7 +148,12 @@ class Handler(BaseHTTPRequestHandler):
                     "start_worlds": WORLD_SYSTEMS.get("start_worlds", {}),
                     "qi_sources": QI_SOURCE_NAMES,
                     "quick_starts": WORLD_SYSTEMS.get("quick_start_presets", []),
+                    "combat_benchmarks": [dict(name=realm.name, values=[expected_combat_power(rank, layer)
+                        for layer in ((1, 7, 13) if rank == 1 else (1, 5, 9))])
+                        for rank, realm in enumerate(REALMS) if rank > 0],
                     "custom_start": custom_start_catalog(),
+                    "common_goods": {"core_effects": WORLD_SYSTEMS['common_core_effects'],
+                        "high_entry_fees": WORLD_SYSTEMS['auction_system']['high_entry_fees_by_world_tier']},
                     "extensions": EXTENSION_REPORT,
                     "monster_species": WORLD_SYSTEMS["monster_species"],
                 })
