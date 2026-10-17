@@ -4,7 +4,7 @@ import copy
 import math
 import random
 import re
-from functools import cached_property
+from functools import cached_property, lru_cache
 from typing import Any
 
 from ..content_registry import (
@@ -116,7 +116,19 @@ def _spirit_stones(player: Player) -> int:
     return next((int(item.quantity) for item in player.inventory if item.id == "spirit_stone"), 0)
 
 
+@lru_cache(maxsize=4096)
+def _listed_price(kind: str, content_id: str, market_identity: int, limited_identity: int) -> int | None:
+    from ..content_registry import LIMITED_TRADE_GOODS
+    # Only immutable content prices are cached, never live stock/quotes or money.
+    for catalog in (LIMITED_TRADE_GOODS, MARKET_GOODS):
+        prices = sorted(int(row['price']) for row in catalog if row['kind'] == kind and row['content_id'] == content_id)
+        if prices:
+            return prices[len(prices)//2]
+    return None
+
+
 def _catalog_price(kind: str, content_id: str) -> int:
+    from ..content_registry import LIMITED_TRADE_GOODS
     if kind in {"item", "talisman_material"} and content_id.startswith("talisman_"):
         from ..talisman_content import catalog
         material = catalog()[0].get(content_id)
@@ -124,12 +136,9 @@ def _catalog_price(kind: str, content_id: str) -> int:
             return material["base_value"]
     if content_id == "qilin_blessing_elixir":
         return 985
-    prices = sorted(
-        int(row["price"]) for row in MARKET_GOODS
-        if row["kind"] == kind and row["content_id"] == content_id
-    )
-    if prices:
-        return prices[len(prices) // 2]
+    listed = _listed_price(kind, content_id, id(MARKET_GOODS), id(LIMITED_TRADE_GOODS))
+    if listed is not None:
+        return listed
     if kind == "technique" and content_id in TECHNIQUE_CATALOG:
         technique = TECHNIQUE_CATALOG[content_id]
         return max(10, round(technique.combat_bonus * 0.35 + technique.grade * 20))
@@ -209,8 +218,8 @@ class EconomySystemMixin(ExchangeSystemMixin):
     def _auction_location_matches(self, game: GameState) -> bool:
         return economy_auctions._auction_location_matches(self._economy_dependencies.auctions, game)
 
-    def _require_auction_access(self, game: GameState, statuses: set[str]) -> dict[str, Any]:
-        return economy_auctions._require_auction_access(self._economy_dependencies.auctions, game, statuses)
+    def _require_auction_access(self, game: GameState, statuses: set[str], *, allow_unpaid: bool = False) -> dict[str, Any]:
+        return economy_auctions._require_auction_access(self._economy_dependencies.auctions, game, statuses, allow_unpaid=allow_unpaid)
 
     def _schedule_auction(self, game: GameState, rng: Any) -> None:
         return economy_auctions._schedule_auction(self._economy_dependencies.auctions, game, rng)

@@ -19,7 +19,7 @@ def category(item, registry, definition_identity):
     if definition and spec:
         if spec['raw']: return 'material'
         return dict(healing='medical', cultivation='training', longevity='training',
-                    breakthrough='training', artifact='arms', repair='material', energy='energy')[spec['use']]
+                    breakthrough='training', artifact='arms', repair='material', energy='energy', talisman='general')[spec['use']]
     if tags & {'healing', 'medicine', 'elixir'} or item == 'healing_pill' or any(s in name for s in ('疗伤', '回春', '养魂', '魂泉', '甘露')):
         return 'medical'
     if 'pill' in tags:
@@ -97,7 +97,7 @@ def purpose(item):
     definition=ITEM_CATALOG.get(item)
     if definition is None or is_raw(item):return None
     spec=specification(item)
-    if spec:return spec['use']
+    if spec:return 'general' if spec['use'] == 'talisman' else spec['use']
     category=kind(item)
     if category=='training':
         return 'breakthrough' if definition.breakthrough_bonus > 0 else 'cultivation'

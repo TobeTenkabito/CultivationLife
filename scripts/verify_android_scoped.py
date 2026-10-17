@@ -19,6 +19,7 @@ def main():
     teachings = '--teachings' in sys.argv[2:]
     common = '--common-techniques' in sys.argv[2:]
     secret = '--secret-arts' in sys.argv[2:]
+    goods = '--common-goods' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
@@ -35,9 +36,12 @@ def main():
         logs=[f'build/android-common-techniques-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if secret:
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('secret-arts','common-techniques') for orientation in ('portrait','landscape')]
+    if goods:
+        logs=[f'build/android-common-goods-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
+        if goods:require('common_goods_scope' in text,f'Missing common goods native coverage: {name}')
         if secret:
             require(('secret_arts_scope' if 'secret-arts' in name else 'common_techniques_scope') in text,f'Missing secret-art native coverage: {name}')
         if common:require('common_techniques_scope' in text,f'Missing common technique native coverage: {name}')
@@ -77,6 +81,7 @@ def main():
     if teachings:receipt['scope']='Four upper worlds, Buddhist wish/blessings and Confucian doctrine/classics/outer opportunity, direct advancement disabled; native clicks, four themes and portrait/landscape'
     if common:receipt['scope']='Common elemental arts, all-root eligibility, real supplement/equip/upgrade, stale shop rejection/recovery and ordinary purchase; four themes and portrait/landscape'
     if secret:receipt['scope']='Independent secret arts, actual low-rank learning and grafting, original source ownership, stale-event recovery, six-entry paging and legacy elemental-art behavior; four themes and portrait/landscape'
+    if goods:receipt['scope']='Fixed core healing, original common ore forging, finite talisman conversion/toggle, paid tiered auction and stale insufficient recovery; four themes and portrait/landscape'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 

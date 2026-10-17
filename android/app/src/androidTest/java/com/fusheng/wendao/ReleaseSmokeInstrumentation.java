@@ -1340,6 +1340,53 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("#inventory-toggle");
                 }
                 result.putString("content_naming_scope","Four themes; original saved IDs, fixed catalog labels, custom names, native manual upgrade and starter use, exact stock and no time charge");
+            } else if(phase.equals("common-goods")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'商品原生验收',spirit_root:'supreme_metal',path:'dao',seed:2151,preset_id:'nascent'})});return g.id;})()");
+                    python(assetText("common_goods_release.py")+"\nfrom cultivation_life import server\nprepare_common_goods(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.documentElement.dataset.theme="+JSONObject.quote(theme)+";true");
+                    tapSelector("[data-panel-target=auction]");
+                    waitForPanelReady("#auction-card");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#auction-title').textContent.includes('高级') && game.auction_system.entry_due===500")),"Native fixed high auction tier and fee");
+                    python(assetText("common_goods_release.py")+"\nfrom cultivation_life import server\ncommon_goods_wallet(server.ENGINE,"+JSONObject.quote(id)+",499)");
+                    tapSelector("#auction-identities button:first-child");
+                    waitForJs("!busy && game.auction_system.spirit_stones===499","Native stale fee refusal recovered");
+                    check(Boolean.TRUE.equals(js("[...document.querySelectorAll('#auction-identities button')].every(b=>b.disabled) && !game.auction_system.entry_paid")),"Insufficient entry disabled and unpaid");
+                    python(assetText("common_goods_release.py")+"\nfrom cultivation_life import server\ncommon_goods_wallet(server.ENGINE,"+JSONObject.quote(id)+",100000)");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    tapSelector("#auction-identities button:first-child");
+                    waitForJs("!busy && game.auction_system.entry_paid && game.auction_system.spirit_stones===99500","Native entry actual payment");
+                    tapSelector("#auction-identities button:nth-child(2)");
+                    waitForJs("!busy","Native identity change");
+                    check(Boolean.TRUE.equals(js("game.auction_system.spirit_stones===99500")),"No repeated entry fee");
+                    capture("common-goods-auction-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("#auction-toggle");tapSelector("[data-panel-target=inventory]");
+                    js("window.__coreHP=game.player.hp;[...document.querySelectorAll('#inventory-list .item')].find(r=>r.textContent.includes('赤兽血丹')).querySelector('.item-use').setAttribute('data-native-core','1');true");
+                    tapSelector("[data-native-core]");
+                    waitForJs("!busy && !game.player.inventory.some(i=>i.id==='econ_human_4_core_blood')","Native fixed core consumption");
+                    check(Boolean.TRUE.equals(js("game.player.hp===window.__coreHP+400")),"Native core heals fixed current HP");
+                    js("[...document.querySelectorAll('#inventory-list .item')].find(r=>r.textContent.includes('护身符')).querySelector('.item-use').setAttribute('data-native-unpack','1');true");
+                    tapSelector("[data-native-unpack]");
+                    waitForJs("!busy && game.talismans.rows.length>0","Native real talisman conversion");
+                    tapSelector("#inventory-toggle");tapSelector("[data-panel-target=talisman]");
+                    js("[...document.querySelectorAll('#talisman-content button')].find(b=>b.textContent==='启用').setAttribute('data-native-enable','1');true");
+                    tapSelector("[data-native-enable]");
+                    waitForJs("!busy && game.talismans.rows.some(r=>r.enabled && r.uses===3)","Native weak finite talisman toggle");
+                    capture("common-goods-talisman-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("#talisman-toggle");tapSelector("[data-panel-target=crafting]");
+                    js("(()=>{const values={'mold':'sword','primary':'common:econ_human_4_ore_structure:0','secondary-a':'common:econ_human_4_ore_conduct:0','secondary-b':'common:econ_human_4_ore_conduct:1','quench':'common:econ_human_4_ore_store:0'};for(const [k,v] of Object.entries(values))document.querySelector('#crafting-'+k).value=v;document.querySelectorAll('#crafting-allocations input').forEach(i=>i.value='0');document.querySelector('#crafting-allocations input[data-stat=combat_power]').value='10';document.querySelector('#crafting-name').value='通用矿材验收';return true;})()");
+                    tapSelector("#crafting-preview");
+                    waitForJs("!busy && !!document.querySelector('#crafting-preview-result button')","Native original ore forge preview");
+                    tapSelector("#crafting-preview-result button");tapSelector("#game-confirm-accept");
+                    waitForJs("!busy && game.crafting_system.artifacts.some(a=>a.name==='通用矿材验收')","Native four-unit actual forge");
+                    python(assetText("common_goods_release.py")+"\nfrom cultivation_life import server\ninspect_common_goods(server.ENGINE,"+JSONObject.quote(id)+")");
+                    waitForPanelReady("#crafting-card");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#crafting-card').scrollWidth<=document.querySelector('#crafting-card').clientWidth+2")),"Native forge fits");
+                    capture("common-goods-forge-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("#crafting-toggle");
+                }
+                result.putString("common_goods_scope","Fixed current HP, finite weak talisman, four real common-ore units, fixed auction entry once and stale-insufficient recovery; four themes");
             } else if(phase.equals("secret-arts")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'秘术原生验收',spirit_root:'supreme_metal',path:'dao',seed:2150})});return g.id;})()");

@@ -144,7 +144,7 @@ def ensure_regional_market(game, maps, world, location):
         account(game, f'operator:{key}')
         changed = True
     market=game.economy_v2['markets'][key]
-    if market.get('goods_policy') != 1:
+    if market.get('goods_policy') != 2:
         # Existing schema-10 markets acquire a catalogue, not free stock or
         # historical production. New markets above already have opening stock.
         for item,definition in commodity_catalog(world).items():
@@ -153,7 +153,8 @@ def ensure_regional_market(game, maps, world, location):
             market['commodities'][item]=dict(stock=0.,target=target,price=float(definition['base_price']),
                 reference=definition['base_price'],tier=definition['tier'],production=0.,consumption=0.,
                 volume=0,history=[],initial_target=target)
-        market['goods_policy']=1
+        market['goods_policy']=2
+        market['revision'] += 1
         changed=True
     if 'household_year' not in market:
         market['household_year']=game.player.age

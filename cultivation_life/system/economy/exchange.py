@@ -82,6 +82,22 @@ def _open_exchange(deps: ExchangeDependencies, game, rng):
             demands=[dict(definition_id=wanted['id'], name=wanted['name'], quantity=quantity,
                           unit_value=int(wanted['base_material_value']))],
             demand_value=quantity * int(wanted['base_material_value']), completed=False, substitution_attempted=False))
+    from ...content_registry import SECRET_MATERIAL_GOODS
+    for kind in ('core', 'soul'):
+        pool = [r for r in SECRET_MATERIAL_GOODS if r['world'] == state['world']
+                and f'secret_art_{kind}' in ITEM_CATALOG[r['content_id']].tags
+                and max(1, tier-1) <= r['tier'] <= tier+1]
+        if not pool:
+            continue
+        material = rng.choice(pool)
+        wanted = rng.choice(eligible)
+        quantity = max(1, math.ceil(material['price'] / int(wanted['base_material_value'])))
+        offers.append(dict(id=f"{state['id']}-secret-{kind}", npc_alias='藏丹客' if kind == 'core' else '拘魂客',
+            reward={'name': ITEM_CATALOG[material['content_id']].name}, reward_kind='secret_material',
+            item_id=material['content_id'], reward_value=material['price'],
+            demands=[dict(definition_id=wanted['id'], name=wanted['name'], quantity=quantity,
+                          unit_value=int(wanted['base_material_value']))],
+            demand_value=quantity * int(wanted['base_material_value']), completed=False, substitution_attempted=False))
 
 
 def _advance_exchange_clock(deps: ExchangeDependencies, game, rng):
@@ -144,9 +160,10 @@ def exchange_action(deps: ExchangeDependencies, game_id: str, action: str, paylo
         offer = next((x for x in state["offers"] if x["id"] == payload.get("offer_id")), None)
         if not offer or offer["completed"]:
             raise ValueError("这项交换已经结束")
-        if offer.get('reward_kind') == 'root_book':
-            from ...content_registry import ROOT_BOOK_GOODS
-            if not any(r['world'] == game.player.world and r['content_id'] == offer.get('item_id') for r in ROOT_BOOK_GOODS):
+        if offer.get('reward_kind') in {'root_book', 'secret_material'}:
+            from ...content_registry import ROOT_BOOK_GOODS, SECRET_MATERIAL_GOODS
+            goods = ROOT_BOOK_GOODS if offer['reward_kind'] == 'root_book' else SECRET_MATERIAL_GOODS
+            if not any(r['world'] == game.player.world and r['content_id'] == offer.get('item_id') for r in goods):
                 raise ValueError('交换书卷不属于当前会场')
         materials = {x["id"]: x for x in deps._exchange_materials(game)}
         selected = payload.get("materials", [])
@@ -185,7 +202,7 @@ def exchange_action(deps: ExchangeDependencies, game_id: str, action: str, paylo
                 else:
                     bag = game.player.crafting_materials if material["kind"] == "crafting" else game.player.formation_materials
                     bag[:] = [x for x in bag if x["id"] != key]
-            if offer.get('reward_kind') == 'root_book':
+            if offer.get('reward_kind') in {'root_book', 'secret_material'}:
                 from ...rules import add_item
                 add_item(game.player, offer['item_id'])
             elif offer.get('reward_kind') == 'spirit_manual':

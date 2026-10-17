@@ -2710,8 +2710,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _auction_location_matches(self, game: GameState) -> bool:
         return economy_auctions._auction_location_matches(self._dependencies.economy.auctions, game)
 
-    def _require_auction_access(self, game: GameState, statuses: set[str]) -> dict[str, Any]:
-        return economy_auctions._require_auction_access(self._dependencies.economy.auctions, game, statuses)
+    def _require_auction_access(self, game: GameState, statuses: set[str], *, allow_unpaid: bool = False) -> dict[str, Any]:
+        return economy_auctions._require_auction_access(self._dependencies.economy.auctions, game, statuses, allow_unpaid=allow_unpaid)
 
     def _schedule_auction(self, game: GameState, rng: Any) -> None:
         return economy_auctions._schedule_auction(self._dependencies.economy.auctions, game, rng)

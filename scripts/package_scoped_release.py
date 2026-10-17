@@ -61,17 +61,18 @@ def main():
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
         current_code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{current_code}'" in metadata and f"versionName='{VERSION}-android.{current_code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
-    if scoped.get('profile') in {'naming', 'natal', 'teachings', 'common-techniques', 'secret-arts'}:
+    if scoped.get('profile') in {'naming', 'natal', 'teachings', 'common-techniques', 'secret-arts', 'common-goods'}:
         natal = scoped['profile'] == 'natal'
         teachings = scoped['profile'] == 'teachings'
         common = scoped['profile'] == 'common-techniques'
         secret = scoped['profile'] == 'secret-arts'
-        phases = ('secret-arts','common-techniques') if secret else ('common-techniques',) if common else ('upper-teachings',) if teachings else ('content-naming','natal-materials') if natal else ('content-naming','strategic-war')
+        goods = scoped['profile'] == 'common-goods'
+        phases = ('common-goods',) if goods else ('secret-arts','common-techniques') if secret else ('common-techniques',) if common else ('upper-teachings',) if teachings else ('content-naming','natal-materials') if natal else ('content-naming','strategic-war')
         required={f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Native naming/war scope incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test artifact changed after acceptance')
         for name in native['logs']:
-            marker=('secret_arts_scope' if 'secret-arts' in name else 'common_techniques_scope') if secret else 'common_techniques_scope' if common else 'upper_teachings_scope' if teachings else 'content_naming_scope' if 'content-naming' in name else 'natal_materials_scope' if natal else 'strategic_war_scope'
+            marker='common_goods_scope' if goods else ('secret_arts_scope' if 'secret-arts' in name else 'common_techniques_scope') if secret else 'common_techniques_scope' if common else 'upper_teachings_scope' if teachings else 'content_naming_scope' if 'content-naming' in name else 'natal_materials_scope' if natal else 'strategic_war_scope'
             require(marker in (ROOT/name).read_text(encoding='utf-8-sig'),'Current native naming/war coverage missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
@@ -83,6 +84,27 @@ def main():
               incompatible_save_schemas='1–9; no migration',dlc_versions=dlcs,
               validation_scope=scoped['scope'],tests=tests,runs=scoped['runs'],
               save_transfer_log=f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
+    if scoped.get('profile') == 'common-goods':
+        upstream=json.loads((ROOT/'build/combat-engine-upstream-2151.json').read_text(encoding='utf-8'))
+        require(upstream['inputs_sha256']==base['inputs_sha256'] and upstream['status']=='passed'
+                and upstream['test_source_sha256']==file_digest(ROOT/'tests/test_engine.py')
+                and upstream['log_sha256']==file_digest(ROOT/'build/combat-engine-upstream-2151.log')
+                and upstream['xml_sha256']==file_digest(ROOT/'build/combat-engine-upstream-2151.xml'),
+                'Focused upstream combat evidence must match final tests and sources')
+        tests+=upstream['tests'];base['tests']=tests;base['combat_upstream']=upstream
+        performance=json.loads((ROOT/'build/common-goods-performance/report.json').read_text(encoding='utf-8'))
+        require(performance['version']==VERSION and performance['source_sha256']==base['inputs_sha256'],
+                'Performance evidence must match final release inputs')
+        require(len(performance['scenarios'])==3 and performance['runs']>=3
+                and all(r['cache_full_state_equal'] for r in performance['scenarios']),
+                'Matched action performance and cache state equivalence required')
+        base['performance']=performance
+        combat=json.loads((ROOT/'build/combat-calibration-2151/report.json').read_text(encoding='utf-8'))
+        require(combat['source_sha256']==base['inputs_sha256'] and combat['version']==VERSION,
+                'Combat calibration must match final release inputs')
+        base['combat_calibration']=dict(source_sha256=combat['source_sha256'],
+            battles={mode:data['battles'] for mode,data in combat['modes'].items()},
+            story_choices=combat['story_choices'],changed_story_choices=combat['changed_story_choices'])
     exe=ROOT/'dist/launcher.exe';named=ROOT/f'dist/浮生问道-v{VERSION}.exe';shutil.copyfile(exe,named)
     win=dict(base,platform='Windows',exe_sha256=file_digest(exe),with_and_without_dlc_verified=True)
     try:shutil.copyfile(exe,ROOT/'launcher.exe');win['root_launcher_updated']=True
@@ -93,6 +115,10 @@ def main():
         z.write(exe,'launcher.exe');z.write(manifest,manifest.name)
         z.writestr('game_config.txt','Debug=False\n')
         for name in ['README.md','CHANGELOG.md','AGENTS.md']:z.write(ROOT/name,name)
+        if scoped.get('profile') == 'common-goods':
+            z.write(ROOT/'build/common-goods-performance/report.md',f'performance-{VERSION}.md')
+            z.write(ROOT/'build/combat-calibration-2151/report.md',f'combat-calibration-{VERSION}.md')
+            z.write(ROOT/'build/combat-calibration-2151/report.json',f'combat-calibration-{VERSION}.json')
         for name in ['scripts/debug_agent.py','cultivation_life/__init__.py','cultivation_life/version.py',
                      'cultivation_life/debug/__init__.py','cultivation_life/debug/agent.py','cultivation_life/debug/client.py']:
             z.write(ROOT/name,name)
@@ -107,6 +133,10 @@ def main():
     am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(target,target.name);z.write(am,am.name);z.write(ROOT/'android/README.md','README.md')
+        if scoped.get('profile') == 'common-goods':
+            z.write(ROOT/'build/common-goods-performance/report.md',f'performance-{VERSION}.md')
+            z.write(ROOT/'build/combat-calibration-2151/report.md',f'combat-calibration-{VERSION}.md')
+            z.write(ROOT/'build/combat-calibration-2151/report.json',f'combat-calibration-{VERSION}.json')
     if scoped.get('profile') == 'teachings':
         for package, title in [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]:
             version = dlcs[package]

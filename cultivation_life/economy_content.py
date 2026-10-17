@@ -4,6 +4,7 @@ Roles describe actual ingredients; uses describe finished demand. Neither is a
 second inventory. Special/quest crafting definitions remain independent.
 """
 from functools import lru_cache
+from .common_talisman_content import SLOTS as TALISMAN_SLOTS
 
 ROLES = ('ore_structure', 'ore_conduct', 'ore_store', 'herb_nurture',
          'herb_heal', 'herb_spirit', 'core_energy', 'core_blood', 'core_soul')
@@ -74,16 +75,23 @@ def specification(item):
         if len(tail) != 2 or not tail[0].isdigit():
             return None
         grade, slot = int(tail[0]), tail[1]
-        if not 1 <= grade <= 12 or slot not in (*ROLES, *TEMPLATES):
+        if not 1 <= grade <= 12 or slot not in (*ROLES, *TEMPLATES, *TALISMAN_SLOTS):
             return None
         if slot in ROLES:
             return dict(world=world, grade=grade, role=slot, raw=True, use=None)
+        if slot in TALISMAN_SLOTS:
+            from .talisman_content import WORLD_TIERS
+            if grade not in WORLD_TIERS[world][1]:
+                return None
+            return dict(world=world, grade=grade, role=None, raw=False, use='talisman', template=slot)
         use = 'artifact' if slot.startswith('artifact_') else slot
         return dict(world=world, grade=grade, role=None, raw=False, use=use, template=slot)
     return None
 
 
 def inputs(world, grade, template):
+    if template in TALISMAN_SLOTS:
+        return {f'talisman_{world}_{grade}_paper': 1, f'talisman_{world}_{grade}_ink': 1}
     roles = TEMPLATES[template][2]
     # Yin-world medical practice nourishes the soul rather than beast blood.
     if world in {'phantom_underworld', 'hell', 'nether', 'reincarnation'}:
@@ -105,7 +113,13 @@ def build(profiles, realms):
                 item = material_id(world, grade, role)
                 definitions.append(dict(id=item, name=f'{name}（{grade}阶）', force_tier=1,
                     tags=['material', 'economic_raw', f'economic_role:{role}', f'native_world:{world}'],
-                    description=f'{THEMES[world]}本界{grade}阶{dict(ore="矿石",herb="草药",core="内丹")[family]}，用于同阶有限加工配方；内丹是原料，不能作为成品丹药服用。'))
+                    description=f'{THEMES[world]}本界{grade}阶{dict(ore="矿石",herb="草药",core="内丹")[family]}，用于同阶有限加工配方。' + (
+                        {'core_energy':'服用获得固定机缘；', 'core_blood':'服用恢复固定当前HP，不增加上限；',
+                         'core_soul':'服用恢复固定当前MP，不增加上限；'}[role]
+                        + '仅限同阶弱效服用，与养元丹共享每年一次消化限制。'
+                        if family == 'core' else
+                        {'ore_structure':'可作炼器主材，通用成器属性较低。', 'ore_conduct':'可作炼器辅材，允许两份同种实物。',
+                         'ore_store':'可作炼器淬火材料。'}.get(role, ''))))
                 goods.append(dict(world=world, kind='item', content_id=item, tier=grade, price=base))
             for (template, (name, category, roles, multiplier)), product_name in zip(TEMPLATES.items(), PRODUCT_NAMES[world], strict=True):
                 item = product_id(world, grade, template)
@@ -125,4 +139,6 @@ def build(profiles, realms):
                     row.update(trial_restore_hp=.12, trial_restore_mp=.06)
                 definitions.append(row)
                 goods.append(dict(world=world, kind='item', content_id=item, tier=grade, price=base * multiplier))
-    return definitions, goods
+    from .common_talisman_content import build as talisman_goods
+    items, offers = talisman_goods()
+    return definitions + items, goods + offers

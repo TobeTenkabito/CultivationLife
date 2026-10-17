@@ -14,6 +14,7 @@ from ...content_registry import (
     TECHNIQUE_CATALOG,
     TECHNIQUE_ELEMENT_NAMES,
     TRANSFORMATION_CATALOG,
+    WORLD_SYSTEMS,
 )
 from ...models import HistoryRecord
 from ...rules import (
@@ -69,7 +70,9 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         raise ValueError("物品不存在")
     from ...economy_content import specification
     economic=specification(item_id)
-    if economic and economic['use'] in {'healing','cultivation','longevity','breakthrough'}:
+    if economic and economic['raw'] and economic['role'].startswith('core_'):
+        economic = dict(economic, use='core')
+    if economic and economic['use'] in {'healing','cultivation','longevity','breakthrough','core'}:
         if economic['grade']!=max(1,game.player.realm_index):
             raise ValueError('标准丹药须与当前真实境界同阶，不能以低阶丹药供养高阶修士')
     if game.player.cultivation_suppression and item.breakthrough_bonus > 0:
@@ -227,7 +230,16 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             ), item_id, "root_added", summary,
             {"additional_root": affinity}, ["system", "item", "root"],
         ))
-    elif economic and economic['use'] in {'cultivation','longevity'}:
+    elif economic and economic['use'] == 'talisman':
+        if game.active_trial or game.player.imprisonment or game.player.ghost_captor:
+            raise ValueError('当前状态不能收入符箓')
+        from ...common_talisman_content import product
+        from ...system.talismans import receive
+        remove_item(game.player, item_id)
+        owned = receive(game.player, product(item_id, economic['world'], economic['grade'], economic['template'], item.name))
+        game.history.append(HistoryRecord('SYS_COMMON_TALISMAN',1,game.player.age,'收入通用符箓',item_id,
+            'received',f"将{item.name}收入符箓，可调用 {owned['uses']} 次，当前停用。",{},['system','item','talisman']))
+    elif economic and economic['use'] in {'cultivation','longevity','core'}:
         from ...system.economy.state import ensure_state
         ensure_state(game)
         personal=game.economy_v2['personal']
@@ -246,17 +258,29 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             if personal.get('medicine_year')==game.player.age:
                 raise ValueError('本年养元药力尚未消化，请在时间推进后再服用')
             personal['medicine_year']=game.player.age
-            gain=deps._add_opportunity(game.player,REALMS[game.player.realm_index].opportunity_base*.02)
-            summary=f'服下{item.name}，获得机缘 {gain:.1f}。'
+            if economic['use'] == 'core' and economic['role'] in {'core_blood', 'core_soul'}:
+                field, maximum = ('hp', max_hp(game.player)) if economic['role'] == 'core_blood' else ('mp', max_mp(game.player))
+                fixed = float(WORLD_SYSTEMS['common_core_effects'][field][economic['grade']-1])
+                gain = max(0, min(maximum - getattr(game.player, field), fixed))
+                setattr(game.player, field, getattr(game.player, field) + gain)
+                summary=f'服下{item.name}，恢复 {field.upper()} {gain:.1f}。'
+            else:
+                amount = (float(WORLD_SYSTEMS['common_core_effects']['opportunity'][economic['grade']-1])
+                          if economic['use'] == 'core' else REALMS[game.player.realm_index].opportunity_base*.02)
+                gain=deps._add_opportunity(game.player,amount,apply_efficiency=economic['use'] != 'core')
+                summary=f'服下{item.name}，获得机缘 {gain:.1f}。'
         remove_item(game.player,item_id)
         game.history.append(HistoryRecord('SYS_ECONOMIC_MEDICINE',1,game.player.age,'服用标准丹药',item_id,
             'consumed',summary,{'gain':gain},['system','item','economy']))
     elif (item_id == "healing_pill" or economic and economic['use']=='healing') and remove_item(game.player, item_id):
-        restored = max_hp(game.player) * 0.35
+        restored = max(0, min(max_hp(game.player)-game.player.hp, max_hp(game.player) * (.12 if economic else .35)))
+        mp_gain = max(0, min(max_mp(game.player)-game.player.mp, max_mp(game.player) * .06)) if economic else 0
         game.player.hp = min(max_hp(game.player), game.player.hp + restored)
+        game.player.mp = min(max_mp(game.player), game.player.mp + mp_gain)
         game.history.append(HistoryRecord(
             "SYS_USE_ITEM", 1, game.player.age, "服用丹药", item_id, "healed",
-            f"服下{item.name}，恢复了 {restored:.0f} 点 HP。", {"hp": round(restored, 1)}, ["system", "item"],
+            f"服下{item.name}，恢复 HP {restored:.0f}" + (f"、MP {mp_gain:.0f}" if economic else '') + '。',
+            {"hp": round(restored, 1), "mp": round(mp_gain, 1)}, ["system", "item"],
         ))
     else:
         raise ValueError("该物品当前不能使用")

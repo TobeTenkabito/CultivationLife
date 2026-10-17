@@ -1,5 +1,6 @@
 """Actual purchases and partial sales for the unique cross-world cargo."""
 import math
+from ...content_registry import restricted_acquisition
 from .ledger import balance, transfer_value
 from .state import ensure_regional_market, reprice
 from .local_market import quote
@@ -16,6 +17,8 @@ def buy(game, fleet, source, target, hops, order=None, *, travel_years):
     wages = guard_wages(fleet, travel_years)
     best = None
     for item, row in source['commodities'].items():
+        if restricted_acquisition('item', item):
+            continue
         if row['stock'] < 1 or (row.get('imported') and not order) or (order and item != order['item']):
             continue
         other = target['commodities'].get(item) or dict(row, stock=0., production=0., consumption=0.,

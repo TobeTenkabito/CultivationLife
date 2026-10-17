@@ -7,6 +7,7 @@ from functools import lru_cache
 from collections import Counter
 from ...content_registry import CONTENT_DOCUMENTS, GUIXU_TIDE_CONTENT
 from .dependencies import CraftingMaterialsDependencies
+from ...economy_content import specification, BASE_PRICES
 
 
 @lru_cache(maxsize=1)
@@ -65,6 +66,25 @@ def _crafting_material_candidates(
             }
         )
     plant_defs = deps._crafting_plant_defs()
+    ore_roles = {'ore_structure': 'primary', 'ore_conduct': 'secondary', 'ore_store': 'quench'}
+    for item in player.inventory:
+        spec = specification(item.id)
+        if item.quantity <= 0 or not spec or spec.get('role') not in ore_roles:
+            continue
+        role = ore_roles[spec['role']]
+        # Addresses refer to real stacked units; the normal forge deducts each.
+        for index in range(min(2 if role == 'secondary' else 1, item.quantity)):
+            candidates.append(dict(id=f'common:{item.id}:{index}', definition_id=item.id,
+                name=item.name, quality=.35, state='通用矿材', source='通用商品',
+                origin_world=spec['world'], material_value=BASE_PRICES[spec['grade']-1],
+                acquired_tier=spec['grade'], roles=[role], tags=list(item.tags),
+                allow_duplicate_type=True, role_effects={role: dict(
+                    design_multipliers={key: .05 if role == 'primary' else .5 for key in
+                        ('combat_power','max_hp','max_mp','opportunity_efficiency',
+                         'body_training_efficiency','divine_sense_efficiency',
+                         'tribulation_reduction','breakthrough_bonus')},
+                    description='通用矿材灵性较弱，成器设计值降低。')},
+                source_kind='inventory', inventory_item_id=item.id, quantity=item.quantity))
     for item in player.inventory:
         definition = plant_defs.get(str(item.plant_id or ""))
         if not definition or item.quantity <= 0:

@@ -187,7 +187,7 @@ def black_market_receipt(game, amount, quantity):
 def auction_fee(game, amount, reason):
     venue = game.auction_state
     destination = operator_account(game, venue.get('world'), venue.get('location_id'))
-    if reason == '拍卖占位费':
+    if reason in {'拍卖占位费', '高级拍卖会入场费'}:
         record_external(game, 'player', destination, int(amount), reason)
     else:
         transfer_value(game, f'background:{game.player.world}', destination, int(amount), reason)
