@@ -17,6 +17,7 @@ def main():
     naming = '--naming' in sys.argv[2:]
     natal = '--natal' in sys.argv[2:]
     teachings = '--teachings' in sys.argv[2:]
+    common = '--common-techniques' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
@@ -29,9 +30,12 @@ def main():
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('content-naming','natal-materials') for orientation in ('portrait','landscape')]
     if teachings:
         logs=[f'build/android-upper-teachings-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
+    if common:
+        logs=[f'build/android-common-techniques-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
+        if common:require('common_techniques_scope' in text,f'Missing common technique native coverage: {name}')
         if bugfix and 'audit-fixes' in name:
             require('followup_fixes_scope' in text,f'Missing current followup native coverage: {name}')
         if naming:
@@ -66,6 +70,7 @@ def main():
     if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
     if natal:receipt['scope']='Naming compatibility and eleven-world natal materials, native socket/return, bounded catalog and qualification; four themes and four orientation phases'
     if teachings:receipt['scope']='Four upper worlds, Buddhist wish/blessings and Confucian doctrine/classics/outer opportunity, direct advancement disabled; native clicks, four themes and portrait/landscape'
+    if common:receipt['scope']='Common elemental arts, all-root eligibility, real supplement/equip/upgrade, stale shop rejection/recovery and ordinary purchase; four themes and portrait/landscape'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 

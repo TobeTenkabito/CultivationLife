@@ -237,7 +237,7 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
     for offer in game.market_offers:
         if offer.get("world", "human") != player.world or offer.get("location_id", location_id) != location_id:
             continue
-        if not natural_market_acquisition_allowed(str(offer['kind']), str(offer['content_id'])):
+        if not natural_market_acquisition_allowed(str(offer.get('kind', '')), str(offer.get('content_id', ''))):
             continue
         shown = public_catalog_entry(offer)
         shown["locked"] = bool(offer.get("locked", False))
@@ -296,7 +296,7 @@ def toggle_market_offer_lock(deps: MarketDependencies, game_id: str, offer_id: s
     location_id = deps.maps.normalize_location(game.player.world, game.player.location_id)
     offer = next((entry for entry in game.market_offers if entry.get("id") == offer_id), None)
     if (
-        not offer or offer.get("sold") or not natural_market_acquisition_allowed(str(offer['kind']), str(offer['content_id']))
+        not offer or offer.get("sold") or not natural_market_acquisition_allowed(str(offer.get('kind', '')), str(offer.get('content_id', '')))
         or offer.get("world", "human") != game.player.world
         or offer.get("location_id", location_id) != location_id
     ):

@@ -3395,7 +3395,8 @@ function renderTechniques(slots) {
     if (!technique) return;
     const row = document.createElement('div'); row.className = 'technique-row';
     const name = document.createElement('b'); name.textContent = `${role} · ${technique.name} Lv.${technique.level} · ${technique.growth_name || "均衡"}倾向`;
-    const effect = document.createElement('small'); effect.textContent = activeText(technique);
+    const effect = document.createElement('small'); effect.textContent = technique.root_requirement_met === false
+      ? `灵根不符 · ${technique.affinity_requirement_display} · 当前失效` : activeText(technique);
     row.append(name, effect); list.appendChild(row);
     if (technique.special_effect_description) {
       const specialty = document.createElement('small'); specialty.textContent = technique.special_effect_description;

@@ -19,6 +19,7 @@ from cultivation_life.rules import (
     acquire_technique, add_item, add_technique_copy, assign_technique,
     can_player_practice_technique, can_practice_technique, public_player,
     technique_scale, validate_technique, ensure_technique_set,
+    max_hp, max_mp, combat_power, opportunity_multiplier,
 )
 from tools.generate_common_techniques import FAMILIES, LINES, ROLES, WORLD_PATHS
 
@@ -283,3 +284,34 @@ def test_refresh_drops_cached_and_reserved_rare_offers_but_keeps_owned_books(rea
     assert not any(o['content_id']==t.id for o in game.market_offers)
     assert not local_market(game).get('reserved_offers')
     assert game.player.known_techniques==books and game.player.inventory==inventory
+
+
+@pytest.mark.parametrize('family',[f for f,(roots,_) in FAMILIES.items() if roots])
+def test_losing_any_required_root_disables_passives_without_erasing_books(ready,family):
+    from cultivation_life.system.combat_system import PlayerCombatSystem, BattleUnit
+    _,game=ready;p=game.player;roots=FAMILIES[family][0]
+    p.spirit_root=next(k for k,v in ROOT_DEFINITIONS.items()
+                      if len(v['elements'])==1 and not set(v['elements'])&set(roots))
+    p.additional_roots=list(roots)
+    p.technique=p.support_technique=p.body_technique=p.divine_sense_technique=p.transformation_technique=None
+    p.combat_techniques=[]
+    p.hp=max_hp(p);p.mp=max_mp(p)
+    baseline=(max_hp(p),max_mp(p),combat_power(p))
+    main,support,combat=[art(family=family,role=role) for role in ROLES]
+    for t in (main,support,combat):acquire_technique(p,t)
+    p.technique=main;p.support_technique=support;p.combat_techniques=[combat]
+    assert max_hp(p)>baseline[0] and max_mp(p)>baseline[1] and opportunity_multiplier(p)>0
+    units=[BattleUnit('player','测试','player',100,1)]
+    for missing in roots:
+        p.additional_roots=[r for r in roots if r!=missing]
+        assert (max_hp(p),max_mp(p),combat_power(p))==baseline
+        assert opportunity_multiplier(p)==0
+        disabled=PlayerCombatSystem._aggregate_stats(units,player=p,terrain_tags=[])
+        p.technique=p.support_technique=None;p.combat_techniques=[]
+        assert PlayerCombatSystem._aggregate_stats(units,player=p,terrain_tags=[])==disabled
+        p.technique=main;p.support_technique=support;p.combat_techniques=[combat]
+        shown=public_player(p)
+        assert not shown['technique_slots']['support']['root_requirement_met']
+        assert len(p.known_techniques)>=3
+    p.additional_roots=list(roots)
+    assert max_hp(p)>baseline[0] and max_mp(p)>baseline[1] and opportunity_multiplier(p)>0
