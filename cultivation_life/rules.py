@@ -80,6 +80,7 @@ def create_technique(
     possession_limit_bonus: int = 0,
     ignore_possession_limit: bool = False,
     growth_preference: str = "balanced",
+    required_affinities: list[str] | None = None,
 ) -> Technique:
     technique = Technique(
         id=technique_id, name=name, path=path, element=element, grade=grade, level=level,
@@ -99,6 +100,7 @@ def create_technique(
         possession_limit_bonus=possession_limit_bonus,
         ignore_possession_limit=ignore_possession_limit,
         growth_preference=growth_preference,
+        required_affinities=list(required_affinities or []),
     )
     validate_technique(technique)
     return technique
@@ -107,6 +109,10 @@ def create_technique(
 def validate_technique(technique: Technique) -> None:
     """每一部功法自身必须完整覆盖机缘、HP、MP 与独立战力四项。"""
     values = (technique.opportunity_bonus, technique.hp_bonus, technique.mp_bonus, technique.combat_bonus)
+    if (not isinstance(technique.required_affinities, list)
+            or any(not isinstance(root, str) or root not in {'metal', 'wood', 'water', 'fire', 'earth', 'wind', 'thunder', 'yin', 'yang'} for root in technique.required_affinities)
+            or len(set(technique.required_affinities)) != len(technique.required_affinities)):
+        raise ValueError("功法所需灵根必须是互不重复的五行或变异属性")
     if technique.growth_preference not in {"balanced", "main", "support", "combat"}:
         raise ValueError("未知功法成长倾向")
     if any(value <= 0 for value in values):
@@ -365,6 +371,7 @@ def ensure_technique_set(player: Player) -> None:
         if technique and technique.id in TECHNIQUE_CATALOG:
             technique.name = TECHNIQUE_CATALOG[technique.id].name
             technique.growth_preference = TECHNIQUE_CATALOG[technique.id].growth_preference
+            technique.required_affinities = list(TECHNIQUE_CATALOG[technique.id].required_affinities)
             if technique.id == "TECH_COMMON_GUI":
                 technique.combat_bonus = 5000
             technique.required_body_training = int(TECHNIQUE_CATALOG[technique.id].required_body_training)
@@ -398,7 +405,7 @@ def assign_technique(player: Player, technique: Technique, slot: str) -> None:
         raise ValueError("妖修以血脉本体进化，不能修炼或配置变化术")
     if technique.requires_immortal_power and not player.immortal_power_converted:
         raise ValueError("尚未完成仙灵力转化，无法配置仙家功法")
-    if not can_player_practice_technique(player, technique.element):
+    if not can_player_practice_technique(player, technique):
         raise ValueError("灵根属性与功法不合")
     if player.body_training < int(technique.required_body_training):
         raise ValueError(f"肉身不足：配置《{technique.name}》需要炼体{technique.required_body_training}层")
@@ -821,27 +828,41 @@ def root_elements(root_id: str) -> list[str]:
     return list(root_definition(root_id)["elements"])
 
 
-def can_practice_technique(root_id: str, technique_element: str) -> bool:
+def can_practice_technique(root_id: str, technique_element: str | Technique) -> bool:
     """无属性功法不限灵根；五行功法必须命中灵根的五行属性。"""
-    if technique_element in {"neutral", "sex"}:
+    if (isinstance(technique_element, str) and technique_element in {'neutral', 'sex'}
+            or isinstance(technique_element, Technique) and technique_element.element in {'neutral', 'sex'} and not technique_element.required_affinities):
         return True
-    elements = set(root_elements(root_id))
-    if technique_element == "five_elements":
-        return {"metal", "wood", "water", "fire", "earth"} <= elements
-    return technique_element in elements
+    return _affinities_allow_technique(set(root_elements(root_id)), technique_element)
 
 
 def player_affinities(player: Player) -> list[str]:
     return list(dict.fromkeys([*root_elements(player.spirit_root), *player.additional_roots]))
 
 
-def can_player_practice_technique(player: Player, technique_element: str) -> bool:
-    if technique_element in {"neutral", "sex"}:
+def _affinities_allow_technique(affinities: set[str], technique: str | Technique) -> bool:
+    element = technique.element if isinstance(technique, Technique) else technique
+    required = technique.required_affinities if isinstance(technique, Technique) else ()
+    if not set(required) <= affinities:
+        return False
+    if element in {"neutral", "sex"}:
         return True
-    affinities = set(player_affinities(player))
-    if technique_element == "five_elements":
+    if element == "five_elements":
         return {"metal", "wood", "water", "fire", "earth"} <= affinities
-    return technique_element in affinities
+    return element in affinities
+
+
+def can_player_practice_technique(player: Player, technique_element: str | Technique) -> bool:
+    if (isinstance(technique_element, str) and technique_element in {'neutral', 'sex'}
+            or isinstance(technique_element, Technique) and technique_element.element in {'neutral', 'sex'} and not technique_element.required_affinities):
+        return True
+    return _affinities_allow_technique(set(player_affinities(player)), technique_element)
+
+
+def technique_affinity_display(technique: Technique) -> str:
+    if len(technique.required_affinities) > 1:
+        return "、".join(TECHNIQUE_ELEMENT_NAMES[root] for root in technique.required_affinities) + "（须全部具备）"
+    return TECHNIQUE_ELEMENT_NAMES[technique.element]
 
 
 def roll_lifespan(player: Player, rng: random.Random) -> int | None:
@@ -938,6 +959,7 @@ def public_player(player: Player) -> dict[str, Any]:
         if technique is None:
             return None
         result = dict(technique.__dict__)
+        result['affinity_requirement_display'] = technique_affinity_display(technique)
         result['special_effect_description'] = technique_special_effect(technique)
         level_multiplier = technique.level_multiplier
         effect_multiplier = technique_scale(technique)
@@ -1089,7 +1111,7 @@ def public_player(player: Player) -> dict[str, Any]:
             + (" · 后天补全：" + "、".join(AFFINITY_NAMES[element] for element in player.additional_roots)
                if player.additional_roots else "")
         ),
-        technique_element_name=TECHNIQUE_ELEMENT_NAMES[player.technique.element] if player.technique else None,
+        technique_element_name=technique_affinity_display(player.technique) if player.technique else None,
         technique_slots={
             "main": public_technique(player.technique, True),
             "support": public_technique(player.support_technique, True),
@@ -1100,9 +1122,9 @@ def public_player(player: Player) -> dict[str, Any]:
         },
         known_techniques=[
             public_technique(technique, False) | {
-                "element_name": TECHNIQUE_ELEMENT_NAMES[technique.element],
+                "element_name": technique_affinity_display(technique),
                 "compatible": (
-                    can_player_practice_technique(player, technique.element)
+                    can_player_practice_technique(player, technique)
                     and (not technique.requires_immortal_power or player.immortal_power_converted)
                     and player.body_training >= int(technique.required_body_training)
                 ),

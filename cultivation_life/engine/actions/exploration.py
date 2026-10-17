@@ -271,7 +271,7 @@ def train(deps: ExplorationDependencies, game, action, units):
     if (
         action == "cultivate"
         and p.technique
-        and not can_player_practice_technique(p, p.technique.element)
+        and not can_player_practice_technique(p, p.technique)
     ):
         raise ValueError("灵根与主修功法不合")
     rng = decode_rng(game.seed, game.rng_state)

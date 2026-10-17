@@ -56,7 +56,7 @@ def dispatch_disciple(deps: RelationshipActionDependencies, game_id: str, target
         pool = [
             entry for entry in pool
             if entry["content_id"] not in {known.id for known in player.known_techniques}
-            and can_player_practice_technique(player, TECHNIQUE_CATALOG[entry["content_id"]].element)
+            and can_player_practice_technique(player, TECHNIQUE_CATALOG[entry["content_id"]])
         ]
     success = bool(pool) and rng.random() < float(FACTION_SYSTEMS["disciple_dispatch_success"])
     if success:
@@ -245,13 +245,13 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
             entry["content_id"] for entry in MARKET_GOODS
             if entry["kind"] == "technique" and int(entry["tier"]) <= max(1, master_realm)
             and entry.get("world", "human") == master.get("world", player.world)
-            and can_player_practice_technique(player, TECHNIQUE_CATALOG[entry["content_id"]].element)
+            and can_player_practice_technique(player, TECHNIQUE_CATALOG[entry["content_id"]])
             and all(known.id != entry["content_id"] for known in player.known_techniques)
         ))
     if scene:
         candidates = list(items) if kind == 'item' else [
             key for key, art in techniques.items()
-            if can_player_practice_technique(player, art.element)
+            if can_player_practice_technique(player, art)
             and all(known.id != key for known in player.known_techniques)
         ]
     if not candidates:
@@ -427,7 +427,7 @@ def manage_dao_companion(
                 if entry["kind"] == request_kind and int(entry["tier"]) <= max(1, int(companion["realm_index"]))
                 and entry.get("world", "human") == player.world
                 and (request_kind == "item" or (
-                    can_player_practice_technique(player, TECHNIQUE_CATALOG[entry["content_id"]].element)
+                    can_player_practice_technique(player, TECHNIQUE_CATALOG[entry["content_id"]])
                     and all(known.id != entry["content_id"] for known in player.known_techniques)
                 ))
             ))
@@ -456,7 +456,7 @@ def manage_dao_companion(
             technique = next((entry for entry in player.known_techniques if entry.id == content_id), None)
             if not technique:
                 raise ValueError("你尚未掌握这部功法")
-            if not can_practice_technique(str(companion.get("spirit_root", "none")), technique.element):
+            if not can_practice_technique(str(companion.get("spirit_root", "none")), technique):
                 raise ValueError("道侣的灵根无法修习这部功法")
             companion["main_technique_id"] = technique.id
             taught = companion.setdefault("techniques", [])

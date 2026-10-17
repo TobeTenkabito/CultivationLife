@@ -64,7 +64,7 @@ def bind_heavens(engine) -> HeavensDependencies:
         return dict(alive=p.alive, blocked_reason=reason, physical_reason=physical_reason,
             can_discover=can_perceive,
             can_apply=physical_reason is None and (p.world != 'celestial' or p.immortal_power_converted) and p.technique is not None
-                and can_player_practice_technique(p, p.technique.element),
+                and can_player_practice_technique(p, p.technique),
             true_realm=perception_realm(p), stones=sum(i.quantity for i in p.inventory if i.id == 'spirit_stone'),
             mp=p.mp, max_mp=max_mp(p))
 

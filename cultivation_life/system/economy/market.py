@@ -6,9 +6,9 @@ from typing import Any
 from ...content_registry import ITEM_CATALOG, MARKET_GOODS, MARKET_SETTINGS, REALMS, TECHNIQUE_CATALOG, TECHNIQUE_ELEMENT_NAMES
 from ...models import GameState
 from ...runtime import now_iso
-from ...rules import QI_SOURCE_NAMES, can_player_practice_technique, combat_requirement_display
+from ...rules import QI_SOURCE_NAMES, can_player_practice_technique, combat_requirement_display, technique_affinity_display
 from .dependencies import MarketDependencies
-from ...content_registry import restricted_acquisition
+from ...content_registry import restricted_acquisition, natural_market_acquisition_allowed
 from . import state as economy_state, local_market as local_trade
 
 
@@ -38,7 +38,7 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
             if material:
                 offer.update(price=material['base_value'], pricing_version=2)
                 repriced = True
-    game.market_offers[:] = [row for row in game.market_offers if not restricted_acquisition(
+    game.market_offers[:] = [row for row in game.market_offers if natural_market_acquisition_allowed(
         str(row.get("kind", "")), str(row.get("content_id", "")))]
     if player.realm_index == 0:
         changed = bool(
@@ -88,6 +88,8 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
                 retained_groups.add(group)
     market_state = economy_state.local_market(game)
     for reserved in market_state.pop('reserved_offers', []):
+        if not natural_market_acquisition_allowed(str(reserved.get('kind', '')), str(reserved.get('content_id', ''))):
+            continue
         group = deps._market_offer_group(reserved)
         if group not in retained_groups:
             retained.append(reserved)
@@ -95,7 +97,10 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
     location_name = deps.maps.location(player.world, location_id)["name"]
     local_trade.release_shelf(game, retained)
     market_name = f"{location_name}·{REALMS[tier].name}坊市"
-    world_goods = deps.maps.localize_goods(MARKET_GOODS, player.world, location_id, "market")
+    shelf_goods = (row for row in MARKET_GOODS
+                   if row.get('world', 'human') == player.world
+                   and natural_market_acquisition_allowed(str(row['kind']), str(row['content_id'])))
+    world_goods = deps.maps.localize_goods(shelf_goods, player.world, location_id, "market")
     general_locked = [row for row in retained if deps._market_offer_group(row) == "general"]
     material_locked = [row for row in retained if deps._market_offer_group(row) == "material"]
     offers: list[dict[str, Any]] = list(general_locked)
@@ -156,7 +161,7 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
             )
             description = (
                 f"{source_display} · 战斗门槛 {combat_requirement_display(content.combat_requirements)}；"
-                f"{TECHNIQUE_ELEMENT_NAMES[content.element]}功法；机缘 +{content.opportunity_bonus:.0%}，"
+                f"{technique_affinity_display(content)}功法；机缘 +{content.opportunity_bonus:.0%}，"
                 f"HP +{content.hp_bonus:.0%}，MP +{content.mp_bonus:.0%}，战力 +{content.combat_bonus:.0f}。"
             )
             if content.category == "transformation":
@@ -232,6 +237,8 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
     for offer in game.market_offers:
         if offer.get("world", "human") != player.world or offer.get("location_id", location_id) != location_id:
             continue
+        if not natural_market_acquisition_allowed(str(offer['kind']), str(offer['content_id'])):
+            continue
         shown = public_catalog_entry(offer)
         shown["locked"] = bool(offer.get("locked", False))
         shown["base_price"] = offer["price"]
@@ -247,7 +254,7 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
         shown["owned"] = False
         shown["compatible"] = (
             offer["kind"] != "technique"
-            or can_player_practice_technique(player, TECHNIQUE_CATALOG[offer["content_id"]].element)
+            or can_player_practice_technique(player, TECHNIQUE_CATALOG[offer["content_id"]])
         )
         if offer.get("kind") == "talisman_material":
             talisman_offers.append(shown)
@@ -289,7 +296,8 @@ def toggle_market_offer_lock(deps: MarketDependencies, game_id: str, offer_id: s
     location_id = deps.maps.normalize_location(game.player.world, game.player.location_id)
     offer = next((entry for entry in game.market_offers if entry.get("id") == offer_id), None)
     if (
-        not offer or offer.get("sold") or offer.get("world", "human") != game.player.world
+        not offer or offer.get("sold") or not natural_market_acquisition_allowed(str(offer['kind']), str(offer['content_id']))
+        or offer.get("world", "human") != game.player.world
         or offer.get("location_id", location_id) != location_id
     ):
         raise ValueError("该货物已经售出或不在当前坊市")

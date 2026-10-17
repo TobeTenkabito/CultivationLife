@@ -632,7 +632,7 @@ def _default_npc_main_technique(npc: SectNpc) -> str | None:
     candidates = [
         technique for technique in TECHNIQUE_CATALOG.values()
         if technique.path == npc.path and technique.grade <= max(1, npc.realm_index)
-        and technique.element != "sex" and can_practice_technique(npc.spirit_root, technique.element)
+        and technique.element != "sex" and can_practice_technique(npc.spirit_root, technique)
         and technique.id not in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
     ]
     if not candidates:

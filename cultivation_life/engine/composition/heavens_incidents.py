@@ -37,7 +37,7 @@ def bind_incidents(engine):
         return dict(reason=reason, mp=p.mp, max_mp=max_mp(p),
                     stones=sum(i.quantity for i in p.inventory if i.id == 'spirit_stone'),
                     can_apply=(p.world != 'celestial' or p.immortal_power_converted) and p.technique is not None
-                    and can_player_practice_technique(p, p.technique.element))
+                    and can_player_practice_technique(p, p.technique))
 
     def relief(game):
         p = game.player

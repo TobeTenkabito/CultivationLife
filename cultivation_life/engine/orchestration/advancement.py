@@ -81,7 +81,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         if guixu_session:
             raise ValueError("归墟内不能勘察外界异闻")
     deps._prepare_sage_action(game, action)
-    if action == "cultivate" and player.technique and not can_player_practice_technique(player, player.technique.element):
+    if action == "cultivate" and player.technique and not can_player_practice_technique(player, player.technique):
         raise ValueError("灵根属性与五行功法不合，无法修炼")
     units = 1 if action == "generated_explore" else max(1, min(10, int(years)))
     from ...system.upper_institutions import begin_work, finish_work, advance_time
