@@ -1,6 +1,6 @@
 # DLC 内容包
 
-> 源码维护基线：本体 v2.13.0，2026-10-12；仅支持存档结构 10，结构 1–9 不兼容。扩展版本以各包目录的 manifest.json 为准。
+> 源码维护基线：本体 v2.14.3，2026-10-17；仅支持存档结构 10，结构 1–9 不兼容。扩展版本以各包目录的 manifest.json 为准。
 
 官方 DLC 不再提供界面或地域地图；全部地理内容位于本体 `content/world.json` 与 `content/maps.json`。专属副本、剧情、道途与特色功能仍由各 DLC 独立提供。
 
@@ -61,12 +61,12 @@ dlc/
 | 包 | 版本 | ID |
 | --- | --- | --- |
 | [修罗显圣：无法无天](asura-manifestation/README.md) | 1.2.1 | `official.asura-manifestation` |
-| [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.0.0 | `official.buddhist-dharma` |
+| [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.1.0 | `official.buddhist-dharma` |
 | [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.9.1 | `official.ghost-reincarnation` |
 | [归墟之潮：九死一生](guixu-tide/README.md) | 2.7.0 | `official.guixu-tide` |
 | [明争暗斗：合纵连横](intrigue-coalitions/README.md) | 1.5.0 | `official.intrigue-coalitions` |
 | [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.15.2 | `official.monster-bloodlines` |
 | [万灵争衡：百族兴衰](monster-civilizations/README.md) | 1.0.0 | `official.monster-civilizations` |
-| [圣人之道：内圣外王](sage-way/README.md) | 1.4.0 | `official.sage-way` |
+| [圣人之道：内圣外王](sage-way/README.md) | 1.5.0 | `official.sage-way` |
 | [神机百变：巧夺天工](tianji-artifacts/README.md) | 2.2.0 | `official.tianji-artifacts` |
 | [万象试境：问道无涯](trial-sites/README.md) | 1.1.0 | `official.trial-sites` |

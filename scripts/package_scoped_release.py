@@ -61,14 +61,15 @@ def main():
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
         current_code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{current_code}'" in metadata and f"versionName='{VERSION}-android.{current_code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
-    if scoped.get('profile') in {'naming', 'natal'}:
+    if scoped.get('profile') in {'naming', 'natal', 'teachings'}:
         natal = scoped['profile'] == 'natal'
-        phases = ('content-naming','natal-materials') if natal else ('content-naming','strategic-war')
+        teachings = scoped['profile'] == 'teachings'
+        phases = ('upper-teachings',) if teachings else ('content-naming','natal-materials') if natal else ('content-naming','strategic-war')
         required={f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Native naming/war scope incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test artifact changed after acceptance')
         for name in native['logs']:
-            marker='content_naming_scope' if 'content-naming' in name else 'natal_materials_scope' if natal else 'strategic_war_scope'
+            marker='upper_teachings_scope' if teachings else 'content_naming_scope' if 'content-naming' in name else 'natal_materials_scope' if natal else 'strategic_war_scope'
             require(marker in (ROOT/name).read_text(encoding='utf-8-sig'),'Current native naming/war coverage missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
@@ -104,6 +105,19 @@ def main():
     am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(target,target.name);z.write(am,am.name);z.write(ROOT/'android/README.md','README.md')
+    if scoped.get('profile') == 'teachings':
+        for package, title in [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]:
+            version = dlcs[package]
+            destination = ROOT / f'dist/{title}-v{version}.zip'
+            with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
+                for p in sorted((ROOT/'dlc'/package).rglob('*')):
+                    if p.is_file() and '__pycache__' not in p.parts:
+                        z.write(p,p.relative_to(ROOT).as_posix())
+                z.write(ROOT/'docs/upper-teachings.md','docs/upper-teachings.md')
+                z.writestr('安装说明.txt',f'配套本体 v{VERSION}，仅支持结构 10。解压至游戏根目录，覆盖对应 dlc/{package} 文件夹；重启生效。旧本体需先升级；Android 请安装同版签名 APK。用户开关与存档不会被本包覆盖。\n')
+                z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc=package,version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
+            with zipfile.ZipFile(destination) as z:
+                require(z.testzip() is None,'DLC archive damaged')
     print(json.dumps(dict(version=VERSION,tests=tests,windows=str(output),android=str(target)),ensure_ascii=False))
 
 

@@ -166,6 +166,16 @@ class SageSystemMixin:
             game.player.sage_effects = {}
             return False
         cfg = sage_config()
+        adopted = False
+        # Upper schools belong to visited worlds; opening the DLC must not start
+        # four additional world simulations or replace an existing doctrine.
+        if game.sage_state.get('version') in {1, 2} and teaching_world(game):
+            key = scope_key(game)
+            worlds = game.sage_state.setdefault('worlds', {})
+            if key not in worlds:
+                presets = copy.deepcopy(cfg.get('initial_doctrines', {}).get(key, []))
+                worlds[key] = {'doctrines': presets, 'ai_found_cooldown_until': 0}
+                adopted = True
         if game.player.world == 'lost':
             game.sage_state.setdefault('worlds', {}).setdefault(scope_key(game), {'doctrines': [], 'ai_found_cooldown_until': 0})
         version = int(game.sage_state.get("version", 0) or 0)
@@ -177,9 +187,11 @@ class SageSystemMixin:
             game.sage_state["version"] = 2
             if version == 1:
                 self._refresh_sage_effects(game)
-            return False
+            return adopted
         worlds: dict[str, Any] = {scope_key(game): {"doctrines": [], "ai_found_cooldown_until": 0}} if game.player.world == "lost" else {}
         for world in cfg.get("worlds", ["human", "spirit"]):
+            if world not in {'human', 'spirit', game.player.world}:
+                continue
             presets = copy.deepcopy(cfg.get("initial_doctrines", {}).get(world, []))
             for row in presets:
                 self._normalize_sage_doctrine(row, game.player.age, cfg)
@@ -244,7 +256,7 @@ class SageSystemMixin:
         if action not in {"sage_preach", "sage_teach", "sage_answer"}:
             return
         if not sage_content_available() or game.player.path != "confucian" or not teaching_world(game):
-            raise ValueError("只有人界或灵界的儒修可以进行圣人教化")
+            raise ValueError("当前界面尚未开放圣人教化，或并非儒修")
         if not self._player_doctrine(game):
             raise ValueError("请先加入或创立一个学说")
         game.sage_state["active_action"] = action
@@ -309,7 +321,7 @@ class SageSystemMixin:
                         "founded_year": game.player.age, "protection_until": game.player.age + int(cfg.get("protection_years", 10)),
                         "extinct_years": 0, "sage_id": "confucius", "sage_cooldown_until": 0,
                         "controller_id": f"sage-ai-{world}-{seq}-master",
-                        "members": [{"id":f"sage-ai-{world}-{seq}-master","name":f"游儒{seq}","inner":10.0,"realm_index":3,"layer":1,"path":"confucian","combat_factor":0.9}],
+                        "members": [{"id":f"sage-ai-{world}-{seq}-master","name":f"游儒{seq}","inner":10.0,"realm_index":9 if world in {'celestial', 'asura', 'nether', 'reincarnation'} else 3,"layer":1,"path":"confucian","combat_factor":0.9}],
                         "active_disciples": [], "graduates": 0,
                     }
                     doctrines.append(new_doctrine)
@@ -595,6 +607,9 @@ class SageSystemMixin:
             "target_name": member["name"],
             "target_power": target_power,
             "target_realm_index": target_realm,
+            "target_layer": target_layer,
+            "path": "confucian",
+            "world": player.world,
             "combat_type": "cultivator",
             "npc_id": str(member["id"]),
             "action": "sage_debate",
@@ -658,7 +673,7 @@ class SageSystemMixin:
         if level <= previous:
             raise ValueError(f"这部经典已参至 Lv.{previous}，相同或更低等级不能重复产生浩然之气")
         template = TECHNIQUE_CATALOG.get(technique_id)
-        origin_realm = max(1, min(8, int(
+        origin_realm = max(1, min(len(REALMS) - 1, int(
             item.technique_origin_realm_index or (template.grade if template else 1)
         )))
         gain = self._haoran_manual_gain(origin_realm, previous, level)
@@ -703,9 +718,11 @@ class SageSystemMixin:
             return cultivation_block_reason(game)
         target = self._outer_target(player)
         if target is None:
-            return "大乘圆满后的飞升必须另渡九重天劫"
+            return "上界不能以外王强行升境，请循本体修持与渡劫" if player.realm_index >= 9 else "大乘圆满后的飞升必须另渡九重天劫"
         if player.sealed_cultivation:
             return "下界法则正封印真实修为"
+        if player.cultivation_suppression:
+            return "请先解除秘法压制"
         if player.spirit_root == "none":
             return "尚无灵根，不能承载强行升境"
         if player.world == "human" and player.realm_index == 5 and player.layer >= 3:
@@ -832,7 +849,7 @@ class SageSystemMixin:
                 continue
             technique_id = str(item.technique_id)
             template = TECHNIQUE_CATALOG.get(technique_id)
-            origin = max(1, min(8, int(item.technique_origin_realm_index or (template.grade if template else 1))))
+            origin = max(1, min(len(REALMS) - 1, int(item.technique_origin_realm_index or (template.grade if template else 1))))
             refined = max(0, int(player.refined_inheritances.get(technique_id, 0)))
             manual_level = max(1, min(9, int(item.technique_level)))
             gain = self._haoran_manual_gain(origin, refined, manual_level)
@@ -852,7 +869,7 @@ class SageSystemMixin:
             if technique_id in classic_rows:
                 continue
             template = TECHNIQUE_CATALOG.get(technique_id)
-            origin = max(1, min(8, int(template.grade if template else 1)))
+            origin = max(1, min(len(REALMS) - 1, int(template.grade if template else 1)))
             classic_rows[technique_id] = {
                 "item_id":None, "technique_id":technique_id,
                 "name":template.name if template else technique_id,
@@ -874,7 +891,7 @@ class SageSystemMixin:
             after_effects = haoran_passive_effects(after_exp, cfg)
             if action == "advance":
                 target = self._outer_target(player)
-                reward = "飞升另循天劫" if target is None else f"直达{REALMS[target[0]].name}·{target[1]}层（劫数不免）"
+                reward = ("上界循本体修持" if player.realm_index >= 9 else "飞升另循天劫") if target is None else f"直达{REALMS[target[0]].name}·{target[1]}层（劫数不免）"
             elif action == "combat":
                 ratio = float(cfg.get("outer_king", {}).get("combat_power", {}).get("standard_power_ratio", 0.05))
                 reward = f"永久固定战斗力 +{expected_combat_power(player.realm_index, player.layer) * ratio:.1f}"

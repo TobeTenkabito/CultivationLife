@@ -1,5 +1,5 @@
 {
-  "base_version": "2.14.2",
+  "base_version": "2.14.3",
   "save_schema": 10,
   "compatible_save_schemas": [
     10
@@ -7,164 +7,144 @@
   "incompatible_save_schemas": "1–9; no migration",
   "dlc_versions": {
     "asura-manifestation": "1.2.1",
-    "buddhist-dharma": "1.0.0",
+    "buddhist-dharma": "1.1.0",
     "ghost-reincarnation": "3.9.1",
     "guixu-tide": "2.7.0",
     "intrigue-coalitions": "1.5.0",
     "monster-bloodlines": "4.15.2",
     "monster-civilizations": "1.0.0",
-    "sage-way": "1.4.0",
+    "sage-way": "1.5.0",
     "tianji-artifacts": "2.2.0",
     "trial-sites": "1.1.0"
   },
   "validation_scope": "User-requested related and upstream tests only; not full repository regression",
-  "tests": 508,
+  "tests": 496,
   "runs": [
     {
       "name": "related-tests-0",
-      "log": "build\\related-tests-0-2142.log",
+      "log": "build\\related-tests-0-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-1",
-      "log": "build\\related-tests-1-2142.log",
+      "log": "build\\related-tests-1-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-2",
-      "log": "build\\related-tests-2-2142.log",
+      "log": "build\\related-tests-2-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-3",
-      "log": "build\\related-tests-3-2142.log",
+      "log": "build\\related-tests-3-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-4",
-      "log": "build\\related-tests-4-2142.log",
+      "log": "build\\related-tests-4-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-5",
-      "log": "build\\related-tests-5-2142.log",
+      "log": "build\\related-tests-5-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-6",
-      "log": "build\\related-tests-6-2142.log",
+      "log": "build\\related-tests-6-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-7",
-      "log": "build\\related-tests-7-2142.log",
+      "log": "build\\related-tests-7-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-8",
-      "log": "build\\related-tests-8-2142.log",
+      "log": "build\\related-tests-8-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-9",
-      "log": "build\\related-tests-9-2142.log",
+      "log": "build\\related-tests-9-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-10",
-      "log": "build\\related-tests-10-2142.log",
+      "log": "build\\related-tests-10-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-11",
-      "log": "build\\related-tests-11-2142.log",
+      "log": "build\\related-tests-11-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-12",
-      "log": "build\\related-tests-12-2142.log",
+      "log": "build\\related-tests-12-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-13",
-      "log": "build\\related-tests-13-2142.log",
+      "log": "build\\related-tests-13-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-14",
-      "log": "build\\related-tests-14-2142.log",
+      "log": "build\\related-tests-14-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-15",
-      "log": "build\\related-tests-15-2142.log",
+      "log": "build\\related-tests-15-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-16",
-      "log": "build\\related-tests-16-2142.log",
+      "log": "build\\related-tests-16-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-17",
-      "log": "build\\related-tests-17-2142.log",
+      "log": "build\\related-tests-17-2143.log",
       "status": "passed"
     },
     {
       "name": "related-tests-18",
-      "log": "build\\related-tests-18-2142.log",
-      "status": "passed"
-    },
-    {
-      "name": "related-tests-19",
-      "log": "build\\related-tests-19-2142.log",
-      "status": "passed"
-    },
-    {
-      "name": "related-tests-20",
-      "log": "build\\related-tests-20-2142.log",
-      "status": "passed"
-    },
-    {
-      "name": "related-tests-21",
-      "log": "build\\related-tests-21-2142.log",
+      "log": "build\\related-tests-18-2143.log",
       "status": "passed"
     },
     {
       "name": "check_world_transition_contract",
-      "log": "build\\check_world_transition_contract-2142.log",
+      "log": "build\\check_world_transition_contract-2143.log",
       "status": "passed"
     },
     {
       "name": "check_module_dependencies",
-      "log": "build\\check_module_dependencies-2142.log",
+      "log": "build\\check_module_dependencies-2143.log",
       "status": "passed"
     },
     {
       "name": "check_documentation",
-      "log": "build\\check_documentation-2142.log",
+      "log": "build\\check_documentation-2143.log",
       "status": "passed"
     },
     {
-      "name": "browser_natal_materials",
-      "log": "build\\browser_natal_materials-2142.log",
-      "status": "passed"
-    },
-    {
-      "name": "browser_content_naming",
-      "log": "build\\browser_content_naming-2142.log",
+      "name": "browser_upper_teachings",
+      "log": "build\\browser_upper_teachings-2143.log",
       "status": "passed"
     },
     {
       "name": "browser_events_212",
-      "log": "build\\browser_events_212-2142.log",
+      "log": "build\\browser_events_212-2143.log",
       "status": "passed"
     }
   ],
-  "save_transfer_log": "build/save-transfer-2142.log",
-  "inputs_sha256": "e1c2979a14cac7fe226aedfa393d6502290a39cf24c824cef41213f505eef97d",
+  "save_transfer_log": "build/save-transfer-2143.log",
+  "inputs_sha256": "4b80d44afc3f7c1419a63821ff862151c22cd4a55612c994475dbb04db2d7e80",
   "platform": "Windows",
-  "exe_sha256": "d505974c12877f63f1b0a5f25abbe207272c03d8d2961fe9d3e60676832d7b1a",
+  "exe_sha256": "bdfc4b4b157834fb53f91ae4b7e3ddb36a61d435ced4f6da40b7ea702acf0a83",
   "with_and_without_dlc_verified": true,
   "root_launcher_updated": true
 }

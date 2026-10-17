@@ -1340,6 +1340,46 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("#inventory-toggle");
                 }
                 result.putString("content_naming_scope","Four themes; original saved IDs, fixed catalog labels, custom names, native manual upgrade and starter use, exact stock and no time charge");
+            } else if(phase.equals("upper-teachings")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String buddhist=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'上界愿力原生验收',spirit_root:'supreme_wood',path:'buddhist',seed:2143,preset_id:'core'})});return g.id;})()");
+                    String sage=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'上界教化原生验收',spirit_root:'supreme_wood',path:'confucian',seed:2143,preset_id:'core'})});return g.id;})()");
+                    for(String world:new String[]{"celestial","asura","nether","reincarnation"}) {
+                        python(assetText("upper_teachings_release.py")+"\nfrom cultivation_life import server\nprepare_upper_teachings(server.ENGINE,"+JSONObject.quote(buddhist)+","+JSONObject.quote(world)+",'buddhist')");
+                        async("loadGame("+JSONObject.quote(buddhist)+")");
+                        js("document.documentElement.dataset.theme="+JSONObject.quote(theme)+";true");
+                        tapSelector("[data-panel-target=buddhist-wish]");
+                        check(Boolean.TRUE.equals(js("game.buddhist_system.wish.value===100 && !!game.buddhist_system.wish.blocked && game.player.layer===1")),"Upper wish retained, direct nirvana unavailable");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#buddhist-wish-content button').disabled && document.querySelector('#buddhist-wish-card').scrollWidth<=document.querySelector('#buddhist-wish-card').clientWidth+2")),"Upper wish disabled and bounded");
+                        capture("upper-teachings-"+world+"-wish-"+theme+"-"+arguments.getString("orientation","portrait"));
+                        tapSelector("[data-panel-target=buddhist]");
+                        tapSelector(".dharma-blessing");
+                        waitForJs("!busy && game.buddhist_system.blessings[0].selected","Native upper local blessing");
+                        python(assetText("upper_teachings_release.py")+"\nfrom cultivation_life import server\nprepare_upper_teachings(server.ENGINE,"+JSONObject.quote(sage)+","+JSONObject.quote(world)+",'confucian')");
+                        async("loadGame("+JSONObject.quote(sage)+")");
+                        tapSelector("[data-panel-target=sage]");
+                        check(Boolean.TRUE.equals(js("game.sage_system.teaching_available && game.sage_system.world==="+JSONObject.quote(world))),"Current upper teaching world");
+                        tapSelector("#sage-doctrine-list .sage-doctrine > button");
+                        waitForJs("!busy && !!game.sage_system.membership_id","Native join original local doctrine");
+                        check(Boolean.TRUE.equals(js("document.querySelectorAll('.sage-action-card').length===3")),"Three upper teaching actions");
+                        tapSelector("[data-panel-target=sage-inner-outer]");
+                        tapSelector("#sage-manual-list .sage-inner-outer-action[data-available='1']");
+                        tapSelector("#game-confirm-accept");
+                        waitForJs("!busy && game.player.haoran_exp>1000000","Native upper classic real grade and gain");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#sage-outer-list .sage-outer-card:first-child button').disabled")),"Upper direct outer advancement disabled");
+                        js("window.__upperOpportunityBefore=game.player.opportunity;true");
+                        tapSelector("#sage-outer-list .sage-outer-card:last-child button");
+                        tapSelector("#game-confirm-accept");
+                        waitForJs("!busy && game.player.opportunity>window.__upperOpportunityBefore && game.player.layer===1","Native upper outer opportunity without advancement");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#sage-inner-outer-card').scrollWidth<=document.querySelector('#sage-inner-outer-card').clientWidth+2")),"Upper sage bounded panel");
+                        capture("upper-teachings-"+world+"-sage-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    }
+                    python(assetText("upper_teachings_release.py")+"\nfrom cultivation_life import server\ng=prepare_upper_teachings(server.ENGINE,"+JSONObject.quote(buddhist)+",'celestial','buddhist')\ng.player.immortal_veins={}\nserver.ENGINE.store.save(g)");
+                    async("loadGame("+JSONObject.quote(buddhist)+")");
+                    tapSelector("[data-panel-target=buddhist-wish]");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#buddhist-wish-content button').disabled && game.buddhist_system.wish.value===100")),"Upper native nirvana remains disabled without spending wish");
+                }
+                result.putString("upper_teachings_scope","Both DLCs, four upper worlds, wish retained and direct advancement disabled; native local blessing, join school, upper classics and outer opportunity; four themes");
             } else if(phase.equals("natal-materials")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'十一界镶材原生验收',spirit_root:'supreme_metal',path:'dao',seed:2142,preset_id:'core'})});return g.id;})()");
