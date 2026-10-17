@@ -79,7 +79,7 @@ def definitions(profiles, purity_caps):
                     limits = [{'source':{'id':key,'op':'<=','level':value}}
                               for key,value in purity_caps.get(path,{}).items()]
                     requirement = {'all':[source_requirement,*limits]} if limits else source_requirement
-                    technique = dict(id=identity, name=title+names[i], path=path,
+                    technique = dict(id=identity, name=names[i], path=path,
                                      element='five_elements' if len(roots)==5 else roots[0] if roots else 'neutral',
                                      grade=grade, level=1, category='spiritual', growth_preference=role,
                                      opportunity_bonus=round(ATTRIBUTES[grade-1]*weights[0]*premium,6),

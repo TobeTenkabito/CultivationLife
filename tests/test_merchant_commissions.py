@@ -65,12 +65,18 @@ def test_supply_board_material_categories_consume_correct_bag(setup):
     assert saved.player.crafting_materials and saved.merchant_state['active'] is None
 
 
-def test_jinque_local_delivery_and_no_unlinked_targets(setup):
+def test_root_books_rejected_before_payment_and_no_unlinked_targets(setup):
     engine, game, local = setup
     payload={'kind':'item','source_world':'human','definition_id':'jinque_metal','quantity':2}
+    before = copy.deepcopy(game.to_dict())
+    with pytest.raises(ValueError):
+        engine._merchant_post(game,local,payload)
+    assert game.to_dict() == before
+    assert not any(i['id'] == 'jinque_metal' for i in engine._merchant_items('human'))
+    payload['definition_id'] = 'secret_manual_water'
     engine._merchant_post(game,local,payload)
     complete(engine,game)
-    assert next(row for row in game.player.inventory if row.id=='jinque_metal').quantity==2
+    assert next(row for row in game.player.inventory if row.id=='secret_manual_water').quantity==2
     game.player.world='true_demon'
     for key in ('jiukun', 'xuanji'):
         alliance=engine._merchant_alliance(game,'true_demon',key)
@@ -184,11 +190,11 @@ def test_debug_endpoint_requires_runtime_switch(setup, tmp_path):
 def test_removed_item_content_cancels_and_refunds_without_crashing_year(setup):
     from cultivation_life.content_registry import ITEM_CATALOG
     engine,game,alliance=setup
-    engine._merchant_post(game,alliance,{'kind':'item','definition_id':'jinque_metal'})
+    engine._merchant_post(game,alliance,{'kind':'item','definition_id':'secret_manual_water'})
     order=game.merchant_state['posted'][-1]
     balance=next(row.quantity for row in game.player.inventory if row.id=='spirit_stone')
     with patch.dict(ITEM_CATALOG):
-        del ITEM_CATALOG['jinque_metal']
+        del ITEM_CATALOG['secret_manual_water']
         game.player.age+=1
         engine._advance_merchant_year(game)
     assert order['status']=='cancelled'

@@ -1340,6 +1340,47 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("#inventory-toggle");
                 }
                 result.putString("content_naming_scope","Four themes; original saved IDs, fixed catalog labels, custom names, native manual upgrade and starter use, exact stock and no time charge");
+            } else if(phase.equals("secret-arts")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'秘术原生验收',spirit_root:'supreme_metal',path:'dao',seed:2150})});return g.id;})()");
+                    python(assetText("secret_arts_release.py")+"\nfrom cultivation_life import server\nprepare_secret_arts(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.documentElement.dataset.theme="+JSONObject.quote(theme)+";true");
+                    tapSelector("[data-panel-target=secret-art]");
+                    if(Boolean.TRUE.equals(js("getComputedStyle(document.querySelector('#secret-art-back')).display!=='none' && document.querySelector('#secret-art-card').dataset.secretView==='detail'"))) tapSelector("#secret-art-back");
+                    js("document.querySelector('#secret-art-search').value='';document.querySelector('#secret-art-search').dispatchEvent(new Event('input',{bubbles:true}));true");
+                    tapSelector("#secret-tab-known");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('#secret-art-library .secret-art-entry').length===4")),"Only acquired native secret arts appear");
+                    tapSelector("#secret-tab-potential");
+                    check(Boolean.TRUE.equals(js("document.querySelectorAll('#secret-art-library .secret-art-entry').length===6 && !document.querySelector('.secret-art-command')")),"Potential arts guide without unowned action buttons");
+                    tapSelector("#secret-tab-known");
+                    capture("secret-arts-catalog-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    js("document.querySelector('#secret-art-search').value='玄水';document.querySelector('#secret-art-search').dispatchEvent(new Event('input',{bubbles:true}));true");
+                    tapSelector("[data-secret-art=root_water]");
+                    check(Boolean.TRUE.equals(js("document.querySelector('.secret-art-facts').textContent.includes('不限')")),"Secret arts have no rank gate");
+                    tapSelector(".secret-art-command");
+                    waitForJs("!busy && game.secret_arts.library.find(a=>a.id==='root_water').learned","Native independent learning");
+                    js("document.querySelector('#secret-art-material').value='item:secret_core_water_4';true");
+                    tapSelector(".secret-art-command");
+                    waitForJs("!busy && game.player.additional_roots.includes('water')","Native actual timed root grafting");
+                    python(assetText("secret_arts_release.py")+"\nfrom cultivation_life import server\ninspect_secret_arts(server.ENGINE,"+JSONObject.quote(id)+")");
+                    capture("secret-arts-completed-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    if(Boolean.TRUE.equals(js("getComputedStyle(document.querySelector('#secret-art-back')).display!=='none'"))) tapSelector("#secret-art-back");
+                    js("document.querySelector('#secret-art-search').value='离火';document.querySelector('#secret-art-search').dispatchEvent(new Event('input',{bubbles:true}));true");
+                    tapSelector("[data-secret-art=root_fire]");
+                    python(assetText("secret_arts_release.py")+"\nfrom cultivation_life import server\npending_secret_art_event(server.ENGINE,"+JSONObject.quote(id)+")");
+                    tapSelector(".secret-art-command");
+                    waitForJs("!busy && !!game.pending_event","Native stale secret-art page recovered");
+                    check(Boolean.TRUE.equals(js("document.querySelector('.secret-art-command').disabled && !game.secret_arts.library.find(a=>a.id==='root_fire').study_progress")),"Stale native study has no charge or progress");
+                    tapSelector("#secret-art-toggle");
+                    tapSelector("#event-choices button:first-child");
+                    waitForJs("!busy && !game.pending_event","Native event completed");
+                    tapSelector("[data-panel-target=secret-art]");
+                      waitForPanelReady("#secret-art-card");
+                    check(Boolean.TRUE.equals(js("!document.querySelector('.secret-art-command').disabled && document.querySelector('#secret-art-card').scrollWidth<=document.querySelector('#secret-art-card').clientWidth+2")),"Native secret-art state recovered and fits");
+                    tapSelector("#secret-art-toggle");
+                }
+                result.putString("secret_arts_scope","Independent source/time/resource settlement, low-rank learning, exact material consumption, stale-event recovery and bounded catalog; four themes");
             } else if(phase.equals("common-techniques")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'通用功法原生验收',spirit_root:'supreme_metal',path:'dao',seed:2144,preset_id:'core'})});return g.id;})()");

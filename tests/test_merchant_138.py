@@ -56,7 +56,7 @@ def test_star_quality_and_cost_improve_with_same_materials_and_mold(setup):
 
 def test_high_star_procurement_adds_other_goods_and_legacy_does_not(setup):
     engine, game, alliance = setup
-    item = 'jinque_metal'
+    item = 'secret_manual_water'
     engine._merchant_post(game, alliance, {'kind':'item','definition_id':item,'quantity':2,'stars':5})
     order = complete(engine, game)
     assert len(order['bonus_items']) == 4

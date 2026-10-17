@@ -1546,6 +1546,7 @@ function renderSecretArts(system) {
   $('#secret-suppress-activate').dataset.available = targets.length && !suppression.active && !system.suppression_block_reason ? '1' : '0';
   $('#secret-suppress-cancel').dataset.available = suppression.active && !system.suppression_block_reason ? '1' : '0';
   $('#secret-suppress-activate').title = $('#secret-suppress-cancel').title = system.suppression_block_reason || '';
+  window.SecretArtPanel?.render(system, payload => mutate(`/api/games/${game.id}/secret-art`, payload));
 }
 
 function renderSageSystem(system) {
@@ -3170,6 +3171,7 @@ function renderInventory(items) {
     ['丹药与突破材料', item => item.breakthrough_bonus > 0 || item.tags?.includes('pill') || item.tags?.includes('breakthrough')],
     ['灵植与种子', item => item.tags?.includes('spirit_plant') || item.tags?.includes('seed')],
     ['灵根法门', item => item.tags?.includes('root_manual')],
+    ['秘法传承', item => item.tags?.includes('secret_art_manual')],
     ['法宝与装备', item => item.combat_bonus > 0 || item.tags?.includes('artifact') || item.tags?.includes('equipment')],
     ['灵石与货币', item => item.tags?.includes('currency')],
     ['剧情信物', item => item.tags?.some(tag => ['story', 'key', 'contract'].includes(tag))],
@@ -3249,6 +3251,11 @@ function renderInventory(items) {
     const guixuUse = item.tags?.includes('guixu_consumable') || (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant'));
     const economicMedicine = (item.tags || []).some(tag => ['economic_use:healing','economic_use:cultivation','economic_use:longevity'].includes(tag));
     const normalUse = economicMedicine || item.id === 'qilin_blessing_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
+    if (item.tags?.includes('secret_art_manual')) {
+      const browse=document.createElement('button');browse.textContent='参阅秘法';
+      browse.onclick=()=>{window.SecretArtPanel?.select(item.tags.find(t=>t.startsWith('secret_art:')).slice(11));window.UtilityPanels?.open('secret-art');};
+      row.appendChild(browse);
+    }
     if (!artifact && (trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
       if (item.tags?.includes('guixu_tide') && item.tags?.includes('spirit_plant')) use.textContent = '炼化';
@@ -4192,6 +4199,7 @@ function renderButtons() {
   });
   document.querySelectorAll('#secret-art-card button, #secret-art-card select').forEach(control => {
     if (control.id === 'secret-art-toggle') return;
+    if (control.closest('.secret-directory,.secret-library-tools,.secret-library-tabs') || control.id === 'secret-art-back') return;
     const cancelling = control.id.endsWith('-cancel');
     control.disabled = busy || !game?.player?.alive || control.dataset.available === '0'
       || (!cancelling && (!!game?.pending_event || !!game?.imprisonment || !!game?.trial?.active));

@@ -1,5 +1,6 @@
 """Explicit personal capabilities inside isolated spaces; geography stays local."""
 PERSONAL_COMMANDS = frozenset({
+    'train_secret_art',
     'contact_action', 'manage_dao_companion', 'manage_dao_friend',
     'manage_party', 'leave_relationship', 'request_from_master', 'gift_disciple',
     'respond_disciple_request', 'relationship_violence', 'begin_relationship_capture',

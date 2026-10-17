@@ -381,6 +381,7 @@ class Player:
     combat_techniques: list[Technique] = field(default_factory=list)
     known_techniques: list[Technique] = field(default_factory=list)
     additional_roots: list[str] = field(default_factory=list)
+    secret_art_state: dict[str, Any] = field(default_factory=dict)
     inventory: list[Item] = field(default_factory=list)
     alive: bool = True
     death_reason: str | None = None
@@ -763,6 +764,8 @@ class Player:
             0.0, min(0.95, float(data.get("next_companion_conception_bonus", 0.0)))
         )
         saved_concealment = data.get("cultivation_concealment")
+        from .secret_art_schema import decode_state as decode_secret_arts
+        data['secret_art_state'] = decode_secret_arts(data.get('secret_art_state'))
         data["cultivation_concealment"] = (
             {
                 "realm_index": max(0, int(saved_concealment.get("realm_index", 0))),

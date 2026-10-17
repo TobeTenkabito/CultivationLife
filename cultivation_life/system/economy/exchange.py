@@ -70,6 +70,18 @@ def _open_exchange(deps: ExchangeDependencies, game, rng):
                           unit_value=int(wanted['base_material_value']))],
             demand_value=quantity * int(wanted['base_material_value']), completed=False, substitution_attempted=False))
     state.update(status="open", remaining=2, offers=offers)
+    from ...content_registry import ROOT_BOOK_GOODS, ITEM_CATALOG
+    books = [r for r in ROOT_BOOK_GOODS if r['world'] == state['world'] and r['tier'] <= max(4, tier + 1)]
+    for index, book in enumerate(rng.sample(books, min(2, len(books)))):
+        wanted = rng.choice(eligible)
+        value = int(book['price'])
+        quantity = max(1, math.ceil(value / int(wanted['base_material_value'])))
+        offers.append(dict(id=f"{state['id']}-root-{index}", npc_alias='阙书客',
+            reward={'name': ITEM_CATALOG[book['content_id']].name}, reward_kind='root_book',
+            item_id=book['content_id'], reward_value=value,
+            demands=[dict(definition_id=wanted['id'], name=wanted['name'], quantity=quantity,
+                          unit_value=int(wanted['base_material_value']))],
+            demand_value=quantity * int(wanted['base_material_value']), completed=False, substitution_attempted=False))
 
 
 def _advance_exchange_clock(deps: ExchangeDependencies, game, rng):
@@ -132,6 +144,10 @@ def exchange_action(deps: ExchangeDependencies, game_id: str, action: str, paylo
         offer = next((x for x in state["offers"] if x["id"] == payload.get("offer_id")), None)
         if not offer or offer["completed"]:
             raise ValueError("这项交换已经结束")
+        if offer.get('reward_kind') == 'root_book':
+            from ...content_registry import ROOT_BOOK_GOODS
+            if not any(r['world'] == game.player.world and r['content_id'] == offer.get('item_id') for r in ROOT_BOOK_GOODS):
+                raise ValueError('交换书卷不属于当前会场')
         materials = {x["id"]: x for x in deps._exchange_materials(game)}
         selected = payload.get("materials", [])
         if not isinstance(selected, list) or not selected or len(selected) > 999:
@@ -169,7 +185,10 @@ def exchange_action(deps: ExchangeDependencies, game_id: str, action: str, paylo
                 else:
                     bag = game.player.crafting_materials if material["kind"] == "crafting" else game.player.formation_materials
                     bag[:] = [x for x in bag if x["id"] != key]
-            if offer.get('reward_kind') == 'spirit_manual':
+            if offer.get('reward_kind') == 'root_book':
+                from ...rules import add_item
+                add_item(game.player, offer['item_id'])
+            elif offer.get('reward_kind') == 'spirit_manual':
                 from ..spirit_voisinage import grant
                 grant(game, offer['manual_id'])
             else:

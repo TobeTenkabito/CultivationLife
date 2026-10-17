@@ -100,7 +100,7 @@
 | `transformation <form_id> <action>` | `transformation` | simulation |
 | `body breakthrough` | `body-breakthrough` | simulation |
 | `sense breakthrough` | `sense-breakthrough` | simulation |
-| `secret art <art> <action> [realm_index] [layer]` | `secret-art` | simulation |
+| `secret art <art> <action> [realm_index] [layer] [revision] [years] [material_id]` | `secret-art` | simulation |
 | `ghost reincarnate` | `ghost-reincarnate` | simulation |
 | `ghost reincarnation prompt` | `ghost-reincarnation-prompt` | simulation |
 | `ghost wangsheng [all]` | `ghost-wangsheng` | simulation |

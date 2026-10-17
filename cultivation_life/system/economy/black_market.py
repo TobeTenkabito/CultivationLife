@@ -8,7 +8,7 @@ from ...rules import add_item, remove_item
 from .dependencies import BlackMarketDependencies
 
 
-from ...content_registry import MARKET_GOODS
+from ...content_registry import MARKET_GOODS, ROOT_BOOK_GOODS, ITEM_CATALOG
 from ...content_registry import REALMS
 import random
 import re
@@ -33,7 +33,9 @@ def buy_black_market_item(deps: BlackMarketDependencies, game_id: str, result_id
         product = result.get('talisman_instance')
         if not recipe or not isinstance(product, dict) or product.get('origin_world') != game.player.world or product.get('method_id') != recipe['id']:
             raise ValueError('这件符箓不属于当前界面的流通范围')
-    if not spirit and not talisman and not deps._is_world_market_good(
+    root_book = any(row['world'] == game.player.world and row['content_id'] == result.get('content_id')
+                    for row in ROOT_BOOK_GOODS) and result.get('kind') == 'item'
+    if not spirit and not talisman and not root_book and not deps._is_world_market_good(
         game.player.world, str(result.get("kind", "")), str(result.get("content_id", "")),
     ):
         raise ValueError("这件货物不属于当前世界的流通范围")
@@ -159,7 +161,7 @@ def search_black_market(deps: BlackMarketDependencies, game_id: str, pattern: st
     except re.error as error:
         raise ValueError(f"正则表达式无效：{error}") from error
     unique: dict[tuple[str, str], dict[str, Any]] = {}
-    for row in MARKET_GOODS:
+    for row in (*MARKET_GOODS, *ROOT_BOOK_GOODS):
         if row.get("world", "human") == game.player.world:
             unique[(str(row["kind"]), str(row["content_id"]))] = dict(row)
     # Material stalls are generated outside MARKET_GOODS because each
@@ -236,7 +238,8 @@ def search_black_market(deps: BlackMarketDependencies, game_id: str, pattern: st
             "id":f"black-{kind}-{content_id}", "kind":kind, "content_id":content_id,
             "name":name, "description":description, "tier":int(row["tier"]),
             "tier_name":REALMS[int(row["tier"])].name,
-            "price":max(1, round(deps._catalog_price(kind, content_id) * multiplier)),
+            "price":max(1, round((int(row['price']) if kind == 'item' and ITEM_CATALOG[content_id].root_grant
+                                  else deps._catalog_price(kind, content_id)) * multiplier)),
         })
     for row in material_rows:
         if not matcher.search(f"{row['name']} {row['description']}"):

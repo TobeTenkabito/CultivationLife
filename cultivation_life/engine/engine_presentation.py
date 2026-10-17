@@ -153,6 +153,8 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         lower_name = WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world)
         player_data["realm_name"] += f"（{lower_name}压制；真实{player_data['true_realm_name']}）"
     secret_arts = deps._public_secret_arts(game.player)
+    from ..system.secret_arts import project as project_secret_arts
+    secret_arts.update(project_secret_arts(game))
     if game.player.cultivation_suppression:
         player_data["true_realm_name"] = secret_arts["true_realm_name"]
         player_data["realm_name"] += f"（秘法压制；原修为{secret_arts['true_realm_name']}）"

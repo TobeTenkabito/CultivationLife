@@ -133,6 +133,7 @@ def bind_encounter_actions(engine: GameEngine) -> EncounterActionDependencies:
         _player_intrinsic_combat_power=lambda *args, **kwargs: engine._player_intrinsic_combat_power(*args, **kwargs),
         _player_protected_npc_ids=lambda *args, **kwargs: engine._player_protected_npc_ids(*args, **kwargs),
         _promote_cached_npc=lambda *args, **kwargs: engine._promote_cached_npc(*args, **kwargs),
+        _random_npc_root=lambda *args, **kwargs: engine._random_npc_root(*args, **kwargs),
         _record_world_coalition_amnesty=lambda *args, **kwargs: engine._record_world_coalition_amnesty(*args, **kwargs),
         _remember_faction_prison_release=lambda *args, **kwargs: engine._remember_faction_prison_release(*args, **kwargs),
         _sage_scaled_gain=lambda *args, **kwargs: engine._sage_scaled_gain(*args, **kwargs),

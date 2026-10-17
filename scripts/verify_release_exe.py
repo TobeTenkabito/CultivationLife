@@ -422,6 +422,8 @@ def verify(with_dlc):
             verify_upper_teachings(base,folder,with_dlc)
             from scripts.verify_common_techniques import verify_common_techniques
             verify_common_techniques(base,folder)
+            from scripts.verify_secret_arts import verify_secret_arts
+            verify_secret_arts(base,folder)
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds={len(config['worlds'])}")
             return {'with_dlc': with_dlc, 'exe_sha256': verified_digest,
                     'base_version': config['base_game']['version']}
