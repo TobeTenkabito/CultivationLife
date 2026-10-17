@@ -179,7 +179,7 @@ def advance_member(game,entity,npc):
     identity=state['books'][cursor]
     if not eligible(entity,identity): return
     t=TECHNIQUE_CATALOG[identity]; offer=offers(entity.world,t.path)[identity]
-    if t.path!=npc.path or offer['grade']>npc.realm_index or not can_practice_technique(npc.spirit_root,t.element): return
+    if t.path!=npc.path or offer['grade']>npc.realm_index or not can_practice_technique(npc.spirit_root,t): return
     level=levels.get(identity,0)
     if level>=9: return
     if level:

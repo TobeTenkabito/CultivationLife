@@ -8,6 +8,7 @@ from typing import Any
 from ...content_identifiers import canonical_content_id
 from ...content_registry import (
     restricted_acquisition,
+    natural_market_acquisition_allowed,
     ITEM_CATALOG,
     REALMS,
     TECHNIQUE_CATALOG,
@@ -275,6 +276,8 @@ def buy_market_offer(deps: InventoryDependencies, game_id: str, offer_id: str) -
         raise ValueError("该货物已经售出或不在本期坊市")
     if restricted_acquisition(str(offer["kind"]), str(offer["content_id"])):
         raise ValueError("此物只能通过其专属来源获得，不能在坊市购买")
+    if not natural_market_acquisition_allowed(str(offer["kind"]), str(offer["content_id"])):
+        raise ValueError("该功法不在坊市直售范围，请通过其他途径获取")
     if offer.get("world", "human") != game.player.world:
         raise ValueError("此物不属于当前世界的坊市货池")
     from ...system.economy.local_market import pay_shelf, shelf_price, require_access

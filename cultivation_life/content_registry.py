@@ -1382,6 +1382,10 @@ class ContentRegistry:
             ):
                 raise ContentError(f"真灵素材 {item.id} 的形态、来源或纯度不合法")
         for technique in techniques.values():
+            if (not isinstance(technique.required_affinities, list)
+                    or any(not isinstance(root, str) or root not in affinities - {'neutral', 'sex', 'five_elements'} for root in technique.required_affinities)
+                    or len(set(technique.required_affinities)) != len(technique.required_affinities)):
+                raise ContentError(f"功法 {technique.id} 的所需灵根必须是互不重复的五行或变异属性")
             if technique.growth_preference not in {"balanced", "main", "support", "combat"}:
                 raise ContentError(f"功法 {technique.id} 的成长倾向未知")
             if technique.element not in affinities or technique.path not in paths:
@@ -1816,6 +1820,20 @@ def restricted_acquisition(kind: str, content_id: str) -> bool:
     if kind == "technique":
         return content_id in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
     return content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "qilin_blessing_elixir"
+
+
+def natural_market_acquisition_allowed(kind: str, content_id: str) -> bool:
+    """Only ordinary shop shelves exclude all-five and multi-mutation arts."""
+    if restricted_acquisition(kind, content_id):
+        return False
+    if kind != "technique":
+        return True
+    technique = TECHNIQUE_CATALOG.get(content_id)
+    if technique is None or technique.element == "five_elements":
+        return False
+    roots = set(technique.required_affinities)
+    return (not {"metal", "wood", "water", "fire", "earth"} <= roots
+            and len(roots & {"wind", "thunder", "yin", "yang"}) < 2)
 
 
 MARKET_GOODS = tuple(row for row in CONTENT.market_goods

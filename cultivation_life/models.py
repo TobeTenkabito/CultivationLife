@@ -113,6 +113,7 @@ class Technique:
     effective_worlds: list[str] = field(default_factory=list)
     force_tier: int = 1
     combat_interventions: list[dict[str, Any]] = field(default_factory=list)
+    required_affinities: list[str] = field(default_factory=list)
 
     def active_in(self, world: str) -> bool:
         return not self.effective_worlds or world in self.effective_worlds

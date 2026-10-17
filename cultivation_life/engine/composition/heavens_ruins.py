@@ -28,7 +28,7 @@ def bind_ruins(engine):
         if entry is None and (p.world != 'human' or p.location_id != location or scene):
             entry = '须在人界无棣原亲自进入'
         equipped = [row for row in [p.technique, *(p.combat_techniques or [])] if row]
-        combat_reason = '灵根属性与已装备功法不合，须先调整战斗预案' if any(not can_player_practice_technique(p, row.element) for row in equipped) else None
+        combat_reason = '灵根属性与已装备功法不合，须先调整战斗预案' if any(not can_player_practice_technique(p, row) for row in equipped) else None
         return dict(alive=p.alive, inside=inside, blocked_reason=reason or ('请先处理当前事件' if game.pending_event else None),
                     physical_reason=activity, activity_reason=activity, entry_reason=entry, mp=p.mp, max_mp=max_mp(p),
                     combat_reason=combat_reason, stones=sum(row.quantity for row in p.inventory if row.id == 'spirit_stone'))

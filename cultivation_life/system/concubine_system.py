@@ -313,7 +313,7 @@ class ConcubineSystemMixin:
         return [
             technique_id for technique_id, technique in TECHNIQUE_CATALOG.items()
             if technique.grade <= max(1, owner.realm_index + 1)
-            and can_player_practice_technique(player, technique.element)
+            and can_player_practice_technique(player, technique)
             and all(known.id != technique_id for known in player.known_techniques)
             and technique_id not in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
         ]

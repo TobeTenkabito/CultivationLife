@@ -220,7 +220,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             game.heavenly_court["wanted_ids"].append("player")
             player.milestones["became_wanted_target"] = 1
     equipped = [entry for entry in [player.technique, *(player.combat_techniques or [])] if entry]
-    if any(not can_player_practice_technique(player, entry.element) for entry in equipped):
+    if any(not can_player_practice_technique(player, entry) for entry in equipped):
         return "technique_blocked", "灵根属性与五行功法不合，无法运转功法迎战。"
 
     hp_max = max_hp(player)
