@@ -8,6 +8,7 @@ from ..combat_rule_engine import BattleRuleRuntime, evaluate_rules, prepare_rule
 from ..content_registry import MONSTER_BLOODLINE_SETTINGS
 from .custom_lineage_system import evaluate_custom_lineage_rules
 from ..models import Player, Technique
+from ..rules import can_player_practice_technique
 from .ghost_system import active_generated_soul_traits, active_soul_traits, ghost_soul_effects
 from ..ghost_soul_traits import evaluate_generated_soul_traits
 from ..monster_bloodline_traits import (
@@ -782,6 +783,7 @@ class PlayerCombatSystem:
             usable_combat_techniques = [
                 art for art in player.combat_techniques
                 if art.active_in(player.world)
+                and can_player_practice_technique(player, art)
                 and (not art.requires_immortal_power or player.immortal_power_converted)
             ]
             burst = bool(
@@ -1622,7 +1624,8 @@ class PlayerCombatSystem:
                 *player.combat_techniques,
             ]
             total_power = max(1.0, sum(unit.power for unit in units))
-            for technique in (entry for entry in techniques if entry and entry.active_in(player.world)):
+            for technique in (entry for entry in techniques if entry and entry.active_in(player.world)
+                              and can_player_practice_technique(player, entry)):
                 cls._apply_technique(stats, technique, total_power)
             body_bonus = min(0.22, max(0, player.body_training) * 0.0022)
             sense_bonus = min(0.28, max(0, player.divine_sense_rank) * 0.018)

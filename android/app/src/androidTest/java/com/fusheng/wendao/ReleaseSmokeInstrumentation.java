@@ -1340,6 +1340,49 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("#inventory-toggle");
                 }
                 result.putString("content_naming_scope","Four themes; original saved IDs, fixed catalog labels, custom names, native manual upgrade and starter use, exact stock and no time charge");
+            } else if(phase.equals("common-techniques")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'通用功法原生验收',spirit_root:'supreme_metal',path:'dao',seed:2144,preset_id:'core'})});return g.id;})()");
+                    python(assetText("common_techniques_release.py")+"\nfrom cultivation_life import server\nprepare_common_techniques(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.documentElement.dataset.theme="+JSONObject.quote(theme)+";true");
+                    tapSelector("[data-panel-target=market]");
+                    check(Boolean.TRUE.equals(js("!document.querySelector('.market-buy[data-offer-id=old-rare-art]')")),"Rare art excluded from native shelf");
+                    js("window.__shopBefore=game.market.spirit_stones;game.market.offers.push({id:'old-rare-art',kind:'technique',name:'旧坊市传承',price:100,tier_name:'练气',description:'旧页面',compatible:true,sold:false,locked:false,market_group:'general'});renderMarket(game.market);true");
+                    tapSelector(".market-buy[data-offer-id=old-rare-art]");
+                    waitForJs("!busy && !game.market.offers.some(o=>o.id==='old-rare-art')","Stale native shelf recovered");
+                    check(Boolean.TRUE.equals(js("game.market.spirit_stones===window.__shopBefore")),"Rejected rare purchase never charged");
+                    tapSelector(".market-buy[data-offer-id=ordinary-art]");
+                    waitForJs("!busy && game.player.known_techniques.some(t=>t.id==='TECH_OPEN_SONGCHUANG_METAL_COMBAT')","Native ordinary art purchase");
+                    check(Boolean.TRUE.equals(js("game.market.spirit_stones===window.__shopBefore-100")),"Ordinary native purchase charged once");
+                    tapSelector("#market-toggle");
+                    tapSelector(".hud-identity");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('.technique-library').open"))) tapSelector(".technique-library > summary");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#known-technique-list .known-technique:first-child .technique-equip').disabled && document.querySelector('#known-technique-list').textContent.includes('金、水（须全部具备）')")),"All-root native gate");
+                    tapSelector("[data-close-dialog=player-details-dialog]");
+                    tapSelector("[data-panel-target=inventory]");
+                    js("Array.from(document.querySelectorAll('#inventory-card .item')).find(e=>e.textContent.includes(game.player.inventory.find(i=>i.id==='jinque_water').name)).querySelector('.item-use').id='common-root-use';true");
+                    tapSelector("#common-root-use");
+                    waitForJs("!busy && game.player.additional_roots.includes('water')","Native root supplement");
+                    tapSelector("#inventory-toggle");
+                    tapSelector(".hud-identity");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('.technique-library').open"))) tapSelector(".technique-library > summary");
+                    tapSelector("#known-technique-list .known-technique:first-child .technique-equip");
+                    waitForJs("!busy && game.player.technique?.id==='TECH_OPEN_SONGCHUANG_METAL_WATER_MAIN'","Native combined-root equip");
+                    tapSelector("#known-technique-list .known-technique:first-child .technique-upgrade");
+                    waitForJs("!busy && game.player.technique.level===2","Native real manual consumption and upgrade");
+                    capture("common-techniques-upgrade-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    python(assetText("common_techniques_release.py")+"\nfrom cultivation_life import server\nlose_common_technique_root(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    if(!Boolean.TRUE.equals(js("document.querySelector('#player-details-dialog').open"))) tapSelector(".hud-identity");
+                    js("document.querySelector('#technique-list').closest('details').querySelector('summary').id='common-config-summary';true");
+                    if(Boolean.TRUE.equals(js("!document.querySelector('#technique-list').closest('details').open"))) tapSelector("#common-config-summary");
+                    check(Boolean.TRUE.equals(js("game.player.technique_slots.main.root_requirement_met===false && document.querySelector('#technique-list').textContent.includes('当前失效')")),"Root loss disables original art without deleting it");
+                    check(Boolean.TRUE.equals(js("document.querySelector('#player-details-dialog').scrollWidth<=document.querySelector('#player-details-dialog').clientWidth+2")),"Bounded native combined-root UI");
+                    capture("common-techniques-root-lost-"+theme+"-"+arguments.getString("orientation","portrait"));
+                    tapSelector("[data-close-dialog=player-details-dialog]");
+                }
+                result.putString("common_techniques_scope","All-root eligibility, real root item/equip/upgrade, stale shop rejection/recovery and ordinary purchase, root-loss disable without losing books; four themes");
             } else if(phase.equals("upper-teachings")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String buddhist=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'上界愿力原生验收',spirit_root:'supreme_wood',path:'buddhist',seed:2143,preset_id:'core'})});return g.id;})()");

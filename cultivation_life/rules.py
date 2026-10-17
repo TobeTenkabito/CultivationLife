@@ -478,7 +478,8 @@ def raw_external_hp_bonus(player: Player) -> float:
     from .system.crafted_artifact_rules import crafted_artifact_bonuses
     reference = intrinsic_hp_reference(player)
     support_bonus = 0.0
-    if player.support_technique and player.support_technique.active_in(player.world):
+    if (player.support_technique and player.support_technique.active_in(player.world)
+            and can_player_practice_technique(player, player.support_technique)):
         support_bonus = (
             player.support_technique.hp_bonus * technique_scale(player.support_technique, "hp_bonus")
             * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
@@ -501,7 +502,8 @@ def raw_external_mp_bonus(player: Player) -> float:
     from .system.crafted_artifact_rules import crafted_artifact_bonuses
     reference = intrinsic_mp_reference(player)
     support_bonus = 0.0
-    if player.support_technique and player.support_technique.active_in(player.world):
+    if (player.support_technique and player.support_technique.active_in(player.world)
+            and can_player_practice_technique(player, player.support_technique)):
         support_bonus = (
             player.support_technique.mp_bonus * technique_scale(player.support_technique, "mp_bonus")
             * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
@@ -584,6 +586,7 @@ def combat_power(player: Player) -> float:
         * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
         for entry in player.combat_techniques
         if combat_requirement_met(entry.combat_requirements, current_qi_levels)
+        and can_player_practice_technique(player, entry)
         and entry.active_in(player.world)
         and (not entry.requires_immortal_power or player.immortal_power_converted)
     )
@@ -797,7 +800,8 @@ def opportunity_multiplier(
 ) -> float:
     """原有效率保持独立，最后仅为当前主修乘上所在界面的气环境倍率。"""
     root_efficiency = root_definition(player.spirit_root)["efficiency"]
-    if player.technique is None and not allow_untrained:
+    if (player.technique is None and not allow_untrained
+            or player.technique is not None and not can_player_practice_technique(player, player.technique)):
         return 0.0
     main_bonus = (
         player.technique.opportunity_bonus * technique_scale(player.technique, "opportunity_bonus")
@@ -960,6 +964,7 @@ def public_player(player: Player) -> dict[str, Any]:
             return None
         result = dict(technique.__dict__)
         result['affinity_requirement_display'] = technique_affinity_display(technique)
+        result['root_requirement_met'] = can_player_practice_technique(player, technique)
         result['special_effect_description'] = technique_special_effect(technique)
         level_multiplier = technique.level_multiplier
         effect_multiplier = technique_scale(technique)

@@ -102,11 +102,20 @@ def main():
                             saved=engine._load(game.id)
                             assert saved.player.technique.required_affinities==['metal','water']
                             assert not any(i.technique_id==art.id for i in saved.player.inventory)
+                            saved.player.additional_roots=[];engine.store.save(saved)
+                            page.evaluate('async id=>loadGame(id)',game.id)
+                            assert not page.evaluate('game.player.technique_slots.main.root_requirement_met')
+                            if not page.locator('#player-details-dialog').evaluate('e=>e.open'):
+                                click_control(page.locator('.hud-identity'))
+                            details=page.locator('#technique-list').locator('xpath=ancestor::details[1]')
+                            if not details.evaluate('e=>e.open'):click_control(details.locator('summary'))
+                            assert '灵根不符' in page.locator('#technique-list').inner_text()
+                            page.screenshot(path=str(output/f'root-lost-{width}.png'))
                             assert not errors,errors
                             page.close()
                     finally:browser.close()
             finally:http.shutdown();http.server_close()
-    (output/'result.json').write_text(json.dumps(dict(passed=True,checks=['restricted-shelf-hidden','stale-purchase-rejected','stale-page-recovered','ordinary-purchase-succeeds','all-roots-disabled','actual-root-item','live-equip','manual-consumed','upgrade-retains-roots','desktop-mobile']),indent=2),encoding='utf-8')
+    (output/'result.json').write_text(json.dumps(dict(passed=True,checks=['restricted-shelf-hidden','stale-purchase-rejected','stale-page-recovered','ordinary-purchase-succeeds','all-roots-disabled','actual-root-item','live-equip','manual-consumed','upgrade-retains-roots','root-loss-disables-equipped','desktop-mobile']),indent=2),encoding='utf-8')
     print('Common elemental techniques browser passed: real supplement, equip and upgrade; desktop/mobile')
 
 
