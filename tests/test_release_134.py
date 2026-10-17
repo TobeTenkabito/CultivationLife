@@ -39,7 +39,8 @@ def test_all_exchange_venues_are_accessible_and_clock_is_two_units(setup_game):
     assert game.exchange_state["actions_until_open"] == 1
     engine._advance_exchange_clock(game, random.Random(3))
     assert game.exchange_state["status"] == "open"
-    assert len(game.exchange_state["offers"]) == 3
+    assert len([o for o in game.exchange_state["offers"] if not o.get('reward_kind')]) == 3
+    assert len([o for o in game.exchange_state["offers"] if o.get('reward_kind') == 'root_book']) == 2
     engine._schedule_exchange(game, random.Random(999))
     assert game.exchange_state["location_id"] == location
 

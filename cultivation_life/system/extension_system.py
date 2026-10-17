@@ -12,6 +12,7 @@ REGISTRY_DOCUMENTS = (
     "items.json", "techniques.json", "transformations.json", "market.json",
     "world.json", "factions.json", "races.json", "world_npcs.json",
     "story_combat_scenarios.json",
+    "secret_arts.json",
 )
 CORE_DOCUMENTS = (*REGISTRY_DOCUMENTS, "maps.json")
 OPTIONAL_DOCUMENTS = (

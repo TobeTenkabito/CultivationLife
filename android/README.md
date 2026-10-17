@@ -1,6 +1,6 @@
 # 浮生问道 · Android
 
-维护基线：2026-10-17，本体 **v2.14.4**。Gradle 配置的版本名为 **2.14.4-android.64**，versionCode **64**，沿用 `com.fusheng.wendao` 包名和正式签名。
+维护基线：2026-10-17，本体 **v2.15.0**。Gradle 配置的版本名为 **2.15.0-android.65**，versionCode **65**，沿用 `com.fusheng.wendao` 包名和正式签名。
 
 **当前源码存档结构为 10，旧结构 1–9 明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构 1–9 的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
 
@@ -35,6 +35,8 @@
 Gradle 从仓库复制 Python、content、web、dlc；`app/src/main/mobile` 在准备阶段注入移动端资源，不维护另一套玩法逻辑。CSS 混色由 `scripts/android_css.py` 转换，以兼容旧 WebView。Lint 仅排除面向商店目标 SDK 政策的 `ExpiredTargetSdkVersion`。
 
 ## 发布证明与验收
+
+v2.15.0 使用secret-arts发行配置执行全仓回归和秘术、通用功法、事件真实页面；Windows同一EXE有/无DLC，以及签名Android 12 secret-arts、common-techniques四主题横竖屏原生阶段。规则见[秘术说明](../docs/secret-arts.md)，最终产物和证据以dist发行清单为准。
 
 v2.14.4 执行通用灵根功法、坊市资格及相关领域专项回归：python scripts/verify_scoped_release.py --profile common-techniques；Windows 同一 EXE 有／无 DLC，以及签名 Android 12 common-techniques 横竖屏、四主题原生验收。本次不是全仓回归。构建限制一个工作进程、512 MiB Java 堆，浏览器与专用 1 GiB 只读模拟器分阶段运行，最终证据见 dist/release-2.14.4*.json。
 

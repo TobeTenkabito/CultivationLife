@@ -141,7 +141,7 @@ class ContentRegistryTests(unittest.TestCase):
     def test_market_rejects_dangling_content_reference(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
-            for name in ("items.json", "techniques.json", "transformations.json", "market.json", "world.json", "factions.json", "races.json", "world_npcs.json", "story_combat_scenarios.json"):
+            for name in ("items.json", "techniques.json", "transformations.json", "market.json", "world.json", "factions.json", "races.json", "world_npcs.json", "story_combat_scenarios.json", "secret_arts.json"):
                 shutil.copy2(SOURCE_ROOT / "content" / name, target / name)
             market_path = target / "market.json"
             market = json.loads(market_path.read_text(encoding="utf-8"))

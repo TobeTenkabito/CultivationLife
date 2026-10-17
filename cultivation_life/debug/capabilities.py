@@ -257,8 +257,9 @@ CAPABILITIES = (
         lambda e, g, p: e.body_breakthrough(g)),
     Capability('sense breakthrough', 'sense-breakthrough', (),
         lambda e, g, p: e.divine_sense_breakthrough(g)),
-    Capability('secret art', 'secret-art', (S('art', choices=('conceal', 'suppress')), S('action', choices=('activate', 'cancel')), I('realm_index', 0, 12), I('layer', 1, 13)),
-        lambda e, g, p: e.manage_secret_art(g, p.get('art', ''), p.get('action', ''), p.get('realm_index'), p.get('layer'))),
+    Capability('secret art', 'secret-art', (S('art'), S('action', choices=('activate', 'cancel', 'study', 'practice')), I('realm_index', 0, 12), I('layer', 1, 13), I('revision', 0, 1000000000), I('years', 1, 100), S('material_id', required=False)),
+        lambda e, g, p: e.train_secret_art(g, p.get('art', ''), p.get('action', ''), revision=p.get('revision'), years=p.get('years'), material_id=p.get('material_id', ''))
+        if p.get('action') in {'study', 'practice'} else e.manage_secret_art(g, p.get('art', ''), p.get('action', ''), p.get('realm_index'), p.get('layer'))),
     Capability('ghost reincarnate', 'ghost-reincarnate', (),
         lambda e, g, p: e.reincarnate_ghost(g)),
     Capability('ghost reincarnation prompt', 'ghost-reincarnation-prompt', (),

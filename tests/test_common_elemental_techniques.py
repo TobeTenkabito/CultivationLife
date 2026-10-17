@@ -45,7 +45,8 @@ def ready(tmp_path):
 
 def test_catalog_all_grades_roles_elements_and_stable_generator():
     assert len(OPEN)==3888
-    assert len({t.id for t in OPEN})==len({t.name for t in OPEN})==3888
+    assert len({t.id for t in OPEN}) == 3888
+    assert len({t.name for t in OPEN}) == len(FAMILIES) * len(ROLES)
     assert {t.grade for t in OPEN}==set(range(1,13))
     assert not any(any(r.name in t.name for r in __import__('cultivation_life.content_registry',fromlist=['REALMS']).REALMS) for t in OPEN)
     for t in OPEN:

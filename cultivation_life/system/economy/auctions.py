@@ -190,7 +190,7 @@ def consign_auction_item(deps: AuctionsDependencies, game_id: str, item_id: str,
     game = deps._load(game_id)
     state = deps._require_auction_access(game, {"scheduled", "open"})
     item = next((entry for entry in game.player.inventory if entry.id == item_id and entry.quantity > 0), None)
-    if not item or item_id == "spirit_stone":
+    if not item or item_id == "spirit_stone" or (ITEM_CATALOG.get(item_id) and ITEM_CATALOG[item_id].root_grant):
         raise ValueError("该物品无法送拍")
     if item.crafted_artifact_id:
         raise ValueError("组合炼器法宝请使用包裹内该物品自己的寄拍按钮")
@@ -430,7 +430,7 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
         for item in game.player.inventory
         if item.id != "spirit_stone" and item.quantity > 0 and not item.crafted_artifact_id
     ]
-    consignable_inventory = [row for row in inventory if row["id"] in ITEM_CATALOG]
+    consignable_inventory = [row for row in inventory if row["id"] in ITEM_CATALOG and not ITEM_CATALOG[row['id']].root_grant]
     sellable_puppets = [
         {"id":str(row.get("id")), "name":str(row.get("name", "无名傀儡")),
          "type":str(row.get("type")), "combat_power":round(float(row.get("combat_power", 0)), 1)}

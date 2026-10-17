@@ -434,6 +434,7 @@ class EncounterActionDependencies:
     _player_intrinsic_combat_power: Callable[..., float]
     _player_protected_npc_ids: Callable[..., set[str]]
     _promote_cached_npc: Callable[..., SectNpc | None]
+    _random_npc_root: Callable[..., str]
     _record_world_coalition_amnesty: Callable[..., None]
     _remember_faction_prison_release: Callable[..., None]
     _sage_scaled_gain: Callable[..., float]

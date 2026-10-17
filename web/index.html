@@ -291,12 +291,18 @@
           <p id="guixu-description" class="muted">大潮有期，入墟无悔。每届宝物一旦离池，便不会自然补回。</p>
           <div id="guixu-content" class="guixu-content"></div>
         </article>
-        <article id="secret-art-card" class="paper utility-panel left-panel secret-art-panel" role="dialog" aria-modal="false" aria-label="修为秘法">
-          <div class="section-title"><div><p class="eyebrow">HIDDEN CULTIVATION ARTS</p><h2>修为秘法</h2></div><div class="panel-heading"><span id="secret-art-heading"></span><button id="secret-art-toggle" type="button">关闭</button></div></div>
-          <p class="muted">收敛只改变外界认知与主动遭遇倾向；压制会暂时改变自身境界属性与条件。两者都不会降低神识等级。</p>
-          <div id="secret-art-sense" class="secret-art-sense"></div>
-          <section class="secret-art-row"><div><h3>伪装（收敛）修为</h3><p id="secret-conceal-status" class="section-note"></p></div><div class="secret-art-controls"><select id="secret-conceal-realm"></select><button id="secret-conceal-activate" type="button">应用伪装</button><button id="secret-conceal-cancel" type="button">取消收敛</button></div></section>
-          <section class="secret-art-row"><div><h3>压制修为</h3><p id="secret-suppress-status" class="section-note"></p></div><div class="secret-art-controls"><select id="secret-suppress-realm"></select><button id="secret-suppress-activate" type="button">运转压制</button><button id="secret-suppress-cancel" type="button">解除压制</button></div></section>
+        <article id="secret-art-card" class="paper utility-panel left-panel secret-art-panel" role="dialog" aria-modal="false" aria-label="秘法" data-secret-view="catalog">
+          <div class="section-title"><div><p class="eyebrow">秘术藏卷</p><h2>秘法</h2></div><div class="panel-heading"><span id="secret-art-heading"></span><button id="secret-art-toggle" type="button">关闭</button></div></div>
+          <div class="secret-library-tabs" role="tablist" aria-label="秘法名录"><button id="secret-tab-known" role="tab" aria-selected="true" type="button">已获秘法</button><button id="secret-tab-potential" role="tab" aria-selected="false" type="button">潜在秘法</button></div>
+          <div class="secret-library-tools"><input id="secret-art-search" type="search" aria-label="搜索秘法" placeholder="搜索秘法"><select id="secret-art-filter" aria-label="秘法类别"><option value="all">全部类别</option><option value="builtin">天生自带</option><option value="root">补灵秘法</option></select></div>
+          <div class="secret-workspace">
+            <div class="secret-directory"><div id="secret-art-library" class="secret-art-library"></div><div class="secret-art-pagination"><button id="secret-page-prev" type="button" aria-label="上一页秘法" title="上一页">←</button><span id="secret-page-label"></span><button id="secret-page-next" type="button" aria-label="下一页秘法" title="下一页">→</button></div></div>
+            <div class="secret-detail"><button id="secret-art-back" type="button">← 秘法目录</button><div id="secret-art-detail-heading"></div>
+              <section id="secret-conceal-detail" class="secret-art-row"><p id="secret-conceal-status" class="section-note"></p><div id="secret-art-sense" class="secret-art-sense"></div><div class="secret-art-controls"><select id="secret-conceal-realm" aria-label="显露修为"></select><button id="secret-conceal-activate" type="button">应用伪装</button><button id="secret-conceal-cancel" type="button">取消收敛</button></div></section>
+              <section id="secret-suppress-detail" class="secret-art-row hidden"><p id="secret-suppress-status" class="section-note"></p><div class="secret-art-controls"><select id="secret-suppress-realm" aria-label="压制修为"></select><button id="secret-suppress-activate" type="button">运转压制</button><button id="secret-suppress-cancel" type="button">解除压制</button></div></section>
+              <div id="secret-root-detail"></div>
+            </div>
+          </div>
         </article>
         <article id="intrigue-card" class="paper utility-panel intrigue-panel hidden" role="dialog" aria-modal="false" aria-label="势力内政">
           <div class="section-title"><div><p class="eyebrow">COALITIONS &amp; INTRIGUE</p><h2>明争暗斗：合纵连横</h2></div><div class="panel-heading"><span id="intrigue-heading">职位、决议与人事</span><button id="intrigue-toggle" type="button">关闭</button></div></div>
@@ -506,7 +512,7 @@
         <button type="button" data-panel-target="spirit-field" title="灵田"><span>田</span><small>灵田</small></button>
         <button type="button" data-panel-target="personal-economy" title="个人经济"><span>账</span><small>经济</small></button>
         <button type="button" data-panel-target="inventory" title="分类行囊"><span>囊</span><small>行囊</small></button>
-        <button type="button" data-panel-target="secret-art" title="修为秘法"><span>秘</span><small>秘法</small></button>
+        <button type="button" data-panel-target="secret-art" title="秘法"><span>秘</span><small>秘法</small></button>
         <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
         <button type="button" data-panel-target="bloodline" data-dlc="monster" title="妖修血脉" class="hidden bloodline-dock-button"><span>脉</span><small>血脉</small></button>
         <button type="button" data-panel-target="civilizations" title="万灵图志" class="hidden"><span>灵</span><small>万灵</small></button>
@@ -646,6 +652,8 @@
   <link rel="stylesheet" href="/panel-pages.css?v=3000">
   <script src="/panel-pages.js?v=3000"></script>
   <script src="/strategic-war-panel.js?v=1"></script>
+  <link rel="stylesheet" href="/secret-art-panel.css?v=1">
+  <script src="/secret-art-panel.js?v=1"></script>
   <script src="/app.js?v=strategic-war-1"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>

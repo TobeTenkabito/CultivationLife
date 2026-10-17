@@ -370,10 +370,15 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
                 player, int(target.get("target_realm_index", 0)),
             )
             result = "killed"
+            core_summary = ''
+            if target.get('action') == 'hunt_beast':
+                from ..system.secret_art_loot import grant as grant_secret_material
+                core_summary = grant_secret_material(game, target, rng, 'core')
             deps._record_player_combat(game, target, resolution, result)
             return result, lead + (
                 f"你在复杂交锋中建立压制并击杀了{target['target_name']}；狩猎准备要求为对手战力的 {threshold:.1f} 倍。"
                 f" 威名 +{fame_gain:.0f}。"
+                + core_summary
                 + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
             )
         if resolution.retreat_impossible and resolution.death_prevented:
@@ -483,6 +488,14 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
     target["killed_member"] = victim
     fame_before = player.fame
     treasure_id = victim.get("treasure_item_id")
+    material_source = dict(victim)
+    source_person = find_person(game, str(victim.get('npc_id') or ''), include_inactive=True)
+    if source_person:
+        material_source.update(spirit_root=source_person.spirit_root, realm_index=source_person.realm_index)
+    else:
+        source_cache = next((r.get('npc', {}) for r in game.encounter_npc_cache if r.get('id') == victim.get('npc_id')), {})
+        if source_cache:
+            material_source.update(spirit_root=source_cache.get('spirit_root'), realm_index=source_cache.get('realm_index', 0))
     tianji_spoils = deps._tianji_handle_npc_kill(game, str(victim.get("npc_id", "")))
     victim.update(in_combat=True, defending=bool(target.get("player_defending")),
                   execution=bool(target.get("execution")), penalty_handled=bool(target.get("penalty_handled")))
@@ -490,9 +503,12 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
     demonic_gain = deps._grant_demonic_kill_opportunity(player, int(victim["realm_index"]))
     spoils = (
         f" 你夺得{ITEM_CATALOG[treasure_id].name}。"
-        if treasure_id in ITEM_CATALOG and victim.get("npc_id") else ""
+        if treasure_id in ITEM_CATALOG and not ITEM_CATALOG[treasure_id].root_grant and victim.get("npc_id") else ""
     )
     spoils += tianji_spoils
+    if target.get('non_story_combat') and not target.get('player_defending'):
+        from ..system.secret_art_loot import grant as grant_secret_material
+        spoils += grant_secret_material(game, material_source, rng, 'soul')
     fame_text = f" 威名 +{player.fame - fame_before:.0f}。"
     victim_path = str(victim.get("path", "dao"))
     if player.path == "monster" and victim_path != "monster" and not target.get("player_defending"):
@@ -572,7 +588,7 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
         if npc.combat_artifact_id in ITEM_CATALOG:
             add_item(player, npc.combat_artifact_id)
             npc.combat_artifact_id = None
-        if treasure_id in ITEM_CATALOG:
+        if treasure_id in ITEM_CATALOG and not ITEM_CATALOG[treasure_id].root_grant:
             add_item(player, treasure_id)
             npc.treasure_item_id = None
             npc.treasure_looted = True
@@ -583,7 +599,7 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
             if artifact_id in ITEM_CATALOG:
                 add_item(player, artifact_id)
             treasure_id = cached.get("npc", {}).get("treasure_item_id")
-            if treasure_id in ITEM_CATALOG:
+            if treasure_id in ITEM_CATALOG and not ITEM_CATALOG[treasure_id].root_grant:
                 add_item(player, str(treasure_id))
             game.encounter_npc_cache = [row for row in game.encounter_npc_cache if row.get("id") != npc_id]
     faction_id = victim.get("faction_id")

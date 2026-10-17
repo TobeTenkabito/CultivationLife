@@ -88,9 +88,10 @@ def main():
 
                     form=open_form()
                     form.get_by_label('委托类型',exact=True).select_option('item')
-                    form.get_by_label('所需材料或道具',exact=True).select_option('jinque_metal')
+                    assert form.locator('option[value=jinque_metal]').count()==0
+                    form.get_by_label('所需材料或道具',exact=True).select_option('secret_manual_water')
                     wait_quote(form)
-                    assert '金阙残书' in form.get_by_label('所需材料或道具',exact=True).text_content()
+                    assert '玄水凝根术玉简' in form.get_by_label('所需材料或道具',exact=True).text_content()
                     form.get_by_role('button',name='支付并发布委托').click()
                     page.wait_for_function('game.merchant_system.posted.length===4')
 

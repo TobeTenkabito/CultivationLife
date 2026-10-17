@@ -294,6 +294,11 @@ class ContentRegistry:
             world_doc['systems']['world_profiles'], world_doc['realms'])
         items_doc['items'].extend(economic_items)
         market_doc['goods'].extend(economic_goods)
+        from .secret_art_content import build as secret_art_definitions
+        secret_items, secret_goods = secret_art_definitions(
+            documents['secret_arts.json'], world_doc['systems']['world_profiles'])
+        items_doc['items'].extend(secret_items)
+        market_doc['goods'].extend(secret_goods)
         items = cls._index_models(items_doc, "items", Item)
         source_defaults = techniques_doc.get("source_defaults_by_path", {})
         expected_source_paths = {"dao", "demonic", "ghost", "monster", "buddhist", "confucian"}
@@ -1819,7 +1824,9 @@ def restricted_acquisition(kind: str, content_id: str) -> bool:
         return True
     if kind == "technique":
         return content_id in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
-    return content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "qilin_blessing_elixir"
+    definition = ITEM_CATALOG.get(content_id)
+    return (content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "qilin_blessing_elixir"
+            or bool(definition and definition.root_grant))
 
 
 def natural_market_acquisition_allowed(kind: str, content_id: str) -> bool:
@@ -1838,6 +1845,10 @@ def natural_market_acquisition_allowed(kind: str, content_id: str) -> bool:
 
 MARKET_GOODS = tuple(row for row in CONTENT.market_goods
                      if not restricted_acquisition(str(row["kind"]), str(row["content_id"])))
+ROOT_BOOK_GOODS = tuple(row for row in CONTENT.market_goods
+                        if row['kind'] == 'item' and ITEM_CATALOG[row['content_id']].root_grant) + tuple(
+    dict(world='human', kind='item', content_id=identity, tier=4, price=12000)
+    for identity, item in ITEM_CATALOG.items() if item.root_grant and identity.startswith('jinque_'))
 REALMS = CONTENT.realms
 PATH_NAMES = CONTENT.path_names
 KARMA_FACTORS = CONTENT.karma_factors

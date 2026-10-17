@@ -1,6 +1,7 @@
 """Real war contracts, original organization assets and consent boundaries."""
 import copy
 import random
+from dataclasses import replace
 from unittest.mock import patch
 
 import pytest
@@ -196,6 +197,8 @@ def test_asset_quote_rejects_changed_ownership_without_partial_effect(api):
 
 def test_will_factors_follow_assignment_balance_supplies_and_casualties(engine):
     g,row,c=own_campaign(engine);deps=bind(engine);org=g.sects[c['defender_id']]
+    # Comparable forces keep each loss visible after integer percentage rounding.
+    deps=replace(deps,power=lambda npc:100)
     before=copy.deepcopy(g.to_dict());first=willingness.evaluate(deps,g,row)
     assert before==g.to_dict()
     commit=next(r for r in row['commitments'] if r['org']['id']==org.id)

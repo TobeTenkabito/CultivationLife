@@ -43,6 +43,14 @@ VISIBLE_KEYS = {
     "trait_descriptions",
 }
 
+# The current naming contract deliberately retains these pre-existing labels.
+# Keep the fiction-term ban everywhere else, including any new uses of the term.
+RETAINED_GINSENG_LABELS = {
+    "content/items.json": {"九曲灵参", "九曲灵参种"},
+    "content/world.json": {"九曲灵参"},
+}
+RETAINED_GINSENG_DOCS = {"docs/content-naming.md", "docs/economy-supply-catalog.md"}
+
 
 def iter_visible_strings(value: object, active: bool = False):
     if isinstance(value, dict):
@@ -65,11 +73,15 @@ class OriginalContentAuditTests(unittest.TestCase):
                 for text in iter_visible_strings(payload):
                     for term in BANNED_VISIBLE_TERMS:
                         if term in text:
+                            if term == "九曲灵参" and text in RETAINED_GINSENG_LABELS.get(path.relative_to(ROOT).as_posix(), set()):
+                                continue
                             failures.append(f"{path.relative_to(ROOT)}: {term!r} in {text!r}")
         for path in [ROOT / "README.md", *(ROOT / "docs").glob("*.md")]:
             text = path.read_text(encoding="utf-8")
             for term in BANNED_VISIBLE_TERMS:
                 if term in text:
+                    if term == "九曲灵参" and path.relative_to(ROOT).as_posix() in RETAINED_GINSENG_DOCS:
+                        continue
                     failures.append(f"{path.relative_to(ROOT)}: {term!r}")
         self.assertEqual([], failures, "\n".join(failures))
 

@@ -270,10 +270,11 @@ def _personal_combat_step(deps: EncounterActionDependencies, game: GameState, ac
         target = {
             "target_name": target_name,
             "target_power": max(1.0, encounter_power * rng.uniform(*settings["power_multiplier"])),
-            "target_realm_index": max(1, player.realm_index - 1),
+            "target_realm_index": max(1, player.realm_index - rng.choice((0, 1))),
             "combat_type": "beast",
             "success_threshold": settings.get("success_threshold"),
         }
+        target['spirit_root'] = deps._random_npc_root(target['target_realm_index'], rng)
     else:
         target = deps._known_npc_encounter_target(game, settings, rng)
         if target is None:

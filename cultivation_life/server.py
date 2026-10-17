@@ -468,6 +468,11 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "sense-breakthrough":
                 result = ENGINE.divine_sense_breakthrough(game_id)
             elif operation == "secret-art":
+                if payload.get('action') in {'study', 'practice'}:
+                    result = ENGINE.train_secret_art(
+                        game_id, payload.get('art', ''), payload['action'], revision=payload.get('revision'),
+                        years=payload.get('years'), material_id=payload.get('material_id', ''))
+                    return self._json(result)
                 target_realm = payload.get("realm_index")
                 target_layer = payload.get("layer")
                 result = ENGINE.manage_secret_art(

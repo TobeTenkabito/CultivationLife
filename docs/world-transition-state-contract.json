@@ -72,7 +72,8 @@
     "wars.*.logistics.sides.*.captured_loss / strategic_war_state.wars.*.peace_proposal.war_losses / claimed / shortfall / demands.*.claimed / compensation / allocations / treaty同名字段": "global：原军需被敌方实际夺走的商品折值与灵石记captured_loss，与原destroyed的消耗/毁损互斥，不新增资产。war_losses合计本方原战役destroyed、captured_loss、mobilization_paid、stationing_paid；不叠加采购或动员本金，不把同一运输损失或消耗重复计算。普通/加重索赔为一倍/两倍损耗加败宗现款25%/50%，可实付限现款75%/90%；按败宗现款分摊补偿需求。claimed与shortfall仅非现金报价，签约明示豁免未付缺口，不创建可领债务。每个实际败宗一条唯一付款义务，allocations最多六项，按本方实际出资分配同笔实付款，整数余款仍只给正权重原组织；总和必须等于amount。付款沿原war_finance/ledger实转，原经营收入/成交额不变，无个人行囊支出。",
     "GameState.sect_relations.*.truce_until_age": "global：种族总和约对原两侧参战组织登记相同1000/3000年日历停战。唯一主体ID关系留原账，不随玩家跨界或行动单位推进缩短；正式独立宣战、盟军加入、战略配对和增援、NPC随机外交/内政候选均检查实际年龄。返乡只更新原状态与旧单位停战字段，不清除日历条约；新约不追改既存50/150年旧约。",
     "sage_state.worlds / memberships / quit_cooldown_until / buddhist_state.worlds / wish": "佛儒上界补完：沿原scope归属，四上界按首次到访建立缺失学说，不覆盖原记录，不复制NPC；本人离界席位冻结，影响力、寺庙、信众、许可与加持选项留在原地址。个人浩然、经典参透、愿力与涅槃时钟随同一玩家保留；不新增顶层或嵌套持久字段，不新增移动或年度全表扫描。",
-    "Player.*Technique.required_affinities / known_techniques / combat_techniques / ghost_self_state": "personal：功法固定所需全部属性，随原功法及等级保留；先天与已补全灵根由原玩家权威字段读取。旧结构10缺失为空，已登记目录的固定门槛由原功法准备入口恢复，未知自定功法保留自身要求；不增加Player/GameState顶层字段，不复制NPC或库存，不绕过移动、气等级与封印规则。"
+    "Player.*Technique.required_affinities / known_techniques / combat_techniques / ghost_self_state": "personal：功法固定所需全部属性，随原功法及等级保留；先天与已补全灵根由原玩家权威字段读取。旧结构10缺失为空，已登记目录的固定门槛由原功法准备入口恢复，未知自定功法保留自身要求；不增加Player/GameState顶层字段，不复制NPC或库存，不绕过移动、气等级与封印规则。",
+    "Player.secret_art_state": "personal：子协议1保存独立秘术修习、施术进度、已冻结所需年份和递增修订号，随同一玩家跨界保留。材料从原inventory扣除，casting仅保存已消耗材料的非资产收据，不能返还或再次领取。只有专用命令的实际年份推进进度；事件、死亡、拘束或转场中断，末年事件处理后才补入原additional_roots。缺失为空，不重学自带秘法、不补发物资、不新增年度扫描，不改先天根种与资质。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",
@@ -112,6 +113,7 @@
     "combat_techniques": "personal",
     "known_techniques": "personal",
     "additional_roots": "personal",
+    "secret_art_state": "personal",
     "inventory": "resources",
     "alive": "personal",
     "death_reason": "personal",

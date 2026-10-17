@@ -951,6 +951,11 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def manage_secret_art(self, game_id: str, art: str, action: str, realm_index: int | None=None, layer: int | None=None) -> dict[str, Any]:
         return cultivation_actions.manage_secret_art(self._dependencies.cultivation_actions, game_id, art, action, realm_index, layer)
 
+    def train_secret_art(self, game_id: str, art: str, action: str, *, revision: int, years: int | None=None, material_id: str='') -> dict[str, Any]:
+        from .composition.secret_arts import bind
+        from ..system.secret_arts import execute
+        return execute(bind(self), game_id, art, action, revision=revision, years=years, material_id=material_id)
+
     def _public_secret_arts(self, player: Player) -> dict[str, Any]:
         return cultivation_actions._public_secret_arts(self._dependencies.cultivation_actions, player)
 

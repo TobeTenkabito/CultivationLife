@@ -64,12 +64,6 @@ def _merchant_items(world):
         if item and item.id != "spirit_stone" and not set(item.tags) & {"unique", "quest", "tianji"}:
             catalog[item.id] = {"id": item.id, "name": item.name, "value": max(1, int(good["price"])),
                                 "tier": int(good.get("tier", 1)), "description": item.description}
-    # Rare root manuals are acquired from human-world ruins rather than
-    # market stock. Keep their acquisition source explicit and DLC-safe.
-    if world == "human":
-        for item in ITEM_CATALOG.values():
-            if "jinque" in item.tags:
-                catalog[item.id] = {"id": item.id, "name": item.name, "value": 50000, "tier": 4, "description": item.description}
     return sorted(catalog.values(), key=lambda row: (row["tier"], row["id"]))
 
 
