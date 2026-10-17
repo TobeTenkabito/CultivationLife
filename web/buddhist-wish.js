@@ -25,7 +25,7 @@
     }
     quiet.append(node('p', '三项独立累计，从第六个完整时间单位起各 +1；防御击杀仍会中断“不杀生”，但不扣进攻杀人的愿力。', 'muted')); root.append(quiet);
     const nirvana = node('section', null, 'wish-section'); nirvana.append(node('h3', '一念涅槃'));
-    nirvana.append(node('p', '消耗 100 愿力，直接提升一个小境界（一层），免除此关天劫；不跨大境界，不越过本界修为上限。此后三个时间单位，机缘获取效率额外 +100%。'));
+    nirvana.append(node('p', '消耗 100 愿力，直接提升一个小境界（一层），免除此关天劫；不跨大境界，不越过本界修为上限。涅槃仅限练气至大乘，三级界面沿用愿力及其他修持收益。此后三个时间单位，机缘获取效率额外 +100%。'));
     if (wish.nirvana_units > 0) nirvana.append(node('p', `涅槃加持中 · 尚余 ${fmt(wish.nirvana_units)} 个时间单位`, 'wish-active'));
     if (wish.blocked) nirvana.append(node('p', wish.blocked, 'muted'));
     const action = node('button', '消耗 100 愿力 · 涅槃'); action.type = 'button';

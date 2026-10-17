@@ -1,0 +1,170 @@
+{
+  "base_version": "2.14.3",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.1.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.0",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.5.0",
+    "tianji-artifacts": "2.2.0",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 496,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-6",
+      "log": "build\\related-tests-6-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-7",
+      "log": "build\\related-tests-7-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-8",
+      "log": "build\\related-tests-8-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-9",
+      "log": "build\\related-tests-9-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-10",
+      "log": "build\\related-tests-10-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-11",
+      "log": "build\\related-tests-11-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-12",
+      "log": "build\\related-tests-12-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-13",
+      "log": "build\\related-tests-13-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-14",
+      "log": "build\\related-tests-14-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-15",
+      "log": "build\\related-tests-15-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-16",
+      "log": "build\\related-tests-16-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-17",
+      "log": "build\\related-tests-17-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-18",
+      "log": "build\\related-tests-18-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_upper_teachings",
+      "log": "build\\browser_upper_teachings-2143.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-2143.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-2143.log",
+  "inputs_sha256": "4b80d44afc3f7c1419a63821ff862151c22cd4a55612c994475dbb04db2d7e80",
+  "platform": "Android 12",
+  "android_version": "2.14.3-android.63",
+  "version_code": 63,
+  "apk_sha256": "cf7af151622a3b21211086d1a4e34fd80a01bb8df01efdd0d488e993521dbe57",
+  "native": {
+    "version": "2.14.3",
+    "apk_sha256": "cf7af151622a3b21211086d1a4e34fd80a01bb8df01efdd0d488e993521dbe57",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-upper-teachings-portrait-2143.log",
+      "build/android-upper-teachings-landscape-2143.log"
+    ],
+    "test_apk_sha256": "bcf89373f31f48679f116bdc76ae66aec8f81cc24fbca676bcc9c0c90a347d8e",
+    "log_hashes": {
+      "build/android-upper-teachings-portrait-2143.log": "b1d6ee08f46086d83ff92e0df41f5d9a168384565f1ab9e871bee74cb47042f4",
+      "build/android-upper-teachings-landscape-2143.log": "b1d6ee08f46086d83ff92e0df41f5d9a168384565f1ab9e871bee74cb47042f4"
+    },
+    "scope": "Four upper worlds, Buddhist wish/blessings and Confucian doctrine/classics/outer opportunity, direct advancement disabled; native clicks, four themes and portrait/landscape"
+  },
+  "physical_device_tested": false
+}

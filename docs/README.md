@@ -103,3 +103,5 @@
 - [照魂归真与妖鬼突破劫](soul-forms-and-upper-trials.md)
 
 - [地图中心平移与触屏手势（v2.13.3）](maps-2133.md)
+
+- [佛儒 DLC 上界修持](upper-teachings.md)：四上界范围、惰性学说、愿力与外王结算边界。

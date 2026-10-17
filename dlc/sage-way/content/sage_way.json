@@ -3,7 +3,7 @@
   "settings": {
     "enabled": true,
     "phase": "inner_sage_outer_king",
-    "worlds": ["human", "spirit"],
+    "worlds": ["human", "spirit", "celestial", "asura", "nether", "reincarnation"],
     "world_influence_pool": 100.0,
     "doctrine_influence_cap": 60.0,
     "influence_floor": 0.1,
@@ -46,7 +46,7 @@
         "exp_per_level_unit": 10.0,
         "threshold_base": 60.0,
         "max_level": 30,
-        "realm_weights": {"1":1,"2":2,"3":4,"4":8,"5":16,"6":32,"7":64,"8":128},
+        "realm_weights": {"1":1,"2":2,"3":4,"4":8,"5":16,"6":32,"7":64,"8":128,"9":256,"10":512,"11":1024,"12":2048},
         "passive_half_level": 10.0,
         "passive_caps": {
           "affinity_multiplier": 0.30,
@@ -120,6 +120,10 @@
       "zheng_xuan": {"name": "郑玄", "description": "遍注群经、兼采今古，提高主修、辅修与战斗功法的实际效果。", "compatible": ["old_text", "new_text"], "effects": {"technique_learning_multiplier": 0.10}}
     },
     "initial_doctrines": {
+      "celestial": [{"id":"sage-celestial-upper","name":"太和理学","combo":{"classic":"guliang","philosophy":"principle","practice":"evidential","script":"old_text"},"combo_key":"guliang|principle|evidential|old_text","external":30.0,"controller_id":"sage-celestial-upper-master","members":[{"id":"sage-celestial-upper-master","name":"闻道衡","inner":30.0,"realm_index":10,"layer":1}]}],
+      "asura": [{"id":"sage-asura-upper","name":"止戈义学","combo":{"classic":"gongyang","philosophy":"principle","practice":"statecraft","script":"new_text"},"combo_key":"gongyang|principle|statecraft|new_text","external":30.0,"controller_id":"sage-asura-upper-master","members":[{"id":"sage-asura-upper-master","name":"厉守仁","inner":30.0,"realm_index":10,"layer":1}]}],
+      "nether": [{"id":"sage-nether-upper","name":"万象实学","combo":{"classic":"zuoshi","philosophy":"mind","practice":"evidential","script":"old_text"},"combo_key":"zuoshi|mind|evidential|old_text","external":30.0,"controller_id":"sage-nether-upper-master","members":[{"id":"sage-nether-upper-master","name":"青砚客","inner":30.0,"realm_index":10,"layer":1}]}],
+      "reincarnation": [{"id":"sage-reincarnation-upper","name":"明心归学","combo":{"classic":"guliang","philosophy":"mind","practice":"statecraft","script":"new_text"},"combo_key":"guliang|mind|statecraft|new_text","external":30.0,"controller_id":"sage-reincarnation-upper-master","members":[{"id":"sage-reincarnation-upper-master","name":"顾照生","inner":30.0,"realm_index":10,"layer":1}]}],
       "human": [
         {"id":"sage-human-righteous","name":"春秋义统","combo":{"classic":"gongyang","philosophy":"principle","practice":"statecraft","script":"new_text"},"combo_key":"gongyang|principle|statecraft|new_text","external":35.0,"controller_id":"sage-h-r-1","members":[{"id":"sage-h-r-1","name":"公孙弘文","inner":28.0,"realm_index":4},{"id":"sage-h-r-2","name":"陆正言","inner":18.0,"realm_index":3},{"id":"sage-h-r-3","name":"季怀礼","inner":12.0,"realm_index":2},{"id":"sage-h-r-4","name":"许问经","inner":8.0,"realm_index":2}]},
         {"id":"sage-human-evidence","name":"古义实学","combo":{"classic":"zuoshi","philosophy":"mind","practice":"evidential","script":"old_text"},"combo_key":"zuoshi|mind|evidential|old_text","external":25.0,"controller_id":"sage-h-e-1","members":[{"id":"sage-h-e-1","name":"顾砚秋","inner":24.0,"realm_index":4},{"id":"sage-h-e-2","name":"戴守一","inner":17.0,"realm_index":3},{"id":"sage-h-e-3","name":"郑闻道","inner":11.0,"realm_index":2}]}

@@ -16,6 +16,7 @@ def main():
     bugfix = '--bugfix' in sys.argv[2:]
     naming = '--naming' in sys.argv[2:]
     natal = '--natal' in sys.argv[2:]
+    teachings = '--teachings' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
@@ -26,6 +27,8 @@ def main():
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('content-naming','strategic-war') for orientation in ('portrait','landscape')]
     if natal:
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('content-naming','natal-materials') for orientation in ('portrait','landscape')]
+    if teachings:
+        logs=[f'build/android-upper-teachings-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
@@ -37,6 +40,8 @@ def main():
         if natal:
             marker='content_naming_scope' if 'content-naming' in name else 'natal_materials_scope'
             require(marker in text,f'Missing current naming/material native coverage: {name}')
+        if teachings:
+            require('upper_teachings_scope' in text,f'Missing upper DLC native coverage: {name}')
     sdk=Path('F:/CultivationLife-Android-Tools/sdk')
     signer=sorted(sdk.glob('build-tools/*/apksigner.bat'))[-1]
     apk=ROOT/'android/app/build/outputs/apk/release/app-release.apk'
@@ -60,6 +65,7 @@ def main():
     if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
     if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
     if natal:receipt['scope']='Naming compatibility and eleven-world natal materials, native socket/return, bounded catalog and qualification; four themes and four orientation phases'
+    if teachings:receipt['scope']='Four upper worlds, Buddhist wish/blessings and Confucian doctrine/classics/outer opportunity, direct advancement disabled; native clicks, four themes and portrait/landscape'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 
