@@ -52,6 +52,8 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None, comba
     fleet = region['fleets'].get(payload.get('fleet_id'))
     alliance = controlled_alliance(game)
     home = home_alliance(game)
+    from ...regional_context import synchronize
+    synchronize(game, [p.world, *([home['world']] if home else [])])
     identity = home.get('network_id', home['id']) if home else None
     if isinstance(action,str) and action.startswith('heritage_'):
         from ..organization_heritage import command as heritage_command

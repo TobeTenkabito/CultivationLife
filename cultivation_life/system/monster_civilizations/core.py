@@ -273,12 +273,17 @@ def _cultural_changes(game, world, data, roster):
 
 
 def advance_year(game):
+    from ...regional_context import includes
     if not executable(game) or not game.monster_civilization_state:
         return
     state = game.monster_civilization_state
+    changed = False
     for world, data in state['worlds'].items():
+        if not includes(game, world):
+            continue
         if game.player.age <= data['last_year']:
             continue
+        changed = True
         data['last_year'] = game.player.age  # No replay after DLC pause or time jumps.
         data['ecology_clock'] += 1
         ecology_year(game, world, data)
@@ -288,7 +293,8 @@ def advance_year(game):
             if data['political_elapsed'] >= interval:
                 data['political_elapsed'] = 0; data['political_clock'] += 1
                 politics(game, world, data)
-    state['revision'] += 1
+    if changed:
+        state['revision'] += 1
 
 
 def settle(game, data, roster):

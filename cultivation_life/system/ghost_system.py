@@ -357,6 +357,12 @@ class GhostSystemMixin:
             WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world),
             lambda destination: self._monster_travel_multiplier(game.player, destination),
         )
+        journey = game.map_journey
+        if journey and (journey['world'], journey['origin']) == (game.player.world, location_id):
+            for place in data['locations']:
+                if place['id'] == journey['destination'] and place['route_ids'] == journey['route']:
+                    place['travel_years'] = journey['years'] - journey['completed']
+                    place['travel_progress'] = dict(completed=journey['completed'], total=journey['years'])
         from .faction_geography import ensure_faction_sites, war_site
         ensure_faction_sites(game)
         factions = [*game.sects.values(), *([game.family] if game.family else [])]

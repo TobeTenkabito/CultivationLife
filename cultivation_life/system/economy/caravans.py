@@ -8,6 +8,7 @@ from ..teleport_system import arrays, separated
 from .ledger import account, balance, transfer_value
 from .local_market import quote
 from .state import ensure_state, ensure_regional_market, market_id, reprice
+from ...regional_context import includes, region as settlement_region
 from .fleet_network import (ensure_network, ensure_routes, advance_network, owner_key,
     owner_sites, seed_organization_fleets, guard_required, managed_by_player, guard_wages)
 
@@ -29,7 +30,7 @@ def ensure_caravans(game, maps, *, _world=None, _linked=True):
     """Adopt a visited realm without spending, dispatching, or drawing game RNG."""
     ensure_state(game)
     state = game.economy_v2.setdefault('transport', dict(version=1, worlds={}))
-    world = _world or game.player.world
+    world = _world or settlement_region(game) or game.player.world
     alliances = game.merchant_state.get('worlds', {}).get(world, [])
     if not alliances or world in state['worlds']:
         changed = ensure_network(game, maps)
@@ -38,7 +39,7 @@ def ensure_caravans(game, maps, *, _world=None, _linked=True):
             for home in sorted({a['home_world'] for a in alliances if a['cross_world']} - {world}):
                 changed = ensure_caravans(game, maps, _world=home, _linked=False) or changed
         return route_change or changed
-    adopted_year = max(game.player.age, game.economy_v2['last_year'])
+    adopted_year = game.player.age if settlement_region(game) else max(game.player.age, game.economy_v2['last_year'])
     state['worlds'][world] = dict(last_year=adopted_year, fleets={}, history=[])
     region = state['worlds'][world]
     for alliance in alliances:
@@ -114,7 +115,7 @@ def _candidate(game, maps, alliance, fleet):
     sites = sorted({alliance['hq'], *(row['location_id'] for row in alliance['offices'])})
     from .market_power import rival_targets
     sites = sorted(set(sites) | set(rival_targets(game, world)))
-    for site in {origin, *sites}:
+    for site in sorted({origin, *sites}):
         ensure_regional_market(game, maps, world, site)
     source = _market(game, world, origin)
     budget = balance(game, _cash(fleet))
@@ -336,6 +337,8 @@ def advance_caravans(game, maps):
     advance_network(game, maps)
     state = game.economy_v2['transport']
     for world, region in state['worlds'].items():
+        if not includes(game, world):
+            continue
         years = game.player.age - region['last_year']
         if years <= 0:
             continue

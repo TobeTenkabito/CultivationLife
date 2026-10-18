@@ -253,6 +253,13 @@ def command(deps: HeavensDependencies, game_id: str, command_seq: int,
     else:
         proposal.update(quote_action(deps, game, action, target_id, options))
     work = copy.deepcopy(game)
+    if action not in {'configure', 'dismiss'}:
+        # Establish the present before opening a new cross-world assignment.
+        # Existing tasks then keep only their causal endpoints current yearly.
+        from ...regional_context import synchronize
+        from ...regional_schema import WORLDS
+        synchronize(work, WORLDS)
+        proposal.update(quote_action(deps, work, action, target_id, options))
     try:
         extra = {}
         if action == 'configure':

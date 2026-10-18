@@ -31,37 +31,54 @@ def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> d
         raise ValueError(str(error)) from error
     if plan.status == "blocked":
         raise ValueError(plan.warning)
+    if plan.origin == plan.destination:
+        raise ValueError('已经身处此地')
+
+    journey = game.map_journey
+    if not journey or (journey['world'], journey['origin'], journey['destination'], journey['route']) != (
+            player.world, plan.origin, plan.destination, list(plan.route)):
+        journey = game.map_journey = dict(world=player.world, origin=plan.origin,
+            destination=plan.destination, route=list(plan.route), years=plan.years, completed=0)
+    remaining = journey['years'] - journey['completed']
 
     rng = decode_rng(game.seed, game.rng_state)
     start_age = player.age
     institution_world = player.world
     institution_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
     era_news: list[str] = []
-    for _ in range(plan.years):
+    for _ in range(remaining):
         advance_player_age(player)
+        journey['completed'] += 1
         if not advance_elapsed_year(deps.year, game, rng, era_news, encounters=False):
             break
-    completed = player.alive and game.pending_event is None and player.age - start_age == plan.years
+    same_origin = player.world == journey['world'] and player.location_id == journey['origin']
+    completed = player.alive and game.pending_event is None and same_origin and journey['completed'] == journey['years']
     if completed:
         player.location_id = plan.destination
+        game.map_journey = None
         deps._clear_market(game)
         if plan.status == "lethal":
             deps._die(game, plan.warning, "SYS_MAP_TRAVEL_DEATH")
             result = "dead"
-            summary = f"你强行踏上远途，历时 {plan.years} 年抵达边缘，却因{plan.warning}。"
+            summary = f"你强行踏上远途，累计行进 {journey['years']} 年抵达边缘，却因{plan.warning}。"
         else:
             deps._ensure_market(game, rng)
             result = "arrived"
             route_names = [deps.maps.location(player.world, node)["name"] for node in plan.route]
-            summary = f"你沿{'—'.join(route_names)}行进，耗时 {plan.years} 年抵达目的地。"
+            summary = f"你沿{'—'.join(route_names)}行进，累计耗时 {journey['years']} 年抵达目的地，本次续行 {player.age-start_age} 年。"
             summary += arrival_notice(game)
     else:
         result = "interrupted"
-        summary = f"远行在第 {player.age - start_age} 年被突发变故中断，你仍停留在原地。"
+        if not player.alive or not same_origin:
+            game.map_journey = None
+            summary = '远行因身死或所在位置改变而结束，旧路线失效。'
+        else:
+            summary = f"远行暂歇，已保留 {journey['completed']}/{journey['years']} 年路程；处理变故后选择同一目的地，继续余下 {journey['years']-journey['completed']} 年。"
         deps._ensure_market(game, rng)
     game.history.append(HistoryRecord(
         "SYS_MAP_TRAVEL", 1, player.age, "跨域远行", plan.destination, result, summary,
-        {"from":plan.origin, "to":plan.destination, "years":player.age - start_age},
+        {"from":plan.origin, "to":plan.destination, "years":player.age - start_age,
+         "completed_years":journey['completed'], "total_years":journey['years']},
         ["action", "travel", "map", f"world:{player.world}"],
     ))
     deps._finish_travel_time(game, start_age, institution_world, institution_unit, era_news, rng)

@@ -165,9 +165,15 @@ def test_isolation_and_duplicate_year_do_not_advance_twice(local):
     engine, initial, deps = local
     game = engine.store.load(initial.id)
     before = copy.deepcopy(get_echo(game.heavens_state['runtime'])['migration'])
+    age = game.world_npcs[identity].age
     game.player.world = 'rift'
+    game.player.age += 1
     engine._advance_world_year(game, decode_rng(game.seed, game.rng_state), [], encounters=False)
-    assert get_echo(game.heavens_state['runtime'])['migration'] == before
+    after = get_echo(game.heavens_state['runtime'])['migration']
+    assert after['elapsed'] == before['elapsed'] + 1
+    assert after['spent'] == before['spent'] + 1000
+    assert after['person_id'] == before['person_id'] == identity
+    assert game.world_npcs[identity].age == age + 1
     game = engine.store.load(initial.id)
     deps.advance_researchers(game)
     once = copy.deepcopy(game.heavens_state)

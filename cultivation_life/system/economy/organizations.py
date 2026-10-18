@@ -12,6 +12,7 @@ from .state import ensure_state, ensure_regional_market, reprice, commodity_cata
 from .local_market import quote
 from .estate_management import settlement_interval
 from .organization_accounts import key, faction_record, register, pay, procure, operating_services
+from ...regional_context import includes, region
 
 
 def ensure_organizations(game, maps=None):
@@ -19,19 +20,23 @@ def ensure_organizations(game, maps=None):
     adopted = 'organizations' not in game.economy_v2
     before = len(game.economy_v2.setdefault('organizations', {}))
     for entity in [*game.sects.values(), *([game.family] if game.family else [])]:
+        if not includes(game, entity.world):
+            continue
         if entity.extinct or entity.kind == 'institution' or entity.world not in game.economy_v2['worlds']:
             continue
         kind = 'family' if entity is game.family else 'sect'
-        if (entity is not game.family and entity.world != game.player.world
+        if (region(game) is None and entity is not game.family and entity.world != game.player.world
                 and key(kind, entity.id) not in game.economy_v2.get('organizations', {})):
             continue  # Adopt a region on first visit; previously visited regions keep running.
         register(game, kind, entity.id, entity.world)
-    if game.heavenly_court:
+    if game.heavenly_court and includes(game, 'celestial'):
         register(game, 'court', 'heavenly', 'celestial')
     for world in game.upper_institutions:
+        if not includes(game, world):
+            continue
         if world in WORLD_SYSTEMS['upper_institutions']['worlds']:
             register(game, 'upper', world, world)
-    if game.player.world == 'celestial':
+    if game.player.world == 'celestial' and includes(game, 'celestial'):
         register(game, 'yaochi', 'yaochi', 'celestial')
     changed = adopted or before != len(game.economy_v2['organizations'])
     if maps is not None:
@@ -170,6 +175,8 @@ def settle_institution(game, row, years):
 def advance_organizations(game, maps):
     ensure_organizations(game, maps)
     for row in game.economy_v2['organizations'].values():
+        if not includes(game, row['world']):
+            continue
         years = game.player.age - row['last_year']
         if years < settlement_interval(game, row):
             continue

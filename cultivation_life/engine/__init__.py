@@ -204,7 +204,14 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         if context:
             year_step(self._dependencies.heavens, game, context)
         from ..system.intrigue.custody import advance_prison_year
-        advance_prison_year(game)
+        if not game.world_simulation:
+            advance_prison_year(game)
+        notice = getattr(game, '_regional_notice', None)
+        if notice:
+            del game._regional_notice
+            if game.player.alive and not game.pending_event:
+                game.pending_event = notice
+                return False
         return result
 
     def travel_map(self, game_id: str, destination: str) -> dict[str, Any]:
@@ -562,6 +569,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return plan_world_transition(game, request, WORLD_SYSTEMS, self.maps)
 
     def _apply_world_transition(self, game, plan, *, entourage=None):
+        from .world.regions import attach
+        attach(self, game)
         from ..system.world_transition_system import WorldTransitionPorts, apply_world_transition
         from ..system.combat.npc_lifecycle import move_world
         ports = WorldTransitionPorts(self._cancel_auction_for_world_change, self._clear_market,
@@ -800,6 +809,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
                 trial_guard(games[game_id], active_command())
             return games[game_id]
         game = persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
+        from .world.regions import attach
+        attach(self, game)
         if active_command():
             guard(game, active_command())
             trial_guard(game, active_command())
@@ -1596,8 +1607,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def _maybe_founded_sect_pressure(self, game: GameState, rng: random.Random) -> bool:
         return world_factions._maybe_founded_sect_pressure(self._dependencies.world_factions, game, rng)
 
-    def _annual_sect_update(self, game: GameState, rng: random.Random) -> list[str]:
-        return world_factions._annual_sect_update(self._dependencies.world_factions, game, rng)
+    def _annual_sect_update(self, game: GameState, rng: random.Random, *, personal=True) -> list[str]:
+        return world_factions._annual_sect_update(self._dependencies.world_factions, game, rng, personal=personal)
 
     def _annual_race_diplomacy_update(self, game: GameState, rng: random.Random) -> list[str]:
         'Compatibility wrapper. Diplomacy now advances once per action unit, not once per year.'

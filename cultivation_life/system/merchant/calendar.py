@@ -14,12 +14,21 @@ from ..economy.caravans import treasury
 
 
 def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
+    from ...regional_context import region
     deps._ensure_merchant(game)
     state = game.merchant_state
-    if game.player.age <= state["last_age"]:
+    world_scope = region(game)
+    clock = game.world_simulation['regions'][world_scope] if world_scope else None
+    previous = clock.get('merchant_year', clock['year']) if clock is not None else state['last_age']
+    if game.player.age <= previous:
         return
-    state["last_age"] = game.player.age
+    if clock is not None:
+        clock['merchant_year'] = game.player.age
+    else:
+        state["last_age"] = game.player.age
     for world, alliances in state["worlds"].items():
+        if world_scope != world and (world_scope is not None or game.world_simulation):
+            continue
         for alliance in alliances:
             if game.player.age < alliance["next_policy_age"]:
                 continue
@@ -58,6 +67,8 @@ def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
                 alliance["relation"] = f"与{rival['name']}合作通商"
             else:
                 alliance["relation"] = f"与{rival['name']}竞争商路"
+    if world_scope is not None:
+        return
     for order in state["posted"]:
         if order["status"] not in {"open", "working"}:
             continue

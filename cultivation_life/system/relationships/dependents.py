@@ -67,6 +67,14 @@ def _maybe_transfer_player_dependency(
     return summary
 
 
+def _proposal_related(player, identity):
+    """Existing personal roles keep their own interactions, including stale offers."""
+    rows = [player.master, player.dao_companion, player.concubine_status, player.ghost_captor,
+            *player.dao_friends, *player.disciples, *player.concubines, *player.offspring]
+    return any(row and str(row.get('npc_id') or row.get('owner_id') or row.get('id', '')) == identity
+               for row in rows)
+
+
 def _maybe_concubine_proposal(deps: DependentLifecycleDependencies, game: GameState, rng: random.Random) -> bool:
     if game.settings.get("silent_events", False):
         return False
@@ -81,6 +89,7 @@ def _maybe_concubine_proposal(deps: DependentLifecycleDependencies, game: GameSt
         npc for npc in deps._all_world_npcs(game)
         if npc.alive and npc.world == player.world and npc.gender == "male"
         and deps._rank(npc) > deps._rank(player)
+        and not _proposal_related(player, npc.id)
     ]
     if not candidates:
         return False
@@ -112,6 +121,8 @@ def _resolve_concubine_proposal(
     name = str(runtime.get("owner_name", "一位高阶修士"))
     if not owner or not owner.alive or owner.world != game.player.world:
         return "owner_absent", "提议者已经离开当前界面，这桩拉拢自然作罢。"
+    if _proposal_related(game.player, owner.id):
+        return "relationship_changed", "你们已有特殊关系，这桩纳妾提议作罢。"
     if not accept:
         owner.affinity = float(owner.affinity or 0) - 8
         player = game.player

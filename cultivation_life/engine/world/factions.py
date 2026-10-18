@@ -191,7 +191,7 @@ def _maybe_founded_sect_pressure(deps: FactionDependencies, game: GameState, rng
     return True
 
 
-def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.Random) -> list[str]:
+def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.Random, *, personal=True) -> list[str]:
     from ...system.economy.organization_consumption import apply_longevity, support
     from ...system.organization_heritage import advance_member
     from ...system.family_membership import resolve_line
@@ -204,10 +204,15 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
         for npc in sect.npcs
     ) + sum(npc.alive and npc.world == "human" and npc.realm_index == 5 for npc in game.world_npcs.values())
     for sect_id, sect in game.sects.items():
+        from ...regional_context import includes, annual_person
+        if not includes(game, sect.world):
+            continue
         if sect.extinct:
             continue
         for npc in sect.npcs:
             if not npc.alive or npc.world != sect.world:
+                continue
+            if not annual_person(game, npc):
                 continue
             npc.age += 1
             if deps._intrigue_is_imprisoned(game, npc.id):
@@ -313,7 +318,14 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
                 ))
             deps._compact_sect_roster(game, sect)
 
-    news.extend(deps._annual_offspring_and_family_update(game, rng))
+    if personal:
+        news.extend(annual_player_faction(deps, game, rng))
+    return news
+
+
+def annual_player_faction(deps, game, rng):
+    news = deps._annual_offspring_and_family_update(game, rng)
+    player = game.player
     deps._annual_relationship_update(game, rng)
     faction_meta = deps._faction_meta(game, player.faction_id or "")
     if (
@@ -476,10 +488,15 @@ def _random_race_diplomacy_event(deps: FactionDependencies, game: GameState, rng
 
 def _random_sect_diplomacy_event(deps: FactionDependencies, game: GameState, rng: random.Random, news: list[str]) -> None:
     active = [sect for sect in game.sects.values() if not sect.extinct and sect.kind != "institution"]
-    worlds = [world for world in {sect.world for sect in active} if sum(sect.world == world for sect in active) >= 2]
+    worlds = [world for world in sorted({sect.world for sect in active}) if sum(sect.world == world for sect in active) >= 2]
     if not worlds:
         return
     world = rng.choice(worlds)
+    from ...regional_context import synchronize
+    synchronize(game, [world])
+    active = [sect for sect in active if not sect.extinct]
+    if sum(sect.world == world for sect in active) < 2:
+        return
     first, second = rng.sample([sect for sect in active if sect.world == world], 2)
     key = race_pair(first.id, second.id)
     relation = game.sect_relations.setdefault(key, {"affinity":0.0,"status":"neutral","since_age":game.player.age})
@@ -522,6 +539,10 @@ def _pressure_weak_npc_powers(deps: FactionDependencies, game: GameState, rng: r
     rules = WORLD_SYSTEMS["player_faction"]
     for sect in game.sects.values():
         if sect.extinct or sect.kind == "institution" or not sect.founded_by_npc:
+            continue
+        from ...regional_context import synchronize
+        synchronize(game, [sect.world])
+        if sect.extinct:
             continue
         threshold = (2 + int(WORLD_SYSTEMS['world_profiles'].get(sect.world,{}).get('tier',1))) if sect.kind == 'family' else deps._governance_threshold(sect.world)
         if any(npc.alive and npc.world == sect.world and npc.realm_index >= threshold for npc in deps._sect_members(game, sect)):

@@ -198,15 +198,22 @@ def test_captivity_preserves_cargo_until_actual_release(local):
     assert get_echo(game.heavens_state['runtime'])['freight']['status'] == 'completed'
 
 
-def test_isolation_freezes_cargo_and_disabled_generation_keeps_it(local):
+def test_player_isolation_preserves_remote_freight_and_disabled_generation_keeps_it(local):
     ready(local)
     start(local)
     engine, initial, _ = local
     game = engine.store.load(initial.id)
     before = copy.deepcopy(get_echo(game.heavens_state['runtime'])['freight'])
     game.player.world = 'rift'
+    game.player.age += 1
     engine._advance_world_year(game, decode_rng(game.seed, game.rng_state), [], encounters=False)
-    assert get_echo(game.heavens_state['runtime'])['freight'] == before
+    after = get_echo(game.heavens_state['runtime'])['freight']
+    # The original carrier is outside the player's instance: its funded task
+    # keeps running, while ownership and the one original material stay intact.
+    assert after['elapsed'] == before['elapsed'] + 1
+    assert after['spent'] == before['spent'] + 1000
+    assert after['material'] == before['material']
+    assert after['cargo_owner'] == before['cargo_owner'] == 'carrier'
     game = engine.store.load(initial.id)
     game.heavens_state['generation_enabled'] = False
     engine.store.save(game)

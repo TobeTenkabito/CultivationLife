@@ -213,24 +213,31 @@ def test_npc_reserved_lane_blocks_player_until_arrival(local):
     assert issue(local,'visit_return')['status']=='completed'
 
 
-def test_independent_space_and_early_personal_event_do_not_tick_outer_npc(local,monkeypatch):
+def test_independent_space_and_early_personal_event_keep_outer_npc_calendar(local,monkeypatch):
     prepared(local)
     engine,initial,deps=local
     issue(local,'mission_start')
     game=engine.store.load(initial.id)
     identity=get_echo(game.heavens_state['runtime'])['visitor_id']
     before=copy.deepcopy(get_echo(game.heavens_state['runtime'])['mission'])
-    # The engine's spatial annual branch owns only the player and local space.
+    age=game.world_npcs[identity].age
+    # A remote civilian journey retains its own original actor and paid year,
+    # even while the player is in an instance or pauses on a personal event.
     game.player.world='rift'
+    game.player.age+=1
     engine._advance_world_year(game,decode_rng(game.seed,game.rng_state),[],encounters=False)
-    assert get_echo(game.heavens_state['runtime'])['mission']==before
-    assert game.world_npcs[identity].age==engine.store.load(initial.id).world_npcs[identity].age
+    after=get_echo(game.heavens_state['runtime'])['mission']
+    assert after['elapsed']==before['elapsed']+1 and after['spent']==before['spent']+1000
+    assert game.world_npcs[identity].age==age+1
     def interrupt(work,rng):
         work.pending_event={'id':'mission_test_event'}
     monkeypatch.setattr(engine,'_check_tribulation',interrupt)
     issue(local,'mission_wait')
     paused=engine.store.load(initial.id)
-    assert get_echo(paused.heavens_state['runtime'])['mission']==before
+    after=get_echo(paused.heavens_state['runtime'])['mission']
+    assert after['elapsed']==before['elapsed']+1 and after['spent']==before['spent']+1000
+    assert paused.world_npcs[identity].age==age+1
+    assert paused.pending_event['id']=='mission_test_event'
 
 
 def test_disabled_generation_and_daily_hook_idempotency(local):

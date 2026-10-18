@@ -426,6 +426,8 @@ def verify(with_dlc):
             verify_secret_arts(base,folder)
             from scripts.verify_common_goods import verify_common_goods
             verify_common_goods(base,folder)
+            from scripts.verify_regional_calendar import verify_regional_calendar
+            verify_regional_calendar(base,folder,with_dlc)
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds={len(config['worlds'])}")
             return {'with_dlc': with_dlc, 'exe_sha256': verified_digest,
                     'base_version': config['base_game']['version']}

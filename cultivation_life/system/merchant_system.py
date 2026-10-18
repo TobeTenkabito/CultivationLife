@@ -117,6 +117,8 @@ def merchant_action(deps: MerchantActionDependencies, game_id, action, payload=N
 
 
 def _merchant_post(deps: MerchantActionDependencies, game, alliance, payload):
+    from ..regional_context import synchronize
+    synchronize(game, [game.player.world, payload.get('source_world', game.player.world)])
     state = game.merchant_state
     if sum(row["status"] in {"open", "working"} or bool(row.get('delivery_goods')) for row in state["posted"]) >= 12:
         raise ValueError("执行中及待领取委托合计最多12个，请先领取已有产物")

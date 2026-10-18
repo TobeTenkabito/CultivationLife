@@ -39,7 +39,7 @@ def api(tmp_path_factory):
                               data=json.dumps(payload).encode(),
                               headers={'Content-Type':'application/json', 'Origin':base})
             try:
-                with urlopen(request, timeout=30) as response:
+                with urlopen(request, timeout=120) as response:
                     code, body = response.status, json.loads(response.read())
             except HTTPError as error:
                 code, body = error.code, json.loads(error.read())

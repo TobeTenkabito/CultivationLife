@@ -1340,6 +1340,35 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("#inventory-toggle");
                 }
                 result.putString("content_naming_scope","Four themes; original saved IDs, fixed catalog labels, custom names, native manual upgrade and starter use, exact stock and no time charge");
+            } else if(phase.equals("regional-calendar")) {
+                for(String theme:new String[]{"a","b","d","f"}) {
+                    String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'远行原生验收',spirit_root:'none',path:'dao',seed:20261018})});return g.id;})()");
+                    python(assetText("regional_calendar_release.py")+"\nfrom cultivation_life import server\nprepare_regional_journey(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    js("document.documentElement.dataset.theme="+JSONObject.quote(theme)+";true");
+                    tapSelector("[data-panel-target=map]");waitForPanelReady("#map-card");
+                    tapSelector(".map-travel[data-destination=lanjiang_steppe]");
+                    waitForJs("!busy && game.pending_event?.id==='EVT_GUIXU_ANNOUNCE'","Native Guixu travel interruption",60000);
+                    check(Boolean.TRUE.equals(js("document.querySelector('.map-travel[data-destination=lanjiang_steppe]').disabled")),"Pending event disables travel");
+                    python(assetText("regional_calendar_release.py")+"\nfrom cultivation_life import server\ninspect_regional_journey(server.ENGINE,"+JSONObject.quote(id)+")");
+                    async("loadGame("+JSONObject.quote(id)+")");
+                    for(int step=0;step<20;step++) {
+                        if(Boolean.TRUE.equals(js("game.player.location_id==='lanjiang_steppe'")))break;
+                        if(Boolean.TRUE.equals(js("!!game.pending_event"))) {
+                            if(Boolean.TRUE.equals(js("document.querySelector('#map-card').classList.contains('panel-open')")))tapSelector("#map-toggle");
+                            tapSelector("#event-choices button:not([disabled])");waitForJs("!busy","Native notification submit",60000);
+                        } else {
+                            if(Boolean.TRUE.equals(js("!document.querySelector('#map-card').classList.contains('panel-open')")))tapSelector("[data-panel-target=map]");
+                            waitForPanelReady("#map-card");
+                            check(Boolean.TRUE.equals(js("document.querySelector('.map-travel[data-destination=lanjiang_steppe]').textContent.includes('继续')")),"Native remaining journey label");
+                            capture("regional-continue-"+theme+"-"+arguments.getString("orientation","portrait"));
+                            tapSelector(".map-travel[data-destination=lanjiang_steppe]");waitForJs("!busy","Native continuation",60000);
+                        }
+                    }
+                    python(assetText("regional_calendar_release.py")+"\nfrom cultivation_life import server\ninspect_regional_journey(server.ENGINE,"+JSONObject.quote(id)+",True)");
+                    if(Boolean.TRUE.equals(js("document.querySelector('#map-card').classList.contains('panel-open')")))tapSelector("#map-toggle");
+                }
+                result.putString("regional_calendar_scope","Real Guixu interruption and choices, reloaded saved progress, disabled travel and exact total years, original regional finance; four themes");
             } else if(phase.equals("common-goods")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'商品原生验收',spirit_root:'supreme_metal',path:'dao',seed:2151,preset_id:'nascent'})});return g.id;})()");

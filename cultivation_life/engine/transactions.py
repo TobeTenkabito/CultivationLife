@@ -53,6 +53,13 @@ def serialized_commands(cls):
                     token = _active_command.set(command.__name__)
                     try:
                         return command(self, *args, **kwargs)
+                    except Exception:
+                        # A failed command must not expose its unsaved working
+                        # state to a recovery GET in the same HTTP request.
+                        games = request_games(self)
+                        if games is not None:
+                            games.clear()
+                        raise
                     finally:
                         _active_command.reset(token)
             return run

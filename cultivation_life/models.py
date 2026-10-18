@@ -918,6 +918,8 @@ class GameState:
     market_age: int | None = None
     market_offers: list[dict[str, Any]] = field(default_factory=list)
     economy_v2: dict[str, Any] = field(default_factory=dict)
+    world_simulation: dict[str, Any] = field(default_factory=dict)
+    map_journey: dict[str, Any] | None = None
     auction_state: dict[str, Any] = field(default_factory=dict)
     exchange_state: dict[str, Any] = field(default_factory=dict)
     exchange_sequence: int = 0
@@ -1028,6 +1030,8 @@ class GameState:
             "market_age": self.market_age,
             "market_offers": self.market_offers,
             "economy_v2": self.economy_v2,
+            "world_simulation": self.world_simulation,
+            "map_journey": self.map_journey,
             "auction_state": self.auction_state,
             "exchange_state": self.exchange_state,
             "exchange_sequence": self.exchange_sequence,
@@ -1079,6 +1083,8 @@ class GameState:
         value = normalize_content_references(value)
         from .economy_schema import validate_economy
         validate_economy(value.get('economy_v2', {}), value.get('merchant_state', {}), value)
+        from .regional_schema import validate as validate_regional
+        validate_regional(value)
         if not value.get("voisinage_schema"):
             from .system.combat.migration import migrate
             value = migrate(value)
@@ -1113,6 +1119,8 @@ class GameState:
             market_age=value.get("market_age"),
             market_offers=value.get("market_offers", []),
             economy_v2=copy.deepcopy(value.get("economy_v2", {})),
+            world_simulation=copy.deepcopy(value.get("world_simulation", {})),
+            map_journey=copy.deepcopy(value.get("map_journey")),
             auction_state=dict(value.get("auction_state", {})),
             exchange_state=dict(value.get("exchange_state", {})),
             exchange_sequence=int(value.get("exchange_sequence", 0)),

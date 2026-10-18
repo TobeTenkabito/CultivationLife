@@ -122,6 +122,22 @@ def test_outbound_cancellation_after_location_change(site):
     assert not research_assignment(cancelled, identity)
 
 
+def test_returned_original_resident_is_not_aged_by_destination_catchup(site):
+    _, identity = start(site)
+    wait(site, 2)
+    act(site, 'ruins_enter')
+    wait(site, 8)
+    returned = wait(site, 1)
+    age, year = returned.world_npcs[identity].age, returned.player.age
+    assert returned.world_npcs[identity].world == 'human'
+    assert returned.world_simulation['regions']['human']['year'] == year
+    act(site, 'ruins_leave')
+    after = load(site)
+    assert after.player.age == year
+    assert after.world_npcs[identity].age == age
+    assert after.world_npcs[identity].alive
+
+
 def test_physical_meeting_after_return_and_frozen_other_instance(site):
     _, identity = start(site)
     wait(site, 2)

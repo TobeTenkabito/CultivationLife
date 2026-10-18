@@ -53,6 +53,8 @@ def _schedule(game, fleet):
 
 
 def dispatch(game, maps, fleet, destination, *, remittance_percent=25, order=None):
+    from ...regional_context import synchronize
+    synchronize(game, [fleet['world'], destination])
     if type(remittance_percent) is not int or remittance_percent not in {0, 25, 50, 100}:
         raise ValueError('索款比例须为 0、25、50 或 100')
     owner = alliance_at(game, fleet['world'], fleet['alliance_id'])

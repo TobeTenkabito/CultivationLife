@@ -33,6 +33,8 @@ class WorldYearDependencies:
     advance_war_finance: Callable[..., Any] | None = None
     advance_civilizations: Callable[..., Any] | None = None
     advance_strategic_wars: Callable[..., Any] | None = None
+    advance_regions: Callable[..., Any] | None = None
+    advance_player_society: Callable[..., Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

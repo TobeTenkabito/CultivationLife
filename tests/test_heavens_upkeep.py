@@ -166,7 +166,7 @@ def test_explicit_remote_facility_view_inside_anomaly_and_cancellation(local, ta
     assert get_echo(done.heavens_state['runtime'])['upkeep']['escrow']['refunded'] == 30000
 
 
-def test_death_before_world_settlement_refunds_without_one_extra_year(local):
+def test_death_after_elapsed_world_year_refunds_only_unspent_upkeep(local):
     _, material = ready(local)
     start(local, material)
     game = load(local)
@@ -175,7 +175,11 @@ def test_death_before_world_settlement_refunds_without_one_extra_year(local):
     dead = annual(local)
     row = get_echo(dead.heavens_state['runtime'])['upkeep']
     assert not dead.player.alive and row['status'] == 'failed'
-    assert row['progress'] == 0 and row['escrow']['refunded'] == 30000
+    # The year really elapsed before the lifespan check. Pay that year's
+    # original facility once, then refund every unused stone on death.
+    assert row['progress'] == 1 and row['escrow']['spent'] == 600
+    assert row['escrow']['refunded'] == 29400
+    assert row['escrow']['spent'] + row['escrow']['refunded'] == 30000
 
 
 def test_same_year_replay_and_ended_facility_do_not_repeat_effects(local):

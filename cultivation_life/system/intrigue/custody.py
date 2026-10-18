@@ -3,6 +3,7 @@ from ...content_registry import WORLD_SYSTEMS
 from ...npc_custody import is_free
 from ...spatial_people import accessible
 from .prison_state import is_imprisoned
+from ...regional_context import includes
 
 
 def _refresh_war_supply(game, identities):
@@ -29,9 +30,12 @@ def advance_prison_year(game):
     if not index:
         return
     released = set()
-    for key in set(index.values()):
+    for key in sorted(set(index.values())):
         record = state.get('factions', {}).get(key)
         if not record:
+            continue
+        entity = game.family if record['kind'] == 'family' and game.family and game.family.id == record['id'] else game.sects.get(record['id'])
+        if not includes(game, record.get('world') or getattr(entity, 'world', None)):
             continue
         remaining = []
         for row in record.get('prison', []):

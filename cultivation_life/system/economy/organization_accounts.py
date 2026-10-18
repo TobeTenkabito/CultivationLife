@@ -1,4 +1,5 @@
 """Original organizational treasuries and shared paid transfer operations."""
+from ...regional_context import adoption_year
 from ...content_registry import WORLD_SYSTEMS
 from .state import ensure_state
 from .ledger import account, balance, transfer_value
@@ -33,7 +34,7 @@ def register(game, kind, identity, world):
         if kind == 'yaochi':
             account(game, address)
         rows[address] = dict(kind=kind, identity=identity, world=world,
-            last_year=max(game.player.age, game.economy_v2['last_year']),
+            last_year=adoption_year(game),
             income=0, expense=0, shortfall=0, benefit_paid=0, benefit_due=0,
             produced=0, commodity=None, history=[], settlement_years=0, turnover=0)
         # A finite transfer funds institutions without a pre-existing treasury.
@@ -44,7 +45,7 @@ def register(game, kind, identity, world):
         # production work are transported by this fiscal address reconciliation.
         rows[address].update(world=world, production_credit=0,
             demand_credit={},cultivation_support={},maintenance_support={},breakthrough_support={},longevity_support={},supply_budget_credit=0,
-            last_year=max(game.player.age, game.economy_v2['last_year']))
+            last_year=adoption_year(game))
     return rows[address]
 
 

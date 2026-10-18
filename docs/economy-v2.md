@@ -94,7 +94,7 @@ Windows 验收使用重新构建的 EXE；Android 使用正式签名构建及独
 
 Windows EXE 通过带／不带 DLC 的真实 HTTP 验收；正式签名 Android APK 在 Android 12 模拟器通过四主题横竖屏原生点击、库存和重载检查。首次 Android 配置加载超时的记录予以保留，同一 APK 重试通过；未将首次失败计为通过。APK 的嵌入源码清单、实际安装包校验值及 EXE 验收收据均与最终构建相符。
 
-这是开发候选构建，未替换根目录启动器或发布新的发行压缩包。可运行 [Windows 候选启动器](../dist/launcher.exe) 体验，在“地图 → 本地市场”查看。验收日志、截图和构建 SHA-256 汇总见 [机器验收记录](../build/economy-v2-acceptance.json)。初始库存、回款深度与费率属于本轮试运行参数，下一轮随商队真实周转继续校准。
+这是开发候选构建，未替换根目录启动器或发布新的发行压缩包。可运行 [Windows 候选启动器](../dist/launcher.exe) 体验，在“地图 → 本地市场”查看。验收日志、截图和构建 SHA-256 汇总见 机器验收记录（历史归档路径 `build/economy-v2-acceptance.json`；当前工作区未附带该历史证据）。初始库存、回款深度与费率属于本轮试运行参数，下一轮随商队真实周转继续校准。
 
 ## 第二轮验收记录（2026-10-07）
 
@@ -102,7 +102,7 @@ Windows EXE 通过带／不带 DLC 的真实 HTTP 验收；正式签名 Android 
 
 真实浏览器覆盖四主题、桌面／窄屏的入盟、成员明细权限、地图物流及只读重载；第一轮市场买卖与旧事件恢复同时复测通过。Windows 候选 EXE 带／不带 DLC 验收通过，包含正式年度命令驱动商队持久状态。正式签名 APK 在 Android 12 模拟器上完成四主题横竖屏原生点击验收；并行回归期间出现的启动超时及测试诊断异常单独留档，回归结束后同一 APK 的独立复验通过，没有将超时当作通过。
 
-Windows、APK 嵌入源码及设备实际安装包校验值均匹配最终代码；[第二轮机器验收记录](../build/economy-v2-r2-acceptance.json) 汇总日志和校验值。截图位于 `build/economy-v2-r2-browser/` 与 `build/economy-v2-r2-native/`。第二轮候选构建随后由第三轮候选更新，根目录启动器和正式发行压缩包未替换。
+Windows、APK 嵌入源码及设备实际安装包校验值均匹配最终代码；第二轮机器验收记录（历史归档路径 `build/economy-v2-r2-acceptance.json`；当前工作区未附带该历史证据） 汇总日志和校验值。截图位于 `build/economy-v2-r2-browser/` 与 `build/economy-v2-r2-native/`。第二轮候选构建随后由第三轮候选更新，根目录启动器和正式发行压缩包未替换。
 
 ## 第三轮验收记录（2026-10-07）
 
@@ -110,7 +110,7 @@ Windows、APK 嵌入源码及设备实际安装包校验值均匹配最终代码
 
 真实浏览器完成四主题 × 桌面／窄屏的本体家族注资、真实产出、当年经营禁用、宗门账目与只读重载；原市场买卖、过期报价恢复及旧事件提交／后续奖励同时复测。Windows 候选 EXE 带／不带 DLC 验收通过，检查正式年度命令下的组织产出及唯一府库。正式签名 Android APK 在 Android 12 模拟器完成四主题横竖屏的原生注资、账目展开、余额持久化与布局检查，两次原生验收均直接通过。
 
-EXE 收据、APK 的 606 项嵌入输入和设备实际安装包均与最终源码对应。[第三轮机器验收记录](../build/economy-v2-r3-acceptance.json) 保存日志与校验值；截图位于 `build/economy-v2-r3-browser/` 和 `build/economy-v2-r3-native/`。`dist/launcher.exe` 为第三轮开发候选，Android 候选位于 `android/app/build/outputs/apk/release/app-release.apk`。本轮未发布新版本，经济参数可继续随第四轮联动试运行调整。
+EXE 收据、APK 的 606 项嵌入输入和设备实际安装包均与最终源码对应。第三轮机器验收记录（历史归档路径 `build/economy-v2-r3-acceptance.json`；当前工作区未附带该历史证据） 保存日志与校验值；截图位于 `build/economy-v2-r3-browser/` 和 `build/economy-v2-r3-native/`。`dist/launcher.exe` 为第三轮开发候选，Android 候选位于 `android/app/build/outputs/apk/release/app-release.apk`。本轮未发布新版本，经济参数可继续随第四轮联动试运行调整。
 
 ## 第四轮：个人账目、组织商队与跨界商盟
 
@@ -160,7 +160,7 @@ EXE 收据、APK 的 606 项嵌入输入和设备实际安装包均与最终源�
 
 Windows 候选 EXE 完成带／不带 DLC 的真实 HTTP 验收。正式签名 Android APK 在 Android 12 模拟器完成四主题横竖屏原生点击组队、聘卫、追加资金、个人流水及重载，两个方向均直接通过。APK 的 614 项嵌入输入、设备实际安装包和 EXE 收据均对应最终源码。
 
-[第四轮机器验收记录](../build/economy-v2-r4-acceptance.json) 汇总源码及构建 SHA-256、日志和测试结果。页面截图在 `build/economy-v2-r4-browser/`，原生截图在 `build/economy-v2-r4-native/`。[Windows 候选启动器](../dist/launcher.exe) 与 [Android 签名候选](../android/app/build/outputs/apk/release/app-release.apk) 可用于体验；本轮没有替换根目录启动器或发布新的发行压缩包。
+第四轮机器验收记录（历史归档路径 `build/economy-v2-r4-acceptance.json`；当前工作区未附带该历史证据） 汇总源码及构建 SHA-256、日志和测试结果。页面截图在 `build/economy-v2-r4-browser/`，原生截图在 `build/economy-v2-r4-native/`。[Windows 候选启动器](../dist/launcher.exe) 与 [Android 签名候选](../android/app/build/outputs/apk/release/app-release.apk) 可用于体验；本轮没有替换根目录启动器或发布新的发行压缩包。
 
 第四轮验收时总部仍固定在成立地图；这一历史限制由下述补完第一步解除。复杂矿区产权、征服后的产业接管与机构反垄断干预留在补完第二、三步。
 
@@ -192,7 +192,7 @@ Windows 候选 EXE 完成带／不带 DLC 的真实 HTTP 验收。正式签名 A
 
 Windows 候选 EXE 带／不带 DLC 均通过包内真实 HTTP 迁址、通道建设、派货、撤回及修复。签名 Android 候选 APK 的 616 项输入与最终源码一致，安装包摘要一致；`economy-expansion` 原生阶段在 Android 12 专用模拟器完成四主题横竖屏实际点击和重载。首次竖屏尝试在配置加载前超时，诊断日志保留；重启后的竖屏与横屏均使用同一签名包通过，不将首次超时计为通过。
 
-[补完第一步机器验收记录](../build/economy-expansion-step1-acceptance.json) 绑定最终源码、EXE、APK、日志和截图。当前交付为开发候选，更新 `dist/launcher.exe` 与 Android release APK，未替换根目录启动器、未制作正式发行压缩包。费用、风险及贸易利润仍使用可调试运行参数；完整产业与战争／垄断机制属于后续第二、三步。
+补完第一步机器验收记录（历史归档路径 `build/economy-expansion-step1-acceptance.json`；当前工作区未附带该历史证据） 绑定最终源码、EXE、APK、日志和截图。当前交付为开发候选，更新 `dist/launcher.exe` 与 Android release APK，未替换根目录启动器、未制作正式发行压缩包。费用、风险及贸易利润仍使用可调试运行参数；完整产业与战争／垄断机制属于后续第二、三步。
 
 ## 经济补完第二步：主动商路、产业产权与实物生产
 
@@ -226,7 +226,7 @@ Windows 候选 EXE 带／不带 DLC 均通过包内真实 HTTP 迁址、通道�
 
 Windows 候选 EXE 带／不带 DLC 两组包内真实 HTTP 验收通过，包含产权、资金、年度生产及指定商路派遣。签名 Android 候选在 Android 12 专用模拟器完成四主题横竖屏的原生购置、注资、投产、订单保存／派遣、重复操作禁用、布局与重载；两个最终方向均通过。前两次尝试在启动配置加载前耗尽共享等待时间，未进入玩法；测试脚本改为 WebView 就绪后给页面配置独立加载时限，并明确区分启动超时与版本错误，原始诊断保留。
 
-APK 的 **625 项嵌入输入**、设备实际安装包与当前源码一致，签名验证通过；Windows 收据也绑定最终源码与二进制摘要。[第二步机器验收记录](../build/economy-expansion-step2-acceptance.json) 汇总日志、校验值和截图路径。候选为 [Windows EXE](../dist/launcher.exe) 与 [Android 签名 APK](../android/app/build/outputs/apk/release/app-release.apk)，未替换根目录启动器或制作正式发行包。第三步的战争产权接管与市场支配反制尚待后续开发。
+APK 的 **625 项嵌入输入**、设备实际安装包与当前源码一致，签名验证通过；Windows 收据也绑定最终源码与二进制摘要。第二步机器验收记录（历史归档路径 `build/economy-expansion-step2-acceptance.json`；当前工作区未附带该历史证据） 汇总日志、校验值和截图路径。候选为 [Windows EXE](../dist/launcher.exe) 与 [Android 签名 APK](../android/app/build/outputs/apk/release/app-release.apk)，未替换根目录启动器或制作正式发行包。第三步的战争产权接管与市场支配反制尚待后续开发。
 
 ## 经济补完第三步：战争产权、商势与本地竞争（v2.2.0）
 
@@ -254,7 +254,7 @@ Android 正式签名包在 Android 12／API 31、x86_64 专用模拟器完成 **
 
 最终包验收期间，上界邻域旧脚本向空天庭状态直接写入选举字段，制造了没有府库的无效测试机构；修正为仅清理已存在天庭的选举后，上界邻域、合练与存档三阶段重新通过。只重建测试程序，游戏 APK 摘要保持不变，未放宽存档校验或替换玩法断言。Windows → 签名 Android → Windows 的存档往返检查通过，全部 JSON 字段一致；原生大存档、分段传输、剪贴板与替换确认通过。未进行 Android 实体手机验收。
 
-APK 的 **630 项嵌入输入**与最终源码一致，设备安装摘要、正式签名、版本信息、release lint 和压缩包完整性均通过发行脚本。发布本体 **v2.2.0**、Android **2.2.0-android.37（versionCode 37）**。[第三步机器验收记录](../build/economy-expansion-step3-acceptance.json) 绑定回归证据、原生及浏览器日志和最终发行文件摘要；界面截图在 `build/economy-governance-browser/` 与 `build/android-220-screens/`。正式包为 Windows 发行包（历史发行包 `浮生问道-v2.2.0-Windows.zip`）、Android 安装包（历史发行包 `浮生问道-v2.2.0-Android12.apk`） 及 Android 发行包（历史发行包 `浮生问道-v2.2.0-Android12.zip`）。
+APK 的 **630 项嵌入输入**与最终源码一致，设备安装摘要、正式签名、版本信息、release lint 和压缩包完整性均通过发行脚本。发布本体 **v2.2.0**、Android **2.2.0-android.37（versionCode 37）**。第三步机器验收记录（历史归档路径 `build/economy-expansion-step3-acceptance.json`；当前工作区未附带该历史证据） 绑定回归证据、原生及浏览器日志和最终发行文件摘要；界面截图在 `build/economy-governance-browser/` 与 `build/android-220-screens/`。正式包为 Windows 发行包（历史发行包 `浮生问道-v2.2.0-Windows.zip`）、Android 安装包（历史发行包 `浮生问道-v2.2.0-Android12.apk`） 及 Android 发行包（历史发行包 `浮生问道-v2.2.0-Android12.zip`）。
 
 
 ## v2.4.0 经营补充
@@ -276,4 +276,9 @@ NPC 招新须无供养缺口，且府库满足当前成员及新弟子三年预�
 
 正式签名 Android 2.4.0-android.39（versionCode 39）在专用 Android 12／API 31、x86_64 模拟器完成 **34 个原生阶段**，新开局、战争、经济、商路与专用面板覆盖横竖屏。未进行实体手机验收。APK 的 **651 项嵌入输入**与当前源码一致，设备安装摘要、签名、版本、release lint 及压缩包完整性均验证。Windows → Android → Windows 存档往返的全部 JSON 字段一致；测试使用独立存档。
 
-[本次机器验收记录](../build/release-240-acceptance.json) 汇总最终源码摘要、回归、浏览器、原生阶段和发行文件校验值。界面截图位于 `build/release-240-browser/` 与 `build/android-240-screens/`。存档结构保持 9，最低支持结构 8。
+本次机器验收记录（历史归档路径 `build/release-240-acceptance.json`；当前工作区未附带该历史证据） 汇总最终源码摘要、回归、浏览器、原生阶段和发行文件校验值。界面截图位于 `build/release-240-browser/` 与 `build/android-240-screens/`。存档结构保持 9，最低支持结构 8。
+
+
+## v2.16.0 地区时间更新
+
+首次到访才登记经济的旧策略已由[地区历法](regional-calendar.md)替代：经济、补员和风险统一冻结或逐年推进；依赖地区先同步，未采用之前不倒算历史收益。

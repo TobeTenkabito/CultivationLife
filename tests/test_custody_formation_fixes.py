@@ -92,7 +92,7 @@ def test_player_prison_year_ticks_npc_sentence_without_double_deducting_player(a
     assert saved.intrigue_state['factions']['sect:audit_org']['prison'][0]['sentence_remaining']==1
 
 
-def test_spatial_year_settles_original_world_prison_once(api):
+def test_spatial_year_defers_original_world_prison_until_catchup(api):
     from test_spatial_talismans import occupy
     engine, act = api
     game, identity = organization_game(engine)
@@ -103,6 +103,12 @@ def test_spatial_year_settles_original_world_prison_once(api):
     act(game.id, 'spatial-action', action='explore')
     saved = engine._load(game.id)
     assert saved.player.age==before.player.age+1
+    # The isolated player has no live task depending on this original prison.
+    # Its society and sentence freeze together, then settle the real year once.
+    assert saved.intrigue_state['factions']['sect:audit_org']['prison'][0]['sentence_remaining']==2
+    from cultivation_life.engine.world import regions
+    regions.synchronize(engine, saved, ['human'])
+    regions.synchronize(engine, saved, ['human'])
     assert saved.intrigue_state['factions']['sect:audit_org']['prison'][0]['sentence_remaining']==1
 
 

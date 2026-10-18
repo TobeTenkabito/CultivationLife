@@ -232,7 +232,7 @@ def test_command_save_failure_rolls_back_autonomous_discovery(site):
 
 
 @pytest.mark.parametrize('reason', ['death', 'event'])
-def test_early_year_interrupt_cannot_run_npc_discovery(site, reason):
+def test_personal_year_interrupt_preserves_remote_calendar_and_hidden_discovery(site, reason):
     game, identity = setup(site)
     if reason == 'death':
         game.player.lifespan = game.player.age+1
@@ -240,9 +240,18 @@ def test_early_year_interrupt_cannot_run_npc_discovery(site, reason):
         game.pending_event = {'id':'test-interruption', 'title':'测试中断', 'body':'请先处理', 'choices':[]}
     site[0].store.save(game)
     stopped = annual(site)
-    assert not survey.get(stopped)
-    assert 'survey_discovery_window' not in stopped.heavens_state['runtime']
-    assert stopped.world_npcs[identity].age == game.world_npcs[identity].age
+    # The elapsed year belongs to the world even if personal play stops.
+    # Autonomous activity must not skip finance, NPC ageing or its own clock.
+    discovery = survey.get(stopped)
+    assert discovery['autonomous'] and not discovery['introduced']
+    assert discovery['started_at'] == 100 and discovery['elapsed'] == 0
+    assert stopped.heavens_state['runtime']['survey_discovery_window'] == 1
+    assert stopped.world_npcs[identity].age == game.world_npcs[identity].age + 1
+    assert not stopped.heavens_state['runtime']['ruins']['player_known']
+    if reason == 'death':
+        assert not stopped.player.alive
+    else:
+        assert stopped.pending_event['id'] == 'test-interruption'
 
 
 def test_custody_and_player_relationships_are_not_autonomous_candidates(site):

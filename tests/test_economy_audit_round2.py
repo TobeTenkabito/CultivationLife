@@ -150,15 +150,21 @@ def test_frozen_controller_cannot_spend_after_losing_control_while_still_a_membe
     assert engine.store._path(game.id).read_bytes() == frozen
 
 
-def open_auction(engine, game):
-    engine._schedule_auction(game, random.Random(3))
+def open_auction(engine, game, rank=None):
+    rng = random.Random(3)
+    engine._schedule_auction(game, rng)
+    while rank is not None and rank not in game.auction_state['rank_band']:
+        engine._schedule_auction(game, rng)
     game.player.location_id = game.auction_state['location_id']
     engine._open_auction(game, random.Random(1001))
     engine.store.save(game)
     return game
 
 
-def consign(engine, game, item='econ_human_5_artifact_attack'):
+def consign(engine, game, item=None):
+    # Respect the scheduled fair's real rank band; settlement is independent of tier.
+    if item is None:
+        item = f"econ_human_{max(game.auction_state['rank_band'])}_artifact_attack"
     add_item(game.player, item)
     engine.store.save(game)
     engine.consign_auction_item(game.id, item, engine._catalog_price('item', item) * 5)
@@ -226,7 +232,7 @@ def test_underfunded_crafted_consignment_returns_the_original_instance(economy):
     game = engine._load(game.id)
     game.pending_event = None
     original = copy.deepcopy(game.player.crafted_artifacts[0])
-    game = open_auction(engine, game)
+    game = open_auction(engine, game, rank=original['scaling_realm_index'])
     engine.crafted_artifact_action(game.id, original['id'], 'consign', original['anchor_value'] * 5)
     game = engine._load(game.id)
     assert not game.player.crafted_artifacts

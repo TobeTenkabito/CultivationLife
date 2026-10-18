@@ -319,6 +319,19 @@ def test_normal_growth_beyond_route_capacity_releases_deployment_without_faking_
 
 def test_actual_road_and_recon_route_roundtrip_uses_one_npc_year_per_elapsed_year(ready):
     work = load(ready)
+    # Exercise every real road/crossing/scouting/return phase from a nearby
+    # valid base. Hundred-year duration is covered by the regional benchmark;
+    # this command test need not serialize a 60-year road in both directions.
+    faction = work.sects['blood_prison']
+    old_home = faction.location_id
+    roads = [ready[0].maps.travel_plan('demon', place['id'], ROUTE.source_location, 4)
+             for place in ready[0].maps.worlds['demon']['locations']
+             if place['id'] != ROUTE.source_location and not place.get('min_realm_index')]
+    road = min((p for p in roads if p.status == 'ok' and p.years > 0), key=lambda p:p.years)
+    faction.location_id = road.origin
+    for npc in faction.npcs:
+        if npc.location_id in {None, old_home}:
+            npc.location_id = faction.location_id
     issuer = ready[2].frontier_authority(work)['issuer_id']
     # Use the supported existing-office path so an unrelated strong recruit
     # does not replace the authorizer through the native leadership fallback.

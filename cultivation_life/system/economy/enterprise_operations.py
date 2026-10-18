@@ -145,9 +145,12 @@ def sell_stock(game, row, market):
 
 
 def advance_estates(game, maps):
+    from ...regional_context import includes
     from .economy_trust import prepare, grow
     # Acquisitions become active on the next tick, never recursively this tick.
     for row in list(estates(game).values()):
+        if not includes(game, row['world']):
+            continue
         years = game.player.age - row['last_year']
         if years <= 0:
             continue

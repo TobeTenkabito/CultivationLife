@@ -15,12 +15,20 @@ def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     """Isolated year: same personal breakthrough, thunder and lifespan order."""
     p = game.player
     from ...system.economy.state import advance_economy
-    advance_economy(game)
+    if deps.advance_regions:
+        deps.advance_regions(game, [])
+        deps._advance_merchant_year(game)
+        if deps.advance_strategic_wars:
+            deps.advance_strategic_wars(game, rng)
+        if deps.advance_researchers:
+            deps.advance_researchers(game)
+    else:
+        advance_economy(game)
     if deps.advance_war_finance:
         deps.advance_war_finance(game)
-    if deps.advance_caravans:
+    if deps.advance_caravans and not deps.advance_regions:
         deps.advance_caravans(game)
-    if deps.advance_organizations:
+    if deps.advance_organizations and not deps.advance_regions:
         deps.advance_organizations(game)
     emit(game, 'time.elapsed', years=1, unit_years=WORLD_SYSTEMS['time_units'][str(p.realm_index)])
     deps._advance_buddhist_year(game)
@@ -28,7 +36,7 @@ def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     deps._advance_monster_bloodline_year(game)
     deps._annual_demonic_update(game, rng)
     deps._annual_spirit_field_update(p)
-    if deps.advance_civilizations:
+    if deps.advance_civilizations and not deps.advance_regions:
         deps.advance_civilizations(game)
     if not p.alive or game.pending_event:
         return False
@@ -49,16 +57,24 @@ def _advance_world_year(
 ) -> bool:
     player = game.player
     from ...system.economy.state import advance_economy
-    advance_economy(game)
+    if deps.advance_regions:
+        deps.advance_regions(game, era_news)
+    else:
+        advance_economy(game)
     if deps.advance_war_finance:
         deps.advance_war_finance(game)
-    if deps.advance_caravans:
+    if deps.advance_caravans and not deps.advance_regions:
         deps.advance_caravans(game)
-    if deps.advance_organizations:
+    if deps.advance_organizations and not deps.advance_regions:
         deps.advance_organizations(game)
     emit(game, "time.elapsed", years=1, unit_years=WORLD_SYSTEMS["time_units"][str(player.realm_index)])
     deps._advance_buddhist_year(game)
     deps._advance_merchant_year(game)
+    if deps.advance_regions:
+        if deps.advance_strategic_wars:
+            deps.advance_strategic_wars(game, rng)
+        if deps.advance_researchers:
+            deps.advance_researchers(game)
     era_news.extend(deps._advance_sage_year(game, rng))
     deps._advance_ghost_phase_two_year(game, rng)
     deps._advance_monster_bloodline_year(game)
@@ -71,13 +87,16 @@ def _advance_world_year(
     if player.lifespan is not None and current_body_age(player) >= player.lifespan:
         deps._die(game, "寿元已尽", "SYS_LIFESPAN")
         return False
-    era_news.extend(deps._annual_sect_update(game, rng))
-    era_news.extend(deps._annual_world_npc_update(game, rng))
-    if deps.advance_strategic_wars:
+    if deps.advance_regions:
+        era_news.extend(deps.advance_player_society(game, rng))
+    else:
+        era_news.extend(deps._annual_sect_update(game, rng))
+        era_news.extend(deps._annual_world_npc_update(game, rng))
+    if deps.advance_strategic_wars and not deps.advance_regions:
         deps.advance_strategic_wars(game, rng)
-    if deps.advance_civilizations:
+    if deps.advance_civilizations and not deps.advance_regions:
         deps.advance_civilizations(game)
-    if deps.advance_researchers:
+    if deps.advance_researchers and not deps.advance_regions:
         deps.advance_researchers(game)
     deps._annual_demonic_update(game, rng)
     deps._annual_spirit_field_update(player)
@@ -86,7 +105,7 @@ def _advance_world_year(
     deps._resolve_breakthroughs(game, rng)
     if not player.alive or game.pending_event:
         return False
-    if deps._advance_guixu_calendar(game, rng, era_news):
+    if not deps.advance_regions and deps._advance_guixu_calendar(game, rng, era_news):
         return False
     if not encounters or game.settings.get("silent_events", False):
         return True

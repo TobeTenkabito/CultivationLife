@@ -63,10 +63,17 @@ def advance_economy(game):
     """One world clock, also used in isolated spaces; no travel or RNG effects."""
     ensure_state(game)
     state = game.economy_v2
-    years = game.player.age - state['last_year']
-    if years <= 0:
-        return False
+    from ...regional_context import includes, region
+    if game.world_simulation and region(game) is None:
+        return False  # The regional scheduler owns growth; UI/load never unfreezes it.
+    changed = False
     for world, row in state['worlds'].items():
+        if not includes(game, world):
+            continue
+        years = game.player.age - row['last_year']
+        if years <= 0:
+            continue
+        changed = True
         previous = row['scale']
         row['scale'] = growth(previous, years, settings()['growth_rate'], settings()['growth_cap'])
         row['last_year'] = game.player.age
@@ -82,11 +89,11 @@ def advance_economy(game):
         state['issued'] += amount
         row['history'].append([game.player.age, round(row['scale'], 6)])
         del row['history'][:-24]
-    state['last_year'] = game.player.age
+    state['last_year'] = max(state['last_year'], game.player.age)
     market = local_market(game)
-    if market:
+    if market and includes(game, market['world']):
         settle_market(game, market)
-    return True
+    return changed
 
 
 @lru_cache(maxsize=32)

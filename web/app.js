@@ -2806,7 +2806,8 @@ function renderMap(map, auction) {
     button.className = 'map-travel'; button.dataset.destination = location.id;
     button.dataset.travelStatus = location.travel_status;
     button.dataset.unavailable = location.current ? '1' : '0';
-    button.textContent = location.current ? '所在地' : location.travel_status === 'lethal' ? '强行前往（必死）' : `前往 · ${location.travel_years}年`;
+    button.textContent = location.current ? '所在地' : location.travel_status === 'lethal' ? '强行前往（必死）' : `${location.travel_progress ? '继续前往' : '前往'} · ${location.travel_years}年`;
+    if (location.travel_progress) route.textContent += ` · 已走 ${location.travel_progress.completed}/${location.travel_progress.total} 年（更换目的地将放弃进度）`;
     button.disabled = busy || location.current || !!game.pending_event || !!game.imprisonment || game?.ghost_system?.phase_two?.state === 'controlled' || !game.player.alive;
     button.onclick = () => {
       const travel = () => mutate(`/api/games/${game.id}/map-travel`, {destination:location.id});

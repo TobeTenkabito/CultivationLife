@@ -195,12 +195,17 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
         npc.alive and npc.world == "human" and npc.realm_index == 5
         for sect in game.sects.values() for npc in sect.npcs
     )
+    from ...regional_context import annual_person, includes, region
     simulated_npcs = [*game.world_npcs.values(), *game.notable_npcs.values()]
+    if region(game) is not None:
+        simulated_npcs.extend(n for s in game.sects.values() for n in s.npcs if n.world != s.world)
     for npc in simulated_npcs:
         from ...spatial_people import instance_of
         if instance_of(game, npc.id):
             continue
         if not npc.alive:
+            continue
+        if not annual_person(game, npc):
             continue
         npc.age += 1
         if deps._intrigue_is_imprisoned(game, npc.id):
@@ -259,6 +264,7 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
 
 
 def _maybe_notorious_npc_killing(deps: NpcDependencies, game: GameState, rng: random.Random, news: list[str]) -> None:
+    from ...regional_context import includes
     from ...person_assignments import in_transit
     from ...spatial_people import instance_of
     protected = {
@@ -267,7 +273,7 @@ def _maybe_notorious_npc_killing(deps: NpcDependencies, game: GameState, rng: ra
     }
     villains = [
         npc for npc in game.world_npcs.values()
-        if npc.alive and not npc.encountered_player and not deps._intrigue_is_imprisoned(game, npc.id)
+        if includes(game, npc.world) and npc.alive and not npc.encountered_player and not deps._intrigue_is_imprisoned(game, npc.id)
         and not instance_of(game, npc.id) and not in_transit(game, npc.id)
         and (npc.notorious or npc.path == "demonic")
         and rng.random() < (0.014 if npc.path == "demonic" else 0.004)
@@ -299,9 +305,10 @@ def _maybe_notorious_npc_killing(deps: NpcDependencies, game: GameState, rng: ra
 
 
 def _all_world_npcs(game: GameState) -> list[SectNpc]:
+    from ...regional_context import region
     from ...spatial_people import people, instance_of
     from ...person_assignments import in_transit
-    if game.player.world in {'lost', 'rift'}:
+    if game.player.world in {'lost', 'rift'} and region(game) is None:
         return people(game)
     return [npc for npc in [*game.world_npcs.values(), *game.notable_npcs.values(), *(npc for sect in game.sects.values() for npc in sect.npcs)]
             if not instance_of(game, npc.id) and not in_transit(game, npc.id)]

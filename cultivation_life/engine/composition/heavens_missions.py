@@ -77,7 +77,11 @@ def bind_missions(engine, ports):
         frontier.year_step(ports(), game)
         campaign.year_step(ports(), game)
         upkeep.year_step(ports(), game)
-        ports().advance_survey(game, True)
+        # Surveys retain their documented outside/instance clocks. Running
+        # external freight and campaigns during isolation must not advance
+        # a survey's outside phase on the player's instance year.
+        if game.player.world not in {'lost', 'rift'}:
+            ports().advance_survey(game, True)
         autonomy.year_step(ports(), game)
         missions.year_step(ports(), game)
         runtime = game.heavens_state.get('runtime')

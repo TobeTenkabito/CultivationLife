@@ -1,0 +1,816 @@
+{
+  "base_version": "2.16.0",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.1.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.0",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.5.0",
+    "tianji-artifacts": "2.2.0",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 2093,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_regional_calendar",
+      "log": "build\\browser_regional_calendar-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_economy_trust",
+      "log": "build\\browser_economy_trust-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_strategic_war",
+      "log": "build\\browser_strategic_war-2160.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-2160.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-2160.log",
+  "inputs_sha256": "a807450fdacdcb3201614cc250f6406a9b26150570cad06a607df6064a15588c",
+  "performance": {
+    "version": "2.16.0",
+    "source_sha256": "a807450fdacdcb3201614cc250f6406a9b26150570cad06a607df6064a15588c",
+    "years": 100,
+    "repeats": 3,
+    "full_state_equal": true,
+    "runs": [
+      {
+        "repeat": 0,
+        "mode": "all-live",
+        "away_seconds": 38.96281599999929,
+        "upper_reentry_seconds": 0.00013530001160688698,
+        "before_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "after_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "clocks": {
+          "asura": 391,
+          "celestial": 391,
+          "demon": 391,
+          "hell": 391,
+          "human": 391,
+          "monster_realm": 391,
+          "nether": 391,
+          "phantom_underworld": 391,
+          "reincarnation": 391,
+          "spirit": 391,
+          "true_demon": 391
+        }
+      },
+      {
+        "repeat": 0,
+        "mode": "frozen",
+        "away_seconds": 23.94409550000273,
+        "upper_reentry_seconds": 10.495090600001276,
+        "before_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 997,
+          "alive": 902,
+          "cash": 24000005172200,
+          "issued": 0,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "after_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "clocks": {
+          "asura": 291,
+          "celestial": 291,
+          "demon": 391,
+          "hell": 391,
+          "human": 391,
+          "monster_realm": 391,
+          "nether": 291,
+          "phantom_underworld": 391,
+          "reincarnation": 291,
+          "spirit": 391,
+          "true_demon": 391
+        }
+      },
+      {
+        "repeat": 1,
+        "mode": "frozen",
+        "away_seconds": 23.89088510000147,
+        "upper_reentry_seconds": 10.814278799996828,
+        "before_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 997,
+          "alive": 902,
+          "cash": 24000005172200,
+          "issued": 0,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "after_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "clocks": {
+          "asura": 291,
+          "celestial": 291,
+          "demon": 391,
+          "hell": 391,
+          "human": 391,
+          "monster_realm": 391,
+          "nether": 291,
+          "phantom_underworld": 391,
+          "reincarnation": 291,
+          "spirit": 391,
+          "true_demon": 391
+        }
+      },
+      {
+        "repeat": 1,
+        "mode": "all-live",
+        "away_seconds": 40.107136199992965,
+        "upper_reentry_seconds": 0.00011979999544564635,
+        "before_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "after_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "clocks": {
+          "asura": 391,
+          "celestial": 391,
+          "demon": 391,
+          "hell": 391,
+          "human": 391,
+          "monster_realm": 391,
+          "nether": 391,
+          "phantom_underworld": 391,
+          "reincarnation": 391,
+          "spirit": 391,
+          "true_demon": 391
+        }
+      },
+      {
+        "repeat": 2,
+        "mode": "all-live",
+        "away_seconds": 40.68168829999922,
+        "upper_reentry_seconds": 0.00011049999739043415,
+        "before_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "after_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "clocks": {
+          "asura": 391,
+          "celestial": 391,
+          "demon": 391,
+          "hell": 391,
+          "human": 391,
+          "monster_realm": 391,
+          "nether": 391,
+          "phantom_underworld": 391,
+          "reincarnation": 391,
+          "spirit": 391,
+          "true_demon": 391
+        }
+      },
+      {
+        "repeat": 2,
+        "mode": "frozen",
+        "away_seconds": 24.377002300010645,
+        "upper_reentry_seconds": 11.163767300007748,
+        "before_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 997,
+          "alive": 902,
+          "cash": 24000005172200,
+          "issued": 0,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "after_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1376,
+          "alive": 1242,
+          "cash": 24001371621050,
+          "issued": 1366448850,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "clocks": {
+          "asura": 291,
+          "celestial": 291,
+          "demon": 391,
+          "hell": 391,
+          "human": 391,
+          "monster_realm": 391,
+          "nether": 291,
+          "phantom_underworld": 391,
+          "reincarnation": 291,
+          "spirit": 391,
+          "true_demon": 391
+        }
+      }
+    ],
+    "medians": {
+      "all-live": {
+        "away_seconds": 40.107136199992965,
+        "upper_reentry_seconds": 0.00011979999544564635
+      },
+      "frozen": {
+        "away_seconds": 23.94409550000273,
+        "upper_reentry_seconds": 10.814278799996828
+      }
+    }
+  },
+  "platform": "Windows",
+  "exe_sha256": "48a49bb422404bdc705fa12258010824859a6e3d87ff83f4d75eab1530b61c58",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

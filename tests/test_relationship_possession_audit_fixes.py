@@ -64,6 +64,12 @@ def test_release_suppression_then_possess_and_leave_preserves_true_rank(api):
     act(game.id, 'captive-action', target_id=target, action='possess', status=400)
     assert engine.store._path(game.id).read_bytes() == frozen
     act(game.id, 'secret-art', art='suppress', action='cancel')
+    # This case verifies rank restoration, not a random possession loss.
+    # Hydration after the restored rank may consume the market RNG; establish
+    # the intended successful draw at the actual attempt boundary.
+    prepared = engine._load(game.id)
+    prepared.rng_state = encode_rng(random.Random(1))
+    engine.store.save(prepared)
     act(game.id, 'captive-action', target_id=target, action='possess')
     possessed = engine._load(game.id)
     assert possessed.player.ghost_host_body

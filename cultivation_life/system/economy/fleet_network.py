@@ -1,4 +1,5 @@
 """Fleet ownership and regional treasuries. No player or individual NPC movement."""
+from ...regional_context import adoption_year
 from ...content_registry import WORLD_SYSTEMS, REALMS
 from ...rules import expected_combat_power
 from .ledger import account, balance, transfer_value
@@ -102,7 +103,7 @@ def new_fleet(game, region, world, identity, kind, location, name, *, identifier
         investment=0, profit=0, dividends=0, voyages=0, delivered=0, lost=0,
         loss_streak=0, idle_years=0, cargo=None, operating_costs=0,
         guard_power=guard_required(world) if kind == 'alliance' else 0,
-        next_departure=max(game.player.age, game.economy_v2['last_year']) + 1,
+        next_departure=adoption_year(game) + 1,
         last_result='等待出资与本地商机')
     region['fleets'][identifier] = fleet
     account(game, f'caravan:{identifier}')
@@ -114,6 +115,9 @@ def ensure_network(game, maps):
     transport = game.economy_v2['transport']
     changed = False
     for world, region in transport['worlds'].items():
+        from ...regional_context import includes
+        if not includes(game, world):
+            continue
         if region.get('ownership_version') == 2:
             continue
         region.update(ownership_version=2, sequence=0)
@@ -197,7 +201,7 @@ def ensure_routes(game):
         return False  # Independent-space starts have no adopted merchant society yet.
     if 'network' in game.economy_v2:
         return False
-    network = game.economy_v2['network'] = dict(last_year=max(game.player.age, game.economy_v2['last_year']), routes={})
+    network = game.economy_v2['network'] = dict(last_year=adoption_year(game), routes={})
     for world, alliances in game.merchant_state['worlds'].items():
         for alliance in alliances:
             if not alliance['cross_world'] or alliance['home_world'] != world:
@@ -272,16 +276,19 @@ def maintenance_quote(game, world, location):
 
 
 def advance_network(game, maps):
+    from ...regional_context import region as settlement_region, includes
     ensure_routes(game)
     if 'network' not in game.economy_v2:
         return
     network = game.economy_v2['network']
-    if game.player.age <= network['last_year']:
+    if settlement_region(game) is None and game.player.age <= network['last_year']:
         return
-    network['last_year'] = game.player.age
-    for route in routes(game).values():
+    network['last_year'] = max(network['last_year'], game.player.age)
+    for _, route in sorted(routes(game).items()):
         endpoint = alliance_at(game, route['home'], route['alliance_id'])
         home = alliance_at(game, endpoint['home_world'], route['alliance_id']) if endpoint else None
+        if not includes(game, home['world'] if home else route['home']):
+            continue
         region = game.economy_v2.get('transport', {}).get('worlds', {}).get(home['world']) if home else None
         years = max(0, game.player.age - max(route['last_year'], region['last_year'])) if region else 0
         route['last_year'] = game.player.age

@@ -4,6 +4,7 @@ from ...models import GameState
 from ...models import HistoryRecord
 import copy
 import random
+from ...regional_context import includes, historical
 from .dependencies import GuixuCalendarDependencies
 
 
@@ -46,7 +47,7 @@ def _announce_guixu_cycle(
         ["system", "guixu", "announcement", f"world:{dungeon['world']}"],
     ))
     if (
-        game.settings.get("guixu_event_popup", True) and not game.settings.get("silent_events", False)
+        game.settings.get("guixu_event_popup", True) and not game.settings.get("silent_events", False) and not historical(game)
         and game.player.world == dungeon["world"] and not game.pending_event
     ):
         event = deps._instantiate_event(deps.events_by_id["EVT_GUIXU_ANNOUNCE"], game, rng)
@@ -95,7 +96,7 @@ def _open_guixu_cycle(
         ["system", "guixu", "open", f"world:{dungeon['world']}"],
     ))
     if (
-        game.settings.get("guixu_event_popup", True) and not game.settings.get("silent_events", False)
+        game.settings.get("guixu_event_popup", True) and not game.settings.get("silent_events", False) and not historical(game)
         and game.player.world == dungeon["world"] and not game.pending_event
         and not (session and session.get("dungeon_id") == dungeon["id"])
     ):
@@ -172,6 +173,8 @@ def _advance_guixu_calendar(
     definitions = deps._guixu_definitions()
     requires_input = False
     for dungeon_id, dungeon in definitions.items():
+        if not includes(game, dungeon['world']):
+            continue
         cycle = game.guixu_state["cycles"][dungeon_id]
         if cycle.get("phase") == "open" and game.player.age > int(cycle.get("opened_age") or -1):
             session = game.guixu_state.get("player_session")

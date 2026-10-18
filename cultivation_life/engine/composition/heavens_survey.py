@@ -4,6 +4,7 @@ from ...content_registry import WORLD_SYSTEMS
 from ...system.combat.npc_lifecycle import move_world
 from ...person_assignments import research_assignment
 from ...spatial_people import instance_of
+from ...regional_context import synchronize
 from ...system.heavens import survey
 from ...system.heavens.definitions import RUINS_ID, MIRROR_ID
 
@@ -59,6 +60,10 @@ def bind_survey(engine, ports):
                 and not facts(game, npc.id, target=target)['blocked_reason']]
 
     def move(game, phase, *, target=RUINS_ID):
+        # Replay the destination while the original person is still inside
+        # the instance, never as a resident of its already elapsed history.
+        if phase == 'returning':
+            synchronize(game, ['human'])
         anomaly = survey.scene_for(game, target)
         row = anomaly['survey']
         reason = facts(game, target=target)['blocked_reason']

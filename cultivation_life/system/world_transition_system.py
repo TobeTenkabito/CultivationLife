@@ -192,6 +192,9 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
             or plan.source_instance != (game.spatial_state.get('current') if player.world in {'rift', 'lost'} else None)
             or plan.source_location is not None and player.location_id != plan.source_location):
         raise ValueError("跨界计划已失效，请重新规划")
+    from ..regional_context import synchronize
+    synchronize(game, [plan.source, plan.destination])
+    game.map_journey = None
     hp, mp = player.hp / max(1, max_hp(player)), player.mp / max(1, max_mp(player))
     ports.cancel_auction(game)
     # Every route shares this boundary, including rifts and reversible visits.

@@ -75,7 +75,9 @@
     "GameState.sect_relations.*.truce_until_age": "global：种族总和约对原两侧参战组织登记相同1000/3000年日历停战。唯一主体ID关系留原账，不随玩家跨界或行动单位推进缩短；正式独立宣战、盟军加入、战略配对和增援、NPC随机外交/内政候选均检查实际年龄。返乡只更新原状态与旧单位停战字段，不清除日历条约；新约不追改既存50/150年旧约。",
     "sage_state.worlds / memberships / quit_cooldown_until / buddhist_state.worlds / wish": "佛儒上界补完：沿原scope归属，四上界按首次到访建立缺失学说，不覆盖原记录，不复制NPC；本人离界席位冻结，影响力、寺庙、信众、许可与加持选项留在原地址。个人浩然、经典参透、愿力与涅槃时钟随同一玩家保留；不新增顶层或嵌套持久字段，不新增移动或年度全表扫描。",
     "Player.*Technique.required_affinities / known_techniques / combat_techniques / ghost_self_state": "personal：功法固定所需全部属性，随原功法及等级保留；先天与已补全灵根由原玩家权威字段读取。旧结构10缺失为空，已登记目录的固定门槛由原功法准备入口恢复，未知自定功法保留自身要求；不增加Player/GameState顶层字段，不复制NPC或库存，不绕过移动、气等级与封印规则。",
-    "Player.secret_art_state": "personal：子协议1保存独立秘术修习、施术进度、已冻结所需年份和递增修订号，随同一玩家跨界保留。材料从原inventory扣除，casting仅保存已消耗材料的非资产收据，不能返还或再次领取。只有专用命令的实际年份推进进度；事件、死亡、拘束或转场中断，末年事件处理后才补入原additional_roots。缺失为空，不重学自带秘法、不补发物资、不新增年度扫描，不改先天根种与资质。"
+    "Player.secret_art_state": "personal：子协议1保存独立秘术修习、施术进度、已冻结所需年份和递增修订号，随同一玩家跨界保留。材料从原inventory扣除，casting仅保存已消耗材料的非资产收据，不能返还或再次领取。只有专用命令的实际年份推进进度；事件、死亡、拘束或转场中断，末年事件处理后才补入原additional_roots。缺失为空，不重学自带秘法、不补发物资、不新增年度扫描，不改先天根种与资质。",
+    "world_simulation（2.16.0）": "global：每个普通界面独立 year/rng/merchant_year/initialized，base_year 为首次采用基准；people 是原人物年度去重标记，无人物/库存/府库副本。recent 为有限同步摘要，不是第二份任务状态。重要活动连接的界面逐年同步，入界补齐；原年度规则、物资、任务进度和收据仍为权威。保存同一工作状态原子提交，失败丢弃请求缓存；不重演采用前历史，不复活死者。",
+    "map_journey（2.16.0）": "session：玩家本界出发点、目的地、已走路程及原预计年限；处理事件后同路线续行仅消耗余程。真实移动、更换路线或跨界使旧行程失效；不能跨地点兑换进度或在到达前使用目的地设施。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",
@@ -343,7 +345,9 @@
     "monster_civilization_state": "global",
     "generated_event_state": "session",
     "trial_site_state": "scope",
-    "strategic_war_state": "global"
+    "strategic_war_state": "global",
+    "world_simulation": "global",
+    "map_journey": "session"
   },
   "spirit_inheritance_ownership_notes": {
     "Player.immortal_aperture": "本人唯一元力账本；current 为保留的上界总储量，imitation_current 为下界仿元力。仙界与显圣修罗分别按本界转化阶段限制可用快照，未开放余量不随战斗回写丢失。战斗绑定原账本和池名，余量仅在临时绑定内保存，不新增持久池或补发储量。",

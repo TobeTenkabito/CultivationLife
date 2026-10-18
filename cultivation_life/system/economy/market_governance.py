@@ -41,7 +41,10 @@ def settle_claim(game, market):
 
 
 def advance_governance(game):
+    from ...regional_context import includes
     for market in game.economy_v2['markets'].values():
+        if not includes(game, market['world']):
+            continue
         claim = market.get('control')
         if claim and claim['last_year'] < game.player.age:
             settle_claim(game, market)

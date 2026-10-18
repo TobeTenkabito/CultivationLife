@@ -1,5 +1,6 @@
 """Endpoint geographic settlement; no yearly territorial simulation."""
 from ...npc_custody import is_free
+from ...regional_context import current
 from ..economy.ledger import balance, transfer_value
 from ..economy.organization_accounts import key, procure
 from .rules import enabled, POLICIES, permits, DECAY_PER_YEAR
@@ -44,7 +45,7 @@ def settle_unit(host,game,rng):
     s=state(game);clocks=s['settlement_years']
     pending=[(address,row,game.player.age-clocks[address])
              for address,row in game.economy_v2.get('organizations',{}).items()
-             if address in clocks and game.player.age>clocks[address]]
+             if address in clocks and game.player.age>clocks[address] and current(game,row['world'])]
     if not pending:return
     prepare(game,host.maps)
     for address,row,years in pending:
@@ -63,7 +64,7 @@ def settle_unit(host,game,rng):
 def prepare(game,maps):
     if not enabled(): return
     s=state(game)
-    for world in {r['world'] for r in game.economy_v2.get('organizations',{}).values() if r['kind']=='sect'}:
+    for world in sorted({r['world'] for r in game.economy_v2.get('organizations',{}).values() if r['kind']=='sect' and current(game,r['world'])}):
         book=ensure(game,maps,world)
         visible=snapshot(game,maps,world)
         for loc,rows in book.items():
@@ -107,6 +108,7 @@ def dividends(game):
     if not enabled(): return
     s=state(game);cursors=s.setdefault('fee_cursors',{})
     for market in game.economy_v2.get('markets',{}).values():
+        if not current(game,market['world']):continue
         actual=market.get('fees',0);previous=cursors.get(market['id'],actual)
         cursors[market['id']]=actual
         rows=s['holdings'].get(market['world'],{}).get(market['location'],{})
@@ -130,7 +132,7 @@ def npc_proposal(host,game,rng):
     s['ai_decade']=game.player.age//10
     # At most one proposal per endpoint, with the original ten-year lower
     # spacing. A century never replays the intervening decades.
-    candidates=[e for e in game.sects.values() if not e.extinct and e.kind=='sect' and not e.founded_by_player and e.id!=game.player.faction_id and key('sect',e.id) in game.economy_v2.get('organizations',{})]
+    candidates=[e for e in game.sects.values() if current(game,e.world) and not e.extinct and e.kind=='sect' and not e.founded_by_player and e.id!=game.player.faction_id and key('sect',e.id) in game.economy_v2.get('organizations',{})]
     if not candidates:return
     entity=candidates[s['ai_cursor']%len(candidates)];s['ai_cursor']+=1
     row=game.economy_v2['organizations'][key('sect',entity.id)]

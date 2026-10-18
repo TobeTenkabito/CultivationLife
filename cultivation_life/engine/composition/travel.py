@@ -11,11 +11,14 @@ from ...time_dependencies import (
 
 
 def bind_world_year(host) -> WorldYearDependencies:
+    from ..world import regions, factions
     from ...system.monster_civilizations.core import advance_year
     from ...system.economy.caravans import advance_caravans
     from ...system.economy.organizations import advance_organizations
     from ...system.war.stationing import advance as advance_stationing
     return WorldYearDependencies(
+        advance_regions=lambda game, news: regions.advance(host, game, news),
+        advance_player_society=lambda game, rng: factions.annual_player_faction(host._dependencies.world_factions, game, rng),
         advance_civilizations=advance_year,
         advance_caravans=lambda game: advance_caravans(game, host.maps),
         advance_organizations=lambda game: advance_organizations(game, host.maps),
