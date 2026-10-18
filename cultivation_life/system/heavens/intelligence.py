@@ -63,6 +63,10 @@ def news(game, *, subject=None, purchased_level=None):
                         details.append(f"{label}疲敝 {war['exhaustion'][side]:g}")
                 if details:
                     row['text'] += '\n' + '；'.join(details) + '。'
+        from ...regional_context import remote_notice
+        notice = remote_notice(game, world)
+        if notice:
+            row['text'] += '\n' + notice
         if row not in result:
             result.append(row)
     return result

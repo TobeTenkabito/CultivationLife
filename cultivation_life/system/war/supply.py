@@ -6,6 +6,7 @@ from ..economy.ledger import account, balance, transfer_value
 from ..economy.state import ensure_regional_market, reprice
 from ..economy.local_market import quote
 from . import requirements
+from ..economy.deferred import frozen, market_change
 
 
 def order_plan(game,war,side,market,turns=4):
@@ -19,7 +20,7 @@ def order_plan(game,war,side,market,turns=4):
             available[item]=available.get(item,0)-held;missing-=held
         for item in eligible:
             product=market['commodities'][item]
-            count=min(missing,max(0,int(product['stock'])-orders.get(item,0)))
+            count=missing if frozen(game, market['world']) else min(missing,max(0,int(product['stock'])-orders.get(item,0)))
             if count:
                 orders[item]=orders.get(item,0)+count;missing-=count
             if not missing:break
@@ -78,7 +79,7 @@ def purchase(game,maps,war,side,world,location,budget,*,loss=0):
     spent=0
     orders = order_plan(game,war,side,market)
     for item, wanted in orders.items():
-        product=market['commodities'][item];low,high=0,min(1000000,int(product['stock']),wanted)
+        product=market['commodities'][item];low,high=0,min(1000000,wanted if frozen(game, world) else int(product['stock']),wanted)
         while low<high:
             mid=(low+high+1)//2
             if quote(product,'buy',mid)['total']<=budget-spent:low=mid
@@ -87,12 +88,13 @@ def purchase(game,maps,war,side,world,location,budget,*,loss=0):
         bill=quote(product,'buy',low)
         transfer_value(game,wallet(war,side),f'market:{market["id"]}',bill['total'],'军队采购真实战备商品')
         transfer_value(game,f'market:{market["id"]}',f'operator:{market["id"]}',bill['fee'],'军需商品交易手续费')
-        product['stock']-=low;product['volume']+=low
-        market['turnover']+=bill['gross'];market['fees']+=bill['fee']
-        market['war_income']=market.get('war_income',0)+bill['total']
-        from ..economy.market_power import record_trade
-        record_trade(game,market,item,wallet(war,side),'buy',low)
-        reprice(game,market,product)
+        if not market_change(game,market,item,-low,gross=bill['gross'],fee=bill['fee']):
+            product['stock']-=low;product['volume']+=low
+            market['turnover']+=bill['gross'];market['fees']+=bill['fee']
+            market['war_income']=market.get('war_income',0)+bill['total']
+            from ..economy.market_power import record_trade
+            record_trade(game,market,item,wallet(war,side),'buy',low)
+            reprice(game,market,product)
         add_shipment(game,row,item,low,loss)
         row['purchased']+=bill['total'];spent+=bill['total']
     return spent
@@ -140,7 +142,7 @@ def mobilize(game,maps,war,side,entity,amount,distance):
     row=war['logistics']['sides'][side];stock=depot.find(game,entity)
     loss=min(.7,.02+distance*.003+(.2 if row.get('cross_realm') else 0))
     value=0
-    if stock:
+    if stock and not frozen(game, entity.world):
         market=game.economy_v2['markets'][f"{row['world']}:{row['location']}"]
         allowed={k for group in requirements.physical(game,war,side) for k in requirements.suitable(market,group)}
         for key in sorted(stock['stock']):
@@ -153,7 +155,8 @@ def mobilize(game,maps,war,side,entity,amount,distance):
             add_shipment(game,row,item,quantity,loss)
             value+=price(game,row,item)*quantity
             depot.record(stock,game,f'调拨前线：{ITEM_CATALOG[item].name} ×{quantity}，运输损耗按距离结算')
-    cash=min(max(0,int(amount-value)),balance(game,depot.treasury(game,entity)))
+    desired=max(0,int(amount-value))
+    cash=desired if frozen(game, entity.world) else min(desired,balance(game,depot.treasury(game,entity)))
     transfer_value(game,depot.treasury(game,entity),wallet(war,side),cash,'势力筹备战争采购金与灵石能源')
     if cash:
         purchase(game,maps,war,side,entity.world,entity.location_id,int(cash*.8),loss=loss)
@@ -212,6 +215,14 @@ def return_items(game,war,side,entities):
     # Keep goods at their actual battlefield. Returning money is not permission
     # to teleport stock to a former headquarters.
     owner=next((e for e in entities if e.world==row['world'] and e.location_id==row['location']),None)
+    if owner and frozen(game, owner.world):
+        from ..economy.deferred import append
+        for item,n in row['items'].items():
+            if n:
+                append(game,owner.world,'depot',owner=owner.id,owner_kind=depot.owner_kind(game,owner),item=item,quantity=n)
+                row['items'][item]=0
+                received+=n
+        return received
     if owner:
         stock=depot.ensure(game,owner)
         for item,n in row['items'].items():

@@ -114,8 +114,12 @@ def year_step(deps, game):
     runtime = game.heavens_state.get('runtime')
     if not runtime:
         return
-    year = runtime['processed_years'] + 1
+    from ...regional_context import task_active, task_year
+    from .state import echo_site
+    year = task_year(game)
     for echo, mission in research_assignments(game):
+        if not task_active(game, echo_site(echo).world):
+            continue
         if mission is not echo.get('mission'):
             continue
         if mission['status'] != 'active' or mission['last_year'] >= year:

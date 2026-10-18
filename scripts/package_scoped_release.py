@@ -62,6 +62,12 @@ def main():
         current_code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{current_code}'" in metadata and f"versionName='{VERSION}-android.{current_code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='regional':
+        rift_audit=json.loads((ROOT/f'build/rifts-{tag}-verification.json').read_text(encoding='utf8'))
+        require(rift_audit['version']==VERSION and rift_audit['inputs_sha256']==inputs_digest(ROOT)
+                and rift_audit['status']=='passed','Matched spatial rift/node audit required')
+        require(all(file_digest(ROOT/name)==digest for name,digest in (rift_audit['test_sources']|rift_audit['logs']).items()),
+                'Spatial rift/node audit evidence changed')
+        tests+=rift_audit['tests']
         regional_exe=json.loads((ROOT/f'build/regional-exe-{tag}.json').read_text(encoding='utf8'))
         require(regional_exe['inputs_sha256']==inputs_digest(ROOT) and regional_exe['exe_sha256']==file_digest(ROOT/'dist/launcher.exe')
                 and {r['with_dlc'] for r in regional_exe['cases'] if r['status']=='passed'}=={False,True},'Regional EXE acceptance missing')
@@ -72,7 +78,17 @@ def main():
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
         performance=json.loads((ROOT/'build/regional-calendar-performance/report.json').read_text(encoding='utf-8'))
-        require(performance['source_sha256']==inputs_digest(ROOT) and performance['version']==VERSION and performance['years']==100 and performance['repeats']>=3 and performance['full_state_equal'],'Matched hundred-year final-source benchmark required')
+        require(performance['source_sha256']==inputs_digest(ROOT) and performance['version']==VERSION and performance['years']==100 and performance['repeats']>=3
+                and performance['resume_state_equal'] and performance['settlement_checks']
+                and len(performance['runs'])>=9 and all(r['repeat_and_reload_equal'] and r['supply_conserved'] for r in performance['runs']),
+                'Matched hundred-year frozen-task/reload/conservation benchmark required')
+        web_performance=json.loads((ROOT/'build/web-regional-performance/report.json').read_text(encoding='utf-8'))
+        require(web_performance['source_sha256']==inputs_digest(ROOT) and web_performance['version']==VERSION
+                and web_performance['status']=='passed' and web_performance['repeats']>=3,'Matched real Web benchmark required')
+        require(all(web_performance['medians']['current'][a] < web_performance['medians']['baseline'][a]
+                    for a in ('1','2')),'Both real hundred-year actions must improve')
+        require(len(web_performance['runs'])>=9 and all(len(r['dlcs'])==10 and len(r['rows'])==2
+                and all(x['years']==100 for x in r['rows']) for r in web_performance['runs']), 'Web scope incomplete')
     if scoped.get('profile') in {'naming', 'natal', 'teachings', 'common-techniques', 'secret-arts', 'common-goods'}:
         natal = scoped['profile'] == 'natal'
         teachings = scoped['profile'] == 'teachings'
@@ -98,6 +114,8 @@ def main():
               save_transfer_log=f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
     if scoped.get('profile') == 'regional':
         base['performance']=performance
+        base['web_performance']=web_performance
+        base['rift_audit']=rift_audit
     if scoped.get('profile') == 'common-goods':
         upstream=json.loads((ROOT/'build/combat-engine-upstream-2151.json').read_text(encoding='utf-8'))
         require(upstream['inputs_sha256']==base['inputs_sha256'] and upstream['status']=='passed'
@@ -131,6 +149,7 @@ def main():
         for name in ['README.md','CHANGELOG.md','AGENTS.md']:z.write(ROOT/name,name)
         if scoped.get('profile') == 'regional':
             z.write(ROOT/'build/regional-calendar-performance/report.json',f'performance-{VERSION}.json')
+            z.write(ROOT/'build/web-regional-performance/report.json',f'web-performance-{VERSION}.json')
         if scoped.get('profile') == 'common-goods':
             z.write(ROOT/'build/common-goods-performance/report.md',f'performance-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.md',f'combat-calibration-{VERSION}.md')
@@ -151,6 +170,7 @@ def main():
         z.write(target,target.name);z.write(am,am.name);z.write(ROOT/'android/README.md','README.md')
         if scoped.get('profile') == 'regional':
             z.write(ROOT/'build/regional-calendar-performance/report.json',f'performance-{VERSION}.json')
+            z.write(ROOT/'build/web-regional-performance/report.json',f'web-performance-{VERSION}.json')
         if scoped.get('profile') == 'common-goods':
             z.write(ROOT/'build/common-goods-performance/report.md',f'performance-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.md',f'combat-calibration-{VERSION}.md')

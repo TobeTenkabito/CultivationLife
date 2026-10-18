@@ -47,7 +47,9 @@ def verify_regional_calendar(base, folder, with_dlc):
     assert raw['player']['age']-start==travel[-1]['state_diff']['total_years']
     assert raw['world_simulation']['regions']['human']['year']==raw['player']['age']
     assert raw['world_simulation']['regions']['celestial']['year']<raw['player']['age']
-    assert 'organization:sect:taixuan' in raw['economy_v2']['organizations']
+    assert 'organization:sect:tianjian' in raw['economy_v2']['organizations']
+    assert raw['world_simulation']['regions']['spirit']['year'] < raw['player']['age']
+    assert 'organization:sect:taixuan' not in raw['economy_v2']['organizations']
     print('Regional EXE scope passed: original annual finance, frozen upper region, real travel and retained time')
 
 

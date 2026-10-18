@@ -55,6 +55,7 @@ def require_unassigned(game, identity):
 
 def route_occupied(game, source, destination, *, exclude=None):
     from .system.heavens.definitions import default_site
+    from .regional_context import task_active
     # A personal crossing that already reserved the lane keeps it when an NPC
     # finishes studying and queues its return during that same world year.
     runtime = game.heavens_state.get('runtime') or {}
@@ -69,6 +70,11 @@ def route_occupied(game, source, destination, *, exclude=None):
             return exclude != game.id
     for echo, mission in research_assignments(game):
         if assignment_person(echo, mission) == exclude or mission['status'] != 'active' or mission['phase'] in {'studying', 'settling'}:
+            continue
+        # A suspended foreign trip retains its person and escrow, but cannot
+        # reserve a live lane forever and prevent entry into its owning world.
+        # On entry it resumes behind any already reserved personal crossing.
+        if not task_active(game, default_site(echo['id']).world):
             continue
         a, b = default_site(echo['id']).world, default_site(mission['destination']).world
         if mission['phase'] == 'returning':

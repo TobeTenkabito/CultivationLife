@@ -130,7 +130,8 @@
       row.dataset.status = order.status;
       row.append(element('strong', `${'★'.repeat(order.stars)} ${order.name} · ${{open:'等待接取',working:'执行中',completed:'已完成',failed:'执行失败 · 已退款',cancelled:'已取消并退款'}[order.status]}`));
       row.append(element('p', `本金 ${money(order.principal)} / 手续费 ${money(order.fee)} · 取消期限：第${order.deadline}年${order.cross_world ? ' · 跨界委托' : ''}`));
-      if (order.worker) {
+      if (order.remote_notice) row.append(element('p', order.remote_notice, 'muted'));
+      if (order.worker && !order.remote_notice) {
         const progress = element('progress'); progress.max = 1; progress.value = order.progress;
         progress.setAttribute('aria-label', `${order.name}完成进度`); row.append(progress);
         row.append(element('p', `${order.worker}${order.worker_realm_name ? `（${order.worker_realm_name}）` : ''} · ${Math.floor(order.progress * 100)}%${order.status === 'working' ? ` · 预计第${order.finish_age}年完成` : ''}${order.failure_chance != null ? ` · 接单评估失败风险 ${Math.round(order.failure_chance * 100)}%` : ''}`));

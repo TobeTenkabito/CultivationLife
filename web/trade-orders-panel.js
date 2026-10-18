@@ -7,6 +7,7 @@
     for(const f of fleets){
       const card=e('details');card.dataset.orderFleet=f.id;card.append(e('summary',f.name));const order=f.trade_order||{};
       card.append(e('p',`当前：${{auto:'自动择货',hold:'暂停派新货',once:'单次订单',repeat:'长期订单'}[order.mode]} · ${f.last_result||f.status}`));
+      if(f.cross_trip)card.append(e('p','商队已经派出。跨界传讯不易，途中消息仅供参考，交割与回款以实际收到的凭据为准。'));
       const controls=e('div');controls.className='estate-controls';
       const select=(label,options,value)=>{const l=e('label',label),s=e('select');s.setAttribute('aria-label',label);for(const [v,t] of options){const o=e('option',t);o.value=v;s.append(o);}if(value!=null&&options.some(o=>o[0]===value))s.value=value;l.append(s);controls.append(l);return s;};
       const input=(label,value)=>{const l=e('label',label),n=e('input');n.type='number';n.min='0';n.step='1';n.value=String(value);n.setAttribute('aria-label',label);l.append(n);controls.append(l);return n;};

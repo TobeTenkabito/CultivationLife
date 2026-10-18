@@ -89,36 +89,54 @@ def _advance_intrigue_unit(deps: IntrigueRuntimeDependencies, game: GameState, r
         if candidates:
             state["ai_cursor"] = (int(state.get("ai_cursor", 0)) + 1) % len(candidates)
             sect = candidates[state["ai_cursor"]]
-            record = deps._ensure_intrigue_faction(game, "sect", sect.id)
-            controller = deps._intrigue_find_npc(game, str(record.get("controller_id", "")))
-            eligible_voters = [
-                npc for npc in deps._intrigue_members(game, "sect", sect.id)
-                if deps._intrigue_has_decision_authority(game, "sect", sect.id, npc.id)
-            ]
-            if controller and eligible_voters and rng.random() < .16:
-                style = deps._intrigue_governance_style(game, controller)
-                resolution_type = {"internal": "mass_recruitment", "balance": "investment", "diplomacy": "form_alliance", "military": "declare_war"}[style]
-                from ..economy.estate_management import recruitment_ready
-                if resolution_type=='declare_war' and not recruitment_ready(game,sect):
-                    resolution_type='investment'
-                target_id = ""
-                if resolution_type in {"form_alliance", "declare_war"}:
-                    possible = [row.id for row in candidates if row.id != sect.id and row.world == sect.world]
-                    if resolution_type == "declare_war":
-                        from ..war.policy import strategic_conflicts
-                        from ..war.occupancy import busy, organization
-                        possible = [target for target in possible if game.diplomacy_unit >= max(
-                            int(deps._war_relation(game, "sect", sect.id, target).get("truce_until_unit", 0)),
-                            int(deps._war_relation(game, "sect", sect.id, target).get("war_truce_until_unit", 0)))
-                            and game.player.age >= int(deps._war_relation(game,"sect",sect.id,target).get('truce_until_age',0))
-                            and not strategic_conflicts(game,sect.id,target)
-                            and not busy(game,sect,managed_only=True)
-                            and (not (org:=organization(game,target)) or not busy(game,org,managed_only=True))]
-                    if not possible:
-                        resolution_type = "investment"
-                    else:
-                        target_id = rng.choice(possible)
-                resolution = deps._intrigue_resolve(game, "sect", sect.id, resolution_type, target_id, None, controller.id, rng)
-                if game.debug_world_news or sect.world == game.player.world:
-                    news.append(f"{sect.name}在{deps.STYLE_LABELS[style]}主政下提出{deps.RESOLUTION_LABELS[resolution_type]}，决议{('通过' if resolution['result'] == 'passed' else '遭否决')}。")
+            from ...regional_context import task_active
+            if not task_active(game, sect.world):
+                pending = game.world_simulation.setdefault('faction_units', {}).setdefault(sect.world, [])
+                row = dict(year=game.player.age, unit=game.diplomacy_unit, faction=sect.id)
+                if not pending or pending[-1] != row:
+                    pending.append(row)
+            else:
+                advance_npc_faction(deps, game, rng, sect.id, news)
     return news
+
+
+def advance_npc_faction(deps, game, rng, identity, news):
+    """Replay one original faction opportunity without player's unit rewards."""
+    sect = game.sects.get(identity)
+    if not sect or sect.extinct or not deps._intrigue_enabled():
+        return
+    candidates = [row for row in game.sects.values() if row.world == sect.world
+                  and row.kind != 'institution' and not row.extinct
+                  and not row.founded_by_player and row.id != game.player.faction_id]
+    record = deps._ensure_intrigue_faction(game, "sect", sect.id)
+    controller = deps._intrigue_find_npc(game, str(record.get("controller_id", "")))
+    eligible_voters = [
+        npc for npc in deps._intrigue_members(game, "sect", sect.id)
+        if deps._intrigue_has_decision_authority(game, "sect", sect.id, npc.id)
+    ]
+    if controller and eligible_voters and rng.random() < .16:
+        style = deps._intrigue_governance_style(game, controller)
+        resolution_type = {"internal": "mass_recruitment", "balance": "investment", "diplomacy": "form_alliance", "military": "declare_war"}[style]
+        from ..economy.estate_management import recruitment_ready
+        if resolution_type=='declare_war' and not recruitment_ready(game,sect):
+            resolution_type='investment'
+        target_id = ""
+        if resolution_type in {"form_alliance", "declare_war"}:
+            possible = [row.id for row in candidates if row.id != sect.id and row.world == sect.world]
+            if resolution_type == "declare_war":
+                from ..war.policy import strategic_conflicts
+                from ..war.occupancy import busy, organization
+                possible = [target for target in possible if game.diplomacy_unit >= max(
+                    int(deps._war_relation(game, "sect", sect.id, target).get("truce_until_unit", 0)),
+                    int(deps._war_relation(game, "sect", sect.id, target).get("war_truce_until_unit", 0)))
+                    and game.player.age >= int(deps._war_relation(game,"sect",sect.id,target).get('truce_until_age',0))
+                    and not strategic_conflicts(game,sect.id,target)
+                    and not busy(game,sect,managed_only=True)
+                    and (not (org:=organization(game,target)) or not busy(game,org,managed_only=True))]
+            if not possible:
+                resolution_type = "investment"
+            else:
+                target_id = rng.choice(possible)
+        resolution = deps._intrigue_resolve(game, "sect", sect.id, resolution_type, target_id, None, controller.id, rng)
+        if game.debug_world_news or sect.world == game.player.world:
+            news.append(f"{sect.name}在{deps.STYLE_LABELS[style]}主政下提出{deps.RESOLUTION_LABELS[resolution_type]}，决议{('通过' if resolution['result'] == 'passed' else '遭否决')}。")

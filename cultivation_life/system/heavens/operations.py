@@ -43,6 +43,13 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
                           current=row.world == game.player.world)
                        for row in ([site_for(deps, game, item.id) for item in deps.get_definitions().contact_sites] if deps else ())]
     result['upkeeps'] = [dict(name=row['name'], **upkeep.project(deps, game, row['id'])) for row in result['sites']] if deps else []
+    from ...regional_context import remote_notice
+    remote_worlds = [echo_site(row).world for row in contacts(runtime)
+                     if any((row.get(key) or {}).get('status') == 'active'
+                            for key in ('mission', 'freight', 'migration', 'upkeep'))] if runtime else []
+    if runtime and (runtime.get('campaign') or {}).get('known'):
+        remote_worlds.append('human')
+    result['remote_notice'] = next((notice for world in remote_worlds if (notice := remote_notice(game, world))), '')
     if deps and target_id:
         result['upkeep'] = upkeep.project(deps, game, target_id, detail=True)
     result['generation_available'] = bool(deps and deps.get_definitions().generation_available)
@@ -254,11 +261,20 @@ def command(deps: HeavensDependencies, game_id: str, command_seq: int,
         proposal.update(quote_action(deps, game, action, target_id, options))
     work = copy.deepcopy(game)
     if action not in {'configure', 'dismiss'}:
-        # Establish the present before opening a new cross-world assignment.
-        # Existing tasks then keep only their causal endpoints current yearly.
+        # Establish only the actual command endpoints, not every ordinary world.
         from ...regional_context import synchronize
-        from ...regional_schema import WORLDS
-        synchronize(work, WORLDS)
+        from .definitions import VISIT_DESTINATIONS
+        endpoints = {work.player.world}
+        site = site_for(deps, work, target_id)
+        if site:
+            endpoints.add(site.world)
+            if action in VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS:
+                endpoints.add(site_for(deps, work, VISIT_DESTINATIONS[target_id]).world)
+        elif target_id in {MIRROR_ID,RUINS_ID} | OMEN_IDS:
+            endpoints.add('human')
+        elif target_id in {FRONTIER_ID,CAMPAIGN_ID}:
+            endpoints.update({'human','demon','spirit'})
+        synchronize(work, endpoints)
         proposal.update(quote_action(deps, work, action, target_id, options))
     try:
         extra = {}

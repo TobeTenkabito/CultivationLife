@@ -390,6 +390,9 @@ def _advance_diplomacy_unit(deps: FactionDependencies, game: GameState, rng: ran
                     or game.player.age < int(relation.get('truce_until_age', 0))):
                 continue
             first, second = split_race_pair(key)
+            from ...regional_context import task_active
+            if kind == 'sect' and first in game.sects and not task_active(game, game.sects[first].world):
+                continue
             if kind == "race" and not all(
                 game.player.world in RACE_DEFINITIONS.get(side, {}).get("worlds", [])
                 for side in (first, second)
@@ -487,7 +490,8 @@ def _random_race_diplomacy_event(deps: FactionDependencies, game: GameState, rng
 
 
 def _random_sect_diplomacy_event(deps: FactionDependencies, game: GameState, rng: random.Random, news: list[str]) -> None:
-    active = [sect for sect in game.sects.values() if not sect.extinct and sect.kind != "institution"]
+    from ...regional_context import task_active
+    active = [sect for sect in game.sects.values() if not sect.extinct and sect.kind != "institution" and task_active(game, sect.world)]
     worlds = [world for world in sorted({sect.world for sect in active}) if sum(sect.world == world for sect in active) >= 2]
     if not worlds:
         return
@@ -539,6 +543,15 @@ def _pressure_weak_npc_powers(deps: FactionDependencies, game: GameState, rng: r
     rules = WORLD_SYSTEMS["player_faction"]
     for sect in game.sects.values():
         if sect.extinct or sect.kind == "institution" or not sect.founded_by_npc:
+            continue
+        from ...regional_context import task_active, region
+        if not task_active(game, sect.world):
+            if region(game):
+                continue
+            pending = game.world_simulation.setdefault('society_units', {}).setdefault(sect.world, [])
+            receipt = dict(year=game.player.age, unit=game.diplomacy_unit)
+            if not pending or pending[-1] != receipt:
+                pending.append(receipt)
             continue
         from ...regional_context import synchronize
         synchronize(game, [sect.world])

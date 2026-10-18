@@ -28,6 +28,11 @@ def _merchant(game, key):
 
 
 def balance(game, account):
+    from .deferred import projected_balance
+    return projected_balance(game, account, _balance(game, account))
+
+
+def _balance(game, account):
     if account == 'player':
         return sum(i.quantity for i in game.player.inventory if i.id == 'spirit_stone')
     organization = _organization(game, account)
@@ -50,6 +55,11 @@ def account(game, key, opening=0):
 def transfer_value(game, source, destination, amount, reason):
     if type(amount) is not int or amount < 0 or source == destination:
         raise ValueError('资金转移参数无效')
+    if not amount:
+        return
+    from .deferred import transfer
+    if game.world_simulation and transfer(game, source, destination, amount, reason, account=account, transfer_value=transfer_value, balance=_balance):
+        return
     accounts=game.economy_v2['accounts']
     direct_source=accounts.get(source) if source!='player' and not source.startswith(('organization:','alliance:')) else None
     direct_destination=accounts.get(destination) if destination!='player' and not destination.startswith(('organization:','alliance:')) else None

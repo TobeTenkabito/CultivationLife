@@ -222,7 +222,9 @@ def validate_runtime(runtime):
     for echo in echoes:
         if echo['origin_year'] > runtime['processed_years']:
             raise ValueError('诸天现象起点在未来')
-        if echo['cycle'] != (runtime['processed_years']-echo['origin_year']) // echo['definition']['period_years']:
+        # A frozen contact can lag the global clock; it cannot be in a future
+        # cycle. Its local counters and observed cycle are checked by validate_echo.
+        if echo['cycle'] > (runtime['processed_years']-echo['origin_year']) // echo['definition']['period_years']:
             raise ValueError('诸天现象周期与日历不一致')
     active = 0
     ids = set()
@@ -521,7 +523,7 @@ def validate_upkeep(echo, runtime):
             or row['cycle'] != (row['started_at']-echo['origin_year']) // definition['period_years']
             or row['started_at'] + row['duration'] >= cutoff
             or row['progress'] > row['last_year']-row['started_at'] or not echo['exchanged']
-            or row['status'] == 'active' and runtime['processed_years'] >= cutoff
+            or row['status'] == 'active' and row['last_year'] >= cutoff
             or row['status'] == 'completed' and row['last_year'] >= cutoff
             or row['status'] == 'expired' and row['last_year'] < cutoff
             or (row['status'] == 'completed') != (row['progress'] == row['duration'])

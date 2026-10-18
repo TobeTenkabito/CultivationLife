@@ -8,6 +8,7 @@ from .ledger import account, balance, transfer_value
 from .organizations import register
 from .state import ensure_regional_market, reprice
 from .local_market import quote
+from .deferred import frozen, market_change, append
 
 
 def address(identity, side):
@@ -18,12 +19,13 @@ def purchase(game,market,source,item,quantity,reason):
     product=market['commodities'][item];bill=quote(product,'buy',quantity)
     transfer_value(game,source,f'market:{market["id"]}',bill['total'],reason)
     transfer_value(game,f'market:{market["id"]}',f'operator:{market["id"]}',bill['fee'],'远征采购手续费')
-    product['stock']-=quantity;product['volume']+=quantity
-    market['turnover']+=bill['gross'];market['fees']+=bill['fee']
-    market['war_income']=market.get('war_income',0)+bill['total']
-    from .market_power import record_trade
-    record_trade(game,market,item,source,'buy',quantity)
-    reprice(game,market,product)
+    if not market_change(game,market,item,-quantity,gross=bill['gross'],fee=bill['fee']):
+        product['stock']-=quantity;product['volume']+=quantity
+        market['turnover']+=bill['gross'];market['fees']+=bill['fee']
+        market['war_income']=market.get('war_income',0)+bill['total']
+        from .market_power import record_trade
+        record_trade(game,market,item,source,'buy',quantity)
+        reprice(game,market,product)
     return bill['total']
 
 
@@ -37,16 +39,19 @@ def prepare(game,maps,identity,side,owner,world,location,budget,quantity=0,mater
     register(game,'sect',owner,world)
     ensure_regional_market(game,maps,world,location)
     market=game.economy_v2['markets'][f'{world}:{location}'];source=f'organization:sect:{owner}'
-    goods=sorted((k for k,v in market['commodities'].items() if int(v['stock'])>=quantity),key=lambda k:market['commodities'][k]['price'])
+    goods=sorted((k for k,v in market['commodities'].items() if frozen(game,world) or int(v['stock'])>=quantity),key=lambda k:market['commodities'][k]['price'])
     if quantity and not goods:return False
     item=goods[0] if quantity else None
     bill=quote(market['commodities'][item],'buy',quantity)['total'] if item else 0
-    if balance(game,source)<budget+bill+materials:return False
+    if not frozen(game,world) and balance(game,source)<budget+bill+materials:return False
     account(game,key)
     if item:purchase(game,market,source,item,quantity,'远征初始实物筹备')
     if materials:
         transfer_value(game,source,f'market:{market["id"]}',materials,'当地阵坊承制有限远征界门组件')
-        market['turnover']+=materials;market['war_income']=market.get('war_income',0)+materials
+        if frozen(game,world):
+            append(game,world,'service',market=market['id'],amount=materials)
+        else:
+            market['turnover']+=materials;market['war_income']=market.get('war_income',0)+materials
     transfer_value(game,source,key,budget,'远征专项经费真实预留')
     game.economy_v2.setdefault('campaigns',{})[key]=dict(owner=owner,world=world,location=location,
         supply_item=item,quantity=quantity,procurement=bill+materials,opening=budget,charged=0,
@@ -68,7 +73,7 @@ def settle(game,maps,identity,side,spent,world,location,*,portal_scale=0,finishe
     # Real local consumption: procurement immediately consumes these supplies,
     # separate from the expedition's already-purchased transported stock.
     for item,product in sorted(market['commodities'].items(),key=lambda p:p[1]['price'])[:6]:
-        lo,hi=0,min(10000,int(product['stock']))
+        lo,hi=0,10000 if frozen(game,world) else min(10000,int(product['stock']))
         while lo<hi:
             mid=(lo+hi+1)//2
             if quote(product,'buy',mid)['total']<=budget-purchased:lo=mid

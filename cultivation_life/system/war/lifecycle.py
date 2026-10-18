@@ -17,6 +17,13 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
             continue
         if war.get("status") != "active":
             continue
+        from ...regional_context import task_active
+        if not task_active(game, war['world']):
+            row = dict(year=game.player.age, unit=game.diplomacy_unit)
+            pending = war.setdefault('deferred_units', [])
+            if not pending or pending[-1] != row:
+                pending.append(row)
+            continue
         deps._ensure_war_shape(game, war)
         if deps._finish_war_by_morale(game, war):
             if war.get("controller") == "ai":

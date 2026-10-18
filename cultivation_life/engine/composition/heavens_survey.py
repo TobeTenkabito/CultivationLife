@@ -60,10 +60,7 @@ def bind_survey(engine, ports):
                 and not facts(game, npc.id, target=target)['blocked_reason']]
 
     def move(game, phase, *, target=RUINS_ID):
-        # Replay the destination while the original person is still inside
-        # the instance, never as a resident of its already elapsed history.
-        if phase == 'returning':
-            synchronize(game, ['human'])
+        # Returning a surveyor does not wake the remote human society.
         anomaly = survey.scene_for(game, target)
         row = anomaly['survey']
         reason = facts(game, target=target)['blocked_reason']
@@ -81,6 +78,10 @@ def bind_survey(engine, ports):
             npc.location_id = 'mirror_hall' if target == MIRROR_ID else 'causal_hall'
         else:
             scene['npc_ids'].remove(npc.id)
+            if game.world_simulation:
+                # Its documented instance clock was already handled by the
+                # survey. Do not replay those years as human residency.
+                game.world_simulation['people'][npc.id] = game.player.age
             move_world(npc, 'human', game.player.age, WORLD_SYSTEMS.get('transcendent_combat', {}))
             npc.location_id = anomaly['definition']['location_id']
 

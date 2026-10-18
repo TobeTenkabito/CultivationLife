@@ -31,5 +31,7 @@ def inspect_regional_journey(engine, identity, finished=False):
     sim = game.world_simulation
     assert sim and sim['regions']['human']['year'] == game.player.age
     assert sim['regions']['celestial']['year'] < game.player.age
-    assert 'organization:sect:taixuan' in game.economy_v2['organizations']
+    assert 'organization:sect:tianjian' in game.economy_v2['organizations']
+    assert sim['regions']['spirit']['year'] < game.player.age
+    assert 'organization:sect:taixuan' not in game.economy_v2['organizations']
     return True

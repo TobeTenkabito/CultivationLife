@@ -126,5 +126,7 @@ def prepare(owner: Any, now: float | None, config: Mapping[str, Any], *, imitati
 
 def move_world(owner: Any, destination: str, now: float, config: Mapping[str, Any]) -> None:
     settle(owner, now, config)
+    from ...regional_context import before_departure
+    before_departure(destination, owner)
     _write(owner, "world", destination)
     settle(owner, now, config)

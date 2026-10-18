@@ -234,6 +234,9 @@ def reconcile(deps, game):
                 cancel(deps, game, task, failed=True, reason='此生已结束或离开原诸天异象')
             return
         echo = get_echo(runtime, task.get('target_id', 'sea_echo'))
+        from ...regional_context import task_active
+        if echo and not task_active(game, echo_site(echo).world):
+            return
         facts = deps.read_actor_facts(game, echo['id'])
         if not facts['alive']:
             cancel(deps, game, task, failed=True, reason='此生已结束')

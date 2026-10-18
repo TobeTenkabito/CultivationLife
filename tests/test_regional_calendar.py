@@ -42,6 +42,10 @@ def projection(game, world):
 def test_frozen_replay_matches_each_real_year_and_is_idempotent(regional):
     engine, original = regional
     regions.synchronize(engine, original, regions.worlds())
+    # Independent-society equivalence: cross-world transactions have their
+    # own deferred-credit contract and are checked separately.
+    for route in original.economy_v2['network']['routes'].values():
+        route.update(open=False, built=False, paid=0)
     live, lazy = copy.deepcopy(original), copy.deepcopy(original)
     untouched = copy.deepcopy(projection(lazy, 'celestial'))
     for _ in range(25):
@@ -70,6 +74,9 @@ def test_unvisited_sect_earns_real_income_recruits_and_can_die(regional):
     for _ in range(20):
         game.player.age += 1
         regions.advance(engine, game, [])
+    assert 'organization:sect:taixuan' not in game.economy_v2['organizations']
+    assert victim.alive  # All three clocks are frozen together until needed.
+    regions.synchronize(engine, game, ['spirit'])
     row = game.economy_v2['organizations']['organization:sect:taixuan']
     assert row['last_year'] > game.world_simulation['base_year']
     assert row['produced'] > 0 and balance(game, 'organization:sect:taixuan') > 0
@@ -99,7 +106,7 @@ def test_copy_on_write_scheduler_binds_the_actual_working_state(regional):
     engine, original = regional
     working = copy.deepcopy(original)
     working.player.age += 2
-    synchronize(working, ['celestial'])
+    synchronize(working, ['celestial'], entering=True)
     assert working.world_simulation['regions']['celestial']['year'] == working.player.age
     assert original.world_simulation['regions']['celestial']['year'] == original.player.age
 
@@ -138,7 +145,7 @@ def test_new_task_catches_up_target_before_mutating(regional):
     game.player.age += 5
     regions.advance(engine, game, [])
     assert game.world_simulation['regions']['celestial']['year'] < game.player.age
-    synchronize(game, ['celestial'])
+    synchronize(game, ['celestial'], entering=True)
     assert game.world_simulation['regions']['celestial']['year'] == game.player.age
     assert all(game.world_simulation['regions'][w]['year'] == game.player.age
                for w in regions.closure(engine, game, ['celestial']))
@@ -157,6 +164,7 @@ def test_ascension_dependency_ages_original_npc_once(regional):
     assert npc.world == 'spirit' and npc.age == age + 1
     game.player.age += 1
     regions.advance(engine, game, [])
+    regions.synchronize(engine, game, ['spirit'])
     assert npc.age == age + 2
 
 
@@ -175,13 +183,77 @@ def test_civilization_revision_advances_only_for_its_own_year(regional):
     assert game.monster_civilization_state == after
 
 
-def test_autonomous_discovery_and_existing_survey_keep_departure_society_live(regional):
+def test_only_existing_survey_keeps_departure_society_live(regional):
     _, game = regional
     game.player.world = 'celestial'  # Fixture location, no production movement.
     game.heavens_state = {'generation_enabled': True, 'runtime': {'processed_years': 99}}
-    assert 'human' in regions.important_worlds(game)
+    assert 'human' not in regions.important_worlds(game)
     game.heavens_state['generation_enabled'] = False
     assert 'human' not in regions.important_worlds(game)
     game.heavens_state['runtime']['ruins'] = {'survey': {'status': 'active'}}
-    assert 'human' in regions.important_worlds(game)
+    assert 'human' not in regions.important_worlds(game)
 
+
+def test_closed_routes_and_unused_alliance_metadata_do_not_bind_regions(regional):
+    engine, game = regional
+    for route in game.economy_v2['network']['routes'].values():
+        route['open'] = False
+    assert regions.closure(engine, game, ['spirit']) == ['spirit']
+    assert regions.closure(engine, game, ['celestial']) == ['celestial']
+
+
+def test_existing_cross_freight_keeps_running_when_player_is_elsewhere(regional):
+    engine, game = regional
+    game.player.world = 'celestial'
+    game.economy_v2['transport']['worlds']['human']['fleets']['test'] = {
+        'cross_trip': {'destination':'spirit','path':['human','spirit']}}
+    assert regions.important_worlds(game) == {'celestial'}
+    game.economy_v2['transport']['worlds']['human']['fleets']['test']['cross_trip'] = None
+    assert 'human' not in regions.important_worlds(game)
+
+
+def test_remote_native_does_not_ascend_until_origin_is_entered(regional):
+    engine, game = regional
+    game.player.world = 'spirit'
+    npc = game.world_npcs['xiang_zhili']
+    npc.cultivation_progress = 10**6
+    npc.lifespan = None
+    start = npc.age
+    game.player.age += 1
+    regions.advance(engine, game, [])
+    assert npc.world == 'human' and npc.age == start
+    with patch.object(engine, '_npc_breakthrough_probability', return_value=1):
+        regions.synchronize(engine, game, ['human'])
+    assert npc.world == 'spirit' and npc.age == start+1
+
+
+
+def test_closed_passage_does_not_wake_or_charge_destination(regional):
+    from cultivation_life.system.economy import cross_freight
+    engine, game = regional
+    regions.initialize_region(engine,game,'spirit')
+    fleet=next(f for f in game.economy_v2['transport']['worlds']['spirit']['fleets'].values()
+               if f['alliance_id']=='xuanji')
+    for route in game.economy_v2['network']['routes'].values():route['open']=False
+    game.player.age+=20
+    before=copy.deepcopy(game.to_dict())
+    with patch.object(game,'_synchronize_regions',wraps=game._synchronize_regions) as sync:
+        with pytest.raises(ValueError,match='开放通道'):
+            cross_freight.dispatch(game,engine.maps,fleet,'true_demon')
+        sync.assert_not_called()
+    assert game.to_dict()==before
+
+
+def test_historical_unissued_trade_cannot_write_future_market(regional):
+    from cultivation_life.system.economy import cross_freight
+    engine,game=regional
+    regions.initialize_region(engine,game,'spirit')
+    fleet=next(f for f in game.economy_v2['transport']['worlds']['spirit']['fleets'].values()
+               if f['alliance_id']=='xuanji')
+    old=game.player.age
+    game.player.age+=10
+    game.world_simulation['regions']['true_demon']['year']=game.player.age
+    before=copy.deepcopy(game.to_dict())
+    with pytest.raises(ValueError,match='历史补算'):
+        cross_freight.dispatch(CalendarGame(game,'spirit',old),engine.maps,fleet,'true_demon')
+    assert game.to_dict()==before

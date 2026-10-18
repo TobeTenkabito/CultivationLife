@@ -339,7 +339,10 @@ def test_normal_annual_grows_each_transferred_person_once(military):
     with patch.object(engine,'_advance_guixu_calendar',return_value=False), patch.object(engine,'_advance_npc_cultivation',return_value=None):
         issue(real,'campaign_wait')
     work = load(real)
-    assert all(work.world_npcs[key].age == ages[key]+1 for key in identities)
+    # Original personnel still in the remote departure world remain frozen;
+    # campaign progress belongs to the human battlefield, not their society.
+    assert all(work.world_npcs[key].age == ages[key] + int(work.world_npcs[key].world == work.player.world)
+               for key in identities)
     assert all(u['progress'] == 1 for u in campaign.get(work)['units'])
 
 

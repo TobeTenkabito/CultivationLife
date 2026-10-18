@@ -199,7 +199,14 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
     simulated_npcs = [*game.world_npcs.values(), *game.notable_npcs.values()]
     if region(game) is not None:
         simulated_npcs.extend(n for s in game.sects.values() for n in s.npcs if n.world != s.world)
+    only = getattr(game, '_regional_single_person', None)
+    if only is not None:
+        person = find_person(game, only, include_inactive=True)
+        simulated_npcs = [person] if person else []
     for npc in simulated_npcs:
+        only = getattr(game, '_regional_single_person', None)
+        if only is not None and npc.id != only:
+            continue
         from ...spatial_people import instance_of
         if instance_of(game, npc.id):
             continue
@@ -259,7 +266,8 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
             {"npc_id": npc.id, "realm": [result["old"], result["new"]]},
             ["system", "world_npc", "world_news", f"world:{event_world}"],
         ))
-    deps._maybe_notorious_npc_killing(game, rng, news)
+    if getattr(game, '_regional_single_person', None) is None:
+        deps._maybe_notorious_npc_killing(game, rng, news)
     return news
 
 

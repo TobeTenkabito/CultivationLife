@@ -134,6 +134,8 @@ def ensure_regional_market(game, maps, world, location):
     maps.location(world, location)
     key = market_id(world, location)
     if key not in game.economy_v2['markets']:
+        from .deferred import frozen, posting
+        opening_year = game.world_simulation['regions'][world]['year'] if frozen(game, world) else game.player.age
         scale = game.economy_v2['worlds'][world]['scale']
         commodities = {}
         for item, definition in commodity_catalog(world).items():
@@ -143,11 +145,12 @@ def ensure_regional_market(game, maps, world, location):
                 production=0., consumption=0.,
                 volume=0, history=[], initial_target=target)
         game.economy_v2['markets'][key] = dict(id=key, world=world, location=location,
-            name=maps.location(world, location)['name'], last_year=game.player.age,
+            name=maps.location(world, location)['name'], last_year=opening_year,
             revision=0, commodities=commodities, turnover=0, fees=0, unique_sales=0)
         account(game, f'market:{key}')
         opening = min(settings()['market_opening'], account(game, f'background:{world}')['balance'])
-        transfer_value(game, f'background:{world}', f'market:{key}', opening, '市场开业周转金')
+        with posting():
+            transfer_value(game, f'background:{world}', f'market:{key}', opening, '市场开业周转金')
         account(game, f'operator:{key}')
         changed = True
     market=game.economy_v2['markets'][key]
@@ -164,7 +167,7 @@ def ensure_regional_market(game, maps, world, location):
         market['revision'] += 1
         changed=True
     if 'household_year' not in market:
-        market['household_year']=game.player.age
+        market['household_year']=market['last_year']
         changed=True
     return settle_market(game, market) or changed
 
@@ -205,6 +208,9 @@ def ensure_market(game, maps):
 
 def settle_market(game, market):
     """Settle bounded real baskets once for the observed interval."""
+    from .deferred import frozen
+    if frozen(game, market['world']):
+        return False
     years = game.player.age - market['last_year']
     if years <= 0:
         return False

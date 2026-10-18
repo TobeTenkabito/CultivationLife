@@ -109,7 +109,7 @@ def test_old_personal_maintenance_reserves_the_same_quota(local):
     with pytest.raises(ValueError, match='名额'): start(local, material)
 
 
-def test_ordinary_years_away_continue_and_cancellation_is_available_remotely(local):
+def test_ordinary_years_away_freeze_and_cancellation_refunds_unspent_funds(local):
     _, material = ready(local)
     start(local, material)
     game = load(local)
@@ -117,12 +117,12 @@ def test_ordinary_years_away_continue_and_cancellation_is_available_remotely(loc
     game.heavens_state['generation_enabled'] = False
     local[0].store.save(game)
     game = annual(local, 2)
-    assert get_echo(game.heavens_state['runtime'])['upkeep']['progress'] == 2
+    assert get_echo(game.heavens_state['runtime'])['upkeep']['progress'] == 0
     issue(local, 'upkeep_cancel')
-    assert get_echo(load(local).heavens_state['runtime'])['upkeep']['escrow']['refunded'] == 28800
+    assert get_echo(load(local).heavens_state['runtime'])['upkeep']['escrow']['refunded'] == 30000
 
 
-def test_spatial_years_freeze_funding_but_real_deadline_still_closes_it(local):
+def test_spatial_years_freeze_funding_and_remote_deadline_until_reentry(local):
     before, material = ready(local)
     start(local, material)
     game = load(local)
@@ -139,10 +139,14 @@ def test_spatial_years_freeze_funding_but_real_deadline_still_closes_it(local):
     issue(local, 'mirror_decipher', {'chamber':'0'}, target='mirror_field')
     done = load(local)
     row = get_echo(done.heavens_state['runtime'])['upkeep']
-    assert row['status'] == 'expired' and row['progress'] == 0
-    assert row['escrow']['refunded'] == 30000
-    assert stones(done) == stones(before)
+    assert row['status'] == 'active' and row['progress'] == 0
+    assert row['escrow']['refunded'] == 0
+    assert stones(done) == stones(before)-30000
     assert not get_echo(done.heavens_state['runtime'])['maintained']
+    # A remote cancellation remains an explicit player command; no automatic
+    # expiry or extra paid progress is invented while the owner is frozen.
+    issue(local,'upkeep_cancel')
+    assert get_echo(load(local).heavens_state['runtime'])['upkeep']['escrow']['refunded']==30000
 
 
 @pytest.mark.parametrize('target,location', [('mirror_field','muling_desert'), ('causal_ruins','wudi_plain')])
@@ -268,7 +272,9 @@ def test_corrupt_facility_rejected(local, kind):
     if kind == 'effect': echo['maintained'] = True
     if kind == 'material': row['material']['origin_world'] = 'human'
     if kind == 'duplicate': game.player.formation_materials.append(copy.deepcopy(row['material']))
-    if kind == 'deadline': game.heavens_state['runtime'].update(processed_years=1200, last_year_key=1200)
+    if kind == 'deadline':
+        game.heavens_state['runtime'].update(processed_years=1200, last_year_key=1200)
+        row['last_year']=1200  # Claims actual local settlement past its cutoff.
     with pytest.raises(ValueError):
         validate_state(game.heavens_state)
         validate_references(game)
@@ -302,7 +308,7 @@ def test_completion_save_failure_does_not_publish_paid_years_or_maintenance(loca
     assert engine.store._path(game.id).read_bytes() == before
 
 
-def test_four_facilities_share_one_world_year_without_npc_duplication(local):
+def test_only_current_facility_spends_without_npc_duplication(local):
     game = load(local)
     add_item(game.player, 'spirit_stone', 100000)
     local[0].store.save(game)
@@ -313,4 +319,21 @@ def test_four_facilities_share_one_world_year_without_npc_duplication(local):
     after = annual(local)
     assert set(after.world_npcs) == set(before.world_npcs)
     for site in CONTACT_SITES:
-        assert get_echo(after.heavens_state['runtime'], site.id)['upkeep']['escrow']['spent'] == 600
+        assert get_echo(after.heavens_state['runtime'], site.id)['upkeep']['escrow']['spent'] == (600 if site.world==after.player.world else 0)
+
+
+def test_frozen_contact_past_global_cycle_is_valid_but_future_cycle_is_not(local):
+    game, material=ready(local)
+    start(local,material)
+    game=load(local)
+    runtime=game.heavens_state['runtime']
+    echo=get_echo(runtime)
+    runtime['processed_years']=runtime['last_year_key']=echo['origin_year']+echo['definition']['period_years']+1
+    validate_state(game.heavens_state)
+    assert echo['upkeep']['status']=='active' and echo['upkeep']['escrow']['spent']==0
+    invalid=copy.deepcopy(game.heavens_state)
+    get_echo(invalid['runtime'])['cycle']=2
+    with pytest.raises(ValueError): validate_state(invalid)
+    invalid=copy.deepcopy(game.heavens_state)
+    get_echo(invalid['runtime'])['upkeep']['last_year']=runtime['processed_years']
+    with pytest.raises(ValueError): validate_state(invalid)

@@ -5,6 +5,7 @@ from .ledger import balance, transfer_value
 from .state import ensure_regional_market, reprice
 from .local_market import quote
 from .fleet_network import guard_wages
+from .deferred import frozen, market_change
 
 
 def market(game, maps, world, location):
@@ -19,11 +20,11 @@ def buy(game, fleet, source, target, hops, order=None, *, travel_years):
     for item, row in source['commodities'].items():
         if restricted_acquisition('item', item):
             continue
-        if row['stock'] < 1 or (row.get('imported') and not order) or (order and item != order['item']):
+        if (row['stock'] < 1 and not frozen(game, source['world'])) or (row.get('imported') and not order) or (order and item != order['item']):
             continue
         other = target['commodities'].get(item) or dict(row, stock=0., production=0., consumption=0.,
             volume=0, history=[], imported=True)
-        maximum = min(fleet['capacity'], int(row['stock']))
+        maximum = fleet['capacity'] if frozen(game, source['world']) else min(fleet['capacity'], int(row['stock']))
         for quantity in ([order['quantity']] if order else sorted({maximum, maximum // 2, maximum // 4, 1}, reverse=True)):
             if quantity < 1 or quantity > maximum:
                 continue
@@ -36,7 +37,7 @@ def buy(game, fleet, source, target, hops, order=None, *, travel_years):
             profit = sale['total'] - total - wages
             # Keep enough working cash to bring this cargo back if a later edge
             # closes before a sale. This is retained cash, never a second wallet.
-            if total + tariff * hops + wages <= balance(game, cash) and (order or (profit > 0 and sale['gross'] <= balance(game, f'market:{target["id"]}'))):
+            if total + tariff * hops + wages <= balance(game, cash) and (order or (profit > 0 and (frozen(game, target['world']) or sale['gross'] <= balance(game, f'market:{target["id"]}')))):
                 if best is None or profit > best['profit']:
                     best = dict(item=item, row=row, target=other, quantity=quantity, purchase=purchase, tariff=tariff, profit=profit)
     if best is None:
@@ -45,16 +46,20 @@ def buy(game, fleet, source, target, hops, order=None, *, travel_years):
     target['commodities'].setdefault(best['item'], best['target'])
     transfer_value(game, cash, f'market:{source["id"]}', purchase['total'], '跨界商队采购实货')
     transfer_value(game, f'market:{source["id"]}', f'operator:{source["id"]}', purchase['fee'], '跨界采购手续费')
-    row['stock'] -= quantity
+    deferred = market_change(game, source, best['item'], -quantity, gross=purchase['gross'], fee=purchase['fee'], direction='out', trader=cash)
+    if not deferred:
+        row['stock'] -= quantity
     from .market_power import record_trade
-    record_trade(game, source, best['item'], cash, 'buy', quantity)
-    row['volume'] += quantity
-    source['turnover'] += purchase['gross']
+    if not deferred:
+        record_trade(game, source, best['item'], cash, 'buy', quantity)
+        row['volume'] += quantity
+        source['turnover'] += purchase['gross']
     fleet['turnover'] = fleet.get('turnover', 0) + purchase['gross']
     fleet.setdefault('turnover_since', game.player.age)
-    source['fees'] += purchase['fee']
-    source['freight_out'] = source.get('freight_out', 0) + quantity
-    reprice(game, source, row)
+    if not deferred:
+        source['fees'] += purchase['fee']
+        source['freight_out'] = source.get('freight_out', 0) + quantity
+        reprice(game, source, row)
     return dict(item=best['item'], quantity=quantity, purchased=quantity, tariff=best['tariff'], cost=purchase['total'])
 
 
@@ -64,7 +69,7 @@ def sell(game, fleet, trip, target):
     while low < high:
         middle = (low + high + 1) // 2
         sale = quote(row, 'sell', middle)
-        if sale['gross'] <= balance(game, f'market:{target["id"]}') and sale['total'] >= middle * trip.get('sell_limit', 0):
+        if (frozen(game, target['world']) or sale['gross'] <= balance(game, f'market:{target["id"]}')) and sale['total'] >= middle * trip.get('sell_limit', 0):
             low = middle
         else:
             high = middle - 1
@@ -72,18 +77,23 @@ def sell(game, fleet, trip, target):
         sale = quote(row, 'sell', low)
         transfer_value(game, f'market:{target["id"]}', f'caravan:{fleet["id"]}', sale['total'], '跨界实货交割')
         transfer_value(game, f'market:{target["id"]}', f'operator:{target["id"]}', sale['fee'], '跨界到货手续费')
-        row['stock'] += low
-        row['volume'] += low
-        target['turnover'] += sale['gross']
+        deferred = market_change(game, target, trip['item'], low, gross=sale['gross'], fee=sale['fee'], direction='in', trader=f'caravan:{fleet["id"]}')
+        if not deferred:
+            row['stock'] += low
+            row['volume'] += low
+            target['turnover'] += sale['gross']
         fleet['turnover'] = fleet.get('turnover', 0) + sale['gross']
         fleet.setdefault('turnover_since', game.player.age)
         fleet['sale_income'] = fleet.get('sale_income', 0) + sale['total']
-        target['fees'] += sale['fee']
-        target['freight_in'] = target.get('freight_in', 0) + low
+        if not deferred:
+            target['fees'] += sale['fee']
+            target['freight_in'] = target.get('freight_in', 0) + low
         trip['quantity'] -= low
         trip['revenue'] += sale['total']
         fleet['delivered'] += low
-        reprice(game, target, row)
+        if not deferred:
+            reprice(game, target, row)
         from .industry import supplier_delivery
         from .fleet_network import owner_key
-        supplier_delivery(target, f'caravan:{fleet["id"]}', low, game=game, item=trip['item'])
+        if not deferred:
+            supplier_delivery(target, f'caravan:{fleet["id"]}', low, game=game, item=trip['item'])

@@ -67,11 +67,13 @@ def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
                 alliance["relation"] = f"与{rival['name']}合作通商"
             else:
                 alliance["relation"] = f"与{rival['name']}竞争商路"
-    if world_scope is not None:
-        return
     for order in state["posted"]:
+        from ...regional_context import task_active
+        if not task_active(game, order['world']) or order.get('regional_year', -1) >= game.player.age:
+            continue
         if order["status"] not in {"open", "working"}:
             continue
+        order['regional_year'] = game.player.age
         alliance = deps._merchant_alliance(game, order["world"], order["alliance_id"])
         if not deps._merchant_route_exists(game, alliance, order["source_world"]) and not (alliance and order["kind"] == "intel" and intelligence_route(game, order["source_world"])):
             deps._merchant_refund(game, order, "cancelled", "目标界面未设本盟总部，商路不可用", order["fee"])

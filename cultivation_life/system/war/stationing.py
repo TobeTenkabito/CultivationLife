@@ -6,6 +6,9 @@ from .supply import return_items
 
 def advance(game):
     for war in game.wars:
+        from ...regional_context import task_active
+        if not task_active(game, war['world']):
+            continue
         if (war.get('strategic_war_id') and war.get('status')=='ended'
                 and war.get('campaign_phase')=='home' and war.get('logistics',{}).get('refunded')):
             # Returned goods can outlive both a full depot and parent history.

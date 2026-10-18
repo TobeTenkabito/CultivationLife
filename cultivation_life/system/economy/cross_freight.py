@@ -53,8 +53,7 @@ def _schedule(game, fleet):
 
 
 def dispatch(game, maps, fleet, destination, *, remittance_percent=25, order=None):
-    from ...regional_context import synchronize
-    synchronize(game, [fleet['world'], destination])
+    from ...regional_context import synchronize, region
     if type(remittance_percent) is not int or remittance_percent not in {0, 25, 50, 100}:
         raise ValueError('索款比例须为 0、25、50 或 100')
     owner = alliance_at(game, fleet['world'], fleet['alliance_id'])
@@ -62,6 +61,14 @@ def dispatch(game, maps, fleet, destination, *, remittance_percent=25, order=Non
     if (not owner or fleet.get('owner_kind') != 'alliance' or fleet['status'] != 'waiting'
             or fleet['cargo'] or fleet.get('cross_trip') or fleet['location'] != owner['hq'] or len(path) < 2):
         raise ValueError('需由本地总部或分总部的空闲商队沿开放通道出发')
+    if region(game) and game.player.age < game._game.player.age:
+        # No shipment was dispatched while this society was frozen. Do not
+        # invent a historical order against a market already in its future.
+        raise ValueError('历史补算不补造新的跨界货单，入界后重新询价')
+    synchronize(game, path)
+    path = route_path(game, owner, destination)
+    if len(path) < 2:
+        raise ValueError('通道在年度维护结算后已关闭')
     target = alliance_at(game, destination, _identity(owner))
     source_market = market(game, maps, fleet['world'], fleet['location'])
     target_market = market(game, maps, destination, target['hq'])

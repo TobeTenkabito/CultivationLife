@@ -6,12 +6,15 @@ from .definitions import RUINS_ID, MIRROR_ID
 
 
 def year_step(deps, game):
+    from ...regional_context import task_active, task_year, region
+    if not task_active(game, 'human'):
+        return
     state = game.heavens_state
     runtime = state.get('runtime')
     if (not runtime or survey.occupied(game) or not state['generation_enabled']
-            or game.player.world in {'lost', 'rift'}):
+            or (region(game) or game.player.world) in {'lost', 'rift'}):
         return
-    year = runtime['processed_years'] + 1
+    year = task_year(game)
     window = year // 100
     if window < 1 or window <= runtime.get('survey_discovery_window', 0):
         return
@@ -23,6 +26,8 @@ def year_step(deps, game):
     raw = sha256(f'{game.seed}:heavens:resident-survey:v1:{window}'.encode()).digest()
     if int.from_bytes(raw[:8], 'big') >= 2**62:
         return
+    from ...regional_context import synchronize
+    synchronize(game, ['human'])
     routes = [target for target in (RUINS_ID, MIRROR_ID) if not survey.get(game, target)]
     # Both unassigned destinations use the same civilian qualifications; scan
     # the real roster once. An undiscovered mirror needs a local witness.

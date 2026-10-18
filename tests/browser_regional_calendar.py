@@ -60,6 +60,33 @@ def main():
                             inspect_regional_journey(engine,identity,True)
                             assert not errors,errors
                             page.close()
+                    # Read the real merchant panel, then reload its frozen
+                    # order: no fabricated progress or state mutation on view.
+                    from test_merchant_execution import posted
+                    from cultivation_life.engine.world import regions
+                    identity=engine.create_game('异界消息验收','heavenly','dao',20261018,preset_id='core')['id']
+                    game=engine._load(identity)
+                    _,game,order=posted((engine,game))
+                    engine._merchant_start_order(game,order,__import__('random').Random(4))
+                    regions.ensure(engine,game)
+                    game.player.world='demon'  # Disposable remote observation.
+                    game.player.location_id=game.merchant_state['worlds']['demon'][0]['hq']
+                    game.player.age+=20
+                    regions.synchronize(engine,game,['demon'])
+                    engine.store.save(game)
+                    page=browser.new_page(viewport=dict(width=393,height=852))
+                    page.goto(f'http://127.0.0.1:{http.server_port}')
+                    page.wait_for_function('!!configData')
+                    for repeat in range(2):
+                        page.evaluate('async id=>loadGame(id)',identity)
+                        navigation_locator(page,'[data-panel-target=merchant]').click()
+                        row=page.locator(f'.merchant-order[data-order-id="{order["id"]}"]')
+                        assert '暂无法得到确切进度' in row.inner_text()
+                        assert row.locator('progress').count()==0
+                        assert engine.store.load(identity).merchant_state['posted'][-1]['status']=='working'
+                        page.screenshot(path=str(output/f'remote-notice-{repeat}.png'))
+                        page.reload();page.wait_for_function('!!configData')
+                    page.close()
                     browser.close()
             finally:http.shutdown();http.server_close()
     (output/'result.json').write_text(json.dumps(dict(passed=True,themes=4,layouts=3,

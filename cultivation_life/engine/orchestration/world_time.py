@@ -88,7 +88,9 @@ def _advance_world_year(
         deps._die(game, "寿元已尽", "SYS_LIFESPAN")
         return False
     if deps.advance_regions:
-        era_news.extend(deps.advance_player_society(game, rng))
+        from ...regional_context import calendar_scope
+        with calendar_scope(game, player.world, player.age):
+            era_news.extend(deps.advance_player_society(game, rng))
     else:
         era_news.extend(deps._annual_sect_update(game, rng))
         era_news.extend(deps._annual_world_npc_update(game, rng))

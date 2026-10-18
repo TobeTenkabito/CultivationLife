@@ -74,13 +74,16 @@ def bind_missions(engine, ports):
         npc.location_id = destination.location_id
 
     def advance(game):
+        from ...regional_context import task_year, region, ordinary_year
+        from ...system.heavens.calendar import advance_contact_cycles
+        advance_contact_cycles(game, task_year(game))
         frontier.year_step(ports(), game)
         campaign.year_step(ports(), game)
         upkeep.year_step(ports(), game)
         # Surveys retain their documented outside/instance clocks. Running
         # external freight and campaigns during isolation must not advance
         # a survey's outside phase on the player's instance year.
-        if game.player.world not in {'lost', 'rift'}:
+        if (region(game) or game.player.world) not in {'lost', 'rift'} and ordinary_year(game):
             ports().advance_survey(game, True)
         autonomy.year_step(ports(), game)
         missions.year_step(ports(), game)
@@ -88,9 +91,9 @@ def bind_missions(engine, ports):
         if runtime:
             for echo, row in research_assignments(game):
                 if row is echo.get('freight'):
-                    freight.year_step(ports(), game, echo, row, runtime['processed_years']+1)
+                    freight.year_step(ports(), game, echo, row, task_year(game))
                 elif row is echo.get('migration'):
-                    migration.year_step(ports(), game, echo, row, runtime['processed_years']+1)
+                    migration.year_step(ports(), game, echo, row, task_year(game))
 
     def candidates(game, target):
         if missions.contact_reason(ports(), game, target):

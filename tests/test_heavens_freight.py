@@ -208,10 +208,8 @@ def test_player_isolation_preserves_remote_freight_and_disabled_generation_keeps
     game.player.age += 1
     engine._advance_world_year(game, decode_rng(game.seed, game.rng_state), [], encounters=False)
     after = get_echo(game.heavens_state['runtime'])['freight']
-    # The original carrier is outside the player's instance: its funded task
-    # keeps running, while ownership and the one original material stay intact.
-    assert after['elapsed'] == before['elapsed'] + 1
-    assert after['spent'] == before['spent'] + 1000
+    # All off-world tasks now freeze, including a prepaid original carrier.
+    assert after == before
     assert after['material'] == before['material']
     assert after['cargo_owner'] == before['cargo_owner'] == 'carrier'
     game = engine.store.load(initial.id)

@@ -344,6 +344,7 @@ def _try_conceive_child(deps: RelationshipDependencies, game: GameState, rng: ra
 
 
 def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: GameState, rng: random.Random) -> list[str]:
+    from ...regional_context import task_active, annual_person
     news: list[str] = []
     player = game.player
     family_ids = {npc.id for npc in game.family.npcs} if game.family and not game.family.extinct else set()
@@ -351,11 +352,21 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
     independent.update(game.notable_npcs)
     independent.update(game.inactive_npcs)
     for child in player.offspring:
+        only = getattr(game, '_regional_single_person', None)
+        if only is not None and child.get('id') != only:
+            continue
+        if not task_active(game, child.get('world', player.world)):
+            continue
         if child.get("id") in independent:
             child.update(independent[child["id"]].to_dict())
             continue
         if not child.get("alive", True) or child.get("id") in family_ids:
             continue
+        if game.world_simulation:
+            marks = game.world_simulation['people']
+            if only is None and marks.get(child['id'], -1) >= player.age:
+                continue
+            marks[child['id']] = max(marks.get(child['id'], -1), player.age)
         child["age"] = int(child.get("age", 0)) + 1
         if child.get("lifespan") is not None and child["age"] >= int(child["lifespan"]):
             child["alive"] = False
@@ -413,11 +424,18 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
                     {"child_id":child["id"],"realm":[result["old"],result["new"]]},
                     ["system","family","offspring","world_news",f"world:{child.get('world',player.world)}"],
                 ))
-    family = game.family
-    if not family or family.extinct:
+    if getattr(game, '_regional_single_person', None) is not None:
         return news
+    family = game.family
+    if not family or family.extinct or not task_active(game, family.world):
+        return news
+    if game.world_simulation:
+        years = game.world_simulation.setdefault('family_years', {})
+        if years.get(family.id, -1) >= player.age:
+            return news
+        years[family.id] = player.age
     for npc in family.npcs:
-        if not npc.alive:
+        if not npc.alive or not annual_person(game, npc):
             continue
         child = next((row for row in player.offspring if row.get("id") == npc.id), None)
         npc.age += 1
@@ -631,6 +649,9 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
     ]
     seen = set()
     for relation in event_relations:
+        from ...regional_context import task_active
+        if not task_active(game, relation.get('world', player.world)):
+            continue
         from ...spatial_people import instance_of
         if instance_of(game, relation['id']):
             continue
@@ -639,6 +660,11 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
         seen.add(relation["id"])
         if not relation.get("alive", True):
             continue
+        if game.world_simulation:
+            marks = game.world_simulation['people']
+            if marks.get(relation['id'], -1) >= player.age:
+                continue
+            marks[relation['id']] = player.age
         relation["age"] = int(relation.get("age", 0)) + 1
         lifespan = relation.get("lifespan")
         if lifespan is not None and relation["age"] >= lifespan:

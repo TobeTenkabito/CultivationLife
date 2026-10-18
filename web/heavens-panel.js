@@ -131,6 +131,7 @@
     const navigation=node('div',null,'heavens-navigation');
     tabs(navigation,[['home','见闻'],['worlds','诸界'],['anomalies','异象'],['journey','行程'],['frontier','战局']],ui.page,id=>go(id), '诸天导航','primary');
     host.append(navigation);
+    if(h.remote_notice)host.append(node('p',h.remote_notice,'muted'));
     if(pending){const box=node('div',null,'heavens-retry');box.setAttribute('role','status');box.append(node('small','上次提交尚未确认，可安全重试。'),button('重试上次提交（不会重复扣费）',()=>send(pending.payload)));host.append(box);}
     const task=activeTask(h);
     if(task&&ui.page!=='journey'){const strip=button(`进行中 · ${task.progress}/${task.duration} 年 · 查看行程 ›`,()=>go('journey'));strip.className='heavens-task-strip';host.append(strip);}

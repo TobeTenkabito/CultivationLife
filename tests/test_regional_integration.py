@@ -21,6 +21,9 @@ def test_full_campaign_freight_war_and_order_resume_without_double_payment(tmp_p
         for year in range(12):
             game.player.age+=1
             engine._advance_world_year(game,random.Random(100+year),[],encounters=False)
+            for home, transport in game.economy_v2['transport']['worlds'].items():
+                if any(f.get('cross_trip') for f in transport['fleets'].values()):
+                    assert transport['last_year'] == (game.player.age if home==game.player.world else initial.player.age)
             if year == 9:
                 game.diplomacy_unit += 1
                 engine._advance_wars_unit(game, random.Random(909))

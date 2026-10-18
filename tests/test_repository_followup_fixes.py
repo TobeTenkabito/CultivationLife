@@ -73,6 +73,13 @@ def test_crossed_delivery_retains_exact_goods_until_local_claim(api, kind):
     cross(engine, game, destination)
     act(game.id, 'advance', action='rest', years=1)
     finished = engine._load(game.id)
+    assert finished.merchant_state['posted'][-1]['status'] == 'working'
+    # Actual entry catches up the original order before moving the player.
+    # Its resulting parcel stays at the issuing site until explicitly claimed.
+    cross(engine, finished, original_world, original_location)
+    finished = engine._load(game.id)
+    cross(engine, finished, destination)
+    finished = engine._load(game.id)
     order = next(row for row in finished.merchant_state['posted'] if row['id'] == identity)
     assert order['status'] == 'completed' and order['delivery_goods']
     parcel = copy.deepcopy(order['delivery_goods'])

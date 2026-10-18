@@ -34,13 +34,7 @@ def year_step(deps, game, context: YearContext):
     if deps.advance_survey:
         deps.advance_survey(game, False)
     runtime['notifications'] = [row for row in runtime['notifications'] if row['expires_at'] > now]
-    for echo in contacts(runtime):
-        cycle, _offset, _cutoff = phase(runtime, echo)
-        if cycle != echo['cycle']:
-            echo.update(cycle=cycle, maintained=False, maintenance_started=False,
-                        applications_used=0, reward_base=None, reward_claimed=0.0, application=None)
-            record(game, f'{echo_site(echo).name}进入下一周期。旧记和合法抄录仍在，应用前须重新体察当期现象。')
-        # Existing tasks still close when generation is switched off.
+    advance_contact_cycles(game, now)
     upkeep.reconcile(deps, game)
     deps.reconcile_tasks(game)
     window = now // 100 - 1
@@ -66,6 +60,21 @@ def year_step(deps, game, context: YearContext):
             return
         create_echo(deps, game, site.id)
         visible_notice(game, f'{site.name}出现可求证的线索，可留在本地体察或继续原有修行。', site.id)
+
+
+def advance_contact_cycles(game, year):
+    from ...regional_context import task_active
+    runtime = game.heavens_state.get('runtime')
+    if not runtime:
+        return
+    for echo in contacts(runtime):
+        if not task_active(game, echo_site(echo).world) or year < echo['origin_year']:
+            continue
+        cycle, _offset, _cutoff = phase({'processed_years': year}, echo)
+        if cycle > echo['cycle']:
+            echo.update(cycle=cycle, maintained=False, maintenance_started=False,
+                        applications_used=0, reward_base=None, reward_claimed=0.0, application=None)
+            record(game, f'{echo_site(echo).name}进入下一周期。旧记和合法抄录仍在，应用前须重新体察当期现象。', year=year)
 
 
 def take_pause(game):

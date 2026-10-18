@@ -67,6 +67,9 @@ def test_real_resident_settles_without_replacing_visitor(local, site):
     assert row['status'] == 'completed' and row['spent'] == 4000 and row['refunded'] == 0
     assert get_echo(settled.heavens_state['runtime'], site.id)['project_stones'] == 13500
     assert not research_assignment(settled, identity)
+    assert settled.world_npcs[identity].age == before.world_npcs[identity].age+2
+    from cultivation_life.engine.world import regions
+    regions.synchronize(engine, settled, [destination.world])
     assert settled.world_npcs[identity].age == before.world_npcs[identity].age+3
     assert stones(settled) == stones(before) and settled.player.opportunity == before.player.opportunity
     assert set(settled.world_npcs) == set(before.world_npcs)
@@ -83,11 +86,22 @@ def test_actual_destination_contact_during_settling_then_normal_relationship(loc
     start(local, identity)
     game = wait(local, 2)
     engine, initial, _ = local
+    assert game.world_npcs[identity].world == 'celestial'  # Remote task has not run.
+    from test_repository_followup_fixes import cross
+    cross(engine, game, 'celestial')
+    game = engine.store.load(initial.id)
+    target = default_site(VISIT_DESTINATIONS['sea_echo'])
+    cross(engine, game, target.world, target.location_id)
+    game = engine.store.load(initial.id)
     assert availability(game, game.world_npcs[identity])['improve'] == ''
     engine.contact_action(initial.id, identity, 'improve')
     with pytest.raises(ValueError):
         engine.manage_dao_friend(initial.id, identity, 'befriend')
     settled = wait(local, 1)
+    cross(engine, settled, 'celestial')
+    settled = engine.store.load(initial.id)
+    cross(engine, settled, target.world, target.location_id)
+    settled = engine.store.load(initial.id)
     assert not research_assignment(settled, identity)
     assert availability(settled, settled.world_npcs[identity])['improve'] == ''
 
@@ -154,6 +168,15 @@ def test_real_lifespan_death_precedes_arrival_or_settlement(local, years):
     start(local, identity)
     saved = wait(local, years)
     row = get_echo(saved.heavens_state['runtime'])['migration']
+    if years == 3:
+        # The destination society has not lived that year yet. Catching it up
+        # applies real death, without clawing back an already completed task.
+        assert row['status']=='completed' and saved.world_npcs[identity].alive
+        from cultivation_life.engine.world import regions
+        regions.synchronize(local[0], saved, ['reincarnation'])
+        assert not saved.world_npcs[identity].alive and '寿元' in saved.world_npcs[identity].death_reason
+        assert row['spent']==4000 and row['refunded']==0
+        return
     assert row['status'] == 'failed' and row['spent'] == (years-1)*1000
     assert row['refunded'] == 4000-row['spent'] and not saved.world_npcs[identity].alive
     assert saved.world_npcs[identity].world == ('celestial' if years==2 else 'reincarnation')
@@ -170,10 +193,9 @@ def test_isolation_and_duplicate_year_do_not_advance_twice(local):
     game.player.age += 1
     engine._advance_world_year(game, decode_rng(game.seed, game.rng_state), [], encounters=False)
     after = get_echo(game.heavens_state['runtime'])['migration']
-    assert after['elapsed'] == before['elapsed'] + 1
-    assert after['spent'] == before['spent'] + 1000
+    assert after == before
     assert after['person_id'] == before['person_id'] == identity
-    assert game.world_npcs[identity].age == age + 1
+    assert game.world_npcs[identity].age == age
     game = engine.store.load(initial.id)
     deps.advance_researchers(game)
     once = copy.deepcopy(game.heavens_state)

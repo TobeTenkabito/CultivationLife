@@ -160,13 +160,17 @@ def execute(deps, game, action, target, options, *, run_task, cancel_task, task_
 
 
 def year_step(deps, game, *, outside):
+    from ...regional_context import task_active
+    if outside and not task_active(game, 'human'):
+        return
     for target in SITES:
         advance_one(deps, game, outside=outside, target=target)
 
 
 def advance_one(deps, game, *, outside, target):
     row = get(game, target)
-    year = game.heavens_state.get('runtime', {}).get('processed_years', 0)+int(outside)
+    from ...regional_context import task_year
+    year = task_year(game) if outside else game.heavens_state.get('runtime', {}).get('processed_years', 0)
     reveal(deps, game, year=year, target=target)
     if not row or row['status'] != 'active' or (row['phase'] == 'outbound') != outside:
         return

@@ -220,10 +220,13 @@ def battles(deps, game, row, now):
 
 
 def year_step(deps, game):
+    from ...regional_context import task_active, task_year
+    if not task_active(game, 'human'):
+        return
     runtime = game.heavens_state.get('runtime')
     if not runtime:
         return
-    now = runtime['processed_years']+1
+    now = task_year(game)
     row = get(game)
     if row is None:
         start(deps, game, now)

@@ -267,6 +267,9 @@ def advance(deps, game, rng):
     if not state:
         return
     for row in state.get('wars', []):
+        from ...regional_context import task_active
+        if not task_active(game, row['world']):
+            continue
         if row['status'] not in OPEN or row['last_age'] >= game.player.age:
             continue
         row['last_age'] = game.player.age

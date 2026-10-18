@@ -84,6 +84,10 @@ def execute(deps, game, action, target, options):
 
 
 def year_step(deps, game, echo, row, year):
+    from ...regional_context import task_active
+    from .state import echo_site
+    if not task_active(game, echo_site(echo).world):
+        return
     if row['status'] != 'active' or row['last_year'] >= year:
         return
     row['last_year'] = year

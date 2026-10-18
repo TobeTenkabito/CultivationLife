@@ -336,7 +336,8 @@ def advance_caravans(game, maps):
     ensure_caravans(game, maps)
     advance_network(game, maps)
     state = game.economy_v2['transport']
-    for world, region in state['worlds'].items():
+    # A real cross-world dispatch can adopt its destination during this tick.
+    for world, region in list(state['worlds'].items()):
         if not includes(game, world):
             continue
         years = game.player.age - region['last_year']

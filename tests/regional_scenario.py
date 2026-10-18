@@ -13,7 +13,7 @@ from cultivation_life.system.heavens.campaign_definitions import INITIAL_SUPPLY
 from cultivation_life.rules import max_hp, max_mp
 
 
-def prepare(engine):
+def prepare(engine, *, fixed_routes=False):
     from test_heavens_frontier import ready
     from test_heavens_campaign import military, construction
     game = engine.store.load(engine.create_game('并行事务验收', 'none', 'dao', 20261018)['id'])
@@ -39,6 +39,11 @@ def prepare(engine):
         row['last_year'] = game.player.age
     for route in game.economy_v2['network']['routes'].values():
         route['last_year'] = game.player.age
+        if fixed_routes and {route['home'], route['branch']} != {'spirit','true_demon'}:
+            # The equality fixture has one built shipping lane. Other lanes
+            # are unbuilt plans, so unrelated autonomous openings cannot make
+            # live and frozen societies initiate different new transactions.
+            route.update(open=False, built=False, paid=0)
     alliance = fleet_network.alliance_at(game, 'spirit', 'xuanji')
     transfer_value(game, 'background:spirit', 'alliance:spirit:xuanji', 30_000_000, '验收原池提供百年维护资金')
     fleet = next(f for f in game.economy_v2['transport']['worlds']['spirit']['fleets'].values()

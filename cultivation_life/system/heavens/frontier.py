@@ -153,10 +153,13 @@ def complete(deps, game, task):
 
 
 def year_step(deps, game):
+    from ...regional_context import task_active, task_year
+    if not task_active(game, 'human'):
+        return
     row = get(game)
     if not row or row['status'] != 'active':
         return
-    now = game.heavens_state['runtime']['processed_years']+1
+    now = task_year(game)
     if now <= row['last_year']:
         return
     row['last_year'] = now

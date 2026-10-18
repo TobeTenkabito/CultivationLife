@@ -87,6 +87,12 @@ def test_can_meet_actual_researcher_but_not_redeploy_them(local):
     engine, initial, deps = local
     issue(local,'mission_start')
     game = wait(local,2)
+    from test_repository_followup_fixes import cross
+    cross(engine, game, 'celestial')
+    game = engine.store.load(initial.id)
+    destination = default_site(VISIT_DESTINATIONS['sea_echo'])
+    cross(engine, game, destination.world, destination.location_id)
+    game = engine.store.load(initial.id)
     npc = game.world_npcs[get_echo(game.heavens_state['runtime'])['visitor_id']]
     assert engine._find_npc(game,npc.id) is npc
     assert availability(game,npc)['improve'] == ''
@@ -148,7 +154,7 @@ def test_closed_route_preserves_progress_resources_and_real_npc_age(local,monkey
 
 
 def test_capture_and_release_preserve_same_identity_and_return_ticket(local):
-    prepared(local,abroad=True)
+    prepared(local)
     engine,initial,deps=local
     issue(local,'mission_start')
     game=wait(local,2)
@@ -190,7 +196,9 @@ def test_personal_return_reserved_before_npc_queue_does_not_deadlock(local):
     issue(local,'mission_start')
     game=wait(local,5)
     identity=get_echo(game.heavens_state['runtime'])['visitor_id']
-    assert get_echo(game.heavens_state['runtime'])['mission']['progress']==3
+    # The owner is celestial: waiting abroad freezes the entire NPC task.
+    assert get_echo(game.heavens_state['runtime'])['mission']['progress']==0
+    assert get_echo(game.heavens_state['runtime'])['mission']['spent']==0
     result=issue(local,'visit_return')
     assert result['status']=='completed'
     game=engine.store.load(initial.id)
@@ -203,14 +211,45 @@ def test_personal_return_reserved_before_npc_queue_does_not_deadlock(local):
 
 
 def test_npc_reserved_lane_blocks_player_until_arrival(local):
-    prepared(local,abroad=True)
+    prepared(local)
     engine,initial,deps=local
     issue(local,'mission_start')
-    wait(local,6)
+    game=wait(local,1)
+    destination = default_site(VISIT_DESTINATIONS['sea_echo'])
     with pytest.raises(ValueError,match='通道'):
-        issue(local,'visit_return')
-    wait(local,2)
-    assert issue(local,'visit_return')['status']=='completed'
+        engine._plan_world_transition(game, destination.world, 'study',
+            arrival_location=destination.location_id, reason='验收原通道占用')
+    game=wait(local,1)
+    from cultivation_life.person_assignments import route_occupied
+    assert not route_occupied(game, game.player.world, destination.world, exclude=game.id)
+    # Lane release does not grant a second personal study permit.
+    with pytest.raises(ValueError, match='许可'):
+        engine._plan_world_transition(game, destination.world, 'study',
+            arrival_location=destination.location_id, reason='验收抵达后仍需原许可')
+
+
+def test_frozen_return_lane_cannot_prevent_reentry_into_task_owner(local):
+    game = prepared(local, abroad=True)
+    engine, initial, deps = local
+    from test_repository_followup_fixes import cross
+    origin = default_site('sea_echo')
+    cross(engine, game, origin.world, origin.location_id)
+    issue(local, 'mission_start')
+    game = wait(local, 7)
+    echo = get_echo(game.heavens_state['runtime'])
+    identity = echo['visitor_id']
+    assert echo['mission']['phase'] == 'returning' and echo['mission']['progress'] == 1
+    destination = default_site(VISIT_DESTINATIONS['sea_echo'])
+    cross(engine, game, destination.world, destination.location_id)
+    frozen = wait(local, 2)
+    before = copy.deepcopy(get_echo(frozen.heavens_state['runtime'])['mission'])
+    assert before['progress'] == 1 and before['spent'] == 5000
+    assert issue(local, 'visit_return')['status'] == 'completed'
+    returned = wait(local, 1)
+    mission = get_echo(returned.heavens_state['runtime'])['mission']
+    assert returned.world_npcs[identity].world == 'celestial'
+    assert mission['status'] == 'completed' and mission['spent'] == 6000
+    assert mission['refunded'] == 0
 
 
 def test_independent_space_and_early_personal_event_keep_outer_npc_calendar(local,monkeypatch):
@@ -221,14 +260,14 @@ def test_independent_space_and_early_personal_event_keep_outer_npc_calendar(loca
     identity=get_echo(game.heavens_state['runtime'])['visitor_id']
     before=copy.deepcopy(get_echo(game.heavens_state['runtime'])['mission'])
     age=game.world_npcs[identity].age
-    # A remote civilian journey retains its own original actor and paid year,
-    # even while the player is in an instance or pauses on a personal event.
+    # Instance time freezes the outside society and its original task. A
+    # local personal-event interruption still settles its elapsed real year.
     game.player.world='rift'
     game.player.age+=1
     engine._advance_world_year(game,decode_rng(game.seed,game.rng_state),[],encounters=False)
     after=get_echo(game.heavens_state['runtime'])['mission']
-    assert after['elapsed']==before['elapsed']+1 and after['spent']==before['spent']+1000
-    assert game.world_npcs[identity].age==age+1
+    assert after==before
+    assert game.world_npcs[identity].age==age
     def interrupt(work,rng):
         work.pending_event={'id':'mission_test_event'}
     monkeypatch.setattr(engine,'_check_tribulation',interrupt)

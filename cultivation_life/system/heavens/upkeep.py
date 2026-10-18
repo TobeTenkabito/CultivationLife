@@ -78,6 +78,9 @@ def reconcile(deps, game):
         return
     now = runtime['processed_years']
     for echo in contacts(runtime):
+        from ...regional_context import task_active
+        if not task_active(game, echo_site(echo).world):
+            continue
         row = echo.get('upkeep')
         if row and row['status'] == 'active':
             if not game.player.alive:
@@ -87,11 +90,16 @@ def reconcile(deps, game):
 
 
 def year_step(deps, game):
+    from ...regional_context import region, ordinary_year
     runtime = game.heavens_state.get('runtime')
-    if not runtime or game.player.world in {'lost', 'rift'}:
+    if not runtime or (region(game) or game.player.world) in {'lost', 'rift'} or not ordinary_year(game):
         return
-    year = runtime['processed_years'] + 1
+    from ...regional_context import task_year
+    year = task_year(game)
     for echo in contacts(runtime):
+        from ...regional_context import task_active
+        if not task_active(game, echo_site(echo).world):
+            continue
         row = echo.get('upkeep')
         if not row or row['status'] != 'active' or row['last_year'] >= year:
             continue

@@ -51,6 +51,8 @@ def _public_merchant(deps: MerchantViewDependencies, game):
     orders = [copy.deepcopy({key: value for key, value in order.items() if key != 'delivery_goods'})
               for order in state['posted']]
     for order, original in zip(orders, state['posted']):
+        from ...regional_context import remote_notice
+        order['remote_notice'] = remote_notice(game, order['world']) if order['status'] in {'open', 'working'} else ''
         from .delivery import local_delivery
         order['delivery_pending'] = bool(original.get('delivery_goods'))
         order['can_claim'] = order['delivery_pending'] and local_delivery(game, original)
@@ -60,7 +62,8 @@ def _public_merchant(deps: MerchantViewDependencies, game):
         order.pop("will_finish", None)
         order.pop("failure_age", None)
         order.pop("accept_chance", None)
-        order["progress"] = min(.99, max(0, (game.player.age - order.get("started_age", game.player.age)) / order["years"])) if order["status"] == "working" else 1 if order["status"] == "completed" else order.get("progress", 0)
+        year = game.world_simulation.get('regions', {}).get(order['world'], {}).get('year', game.player.age)
+        order["progress"] = min(.99, max(0, (year - order.get("started_age", year)) / order["years"])) if order["status"] == "working" else 1 if order["status"] == "completed" else order.get("progress", 0)
     return {"alliances": visible, "membership": membership, "active": copy.deepcopy(state["active"]),
             "posted": orders, "notices": copy.deepcopy(state["notices"]), "kinds": KINDS,
             "hired_hands": state.get("hired_hands", 0), "year": game.player.age,

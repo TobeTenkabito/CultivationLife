@@ -117,6 +117,7 @@ COMMON_GOODS_TESTS = [
 
 
 REGIONAL_TESTS = list(dict.fromkeys(BUGFIX_TESTS + [
+    'tests/test_deferred_economy.py',
     'tests/test_regional_calendar.py', 'tests/test_travel_relationship_2160.py',
     'tests/test_regional_integration.py', 'tests/test_npc_system.py', 'tests/test_map_system.py',
     'tests/test_monster_civilizations.py',
