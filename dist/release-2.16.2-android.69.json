@@ -1,5 +1,5 @@
 {
-  "base_version": "2.16.1",
+  "base_version": "2.16.2",
   "save_schema": 10,
   "compatible_save_schemas": [
     10
@@ -17,80 +17,183 @@
     "tianji-artifacts": "2.2.0",
     "trial-sites": "1.1.0"
   },
-  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
-  "tests": 2153,
+  "validation_scope": "Related regional and upstream tests, not full repository. Five unchanged passed shards retained with source/log hashes; complete affected shard rerun after test-only newline-digest correction.",
+  "tests": 2213,
   "runs": [
     {
       "name": "related-tests-0",
-      "log": "build\\related-tests-0-2161.log",
-      "status": "passed"
+      "log": "build/related-tests-0-2162.log",
+      "status": "passed",
+      "reused": true,
+      "test_sources": {
+        "tests/test_economy_trust.py": "97d5038b7c3bbf29c4f9dfabd94efac195607e7e399c9b68270744cf3a1f5cf4",
+        "tests/test_organization_balance.py": "04e59626489afea7cd29691ae779901e6fd8c5c0d4cf32196350a67eacf361e4",
+        "tests/test_spatial_talismans.py": "070567dbf73aec91f7ed10fa28247165d3f892d2eadbc870ad0330f6c10e42b2",
+        "tests/test_android_release_checks.py": "de2eef0e9c129f499fdc332a526e59a69185cbd169c79deba4b549a6033e15c6",
+        "tests/test_economy_audit_round3.py": "264a29761189331a5a7a74cf46adcb11282238f08aced54d2ab34723b4d1d264",
+        "tests/test_npc_custody.py": "ac348d806d76919b56b42d640a87272fd57b9cb839d48a70df1941e96b58344e",
+        "tests/test_time_flow.py": "d85b116ce92175773e3b8ceb4ee3a038baf6144888c81cc6219a510cf1197c40",
+        "tests/test_inheritance_audit_fixes.py": "f99686aac7b2b384dbfd1f0ec9462868ef9b1cfb97e865f23fa2929683285aa8",
+        "tests/test_territory_system.py": "560fc19485380f1b599cf816c34570864f6123484837a8b4fcdd68199d536f21",
+        "tests/test_travel_relationship_2160.py": "3fce75a3a1c4858e63195f20d9834a26fa4eb1d8882c2219f7a6959c76839c62",
+        "tests/test_merchant_commissions.py": "cebe5c6244b5c3acbb9cdf59c8792973d30eec25d86c328a75e5a9109765a75c",
+        "tests/test_strategic_peace.py": "ea6adf9b5ed40ba6f2dc90494700eeb946c96e6e81cc6dc68f5a12e10df02f7b",
+        "tests/test_heavens_incidents.py": "1c3b5420c9f002d29caf2f7bd593ec6a5116370e3a1098f4ae1f03c2cc7be31c",
+        "tests/test_heavens_mirror_pact.py": "da76ebc0cbab101730617a2ca3c504affdb4b9b652a102d26e15b440189678cd",
+        "tests/test_heavens_settlement.py": "3bab73a36601d5e8a663d9a78ffe52681358373114d9c2a8547eee58aef6b8e0"
+      },
+      "log_sha256": "0859e71b445e9e94b83c1b7e37f3b8c2ac3a693dac53df2c6483d3880b04da66",
+      "xml": "build/scoped-2162-0.xml",
+      "xml_sha256": "f473be2d839c6cc6e4e9f021bac50c3c361032be62ea90eae4be82e805359d3a"
     },
     {
       "name": "related-tests-1",
-      "log": "build\\related-tests-1-2161.log",
-      "status": "passed"
+      "log": "build/related-tests-1-2162.log",
+      "status": "passed",
+      "reused": true,
+      "test_sources": {
+        "tests/test_economy_estate_audit.py": "4c25f6ff6d4a8716525d27227942bf44faa83a3a4c43576f97abdc8f70fe71f0",
+        "tests/test_family_expansion.py": "0d8ddb9b5a9101c348777176e7843376015a2fedea61bb37c027c84d5a87b9fe",
+        "tests/test_release_211.py": "9986dd4ce009c47b8d4ad26c127ba51e748b05cd1db6fa3de2f8457e2efd5155",
+        "tests/test_release_2135.py": "cffdd406e7b745d59e45ed6a71e41c945ecd26dcaa43c690c30287f355433b18",
+        "tests/test_owned_training.py": "df133707c5db656e5f9a2475933d7bc6d1c7e8c89222f0d701f9838b8569c78e",
+        "tests/test_relationship_records.py": "09b673bc42149edd8042bb1e42c00378e4cf26abaa6c0f7d1df6c7fbe93e4358",
+        "tests/test_crafting_system.py": "81cedf165e7e922ad5aff39d079df6c65858c75257366bb8ec832250732da15e",
+        "tests/test_repository_followup_fixes.py": "ff19e6f5f6e63c692e1fa8dbaf7d113b415fa5b9ee555178656c29cdfccc71a2",
+        "tests/test_war_logistics.py": "ef99910273a7b63bae4d8dfbf293258f03c39cc9fe8b1935474bb77fe76b4a13",
+        "tests/test_regional_integration.py": "37c8e2a0db2f085d108a733f7ad16fb38a6f5a1af98bebcd770f25c1f10af835",
+        "tests/test_guixu_companions.py": "0a2631365a61e8b12109248221b2d9c00f1425ce7ac9d46735d8987ec59798ba",
+        "tests/test_heavens.py": "d4d6562fa2516fe4d93f8e29e66e4bfd0882543f5d541c5b58dbbc2c4d06d9fc",
+        "tests/test_heavens_m1.py": "630a5b8f6c6035251c7cfbeaf55e5843b5f11e08ce5fd8f85b15a1bef6709fe0",
+        "tests/test_heavens_mirror_survey.py": "adfc15898b3f0a47fbb0014df7e6026c1ef3c301094161e9e9397ed7cd8ea05a",
+        "tests/test_heavens_survey.py": "6408d054d49f452c3ab60f5124720453816e6e47daec0d2ad0f578fc1105423f"
+      },
+      "log_sha256": "2b8cb72f723ce56f144b0c47684484a5440ed009046b862720f3ee34cf171e9f",
+      "xml": "build/scoped-2162-1.xml",
+      "xml_sha256": "0e4a71c10244caff845bb378d99b8fc66fcfbd544878dc17903130f6e17c868b"
     },
     {
       "name": "related-tests-2",
-      "log": "build\\related-tests-2-2161.log",
-      "status": "passed"
+      "log": "build/related-tests-2-2162.log",
+      "status": "passed",
+      "reused": true,
+      "test_sources": {
+        "tests/test_economy_enterprises.py": "f7439528381dbbe08f6604860bd2ac90a5f031ff7133f8f01ee1e8230f498f0a",
+        "tests/test_family_expansion.py": "0d8ddb9b5a9101c348777176e7843376015a2fedea61bb37c027c84d5a87b9fe",
+        "tests/test_release_212.py": "c60501daf0529b86c6b6d0ba6fb265ec02c8a3653533d16ec5cd58477d80979b",
+        "tests/test_other_systems_audit_fixes.py": "dca4faeda7dbc898afe5554364862ccb0c6c9877bf711b82fc05ad48aa9a8886",
+        "tests/test_upper_institutions.py": "788a6bf72985b87e217538c32cc52f59e67964afcb72a8988cd0ba346b496e36",
+        "tests/test_relationship_story_update.py": "6b2ae3390c371c369696351ddd7f4fb77cdc39bafdf96b72a15d9d26dac6ab88",
+        "tests/test_formation_system.py": "b74cdaa1ee2fee9f4d3abf3a1acfca1e4260c60ecd2e5bcaa07b8b5cee46806a",
+        "tests/test_crafting_field_audit_fixes.py": "988121d618f6bb77691e727fd7694f865fb03236ed0837a64dc15bac9d7c5f98",
+        "tests/test_war_performance_update.py": "ab04ff00b6e122326fbf0e16c1104ddc8382edde36de76a157452c1c6fcdfc04",
+        "tests/test_npc_system.py": "fe52bd45406a036de6cee3bb55d7797a55913b13f80dde444ac2912533ea3f03",
+        "tests/test_heavens_autonomy.py": "6cc94fe709818cb2d2f4630c8ee1bb0d8835212b2eadb43c4dcce2c774e22337",
+        "tests/test_heavens_m2_acceptance.py": "93768d696f74ecf6ed3954e58845d91500ccac118a211b19f458aa8b00b52990",
+        "tests/test_heavens_missions.py": "6b39c5b9ab802c5cea4880bf13e0184de4733197803f194d8383a4d96db08717",
+        "tests/test_heavens_upkeep.py": "f3be79ddbbd074ae5a7b9e6fa920389e97babf9113f6ec897dd9b08cbb1720f4"
+      },
+      "log_sha256": "1d763691dcdb5430e21b333e2fa41d7f9adf64f542b2b2eb65b4b2dd66d00443",
+      "xml": "build/scoped-2162-2.xml",
+      "xml_sha256": "6e6c83643846ea04fd610adb6b6f32977311e8d1e183d95803fde7798614eb09"
     },
     {
       "name": "related-tests-3",
-      "log": "build\\related-tests-3-2161.log",
-      "status": "passed"
-    },
-    {
-      "name": "related-tests-4",
-      "log": "build\\related-tests-4-2161.log",
-      "status": "passed"
+      "log": "build/related-tests-3-2162.log",
+      "status": "passed",
+      "reused": true,
+      "test_sources": {
+        "tests/test_economy_network.py": "c0cd99ecd900f53af3e0f218d6f243c79a78d0331e39f5b18765efce5e5f2c1f",
+        "tests/test_family_expansion.py": "0d8ddb9b5a9101c348777176e7843376015a2fedea61bb37c027c84d5a87b9fe",
+        "tests/test_base_game_version.py": "588714ce2139d7defbe0d711858cc1a3e165cf8ba86b8bab95e8e039fc85dde4",
+        "tests/test_relationship_possession_audit_fixes.py": "83219c428aa16067d12043867be7b37d9b6f4afd29af3c0c407bee37b7a5989e",
+        "tests/test_secret_arts.py": "813354ffc84f7297faf7248bf69cae9c9e177869497009285bdfc5918a4edf1c",
+        "tests/test_demonic_system.py": "5a37d9f14e49b8de64c4dd11ea93a1b8c9cab5dee147b61d5e105e45421c3b38",
+        "tests/test_persistence_pipeline.py": "cbfcf851d9388763622913423fb08b8261aff02d02ff6009c57257d539658401",
+        "tests/test_ownership_prison_fixes.py": "b65cb7ab3b5f2aafcd755bfcddef7fce917947bb241016bfc733ad87438e172e",
+        "tests/test_deferred_economy.py": "bac0cda17e5d9055aa89869343b1a2107485c5865c73cdd7ee042fbd1f926813",
+        "tests/test_map_system.py": "048375f27c19a500b660f384ea3a1696513980c348e9ddbe7e2703039c5d5a0a",
+        "tests/test_strategic_war.py": "c309c2de08f352d77233f0b85d566aaef06f2bdc03b7186909983192a2d16910",
+        "tests/test_heavens_campaign.py": "4ebaf37dbc6766a3da5183392d68807484ba6fbbb4813a4f86707f1e6aae9d48",
+        "tests/test_heavens_migration.py": "0661a01a7c12bab1e76ec1afa40c29b17a0a3f3510fcfc4ea4607585426130fd",
+        "tests/test_heavens_omens.py": "01ac3e881376c0fa0103294115f26cae2e0e5bcaa19c1c5c7b3aac40ab35103e",
+        "tests/test_heavens_upper_worlds.py": "82bb04ec2e21241e41af6ebb44583a090635575a7a9ac656f78861f4ae5233df"
+      },
+      "log_sha256": "8da23fd0979cdf07e890b2fabccba37bcf7f0eabcd957f4e60e1357ecd79808f",
+      "xml": "build/scoped-2162-3.xml",
+      "xml_sha256": "2dd2e431de68c9a19a55be2fb58a9be2b2d62d9ef3b197f35c14326e1fefab52"
     },
     {
       "name": "related-tests-5",
-      "log": "build\\related-tests-5-2161.log",
+      "log": "build/related-tests-5-2162.log",
+      "status": "passed",
+      "reused": true,
+      "test_sources": {
+        "tests/test_organization_economy.py": "c7081ca72d46ae25c85146576de5f6eb13ed6a52b889465731361f9aad832658",
+        "tests/test_world_transition_system.py": "d57af0550c439ebc5cac50b6020a28c208ebc44bf6a3d7be3c7d237e51304934",
+        "tests/test_windows_release_evidence.py": "46cc18051c0ae21c9a7a19778eea99cf6c27a0b7140b327f2720a6771007c982",
+        "tests/test_economy_audit_followup.py": "83871c3decf9da6f12b097532839ac0965f56434390d85fe468402e245a421b4",
+        "tests/test_ghost_reincarnation_dlc.py": "3ca00311c574df9309316223360d4c491a1ee5dfb23be6ced6743f2c37f3fc56",
+        "tests/test_guixu_tide.py": "c2e9d4852e712607432ab8c8a9f33f059b013588c0a6f97724001b0c2bdf09f8",
+        "tests/test_spirit_inheritance.py": "050a140377f8bfd4f90aec3d736574a90b69dab2c2b5f2e70568e96543caf7ab",
+        "tests/test_guard_workforce_fixes.py": "0713ebd63428e2b10eafe8be774962566947e94becee670a6843f4417873b5ac",
+        "tests/test_regional_calendar.py": "a9cf178f7ca5763a4de671f493d12ef4b53f57c29ae32f08f92d9cb186d12bce",
+        "tests/test_merchant_execution.py": "f880d2f5db481a6633eb3743953c3edcdf654c9adc46491f8bbe35f14fd05945",
+        "tests/test_strategic_dispatch.py": "f388273d8fdf4462741fb7825648fca543303224806eae13ae4ea62b7b5c5723",
+        "tests/test_heavens_frontier.py": "2cb0bd08df9cd7f620ca6aab2393ea9e3408b44ee354d5a59132d8c650da2ef8",
+        "tests/test_heavens_mirror_discovery.py": "6ece7f81c86c98d2182e1e3be81c1fc1855484bbf0ed1699ca3c6c1ac51bcdbb",
+        "tests/test_heavens_ruins.py": "8c2689058b9ec4770c489c3224b1858575d89084e78b9cc243cfa86b0b826d11"
+      },
+      "log_sha256": "4bc6914db74181f6e737606f69e57758bbb31b29b203985e7186d960e26be9af",
+      "xml": "build/scoped-2162-5.xml",
+      "xml_sha256": "0aa2416bc2c2439fb3f901e405cb497a61f514db7d69d3c7f67c41a8151226f5"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build/related-tests-4-2162.log",
       "status": "passed"
     },
     {
       "name": "check_world_transition_contract",
-      "log": "build\\check_world_transition_contract-2161.log",
+      "log": "build/check_world_transition_contract-2162.log",
       "status": "passed"
     },
     {
       "name": "check_module_dependencies",
-      "log": "build\\check_module_dependencies-2161.log",
+      "log": "build/check_module_dependencies-2162.log",
       "status": "passed"
     },
     {
       "name": "check_documentation",
-      "log": "build\\check_documentation-2161.log",
+      "log": "build/check_documentation-2162.log",
       "status": "passed"
     },
     {
       "name": "browser_regional_calendar",
-      "log": "build\\browser_regional_calendar-2161.log",
+      "log": "build/browser_regional_calendar-2162.log",
       "status": "passed"
     },
     {
       "name": "browser_economy_trust",
-      "log": "build\\browser_economy_trust-2161.log",
+      "log": "build/browser_economy_trust-2162.log",
       "status": "passed"
     },
     {
       "name": "browser_strategic_war",
-      "log": "build\\browser_strategic_war-2161.log",
+      "log": "build/browser_strategic_war-2162.log",
       "status": "passed"
     },
     {
       "name": "browser_events_212",
-      "log": "build\\browser_events_212-2161.log",
+      "log": "build/browser_events_212-2162.log",
       "status": "passed"
     }
   ],
-  "save_transfer_log": "build/save-transfer-2161.log",
-  "inputs_sha256": "d09c618939938f440c2592e591adb5610d00886b30dbc1706445bdd6e0e3a6b7",
+  "save_transfer_log": "build/save-transfer-2162.log",
+  "inputs_sha256": "962330932b88e6b3127cf7f838fed15ed3289ac045433daa273da6b94041e588",
   "performance": {
-    "version": "2.16.1",
-    "source_sha256": "d09c618939938f440c2592e591adb5610d00886b30dbc1706445bdd6e0e3a6b7",
+    "version": "2.16.2",
+    "source_sha256": "962330932b88e6b3127cf7f838fed15ed3289ac045433daa273da6b94041e588",
     "years": 100,
     "repeats": 3,
     "fixture": "Player in celestial; existing spirit/true-demon freight, human campaign, war and order. Enter human, spirit, true_demon and demon (campaign front) separately. Other worlds remain frozen. All-live is timing reference only: deferred advances intentionally change trade opportunities. Frozen continuous and reload runs must match full authoritative state.",
@@ -100,13 +203,13 @@
       {
         "repeat": 0,
         "mode": "all-live",
-        "away_seconds": 57.92650170001434,
-        "reentry_seconds": 0.00018259999342262745,
+        "away_seconds": 130.94860880001215,
+        "reentry_seconds": 0.0003525000356603414,
         "entry_times": {
-          "human": 6.849999772384763e-05,
-          "spirit": 3.9300008211284876e-05,
-          "true_demon": 3.090000245720148e-05,
-          "demon": 4.3899985030293465e-05
+          "human": 0.00012959999730810523,
+          "spirit": 8.339999476447701e-05,
+          "true_demon": 6.790002225898206e-05,
+          "demon": 7.160002132877707e-05
         },
         "before_reentry": {
           "supply": {
@@ -225,13 +328,13 @@
       {
         "repeat": 0,
         "mode": "frozen",
-        "away_seconds": 4.982608299993444,
-        "reentry_seconds": 17.317579000024125,
+        "away_seconds": 8.435786000016378,
+        "reentry_seconds": 21.33886740001617,
         "entry_times": {
-          "human": 4.314466899988474,
-          "spirit": 4.580031899997266,
-          "true_demon": 4.890762100025313,
-          "demon": 3.5323181000130717
+          "human": 6.9198662000126205,
+          "spirit": 5.310625100013567,
+          "true_demon": 5.375536000006832,
+          "demon": 3.73284009998315
         },
         "before_reentry": {
           "supply": {
@@ -350,13 +453,13 @@
       {
         "repeat": 0,
         "mode": "frozen-reloaded",
-        "away_seconds": 5.208007000008365,
-        "reentry_seconds": 18.142504499963252,
+        "away_seconds": 5.087956900009885,
+        "reentry_seconds": 18.242909000022337,
         "entry_times": {
-          "human": 4.640596999990521,
-          "spirit": 4.958813499979442,
-          "true_demon": 4.959307000011904,
-          "demon": 3.5837869999813847
+          "human": 5.709090699994704,
+          "spirit": 4.481378600001335,
+          "true_demon": 4.510837900015758,
+          "demon": 3.5416018000105396
         },
         "before_reentry": {
           "supply": {
@@ -475,13 +578,13 @@
       {
         "repeat": 1,
         "mode": "frozen-reloaded",
-        "away_seconds": 5.261008699977538,
-        "reentry_seconds": 17.983869199990295,
+        "away_seconds": 4.899858999997377,
+        "reentry_seconds": 16.525193900015438,
         "entry_times": {
-          "human": 4.543431700003566,
-          "spirit": 4.6946246000006795,
-          "true_demon": 4.998322200000985,
-          "demon": 3.7474906999850646
+          "human": 4.259859900019364,
+          "spirit": 4.307270899997093,
+          "true_demon": 4.725018700002693,
+          "demon": 3.233044399996288
         },
         "before_reentry": {
           "supply": {
@@ -600,13 +703,13 @@
       {
         "repeat": 1,
         "mode": "frozen",
-        "away_seconds": 5.07552320000832,
-        "reentry_seconds": 19.06082700000843,
+        "away_seconds": 7.0989071000076365,
+        "reentry_seconds": 29.78252400000929,
         "entry_times": {
-          "human": 4.709612900012871,
-          "spirit": 5.50023579999106,
-          "true_demon": 5.258767399995122,
-          "demon": 3.592210900009377
+          "human": 7.621805500006303,
+          "spirit": 7.852314499992644,
+          "true_demon": 8.380720599991037,
+          "demon": 5.927683400019305
         },
         "before_reentry": {
           "supply": {
@@ -725,12 +828,137 @@
       {
         "repeat": 1,
         "mode": "all-live",
-        "away_seconds": 62.04129919997649,
-        "reentry_seconds": 0.00024010002380236983,
+        "away_seconds": 98.74346530000912,
+        "reentry_seconds": 0.0004215999797452241,
         "entry_times": {
-          "human": 7.939999341033399e-05,
-          "spirit": 5.950001650489867e-05,
-          "true_demon": 4.710000939667225e-05,
+          "human": 0.0001033000007737428,
+          "spirit": 9.970000246539712e-05,
+          "true_demon": 9.739998495206237e-05,
+          "demon": 0.00012119999155402184
+        },
+        "before_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1357,
+          "alive": 1219,
+          "cash": 24001223145881,
+          "issued": 1217973681,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "after_reentry": {
+          "supply": {
+            "source": 36,
+            "carried": 0,
+            "target": 17,
+            "spent": 57,
+            "lost": 10,
+            "inflight": 0
+          },
+          "campaign": "withdrawing",
+          "deliveries": 3,
+          "orders": [
+            {
+              "id": 1,
+              "status": "completed"
+            }
+          ],
+          "people": 1357,
+          "alive": 1219,
+          "cash": 24001223145881,
+          "issued": 1217973681,
+          "spirit_sects": {
+            "taixuan": {
+              "extinct": false,
+              "alive": 23,
+              "recruits": 20
+            },
+            "wanlingshan": {
+              "extinct": false,
+              "alive": 24,
+              "recruits": 20
+            },
+            "xinghe": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 20
+            },
+            "remote_spirit_1": {
+              "extinct": false,
+              "alive": 22,
+              "recruits": 19
+            },
+            "remote_spirit_2": {
+              "extinct": false,
+              "alive": 19,
+              "recruits": 19
+            }
+          }
+        },
+        "clocks": {
+          "asura": 391,
+          "celestial": 391,
+          "demon": 391,
+          "hell": 391,
+          "human": 391,
+          "monster_realm": 391,
+          "nether": 391,
+          "phantom_underworld": 391,
+          "reincarnation": 391,
+          "spirit": 391,
+          "true_demon": 391
+        },
+        "repeat_and_reload_equal": true,
+        "supply_conserved": true
+      },
+      {
+        "repeat": 2,
+        "mode": "all-live",
+        "away_seconds": 119.68408959999215,
+        "reentry_seconds": 0.0002584999892860651,
+        "entry_times": {
+          "human": 8.379999781027436e-05,
+          "spirit": 6.250001024454832e-05,
+          "true_demon": 5.809997674077749e-05,
           "demon": 5.4100004490464926e-05
         },
         "before_reentry": {
@@ -849,139 +1077,14 @@
       },
       {
         "repeat": 2,
-        "mode": "all-live",
-        "away_seconds": 63.14250820002053,
-        "reentry_seconds": 0.00034410000080242753,
-        "entry_times": {
-          "human": 5.449997843243182e-05,
-          "spirit": 8.639998850412667e-05,
-          "true_demon": 0.00012820001575164497,
-          "demon": 7.500001811422408e-05
-        },
-        "before_reentry": {
-          "supply": {
-            "source": 36,
-            "carried": 0,
-            "target": 17,
-            "spent": 57,
-            "lost": 10,
-            "inflight": 0
-          },
-          "campaign": "withdrawing",
-          "deliveries": 3,
-          "orders": [
-            {
-              "id": 1,
-              "status": "completed"
-            }
-          ],
-          "people": 1357,
-          "alive": 1219,
-          "cash": 24001223145881,
-          "issued": 1217973681,
-          "spirit_sects": {
-            "taixuan": {
-              "extinct": false,
-              "alive": 23,
-              "recruits": 20
-            },
-            "wanlingshan": {
-              "extinct": false,
-              "alive": 24,
-              "recruits": 20
-            },
-            "xinghe": {
-              "extinct": false,
-              "alive": 22,
-              "recruits": 20
-            },
-            "remote_spirit_1": {
-              "extinct": false,
-              "alive": 22,
-              "recruits": 19
-            },
-            "remote_spirit_2": {
-              "extinct": false,
-              "alive": 19,
-              "recruits": 19
-            }
-          }
-        },
-        "after_reentry": {
-          "supply": {
-            "source": 36,
-            "carried": 0,
-            "target": 17,
-            "spent": 57,
-            "lost": 10,
-            "inflight": 0
-          },
-          "campaign": "withdrawing",
-          "deliveries": 3,
-          "orders": [
-            {
-              "id": 1,
-              "status": "completed"
-            }
-          ],
-          "people": 1357,
-          "alive": 1219,
-          "cash": 24001223145881,
-          "issued": 1217973681,
-          "spirit_sects": {
-            "taixuan": {
-              "extinct": false,
-              "alive": 23,
-              "recruits": 20
-            },
-            "wanlingshan": {
-              "extinct": false,
-              "alive": 24,
-              "recruits": 20
-            },
-            "xinghe": {
-              "extinct": false,
-              "alive": 22,
-              "recruits": 20
-            },
-            "remote_spirit_1": {
-              "extinct": false,
-              "alive": 22,
-              "recruits": 19
-            },
-            "remote_spirit_2": {
-              "extinct": false,
-              "alive": 19,
-              "recruits": 19
-            }
-          }
-        },
-        "clocks": {
-          "asura": 391,
-          "celestial": 391,
-          "demon": 391,
-          "hell": 391,
-          "human": 391,
-          "monster_realm": 391,
-          "nether": 391,
-          "phantom_underworld": 391,
-          "reincarnation": 391,
-          "spirit": 391,
-          "true_demon": 391
-        },
-        "repeat_and_reload_equal": true,
-        "supply_conserved": true
-      },
-      {
-        "repeat": 2,
         "mode": "frozen",
-        "away_seconds": 5.415548999997554,
-        "reentry_seconds": 18.469029800005956,
+        "away_seconds": 9.110652700008359,
+        "reentry_seconds": 33.25202640000498,
         "entry_times": {
-          "human": 4.740426000003936,
-          "spirit": 4.836795899987919,
-          "true_demon": 4.97711690000142,
-          "demon": 3.914691000012681
+          "human": 7.609486200002721,
+          "spirit": 7.989804799988633,
+          "true_demon": 10.327859100012574,
+          "demon": 7.324876300001051
         },
         "before_reentry": {
           "supply": {
@@ -1100,13 +1203,13 @@
       {
         "repeat": 2,
         "mode": "frozen-reloaded",
-        "away_seconds": 6.566892000002554,
-        "reentry_seconds": 19.80417519999901,
+        "away_seconds": 11.371836799982702,
+        "reentry_seconds": 38.4830854999891,
         "entry_times": {
-          "human": 5.687764500005869,
-          "spirit": 5.19214820000343,
-          "true_demon": 5.154959899984533,
-          "demon": 3.769302600005176
+          "human": 8.058733500016388,
+          "spirit": 10.33403259998886,
+          "true_demon": 12.228002899995772,
+          "demon": 7.862316499988083
         },
         "before_reentry": {
           "supply": {
@@ -1225,47 +1328,48 @@
     ],
     "medians": {
       "all-live": {
-        "away_seconds": 62.04129919997649,
-        "reentry_seconds": 0.00024010002380236983
+        "away_seconds": 119.68408959999215,
+        "reentry_seconds": 0.0003525000356603414
       },
       "frozen": {
-        "away_seconds": 5.07552320000832,
-        "reentry_seconds": 18.469029800005956
+        "away_seconds": 8.435786000016378,
+        "reentry_seconds": 29.78252400000929
       },
       "frozen-reloaded": {
-        "away_seconds": 5.261008699977538,
-        "reentry_seconds": 18.142504499963252
+        "away_seconds": 5.087956900009885,
+        "reentry_seconds": 18.242909000022337
       }
     }
   },
   "web_performance": {
-    "version": "2.16.1",
-    "source_sha256": "d09c618939938f440c2592e591adb5610d00886b30dbc1706445bdd6e0e3a6b7",
+    "version": "2.16.2",
+    "source_sha256": "962330932b88e6b3127cf7f838fed15ed3289ac045433daa273da6b94041e588",
     "revisions": {
-      "baseline": "1cff7f883a8120f763308ba8dade3544afa09317",
+      "baseline": "0f853842277eb2b6f46ff2f4d19f1c6e89c7f8ac",
       "reference": "1168399aa4d7f02622cca89b3761fb9fbb5ccc00",
-      "current": "d09c618939938f440c2592e591adb5610d00886b30dbc1706445bdd6e0e3a6b7"
+      "current": "962330932b88e6b3127cf7f838fed15ed3289ac045433daa273da6b94041e588"
     },
     "repeats": 3,
-    "method": "Real all-DLC browser preset and cultivate clicks, two consecutive full centuries per fresh save; notifications disabled equally; no mocked simulation; serial matched runs.",
+    "method": "Real all-DLC browser preset and cultivate clicks, two consecutive full centuries per fresh save; notifications disabled equally; opaque UUIDs deterministic only for full-state comparison, gameplay RNG unchanged; serial matched runs.",
     "status": "passed",
+    "full_state_equal": true,
     "medians": {
       "baseline": {
-        "1": 44.88095849999809,
-        "2": 55.174529600015376
+        "1": 9.334943099995144,
+        "2": 9.993811399996048
       },
       "reference": {
-        "1": 7.338506700005382,
-        "2": 7.688122099993052
+        "1": 7.192079900007229,
+        "2": 7.336764800013043
       },
       "current": {
-        "1": 9.101240300020436,
-        "2": 9.916077599977143
+        "1": 7.72914059998584,
+        "2": 8.840632100007497
       }
     },
     "runs": [
       {
-        "version": "2.16.0",
+        "version": "2.16.1",
         "label": "baseline",
         "repeat": 0,
         "seed": 20261018,
@@ -1285,34 +1389,36 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 44.88095849999809,
-            "server_seconds": 44.57341430001543,
-            "years": 100
+            "seconds": 9.334943099995144,
+            "server_seconds": 9.002532400016207,
+            "years": 100,
+            "state_sha256": "f0c91f2a7f2dfb0fcfd1b6f42540d26cb56e849014bcd50e445d538e6a66f742"
           },
           {
             "action": 2,
-            "seconds": 55.49095639999723,
-            "server_seconds": 55.13033889999497,
-            "years": 100
+            "seconds": 9.919373700016877,
+            "server_seconds": 9.620151200011605,
+            "years": 100,
+            "state_sha256": "4b4af6238bc04bbc9d33d921f4c0e590533846c4f9f3d84c2479cb5f16c2185e"
           }
         ],
         "region_clocks": {
           "asura": 31000,
           "celestial": 31000,
-          "demon": 31200,
-          "hell": 31200,
-          "human": 31200,
-          "monster_realm": 31200,
+          "demon": 31000,
+          "hell": 31000,
+          "human": 31000,
+          "monster_realm": 31000,
           "nether": 31000,
-          "phantom_underworld": 31200,
+          "phantom_underworld": 31000,
           "reincarnation": 31000,
           "spirit": 31200,
-          "true_demon": 31200
+          "true_demon": 31000
         },
-        "organizations": 35
+        "organizations": 5
       },
       {
-        "version": "2.16.1",
+        "version": "2.16.2",
         "label": "current",
         "repeat": 0,
         "seed": 20261018,
@@ -1332,15 +1438,17 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 9.282922499987762,
-            "server_seconds": 8.891786399995908,
-            "years": 100
+            "seconds": 7.593886700022267,
+            "server_seconds": 7.293083900003694,
+            "years": 100,
+            "state_sha256": "f0c91f2a7f2dfb0fcfd1b6f42540d26cb56e849014bcd50e445d538e6a66f742"
           },
           {
             "action": 2,
-            "seconds": 9.916077599977143,
-            "server_seconds": 9.537757300015073,
-            "years": 100
+            "seconds": 8.622517300012987,
+            "server_seconds": 8.313698900019517,
+            "years": 100,
+            "state_sha256": "4b4af6238bc04bbc9d33d921f4c0e590533846c4f9f3d84c2479cb5f16c2185e"
           }
         ],
         "region_clocks": {
@@ -1356,7 +1464,13 @@
           "spirit": 31200,
           "true_demon": 31000
         },
-        "organizations": 5
+        "organizations": 5,
+        "account_syntax_cache": {
+          "hits": 903253,
+          "misses": 61,
+          "maxsize": 4096,
+          "currsize": 61
+        }
       },
       {
         "version": "2.15.1",
@@ -1379,15 +1493,17 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 7.623457200010307,
-            "server_seconds": 7.255419399996754,
-            "years": 100
+            "seconds": 7.192079900007229,
+            "server_seconds": 6.808589699998265,
+            "years": 100,
+            "state_sha256": "56ae79664c6bbc3354147dd309086558dba12742072b79728d5ad6f663dbf41a"
           },
           {
             "action": 2,
-            "seconds": 7.826645900000585,
-            "server_seconds": 7.488367799989646,
-            "years": 100
+            "seconds": 7.336764800013043,
+            "server_seconds": 6.963456799974665,
+            "years": 100,
+            "state_sha256": "f27cb0a5ad83de27870c642ff5a1a5ba148c563340ca4467f68e17f3e9aa5e40"
           }
         ],
         "region_clocks": {},
@@ -1414,22 +1530,24 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 7.338506700005382,
-            "server_seconds": 6.990327599982265,
-            "years": 100
+            "seconds": 7.285560100019211,
+            "server_seconds": 6.938950299983844,
+            "years": 100,
+            "state_sha256": "22bfe755c29a1fdf5e0a31a35a03534b892b3880fd03a84f412b0305925e1bca"
           },
           {
             "action": 2,
-            "seconds": 7.688122099993052,
-            "server_seconds": 7.3061344000161625,
-            "years": 100
+            "seconds": 7.232625400007237,
+            "server_seconds": 6.922941800003173,
+            "years": 100,
+            "state_sha256": "f373491f69fc887c665992ca4844e8fd26723e6ff058f7c6478ef899ee070840"
           }
         ],
         "region_clocks": {},
         "organizations": 5
       },
       {
-        "version": "2.16.1",
+        "version": "2.16.2",
         "label": "current",
         "repeat": 1,
         "seed": 20261018,
@@ -1449,15 +1567,17 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 9.101240300020436,
-            "server_seconds": 8.809290700010024,
-            "years": 100
+            "seconds": 7.833160899986979,
+            "server_seconds": 7.5296697999874596,
+            "years": 100,
+            "state_sha256": "301fcb343ac7f4486221f826104a4de635a3372538248fb370f93319c2593f6c"
           },
           {
             "action": 2,
-            "seconds": 10.18692929999088,
-            "server_seconds": 9.776263599982485,
-            "years": 100
+            "seconds": 8.91689910000423,
+            "server_seconds": 8.61654279998038,
+            "years": 100,
+            "state_sha256": "ba859fe84371a19460d995b2e637d8fd87b1d3617df7b452cce7365c739217cb"
           }
         ],
         "region_clocks": {
@@ -1473,10 +1593,16 @@
           "spirit": 31200,
           "true_demon": 31000
         },
-        "organizations": 5
+        "organizations": 5,
+        "account_syntax_cache": {
+          "hits": 903253,
+          "misses": 61,
+          "maxsize": 4096,
+          "currsize": 61
+        }
       },
       {
-        "version": "2.16.0",
+        "version": "2.16.1",
         "label": "baseline",
         "repeat": 1,
         "seed": 20261018,
@@ -1496,34 +1622,36 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 46.15306819998659,
-            "server_seconds": 45.85538789999555,
-            "years": 100
+            "seconds": 9.105019399983576,
+            "server_seconds": 8.730608199985,
+            "years": 100,
+            "state_sha256": "301fcb343ac7f4486221f826104a4de635a3372538248fb370f93319c2593f6c"
           },
           {
             "action": 2,
-            "seconds": 55.174529600015376,
-            "server_seconds": 54.802165699977195,
-            "years": 100
+            "seconds": 10.11091290001059,
+            "server_seconds": 9.845228699996369,
+            "years": 100,
+            "state_sha256": "ba859fe84371a19460d995b2e637d8fd87b1d3617df7b452cce7365c739217cb"
           }
         ],
         "region_clocks": {
           "asura": 31000,
           "celestial": 31000,
-          "demon": 31200,
-          "hell": 31200,
-          "human": 31200,
-          "monster_realm": 31200,
+          "demon": 31000,
+          "hell": 31000,
+          "human": 31000,
+          "monster_realm": 31000,
           "nether": 31000,
-          "phantom_underworld": 31200,
+          "phantom_underworld": 31000,
           "reincarnation": 31000,
           "spirit": 31200,
-          "true_demon": 31200
+          "true_demon": 31000
         },
-        "organizations": 35
+        "organizations": 5
       },
       {
-        "version": "2.16.0",
+        "version": "2.16.1",
         "label": "baseline",
         "repeat": 2,
         "seed": 20261018,
@@ -1543,34 +1671,36 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 43.310023300000466,
-            "server_seconds": 43.03582409999217,
-            "years": 100
+            "seconds": 9.371894299983978,
+            "server_seconds": 8.990006900014123,
+            "years": 100,
+            "state_sha256": "06dd6182468fe92a430954886bde86274b4af37c9c4b1b07754322efe2d66dc1"
           },
           {
             "action": 2,
-            "seconds": 31.375984199985396,
-            "server_seconds": 31.109023199998774,
-            "years": 100
+            "seconds": 9.993811399996048,
+            "server_seconds": 9.622173399984604,
+            "years": 100,
+            "state_sha256": "52f5d3c3eb9fbecd512e0b2a8884da1082a4cded41b1442dc0313a2d07bd5b9d"
           }
         ],
         "region_clocks": {
           "asura": 31000,
           "celestial": 31000,
-          "demon": 31200,
-          "hell": 31200,
-          "human": 31200,
-          "monster_realm": 31200,
+          "demon": 31000,
+          "hell": 31000,
+          "human": 31000,
+          "monster_realm": 31000,
           "nether": 31000,
-          "phantom_underworld": 31200,
+          "phantom_underworld": 31000,
           "reincarnation": 31000,
           "spirit": 31200,
-          "true_demon": 31200
+          "true_demon": 31000
         },
-        "organizations": 35
+        "organizations": 5
       },
       {
-        "version": "2.16.1",
+        "version": "2.16.2",
         "label": "current",
         "repeat": 2,
         "seed": 20261018,
@@ -1590,15 +1720,17 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 4.898125100007746,
-            "server_seconds": 4.706305600004271,
-            "years": 100
+            "seconds": 7.72914059998584,
+            "server_seconds": 7.374337100016419,
+            "years": 100,
+            "state_sha256": "06dd6182468fe92a430954886bde86274b4af37c9c4b1b07754322efe2d66dc1"
           },
           {
             "action": 2,
-            "seconds": 5.441887499997392,
-            "server_seconds": 5.215183799999068,
-            "years": 100
+            "seconds": 8.840632100007497,
+            "server_seconds": 8.495984500012128,
+            "years": 100,
+            "state_sha256": "52f5d3c3eb9fbecd512e0b2a8884da1082a4cded41b1442dc0313a2d07bd5b9d"
           }
         ],
         "region_clocks": {
@@ -1614,7 +1746,13 @@
           "spirit": 31200,
           "true_demon": 31000
         },
-        "organizations": 5
+        "organizations": 5,
+        "account_syntax_cache": {
+          "hits": 903253,
+          "misses": 61,
+          "maxsize": 4096,
+          "currsize": 61
+        }
       },
       {
         "version": "2.15.1",
@@ -1637,15 +1775,17 @@
         "rows": [
           {
             "action": 1,
-            "seconds": 3.9757778999919537,
-            "server_seconds": 3.7629235000058543,
-            "years": 100
+            "seconds": 7.096733000013046,
+            "server_seconds": 6.790895600017393,
+            "years": 100,
+            "state_sha256": "c70b3c53d0bf3b070f9c03e5b87925b50f0e230b476260f0e14fafc5e4675d7e"
           },
           {
             "action": 2,
-            "seconds": 4.194564999983413,
-            "server_seconds": 3.966215199994622,
-            "years": 100
+            "seconds": 7.424331899994286,
+            "server_seconds": 7.055122899997514,
+            "years": 100,
+            "state_sha256": "e75253c930da9d8ddeab4a25268ca504b3e22e31ff8a205e10b2eca940df1e8c"
           }
         ],
         "region_clocks": {},
@@ -1654,8 +1794,8 @@
     ]
   },
   "rift_audit": {
-    "version": "2.16.1",
-    "inputs_sha256": "d09c618939938f440c2592e591adb5610d00886b30dbc1706445bdd6e0e3a6b7",
+    "version": "2.16.2",
+    "inputs_sha256": "962330932b88e6b3127cf7f838fed15ed3289ac045433daa273da6b94041e588",
     "status": "passed",
     "tests": 26,
     "test_sources": {
@@ -1663,13 +1803,13 @@
       "tests/browser_regional_rifts.py": "43355d19904f179d5240ef8e644c6bbe9fc63ab508ce7afde15748af290110b2"
     },
     "logs": {
-      "build/release-2161/rifts-audit.log": "1efe824255156519ceb30dd628caed288fc9a65b3081ec0201ee27a514067b71",
-      "build/release-2161/rifts-browser.log": "06fbd611b3f012fa166c15a6387ae89ec649acc3c690e96bf8be942f4aa2d606",
-      "build/rifts-2161.xml": "e85af76b63241beff8f9285628b3ffae4af02343661c59f7937f38f9850749c4",
-      "build/regional-rifts-browser/result.json": "1a3130d0efe93260415cf80b5967d472746c048f2dd88854f2b3b262e5b85cbd"
+      "build/release-2162/rifts-audit.log": "2e642fe8f942c3c5e3b3b3e4eb2049ffc4b85d03c12085b6499300de27033b47",
+      "build/release-2162/rifts-browser.log": "06fbd611b3f012fa166c15a6387ae89ec649acc3c690e96bf8be942f4aa2d606",
+      "build/rifts-2162.xml": "a6ffd806fff79bbea7889cdaadf81caea7832d036d079d3e18a2b2306ecec3ac",
+      "build/regional-rifts-browser/result.json": "5fc8723e99d7c6be2b81b036fa0e9f862fba8a88612d0fab15c6539c79927c42"
     },
     "browser": {
-      "source_sha256": "d09c618939938f440c2592e591adb5610d00886b30dbc1706445bdd6e0e3a6b7",
+      "source_sha256": "962330932b88e6b3127cf7f838fed15ed3289ac045433daa273da6b94041e588",
       "status": "passed",
       "cases": [
         {
@@ -1685,8 +1825,32 @@
       ]
     }
   },
-  "platform": "Windows",
-  "exe_sha256": "89652f062de18b0224a5a66e00a27f04dbc6731c1f3dabd5e0694703d0550592",
-  "with_and_without_dlc_verified": true,
-  "root_launcher_updated": true
+  "platform": "Android 12",
+  "android_version": "2.16.2-android.69",
+  "version_code": 69,
+  "apk_sha256": "fba9e2279dc68b6b86c1786fcf31ec8ca67a90b24459c040caa86fe9050d04de",
+  "native": {
+    "version": "2.16.2",
+    "apk_sha256": "fba9e2279dc68b6b86c1786fcf31ec8ca67a90b24459c040caa86fe9050d04de",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-regional-calendar-portrait-2162.log",
+      "build/android-regional-calendar-landscape-2162.log",
+      "build/android-economy-network-portrait-2162.log",
+      "build/android-economy-network-landscape-2162.log"
+    ],
+    "test_apk_sha256": "6565072f2e165c08c2a70d6c9c114569efb16f304b667cdea209a3a2d518d87e",
+    "log_hashes": {
+      "build/android-regional-calendar-portrait-2162.log": "98b95d67ff140efe6f85cbfed36e953dc81670422955c8b6906eb113c2cf57dc",
+      "build/android-regional-calendar-landscape-2162.log": "98b95d67ff140efe6f85cbfed36e953dc81670422955c8b6906eb113c2cf57dc",
+      "build/android-economy-network-portrait-2162.log": "733ae9d4e4b9418dd752689e62a24b99bd8e355c5faa839124802c6cfe3d316d",
+      "build/android-economy-network-landscape-2162.log": "733ae9d4e4b9418dd752689e62a24b99bd8e355c5faa839124802c6cfe3d316d"
+    },
+    "scope": "Guixu interruption, persistent travel credit, real resumed arrival and fleet network native clicks; four themes and portrait/landscape"
+  },
+  "physical_device_tested": false
 }

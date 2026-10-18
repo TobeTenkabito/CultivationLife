@@ -6,6 +6,9 @@ explicit system advances, repaid from the original treasury during catch-up.
 """
 from contextlib import contextmanager
 from contextvars import ContextVar
+from functools import lru_cache
+
+from ...regional_context import CalendarGame
 
 _posting = ContextVar('deferred_posting', default=False)
 
@@ -17,26 +20,50 @@ def state(game):
 
 
 def frozen(game, world):
-    from ...regional_context import region
-    if not game.world_simulation or _posting.get():
+    if _posting.get():
         return False
-    return world in game.world_simulation['regions'] and world != (region(game) or game.player.world)
+    root, active = _scope(game)
+    return bool(root.world_simulation and world != active and world in root.world_simulation['regions'])
 
 
-def owner(game, key):
-    key = game.economy_v2.get('organization_aliases', {}).get(key, key)
+def _scope(game):
+    # Unwrap only for reads. Receipts still use the original dated view below.
+    if isinstance(game, CalendarGame):
+        return game._game, game._region_world
+    return game, game.player.world
+
+
+@lru_cache(maxsize=4096)
+def _address(key):
+    """Cache immutable account syntax only, never ownership or freeze state."""
     parts = key.split(':')
     if parts[0] in {'background', 'world', 'market', 'operator', 'alliance', 'transport'}:
-        return parts[1]
+        return 'fixed', parts[1]
     if parts[0] == 'organization':
         kind, identity = parts[1:3]
         if kind in {'sect', 'family'}:
-            entity = game.family if game.family and game.family.id == identity else game.sects.get(identity)
-            return entity.world if entity else None
-        return 'celestial' if kind in {'court', 'yaochi'} else identity if kind == 'upper' else None
+            return 'entity', identity
+        return 'fixed', 'celestial' if kind in {'court', 'yaochi'} else identity if kind == 'upper' else None
+    return 'fixed', None
+
+
+def owner(game, key):
+    if isinstance(game, CalendarGame):
+        game = game._game
+    return _owner(game, key)
+
+
+def _owner(game, key):
+    # Aliases and the original entity's world are live reads: adoption,
+    # relocation, replacement and loading another save cannot stale this cache.
+    key = game.economy_v2.get('organization_aliases', {}).get(key, key)
+    kind, identity = _address(key)
+    if kind == 'entity':
+        entity = game.family if game.family and game.family.id == identity else game.sects.get(identity)
+        return entity.world if entity else None
     # Task cargo, fleet working capital and military escrow have one global
     # owner. They are not a duplicate of the frozen organization's treasury.
-    return None
+    return identity
 
 
 @contextmanager
@@ -57,15 +84,30 @@ def append(game, world, kind, **payload):
 
 
 def projected_balance(game, key, actual):
-    if frozen(game, owner(game, key)):
-        book = game.world_simulation.get('deferred', {})
+    if _posting.get():
+        return actual
+    root, active = _scope(game)
+    sim = root.world_simulation
+    if not sim:
+        return actual
+    world = _owner(root, key)
+    if world != active and world in sim['regions']:
+        book = sim.get('deferred', {})
         return max(0, actual + book.get('cash_delta', {}).get(key, 0)-book.get('debts', {}).get(key, 0))
     return actual
 
 
 def transfer(game, source, destination, amount, reason, *, account, transfer_value, balance):
-    first, second = owner(game, source), owner(game, destination)
-    outgoing, incoming = frozen(game, first), frozen(game, second)
+    if _posting.get():
+        return False
+    root, active = _scope(game)
+    sim = root.world_simulation
+    if not sim:
+        return False
+    first, second = _owner(root, source), _owner(root, destination)
+    regions = sim['regions']
+    outgoing = first != active and first in regions
+    incoming = second != active and second in regions
     if not (outgoing or incoming):
         return False
     try:

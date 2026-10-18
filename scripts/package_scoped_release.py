@@ -84,11 +84,19 @@ def main():
                 'Matched hundred-year frozen-task/reload/conservation benchmark required')
         web_performance=json.loads((ROOT/'build/web-regional-performance/report.json').read_text(encoding='utf-8'))
         require(web_performance['source_sha256']==inputs_digest(ROOT) and web_performance['version']==VERSION
-                and web_performance['status']=='passed' and web_performance['repeats']>=3,'Matched real Web benchmark required')
+                and web_performance['status']=='passed' and web_performance['repeats']>=3
+                and web_performance.get('full_state_equal') is True,'Matched real Web benchmark and full-state equivalence required')
         require(all(web_performance['medians']['current'][a] < web_performance['medians']['baseline'][a]
                     for a in ('1','2')),'Both real hundred-year actions must improve')
         require(len(web_performance['runs'])>=9 and all(len(r['dlcs'])==10 and len(r['rows'])==2
                 and all(x['years']==100 for x in r['rows']) for r in web_performance['runs']), 'Web scope incomplete')
+        require(all(r['version']==('2.16.1' if r['label']=='baseline' else VERSION)
+                    for r in web_performance['runs'] if r['label'] in {'baseline','current'}), 'Wrong routing optimization comparison versions')
+        for repeat in range(web_performance['repeats']):
+            old=next(r for r in web_performance['runs'] if r['label']=='baseline' and r['repeat']==repeat)
+            new=next(r for r in web_performance['runs'] if r['label']=='current' and r['repeat']==repeat)
+            require(all(a.get('state_sha256') and a['state_sha256']==b.get('state_sha256') for a,b in zip(old['rows'],new['rows'])),
+                    'Web optimization must preserve the complete business state after each century')
     if scoped.get('profile') in {'naming', 'natal', 'teachings', 'common-techniques', 'secret-arts', 'common-goods'}:
         natal = scoped['profile'] == 'natal'
         teachings = scoped['profile'] == 'teachings'

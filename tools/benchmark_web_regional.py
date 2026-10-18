@@ -16,6 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def worker(args):
+    # Only opaque instance IDs are deterministic in this disposable process.
+    # Gameplay seeds, rolls and settlement functions are entirely unmodified.
+    import itertools
+    import uuid
+    identities = itertools.count(1 + args.repeat * 1_000_000)
+    uuid.uuid4 = lambda: uuid.UUID(int=next(identities))
     root = args.output / args.worker
     os.environ['CULTIVATION_APP_ROOT'] = str(root)
     sys.path.insert(0, str(root))
@@ -66,6 +72,14 @@ def worker(args):
                 assert end_age-start_age == 100, (args.worker, action, start_age, end_age)
                 assert not errors, errors
                 row = dict(action=action+1,seconds=elapsed,server_seconds=responses[-1],years=end_age-start_age)
+                # Exclude only save identity/timestamps/version metadata. Keep
+                # every business field, ledger entry, life and RNG state.
+                snapshot=server.ENGINE.store.load(identity).to_dict()
+                for field in ('id','created_at','updated_at','created_with_game_version','last_saved_with_game_version'):
+                    snapshot.pop(field,None)
+                encoded=json.dumps(snapshot,ensure_ascii=False,sort_keys=True,separators=(',',':'))
+                row['state_sha256']=hashlib.sha256(encoded.encode('utf8')).hexdigest()
+                (args.output/f'{args.worker}-{args.repeat}-state-{action+1}.json').write_text(encoded,encoding='utf8')
                 rows.append(row)
                 print(json.dumps(dict(label=args.worker,repeat=args.repeat,**row)),flush=True)
             page.reload();page.wait_for_function('!!configData')
@@ -74,6 +88,9 @@ def worker(args):
             final = server.ENGINE.store.load(identity)
             detail = dict(region_clocks={w:r['year'] for w,r in getattr(final,'world_simulation',{}).get('regions',{}).items()},
                           organizations=len(final.economy_v2.get('organizations',{})))
+            if args.worker=='current':
+                from cultivation_life.system.economy.deferred import _address
+                detail['account_syntax_cache']=_address.cache_info()._asdict()
             browser.close()
     finally: http.shutdown();http.server_close()
     result = dict(version=BASE_GAME_VERSION,label=args.worker,repeat=args.repeat,seed=20261018,preset='mahayana',
@@ -84,7 +101,7 @@ def worker(args):
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--output',type=Path,default=ROOT/'build/web-regional-performance')
-    parser.add_argument('--baseline',default='1cff7f88')
+    parser.add_argument('--baseline',default='0f853842')
     parser.add_argument('--reference',default='1168399a')
     parser.add_argument('--repeats',type=int,default=3)
     parser.add_argument('--worker',choices=['current','baseline','reference'])
@@ -117,16 +134,21 @@ def main():
         order=['baseline','current','reference'] if repeat%2==0 else ['reference','current','baseline']
         for label in order:
             subprocess.run([sys.executable,'-X','utf8',str(Path(__file__).resolve()),'--output',str(args.output),
-                            '--worker',label,'--repeat',str(repeat)],cwd=ROOT,check=True)
+                            '--worker',label,'--repeat',str(repeat)],cwd=ROOT,check=True,
+                           env=os.environ | {'PYTHONHASHSEED':'20261018'})
             runs.append(json.loads((args.output/f'{label}-{repeat}.json').read_text(encoding='utf8')))
     medians={label:{str(action):statistics.median(row['seconds'] for run in runs if run['label']==label
                                                 for row in run['rows'] if row['action']==action)
                     for action in (1,2)} for label in roots}
     assert inputs_digest(ROOT)==before,'Production inputs changed during measurement'
     assert all(medians['current'][a] < medians['baseline'][a] for a in ('1','2')),medians
+    for repeat in range(args.repeats):
+        a=next(r for r in runs if r['label']=='baseline' and r['repeat']==repeat)
+        b=next(r for r in runs if r['label']=='current' and r['repeat']==repeat)
+        assert [r['state_sha256'] for r in a['rows']]==[r['state_sha256'] for r in b['rows']], 'Optimization changed full state; inspect saved snapshots'
     report=dict(version=BASE_GAME_VERSION,source_sha256=before,revisions=roots,repeats=args.repeats,
-                method='Real all-DLC browser preset and cultivate clicks, two consecutive full centuries per fresh save; notifications disabled equally; no mocked simulation; serial matched runs.',
-                status='passed',medians=medians,runs=runs)
+                method='Real all-DLC browser preset and cultivate clicks, two consecutive full centuries per fresh save; notifications disabled equally; opaque UUIDs deterministic only for full-state comparison, gameplay RNG unchanged; serial matched runs.',
+                status='passed',full_state_equal=True,medians=medians,runs=runs)
     (args.output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
     print(json.dumps(medians,ensure_ascii=False),flush=True)
 

@@ -1,6 +1,6 @@
 # 浮生问道 · Android
 
-维护基线：2026-10-18，本体 **v2.16.1**。Gradle 配置的版本名为 **2.16.1-android.68**，versionCode **68**，沿用 `com.fusheng.wendao` 包名和正式签名。
+维护基线：2026-10-18，本体 **v2.16.2**。Gradle 配置的版本名为 **2.16.2-android.69**，versionCode **69**，沿用 `com.fusheng.wendao` 包名和正式签名。
 
 v2.16.0 的地区历法、归墟通知与续程采用 regional 相关领域发行配置；原生验收覆盖四主题、手机横竖屏及商路操作。见[地区历法](../docs/regional-calendar.md)。
 
