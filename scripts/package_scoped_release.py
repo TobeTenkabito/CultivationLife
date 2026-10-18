@@ -115,11 +115,33 @@ def main():
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
         current_code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{current_code}'" in metadata and f"versionName='{VERSION}-android.{current_code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
+    if scoped.get('profile') == 'architecture':
+        phases={'upper':'upper_scope','upper-teachings':'upper_teachings_scope',
+            'natal-materials':'natal_materials_scope','asura':'asura_scope',
+            'regional-calendar':'regional_calendar_scope','organizations':'organizations_scope',
+            'audit-fixes':'audit_fixes_scope'}
+        required={f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Native character architecture scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test artifact changed')
+        for phase,marker in phases.items():
+            for orientation in ('portrait','landscape'):
+                require(marker in (ROOT/f'build/android-{phase}-{orientation}-{tag}.log').read_text(encoding='utf-8-sig'),'Native character architecture marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        current_code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{current_code}'" in metadata and f"versionName='{VERSION}-android.{current_code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
+        architecture=json.loads((ROOT/'build/architecture-stage3/verification.json').read_text(encoding='utf-8'))
+        require(architecture['status']=='passed' and architecture['inputs_sha256']==inputs_digest(ROOT), 'Architecture equivalence evidence differs from final source')
+        require(architecture['algorithm_bodies']==119 and architecture['checkpoints']==413 and architecture['protected_files_unchanged'], 'Incomplete architecture equivalence/protected file evidence')
+        require(all(file_digest(ROOT/name)==digest for name,digest in architecture['log_hashes'].items()), 'Architecture evidence changed')
     dlcs={p.parent.name:json.loads(p.read_text(encoding='utf-8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],
               incompatible_save_schemas='1–9; no migration',dlc_versions=dlcs,
               validation_scope=scoped['scope'],tests=tests,runs=scoped['runs'],
               save_transfer_log=f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
+    if scoped.get('profile') == 'architecture':
+        base['architecture']=architecture
     if scoped.get('profile') == 'regional':
         base['performance']=performance
         base['web_performance']=web_performance
@@ -154,6 +176,8 @@ def main():
     with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
         z.write(exe,'launcher.exe');z.write(manifest,manifest.name)
         z.writestr('game_config.txt','Debug=False\n')
+        if scoped.get('profile') == 'architecture':
+            z.write(ROOT/'build/architecture-stage3/verification.json',f'architecture-{VERSION}.json')
         for name in ['README.md','CHANGELOG.md','AGENTS.md']:z.write(ROOT/name,name)
         if scoped.get('profile') == 'regional':
             z.write(ROOT/'build/regional-calendar-performance/report.json',f'performance-{VERSION}.json')
@@ -176,6 +200,8 @@ def main():
     am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(target,target.name);z.write(am,am.name);z.write(ROOT/'android/README.md','README.md')
+        if scoped.get('profile') == 'architecture':
+            z.write(ROOT/'build/architecture-stage3/verification.json',f'architecture-{VERSION}.json')
         if scoped.get('profile') == 'regional':
             z.write(ROOT/'build/regional-calendar-performance/report.json',f'performance-{VERSION}.json')
             z.write(ROOT/'build/web-regional-performance/report.json',f'web-performance-{VERSION}.json')

@@ -100,7 +100,10 @@ def _advance_intrigue_unit(deps: IntrigueRuntimeDependencies, game: GameState, r
     return news
 
 
-def advance_npc_faction(deps, game, rng, identity, news):
+def advance_npc_faction(
+    deps: IntrigueRuntimeDependencies, game: GameState, rng: random.Random,
+    identity: str, news: list[str],
+) -> None:
     """Replay one original faction opportunity without player's unit rewards."""
     sect = game.sects.get(identity)
     if not sect or sect.extinct or not deps._intrigue_enabled():

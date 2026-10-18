@@ -97,7 +97,7 @@ ANNUAL_ORDER = [
 
 
 @pytest.mark.parametrize('stop', [None, 5, 6, 9, 11, 12, 13, 14, 15, 16])
-def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
+def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop, monkeypatch):
     game, rng, seen, news = game_state(), random.Random(91), [], []
     list_hooks = {'_advance_sage_year', '_annual_sect_update', '_annual_world_npc_update'}
 
@@ -138,10 +138,15 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
         civilizations_hook.assert_not_called()
         researchers.assert_not_called()
     strategic_hook=Mock(side_effect=advance_strategic)
+    # This independently constructed contract exercises the non-regional path.
+    # Fields now use the original parcel's calendar rather than the legacy hook.
+    monkeypatch.setattr('cultivation_life.system.economy.spirit_fields.advance_field_year',
+                        callback('_annual_spirit_field_update'))
     deps, unexpected = contract(WorldYearDependencies,
         **{name: callback(name) for name in set(ANNUAL_ORDER)}, advance_researchers=researchers,
         advance_caravans=freight, advance_organizations=Mock(),advance_war_finance=war_finance,
-        advance_civilizations=civilizations_hook, advance_strategic_wars=strategic_hook)
+        advance_civilizations=civilizations_hook, advance_strategic_wars=strategic_hook,
+        advance_regions=None, advance_player_society=None)
     assert _advance_world_year(deps, game, rng, news) is (stop is None)
     # Existing yearly semantics settle fields after demonic consequences, then
     # check death. Preserve that ordering instead of introducing a new rule.
@@ -163,18 +168,78 @@ def test_annual_phases_preserve_order_rng_and_interruption_without_engine(stop):
     unexpected.assert_not_called()
 
 
-def test_lifespan_stops_before_world_npcs_and_demonic_updates():
+@pytest.mark.parametrize('regional', [False, True])
+def test_lifespan_stops_before_world_npcs_and_demonic_updates(regional):
     game = game_state()
     game.player.lifespan = game.player.age
     die = Mock(side_effect=lambda *args: setattr(game.player, 'alive', False))
     permitted = {name: Mock(return_value=[]) for name in ANNUAL_ORDER[:7]}
     freight = Mock()
     war_finance=Mock()
-    deps, unexpected = contract(WorldYearDependencies, **permitted, _die=die, advance_caravans=freight, advance_organizations=Mock(),advance_war_finance=war_finance)
+    regions = Mock()
+    deps, unexpected = contract(WorldYearDependencies, **permitted, _die=die,
+        advance_caravans=freight, advance_organizations=Mock(), advance_war_finance=war_finance,
+        advance_regions=regions if regional else None,
+        advance_strategic_wars=None, advance_researchers=None)
     assert not _advance_world_year(deps, game, random.Random(1), [])
     die.assert_called_once_with(game, '寿元已尽', 'SYS_LIFESPAN')
-    freight.assert_called_once_with(game)
+    if regional:
+        regions.assert_called_once_with(game, [])
+        freight.assert_not_called()
+    else:
+        regions.assert_not_called()
+        freight.assert_called_once_with(game)
     war_finance.assert_called_once_with(game)
+    unexpected.assert_not_called()
+
+
+REGIONAL_ANNUAL_ORDER = [
+    'advance_regions', 'advance_war_finance', '_advance_buddhist_year',
+    '_advance_merchant_year', 'advance_strategic_wars', 'advance_researchers',
+    '_advance_sage_year', '_advance_ghost_phase_two_year',
+    '_advance_monster_bloodline_year', '_resolve_breakthroughs', '_check_tribulation',
+    'advance_player_society', '_annual_demonic_update', '_resolve_breakthroughs',
+    '_maybe_wanted_encounter', '_maybe_race_war_ambush',
+    '_maybe_artifact_synthesis', '_maybe_mortal_root_completion',
+]
+
+
+@pytest.mark.parametrize('stop', [None, 9, 10, 12, 13, 14, 15, 16, 17])
+def test_regional_annual_order_keeps_personal_phases_and_excludes_legacy_clocks(stop, monkeypatch):
+    game, rng, seen, news = game_state(), random.Random(91), [], []
+    expected_rng = random.Random(91)
+    list_hooks = {'_advance_sage_year', 'advance_player_society'}
+
+    def callback(name):
+        def call(actual, *args):
+            assert actual is game
+            if name == 'advance_regions':
+                assert args == (news,)
+            if name == 'advance_player_society':
+                assert game._regional_active == {game.player.world: game.player.age}
+            for arg in args:
+                if isinstance(arg, random.Random):
+                    assert arg is rng
+                    assert arg.random() == expected_rng.random()
+            seen.append(name)
+            stopping = len(seen) - 1 == stop
+            if stopping and name == '_annual_demonic_update':
+                game.player.alive = False
+            elif stopping and name in {'_resolve_breakthroughs', '_check_tribulation'}:
+                game.pending_event = {'id': 'interrupt'}
+            return [name] if name in list_hooks else stopping
+        return call
+
+    deps, unexpected = contract(WorldYearDependencies,
+        **{name: callback(name) for name in set(REGIONAL_ANNUAL_ORDER)})
+    # These calendars belong to the regional scheduler, not a second pass here.
+    monkeypatch.setattr('cultivation_life.system.economy.state.advance_economy', unexpected)
+    monkeypatch.setattr('cultivation_life.system.economy.spirit_fields.advance_field_year', unexpected)
+    assert _advance_world_year(deps, game, rng, news) is (stop is None)
+    assert seen == REGIONAL_ANNUAL_ORDER[:None if stop is None else stop + 1]
+    assert news == [name for name in seen if name in list_hooks]
+    assert not getattr(game, '_regional_active', {})
+    assert rng.getstate() == expected_rng.getstate()
     unexpected.assert_not_called()
 
 
@@ -261,7 +326,8 @@ def test_grouped_ports_remain_late_bound_and_cannot_gain_hidden_attributes(tmp_p
     assert cultivation.session._load('replacement') == 'replacement'
     assert cultivation.body.commit.store is cultivation.fusion.commit.store is replacement
     monkeypatch.setattr(engine, '_advance_world_year', lambda *args, **kwargs: 'replaced')
-    assert time.travel.year._advance_world_year(None) == merchant.work._advance_world_year(None) == 'replaced'
+    assert (time.travel.year._advance_world_year(None, random.Random(1), [])
+            == merchant.work._advance_world_year(None, random.Random(1), []) == 'replaced')
     with pytest.raises((FrozenInstanceError, TypeError, AttributeError)):
         cultivation.body.engine = engine
 

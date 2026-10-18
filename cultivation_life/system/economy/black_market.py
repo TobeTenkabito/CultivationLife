@@ -119,9 +119,12 @@ def sell_black_market_asset(deps: BlackMarketDependencies, game_id: str, kind: s
         game.player.talismans.remove(row)
         name, price = quote["name"], quote["price"]
     elif kind == "puppet":
+        from ...puppet_state import usable
         puppet = next((row for row in game.player.puppets if str(row.get("id")) == asset_id), None)
         if not puppet or puppet.get("type") == "living":
             raise ValueError("黑市只接收机关傀儡与炼尸，不接收活傀")
+        if not usable(puppet, game):
+            raise ValueError('已经毁坏的傀儡不能出售')
         game.player.puppets.remove(puppet)
         name = str(puppet.get("name", "无名傀儡"))
         price = max(5, round(float(puppet.get("combat_power", 0)) * 0.08))

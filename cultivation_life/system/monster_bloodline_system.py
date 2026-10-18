@@ -434,236 +434,280 @@ def public_monster_bloodline(player: Player) -> dict[str, Any]:
     }
 
 
+from .character.dependencies import (
+    MonsterValidationDependencies,
+    MonsterEvolutionDependencies,
+)
+
+def _advance_monster_bloodline_year(deps: MonsterEvolutionDependencies, game: GameState) -> None:
+    player = game.player
+    if player.path != "monster" or not bloodline_content_available():
+        return
+    ensure_monster_bloodline_state(player)
+    location = deps.maps.location(player.world, deps.maps.normalize_location(player.world, player.location_id))
+    themes = set(map(str, location.get("themes", [])))
+    location_id = str(location.get("id", ""))
+    for adaptation_id, definition in MONSTER_BLOODLINE_SETTINGS.get("adaptations", {}).items():
+        if adaptation_id in player.monster_adaptations:
+            continue
+        matching = bool(themes & set(map(str, definition.get("themes", [])))) or location_id in definition.get("locations", [])
+        if not matching:
+            continue
+        progress = int(player.monster_adaptation_progress.get(adaptation_id, 0)) + 1
+        player.monster_adaptation_progress[adaptation_id] = progress
+        threshold = int(definition.get("years", 10))
+        if progress >= threshold:
+            player.monster_adaptations.append(adaptation_id)
+            game.history.append(HistoryRecord(
+                f"SYS_MONSTER_ADAPT_{adaptation_id.upper()}", 1, player.age, "生命适应", adaptation_id, "acquired",
+                f"你在{location['name']}的漫长生活改变了本体，获得适应印记【{definition['name']}】。",
+                {"monster_adaptation": adaptation_id}, ["system", "monster", "bloodline", "adaptation", "milestone"],
+            ))
+
+
+def _monster_travel_multiplier(deps: MonsterEvolutionDependencies, player: Player, destination: str) -> float:
+    profile = active_bloodline_profile(player)
+    node = MONSTER_EVOLUTIONS.get(str(profile.get("id") or ""), {})
+    multiplier = float(profile.get("travel_multiplier", 1.0))
+    required_themes = set(map(str, node.get("travel_themes", [])))
+    if not required_themes:
+        return multiplier
+    origin = deps.maps.location(player.world, deps.maps.normalize_location(player.world, player.location_id))
+    target = deps.maps.location(player.world, destination)
+    return multiplier if required_themes & (set(origin.get("themes", [])) | set(target.get("themes", []))) else 1.0
+
+
+def _validate_monster_evolution(deps: MonsterValidationDependencies, game: GameState, evolution_id: str) -> dict[str, Any]:
+    from .spatial import cultivation_block_reason
+    if cultivation_block_reason(game):
+        raise ValueError(cultivation_block_reason(game))
+    player = game.player
+    if player.path != "monster" or not bloodline_content_available():
+        raise ValueError("当前角色没有可用的妖修血脉体系")
+    if game.pending_event or game.active_trial:
+        raise ValueError("请先处理当前事件或渡劫")
+    if deps._manual_breakthrough_kind(player) != "major" or not player.awaiting_major_breakthrough:
+        raise ValueError("尚未抵达需要蜕变的大境界瓶颈")
+    required = opportunity_required(player)
+    if player.opportunity < required:
+        raise ValueError("机缘尚未圆满")
+    candidate = next((row for row in evolution_candidates(player) if row["id"] == evolution_id), None)
+    if not candidate:
+        raise ValueError("所选形态不属于当前进化支系")
+    if not candidate["enabled"]:
+        raise ValueError("尚未满足这一形态的进化条件")
+    return candidate
+
+
+def _complete_monster_evolution(
+    deps: MonsterEvolutionDependencies, game: GameState, evolution_id: str, candidate: dict[str, Any], *, trial_completed=False, prepared_lineage=None, trial_rng=None,
+) -> dict[str, Any]:
+    player = game.player
+    if not trial_completed and player.world == 'nether' and player.realm_index in {9, 10, 11}:
+        player.opportunity -= opportunity_required(player)
+        deps._consume_breakthrough_aids(player, f'major:{player.realm_index}')
+        player.awaiting_major_breakthrough = False
+        deps._start_upper_trial(game, 'monster_upper', evolution=dict(candidate, id=evolution_id), lineage=prepared_lineage)
+        game.updated_at = now_iso()
+        deps.store.save(game)
+        return deps.present(game)
+    required = opportunity_required(player)
+    rng = trial_rng if trial_rng is not None else decode_rng(game.seed, game.rng_state)
+    old_label = public_player(player)["realm_name"]
+    old_node = MONSTER_EVOLUTIONS[player.monster_evolution_id]
+    old_realm_index = player.realm_index
+    old_world = player.world
+    if not trial_completed:
+        player.opportunity = max(0.0, player.opportunity - required)
+        deps._consume_breakthrough_aids(player, f"major:{player.realm_index}")
+    if evolution_id != "__stable__":
+        player.monster_evolution_id = evolution_id
+        player.monster_evolution_history.append(evolution_id)
+    deps._complete_major_breakthrough(game, rng, old_label)
+    awakened_trait = grant_generated_species_bloodline_trait(player, rng)
+    if awakened_trait:
+        game.history.append(HistoryRecord(
+            "SYS_MONSTER_SPECIES_TRAIT", 1, player.age, "族血觉醒",
+            awakened_trait["id"], "acquired",
+            f"大境界蜕变唤醒了本族血脉特质【{awakened_trait['name']}】：{awakened_trait['description']}",
+            {
+                "species_id": player.monster_species_id,
+                "trait_id": awakened_trait["id"],
+                "generated_rule": True,
+                "realm_index": player.realm_index,
+            },
+            ["system", "monster", "bloodline", "trait", "major", "milestone"],
+        ))
+    if old_realm_index == 8 and player.realm_index == 9:
+        plan = deps._plan_world_transition(game, "nether", reason="血脉蜕变祖路")
+        deps._apply_world_transition(game, plan)
+        game.history.append(HistoryRecord(
+            "SYS_MONSTER_NETHER_ASCENSION", 1, player.age, "飞升幽冥界", evolution_id, "ascended",
+            f"血脉蜕变撕开上界祖路，你从{WORLD_SYSTEMS['world_names'][old_world]}飞升幽冥界。",
+            {"world": [old_world, "nether"], "realm_index": [8, 9]},
+            ["system", "monster", "bloodline", "ascension", "nether", "milestone"],
+        ))
+    lifespan_gain = int(candidate.get("lifespan_gain", 0))
+    if lifespan_gain and player.lifespan is not None:
+        player.lifespan += lifespan_gain
+    player.hp, player.mp = max_hp(player), max_mp(player)
+    new_node = MONSTER_EVOLUTIONS[player.monster_evolution_id]
+    game.history.append(HistoryRecord(
+        "SYS_MONSTER_EVOLUTION", 1, player.age, "血脉蜕变", evolution_id, "evolved",
+        (
+            f"你舍弃其他生命可能，从【{old_node['name']}】不可逆地蜕变为【{new_node['name']}】。"
+            if evolution_id != "__stable__" else f"你稳固【{old_node['name']}】本相，以既有生命形态继续前行。"
+        ) + (f" 此次蜕变令寿元增长 {lifespan_gain} 年。" if lifespan_gain else ""),
+        {"from": old_node["id"], "to": new_node["id"], "lifespan_gain": lifespan_gain},
+        ["system", "monster", "bloodline", "evolution", "major", "milestone"],
+    ))
+    if trial_completed:
+        game.rng_state = encode_rng(rng)
+        return None
+    deps._ensure_market(game, rng)
+    game.rng_state = encode_rng(rng)
+    game.updated_at = now_iso()
+    deps.store.save(game)
+    return deps.present(game)
+
+
+def evolve_monster(deps: MonsterEvolutionDependencies, game_id: str, evolution_id: str) -> dict[str, Any]:
+    game = deps._load(game_id)
+    candidate = deps._validate_monster_evolution(game, evolution_id)
+    if is_self_lineage_node(evolution_id):
+        raise ValueError("自成血脉必须先进入立祖界面，核对功业并确认祖血规则")
+    return deps._complete_monster_evolution(game, evolution_id, candidate)
+
+
+def prepare_custom_lineage(deps: MonsterEvolutionDependencies, game_id: str, evolution_id: str) -> dict[str, Any]:
+    """Open the editor without mutating or saving the game."""
+    game = deps._load(game_id)
+    player = game.player
+    config = MONSTER_BLOODLINE_SETTINGS.get("custom_lineage", {})
+    retroactive = evolution_id == "__retroactive__"
+    if retroactive:
+        stage = self_lineage_stage(player.monster_evolution_id)
+        if not stage or player.monster_custom_lineage:
+            raise ValueError("当前存档不需要补刻祖血")
+    else:
+        deps._validate_monster_evolution(game, evolution_id)
+        stage = self_lineage_stage(evolution_id)
+        if not stage:
+            raise ValueError("所选进化不是自成血脉路线")
+        if stage > 1 and not player.monster_custom_lineage:
+            raise ValueError("旧版自立血脉须先完成一次补刻祖血")
+    shown = deps.present(game)
+    shown["monster_bloodline"]["custom_lineage_editor"] = editor_payload(
+        game, config, stage=stage, evolution_id=evolution_id, retroactive=retroactive,
+    )
+    return shown
+
+
+def confirm_custom_lineage(
+    deps: MonsterEvolutionDependencies, game_id: str, evolution_id: str, name: str, rules: Any,
+) -> dict[str, Any]:
+    game = deps._load(game_id)
+    player = game.player
+    config = MONSTER_BLOODLINE_SETTINGS.get("custom_lineage", {})
+    retroactive = evolution_id == "__retroactive__"
+    candidate: dict[str, Any] | None = None
+    if retroactive:
+        stage = self_lineage_stage(player.monster_evolution_id)
+        if not stage or player.monster_custom_lineage:
+            raise ValueError("当前存档不需要补刻祖血")
+    else:
+        candidate = deps._validate_monster_evolution(game, evolution_id)
+        stage = self_lineage_stage(evolution_id)
+        if not stage:
+            raise ValueError("所选进化不是自成血脉路线")
+        if stage > 1 and not player.monster_custom_lineage:
+            raise ValueError("旧版自立血脉须先完成一次补刻祖血")
+    clean_name = " ".join(str(name or "").strip().split())
+    if not 2 <= len(clean_name) <= 16 or any(ord(char) < 32 for char in clean_name):
+        raise ValueError("祖血名称须为 2 至 16 个可显示字符")
+    existing = player.monster_custom_lineage if isinstance(player.monster_custom_lineage, dict) else None
+    if existing and clean_name != existing.get("name"):
+        raise ValueError("立祖后不能改名")
+    deeds = lineage_deed_budget(game, config)
+    slots = int(config.get("rule_slots", {}).get(str(stage), 0))
+    normalized, spent = normalize_rules(
+        rules, config, slots=slots, budget=int(deeds["total"]),
+        existing_rules=list(existing.get("rules", [])) if existing else None,
+    )
+    if not existing and not normalized:
+        raise ValueError("立祖或补刻祖血时至少需要铭刻一条规则")
+    lineage = copy.deepcopy(existing) if existing else {
+        "id": f"custom-lineage-{uuid.uuid4().hex}",
+        "founder_age": player.age,
+        "founder_species_id": player.monster_species_id,
+        "created_realm_index": 9,
+    }
+    lineage.update({
+        "name": clean_name, "rules": normalized, "spent_points": spent,
+        "finalized_stage": stage,
+    })
+    player.monster_custom_lineage = lineage
+    player.monster_custom_lineage_id = str(lineage["id"])
+    game.history.append(HistoryRecord(
+        "SYS_CUSTOM_LINEAGE_RETROACTIVE" if retroactive else "SYS_CUSTOM_LINEAGE",
+        1, player.age, "补刻祖血" if retroactive else config.get("stage_names", {}).get(str(stage), "立祖"),
+        evolution_id, "inscribed",
+        (
+            f"你为旧版自立血脉补刻祖谱【{clean_name}】，铭定 {len(normalized)} 条祖血规则。"
+            if retroactive else f"你将【{clean_name}】推进至{config.get('stage_names', {}).get(str(stage), '立祖')}，现有 {len(normalized)} 条祖血规则。"
+        ),
+        {"custom_lineage_id": lineage["id"], "stage": stage, "spent_points": spent},
+        ["system", "monster", "bloodline", "custom_lineage", "milestone"],
+    ))
+    if retroactive:
+        game.updated_at = now_iso()
+        deps.store.save(game)
+        return deps.present(game)
+    assert candidate is not None
+    if player.world == 'nether' and player.realm_index in {9, 10, 11}:
+        player.monster_custom_lineage = existing or {}
+        player.monster_custom_lineage_id = existing['id'] if existing else None
+        return deps._complete_monster_evolution(game, evolution_id, candidate, prepared_lineage=lineage)
+    return deps._complete_monster_evolution(game, evolution_id, candidate)
+
+
+def grant_monster_imprint(player: Player, imprint_id: str) -> bool:
+    if imprint_id not in MONSTER_BLOODLINE_SETTINGS.get("imprints", {}):
+        raise ValueError("未知血脉印记")
+    if imprint_id in player.monster_bloodline_imprints:
+        return False
+    player.monster_bloodline_imprints.append(imprint_id)
+    return True
+
+
 class MonsterBloodlineSystemMixin:
     def _advance_monster_bloodline_year(self, game: GameState) -> None:
-        player = game.player
-        if player.path != "monster" or not bloodline_content_available():
-            return
-        ensure_monster_bloodline_state(player)
-        location = self.maps.location(player.world, self.maps.normalize_location(player.world, player.location_id))
-        themes = set(map(str, location.get("themes", [])))
-        location_id = str(location.get("id", ""))
-        for adaptation_id, definition in MONSTER_BLOODLINE_SETTINGS.get("adaptations", {}).items():
-            if adaptation_id in player.monster_adaptations:
-                continue
-            matching = bool(themes & set(map(str, definition.get("themes", [])))) or location_id in definition.get("locations", [])
-            if not matching:
-                continue
-            progress = int(player.monster_adaptation_progress.get(adaptation_id, 0)) + 1
-            player.monster_adaptation_progress[adaptation_id] = progress
-            threshold = int(definition.get("years", 10))
-            if progress >= threshold:
-                player.monster_adaptations.append(adaptation_id)
-                game.history.append(HistoryRecord(
-                    f"SYS_MONSTER_ADAPT_{adaptation_id.upper()}", 1, player.age, "生命适应", adaptation_id, "acquired",
-                    f"你在{location['name']}的漫长生活改变了本体，获得适应印记【{definition['name']}】。",
-                    {"monster_adaptation": adaptation_id}, ["system", "monster", "bloodline", "adaptation", "milestone"],
-                ))
+        from .character.wiring import bind_monster_evolution
+        return _advance_monster_bloodline_year(bind_monster_evolution(self), game)
 
     def _monster_travel_multiplier(self, player: Player, destination: str) -> float:
-        profile = active_bloodline_profile(player)
-        node = MONSTER_EVOLUTIONS.get(str(profile.get("id") or ""), {})
-        multiplier = float(profile.get("travel_multiplier", 1.0))
-        required_themes = set(map(str, node.get("travel_themes", [])))
-        if not required_themes:
-            return multiplier
-        origin = self.maps.location(player.world, self.maps.normalize_location(player.world, player.location_id))
-        target = self.maps.location(player.world, destination)
-        return multiplier if required_themes & (set(origin.get("themes", [])) | set(target.get("themes", []))) else 1.0
+        from .character.wiring import bind_monster_evolution
+        return _monster_travel_multiplier(bind_monster_evolution(self), player, destination)
 
     def _validate_monster_evolution(self, game: GameState, evolution_id: str) -> dict[str, Any]:
-        from .spatial import cultivation_block_reason
-        if cultivation_block_reason(game):
-            raise ValueError(cultivation_block_reason(game))
-        player = game.player
-        if player.path != "monster" or not bloodline_content_available():
-            raise ValueError("当前角色没有可用的妖修血脉体系")
-        if game.pending_event or game.active_trial:
-            raise ValueError("请先处理当前事件或渡劫")
-        if self._manual_breakthrough_kind(player) != "major" or not player.awaiting_major_breakthrough:
-            raise ValueError("尚未抵达需要蜕变的大境界瓶颈")
-        required = opportunity_required(player)
-        if player.opportunity < required:
-            raise ValueError("机缘尚未圆满")
-        candidate = next((row for row in evolution_candidates(player) if row["id"] == evolution_id), None)
-        if not candidate:
-            raise ValueError("所选形态不属于当前进化支系")
-        if not candidate["enabled"]:
-            raise ValueError("尚未满足这一形态的进化条件")
-        return candidate
+        from .character.wiring import bind_monster_validation
+        return _validate_monster_evolution(bind_monster_validation(self), game, evolution_id)
 
-    def _complete_monster_evolution(
-        self, game: GameState, evolution_id: str, candidate: dict[str, Any], *, trial_completed=False, prepared_lineage=None, trial_rng=None,
-    ) -> dict[str, Any]:
-        player = game.player
-        if not trial_completed and player.world == 'nether' and player.realm_index in {9, 10, 11}:
-            player.opportunity -= opportunity_required(player)
-            self._consume_breakthrough_aids(player, f'major:{player.realm_index}')
-            player.awaiting_major_breakthrough = False
-            self._start_upper_trial(game, 'monster_upper', evolution=dict(candidate, id=evolution_id), lineage=prepared_lineage)
-            game.updated_at = now_iso()
-            self.store.save(game)
-            return self.present(game)
-        required = opportunity_required(player)
-        rng = trial_rng if trial_rng is not None else decode_rng(game.seed, game.rng_state)
-        old_label = public_player(player)["realm_name"]
-        old_node = MONSTER_EVOLUTIONS[player.monster_evolution_id]
-        old_realm_index = player.realm_index
-        old_world = player.world
-        if not trial_completed:
-            player.opportunity = max(0.0, player.opportunity - required)
-            self._consume_breakthrough_aids(player, f"major:{player.realm_index}")
-        if evolution_id != "__stable__":
-            player.monster_evolution_id = evolution_id
-            player.monster_evolution_history.append(evolution_id)
-        self._complete_major_breakthrough(game, rng, old_label)
-        awakened_trait = grant_generated_species_bloodline_trait(player, rng)
-        if awakened_trait:
-            game.history.append(HistoryRecord(
-                "SYS_MONSTER_SPECIES_TRAIT", 1, player.age, "族血觉醒",
-                awakened_trait["id"], "acquired",
-                f"大境界蜕变唤醒了本族血脉特质【{awakened_trait['name']}】：{awakened_trait['description']}",
-                {
-                    "species_id": player.monster_species_id,
-                    "trait_id": awakened_trait["id"],
-                    "generated_rule": True,
-                    "realm_index": player.realm_index,
-                },
-                ["system", "monster", "bloodline", "trait", "major", "milestone"],
-            ))
-        if old_realm_index == 8 and player.realm_index == 9:
-            plan = self._plan_world_transition(game, "nether", reason="血脉蜕变祖路")
-            self._apply_world_transition(game, plan)
-            game.history.append(HistoryRecord(
-                "SYS_MONSTER_NETHER_ASCENSION", 1, player.age, "飞升幽冥界", evolution_id, "ascended",
-                f"血脉蜕变撕开上界祖路，你从{WORLD_SYSTEMS['world_names'][old_world]}飞升幽冥界。",
-                {"world": [old_world, "nether"], "realm_index": [8, 9]},
-                ["system", "monster", "bloodline", "ascension", "nether", "milestone"],
-            ))
-        lifespan_gain = int(candidate.get("lifespan_gain", 0))
-        if lifespan_gain and player.lifespan is not None:
-            player.lifespan += lifespan_gain
-        player.hp, player.mp = max_hp(player), max_mp(player)
-        new_node = MONSTER_EVOLUTIONS[player.monster_evolution_id]
-        game.history.append(HistoryRecord(
-            "SYS_MONSTER_EVOLUTION", 1, player.age, "血脉蜕变", evolution_id, "evolved",
-            (
-                f"你舍弃其他生命可能，从【{old_node['name']}】不可逆地蜕变为【{new_node['name']}】。"
-                if evolution_id != "__stable__" else f"你稳固【{old_node['name']}】本相，以既有生命形态继续前行。"
-            ) + (f" 此次蜕变令寿元增长 {lifespan_gain} 年。" if lifespan_gain else ""),
-            {"from": old_node["id"], "to": new_node["id"], "lifespan_gain": lifespan_gain},
-            ["system", "monster", "bloodline", "evolution", "major", "milestone"],
-        ))
-        if trial_completed:
-            game.rng_state = encode_rng(rng)
-            return None
-        self._ensure_market(game, rng)
-        game.rng_state = encode_rng(rng)
-        game.updated_at = now_iso()
-        self.store.save(game)
-        return self.present(game)
+    def _complete_monster_evolution(self, game: GameState, evolution_id: str, candidate: dict[str, Any], *, trial_completed=False, prepared_lineage=None, trial_rng=None) -> dict[str, Any]:
+        from .character.wiring import bind_monster_evolution
+        return _complete_monster_evolution(bind_monster_evolution(self), game, evolution_id, candidate, trial_completed=trial_completed, prepared_lineage=prepared_lineage, trial_rng=trial_rng)
 
     def evolve_monster(self, game_id: str, evolution_id: str) -> dict[str, Any]:
-        game = self._load(game_id)
-        candidate = self._validate_monster_evolution(game, evolution_id)
-        if is_self_lineage_node(evolution_id):
-            raise ValueError("自成血脉必须先进入立祖界面，核对功业并确认祖血规则")
-        return self._complete_monster_evolution(game, evolution_id, candidate)
+        from .character.wiring import bind_monster_evolution
+        return evolve_monster(bind_monster_evolution(self), game_id, evolution_id)
 
     def prepare_custom_lineage(self, game_id: str, evolution_id: str) -> dict[str, Any]:
-        """Open the editor without mutating or saving the game."""
-        game = self._load(game_id)
-        player = game.player
-        config = MONSTER_BLOODLINE_SETTINGS.get("custom_lineage", {})
-        retroactive = evolution_id == "__retroactive__"
-        if retroactive:
-            stage = self_lineage_stage(player.monster_evolution_id)
-            if not stage or player.monster_custom_lineage:
-                raise ValueError("当前存档不需要补刻祖血")
-        else:
-            self._validate_monster_evolution(game, evolution_id)
-            stage = self_lineage_stage(evolution_id)
-            if not stage:
-                raise ValueError("所选进化不是自成血脉路线")
-            if stage > 1 and not player.monster_custom_lineage:
-                raise ValueError("旧版自立血脉须先完成一次补刻祖血")
-        shown = self.present(game)
-        shown["monster_bloodline"]["custom_lineage_editor"] = editor_payload(
-            game, config, stage=stage, evolution_id=evolution_id, retroactive=retroactive,
-        )
-        return shown
+        from .character.wiring import bind_monster_evolution
+        return prepare_custom_lineage(bind_monster_evolution(self), game_id, evolution_id)
 
-    def confirm_custom_lineage(
-        self, game_id: str, evolution_id: str, name: str, rules: Any,
-    ) -> dict[str, Any]:
-        game = self._load(game_id)
-        player = game.player
-        config = MONSTER_BLOODLINE_SETTINGS.get("custom_lineage", {})
-        retroactive = evolution_id == "__retroactive__"
-        candidate: dict[str, Any] | None = None
-        if retroactive:
-            stage = self_lineage_stage(player.monster_evolution_id)
-            if not stage or player.monster_custom_lineage:
-                raise ValueError("当前存档不需要补刻祖血")
-        else:
-            candidate = self._validate_monster_evolution(game, evolution_id)
-            stage = self_lineage_stage(evolution_id)
-            if not stage:
-                raise ValueError("所选进化不是自成血脉路线")
-            if stage > 1 and not player.monster_custom_lineage:
-                raise ValueError("旧版自立血脉须先完成一次补刻祖血")
-        clean_name = " ".join(str(name or "").strip().split())
-        if not 2 <= len(clean_name) <= 16 or any(ord(char) < 32 for char in clean_name):
-            raise ValueError("祖血名称须为 2 至 16 个可显示字符")
-        existing = player.monster_custom_lineage if isinstance(player.monster_custom_lineage, dict) else None
-        if existing and clean_name != existing.get("name"):
-            raise ValueError("立祖后不能改名")
-        deeds = lineage_deed_budget(game, config)
-        slots = int(config.get("rule_slots", {}).get(str(stage), 0))
-        normalized, spent = normalize_rules(
-            rules, config, slots=slots, budget=int(deeds["total"]),
-            existing_rules=list(existing.get("rules", [])) if existing else None,
-        )
-        if not existing and not normalized:
-            raise ValueError("立祖或补刻祖血时至少需要铭刻一条规则")
-        lineage = copy.deepcopy(existing) if existing else {
-            "id": f"custom-lineage-{uuid.uuid4().hex}",
-            "founder_age": player.age,
-            "founder_species_id": player.monster_species_id,
-            "created_realm_index": 9,
-        }
-        lineage.update({
-            "name": clean_name, "rules": normalized, "spent_points": spent,
-            "finalized_stage": stage,
-        })
-        player.monster_custom_lineage = lineage
-        player.monster_custom_lineage_id = str(lineage["id"])
-        game.history.append(HistoryRecord(
-            "SYS_CUSTOM_LINEAGE_RETROACTIVE" if retroactive else "SYS_CUSTOM_LINEAGE",
-            1, player.age, "补刻祖血" if retroactive else config.get("stage_names", {}).get(str(stage), "立祖"),
-            evolution_id, "inscribed",
-            (
-                f"你为旧版自立血脉补刻祖谱【{clean_name}】，铭定 {len(normalized)} 条祖血规则。"
-                if retroactive else f"你将【{clean_name}】推进至{config.get('stage_names', {}).get(str(stage), '立祖')}，现有 {len(normalized)} 条祖血规则。"
-            ),
-            {"custom_lineage_id": lineage["id"], "stage": stage, "spent_points": spent},
-            ["system", "monster", "bloodline", "custom_lineage", "milestone"],
-        ))
-        if retroactive:
-            game.updated_at = now_iso()
-            self.store.save(game)
-            return self.present(game)
-        assert candidate is not None
-        if player.world == 'nether' and player.realm_index in {9, 10, 11}:
-            player.monster_custom_lineage = existing or {}
-            player.monster_custom_lineage_id = existing['id'] if existing else None
-            return self._complete_monster_evolution(game, evolution_id, candidate, prepared_lineage=lineage)
-        return self._complete_monster_evolution(game, evolution_id, candidate)
+    def confirm_custom_lineage(self, game_id: str, evolution_id: str, name: str, rules: Any) -> dict[str, Any]:
+        from .character.wiring import bind_monster_evolution
+        return confirm_custom_lineage(bind_monster_evolution(self), game_id, evolution_id, name, rules)
 
     def grant_monster_imprint(self, player: Player, imprint_id: str) -> bool:
-        if imprint_id not in MONSTER_BLOODLINE_SETTINGS.get("imprints", {}):
-            raise ValueError("未知血脉印记")
-        if imprint_id in player.monster_bloodline_imprints:
-            return False
-        player.monster_bloodline_imprints.append(imprint_id)
-        return True
+        return grant_monster_imprint(player, imprint_id)

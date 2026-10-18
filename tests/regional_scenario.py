@@ -31,8 +31,8 @@ def prepare(engine, *, fixed_routes=False):
         game = construction(fixture)
     # The established campaign fixture authors its starting date with a focused
     # calendar. This is the initial observation, not replay of a user history.
-    regions.ensure(engine, game)
-    regions.synchronize(engine, game, regions.worlds())
+    regions.ensure(engine._dependencies.regions, game)
+    regions.synchronize(engine._dependencies.regions, game, regions.worlds())
     for row in game.economy_v2['organizations'].values():
         row['last_year'] = game.player.age
     for row in game.economy_v2['transport']['worlds'].values():

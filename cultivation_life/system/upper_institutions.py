@@ -3,6 +3,7 @@
 Only elapsed action/travel time advances politics. Views never consume RNG,
 refresh jobs, pay income or alter allegiance. Institutions do not own sect slots.
 """
+from .character.dependencies import UpperInstitutionDependencies
 import copy
 from math import floor
 
@@ -149,8 +150,8 @@ def spend(state, amount):
     state['merit']-=amount
 
 
-def act(engine, game_id, action, target=''):
-    game=engine._load(game_id)
+def run_action(deps: UpperInstitutionDependencies, game_id, action, target=''):
+    game=deps._load(game_id)
     require_action(game)
     cfg, state, p=definition(game), account(game,create=True),game.player
     finance.register(game, 'upper', p.world, p.world)
@@ -160,7 +161,7 @@ def act(engine, game_id, action, target=''):
         asura_court.reconcile(game, state)
     if action=='work':
         begin_work(game)
-        return engine.advance(game_id,'institution_work',1)
+        return deps.advance(game_id,'institution_work',1)
     if action=='join':
         if state['joined']:
             raise ValueError('已登记，无需重复加入')
@@ -176,7 +177,7 @@ def act(engine, game_id, action, target=''):
         if not state['joined']:
             raise ValueError('请先登记机构身份')
         if p.world == 'asura' and action in ('blood_duel', 'answer_duel', 'yield_duel', 'appoint', 'build', 'decree', 'faction_decree', 'royal_tribute'):
-            text = asura_court.act(engine, game, state, action, target)
+            text = asura_court.settle_action(deps.court, game, state, action, target)
         elif action=='leave':
             if state['job']:
                 raise ValueError('请先交付或放弃委托')
@@ -346,8 +347,14 @@ def act(engine, game_id, action, target=''):
             raise ValueError('未知机构事务')
     record(game,state,text)
     game.updated_at=now_iso()
-    engine.store.save(game)
-    return engine.present(game)
+    deps.store.save(game)
+    return deps.present(game)
+
+
+def act(engine, game_id, action, target=''):
+    from .character.wiring import bind_upper_institution
+    return run_action(bind_upper_institution(engine), game_id, action, target)
+
 
 
 def public_institution(game):

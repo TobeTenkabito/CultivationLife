@@ -12,6 +12,7 @@ def bind_identity(host) -> GhostIdentityDependencies:
     return GhostIdentityDependencies(
         _advance_soul_erosion_time=lambda *args, **kwargs: host._advance_soul_erosion_time(*args, **kwargs),
         _advance_world_year=lambda *args, **kwargs: host._advance_world_year(*args, **kwargs),
+        _ensure_market=lambda *args, **kwargs: host._ensure_market(*args, **kwargs),
         _die=lambda *args, **kwargs: host._die(*args, **kwargs),
         _find_npc=lambda *args, **kwargs: host._find_npc(*args, **kwargs),
         _load=lambda *args, **kwargs: host._load(*args, **kwargs),

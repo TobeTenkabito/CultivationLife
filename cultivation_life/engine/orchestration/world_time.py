@@ -35,7 +35,8 @@ def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     deps._advance_sage_year(game, rng)
     deps._advance_monster_bloodline_year(game)
     deps._annual_demonic_update(game, rng)
-    deps._annual_spirit_field_update(p)
+    from ...system.economy.spirit_fields import advance_field_year
+    advance_field_year(game)
     if deps.advance_civilizations and not deps.advance_regions:
         deps.advance_civilizations(game)
     if not p.alive or game.pending_event:
@@ -101,7 +102,9 @@ def _advance_world_year(
     if deps.advance_researchers and not deps.advance_regions:
         deps.advance_researchers(game)
     deps._annual_demonic_update(game, rng)
-    deps._annual_spirit_field_update(player)
+    if not deps.advance_regions:
+        from ...system.economy.spirit_fields import advance_field_year
+        advance_field_year(game)
     if not player.alive:
         return False
     deps._resolve_breakthroughs(game, rng)
@@ -119,7 +122,7 @@ def _advance_world_year(
     )
 
 
-def _finish_travel_time(deps: ElapsedTravelDependencies, game, start_age, institution_world, institution_unit, era_news, rng):
+def _finish_travel_time(deps: ElapsedTravelDependencies, game, start_age, institution_world, institution_unit, era_news, rng, *, action_units=None):
     player = game.player
     elapsed = player.age - start_age
     if player.world == institution_world:
@@ -129,6 +132,6 @@ def _finish_travel_time(deps: ElapsedTravelDependencies, game, start_age, instit
         time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
         settle_elapsed_time(
             deps, game, rng, era_news, action="travel",
-            units=completed_action_units(elapsed, time_unit), start_age=start_age,
+            units=completed_action_units(elapsed, time_unit) if action_units is None else action_units, start_age=start_age,
             policy=TRAVEL_TIME, elapsed_years=elapsed,
         )

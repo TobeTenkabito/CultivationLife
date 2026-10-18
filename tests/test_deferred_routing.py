@@ -115,10 +115,10 @@ def test_mixed_tasks_exact_state_matches_release_after_reload_and_entry(regional
                     game=GameState.from_dict(game.to_dict())
             snapshots.append(game.to_dict())
             for world in ['human','spirit','true_demon','demon']:
-                regions.synchronize(engine,game,[world])
+                regions.synchronize(engine._dependencies.regions,game,[world])
                 check(game)
                 snapshot=game.to_dict()
-                regions.synchronize(engine,game,[world])
+                regions.synchronize(engine._dependencies.regions,game,[world])
                 assert game.to_dict()==snapshot
                 snapshots.append(snapshot)
         return snapshots

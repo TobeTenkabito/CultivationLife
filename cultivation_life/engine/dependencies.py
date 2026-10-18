@@ -1,5 +1,6 @@
 """Explicit, narrow dependency contracts for engine domain functions."""
 from __future__ import annotations
+from ..system.character.dependencies import CharacterDependencies
 
 from ..system.court.dependencies import (
     CourtStateDependencies,
@@ -11,7 +12,9 @@ from ..system.court.dependencies import (
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from ..models import GameState, SectNpc, SectState
+from ..models import GameState, Player, HistoryRecord, SectNpc, SectState
+from ..regional_dependencies import RegionalDependencies
+from .response_dependencies import ResponseDependencies
 from ..system.combat_system import BattleUnit
 from ..system.npc_contact_dependencies import NpcContactDependencies
 from ..system.tianji.dependencies import TianjiDependencies
@@ -130,81 +133,94 @@ class CombatDependencies:
 
 
 @dataclass(frozen=True, slots=True)
-class PresentationDependencies:
-    _ensure_natal_artifact: Callable[..., bool]
-    _guixu_definitions: Callable[..., dict[str, dict[str, Any]]]
-    _history_visible_in_world: Callable[..., bool]
-    _intrigue_can_invite_guest: Callable[..., bool]
-    _natal_artifact_inventory_item: Callable[..., dict[str, Any] | None]
-    _npc_realm_name: Callable[..., str]
-    _player_battle_power: Callable[..., float]
-    _player_intrinsic_combat_power: Callable[..., float]
-    _public_art_skills: Callable[..., list[dict[str, Any]]]
-    _public_auction: Callable[..., dict[str, Any]]
-    _public_body_cultivation: Callable[..., dict[str, Any]]
-    _public_concubine_system: Callable[..., dict[str, Any]]
-    _public_crafting_system: Callable[..., dict[str, Any]]
-    _public_dao_companion: Callable[..., dict[str, Any] | None]
-    _public_dao_friends: Callable[..., list[dict[str, Any]]]
-    _public_demonic_system: Callable[..., dict[str, Any]]
-    _public_exchange: Callable[..., Any]
-    _public_faction: Callable[..., dict[str, Any]]
-    _public_family: Callable[..., dict[str, Any]]
-    _public_formation_system: Callable[..., dict[str, Any]]
-    _public_ghost_system: Callable[..., dict[str, Any]]
-    _public_governance: Callable[..., dict[str, Any]]
-    _public_guixu: Callable[..., dict[str, Any]]
-    _public_heavenly_court: Callable[..., dict[str, Any]]
-    _public_yaochi: Callable[..., dict[str, Any]]
-    _public_golden_light: Callable[..., dict[str, Any]]
-    _public_intrigue_system: Callable[..., dict[str, Any]]
-    _public_major_breakthrough: Callable[..., dict[str, Any]]
-    _public_map_with_ghost_parade: Callable[..., dict[str, Any]]
-    _public_market: Callable[..., dict[str, Any]]
-    _public_merchant: Callable[..., Any]
-    _public_natal_artifact: Callable[..., dict[str, Any]]
-    _public_party: Callable[..., list[dict[str, Any]]]
-    _public_personal_relations: Callable[..., dict[str, list[dict[str, Any]]]]
-    _public_race_system: Callable[..., dict[str, Any]]
-    _public_sage_system: Callable[..., dict[str, Any]]
-    _public_secret_arts: Callable[..., dict[str, Any]]
-    _public_spirit_field: Callable[..., dict[str, Any]]
-    _public_spirit_ranking: Callable[..., dict[str, Any]]
-    _public_tianji: Callable[..., dict[str, Any]]
-    _public_doctrines: Callable[..., dict[str, Any]]
-    _public_wanted: Callable[..., list[dict[str, Any]]]
-    _public_war_system: Callable[..., dict[str, Any]]
-    _public_world_npcs: Callable[..., list[dict[str, Any]]]
-    _public_world_route: Callable[..., dict[str, Any]]
-    _rank: Callable[..., tuple[int, int]]
-    _relationship_can_join_faction: Callable[..., bool]
-    _stable_gender: Callable[..., str]
-    _tribulation_base_power_cap: Callable[..., float | None]
-    _get_achievements: Callable[[], AchievementPort]
+class ViewPreparationDependencies:
+    _ensure_natal_artifact: Callable[[GameState], bool]
+    _guixu_definitions: Callable[[], dict[str, dict[str, Any]]]
+    _history_visible_in_world: Callable[[HistoryRecord, GameState], bool]
+    _intrigue_can_invite_guest: Callable[[GameState, str], bool]
+    _natal_artifact_inventory_item: Callable[[GameState], dict[str, Any] | None]
+    _npc_realm_name: Callable[[SectNpc], str]
+    _player_battle_power: Callable[[GameState], float]
+    _player_intrinsic_combat_power: Callable[[Player], float]
+    _public_art_skills: Callable[[Player], list[dict[str, Any]]]
+    _public_auction: Callable[[GameState], dict[str, Any]]
+    _public_body_cultivation: Callable[[Player], dict[str, Any]]
+    _public_concubine_system: Callable[[GameState], dict[str, Any]]
+    _public_crafting_system: Callable[[GameState], dict[str, Any]]
+    _public_dao_companion: Callable[[GameState], dict[str, Any] | None]
+    _public_dao_friends: Callable[[GameState], list[dict[str, Any]]]
+    _public_demonic_system: Callable[[Player, GameState], dict[str, Any]]
+    _public_exchange: Callable[[GameState], dict[str, Any]]
+    _public_faction: Callable[[GameState], dict[str, Any]]
+    _public_family: Callable[[GameState], dict[str, Any]]
+    _public_formation_system: Callable[[GameState], dict[str, Any]]
+    _public_ghost_system: Callable[[GameState], dict[str, Any]]
+    _public_governance: Callable[[GameState], dict[str, Any]]
+    _public_guixu: Callable[[GameState], dict[str, Any]]
+    _public_heavenly_court: Callable[[GameState], dict[str, Any]]
+    _public_yaochi: Callable[[GameState], dict[str, Any]]
+    _public_golden_light: Callable[[GameState], dict[str, Any]]
+    _public_intrigue_system: Callable[[GameState], dict[str, Any]]
+    _public_major_breakthrough: Callable[[Player], dict[str, Any]]
+    _public_map_with_ghost_parade: Callable[[GameState, str], dict[str, Any]]
+    _public_market: Callable[[GameState], dict[str, Any]]
+    _public_merchant: Callable[[GameState], dict[str, Any]]
+    _public_natal_artifact: Callable[[GameState], dict[str, Any]]
+    _public_party: Callable[[GameState], list[dict[str, Any]]]
+    _public_personal_relations: Callable[[GameState], dict[str, list[dict[str, Any]]]]
+    _public_race_system: Callable[[GameState], dict[str, Any]]
+    _public_sage_system: Callable[[GameState], dict[str, Any]]
+    _public_secret_arts: Callable[[Player], dict[str, Any]]
+    _public_spirit_field: Callable[[Player], dict[str, Any]]
+    _public_spirit_ranking: Callable[[GameState], dict[str, Any]]
+    _public_tianji: Callable[[GameState], dict[str, Any]]
+    _public_doctrines: Callable[[GameState], dict[str, Any]]
+    _public_wanted: Callable[[GameState], list[dict[str, Any]]]
+    _public_war_system: Callable[[GameState], dict[str, Any]]
+    _public_world_npcs: Callable[[GameState], list[dict[str, Any]]]
+    _public_world_route: Callable[[GameState], dict[str, Any]]
+    _rank: Callable[[Player | SectNpc | dict[str, Any]], tuple[int, int]]
+    _relationship_can_join_faction: Callable[[GameState, dict[str, Any]], bool]
+    _stable_gender: Callable[[str], str]
+    _tribulation_base_power_cap: Callable[[str], float | None]
+    _evaluate_achievements: Callable[[GameState, int | None], list[dict[str, Any]]]
+    _public_buddhist: Callable[[GameState], dict[str, Any]]
+    _public_heavens: Callable[[GameState], dict[str, Any]]
     _get_maps: Callable[[], MapPort]
-
-    @property
-    def achievements(self) -> AchievementPort:
-        return self._get_achievements()
 
     @property
     def maps(self) -> MapPort:
         return self._get_maps()
 
 
+# Historical name remains an alias for independent consumers. These capabilities
+# prepare a response; pure projection receives only a PreparedGameView.
+PresentationDependencies = ViewPreparationDependencies
+
+
 @dataclass(frozen=True, slots=True)
-class PersistenceDependencies:
+class SessionPreparationDependencies:
     foundations: FoundationsPreparationDependencies
     vitality: VitalityPreparationDependencies
     character: CharacterPreparationDependencies
     world: WorldPreparationDependencies
     services: ServicesPreparationDependencies
     events: EventsPreparationDependencies
+
+
+@dataclass(frozen=True, slots=True)
+class PersistenceDependencies(SessionPreparationDependencies):
     _get_store: Callable[[], SavePort]
 
     @property
     def store(self) -> SavePort:
         return self._get_store()
+
+    @property
+    def preparation(self) -> SessionPreparationDependencies:
+        return SessionPreparationDependencies(
+            self.foundations, self.vitality, self.character, self.world, self.services, self.events,
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -980,6 +996,9 @@ class AsuraTrialDependencies:
 
 @dataclass(frozen=True, slots=True)
 class EngineDependencies:
+    character: CharacterDependencies
+    regions: RegionalDependencies
+    response: ResponseDependencies
     heavens: HeavensDependencies
     ghost_flows: GhostFlowDependencies
     demonic_flows: DemonicFlowDependencies
@@ -1007,7 +1026,7 @@ class EngineDependencies:
     world_runtime: WorldRuntimeDependencies
     event_runtime: EventDependencies
     combat_runtime: CombatDependencies
-    presentation_runtime: PresentationDependencies
+    view_preparation: ViewPreparationDependencies
     persistence_runtime: PersistenceDependencies
     session: SessionDependencies
     advancement: AdvancementDependencies
@@ -1029,3 +1048,7 @@ class EngineDependencies:
     character_view: CharacterViewDependencies
     world_view: WorldViewDependencies
     faction_view: FactionViewDependencies
+
+    @property
+    def presentation_runtime(self) -> ViewPreparationDependencies:
+        return self.view_preparation

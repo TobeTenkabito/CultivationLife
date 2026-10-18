@@ -7,6 +7,7 @@ import pytest
 
 from cultivation_life.models import GameState, SectNpc
 from cultivation_life.npc_custody import detain_person, release_person
+from cultivation_life.relationship_records import find_person
 from cultivation_life.person_assignments import research_assignment
 from cultivation_life.system.heavens import operations, survey
 from cultivation_life.system.heavens.definitions import RUINS_ID
@@ -172,6 +173,13 @@ def test_death_and_custody_never_replace_or_reward(site, inside):
     row = copy.deepcopy(survey.get(game))
     npc = game.world_npcs[identity]
     detain_person(game, npc.to_dict(), SectNpc)
+    if inside:
+        scene = game.spatial_state['instances'][game.heavens_state['runtime']['ruins']['scene_id']]
+        assert identity not in scene['npc_ids']
+        scene['npc_ids'].append(identity)
+        with pytest.raises(ValueError, match='异象空间'):
+            validate_references(game)
+        scene['npc_ids'].remove(identity)
     site[0].store.save(game)
     detained = wait(site, 1)
     assert survey.get(detained)['elapsed'] == row['elapsed']
@@ -179,7 +187,7 @@ def test_death_and_custody_never_replace_or_reward(site, inside):
     npc.lifespan = npc.age + 1
     site[0].store.save(detained)
     dead = wait(site, 1)
-    assert not dead.world_npcs[identity].alive
+    assert not find_person(dead, identity, include_inactive=True).alive
     assert survey.get(dead)['status'] == 'failed'
     assert dead.player.formation_materials == []
     validate_references(dead)

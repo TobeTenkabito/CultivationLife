@@ -188,8 +188,12 @@ def test_invalid_imprisonment_resolution_refuses_without_votes_rng_or_prison_cha
         game.world_npcs[npc.id] = npc; target = npc.id
     elif invalid == 'dead': npc.alive = False
     elif invalid == 'other_world': npc.world = 'spirit'
-    elif invalid == 'instance': game.spatial_state.setdefault('instances', {})['elsewhere'] = {
-        'id':'elsewhere', 'kind':'lost', 'name':'隔绝实例', 'npc_ids':[npc.id], 'location_id':None}
+    elif invalid == 'instance':
+        from cultivation_life.system.combat.npc_lifecycle import move_world
+        from cultivation_life.content_registry import WORLD_SYSTEMS
+        move_world(npc, 'lost', game.player.age, WORLD_SYSTEMS.get('transcendent_combat', {}))
+        game.spatial_state.setdefault('instances', {})['elsewhere'] = {
+            'id':'elsewhere', 'kind':'lost', 'name':'隔绝实例', 'npc_ids':[npc.id], 'location_id':None}
     elif invalid == 'controller': target = 'player'
     elif invalid == 'ruling_member':
         npc.realm_index = 5

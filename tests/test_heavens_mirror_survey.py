@@ -170,10 +170,17 @@ def test_custody_pauses_mirror_research_and_disabling_generation_preserves_it(si
     game = enter(site)
     game.heavens_state['generation_enabled'] = False
     detain_person(game, game.world_npcs[identity].to_dict(), SectNpc)
+    scene = game.spatial_state['instances'][game.heavens_state['runtime']['mirror']['scene_id']]
+    assert identity not in scene['npc_ids']
+    scene['npc_ids'].append(identity)
+    with pytest.raises(ValueError, match='异象空间'):
+        validate_references(game)
+    scene['npc_ids'].remove(identity)
     site[0].store.save(game)
     paused = wait(site, 2)
     assert survey.get(paused, MIRROR_ID)['progress'] == 0
     release_person(paused, identity)
+    assert identity in paused.world_npcs and identity not in paused.relationship_npcs
     site[0].store.save(paused)
     continued = wait(site, 2)
     assert survey.get(continued, MIRROR_ID)['progress'] == 2

@@ -351,14 +351,18 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
     independent = {npc.id:npc for sect in game.sects.values() for npc in sect.npcs}
     independent.update(game.notable_npcs)
     independent.update(game.inactive_npcs)
+    if game.family and not game.family.extinct:
+        independent.update((npc.id, npc) for npc in game.family.npcs if npc.world != game.family.world)
     for child in player.offspring:
         only = getattr(game, '_regional_single_person', None)
         if only is not None and child.get('id') != only:
             continue
-        if not task_active(game, child.get('world', player.world)):
-            continue
         if child.get("id") in independent:
-            child.update(independent[child["id"]].to_dict())
+            person = independent[child['id']]
+            if task_active(game, person.world):
+                child.update(person.to_dict())
+            continue
+        if not task_active(game, child.get('world', player.world)):
             continue
         if not child.get("alive", True) or child.get("id") in family_ids:
             continue

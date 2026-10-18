@@ -14,9 +14,47 @@ def field_operation_available(game):
                 or p.ghost_captor or game.guixu_state.get('player_session'))
 
 
-def require_field_access(game):
+def field_is_local(game):
+    owner = game.player.spirit_field.get('owner')
+    if not owner:
+        return True
+    instance = game.spatial_state.get('current') if game.player.world in {'lost', 'rift'} else None
+    return owner['world'] == game.player.world and owner.get('instance_id') == instance
+
+
+def adopt_field(game):
+    """Bind existing structure-10 land once, before any subsequent departure."""
+    field = game.player.spirit_field
+    if 'owner' not in field and (field.get('reclaimed_qing') or field.get('plots')):
+        field['owner'] = dict(world=game.player.world, location_id=game.player.location_id,
+                              instance_id=game.spatial_state.get('current') if game.player.world in {'lost', 'rift'} else None)
+        field['settled_year'] = game.player.age
+        return True
+    return False
+
+
+def advance_field_year(game):
+    """One original parcel follows its owning regional/occupied-space calendar."""
+    from ...regional_context import region
+    field = game.player.spirit_field
+    owner = field.get('owner')
+    if not owner:
+        return
+    world = region(game) or game.player.world
+    instance = game.spatial_state.get('current') if world in {'lost', 'rift'} else None
+    if owner['world'] != world or owner.get('instance_id') != instance:
+        return
+    if game.player.age <= field.get('settled_year', game.player.age):
+        return
+    field['settled_year'] = game.player.age
+    _grow_field(game.player)
+
+
+def require_field_access(game, *, local=True):
     if not field_operation_available(game):
         raise ValueError('当前状态无法操持灵田或炼化灵植，请先处理事件或脱离拘束')
+    if local and not field_is_local(game):
+        raise ValueError('灵田留在原界面或空间实例，请返回原地后操持')
 
 
 def _plant_item_value(deps: SpiritFieldsDependencies, item_or_id: Item | str) -> int | None:
@@ -64,6 +102,10 @@ def _add_harvested_plant(deps: SpiritFieldsDependencies, player: Player, plant_i
 
 
 def _annual_spirit_field_update(deps: SpiritFieldsDependencies, player: Player) -> None:
+    _grow_field(player)
+
+
+def _grow_field(player):
     # Bounded by max_qing, so multi-century actions stay O(years * 8) with no logs.
     growth = 1.0 + max(0.0, float(player.sage_effects.get("field_alchemy_multiplier", 0.0)))
     for plot in player.spirit_field.get("plots", []):
@@ -142,6 +184,7 @@ def reclaim_spirit_field(deps: SpiritFieldsDependencies, game_id: str) -> dict[s
     if not remove_item(player, "spirit_stone", cost):
         raise ValueError(f"开垦下一顷灵田需要 {cost} 枚下品灵石")
     player.spirit_field["reclaimed_qing"] = reclaimed + 1
+    adopt_field(game)
     deps._grant_art_experience(player, "formation", 12 + 4 * reclaimed)
     summary = f"你耗费 {cost} 枚灵石布置聚灵、沃土诸阵，立即开垦了第 {reclaimed + 1} 顷灵田。"
     game.history.append(HistoryRecord(
@@ -256,7 +299,7 @@ def harvest_spirit_crop(deps: SpiritFieldsDependencies, game_id: str, plot_id: s
 
 def use_harvested_plant(deps: SpiritFieldsDependencies, game_id: str, item_id: str) -> dict[str, Any]:
     game = deps._load(game_id)
-    require_field_access(game)
+    require_field_access(game, local=False)
     player = game.player
     item = next((row for row in player.inventory if row.id == item_id and row.quantity > 0), None)
     if not item or not item.plant_id:

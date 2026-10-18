@@ -5,6 +5,9 @@ remain the original objects. A view is never a save or a second resource pool.
 """
 from contextlib import contextmanager
 from contextvars import ContextVar
+from collections.abc import Collection
+from typing import cast
+from .regional_ports import RegionSynchronizationPort
 
 _calendar = ContextVar('regional_calendar', default=None)
 
@@ -98,9 +101,9 @@ def annual_person(game, npc):
     return True
 
 
-def synchronize(game, worlds, *, entering=False):
+def synchronize(game, worlds: Collection[str], *, entering: bool = False) -> None:
     """Explicit mutation boundaries call the engine-bound scheduler, never previews."""
-    callback = getattr(game, '_synchronize_regions', None)
+    callback = cast(RegionSynchronizationPort[object] | None, getattr(game, '_synchronize_regions', None))
     if callback and game.world_simulation:
         root = game._game if isinstance(game, CalendarGame) else game
         selected = worlds if entering else set(worlds) & {region(game) or game.player.world}

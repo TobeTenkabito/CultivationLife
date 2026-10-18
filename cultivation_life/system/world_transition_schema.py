@@ -1,5 +1,6 @@
 """World route classification and content validation without transition side effects."""
 from enum import Enum
+from dataclasses import dataclass
 
 
 class TransitionDirection(str, Enum):
@@ -17,6 +18,46 @@ class TransitionMode(str, Enum):
     STUDY = "study"
     RIFT = "rift"
     EXPULSION = "expulsion"
+
+
+
+@dataclass(frozen=True, slots=True)
+class WorldTransitionRequest:
+    destination: str
+    mode: TransitionMode
+    route_id: str
+    reason: str = ""
+    arrival_location: str | None = None
+    instance_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class WorldTransitionPlan:
+    source: str
+    destination: str
+    direction: TransitionDirection
+    mode: TransitionMode
+    route_id: str
+    reason: str
+    arrival_location: str
+    source_rank: tuple[int, int]
+    target_rank: tuple[int, int]
+    seal_action: str
+    seal_snapshot: dict | None
+    source_location: str | None = None
+    source_instance: str | None = None
+    destination_instance: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class WorldTransitionResult:
+    source: str
+    destination: str
+    direction: TransitionDirection
+    mode: TransitionMode
+    route_id: str
+    suppressed: bool
+
 
 
 def classify_transition(profiles, source, destination):

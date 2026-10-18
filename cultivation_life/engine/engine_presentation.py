@@ -1,6 +1,6 @@
 from __future__ import annotations
 from ..system.economy.presentation import public_economy
-from ..system.economy.spirit_fields import field_operation_available
+from ..system.economy.spirit_fields import field_operation_available, field_is_local
 from ..system.economy.caravans import public_caravans
 from ..system.economy.personal import public_personal
 from ..system.economy.network_actions import public_network
@@ -31,13 +31,19 @@ from ..system.upper_institutions import public_institution
 from ..system.upper_voisinage import public_upper_voisinages
 from ..system.combat_plan import public_plan
 from ..system.tutorial_system import public_tutorial
-from .dependencies import PresentationDependencies
+from .dependencies import ViewPreparationDependencies
 from ..relationship_records import RelationshipRecord
 from ..spatial_people import accessible
 from ..npc_custody import is_free
 
 
-def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
+def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str, Any]:
+    """Build a response in the original order, including declared lazy repairs.
+
+    This preparation phase may initialize derived state and award achievements.
+    It has no save or annual-settlement capability. The separate snapshot
+    projector neither accepts this contract nor sees the authoritative game.
+    """
     def relationship_labels(npc):
         return {
             'realm_name': deps._npc_realm_name(npc),
@@ -212,9 +218,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
             soul_battles=int(game.active_trial.get("soul_battles", 0)),
         )
     ranking_data = deps._public_spirit_ranking(game)
-    new_achievements = deps.achievements.evaluate(
-        game, player_rank=ranking_data.get("player_rank"),
-    )
+    new_achievements = deps._evaluate_achievements(game, ranking_data.get("player_rank"))
     from .actions.world_travel import plan_public_crossing
     travel_routes = []
     for destination in WORLD_SYSTEMS["world_profiles"]:
@@ -232,7 +236,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
                               f"修为将受当地法则压制至{deps._npc_realm_name(target_shell)}；可循原路返界"})
     eligible = {row["destination"] for row in travel_routes}
     from ..system.trial_sites import public as public_trial_sites
-    return {
+    result = {
         "id": game.id,
         "seed": game.seed,
         "created_at": game.created_at,
@@ -261,7 +265,10 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "merchant_system": deps._public_merchant(game),
         "personal_economy": public_personal(game),
         "fleet_network": public_network(game, deps.maps),
-        "spirit_field": deps._public_spirit_field(game.player) | {'operation_available': field_operation_available(game)},
+        "spirit_field": deps._public_spirit_field(game.player) | {
+            'operation_available': field_operation_available(game),
+            'local_available': field_is_local(game),
+        },
         "art_skills": deps._public_art_skills(game.player),
         "map": {**deps._public_map_with_ghost_parade(game, location_id), "economy": {
             **public_economy(game), "caravans": public_caravans(game, deps.maps, local=True),
@@ -294,7 +301,7 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
         "party": party,
         "wanted": deps._public_wanted(game),
         "imprisonment": copy.deepcopy(game.player.imprisonment),
-        "demonic_system": deps._public_demonic_system(game.player),
+        "demonic_system": deps._public_demonic_system(game.player, game),
         "asura": public_asura(game),
         "ghost_system": deps._public_ghost_system(game),
         "breakthrough": deps._public_major_breakthrough(game.player),
@@ -339,6 +346,24 @@ def present(deps: PresentationDependencies, game: GameState) -> dict[str, Any]:
             "years_remaining": years_to_tribulation,
         },
     }
+    from ..system import spatial, talismans
+    from ..system.monster_civilizations.core import marker
+    result['buddhist_system'] = deps._public_buddhist(game)
+    result['spatial'] = spatial.public(game)
+    result['talismans'] = talismans.public(game)
+    result['heavens'] = deps._public_heavens(game)
+    result['monster_civilizations'] = marker(game)
+    spatial_limit = spatial.cultivation_block_reason(game)
+    if spatial_limit:
+        result['breakthrough'].update(ready=False, enabled=False, met=False, reason=spatial_limit)
+    if spatial.current(game):
+        scene = spatial.current(game)
+        result['player']['world_name'] = scene['name']
+        result['player']['location_name'] = next(row['name'] for row in scene['locations'] if row['id'] == scene['location_id'])
+        result['player']['qi_gain_efficiencies'] = spatial.current_qi(game)
+        result['map'] = spatial.public_map(game)
+        result['market'] = []
+    return result
 
 
 def _history_visible_in_world(record: HistoryRecord, game: GameState) -> bool:

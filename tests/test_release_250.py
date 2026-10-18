@@ -56,6 +56,9 @@ def test_rift_gate_cost_and_natural_exit(ready, boundary):
         game.player.realm_index,game.player.layer=realm,layer
         game.player.mp=max_mp(game.player)
         engine.store.save(game)
+        # Realm changes in this fixture require the normal session preparation
+        # before measuring whether a refused command has any side effects.
+        game=engine._load(game.id)
         assert spatial.public(game)['can_open']==allowed
         if not allowed:
             before=engine.store.load(game.id).to_dict()

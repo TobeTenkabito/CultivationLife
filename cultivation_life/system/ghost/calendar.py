@@ -7,22 +7,28 @@ from ...content_registry import WORLD_SYSTEMS
 from ...models import GameState, HistoryRecord, SectNpc
 from ..ghost_resources import ghost_phase_two_config as ghost_phase_two_config
 from .dependencies import GhostCalendarDependencies
+from . import parades
+from ...regional_context import region, historical
 
 
-def _advance_ghost_phase_two_year(deps: GhostCalendarDependencies, game: GameState, rng: random.Random) -> None:
+def advance_parade_year(deps: GhostCalendarDependencies, game: GameState, rng: random.Random) -> None:
     if not ghost_phase_two_config().get("enabled", False):
         return
     deps._ensure_ghost_parade(game, rng)
-    parade = game.ghost_parade
+    parade = parades.get(game)
     if not parade:
         return
-    phase_rng = random.Random(f"{game.seed}:ghost-phase-two:{game.player.age}")
-    unit = max(1, int(WORLD_SYSTEMS["time_units"][str(game.player.realm_index)]))
+    if int(parade.get('settled_year', -1)) >= game.player.age:
+        return
+    parade['settled_year'] = game.player.age
+    phase_rng = random.Random(f"{game.seed}:ghost-phase-two:{parade['world']}:{game.player.age}")
+    unit = int(parade.get('unit_years', WORLD_SYSTEMS['time_units'][str(game.player.realm_index)]))
+    records = []
     announce_age = int(parade.get("start_age", game.player.age)) - 2 * unit
     if not parade.get("announced") and game.player.age >= announce_age:
         parade["announced"] = True
         parade["status"] = "announced"
-        game.history.append(HistoryRecord(
+        records.append(HistoryRecord(
             "SYS_GHOST_PARADE_ANNOUNCED", 1, game.player.age, "百鬼将行", None, "announced",
             "阴风先至，百鬼夜行将在两个游戏时间单位后降临；地图已经标出鬼门所在。",
             {"location_id": parade.get("location_id"), "start_age": parade.get("start_age")},
@@ -30,8 +36,8 @@ def _advance_ghost_phase_two_year(deps: GhostCalendarDependencies, game: GameSta
         ))
     if game.player.age >= int(parade.get("start_age", 10**18)) and parade.get("status") != "active":
         parade["status"] = "active"
-        parade["souls"] = deps._generate_parade_souls(game, phase_rng)
-        game.history.append(HistoryRecord(
+        parade["souls"] = deps._generate_parade_souls(game, phase_rng, realm_index=parade.get('realm_index', game.player.realm_index))
+        records.append(HistoryRecord(
             "SYS_GHOST_PARADE_STARTED", 1, game.player.age, "百鬼夜行", None, "active",
             "鬼门洞开，游魂并非临时数值，而以姓名、修为、魂压与魂性现身世间。",
             {"location_id": parade.get("location_id"), "soul_count": len(parade["souls"])},
@@ -39,13 +45,26 @@ def _advance_ghost_phase_two_year(deps: GhostCalendarDependencies, game: GameSta
         ))
     if game.player.age >= int(parade.get("end_age", 10**18)):
         escaped = len(parade.get("souls", []))
-        game.history.append(HistoryRecord(
+        records.append(HistoryRecord(
             "SYS_GHOST_PARADE_ENDED", 1, game.player.age, "鬼门复闭", None, "ended",
             f"夜行散去，仍有 {escaped} 道未被拘束的魂魄归入幽暗。下一次异动将在未来重新孕生。",
             {"escaped_souls": escaped}, ["system", "ghost", "parade"],
         ))
-        game.ghost_parade = {}
+        parades.put(game, parade['world'], {})
         deps._ensure_ghost_parade(game, rng)
+        parades.get(game)['settled_year'] = game.player.age
+    if not historical(game) and (region(game) or game.player.world) == game.player.world:
+        game.history.extend(records)
+
+
+def _advance_ghost_phase_two_year(deps: GhostCalendarDependencies, game: GameState, rng: random.Random) -> None:
+    if not ghost_phase_two_config().get("enabled", False):
+        return
+    if not game.world_simulation:
+        advance_parade_year(deps, game, rng)
+    phase_rng = random.Random(f"{game.seed}:ghost-phase-two:{game.player.age}")
+    from .captors import release_dead_captor
+    release_dead_captor(game)
     captor = game.player.ghost_captor
     if captor:
         captor["followed_years"] = int(captor.get("followed_years", 0)) + 1
@@ -56,7 +75,10 @@ def _advance_ghost_phase_two_year(deps: GhostCalendarDependencies, game: GameSta
             ).get("locations", []) if row.get("travel_status") in {"ok", "current"}]
             if locations:
                 captor["location_id"] = phase_rng.choice(locations)
-        game.player.location_id = captor.get("location_id", game.player.location_id)
+        destination = captor.get('location_id', game.player.location_id)
+        if destination != game.player.location_id:
+            game.map_journey = None
+            game.player.location_id = destination
         if phase_rng.random() < 0.12:
             from ...rules import combat_power
             contribution = combat_power(game.player)

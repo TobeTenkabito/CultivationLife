@@ -4,6 +4,7 @@ from ..race_diplomacy import relations_for
 
 from ..npc_custody import kill_person, settle_puppet_person
 from ..relationship_records import find_person
+from ..puppet_state import usable as usable_puppet
 
 from ..system.semantic_events import emit, relationship_roles
 
@@ -44,7 +45,7 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
     )]
     for puppet in player.puppets:
         kind = str(puppet.get("type", "mechanical"))
-        if not puppet.get("alive", True) or kind not in {"mechanical", "corpse"}:
+        if not usable_puppet(puppet, game) or kind not in {"mechanical", "corpse"}:
             continue
         field = "durability" if kind == "mechanical" else "corpse_integrity"
         integrity = max(0.0, min(1.0, float(puppet.get(field, 100.0)) / 100.0))
@@ -65,7 +66,7 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
             str(relation.get("path", "dao")),
         ))
     for puppet in player.puppets:
-        if not puppet.get("alive", True) or puppet.get("type") != "living":
+        if not usable_puppet(puppet, game) or puppet.get("type") != "living":
             continue
         effective = max(0.0, float(puppet.get("combat_power", 0)))
         control = max(0.2, min(1.0, float(puppet.get("control", 100)) / 100.0))

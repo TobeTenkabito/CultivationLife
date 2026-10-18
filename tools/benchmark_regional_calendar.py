@@ -24,14 +24,14 @@ def run(engine, initial, mode, years):
     start = time.perf_counter()
     for index in range(years):
         game.player.age += 1
-        if mode == 'all-live': regions.synchronize(engine, game, regions.worlds())
+        if mode == 'all-live': regions.synchronize(engine._dependencies.regions, game, regions.worlds())
         engine._advance_world_year(game, rng, [], encounters=False)
         if (index+1) % WORLD_SYSTEMS['time_units'][str(game.player.realm_index)] == 0:
             game.diplomacy_unit += 1
             engine._advance_wars_unit(game, rng)
         if mode == 'frozen-reloaded' and index+1 == years//2:
             game = GameState.from_dict(game.to_dict())
-            regions.attach(engine, game)
+            regions.attach(engine._dependencies.regions, game)
         if (index+1)%25 == 0:
             print(dict(mode=mode, year=index+1, seconds=round(time.perf_counter()-start,3)), flush=True)
     elapsed = time.perf_counter()-start
@@ -46,14 +46,14 @@ def run(engine, initial, mode, years):
     entered = ('human', 'spirit', 'true_demon', 'demon')
     for world in entered:
         start = time.perf_counter()
-        regions.synchronize(engine, game, [world])
+        regions.synchronize(engine._dependencies.regions, game, [world])
         entry_times[world] = time.perf_counter()-start
         print(dict(mode=mode, entered=world, seconds=round(entry_times[world],3)), flush=True)
         check(game)
     # Only the actual campaign/freight destinations are entered. The other
     # societies and their pending receipts must remain frozen in this scenario.
     snapshot = canonical(game)
-    regions.synchronize(engine, game, [game.player.world, *entered])
+    regions.synchronize(engine._dependencies.regions, game, [game.player.world, *entered])
     assert canonical(game) == snapshot
     assert canonical(GameState.from_dict(game.to_dict())) == snapshot
     return game, dict(away_seconds=elapsed, reentry_seconds=sum(entry_times.values()), entry_times=entry_times,

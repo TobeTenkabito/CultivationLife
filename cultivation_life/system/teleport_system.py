@@ -48,6 +48,7 @@ def _instant_arrival(deps: TeleportDependencies, game, destination):
     if plan.status in {'blocked', 'lethal'}:
         raise ValueError(plan.warning or '目的地不可抵达')
     p.location_id = destination
+    game.map_journey = None
     deps._clear_market(game)
     rng = decode_rng(game.seed, game.rng_state)
     deps._ensure_market(game, rng)

@@ -1,5 +1,6 @@
 """Spatial membership references share the ordinary authoritative NPC registry."""
 from .relationship_records import find_person
+from .npc_custody import family_rosters
 
 
 def bind(game, npc_type):
@@ -18,12 +19,20 @@ def bind(game, npc_type):
 def people(game, scene=None):
     scene = scene or game.spatial_state.get('instances', {}).get(game.spatial_state.get('current')) or {}
     return [npc for identity in scene.get('npc_ids', [])
-            if (npc := find_person(game, identity, include_inactive=True)) is not None]
+            if (npc := find_person(game, identity, include_inactive=True)) is not None
+            and npc.roster_state == 'active'
+            and npc.world == ('lost' if scene.get('kind') == 'lost' else 'rift')]
 
 
 def instance_of(game, identity):
-    return next((key for key, scene in game.spatial_state.get('instances', {}).items()
-                 if identity in scene.get('npc_ids', [])), None)
+    owner = next((key for key, scene in game.spatial_state.get('instances', {}).items()
+                  if identity in scene.get('npc_ids', [])), None)
+    if owner is None:
+        return None
+    npc = find_person(game, identity, include_inactive=True)
+    if npc is not None and (npc.roster_state != 'active' or npc.world not in {'lost', 'rift'}):
+        return None
+    return owner
 
 
 def accessible(game, person):

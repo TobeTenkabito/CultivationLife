@@ -327,7 +327,8 @@ def _convert_to_puppet(
     elif kind == "corpse" and source == "relationship:master":
         player.milestones["master_turned_corpse"] = 1
     if kind == "living":
-        game.detain_person(target, kind="living_puppet")
+        held = game.detain_person(target, kind="living_puppet")
+        puppet.update(age=held['age'], lifespan=held['lifespan'])
     else:
         kill_person(game, target.get("npc_id") or target["id"],
                     f"被{player.name}炼为{PUPPET_NAMES[kind]}")

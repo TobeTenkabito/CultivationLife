@@ -34,14 +34,14 @@ def test_full_campaign_freight_war_and_order_resume_without_double_payment(tmp_p
                 # Reload all persistent authorities in place for the next step.
                 game.__dict__.clear();game.__dict__.update(restored.__dict__)
         before=canonical(game)
-        regions.synchronize(engine,game,regions.important_worlds(game))
+        regions.synchronize(engine._dependencies.regions,game,regions.important_worlds(game))
         assert canonical(game)==before
     assert canonical(a)==canonical(b)
 
 
 def test_new_process_hash_order_and_midpoint_resume_match(regional,tmp_path):
     engine,game=regional
-    regions.synchronize(engine,game,regions.worlds())
+    regions.synchronize(engine._dependencies.regions,game,regions.worlds())
     source=tmp_path/'source.json'
     source.write_text(json.dumps(game.to_dict(),ensure_ascii=False),encoding='utf8')
     script='''
@@ -56,7 +56,7 @@ engine=GameEngine(Path(sys.argv[1]),Path(sys.argv[2])/'isolated')
 g=GameState.from_dict(json.loads(Path(sys.argv[2]).read_text(encoding='utf8')))
 for i in range(6):
  g.player.age+=1
- regions.synchronize(engine,g,regions.worlds())
+ regions.synchronize(engine._dependencies.regions,g,regions.worlds())
  if i==2 and sys.argv[4]=='reload':g=GameState.from_dict(g.to_dict())
 Path(sys.argv[3]).write_text(json.dumps(canonical(g),ensure_ascii=False,sort_keys=True),encoding='utf8')
 '''

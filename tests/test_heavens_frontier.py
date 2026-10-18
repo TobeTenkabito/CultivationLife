@@ -244,7 +244,7 @@ def test_real_npc_annual_continues_once_after_registry_handoff(ready):
     work = load(ready)
     assert work.world_npcs[identity].age == age
     from cultivation_life.engine.world import regions
-    regions.synchronize(ready[0], work, ['demon'])
+    regions.synchronize(ready[0]._dependencies.regions, work, ['demon'])
     assert work.world_npcs[identity].age == age+1
     assert frontier.get(work)['budget']['spent'] == 100
     assert all(n.id != identity for n in work.sects['blood_prison'].npcs)
@@ -363,6 +363,6 @@ def test_actual_road_and_recon_route_roundtrip_uses_one_npc_year_per_elapsed_yea
     with (patch.object(ready[0], '_advance_guixu_calendar', new=lambda *args, **kwargs:False),
           patch.object(ready[0], '_advance_npc_cultivation', new=lambda *args, **kwargs:None),
           patch.dict(FACTION_SYSTEMS['npc_cultivation'], accident_death_chance=0)):
-        regions.synchronize(ready[0], work, ['demon'])
+        regions.synchronize(ready[0]._dependencies.regions, work, ['demon'])
     assert work.world_npcs[identity].age == start_age+count
     assert work.world_npcs[identity].world == 'demon' and work.world_npcs[identity].location_id == row['home']

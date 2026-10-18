@@ -41,6 +41,14 @@ def validate(value):
             raise ValueError('地区同步记录无效')
         if 'deferred' in state:
             validate_deferred(state['deferred'], age)
+        parades = state.get('ghost_parades', {})
+        if not isinstance(parades, dict) or any(w not in known for w in parades):
+            raise ValueError('百鬼夜行归属无效')
+        for world, parade in parades.items():
+            if (not isinstance(parade, dict) or parade and (
+                    parade.get('world') != world or type(parade.get('settled_year')) is not int
+                    or not 0 <= parade['settled_year'] <= age)):
+                raise ValueError('百鬼夜行地区年份无效')
         spans = state.get('space_years', [])
         if not isinstance(spans, list):
             raise ValueError('空间年份区间无效')
@@ -91,6 +99,7 @@ def validate(value):
                 or not isinstance(journey.get('origin'), str) or not isinstance(journey.get('destination'), str)
                 or type(journey.get('years')) is not int or journey['years'] < 0
                 or type(journey.get('completed')) is not int or not 0 <= journey['completed'] <= journey['years']
+                or type(journey.get('unit_years', 1)) is not int or journey.get('unit_years', 1) <= 0
                 or not isinstance(journey.get('route'), list) or len(journey['route']) < 2
                 or journey['route'][0] != journey['origin'] or journey['route'][-1] != journey['destination']):
             raise ValueError('远行进度无效')

@@ -62,7 +62,7 @@ def test_all_remote_years_stay_frozen_with_cross_obligations(regional):
     game.heavens_state['generation_enabled'] = True
     for _ in range(10):
         game.player.age += 1
-        regions.advance(engine, game, [])
+        regions.advance(engine._dependencies.regions, game, [])
     assert all(r['year'] == (game.player.age if w == 'human' else initial[w])
                for w,r in game.world_simulation['regions'].items())
 
@@ -104,12 +104,12 @@ def test_frozen_task_and_society_resume_together(tmp_path):
     assert game.economy_v2['transport']['worlds']['spirit'] == fleets
     assert all(r['year']==initial.player.age for w,r in game.world_simulation['regions'].items() if w!='celestial')
     assert any(w.get('deferred_units') for w in game.wars)
-    regions.synchronize(engine, game, ['human'])
+    regions.synchronize(engine._dependencies.regions, game, ['human'])
     assert game.heavens_state['runtime']['campaign'] != campaign
     assert all(not w.get('deferred_units') for w in game.wars if w['world']=='human')
     check(game)
     before = canonical(game)
-    regions.synchronize(engine, game, ['human'])
+    regions.synchronize(engine._dependencies.regions, game, ['human'])
     assert canonical(game) == before
     assert canonical(GameState.from_dict(game.to_dict())) == before
 
@@ -204,16 +204,16 @@ def test_returned_original_person_replays_missing_life_once(regional, registry):
         move_world(npc, 'spirit', game.player.age, config)
     for _ in range(4):
         game.player.age += 1
-        regions.advance(engine, game, [])
+        regions.advance(engine._dependencies.regions, game, [])
     assert npc.age == original and npc.alive
     with calendar_scope(game, 'human', game.player.age):
         move_world(npc, 'human', game.player.age, config)
-    regions.synchronize(engine, game, ['human'])
+    regions.synchronize(engine._dependencies.regions, game, ['human'])
     assert npc.age == original+2 and not npc.alive and '寿元' in npc.death_reason
     from cultivation_life.relationship_records import find_person
     assert find_person(game, npc.id, include_inactive=True) is npc
     saved = copy.deepcopy(game.to_dict())
-    regions.synchronize(engine, game, ['human'])
+    regions.synchronize(engine._dependencies.regions, game, ['human'])
     assert game.to_dict() == saved
 
 
@@ -241,16 +241,16 @@ def test_personal_catchup_ascension_cannot_repeat_already_aged_years(regional):
         move_world(npc, 'spirit', game.player.age, config)
     for _ in range(4):
         game.player.age += 1
-        regions.advance(engine, game, [])
+        regions.advance(engine._dependencies.regions, game, [])
     with calendar_scope(game, 'human', game.player.age):
         move_world(npc, 'human', game.player.age, config)
     with patch.object(engine, '_npc_breakthrough_probability', return_value=1):
-        regions.synchronize(engine, game, ['human'])
+        regions.synchronize(engine._dependencies.regions, game, ['human'])
         assert npc.world == 'spirit' and npc.age == original+1
-        regions.synchronize(engine, game, ['spirit'])
+        regions.synchronize(engine._dependencies.regions, game, ['spirit'])
     assert npc.age == original+4
     snapshot = copy.deepcopy(game.to_dict())
-    regions.synchronize(engine, game, ['human', 'spirit'])
+    regions.synchronize(engine._dependencies.regions, game, ['human', 'spirit'])
     assert game.to_dict() == snapshot
 
 
@@ -326,7 +326,7 @@ def test_full_year_and_action_unit_leave_other_societies_unchanged(regional):
     import random
     from test_regional_calendar import projection
     engine, game = regional
-    regions.synchronize(engine, game, regions.worlds())
+    regions.synchronize(engine._dependencies.regions, game, regions.worlds())
     before = {w:copy.deepcopy(projection(game,w)) for w in regions.worlds() if w!='human'}
     rng = random.Random(20261018)
     for year in range(9):
@@ -345,7 +345,7 @@ def test_same_year_entry_drains_action_units_once_in_chronological_order(regiona
     engine, game = regional
     if mixed_clocks:
         game.player.age += 2
-    regions.synchronize(engine, game, ['spirit'])
+    regions.synchronize(engine._dependencies.regions, game, ['spirit'])
     year = game.player.age
     game.world_simulation['society_units'] = {'spirit':[dict(year=year, unit=3), dict(year=year, unit=6)]}
     game.world_simulation['faction_units'] = {'spirit':[dict(year=year, unit=3, faction='taixuan')]}
@@ -359,8 +359,8 @@ def test_same_year_entry_drains_action_units_once_in_chronological_order(regiona
         seen.append((identity, view.player.age, view.diplomacy_unit))
     with patch.object(engine, '_pressure_weak_npc_powers', side_effect=pressure), patch(
             'cultivation_life.system.intrigue.runtime.advance_npc_faction', side_effect=faction):
-        regions.synchronize(engine, game, ['spirit', 'demon'] if mixed_clocks else ['spirit'])
-        regions.synchronize(engine, game, ['spirit'])
+        regions.synchronize(engine._dependencies.regions, game, ['spirit', 'demon'] if mixed_clocks else ['spirit'])
+        regions.synchronize(engine._dependencies.regions, game, ['spirit'])
     assert seen == [('pressure', year, 3), ('taixuan', year, 3), ('pressure', year, 6)]
     assert not game.world_simulation['society_units']['spirit']
     assert not game.world_simulation['faction_units']['spirit']

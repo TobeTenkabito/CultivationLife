@@ -206,8 +206,10 @@ def test_forgery_skill_roll_and_bad_destination_no_cost(prepared):
 
 def test_tianji_template_tier_and_actual_equipment_ownership(prepared):
     e,g,_=prepared
-    assert artifact_force_tier({'base_combat_power':179999999})==1
-    assert artifact_force_tier({'base_combat_power':180000000})==2
+    from cultivation_life.content_registry import WORLD_SYSTEMS
+    threshold = WORLD_SYSTEMS['combat_expectations']['true_immortal']['value']
+    assert artifact_force_tier({'base_combat_power':threshold-1})==1
+    assert artifact_force_tier({'base_combat_power':threshold})==2
     d=next(d for d in g.tianji_state['artifacts'] if d['force_tier']==2)
     instance=dict(id='test_artifact',tianji={'definition_id':d['id'],'kind':'replica','replica_ratio':.01})
     g.player.inventory=[]

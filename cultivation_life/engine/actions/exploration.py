@@ -1,7 +1,8 @@
 """Explicit entry points for talismans, spatial instances and world ejection."""
 
 from dataclasses import dataclass
-from typing import Callable, Any
+from random import Random
+from typing import Callable, Any, Protocol
 
 from ...content_registry import ACTIONS, WORLD_SYSTEMS
 from ...runtime import decode_rng, encode_rng, now_iso
@@ -9,32 +10,47 @@ from ...rules import max_hp, max_mp, opportunity_multiplier, grant_qi_experience
 from ...system import spatial, talismans, world_boundary
 from ...system.possession_system import advance_player_age
 from ...time_flow import advance_elapsed_year
+from ...time_dependencies import WorldYearPort
+from ...models import GameState, Player
+from ...ports import MapPort
+from ...system.world_transition_system import WorldTransitionPlan, WorldTransitionResult
 
 
-@dataclass(frozen=True)
-class ExplorationDependencies:
-    load: Callable
-    save: Callable
-    present: Callable
-    maps: Any
-    plan: Callable
-    apply: Callable
-    refresh_market: Callable
-    die: Callable
-    _advance_world_year: Callable
-    body_step: Callable
-    body_required: Callable
-    sense_step: Callable
-    _advance_soul_erosion_time: Callable
-    prepare_sage: Callable
-    finish_sage: Callable
-    advance_natal: Callable
-    select_event: Callable
-    instantiate_event: Callable
+class TransitionPlanner(Protocol):
+    def __call__(
+        self, game: GameState, destination: str, mode: str, *,
+        arrival_location: str | None = None, instance_id: str | None = None, reason: str = '',
+    ) -> WorldTransitionPlan: ...
+
+
+@dataclass(frozen=True, slots=True)
+class WorldMoveDependencies:
+    maps: MapPort
+    plan: TransitionPlanner
+    apply: Callable[[GameState, WorldTransitionPlan], WorldTransitionResult]
+    refresh_market: Callable[[GameState, Random], bool]
+
+
+@dataclass(frozen=True, slots=True)
+class ExplorationDependencies(WorldMoveDependencies):
+    load: Callable[[str], GameState]
+    save: Callable[[GameState], None]
+    present: Callable[[GameState], dict[str, Any]]
+    die: Callable[[GameState, str, str], None]
+    _advance_world_year: WorldYearPort
+    body_step: Callable[[Player, Random], float]
+    body_required: Callable[[Player], float]
+    sense_step: Callable[[Player], float]
+    _advance_soul_erosion_time: Callable[[GameState, int], bool]
+    prepare_sage: Callable[[GameState, str], None]
+    finish_sage: Callable[[GameState], None]
+    advance_natal: Callable[[GameState, str, int], str | None]
+    select_event: Callable[[GameState, str, Random], dict[str, Any] | None]
+    instantiate_event: Callable[[dict[str, Any], GameState, Random], dict[str, Any]]
 
 
 def move_world(
-    deps: ExplorationDependencies, game, destination, rng, *, mode="rift", location=None, instance_id=None
+    deps: WorldMoveDependencies, game, destination, rng, *, mode="rift", location=None, instance_id=None
 ):
     source = game.player.world
     if source != destination or instance_id and instance_id != game.spatial_state.get('current'):
@@ -48,6 +64,7 @@ def move_world(
         )
         deps.apply(game, plan)
     elif location:
+        game.map_journey = None
         game.player.location_id = location
     game.player.party = []
     game.player.awaiting_ascension = False
@@ -65,7 +82,7 @@ def move_world(
             del game._pending_world_market
 
 
-def reconcile_boundary(deps: ExplorationDependencies, game, rng=None):
+def reconcile_boundary(deps: WorldMoveDependencies, game: GameState, rng: Random | None = None) -> bool:
     if not game.player.alive or game.active_trial or game.pending_event:
         return False
     scene = spatial.current(game)
@@ -189,11 +206,14 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
         elif outcome == "local" and spatial.current(game):
             scene = spatial.current(game)
             scene["location_id"] = rng.choice(scene["locations"])["id"]
+            game.map_journey = None
             spatial.journal(game, "裂缝将你安全送至当前独立空间内的另一处地图。")
         elif outcome == "local":
             location = rng.choice(deps.maps.worlds[origin]["locations"])["id"]
             # Arrival deliberately does not invoke normal travel's lethal gate.
             p.location_id = location
+            game.map_journey = None
+            deps.refresh_market(game, rng)
             spatial.journal(
                 game,
                 f"裂缝将你安全送往本界地图：{deps.maps.location(origin, location)['name']}。",

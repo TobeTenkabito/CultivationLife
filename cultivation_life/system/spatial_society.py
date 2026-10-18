@@ -1,16 +1,14 @@
 """Small instance-local societies; people remain references to the NPC registry."""
 import copy
 
-from ..spatial_people import people
+from ..spatial_people import people, family_rosters
 from ..models import Technique
 from ..rules import learn_technique
 
 
 def families(scene):
     # Deterministic projection also supports old scenes without consuming RNG.
-    return scene.get('families', [dict(id=scene['id'] + f'_family_{i}',
-        name=scene['name'][:2] + surname + '氏家族', location_id=scene['locations'][i + 1]['id'],
-        member_ids=scene.get('npc_ids', [])[i::2]) for i, surname in enumerate(('林', '陆'))])
+    return family_rosters(scene)
 
 
 def public(game, scene):

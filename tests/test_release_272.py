@@ -53,7 +53,8 @@ def test_economic_equipment_real_damage_respects_upper_threshold(world,grade,kin
 
 def test_every_economic_item_keeps_commercial_grade_separate_from_combat():
     goods={row['content_id']:row for row in MARKET_GOODS if row['kind']=='item' and specification(row['content_id'])}
-    assert len(goods)==1666
+    # v2.15.1 added 138 ordinary talismans to the original 1666 goods.
+    assert len(goods)==1804
     for identity,good in goods.items():
         spec=specification(identity)
         item=ITEM_CATALOG[identity]

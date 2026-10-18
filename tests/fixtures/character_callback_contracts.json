@@ -1,0 +1,1988 @@
+{
+  "baseline": "Stage 2 / 2.16.2",
+  "archive_sha256": "824ef89fdf74fc622b6ea918be11de0faadf61b96117e99afd186644cabefa4a",
+  "cases": [
+    {
+      "module": "buddhist_system",
+      "function": "_advance_buddhist_year",
+      "callback": "_ensure_buddhist_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "buddhist_system",
+      "function": "_advance_buddhist_year",
+      "callback": "_advance_buddhist_society_year",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "buddhist_system",
+      "function": "_public_buddhist",
+      "callback": "_ensure_buddhist_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "buddhist_system",
+      "function": "_public_buddhist",
+      "callback": "_buddhist_burden",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "buddhist_system",
+      "function": "_public_buddhist",
+      "callback": "_buddhist_permissions",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "buddhist_system",
+      "function": "assert_buddhist_operation_allowed",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_register_children",
+      "callback": "_family_child_npc",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_total_power",
+      "callback": "_sect_members",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_total_power",
+      "callback": "_npc_power",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_elites",
+      "callback": "_family_world_tier",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_elites",
+      "callback": "_sect_members",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_elites",
+      "callback": "_actual_player_realm",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_infusion",
+      "callback": "_family_world_tier",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_infusion",
+      "callback": "_intrigue_is_imprisoned",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_infusion",
+      "callback": "_actual_player_realm",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_decision_member",
+      "callback": "_intrigue_enabled",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_decision_member",
+      "callback": "_intrigue_has_decision_authority",
+      "positional": 4,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_decision_member",
+      "callback": "_governance_threshold",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_assign_office",
+      "callback": "_ensure_intrigue_faction",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_assign_office",
+      "callback": "_intrigue_position_specs",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_assign_office",
+      "callback": "_intrigue_enabled",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_assign_office",
+      "callback": "_find_npc",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_assign_office",
+      "callback": "_intrigue_decision_threshold",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "assert_guixu_operation_allowed",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_register_children",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_log",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_child_npc",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_intrigue_is_imprisoned",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_equipment",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_is_kin",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_has_family_voice",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_infusion",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_npc_realm_name",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_assign_office",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_world_tier",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_relation",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_random_npc_root",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_decision_member",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_start_war",
+      "positional": 4,
+      "keywords": [
+        "initiated_by_player"
+      ]
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_elites",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_intrigue_enabled",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "family_action",
+      "callback": "_family_total_power",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_world_tier",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_elites",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_log",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_relation",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_dissolve",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_decision_member",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_child_npc",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_dissolve",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_npc_root_name",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_is_kin",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_annual_governance",
+      "callback": "_family_total_power",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_dissolve",
+      "callback": "_family_log",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_find_npc",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_intrigue_is_imprisoned",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_family_infusion",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_intrigue_enabled",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_npc_power",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_family_is_kin",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_family_total_power",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_has_family_voice",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_family_equipment",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_family_relation",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "family_system",
+      "function": "_family_presentation",
+      "callback": "_family_world_tier",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_normalize_sage_doctrine",
+      "callback": "_normalize_sage_member",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_ensure_sage_state",
+      "callback": "_refresh_sage_effects",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_ensure_sage_state",
+      "callback": "_normalize_sage_doctrine",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_sage_world",
+      "callback": "_ensure_sage_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_player_doctrine",
+      "callback": "_sage_world",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_refresh_sage_effects",
+      "callback": "_player_doctrine",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_prepare_sage_action",
+      "callback": "_player_doctrine",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_finish_sage_action",
+      "callback": "_refresh_sage_effects",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_advance_sage_year",
+      "callback": "_ensure_sage_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_advance_sage_year",
+      "callback": "_player_doctrine",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_advance_sage_year",
+      "callback": "_refresh_sage_effects",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_advance_sage_year",
+      "callback": "_advance_sage_society_year",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_advance_sage_year",
+      "callback": "_sage_world",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_advance_sage_year",
+      "callback": "_add_opportunity",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_doctrine_action",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_doctrine_action",
+      "callback": "_ensure_sage_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_doctrine_action",
+      "callback": "_sage_world",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_doctrine_action",
+      "callback": "_player_doctrine",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_doctrine_action",
+      "callback": "_refresh_sage_effects",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_doctrine_action",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_doctrine_action",
+      "callback": "_rank_members",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_toggle_recruitment",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_toggle_recruitment",
+      "callback": "_ensure_sage_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_toggle_recruitment",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_choose_sage",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_choose_sage",
+      "callback": "_ensure_sage_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_choose_sage",
+      "callback": "_player_doctrine",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_choose_sage",
+      "callback": "_rank_members",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_choose_sage",
+      "callback": "_refresh_sage_effects",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_choose_sage",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_debate",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_debate",
+      "callback": "_ensure_sage_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_debate",
+      "callback": "_player_doctrine",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_debate",
+      "callback": "_sage_world",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_debate",
+      "callback": "_combat",
+      "positional": 4,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_debate",
+      "callback": "_refresh_sage_effects",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_debate",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_refine_manual",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_refine_manual",
+      "callback": "_haoran_manual_gain",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_refine_manual",
+      "callback": "_refresh_sage_effects",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_refine_manual",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_outer_advance_block_reason",
+      "callback": "_outer_target",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_outer_advance_block_reason",
+      "callback": "_major_breakthrough_requirement",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_outer_cost",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_refresh_sage_effects",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_outer_advance_block_reason",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_outer_target",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_start_breakthrough_trial",
+      "positional": 5,
+      "keywords": [
+        "major",
+        "rng"
+      ]
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_add_opportunity",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_complete_major_breakthrough",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "sage_outer_king",
+      "callback": "_complete_minor_breakthrough",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_inner_outer",
+      "callback": "_haoran_manual_gain",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_inner_outer",
+      "callback": "_outer_cost",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_inner_outer",
+      "callback": "_outer_advance_block_reason",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_inner_outer",
+      "callback": "_outer_target",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_sage_system",
+      "callback": "_ensure_sage_state",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_sage_system",
+      "callback": "_sage_world",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_sage_system",
+      "callback": "_player_doctrine",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_sage_system",
+      "callback": "_rank_members",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "sage_system",
+      "function": "_public_sage_system",
+      "callback": "_public_inner_outer",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_relationship_sanction_candidates",
+      "callback": "_find_npc",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_relationship_sanction_candidates",
+      "callback": "_revenge_ready",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_relationship_protectors",
+      "callback": "_find_npc",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_relationship_protectors",
+      "callback": "_rank",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_relationship_protectors",
+      "callback": "_sect_members",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_filter_personal_revenge_by_protection",
+      "callback": "_relationship_protectors",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_concubine_target",
+      "callback": "_relation_by_id",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_concubine_target",
+      "callback": "_find_npc",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_concubine_target",
+      "callback": "_promote_cached_npc",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_concubine_target",
+      "callback": "_npc_realm_name",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_concubine_target",
+      "callback": "_npc_power",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_normalize_concubine",
+      "callback": "_stable_gender",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_normalize_concubine",
+      "callback": "_npc_realm_name",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_owner_personality",
+      "callback": "_intrigue_enabled",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_owner_personality",
+      "callback": "_ensure_intrigue_personality",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_proposal_revenge_chance",
+      "callback": "_personality_score",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_proposal_revenge_chance",
+      "callback": "_intrigue_enabled",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_proposal_revenge_chance",
+      "callback": "_owner_personality",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_escape_chance",
+      "callback": "_intrigue_enabled",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_escape_chance",
+      "callback": "_npc_power",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_escape_chance",
+      "callback": "_personality_score",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_escape_chance",
+      "callback": "_owner_personality",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_owner_request_chance",
+      "callback": "_intrigue_enabled",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_owner_request_chance",
+      "callback": "_personality_score",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_owner_request_chance",
+      "callback": "_owner_personality",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_public_concubine_system",
+      "callback": "_find_npc",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_public_concubine_system",
+      "callback": "_npc_root_name",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_public_concubine_system",
+      "callback": "_rank",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_public_concubine_system",
+      "callback": "_npc_realm_name",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "concubine_system",
+      "function": "_public_concubine_system",
+      "callback": "_npc_power",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "assert_ghost_operation_allowed",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "ghost_parade_action",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "ghost_parade_action",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "ghost_parade_action",
+      "callback": "_combat",
+      "positional": 2,
+      "keywords": [
+        "lethal",
+        "rng"
+      ]
+    },
+    {
+      "module": "ghost_system",
+      "function": "ghost_soul_action",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "ghost_soul_action",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "ghost_attachment_action",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "ghost_attachment_action",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "_public_map_with_ghost_parade",
+      "callback": "_monster_travel_multiplier",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "ghost_system",
+      "function": "_public_ghost_system",
+      "callback": "_public_ghost_phase_two",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "_validate_monster_evolution",
+      "callback": "_manual_breakthrough_kind",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "_complete_monster_evolution",
+      "callback": "_complete_major_breakthrough",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "_complete_monster_evolution",
+      "callback": "_ensure_market",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "_complete_monster_evolution",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "_complete_monster_evolution",
+      "callback": "_consume_breakthrough_aids",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "_complete_monster_evolution",
+      "callback": "_start_upper_trial",
+      "positional": 2,
+      "keywords": [
+        "evolution",
+        "lineage"
+      ]
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "_complete_monster_evolution",
+      "callback": "_plan_world_transition",
+      "positional": 2,
+      "keywords": [
+        "reason"
+      ]
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "_complete_monster_evolution",
+      "callback": "_apply_world_transition",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "evolve_monster",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "evolve_monster",
+      "callback": "_validate_monster_evolution",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "evolve_monster",
+      "callback": "_complete_monster_evolution",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "prepare_custom_lineage",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "prepare_custom_lineage",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "prepare_custom_lineage",
+      "callback": "_validate_monster_evolution",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "confirm_custom_lineage",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "confirm_custom_lineage",
+      "callback": "_complete_monster_evolution",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "confirm_custom_lineage",
+      "callback": "_validate_monster_evolution",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "confirm_custom_lineage",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "monster_bloodline_system",
+      "function": "confirm_custom_lineage",
+      "callback": "_complete_monster_evolution",
+      "positional": 3,
+      "keywords": [
+        "prepared_lineage"
+      ]
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_artifact_material_definitions",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_artifact_candidate",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_bind_crafted_natal_artifact",
+      "callback": "_sync_natal_artifact_bonuses",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_unbind_crafted_natal_artifact",
+      "callback": "_sync_natal_artifact_bonuses",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_slots_for_level",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_level_scale",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_flat_combat_growth",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_refine_cost",
+      "callback": "_crafted_natal_source",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_refine_cost",
+      "callback": "_natal_flat_combat_growth",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_refine_cost",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_refine_cost",
+      "callback": "_natal_level_scale",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_level_required",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_ensure_natal_artifact",
+      "callback": "_sync_natal_artifact_bonuses",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_ensure_natal_artifact",
+      "callback": "_crafted_natal_source",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_ensure_natal_artifact",
+      "callback": "_natal_slots_for_level",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_ensure_natal_artifact",
+      "callback": "_bind_crafted_natal_artifact",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_sync_natal_artifact_bonuses",
+      "callback": "_natal_level_scale",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_sync_natal_artifact_bonuses",
+      "callback": "_natal_flat_combat_growth",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_sync_natal_artifact_bonuses",
+      "callback": "_crafted_natal_source",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_sync_natal_artifact_bonuses",
+      "callback": "_natal_artifact_material_definitions",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_artifact_combat_effects",
+      "callback": "_natal_artifact_material_definitions",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_add_natal_artifact_experience",
+      "callback": "_natal_slots_for_level",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_add_natal_artifact_experience",
+      "callback": "_sync_natal_artifact_bonuses",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_add_natal_artifact_experience",
+      "callback": "_natal_level_required",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_refine_all_plan",
+      "callback": "_natal_refine_cost",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_refine_all_plan",
+      "callback": "_natal_level_required",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_natal_refine_all_plan",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_advance_natal_artifact",
+      "callback": "_add_natal_artifact_experience",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_advance_natal_artifact",
+      "callback": "_natal_slots_for_level",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_ensure_natal_artifact",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_sync_natal_artifact_bonuses",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_bind_crafted_natal_artifact",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_natal_artifact_candidate",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_unbind_crafted_natal_artifact",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_add_natal_artifact_experience",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_natal_refine_all_plan",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_natal_refine_cost",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_natal_slots_for_level",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_natal_artifact_material_definitions",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "natal_artifact_action",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_ensure_natal_artifact",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_slots_for_level",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_artifact_material_definitions",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_crafted_natal_source",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_refine_all_plan",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_flat_combat_growth",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_level_required",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_refine_cost",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_artifact_candidate",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_artifact_config",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "natal_artifact_system",
+      "function": "_public_natal_artifact",
+      "callback": "_natal_level_scale",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "preview_puppet",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "craft_mechanical_puppet",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "craft_mechanical_puppet",
+      "callback": "_grant_art_experience",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "craft_mechanical_puppet",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "train_owned",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "train_owned",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "puppet_action",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "puppet_action",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "puppet_action",
+      "callback": "train_owned",
+      "positional": 5,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "puppet_action",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "puppet_action",
+      "callback": "_puppet_technique",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "puppet_action",
+      "callback": "_grant_art_experience",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "puppet_action",
+      "callback": "_devour_puppet",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_devour_puppet",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "refine_foreign_souls",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "refine_foreign_souls",
+      "callback": "_soul_refine_gain",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "refine_foreign_souls",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "refine_foreign_souls",
+      "callback": "_complete_soul_refinement",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_soul_refine_gain",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_secluded_refining_years",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_secluded_refining_years",
+      "callback": "_soul_refine_gain",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_complete_soul_refinement",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_public_demonic_system",
+      "callback": "_puppet_technique",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_public_demonic_system",
+      "callback": "_secluded_refining_years",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_public_demonic_system",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_public_demonic_system",
+      "callback": "_stable_gender",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_public_demonic_system",
+      "callback": "_npc_realm_name",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_puppet_intrinsic_contribution",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_living_puppet_party_powers",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_player_intrinsic_combat_power",
+      "callback": "_puppet_intrinsic_contribution",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_player_battle_power",
+      "callback": "_player_intrinsic_combat_power",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_player_battle_power",
+      "callback": "_public_party",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_player_battle_power",
+      "callback": "_living_puppet_party_powers",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_grant_demonic_kill_opportunity",
+      "callback": "_demonic_rules",
+      "positional": 0,
+      "keywords": []
+    },
+    {
+      "module": "demonic_system",
+      "function": "_grant_demonic_kill_opportunity",
+      "callback": "_add_opportunity",
+      "positional": 2,
+      "keywords": []
+    },
+    {
+      "module": "upper_institutions",
+      "function": "run_action",
+      "callback": "_load",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "upper_institutions",
+      "function": "run_action",
+      "callback": "present",
+      "positional": 1,
+      "keywords": []
+    },
+    {
+      "module": "upper_institutions",
+      "function": "run_action",
+      "callback": "advance",
+      "positional": 3,
+      "keywords": []
+    },
+    {
+      "module": "asura_court",
+      "function": "settle_action",
+      "callback": "_combat",
+      "positional": 4,
+      "keywords": []
+    },
+    {
+      "module": "asura_court",
+      "function": "settle_action",
+      "callback": "_npc_power",
+      "positional": 1,
+      "keywords": []
+    }
+  ]
+}

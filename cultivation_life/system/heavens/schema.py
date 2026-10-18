@@ -863,7 +863,12 @@ def validate_survey_reference(game, anomaly, scene, people):
     row = anomaly.get('survey')
     if row and row['person_id'] not in people:
         raise ValueError('勘察人物缺少权威引用')
-    allowed = [row['person_id']] if row and row['phase'] != 'outbound' and row['status'] in {'active', 'failed'} else []
+    # Custody owns the original person in inactive_npcs and removes their free
+    # scene membership. Keep the survey reference while its existing clock
+    # pauses; a released person must rejoin the scene through release_person.
+    allowed = [row['person_id']] if (row and row['phase'] != 'outbound'
+        and row['status'] in {'active', 'failed'}
+        and row['person_id'] not in game.inactive_npcs) else []
     if type(scene.get('npc_ids')) is not list or scene['npc_ids'] != allowed:
         raise ValueError('异象空间含无来源或重复人物')
     if row and sum(row['person_id'] in s.get('npc_ids', []) for s in game.spatial_state.get('instances', {}).values()) != len(allowed):

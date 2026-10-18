@@ -9,9 +9,13 @@ from ..npc_custody import sync_offspring
 
 import copy
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Protocol
+from ..models import GameState, SectNpc
 
 from .world_transition_schema import (
+    WorldTransitionRequest as WorldTransitionRequest,
+    WorldTransitionPlan as WorldTransitionPlan,
+    WorldTransitionResult as WorldTransitionResult,
     TransitionDirection as TransitionDirection,
     TransitionMode as TransitionMode,
     classify_transition as classify_transition,
@@ -19,50 +23,25 @@ from .world_transition_schema import (
 )
 
 
-@dataclass(frozen=True, slots=True)
-class WorldTransitionRequest:
-    destination: str
-    mode: TransitionMode
-    route_id: str
-    reason: str = ""
-    arrival_location: str | None = None
-    instance_id: str | None = None
 
 
-@dataclass(frozen=True, slots=True)
-class WorldTransitionPlan:
-    source: str
-    destination: str
-    direction: TransitionDirection
-    mode: TransitionMode
-    route_id: str
-    reason: str
-    arrival_location: str
-    source_rank: tuple[int, int]
-    target_rank: tuple[int, int]
-    seal_action: str
-    seal_snapshot: dict | None
-    source_location: str | None = None
-    source_instance: str | None = None
-    destination_instance: str | None = None
 
 
-@dataclass(frozen=True, slots=True)
-class WorldTransitionResult:
-    source: str
-    destination: str
-    direction: TransitionDirection
-    mode: TransitionMode
-    route_id: str
-    suppressed: bool
+
+
+class PermanentDeparturePort(Protocol):
+    def __call__(
+        self, game: GameState, *, keep_companion: bool = False,
+        keep_friend_ids: set[str] | None = None,
+    ) -> None: ...
 
 
 @dataclass(frozen=True, slots=True)
 class WorldTransitionPorts:
-    cancel_auction: Callable
-    clear_market: Callable
-    permanent_departure: Callable
-    move_npc: Callable | None = None
+    cancel_auction: Callable[[GameState], None]
+    clear_market: Callable[[GameState], None]
+    permanent_departure: PermanentDeparturePort
+    move_npc: Callable[[SectNpc, str, int], None] | None = None
 
 
 def cultivation_ceiling(systems, world, *, passage=False):

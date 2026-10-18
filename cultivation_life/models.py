@@ -733,6 +733,16 @@ class Player:
             "plots": list(saved_field.get("plots", [])),
             "sequence": max(0, int(saved_field.get("sequence", 0))),
         }
+        if 'owner' in saved_field:
+            owner = saved_field['owner']
+            if (not isinstance(owner, dict) or not isinstance(owner.get('world'), str)
+                    or not owner['world'] or not isinstance(owner.get('location_id'), str)
+                    or not owner['location_id']
+                    or (owner.get('instance_id') is not None and not isinstance(owner['instance_id'], str))
+                    or (owner['world'] in {'lost', 'rift'} and not owner.get('instance_id'))):
+                raise ValueError('灵田的地理归属损坏，保留原存档')
+            data['spirit_field']['owner'] = dict(owner)
+            data['spirit_field']['settled_year'] = int(saved_field['settled_year'])
         data.setdefault("lineage_race", data.get("race", "human"))
         data.setdefault("allegiance_race", data.get("race", "human"))
         data["monster_evolution_history"] = list(dict.fromkeys(map(str, data.get("monster_evolution_history", []))))

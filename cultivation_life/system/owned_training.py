@@ -43,7 +43,9 @@ def quote(player, target, axis, batches=1):
     row = facts(target)
     before = status(row, axis)
     cost, mp, rounds, gain = 0.0, 0.0, 0, 0
-    for _ in range(batches):
+    from ..puppet_state import usable
+    available = usable(target)
+    for _ in range(batches if available else 0):
         realm = max(0, min(12, int(row.get('realm_index', 0))))
         delta = 0
         if axis == 'cultivation':
@@ -92,9 +94,16 @@ def quote(player, target, axis, batches=1):
         cost += max(1.0, REALMS[realm].opportunity_base * .015) * (1 - min(.35, max(0., float(target.get('breakthrough_bonus', 0)))))
         mp += max(1.0, max_mp(player) * .02)
         row['combat_power'] = round(max(1.0, float(row.get('combat_power', 1))) * factor, 1)
+        if 'technique_power_base' in row:
+            from ..content_registry import TECHNIQUE_CATALOG
+            row['technique_power_base'] *= factor
+            row['technique_power_scale'] *= factor
+            technique = TECHNIQUE_CATALOG.get(row.get('main_technique_id'))
+            row['combat_power'] = round(row['technique_power_base'] +
+                (technique.combat_bonus * .10 if technique else 0.0) * row['technique_power_scale'], 1)
         rounds += 1
         gain += delta
-    reason = '' if rounds else '已达玩家对应能力的培养上限'
+    reason = '' if rounds else ('已达玩家对应能力的培养上限' if available else '该躯体已经毁坏或陨落')
     if rounds and (player.opportunity < round(cost, 2) or player.mp < round(mp, 2)):
         reason = '机缘或法力不足，可减少投入轮数'
     if rounds:

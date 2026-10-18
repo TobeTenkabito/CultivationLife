@@ -12,6 +12,7 @@ from ...ports import MapPort, SavePort
 class GhostIdentityDependencies:
     _advance_soul_erosion_time: Callable[..., Any]
     _advance_world_year: Callable[..., Any]
+    _ensure_market: Callable[..., Any]
     _die: Callable[..., Any]
     _find_npc: Callable[..., Any]
     _load: Callable[[str], GameState]

@@ -1605,7 +1605,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     if(auditCase.equals("return")) {
                         tapSelector("#cross-world-action");waitForJs("!busy && game.player.world==='human'","Native suppressed descent");
                         tapSelector("[data-panel-target=secret-art]");
-                        check(Boolean.TRUE.equals(js("document.querySelector('#secret-suppress-cancel').disabled")),"Cannot cancel before returning");
+                        tapSelector("#secret-art-library [data-secret-art=suppress]");
+                        check(Boolean.TRUE.equals(js("document.querySelector('#secret-suppress-cancel').getClientRects().length>0 && document.querySelector('#secret-suppress-cancel').disabled")),"Cannot cancel before returning");
                         tapSelector("#secret-art-toggle");tapSelector("#cross-world-action");
                         waitForJs("!busy && game.player.world==='spirit'","Native original return");
                         tapSelector("[data-panel-target=secret-art]");tapSelector("#secret-suppress-cancel");

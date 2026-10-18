@@ -23,7 +23,7 @@ def regional(tmp_path):
     game.settings.update(silent_events=True, guixu_event_popup=False)
     game.pending_event = None
     game.player.lifespan = 10000
-    regions.ensure(engine, game)
+    regions.ensure(engine._dependencies.regions, game)
     return engine, game
 
 
@@ -41,7 +41,7 @@ def projection(game, world):
 
 def test_frozen_replay_matches_each_real_year_and_is_idempotent(regional):
     engine, original = regional
-    regions.synchronize(engine, original, regions.worlds())
+    regions.synchronize(engine._dependencies.regions, original, regions.worlds())
     # Independent-society equivalence: cross-world transactions have their
     # own deferred-credit contract and are checked separately.
     for route in original.economy_v2['network']['routes'].values():
@@ -51,17 +51,17 @@ def test_frozen_replay_matches_each_real_year_and_is_idempotent(regional):
     for _ in range(25):
         live.player.age += 1
         lazy.player.age += 1
-        regions.synchronize(engine, live, regions.worlds())
-        regions.advance(engine, lazy, [])
+        regions.synchronize(engine._dependencies.regions, live, regions.worlds())
+        regions.advance(engine._dependencies.regions, lazy, [])
     assert projection(lazy, 'celestial') == untouched
-    regions.synchronize(engine, lazy, regions.worlds())
+    regions.synchronize(engine._dependencies.regions, lazy, regions.worlds())
     for world in regions.worlds():
         assert projection(lazy, world) == projection(live, world), world
     before = copy.deepcopy(lazy.to_dict())
-    regions.synchronize(engine, lazy, regions.worlds())
+    regions.synchronize(engine._dependencies.regions, lazy, regions.worlds())
     assert lazy.to_dict() == before
     restored = GameState.from_dict(before)
-    regions.synchronize(engine, restored, regions.worlds())
+    regions.synchronize(engine._dependencies.regions, restored, regions.worlds())
     assert restored.to_dict() == before
 
 
@@ -73,10 +73,10 @@ def test_unvisited_sect_earns_real_income_recruits_and_can_die(regional):
     victim.lifespan = victim.age + 1
     for _ in range(20):
         game.player.age += 1
-        regions.advance(engine, game, [])
+        regions.advance(engine._dependencies.regions, game, [])
     assert 'organization:sect:taixuan' not in game.economy_v2['organizations']
     assert victim.alive  # All three clocks are frozen together until needed.
-    regions.synchronize(engine, game, ['spirit'])
+    regions.synchronize(engine._dependencies.regions, game, ['spirit'])
     row = game.economy_v2['organizations']['organization:sect:taixuan']
     assert row['last_year'] > game.world_simulation['base_year']
     assert row['produced'] > 0 and balance(game, 'organization:sect:taixuan') > 0
@@ -99,7 +99,7 @@ def test_views_keep_original_authorities_and_do_not_copy_game_per_year(regional)
     with patch('copy.deepcopy', checked):
         for _ in range(3):
             game.player.age += 1
-            regions.advance(engine, game, [])
+            regions.advance(engine._dependencies.regions, game, [])
 
 
 def test_copy_on_write_scheduler_binds_the_actual_working_state(regional):
@@ -143,12 +143,12 @@ def test_invalid_regional_receipts_rejected(regional, damage):
 def test_new_task_catches_up_target_before_mutating(regional):
     engine, game = regional
     game.player.age += 5
-    regions.advance(engine, game, [])
+    regions.advance(engine._dependencies.regions, game, [])
     assert game.world_simulation['regions']['celestial']['year'] < game.player.age
     synchronize(game, ['celestial'], entering=True)
     assert game.world_simulation['regions']['celestial']['year'] == game.player.age
     assert all(game.world_simulation['regions'][w]['year'] == game.player.age
-               for w in regions.closure(engine, game, ['celestial']))
+               for w in regions.closure(['celestial']))
 
 
 def test_ascension_dependency_ages_original_npc_once(regional):
@@ -160,11 +160,11 @@ def test_ascension_dependency_ages_original_npc_once(regional):
     age = npc.age
     with patch.object(engine, '_npc_breakthrough_probability', return_value=1):
         game.player.age += 1
-        regions.advance(engine, game, [])
+        regions.advance(engine._dependencies.regions, game, [])
     assert npc.world == 'spirit' and npc.age == age + 1
     game.player.age += 1
-    regions.advance(engine, game, [])
-    regions.synchronize(engine, game, ['spirit'])
+    regions.advance(engine._dependencies.regions, game, [])
+    regions.synchronize(engine._dependencies.regions, game, ['spirit'])
     assert npc.age == age + 2
 
 
@@ -198,8 +198,8 @@ def test_closed_routes_and_unused_alliance_metadata_do_not_bind_regions(regional
     engine, game = regional
     for route in game.economy_v2['network']['routes'].values():
         route['open'] = False
-    assert regions.closure(engine, game, ['spirit']) == ['spirit']
-    assert regions.closure(engine, game, ['celestial']) == ['celestial']
+    assert regions.closure(['spirit']) == ['spirit']
+    assert regions.closure(['celestial']) == ['celestial']
 
 
 def test_existing_cross_freight_keeps_running_when_player_is_elsewhere(regional):
@@ -220,10 +220,10 @@ def test_remote_native_does_not_ascend_until_origin_is_entered(regional):
     npc.lifespan = None
     start = npc.age
     game.player.age += 1
-    regions.advance(engine, game, [])
+    regions.advance(engine._dependencies.regions, game, [])
     assert npc.world == 'human' and npc.age == start
     with patch.object(engine, '_npc_breakthrough_probability', return_value=1):
-        regions.synchronize(engine, game, ['human'])
+        regions.synchronize(engine._dependencies.regions, game, ['human'])
     assert npc.world == 'spirit' and npc.age == start+1
 
 
@@ -231,7 +231,7 @@ def test_remote_native_does_not_ascend_until_origin_is_entered(regional):
 def test_closed_passage_does_not_wake_or_charge_destination(regional):
     from cultivation_life.system.economy import cross_freight
     engine, game = regional
-    regions.initialize_region(engine,game,'spirit')
+    regions.initialize_region(engine._dependencies.regions,game,'spirit')
     fleet=next(f for f in game.economy_v2['transport']['worlds']['spirit']['fleets'].values()
                if f['alliance_id']=='xuanji')
     for route in game.economy_v2['network']['routes'].values():route['open']=False
@@ -247,7 +247,7 @@ def test_closed_passage_does_not_wake_or_charge_destination(regional):
 def test_historical_unissued_trade_cannot_write_future_market(regional):
     from cultivation_life.system.economy import cross_freight
     engine,game=regional
-    regions.initialize_region(engine,game,'spirit')
+    regions.initialize_region(engine._dependencies.regions,game,'spirit')
     fleet=next(f for f in game.economy_v2['transport']['worlds']['spirit']['fleets'].values()
                if f['alliance_id']=='xuanji')
     old=game.player.age

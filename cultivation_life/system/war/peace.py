@@ -190,22 +190,20 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
             if ratio < float(deps._war_rules().get("annex_power_ratio", 2.5)):
                 raise ValueError("双方战力差距尚不足以执行合并")
             if winner_sect:
+                from ...npc_custody import transfer_free_person
                 for npc in deps._sect_members(game, loser_sect):
                     if npc.alive and not can_enter_faction(winner_sect, npc):
-                        npc.faction_id = None
-                        game.notable_npcs.setdefault(npc.id, npc)
+                        transfer_free_person(game, npc)
                     elif npc.alive:
-                        npc.faction_id = winner_id
-                        if all(existing.id != npc.id for existing in winner_sect.npcs):
-                            winner_sect.npcs.append(npc)
+                        transfer_free_person(game, npc, winner_sect)
             detail = f"{loser_name}并入{winner_name}"
         else:
             if ratio < float(deps._war_rules().get("dissolve_power_ratio", 1.35)):
                 raise ValueError("胜方总战力尚不足以强制解散对方势力")
+            from ...npc_custody import transfer_free_person
             for npc in deps._sect_members(game, loser_sect):
                 if npc.alive:
-                    npc.faction_id = None
-                    game.notable_npcs.setdefault(npc.id, npc)
+                    transfer_free_person(game, npc)
             detail = f"{loser_name}就地解散"
         from ..economy.war_assets import transfer
         detail += '；' + transfer(game, deps.maps, war, winner_id, loser_id)

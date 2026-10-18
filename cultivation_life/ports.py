@@ -7,10 +7,16 @@ from typing import Any, Protocol
 from .models import GameState
 
 
-class SavePort(Protocol):
+class LoadPort(Protocol):
     def load(self, game_id: str) -> GameState: ...
 
+
+class CommitPort(Protocol):
     def save(self, game: GameState) -> None: ...
+
+
+class SavePort(LoadPort, CommitPort, Protocol):
+    """Compatibility interface for existing command adapters needing both."""
 
 
 class MapPort(Protocol):

@@ -250,12 +250,31 @@ def violations(edges):
             or source == 'cultivation_life.npc_custody'
             and target.startswith('cultivation_life.')
             and target not in {'cultivation_life.relationship_schema', 'cultivation_life.relationship_records'})
+        # Projection sees only detached display values; regional algorithms and
+        # their contracts cannot regain the engine or its composition services.
+        lifecycle_reverse_import = (
+            source in {'cultivation_life.engine.presentation.projection', 'cultivation_life.regional_ports'}
+            and target.startswith('cultivation_life.')
+            or source == 'cultivation_life.engine.world.regions'
+            and (target in {'cultivation_life.engine', 'cultivation_life.engine.dependencies',
+                            'cultivation_life.storage', 'cultivation_life.server'}
+                 or target.startswith('cultivation_life.engine.composition.'))
+            or source == 'cultivation_life.regional_dependencies'
+            and target.startswith('cultivation_life.')
+            and target not in {'cultivation_life.models', 'cultivation_life.ports',
+                               'cultivation_life.regional_context'})
+        character_reverse_import = (
+            source == 'cultivation_life.system.character.dependencies'
+            and target.startswith('cultivation_life.')
+            and target not in {'cultivation_life.models', 'cultivation_life.ports',
+                               'cultivation_life.system.world_transition_schema'})
         if (system_to_engine or domain_to_facade or domain_to_wiring
                 or shared_definition_cycle or shared_to_consumer or battle_reverse_import
                 or core_reverse_import or court_reverse_import or schema_to_runtime or preparation_to_storage
                 or heavens_reverse_import
                 or three_group_reverse_import or key_flow_reverse_import or time_flow_reverse_import
-                or relationship_storage_reverse_import or debug_reverse_import or debug_bridge_import):
+                or relationship_storage_reverse_import or debug_reverse_import or debug_bridge_import
+                or lifecycle_reverse_import or character_reverse_import):
             invalid.append({'source': source, 'target': target, 'line': line})
     return invalid
 
@@ -263,7 +282,59 @@ def violations(edges):
 def report(root):
     modules, edges = import_edges(root)
     return {'modules': len(modules), 'edges': len(edges), 'cycles': cycles(modules, edges),
-            'violations': violations(edges)}
+            'violations': violations(edges) + character_contract_violations(root)}
+
+
+def character_contract_violations(root):
+    """Keep migrated character algorithms independent of implicit engine state."""
+    invalid = []
+    entry = root / 'cultivation_life/engine/__init__.py'
+    if entry.is_file():
+        for node in ast.parse(entry.read_text(encoding='utf-8-sig')).body:
+            if isinstance(node, ast.ClassDef) and node.name == 'GameEngine' and node.bases:
+                invalid.append(dict(source='cultivation_life.engine', target='implicit-character-inheritance', line=node.lineno))
+    contract_file = root / 'cultivation_life/system/character/dependencies.py'
+    if not contract_file.is_file():
+        return invalid
+    contracts = {}
+    for node in ast.parse(contract_file.read_text(encoding='utf-8-sig')).body:
+        if isinstance(node, ast.ClassDef):
+            contracts[node.name] = {
+                child.target.id for child in node.body
+                if isinstance(child, ast.AnnAssign) and isinstance(child.target, ast.Name)} | {
+                child.name for child in node.body if isinstance(child, ast.FunctionDef)
+                and any(isinstance(d, ast.Name) and d.id == 'property' for d in child.decorator_list)}
+    for name in ('buddhist_system', 'family_system', 'sage_system', 'concubine_system',
+                 'ghost_system', 'monster_bloodline_system', 'natal_artifact_system',
+                 'demonic_system', 'upper_institutions', 'asura_court'):
+        path = root / 'cultivation_life/system' / (name + '.py')
+        if not path.is_file():
+            continue
+        module = 'cultivation_life.system.' + name
+        for function in ast.parse(path.read_text(encoding='utf-8-sig')).body:
+            if not isinstance(function, ast.FunctionDef) or not function.args.args:
+                continue
+            receiver = function.args.args[0]
+            # The two original module entry points are intentionally thin adapters.
+            if receiver.arg in {'self', 'cls', 'engine', 'host'}:
+                compatibility = (function.name == 'act' and name in {'upper_institutions', 'asura_court'}
+                    and len(function.body) == 2 and isinstance(function.body[0], ast.ImportFrom)
+                    and isinstance(function.body[1], ast.Return))
+                if not compatibility:
+                    invalid.append(dict(source=module, target='implicit-character-receiver', line=function.lineno))
+            if receiver.arg != 'deps':
+                continue
+            annotation = receiver.annotation
+            declared = contracts.get(annotation.id if isinstance(annotation, ast.Name) else '', set())
+            for node in ast.walk(function):
+                if (isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name)
+                        and node.value.id == 'deps' and node.attr not in declared):
+                    invalid.append(dict(source=module, target='undeclared-character-capability:' + node.attr, line=node.lineno))
+                if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                        and node.func.id in {'getattr', 'setattr', 'vars'}
+                        and any(isinstance(arg, ast.Name) and arg.id == 'deps' for arg in node.args)):
+                    invalid.append(dict(source=module, target='dynamic-character-capability', line=node.lineno))
+    return invalid
 
 
 def main():

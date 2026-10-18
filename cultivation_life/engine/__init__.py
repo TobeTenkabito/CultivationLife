@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ..system import realm_ascension  # register base-world route defaults first
-from ..system.buddhist_system import BuddhistSystemMixin
+from ..system import buddhist_system as character_buddhist
 from ..system.path_modifiers import modifier
 
 import random
@@ -10,23 +10,26 @@ from typing import Any
 from ..content_registry import WORLD_SYSTEMS, STORY_COMBAT_SCENARIOS, CONTENT_DOCUMENTS, ContentError
 from ..system.combat_system import BattleUnit
 from ..event_repository import EventRepository
-from ..system.demonic_system import DemonicSystemMixin
+from ..system import demonic_system as character_demonic
 from ..models import GameState, HistoryRecord, Item, Player, SectNpc, SectState
 from ..system.map_system import MapCatalog
 from ..storage import SaveStore
 from ..achievements import AchievementSystem, load_achievement_definitions
 from ..runtime import decode_rng, encode_rng, now_iso
-from ..system.upper_institutions import UpperInstitutionMixin
-from ..system.natal_artifact_system import NatalArtifactSystemMixin
-from ..system.monster_bloodline_system import MonsterBloodlineSystemMixin, bloodline_content_available
-from ..system.ghost_system import GhostSystemMixin
-from ..system.sage_system import SageSystemMixin
-from ..system.concubine_system import ConcubineSystemMixin
-from ..system.family_system import FamilySystemMixin
+from ..system import upper_institutions as institution_runtime
+from ..system import natal_artifact_system as character_natal
+from ..system import monster_bloodline_system as character_monster
+from ..system.monster_bloodline_system import bloodline_content_available
+from ..system import ghost_system as character_ghost
+from ..system import sage_system as character_sage
+from ..system import concubine_system as character_concubine
+from ..system import family_system as character_family
 from . import engine_world_runtime as world_runtime
 from . import engine_event_runtime as event_runtime
 from . import engine_combat_runtime as combat_runtime
 from . import engine_presentation as presentation_runtime
+from .orchestration import response as response_flow
+from .presentation import projection as view_projection
 from . import engine_persistence as persistence_runtime
 from .orchestration import session as session
 from .orchestration import advancement as advancement
@@ -156,8 +159,16 @@ from ..system.buddhist import actions as buddhist_actions
 from ..system.buddhist import assembly as buddhist_assembly
 
 
+
+
+
+
+
+
+
+
 @serialized_commands
-class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, SageSystemMixin, ConcubineSystemMixin, GhostSystemMixin, MonsterBloodlineSystemMixin, NatalArtifactSystemMixin, DemonicSystemMixin):
+class GameEngine:
     def __init__(self, project_root: Path, save_directory: Path | None = None):
         self.root = project_root
         self.store = SaveStore(save_directory or project_root / "data" / "saves")
@@ -412,8 +423,8 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     def aperture_action(self, game_id, action, manual_id=None):
         return immortal_aperture.aperture_action(self._dependencies.cultivation.aperture, game_id, action, manual_id)
 
-    def _finish_travel_time(self, game, start_age, institution_world, institution_unit, era_news, rng):
-        return world_time._finish_travel_time(self._dependencies.time.elapsed_travel, game, start_age, institution_world, institution_unit, era_news, rng)
+    def _finish_travel_time(self, game, start_age, institution_world, institution_unit, era_news, rng, *, action_units=None):
+        return world_time._finish_travel_time(self._dependencies.time.elapsed_travel, game, start_age, institution_world, institution_unit, era_news, rng, action_units=action_units)
 
     @staticmethod
     def _post_battle_possession_candidates(game: GameState) -> list[dict[str, Any]]:
@@ -570,7 +581,7 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
 
     def _apply_world_transition(self, game, plan, *, entourage=None):
         from .world.regions import attach
-        attach(self, game)
+        attach(self._dependencies.regions, game)
         from ..system.world_transition_system import WorldTransitionPorts, apply_world_transition
         from ..system.combat.npc_lifecycle import move_world
         ports = WorldTransitionPorts(self._cancel_auction_for_world_change, self._clear_market,
@@ -771,28 +782,17 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
         return combat_runtime._diff(before, after)
 
     def present(self, game: GameState) -> dict[str, Any]:
-        from .actions.exploration import reconcile_boundary
-        from ..system import spatial, talismans
-        if reconcile_boundary(self._exploration_dependencies(), game):
-            self.store.save(game)
-        result = presentation_runtime.present(self._dependencies.presentation_runtime, game)
-        result["buddhist_system"] = self._public_buddhist(game)
-        result['spatial'] = spatial.public(game)
-        result['talismans'] = talismans.public(game)
-        result['heavens'] = heavens_operations.project(game, 'known', deps=self._dependencies.heavens)
-        from ..system.monster_civilizations.core import marker
-        result['monster_civilizations'] = marker(game)
-        spatial_limit = spatial.cultivation_block_reason(game)
-        if spatial_limit:
-            result['breakthrough'].update(ready=False, enabled=False, met=False, reason=spatial_limit)
-        if spatial.current(game):
-            scene = spatial.current(game)
-            result['player']['world_name'] = scene['name']
-            result['player']['location_name'] = next(r['name'] for r in scene['locations'] if r['id']==scene['location_id'])
-            result['player']['qi_gain_efficiencies'] = spatial.current_qi(game)
-            result['map'] = spatial.public_map(game)
-            result['market'] = []
-        return result
+        return self.project_game(self.prepare_response(game))
+
+    def prepare_response(self, game: GameState) -> view_projection.PreparedGameView:
+        return response_flow.prepare_response(self._dependencies.response, game)
+
+    @staticmethod
+    def project_game(prepared: view_projection.PreparedGameView) -> dict[str, Any]:
+        return view_projection.project_game(prepared)
+
+    def _public_heavens(self, game: GameState) -> dict[str, Any]:
+        return heavens_operations.project(game, 'known', deps=self._dependencies.heavens)
 
     @staticmethod
     def _history_visible_in_world(record: HistoryRecord, game: GameState) -> bool:
@@ -810,7 +810,7 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
             return games[game_id]
         game = persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
         from .world.regions import attach
-        attach(self, game)
+        attach(self._dependencies.regions, game)
         if active_command():
             guard(game, active_command())
             trial_guard(game, active_command())
@@ -909,12 +909,23 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
 
     def _exploration_dependencies(self):
         from .actions.exploration import ExplorationDependencies
-        return ExplorationDependencies(self._load, self.store.save, self.present, self.maps,
-            self._plan_world_transition, self._apply_world_transition, self._ensure_market,
-            self._die, self._advance_world_year,
-            self._body_training_step, self._body_progress_required, self._sense_training_step, self._advance_soul_erosion_time,
-            self._prepare_sage_action, self._finish_sage_action, self._advance_natal_artifact,
-            self._select_event, self._instantiate_event)
+        return ExplorationDependencies(
+            maps=self.maps, plan=self._plan_world_transition, apply=self._apply_world_transition,
+            refresh_market=self._ensure_market, load=self._load, save=self.store.save, present=self.present,
+            die=self._die, _advance_world_year=self._advance_world_year,
+            body_step=self._body_training_step, body_required=self._body_progress_required,
+            sense_step=self._sense_training_step, _advance_soul_erosion_time=self._advance_soul_erosion_time,
+            prepare_sage=self._prepare_sage_action, finish_sage=self._finish_sage_action,
+            advance_natal=self._advance_natal_artifact, select_event=self._select_event,
+            instantiate_event=self._instantiate_event,
+        )
+
+    def _world_move_dependencies(self):
+        from .actions.exploration import WorldMoveDependencies
+        return WorldMoveDependencies(
+            maps=self.maps, plan=self._plan_world_transition, apply=self._apply_world_transition,
+            refresh_market=self._ensure_market,
+        )
 
     def spatial_action(self, game_id, action, payload=None):
         from .actions.exploration import spatial_action
@@ -3276,3 +3287,384 @@ class GameEngine(UpperInstitutionMixin, BuddhistSystemMixin, FamilySystemMixin, 
     @property
     def _war_dependencies(self):
         return self._dependencies.war
+
+    def _ensure_buddhist_state(self, game):
+        return character_buddhist._ensure_buddhist_state(game)
+
+    def _advance_buddhist_society_year(self, game):
+        return character_buddhist._advance_buddhist_society_year(game)
+
+    def _advance_buddhist_year(self, game):
+        return character_buddhist._advance_buddhist_year(self._dependencies.character.buddhist_state, game)
+
+    def _buddhist_permissions(self, game):
+        return character_buddhist._buddhist_permissions(game)
+
+    def _buddhist_burden(self, game):
+        return character_buddhist._buddhist_burden(game)
+
+    def _public_buddhist(self, game):
+        return character_buddhist._public_buddhist(self._dependencies.character.buddhist_state, game)
+
+    def assert_buddhist_operation_allowed(self, game_id, operation):
+        return character_buddhist.assert_buddhist_operation_allowed(self._dependencies.character.buddhist_guard, game_id, operation)
+
+    def _buddhist_record(self, game, text):
+        return character_buddhist._buddhist_record(game, text)
+
+    @staticmethod
+    def _family_equipment(player, item):
+        return character_family._family_equipment(player, item)
+
+    @staticmethod
+    def _family_world_tier(world):
+        return character_family._family_world_tier(world)
+
+    @staticmethod
+    def _family_child_npc(child):
+        return character_family._family_child_npc(child)
+
+    def _family_register_children(self, game):
+        return character_family._family_register_children(self._dependencies.character.family_society, game)
+
+    def _family_is_kin(self, game, npc):
+        return character_family._family_is_kin(game, npc)
+
+    def _family_relation(self, game, other):
+        return character_family._family_relation(game, other)
+
+    def _family_total_power(self, game, family):
+        return character_family._family_total_power(self._dependencies.character.family_society, game, family)
+
+    def _family_elites(self, game, entity):
+        return character_family._family_elites(self._dependencies.character.family_society, game, entity)
+
+    def _family_infusion(self, game, npc):
+        return character_family._family_infusion(self._dependencies.character.family_society, game, npc)
+
+    def _family_decision_member(self, game, npc, sect):
+        return character_family._family_decision_member(self._dependencies.character.family_society, game, npc, sect)
+
+    def _family_assign_office(self, game, npc, sect):
+        return character_family._family_assign_office(self._dependencies.character.family_society, game, npc, sect)
+
+    def _family_log(self, game, action, text, changes=None):
+        return character_family._family_log(game, action, text, changes)
+
+    def family_action(self, game_id, action, payload):
+        return character_family.family_action(self._dependencies.character.family_actions, game_id, action, payload)
+
+    def _family_annual_governance(self, game, rng):
+        return character_family._family_annual_governance(self._dependencies.character.family_society, game, rng)
+
+    def _family_dissolve(self, game, reason, absorber=None):
+        return character_family._family_dissolve(self._dependencies.character.family_actions, game, reason, absorber)
+
+    def _family_presentation(self, game, result):
+        return character_family._family_presentation(self._dependencies.character.family_view, game, result)
+
+    @staticmethod
+    def _sage_scaled_gain(player, amount: float, reduction_key: str) -> float:
+        return character_sage._sage_scaled_gain(player, amount, reduction_key)
+
+    @staticmethod
+    def _sage_affinity_gain(player, amount: float) -> float:
+        return character_sage._sage_affinity_gain(player, amount)
+
+    @staticmethod
+    def _normalize_sage_member(member: dict[str, Any]) -> None:
+        return character_sage._normalize_sage_member(member)
+
+    def _normalize_sage_doctrine(self, doctrine: dict[str, Any], age: int, cfg: dict[str, Any]) -> None:
+        return character_sage._normalize_sage_doctrine(self._dependencies.character.sage_society, doctrine, age, cfg)
+
+    def _ensure_sage_state(self, game: GameState) -> bool:
+        return character_sage._ensure_sage_state(self._dependencies.character.sage_society, game)
+
+    def _sage_world(self, game: GameState, world: str | None=None) -> dict[str, Any] | None:
+        return character_sage._sage_world(self._dependencies.character.sage_society, game, world)
+
+    def _player_doctrine(self, game: GameState, world: str | None=None) -> dict[str, Any] | None:
+        return character_sage._player_doctrine(self._dependencies.character.sage_society, game, world)
+
+    @staticmethod
+    def _rank_members(doctrine: dict[str, Any]) -> list[dict[str, Any]]:
+        return character_sage._rank_members(doctrine)
+
+    def _refresh_sage_effects(self, game: GameState) -> None:
+        return character_sage._refresh_sage_effects(self._dependencies.character.sage_society, game)
+
+    def _prepare_sage_action(self, game: GameState, action: str) -> None:
+        return character_sage._prepare_sage_action(self._dependencies.character.sage_society, game, action)
+
+    def _finish_sage_action(self, game: GameState) -> None:
+        return character_sage._finish_sage_action(self._dependencies.character.sage_society, game)
+
+    def _advance_sage_society_year(self, game: GameState, rng: random.Random) -> None:
+        return character_sage._advance_sage_society_year(game, rng)
+
+    def _advance_sage_year(self, game: GameState, rng: random.Random) -> list[str]:
+        return character_sage._advance_sage_year(self._dependencies.character.sage_society, game, rng)
+
+    def sage_doctrine_action(self, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return character_sage.sage_doctrine_action(self._dependencies.character.sage_actions, game_id, action, payload)
+
+    def sage_toggle_recruitment(self, game_id: str, enabled: bool) -> dict[str, Any]:
+        return character_sage.sage_toggle_recruitment(self._dependencies.character.sage_actions, game_id, enabled)
+
+    def sage_choose_sage(self, game_id: str, sage_id: str) -> dict[str, Any]:
+        return character_sage.sage_choose_sage(self._dependencies.character.sage_actions, game_id, sage_id)
+
+    def sage_debate(self, game_id: str, doctrine_id: str, member_id: str) -> dict[str, Any]:
+        return character_sage.sage_debate(self._dependencies.character.sage_actions, game_id, doctrine_id, member_id)
+
+    @staticmethod
+    def _haoran_manual_gain(origin_realm: int, previous: int, level: int) -> float:
+        return character_sage._haoran_manual_gain(origin_realm, previous, level)
+
+    def sage_refine_manual(self, game_id: str, item_id: str) -> dict[str, Any]:
+        return character_sage.sage_refine_manual(self._dependencies.character.sage_actions, game_id, item_id)
+
+    @staticmethod
+    def _outer_target(player) -> tuple[int, int] | None:
+        return character_sage._outer_target(player)
+
+    def _outer_advance_block_reason(self, game: GameState) -> str:
+        return character_sage._outer_advance_block_reason(self._dependencies.character.sage_actions, game)
+
+    @staticmethod
+    def _outer_cost(action: str, player) -> int:
+        return character_sage._outer_cost(action, player, target_for=character_sage.SageSystemMixin._outer_target)
+
+    def sage_outer_king(self, game_id: str, action: str) -> dict[str, Any]:
+        return character_sage.sage_outer_king(self._dependencies.character.sage_actions, game_id, action)
+
+    def _public_inner_outer(self, game: GameState) -> dict[str, Any]:
+        return character_sage._public_inner_outer(self._dependencies.character.sage_view, game)
+
+    def _public_sage_system(self, game: GameState) -> dict[str, Any]:
+        return character_sage._public_sage_system(self._dependencies.character.sage_view, game)
+
+    def _relation_by_id(self, player: Player, target_id: str) -> dict[str, Any] | None:
+        return character_concubine._relation_by_id(player, target_id)
+
+    def _retaliatory_relationship_ids(self, game: GameState) -> set[str]:
+        return character_concubine._retaliatory_relationship_ids(game)
+
+    def _relationship_sanction_candidates(self, game: GameState) -> list[dict[str, Any]]:
+        return character_concubine._relationship_sanction_candidates(self._dependencies.character.concubine_queries, game)
+
+    def _relationship_protectors(self, game: GameState, enemy: SectNpc) -> list[dict[str, Any]]:
+        return character_concubine._relationship_protectors(self._dependencies.character.concubine_queries, game, enemy)
+
+    def _filter_personal_revenge_by_protection(self, game: GameState, enemies: list[SectNpc], rng: random.Random) -> list[SectNpc]:
+        return character_concubine._filter_personal_revenge_by_protection(self._dependencies.character.concubine_queries, game, enemies, rng)
+
+    def _concubine_target(self, game: GameState, target_id: str) -> tuple[dict[str, Any] | None, str]:
+        return character_concubine._concubine_target(self._dependencies.character.concubine_queries, game, target_id)
+
+    def _normalize_concubine(self, target: dict[str, Any], source: str) -> dict[str, Any]:
+        return character_concubine._normalize_concubine(self._dependencies.character.concubine_queries, target, source)
+
+    @staticmethod
+    def _personality_score(personality: dict[str, Any], scores: dict[str, float], default: float=0.0) -> float:
+        return character_concubine._personality_score(personality, scores, default)
+
+    def _owner_personality(self, game: GameState, owner: SectNpc) -> dict[str, Any]:
+        return character_concubine._owner_personality(self._dependencies.character.concubine_queries, game, owner)
+
+    def _proposal_revenge_chance(self, game: GameState, owner: SectNpc) -> float:
+        return character_concubine._proposal_revenge_chance(self._dependencies.character.concubine_queries, game, owner)
+
+    def _escape_chance(self, game: GameState, owner: SectNpc, status: dict[str, Any], method: str) -> float:
+        return character_concubine._escape_chance(self._dependencies.character.concubine_queries, game, owner, status, method)
+
+    def _owner_request_chance(self, game: GameState, owner: SectNpc, status: dict[str, Any], kind: str) -> float:
+        return character_concubine._owner_request_chance(self._dependencies.character.concubine_queries, game, owner, status, kind)
+
+    def _owner_technique_candidates(self, player: Player, owner: SectNpc) -> list[str]:
+        return character_concubine._owner_technique_candidates(player, owner)
+
+    @staticmethod
+    def _owner_equipment_candidates(owner: SectNpc) -> list[str]:
+        return character_concubine._owner_equipment_candidates(owner)
+
+    def _public_concubine_system(self, game: GameState) -> dict[str, Any]:
+        return character_concubine._public_concubine_system(self._dependencies.character.concubine_queries, game)
+
+    def assert_ghost_operation_allowed(self, game_id: str, operation: str) -> None:
+        return character_ghost.assert_ghost_operation_allowed(self._dependencies.character.ghost_actions, game_id, operation)
+
+    def _ensure_ghost_parade(self, game: GameState, rng: random.Random) -> None:
+        return character_ghost._ensure_ghost_parade(self._dependencies.character.ghost_state, game, rng)
+
+    def _generate_parade_souls(self, game: GameState, rng: random.Random, *, realm_index=None) -> list[dict[str, Any]]:
+        return character_ghost._generate_parade_souls(game, rng, realm_index=realm_index)
+
+    def ghost_parade_action(self, game_id: str, soul_id: str, action: str) -> dict[str, Any]:
+        return character_ghost.ghost_parade_action(self._dependencies.character.ghost_actions, game_id, soul_id, action)
+
+    def ghost_soul_action(self, game_id: str, soul_id: str, action: str, slot: str='') -> dict[str, Any]:
+        return character_ghost.ghost_soul_action(self._dependencies.character.ghost_actions, game_id, soul_id, action, slot)
+
+    def ghost_attachment_action(self, game_id: str, action: str, item_id: str='') -> dict[str, Any]:
+        return character_ghost.ghost_attachment_action(self._dependencies.character.ghost_actions, game_id, action, item_id)
+
+    def _public_ghost_phase_two(self, game: GameState) -> dict[str, Any]:
+        return character_ghost._public_ghost_phase_two(self._dependencies.character.ghost_state, game)
+
+    def _public_map_with_ghost_parade(self, game: GameState, location_id: str) -> dict[str, Any]:
+        return character_ghost._public_map_with_ghost_parade(self._dependencies.character.ghost_state, game, location_id)
+
+    def _public_ghost_system(self, game: GameState) -> dict[str, Any]:
+        return character_ghost._public_ghost_system(self._dependencies.character.ghost_state, game)
+
+    def _advance_monster_bloodline_year(self, game: GameState) -> None:
+        return character_monster._advance_monster_bloodline_year(self._dependencies.character.monster_evolution, game)
+
+    def _monster_travel_multiplier(self, player: Player, destination: str) -> float:
+        return character_monster._monster_travel_multiplier(self._dependencies.character.monster_evolution, player, destination)
+
+    def _validate_monster_evolution(self, game: GameState, evolution_id: str) -> dict[str, Any]:
+        return character_monster._validate_monster_evolution(self._dependencies.character.monster_validation, game, evolution_id)
+
+    def _complete_monster_evolution(self, game: GameState, evolution_id: str, candidate: dict[str, Any], *, trial_completed=False, prepared_lineage=None, trial_rng=None) -> dict[str, Any]:
+        return character_monster._complete_monster_evolution(self._dependencies.character.monster_evolution, game, evolution_id, candidate, trial_completed=trial_completed, prepared_lineage=prepared_lineage, trial_rng=trial_rng)
+
+    def evolve_monster(self, game_id: str, evolution_id: str) -> dict[str, Any]:
+        return character_monster.evolve_monster(self._dependencies.character.monster_evolution, game_id, evolution_id)
+
+    def prepare_custom_lineage(self, game_id: str, evolution_id: str) -> dict[str, Any]:
+        return character_monster.prepare_custom_lineage(self._dependencies.character.monster_evolution, game_id, evolution_id)
+
+    def confirm_custom_lineage(self, game_id: str, evolution_id: str, name: str, rules: Any) -> dict[str, Any]:
+        return character_monster.confirm_custom_lineage(self._dependencies.character.monster_evolution, game_id, evolution_id, name, rules)
+
+    def grant_monster_imprint(self, player: Player, imprint_id: str) -> bool:
+        return character_monster.grant_monster_imprint(player, imprint_id)
+
+    @staticmethod
+    def _natal_artifact_config() -> dict[str, Any]:
+        return character_natal._natal_artifact_config()
+
+    def _natal_artifact_material_definitions(self) -> dict[str, dict[str, Any]]:
+        return character_natal._natal_artifact_material_definitions(self._dependencies.character.natal_state)
+
+    def _natal_artifact_candidate(self, item: Any) -> bool:
+        return character_natal._natal_artifact_candidate(self._dependencies.character.natal_state, item)
+
+    @staticmethod
+    def _crafted_natal_source(game: GameState) -> dict[str, Any] | None:
+        return character_natal._crafted_natal_source(game)
+
+    def _bind_crafted_natal_artifact(self, game: GameState, artifact: dict[str, Any]) -> None:
+        return character_natal._bind_crafted_natal_artifact(self._dependencies.character.natal_state, game, artifact)
+
+    def _unbind_crafted_natal_artifact(self, game: GameState, artifact_id: str) -> None:
+        return character_natal._unbind_crafted_natal_artifact(self._dependencies.character.natal_state, game, artifact_id)
+
+    def _natal_slots_for_level(self, level: int) -> int:
+        return character_natal._natal_slots_for_level(self._dependencies.character.natal_state, level)
+
+    def _natal_level_scale(self, level: int) -> float:
+        return character_natal._natal_level_scale(self._dependencies.character.natal_state, level)
+
+    def _natal_flat_combat_growth(self, level: int) -> float:
+        return character_natal._natal_flat_combat_growth(self._dependencies.character.natal_state, level)
+
+    def _natal_refine_cost(self, level: int, game: GameState | None=None) -> int:
+        return character_natal._natal_refine_cost(self._dependencies.character.natal_state, level, game)
+
+    def _natal_level_required(self, level: int) -> int:
+        return character_natal._natal_level_required(self._dependencies.character.natal_state, level)
+
+    def _ensure_natal_artifact(self, game: GameState) -> bool:
+        return character_natal._ensure_natal_artifact(self._dependencies.character.natal_state, game)
+
+    def _sync_natal_artifact_bonuses(self, game: GameState) -> None:
+        return character_natal._sync_natal_artifact_bonuses(self._dependencies.character.natal_state, game)
+
+    def _natal_artifact_combat_effects(self, game: GameState) -> list[dict[str, Any]]:
+        return character_natal._natal_artifact_combat_effects(self._dependencies.character.natal_state, game)
+
+    def _add_natal_artifact_experience(self, game: GameState, amount: int) -> tuple[int, int]:
+        return character_natal._add_natal_artifact_experience(self._dependencies.character.natal_state, game, amount)
+
+    def _natal_refine_all_plan(self, game: GameState) -> tuple[int, int]:
+        return character_natal._natal_refine_all_plan(self._dependencies.character.natal_state, game)
+
+    def _advance_natal_artifact(self, game: GameState, action: str, units: int) -> str | None:
+        return character_natal._advance_natal_artifact(self._dependencies.character.natal_state, game, action, units)
+
+    def natal_artifact_action(self, game_id: str, action: str, item_id: str='', slot_index: int=-1) -> dict[str, Any]:
+        return character_natal.natal_artifact_action(self._dependencies.character.natal_actions, game_id, action, item_id, slot_index)
+
+    def _public_natal_artifact(self, game: GameState) -> dict[str, Any]:
+        return character_natal._public_natal_artifact(self._dependencies.character.natal_view, game)
+
+    def _natal_artifact_inventory_item(self, game: GameState) -> dict[str, Any] | None:
+        return character_natal._natal_artifact_inventory_item(game)
+
+    @staticmethod
+    def _demonic_rules() -> dict[str, Any]:
+        return character_demonic._demonic_rules()
+
+    @staticmethod
+    def _puppet_technique(technique_id: str | None):
+        return character_demonic._puppet_technique(technique_id)
+
+    def preview_puppet(self, game_id, form, core, shell, energy):
+        return character_demonic.preview_puppet(self._dependencies.character.demonic_preview, game_id, form, core, shell, energy)
+
+    def craft_mechanical_puppet(self, game_id, form='', core='', shell='', energy=''):
+        return character_demonic.craft_mechanical_puppet(self._dependencies.character.demonic_actions, game_id, form, core, shell, energy)
+
+    def train_owned(self, game_id: str, target_id: str, kind: str, axis: str, batches: int=1):
+        return character_demonic.train_owned(self._dependencies.character.demonic_actions, game_id, target_id, kind, axis, batches)
+
+    def puppet_action(self, game_id: str, puppet_id: str, action: str, content_id: str='') -> dict[str, Any]:
+        return character_demonic.puppet_action(self._dependencies.character.demonic_actions, game_id, puppet_id, action, content_id)
+
+    def _devour_puppet(self, game: GameState, puppet: dict[str, Any]) -> tuple[str, str]:
+        return character_demonic._devour_puppet(self._dependencies.character.demonic_actions, game, puppet)
+
+    def refine_foreign_souls(self, game_id: str) -> dict[str, Any]:
+        return character_demonic.refine_foreign_souls(self._dependencies.character.demonic_actions, game_id)
+
+    def _soul_refine_gain(self, player: Player) -> float:
+        return character_demonic._soul_refine_gain(self._dependencies.character.demonic_growth, player)
+
+    def _secluded_refining_years(self, player: Player) -> int:
+        return character_demonic._secluded_refining_years(self._dependencies.character.demonic_growth, player)
+
+    def _complete_soul_refinement(self, player: Player, soul: dict[str, Any]) -> None:
+        return character_demonic._complete_soul_refinement(self._dependencies.character.demonic_growth, player, soul)
+
+    def _public_demonic_system(self, player: Player, game=None) -> dict[str, Any]:
+        return character_demonic._public_demonic_system(self._dependencies.character.demonic_view, player, game)
+
+    @classmethod
+    def _puppet_intrinsic_contribution(cls, player: Player) -> float:
+        from ..system.character.wiring import bind_demonic_puppet_rules
+        return character_demonic._puppet_intrinsic_contribution(bind_demonic_puppet_rules(cls), player)
+
+    @classmethod
+    def _living_puppet_party_powers(cls, player: Player, game=None) -> list[float]:
+        from ..system.character.wiring import bind_demonic_puppet_rules
+        return character_demonic._living_puppet_party_powers(bind_demonic_puppet_rules(cls), player, game)
+
+    def _player_intrinsic_combat_power(self, player: Player) -> float:
+        return character_demonic._player_intrinsic_combat_power(self._dependencies.character.demonic_combat, player)
+
+    def _player_battle_power(self, game: GameState) -> float:
+        return character_demonic._player_battle_power(self._dependencies.character.demonic_combat, game)
+
+    def _grant_demonic_kill_opportunity(self, player: Player, victim_realm_index: int) -> float:
+        return character_demonic._grant_demonic_kill_opportunity(self._dependencies.character.demonic_growth, player, victim_realm_index)
+
+    @staticmethod
+    def _raise_divine_sense_one_level(player: Player) -> None:
+        return character_demonic._raise_divine_sense_one_level(player)
+
+    def upper_institution_action(self, game_id, action, target_id=""):
+        return institution_runtime.run_action(self._dependencies.character.upper_institution, game_id, action, target_id)

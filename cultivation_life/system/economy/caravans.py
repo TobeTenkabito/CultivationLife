@@ -297,7 +297,10 @@ def _arrival(game, maps, fleet, region):
     margin = cargo['revenue'] - cargo['cost']
     profit = margin - cargo.get('running_costs', 0)
     fleet['profit'] += margin  # Running costs were debited when actually paid.
-    fleet['loss_streak'] = fleet['loss_streak'] + 1 if profit < 0 else 0
+    # Internal delivery/empty return pays real costs, but is not a failed sale.
+    commercial = not (cargo.get('target_estate') or cargo.get('empty_return'))
+    if commercial:
+        fleet['loss_streak'] = fleet['loss_streak'] + 1 if profit < 0 else 0
     dividend = min(balance(game, _cash(fleet)), max(0, profit) // 4)
     if dividend:
         transfer_value(game, _cash(fleet), owner_key(fleet), dividend, '商队实得利润分红')
@@ -308,9 +311,9 @@ def _arrival(game, maps, fleet, region):
     from .trade_orders import finish
     finish(fleet, cargo)
     fleet.update(status='waiting', cargo=None, next_departure=game.player.age + 1)
-    if fleet['loss_streak'] >= 2:
+    if commercial and fleet['loss_streak'] >= 2:
         fleet['capacity'] = max(6, fleet['capacity'] // 2)
-    elif profit > 0 and fleet['profit'] > 0 and balance(game, _cash(fleet)) >= max(100, fleet['investment'] * 2) and fleet['capacity'] < 240:
+    elif commercial and profit > 0 and fleet['profit'] > 0 and balance(game, _cash(fleet)) >= max(100, fleet['investment'] * 2) and fleet['capacity'] < 240:
         cost = max(20, fleet['investment'] // 4)
         transfer_value(game, _cash(fleet), f'background:{world}', cost, '商队扩充运力')
         fleet['operating_costs'] += cost

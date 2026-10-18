@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from ...npc_custody import settle_puppet_person
+from ...puppet_state import usable
 
 import random
 
@@ -16,11 +17,11 @@ def _annual_demonic_update(deps: DemonicAnnualDependencies, game: GameState, rng
     rules = deps._demonic_rules()
     for puppet in player.puppets:
         kind = str(puppet.get("type"))
-        if puppet.get("alive", True) and kind in {"corpse", "living"}:
+        if usable(puppet, game) and kind in {"corpse", "living"}:
             contribution = max(0.1, int(puppet.get("realm_index", 0)) * (0.16 if kind == "corpse" else 0.34))
             deps._add_opportunity(player, contribution)
     for puppet in list(player.puppets):
-        if not puppet.get("alive", True) or puppet.get("type") != "living":
+        if not usable(puppet, game) or puppet.get("type") != "living":
             continue
         growth = 1 + int(puppet.get("realm_index", 0)) * 0.12
         puppet["control"] = max(0.0, float(puppet.get("control", 100)) - float(rules["living_control_loss_per_year"]) * growth)

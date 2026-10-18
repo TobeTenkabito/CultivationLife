@@ -255,16 +255,18 @@ def test_stale_purchase_and_lock_reject_without_charging_or_granting(ready,famil
     engine,game=ready;t=art(family=family)
     add_item(game.player,'spirit_stone',1000)
     engine.store.save(game)
-    # Hydrate once, then exercise both command guards against a stale request cache.
-    with request_scope(engine):
-        loaded=engine._load(game.id)
-        loaded.market_offers.append(shelf_offer(loaded,t));engine.store.save(loaded)
-        before=engine.store._path(game.id).read_bytes();state=copy.deepcopy(loaded.to_dict())
-        with pytest.raises(ValueError,match='坊市直售'):
-            engine.buy_market_offer(game.id,'legacy-rare-art')
-        assert loaded.to_dict()==state and engine.store._path(game.id).read_bytes()==before
-        with pytest.raises(ValueError):engine.toggle_market_offer_lock(game.id,'legacy-rare-art')
-        assert loaded.to_dict()==state and engine.store._path(game.id).read_bytes()==before
+    # A rejected command evicts the request cache. Give each guard its own
+    # hydrated stale shelf so the next load's legitimate repair is not charged
+    # to the rejected command.
+    for command, message in ((engine.buy_market_offer, '坊市直售'),
+                             (engine.toggle_market_offer_lock, '该货物')):
+        with request_scope(engine):
+            loaded=engine._load(game.id)
+            loaded.market_offers.append(shelf_offer(loaded,t));engine.store.save(loaded)
+            before=engine.store._path(game.id).read_bytes();state=copy.deepcopy(loaded.to_dict())
+            with pytest.raises(ValueError,match=message):
+                command(game.id,'legacy-rare-art')
+            assert loaded.to_dict()==state and engine.store._path(game.id).read_bytes()==before
 
 
 def test_refresh_drops_cached_and_reserved_rare_offers_but_keeps_owned_books(ready):

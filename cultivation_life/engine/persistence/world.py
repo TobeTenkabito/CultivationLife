@@ -20,7 +20,9 @@ def prepare_world(deps: WorldPreparationDependencies, game: GameState) -> bool:
         changed = True
     if deps._ensure_doctrines(game):
         changed = True
+    before_sage_effects = game.player.sage_effects.copy()
     deps._refresh_sage_effects(game)
+    changed = before_sage_effects != game.player.sage_effects or changed
     changed = deps._migrate_true_demon_races(game) or changed
     if game.player.faction_id in game.sects:
         sect_allegiance = game.sects[game.player.faction_id].allegiance_race

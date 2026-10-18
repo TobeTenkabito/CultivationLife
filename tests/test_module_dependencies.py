@@ -74,6 +74,9 @@ def test_system_algorithms_use_real_module_globals_and_declared_collaborators(ar
         for name, function in inspect.getmembers(module, inspect.isfunction):
             if function.__module__ != module.__name__:
                 continue
+            # Inspect the domain implementation beneath standard decorators.
+            # contextmanager's wrapper legitimately uses contextlib globals.
+            function = inspect.unwrap(function)
             assert function.__globals__ is vars(module)
             assert not {'GameEngine', 'EconomySystemMixin', 'TianjiSystemMixin', 'IntrigueSystemMixin',
                         'CraftingSystemMixin', 'FormationSystemMixin', 'ExchangeSystemMixin', 'GuixuSystemMixin', 'WarSystemMixin'} & vars(module).keys()

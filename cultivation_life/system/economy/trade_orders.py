@@ -118,6 +118,11 @@ def candidate(game, maps, fleet, route_quote):
                 or (estate['owner_kind'], estate['owner_id']) != (target_estate['owner_kind'], target_estate['owner_id'])
                 or estate['stock'].get(item, 0) < count):
             raise ValueError('源产业仓库库存不足')
+        from .fleet_network import managed_by_player
+        same_owner = (estate['owner_kind'], estate['owner_id']) == (fleet['owner_kind'], fleet['owner_id'])
+        if not (same_owner or (managed_by_player(game, fleet) and
+                owner_allowed(game, estate['owner_kind'], estate['owner_id'], world))):
+            raise ValueError('调货授权已失效，商队无权提取原产业库存')
         purchase = dict(total=0, gross=0, fee=0)
     elif count and (row['stock'] < count or purchase['total'] > count * order['buy_limit']):
         raise ValueError('订单库存不足或采购均价超过上限')

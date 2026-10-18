@@ -25,8 +25,30 @@ def sync_offspring(game, npc):
             child.update(npc.to_dict())
 
 
-def _detach(game, npc):
+def family_rosters(scene):
+    """Freeze existing membership before changing the free spatial roster."""
+    if 'families' in scene:
+        return scene['families']
+    return [dict(id=scene['id'] + f'_family_{i}', name=scene['name'][:2] + surname + '氏家族',
+                 location_id=scene['locations'][i + 1]['id'],
+                 member_ids=scene.get('npc_ids', [])[i::2])
+            for i, surname in enumerate(('林', '陆'))]
+
+
+def _detach_spatial(game, npc):
     origins = []
+    for identity, scene in game.spatial_state.get('instances', {}).items():
+        ids = scene.get('npc_ids', [])
+        if npc.id in ids:
+            if scene.get('kind') == 'lost':
+                scene.setdefault('families', family_rosters(scene))
+            origins.append({'container': 'spatial', 'id': identity, 'index': ids.index(npc.id)})
+            ids[:] = [entry for entry in ids if entry != npc.id]
+    return origins
+
+
+def _detach(game, npc):
+    origins = _detach_spatial(game, npc)
     for field in ('world_npcs', 'notable_npcs', 'relationship_npcs'):
         registry = getattr(game, field)
         if npc.id in registry:
@@ -42,6 +64,26 @@ def _detach(game, npc):
     game.encounter_npc_cache[:] = [row for row in game.encounter_npc_cache if row.get('id') != npc.id]
     game.player.party[:] = [row for row in game.player.party if row.get('id') != npc.id]
     return origins
+
+
+def transfer_free_person(game, npc, faction=None):
+    """Move the original free roster entry; keep its physical address and life."""
+    if not is_free(npc):
+        return False
+    # A change of faction is not detention: preserve party, scene and encounter
+    # references, and remove only competing authoritative person containers.
+    for field in ('world_npcs', 'notable_npcs', 'relationship_npcs'):
+        getattr(game, field).pop(npc.id, None)
+    for group in [game.family, *game.sects.values()]:
+        if group is not None:
+            group.npcs[:] = [entry for entry in group.npcs if entry.id != npc.id]
+    npc.faction_id = faction.id if faction else None
+    if faction is not None:
+        faction.npcs.append(npc)
+    else:
+        game.notable_npcs[npc.id] = npc
+    sync_offspring(game, npc)
+    return True
 
 
 def detain_person(game, seed, npc_type, *, kind='prisoner'):
@@ -61,6 +103,9 @@ def detain_person(game, seed, npc_type, *, kind='prisoner'):
         raise ValueError('此人不受你控制')
     if npc.roster_state != 'held':
         npc.roster_origin = _detach(game, npc)
+    else:
+        # Adopt existing structure-10 held references without creating a person.
+        npc.roster_origin.extend(_detach_spatial(game, npc))
     npc.roster_state = 'held'
     npc.custody = {'kind': kind, 'holder_id': game.id,
                    'since_age': (npc.custody or {}).get('since_age', game.player.age)}
@@ -76,10 +121,15 @@ def release_person(game, identity, *, affinity=None):
         raise ValueError('此人不在你的拘禁名册中')
     if not npc.alive:
         raise ValueError('已经陨落的人物不能释放为活人')
+    npc.roster_origin.extend(_detach_spatial(game, npc))
+    scene = game.spatial_state.get('instances', {}).get(game.spatial_state.get('current'))
+    in_scene = scene is not None and npc.world == game.player.world and npc.world in {'lost', 'rift'}
     restored = False
     # Restore the former roster only when it still belongs to this world.
     for origin in npc.roster_origin:
         kind = origin['container']
+        if in_scene:
+            continue
         if kind in {'world_npcs', 'notable_npcs'}:
             getattr(game, kind)[npc.id] = npc
             restored = True
@@ -89,9 +139,26 @@ def release_person(game, identity, *, affinity=None):
                 group.npcs.insert(min(int(origin.get('index', len(group.npcs))), len(group.npcs)), npc)
                 restored = True
     if not restored:
-        game.notable_npcs[npc.id] = npc
+        if in_scene:
+            original_scene = next((o for o in npc.roster_origin
+                                   if o['container'] == 'spatial' and o.get('id') == scene['id']), None)
+            # An ordinary resident surveying this same instance still owns its
+            # original registry responsibility after release. Other instances
+            # keep the existing local relationship roster rule.
+            if original_scene and any(o['container'] == 'world_npcs' for o in npc.roster_origin):
+                game.world_npcs[npc.id] = npc
+            else:
+                game.relationship_npcs[npc.id] = npc
+            if scene.get('kind') == 'lost':
+                scene.setdefault('families', family_rosters(scene))
+            ids = scene.setdefault('npc_ids', [])
+            ids.insert(min(int(original_scene.get('index', len(ids))), len(ids)) if original_scene else len(ids), npc.id)
+            if not original_scene:
+                npc.faction_id = None
+        else:
+            game.notable_npcs[npc.id] = npc
         faction = game.sects.get(npc.faction_id or '')
-        if faction is None or faction.extinct or faction.world != npc.world:
+        if not in_scene and (faction is None or faction.extinct or faction.world != npc.world):
             npc.faction_id = None
     game.inactive_npcs.pop(npc.id, None)
     npc.roster_state, npc.custody, npc.roster_origin = 'active', None, []
@@ -107,6 +174,7 @@ def kill_person(game, identity, reason):
         return None
     npc.alive, npc.death_reason = False, reason
     if npc.roster_state == 'held':
+        _detach_spatial(game, npc)
         npc.roster_state, npc.custody = 'retired', None
     game.player.party[:] = [row for row in game.player.party if row.get('id') != npc.id]
     sync_offspring(game, npc)
@@ -140,7 +208,7 @@ def settle_puppet_person(game, puppet, *, outcome, reason=''):
     if npc is None or puppet.get('type') != 'living':
         return
     if outcome == 'released' and npc.alive and npc.roster_state == 'held':
-        for key in ('realm_index', 'layer', 'body_training', 'immortal_body_level', 'divine_sense_rank', 'main_technique_id'):
+        for key in ('realm_index', 'layer', 'body_training', 'immortal_body_level', 'divine_sense_rank', 'main_technique_id', 'lifespan'):
             if key in puppet:
                 setattr(npc, key, copy.deepcopy(puppet[key]))
         release_person(game, npc.id)

@@ -490,10 +490,11 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
     allowed_ids = {row['content_id'] for row in _class_pool(deps, state) if row['kind'] == 'item'}
     consignable_inventory = [row for row in inventory if row["id"] in ITEM_CATALOG and not limited_trade_item(row['id'])
                             and (not state.get('rank_band') or row['id'] in allowed_ids)]
+    from ...puppet_state import usable
     sellable_puppets = [
         {"id":str(row.get("id")), "name":str(row.get("name", "无名傀儡")),
          "type":str(row.get("type")), "combat_power":round(float(row.get("combat_power", 0)), 1)}
-        for row in game.player.puppets if row.get("type") in {"mechanical", "corpse"}
+        for row in game.player.puppets if row.get("type") in {"mechanical", "corpse"} and usable(row, game)
     ]
     from ..talismans import sale_rows
     return {

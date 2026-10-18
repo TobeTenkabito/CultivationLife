@@ -60,6 +60,8 @@ def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: 
             raise ValueError("当前没有需要接受的敌方和约")
         deps._conclude_war_bundle(game, war, offer["demands"], offer["proposer_side"], automatic=True)
     elif action == "conquest":
+        if war.get("status") != "active":
+            raise ValueError("战场胜负已定，无法再派先锋出阵")
         if war.get("preliminary_resolved"):
             raise ValueError("先锋出阵已经结算")
         enemy = "defender" if side == "attacker" else "attacker"

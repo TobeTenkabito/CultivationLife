@@ -1226,6 +1226,13 @@ class EngineTests(unittest.TestCase):
         game.player.hp = max_hp(game.player)
         game.player.mp = max_mp(game.player)
         start_age = game.player.age
+        # 本界年度只处理实际驻在本界的人物；原人界人物继续冻结。
+        from cultivation_life.system.combat.npc_lifecycle import move_world
+        move_world(game.world_npcs["xiang_zhili"], "spirit", game.player.age,
+                   WORLD_SYSTEMS.get("transcendent_combat", {}))
+        game.world_npcs["xiang_zhili"].location_id = self.engine.maps.normalize_location("spirit", None)
+        frozen_npc = next(npc for npc in game.world_npcs.values() if npc.world == "human")
+        frozen_age = frozen_npc.age
         xiang_age = game.world_npcs["xiang_zhili"].age
         self.engine.store.save(game)
         # 隔离剧情与副本潮讯，只验证未被事件中断时的百年结算语义。
@@ -1236,6 +1243,7 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(result["player"]["time_unit_years"], 100)
         saved = self.engine.store.load(created["id"])
         self.assertEqual(saved.world_npcs["xiang_zhili"].age, xiang_age + 100)
+        self.assertEqual(saved.world_npcs[frozen_npc.id].age, frozen_age)
         self.assertTrue(any(record.event_id == "SYS_ERA_SUMMARY" for record in saved.history))
 
     def test_faction_events_are_world_scoped(self):

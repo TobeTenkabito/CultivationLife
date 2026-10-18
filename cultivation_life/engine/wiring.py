@@ -1,11 +1,14 @@
 """Composition root: select explicit builders for each engine responsibility."""
 from __future__ import annotations
+from ..system.character.wiring import bind_character
 
 from typing import TYPE_CHECKING, Callable
 
 from .dependencies import EngineDependencies, NpcClassDependencies
 from ..system.court import wiring as court_wiring
 from .composition import heavens
+from .composition import regions
+from .composition import response
 from .composition import ghost_flows, demonic_flows, relationships, buddhist_flows, travel, merchant, cultivation, actions, asura, combat, contacts, events, lifecycle, presentation, systems, world
 
 if TYPE_CHECKING:
@@ -17,6 +20,9 @@ def bind_dependencies(
 ) -> EngineDependencies:
     """Resolve callbacks and resource getters on use, preserving late overrides."""
     return EngineDependencies(
+        character=bind_character(engine),
+        regions=regions.bind_regions(engine),
+        response=response.bind_response(engine),
         heavens=heavens.bind_heavens(engine),
         ghost_flows=ghost_flows.bind_ghost_flows(engine),
         demonic_flows=demonic_flows.bind_demonic_flows(engine),
@@ -44,7 +50,7 @@ def bind_dependencies(
         world_runtime=lifecycle.bind_world_runtime(engine),
         event_runtime=events.bind_event_runtime(engine),
         combat_runtime=combat.bind_combat_runtime(engine),
-        presentation_runtime=presentation.bind_presentation_runtime(engine),
+        view_preparation=presentation.bind_view_preparation(engine),
         persistence_runtime=lifecycle.bind_persistence_runtime(engine, bloodline_content_available=bloodline_content_available),
         session=lifecycle.bind_session(engine, bloodline_content_available=bloodline_content_available),
         advancement=lifecycle.bind_advancement(engine),

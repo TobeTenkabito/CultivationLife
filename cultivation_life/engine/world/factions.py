@@ -323,7 +323,7 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
     return news
 
 
-def annual_player_faction(deps, game, rng):
+def annual_player_faction(deps: FactionDependencies, game: GameState, rng: random.Random) -> list[str]:
     news = deps._annual_offspring_and_family_update(game, rng)
     player = game.player
     deps._annual_relationship_update(game, rng)

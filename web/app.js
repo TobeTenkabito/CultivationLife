@@ -2657,6 +2657,7 @@ function renderGhostPhaseTwo(system) {
     constraints.appendChild(note);
     [['wait','忍耐一年'],['resist','反抗拘魂者'],['possess','夺舍拘魂者']].forEach(([action,label]) => {
       const button = document.createElement('button'); button.textContent = label; button.disabled = busy || !game.player.alive;
+      button.classList.add('ghost-constraint-action');
       button.onclick = () => mutate(`/api/games/${game.id}/ghost-constraint`, {action}); constraints.appendChild(trackAction(button));
     });
   }
@@ -3097,6 +3098,7 @@ function renderSpiritField(field) {
   $('#spirit-field-note').textContent = field.reclaimed_qing
     ? `已有 ${field.free_qing} 顷空闲。按数量级向下取整：201 年记作 200 年，2,001 年记作 2,000 年；年份更高不保证品质更好。`
     : '尚未开垦。开垦只消耗灵石，视为瞬间完成，不推进任何时间单位。';
+  if (field.local_available === false) $('#spirit-field-note').textContent = '灵田留在原界面或空间实例，返回后可继续操持。';
   const plots = $('#spirit-field-plots'); plots.innerHTML = '';
   for (let index = 0; index < Number(field.max_qing || 0); index += 1) {
     const crop = (field.plots || []).find(entry => Number(entry.slot) === index);
@@ -3140,6 +3142,9 @@ function renderSpiritField(field) {
     harvest.onclick = () => mutate(`/api/games/${game.id}/spirit-field-harvest`, {plot_id:crop.id});
     tools.append(amount, booster, water, harvest); row.append(info, tools); plots.appendChild(row);
   }
+  if (field.local_available === false) plots.querySelectorAll('button, input, select').forEach(control => {
+    control.disabled = true; control.dataset.actionUnavailable = '1';
+  });
   const alchemy = field.alchemy || {};
   const target = $('#alchemy-target'); const previousTarget = target.value; target.innerHTML = '';
   (alchemy.targets || []).forEach(entry => { const option = document.createElement('option'); option.value = entry.id; option.textContent = `${entry.tier}阶 · ${entry.name}`; target.appendChild(option); });
@@ -3310,21 +3315,23 @@ function renderDemonicSystem(system) {
   const puppetList = $('#puppet-list'); puppetList.innerHTML = '';
   (system.puppets || []).forEach(puppet => {
     const row = document.createElement('div'); row.className = 'puppet-row';
+    const available = puppet.usable !== false;
     const control = puppet.type === 'living' ? ` · 控制度 ${number(puppet.control)}%` : '';
     row.innerHTML = htmlText`<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}） · 主修《${puppet.main_technique_name}》${control}</small><small>下次培养机缘减免 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
     const tools = document.createElement('div'); tools.className = 'puppet-tools';
 
-    if ((system.pill_options || []).length && puppet.type !== 'mechanical') {
+    if (!available) { const status=document.createElement('small');status.textContent='已毁坏或陨落 · 可解除';row.appendChild(status); }
+    if (available && (system.pill_options || []).length && puppet.type !== 'mechanical') {
       const select = optionSelect(system.pill_options); tools.append(select, puppetButton('喂丹', puppet.id, 'pill', select));
     }
-    if (puppet.type === 'living' && (system.technique_options || []).length) {
+    if (available && puppet.type === 'living' && (system.technique_options || []).length) {
       const select = optionSelect(system.technique_options); tools.append(select, puppetButton('更换功法', puppet.id, 'technique', select));
     }
-    if (system.is_demonic && puppet.type === 'living') tools.appendChild(puppetButton(`加固控制（${number(system.control_mp_cost || 0)} MP）`, puppet.id, 'reinforce_control'));
-    if (system.is_demonic && puppet.type !== 'mechanical') tools.appendChild(puppetButton('吞噬', puppet.id, 'devour'));
+    if (available && system.is_demonic && puppet.type === 'living') tools.appendChild(puppetButton(`加固控制（${number(system.control_mp_cost || 0)} MP）`, puppet.id, 'reinforce_control'));
+    if (available && system.is_demonic && puppet.type !== 'mechanical') tools.appendChild(puppetButton('吞噬', puppet.id, 'devour'));
     tools.appendChild(puppetButton('解除', puppet.id, 'dismiss'));
     const dimensions=document.createElement('small');dimensions.textContent=`${puppet.form_name ? puppet.form_name+' · ' : ''}普通炼体 ${puppet.body_training||0}/100层 · 高阶肉身 ${puppet.immortal_body_level||0}层 · 神识 ${puppet.divine_sense_rank||0}阶`;row.append(dimensions);
-    row.appendChild(tools); appendTraining(row, puppet, 'puppet'); puppetList.appendChild(row);
+    row.appendChild(tools); if (available) appendTraining(row, puppet, 'puppet'); puppetList.appendChild(row);
   });
   if (!puppetList.children.length) puppetList.innerHTML = '<p class="empty">尚无受控傀儡。</p>';
 
@@ -4243,6 +4250,9 @@ function renderButtons() {
   });
   document.querySelectorAll('.ghost-state-action').forEach(button => {
     button.disabled = busy || !game?.player?.alive || button.dataset.available !== '1';
+  });
+  document.querySelectorAll('.ghost-constraint-action').forEach(button => {
+    button.disabled = busy || !game?.player?.alive || button.dataset.available !== '1' || !!game?.pending_event || !!game?.trial?.active;
   });
   const demonic = game?.demonic_system || {};
   if ($('#craft-puppet')) $('#craft-puppet').disabled = $('#craft-puppet').dataset.unavailable !== '0' || busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || (demonic.used || 0) >= (demonic.capacity || 0);

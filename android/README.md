@@ -1,6 +1,8 @@
 # 浮生问道 · Android
 
-维护基线：2026-10-18，本体 **v2.16.2**。Gradle 配置的版本名为 **2.16.2-android.69**，versionCode **69**，沿用 `com.fusheng.wendao` 包名和正式签名。
+维护基线：2026-10-19，本体 **v2.16.3**。Gradle 配置的版本名为 **2.16.3-android.70**，versionCode **70**，沿用 `com.fusheng.wendao` 包名和正式签名。
+
+v2.16.3 使用 architecture 发行配置：全仓回归、人物与事件及地区页面，Windows 同一 EXE 有／无 DLC，签名 Android 12 的上界、佛儒、本命、修罗王庭、地区、组织与既有修复共七阶段横竖屏原生验收。最终源码、包哈希和通过范围以 `dist/` 同版发行清单为准；设计边界见[架构第三阶段](../docs/architecture-stage3.md)。
 
 v2.16.0 的地区历法、归墟通知与续程采用 regional 相关领域发行配置；原生验收覆盖四主题、手机横竖屏及商路操作。见[地区历法](../docs/regional-calendar.md)。
 

@@ -8,7 +8,7 @@ from .models import HistoryRecord
 from .runtime import decode_rng, encode_rng, now_iso
 from .system.possession_system import advance_player_age
 from .time_dependencies import MapTravelDependencies
-from .time_flow import advance_elapsed_year
+from .time_flow import advance_elapsed_year, completed_action_units
 from .system.heavens.local_control import arrival_notice
 
 def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> dict[str, Any]:
@@ -45,6 +45,10 @@ def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> d
     start_age = player.age
     institution_world = player.world
     institution_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
+    # Freeze the action denominator for this journey, including after a realm
+    # change or reload. Older journeys adopt it without replaying past units.
+    unit_years = journey.setdefault('unit_years', institution_unit)
+    settled_before = completed_action_units(journey['completed'], unit_years)
     era_news: list[str] = []
     for _ in range(remaining):
         advance_player_age(player)
@@ -81,7 +85,8 @@ def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> d
          "completed_years":journey['completed'], "total_years":journey['years']},
         ["action", "travel", "map", f"world:{player.world}"],
     ))
-    deps._finish_travel_time(game, start_age, institution_world, institution_unit, era_news, rng)
+    deps._finish_travel_time(game, start_age, institution_world, institution_unit, era_news, rng,
+        action_units=completed_action_units(journey['completed'], unit_years) - settled_before)
     deps._compact_world_history(game)
     game.updated_at = now_iso()
     game.rng_state = encode_rng(rng)

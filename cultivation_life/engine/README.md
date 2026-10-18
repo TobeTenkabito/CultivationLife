@@ -1,6 +1,6 @@
 # 引擎架构与行为兼容说明
 
-第二轮重构将 25 个方法容器中的 251 个实现改为普通模块函数，通过显式依赖调用其他能力。算法不再通过 `FunctionType` 重绑定全局命名空间或动态安装到入口类；`transactions.serialized_commands` 仍为公开操作统一包装存档锁。此前各组 Mixin 迁移保持游戏规则、结算顺序、随机数调用顺序和存档格式；当前存档结构为 9，支持纯数据的 6→7→8→9 迁移，结构 1–5 停止支持；当前架构边界见 [项目诊断](../../docs/project-diagnosis.md)。
+第二轮重构将 25 个方法容器中的 251 个实现改为普通模块函数，通过显式依赖调用其他能力。算法不再通过 `FunctionType` 重绑定全局命名空间或动态安装到入口类；`transactions.serialized_commands` 仍为公开操作统一包装存档锁。此前各组 Mixin 迁移保持游戏规则、结算顺序、随机数调用顺序和存档格式；当前仅支持存档结构 10，结构 1–9 不兼容、不映射、不转换；当前架构边界见 [项目诊断](../../docs/project-diagnosis.md)。
 
 外部入口保持不变：
 
@@ -8,7 +8,9 @@
 from cultivation_life.engine import GameEngine, encode_rng
 ```
 
-`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。当前已将修罗养成、天庭、瑶池、神机、内政、经济／交换会、炼器、阵法、归墟、战争、地图／传送、商盟、道统／仙界养成及关系处置移出继承列表。鬼道、魔道、侍妾和佛门的关键流程也已迁出，其余直接基类的相对顺序保持不变。
+`GameEngine` 保留原方法签名、默认值及静态方法/类方法性质。入口类中的转发方法静态声明，算法在对应职责模块中实现；保留这些转发方法是为了让现有调用方及子类继续使用原接口。v2.16.3 第三阶段移除最后九组玩法继承，当前引擎仅继承 `object`。最后 119 个方法成为原领域模块中的普通函数，机构命令与王庭结算也使用明确契约；旧 Mixin 仅适配独立消费者。历史迁移记录如下，当前边界与发行验证见[第三阶段架构说明](../../docs/architecture-stage3.md)。
+
+`system/character/dependencies.py` 提供家族、佛儒、鬼道、血脉、本命、魔道和机构各职责的冻结能力；`wiring.py` 延迟解析原方法、配置与资源，保留可选参数省略、显式 None、静态钩子及子类类方法分派。校验与傀儡预览没有保存或展示能力。不得通过恢复 Mixin、动态接收者或通用属性代理扩展引擎。转场数据类型由 `world_transition_schema.py` 独立导出，兼容运行时入口继续引用同一类型对象。
 
 `actions/asura.py` 接收 `AsuraActionDependencies`，修罗试炼接收 `AsuraTrialDependencies`；两者均不接收整个引擎。旧 `system/asura_system.py` 保留薄适配器供既有调用方使用，引擎不再继承它。
 
@@ -179,8 +181,11 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | `engine_world_runtime.py` | 世界年度更新协作 |
 | `engine_event_runtime.py` | 事件选择与执行协作 |
 | `engine_combat_runtime.py` | 战斗、击杀后果与死亡处理 |
-| `engine_presentation.py` | 对外状态汇总 |
-| `engine_persistence.py` | 读取、按顺序调用会话准备阶段、统一提交 |
+| `engine_presentation.py` | 按原顺序执行有副作用的视图准备与状态汇总 |
+| `engine_persistence.py` | 无存储能力的 `prepare_session`；读取与单次提交协调器 `_load` |
+| `orchestration/response.py` | 协调原边界结算、原保存点及视图准备，生成独立快照 |
+| `presentation/projection.py` | 仅从不可变 `PreparedGameView` 生成独立展示数据，不接收游戏或服务 |
+| `world/regions.py`、`../regional_dependencies.py` | 地区算法及其显式能力，不接收整个引擎 |
 | `persistence/` | 内容基础、魂基结算、角色、世界、服务和事件六组准备算法及窄依赖契约 |
 | `../save_schema.py` | 与游戏运行时隔离的结构 10 边界 |
 
@@ -191,8 +196,10 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 处理分为三个边界：
 
 1. `SaveStore.load` 在锁内读 JSON，先执行结构 10 版本检查，再构造 `GameState`。当前结构直接解码，不写文件、不调用会话准备；存档编号必须与请求的文件名一致。
-2. `engine_persistence._load` 按固定顺序运行六组准备阶段。它仍是有副作用的会话入口，可能补全 DLC 状态、消耗市场随机数或执行魂基判死，不能作为纯查询接口。
-3. 准备阶段不持有存档服务；有变化时由协调器统一保存一次。HTTP 请求仍缓存本次准备好的对象，请求结束即释放。
+2. `engine_persistence._load` 调用 `prepare_session(SessionPreparationDependencies, game)` 按固定顺序运行六组准备阶段。准备函数只操作调用方的原工作状态并返回变化标记，不持有存储能力；读取和最终单次保存属于 `_load`。整个入口仍可能补全 DLC 状态、消耗市场随机数或执行魂基判死，不能作为纯查询接口。
+3. 六组准备之后，`persistence/reconciliation.py` 按原先顺序补全百鬼夜行时钟、解除已故原人物的拘魂禁制、绑定已有灵田归属。各入口报告实际变更，统一由 `engine_persistence._load` 保存一次；任何准备或最终修正失败均不提前提交。HTTP 请求只缓存成功准备的对象，请求结束即释放。
+
+独立空间保留原个人状态准备顺序，不启动外界市场、经济和年度结算；角色、关系、儒道效果、佛门、本命、魂基、事件及最后修正的变化也参加同一次保存。重复读取已准备好的状态不应再保存或追加历史，不推进年龄、不消费额外 RNG。`GameEngine._load` 在准备成功后只绑定运行时地区协调器并校验命令准入，不再追加未提交的持久修正。
 
 | 阶段 | 职责与副作用 |
 | --- | --- |
@@ -211,6 +218,10 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 
 ## 系统与引擎之间的依赖
 
+第二阶段将响应拆为 `prepare_response(game)` 与 `project_game(prepared)`：前者经 `ResponseDependencies` 按原顺序执行界面排斥、必要的原保存和视图准备，后者仅接收不可变的 `PreparedGameView`，返回可独立修改的展示字典。`GameEngine.present(game)` 保留兼容，仍协调两者；它不是纯查询。快照只冻结公开响应数据，不复制游戏、人物名册或资源池。历史展示辅助函数的惰性补全和成就评估集中在 `ViewPreparationDependencies`，不得因为重构而提前执行、重复发奖或增加保存点。`PresentationDependencies` 类型别名与 `presentation_runtime` 属性暂供既有消费者使用，不是另一条准备流程。
+
+地区算法使用 `RegionalDependencies`，地图和各年度能力由 `composition/regions.py` 延迟连接，不能沿整个引擎获得读档、保存或展示。地区同步回调位于不依赖模型的 `regional_ports.py`；时间、转场、会话准备及视图准备回调明确参数、关键字约束和返回类型，不使用任意参数转发掩盖不匹配。模块检查禁止投影反向导入运行时，以及地区调度重新导回引擎装配或存储。上述边界、原结算顺序、写盘失败和快照隔离由 `tests/test_architecture_stage2.py` 持续验证。
+
 人物交往由 `composition/contacts.py` 注入明确的操作契约，系统不再导入引擎内部的师徒实现。经济、神机、内政、炼器、阵法、归墟和战争分别通过各自目录的 `dependencies.py` 和 `wiring.py` 声明、连接协作能力，并由 `composition/systems.py` 直接接入引擎。配置钩子和具名常量仍从原模块延迟读取，各系统算法不反向导入自身的兼容入口。
 
 战斗能力适配已移至 `system/combat_adapter.py`，供引擎与王庭共同调用。`engine/combat_capabilities.py` 保留同一对象的兼容导出。适配器仍承担规则、模型与持久化对象之间的连接，不能视作纯战斗规则。
@@ -226,16 +237,16 @@ GameEngine ── wiring.py ── composition/ ── dependencies.py ── po
 | 代码或函数 | 保留原因与后续修改边界 |
 | --- | --- |
 | `engine_persistence._load` | 已拆分版本入口和六组准备阶段；会话准备仍可能消耗随机数、记录历史及结算死亡。有变化时统一保存，不是纯读接口；进一步迁移到行动生命周期需要单独验证触发时机。 |
-| `engine_presentation.present`、`presentation.world._public_race_system` 及其调用链 | 展示链仍会补全本命法宝、种族关系和成就元数据。移到其他生命周期可能改变首次查询结果和状态，故保留调用顺序与副作用。 |
+| `engine_presentation.prepare_view`、`presentation.world._public_race_system` 及其调用链 | 显式视图准备仍会补全本命法宝、种族关系和成就元数据；保留原位置及副作用。纯投影另由 `presentation/projection.py` 处理。 |
 | `orchestration.advancement.advance` | 已与旅行共用年度收尾和行动单位结算；逐年收益、单位扣费、机构工作及最终提交位置保留，两个结算配置的规则差异见第 9 项说明。 |
 | `events.effects._effect` | 保留效果分支顺序、提前返回和共享状态写入。改成异步事件总线可能改变同次行动内的可见状态。 |
 | `engine_combat_runtime._combat`、`_apply_cultivator_kill`、`_die` | 保留战斗、奖励、击杀后果、夺舍及死亡处理的先后关系，以及玩家战斗与后台战斗边界。 |
 | `actions.world_travel._prepare_permanent_world_transition` 及飞升/返回流程 | 保留势力继承、监禁、拍卖、随行人员、关系及傀儡的清理范围与顺序，避免跨界结果变化。 |
 | `world.relationships._sync_relationship_records`、`_sync_party_state` | 普通关系已通过 ID 读写权威 NPC，关系存档仅保留特有字段；俘虏来源侍妾等特殊生命周期暂不合并，见第 8 项。 |
 | `progression/breakthroughs.py`、`progression/trials.py` | 保留概率、保底、消耗、联合结算和随机数调用顺序，不顺手修正规则。 |
-| `GameEngine` 仍保留的 9 个直接基类 | 上界机构、佛门、家族、儒道、侍妾、鬼道、妖族血脉、本命法宝和魔道仍使用 Mixin；其中鬼道、魔道、侍妾、佛门的关键跨系统流程已移出，其他局部规则、培养和查询继续保留。 |
+| `GameEngine` 与旧兼容 Mixin | 引擎已无玩法基类，原算法经静态转发和明确契约调用；旧类保留原接口适配。算法、配置钩子、专用时钟与原提交位置不因消除继承而改变。 |
 | `orchestration/world_time.py` 的 `_advance_world_year` | 已从地图 Mixin 移出，通过明确的年度契约调用各系统；阶段顺序与中断语义保持原样，不等于已统一所有活动的计时规则。 |
-| `GameState`、`Player` 与现有存档模型 | 保留共享可变对象与 JSON 存储；结构版本为 8，提供 6→7→8 纯文档迁移，1–5 不支持；没有引入实体数据库。 |
+| `GameState`、`Player` 与现有存档模型 | 保留共享可变对象与 JSON 存储；只支持结构 10，结构 1–9 不兼容、不转换；没有引入实体数据库。 |
 
 本轮解决的是 `engine/` 实现对入口全局变量和未声明引擎能力的隐式依赖。外部玩法 Mixin 的内部耦合，以及上表中的共享状态和副作用，仍是兼容边界；不能据此认为整个项目已完成解耦。
 
@@ -274,4 +285,4 @@ python -m pytest -q
 
 ## 诸天 M1 本地闭环
 
-结构 9 的 8→9 纯迁移只增加空 `heavens_state`，不创建玩法、人物或随机状态。`system/heavens/` 提供纯校验、有限设置、视图和工作副本提交，`engine/composition/heavens.py` 显式装配；仅原子保存成功后更新请求缓存，失败失效缓存并保留原档。M1 已接入公共年度、真实人物引用、短活动精确余量、资源托管和有限修炼应用；新档默认启用，旧档仍由玩家开启。具体接口和边界见[诸天实装进度](../../docs/heavens-implementation.md)。
+诸天状态保存于结构 10 的 `heavens_state`，不提供旧结构转换。`system/heavens/` 提供纯校验、有限设置、视图和工作副本提交，`engine/composition/heavens.py` 显式装配；仅原子保存成功后更新请求缓存，失败失效缓存并保留原档。M1 已接入公共年度、真实人物引用、短活动精确余量、资源托管和有限修炼应用；新档默认启用，允许载入的已有结构 10 状态仍沿原设置规则。具体接口和边界见[诸天实装进度](../../docs/heavens-implementation.md)。

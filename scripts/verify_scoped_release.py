@@ -129,7 +129,7 @@ REGIONAL_TESTS = list(dict.fromkeys(BUGFIX_TESTS + [
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture'],default='legacy')
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     options=parser.parse_args()
@@ -142,8 +142,12 @@ def main():
     if profile=='secret-arts':
         modules=[str(p.relative_to(ROOT)).replace('\\','/') for p in sorted((ROOT/'tests').rglob('test_*.py'))]
         selected=[modules[i::4] for i in range(4)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional'}:
-        jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short','--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
+    if profile=='architecture':
+        modules=[str(p.relative_to(ROOT)).replace('\\','/') for p in sorted((ROOT/'tests').rglob('test_*.py'))]
+        selected=[modules[i::options.shards] for i in range(options.shards)]
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture'}:
+        jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
+                                   '--maxfail=0' if profile=='architecture' else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
     else:
         jobs=[('related-tests',['-m','pytest',*selected,'-q','--tb=short',f'--junitxml=build/scoped-{tag}.xml'])]
@@ -170,6 +174,10 @@ def main():
         browsers=['browser_common_goods','browser_secret_art_training','browser_quick_start_1411','browser_events_212']
     if profile=='regional':
         browsers=['browser_regional_calendar','browser_economy_trust','browser_strategic_war','browser_events_212']
+    if profile=='architecture':
+        browsers=['browser_events_212','browser_release_251','browser_upper_teachings',
+                  'browser_natal_materials','browser_regional_calendar','browser_regional_rifts',
+                  'browser_custody_formation_fixes']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     if profile=='common-goods':
         jobs.append(('combat-upstream',['tools/verify_combat_upstream_2151.py']))
@@ -183,20 +191,20 @@ def main():
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         print(name+' passed',flush=True)
         return dict(name=name,log=str(log.relative_to(ROOT)),status='passed')
-    if profile in {'secret-arts','common-goods','regional'}:
+    if profile in {'secret-arts','common-goods','regional','architecture'}:
         # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)
         ET.ElementTree(combined).write(ROOT/f'build/scoped-{tag}.xml',encoding='utf-8',xml_declaration=True)
     (ROOT/f'build/scoped-{tag}.json').write_text(json.dumps(dict(version=BASE_GAME_VERSION,inputs_sha256=before,
-        profile=profile,scope='Full repository regression plus secret-art, common-technique and real event browser acceptance' if profile=='secret-arts' else 'User-requested economic, related interaction and release tests only; not full repository regression' if profile=='economy' else 'User-requested related and upstream tests only; not full repository regression',tests=selected,runs=runs),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        profile=profile,scope='Full repository regression plus character, event and regional browser acceptance; explicit character composition' if profile=='architecture' else 'Full repository regression plus secret-art, common-technique and real event browser acceptance' if profile=='secret-arts' else 'User-requested economic, related interaction and release tests only; not full repository regression' if profile=='economy' else 'User-requested related and upstream tests only; not full repository regression',tests=selected,runs=runs),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
 if __name__=='__main__':main()

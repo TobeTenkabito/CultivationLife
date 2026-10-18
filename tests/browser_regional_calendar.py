@@ -68,11 +68,11 @@ def main():
                     game=engine._load(identity)
                     _,game,order=posted((engine,game))
                     engine._merchant_start_order(game,order,__import__('random').Random(4))
-                    regions.ensure(engine,game)
+                    regions.ensure(engine._dependencies.regions,game)
                     game.player.world='demon'  # Disposable remote observation.
                     game.player.location_id=game.merchant_state['worlds']['demon'][0]['hq']
                     game.player.age+=20
-                    regions.synchronize(engine,game,['demon'])
+                    regions.synchronize(engine._dependencies.regions,game,['demon'])
                     engine.store.save(game)
                     page=browser.new_page(viewport=dict(width=393,height=852))
                     page.goto(f'http://127.0.0.1:{http.server_port}')

@@ -40,7 +40,7 @@ def main():
                         game=engine._load(identity)
                         game.settings.update(silent_events=True,guixu_event_popup=False)
                         game.player.lifespan=10000;game.pending_event=None
-                        regions.ensure(engine,game)
+                        regions.ensure(engine._dependencies.regions,game)
                         prepare(engine,game)
                         transfer_value(game,'background:human','background:spirit',123,'节点页面托管')
                         target=node(engine,game,'spirit')

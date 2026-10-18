@@ -21,6 +21,7 @@ def main():
     secret = '--secret-arts' in sys.argv[2:]
     goods = '--common-goods' in sys.argv[2:]
     regional = '--regional' in sys.argv[2:]
+    architecture = '--architecture' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
@@ -41,6 +42,9 @@ def main():
         logs=[f'build/android-common-goods-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if regional:
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('regional-calendar','economy-network') for orientation in ('portrait','landscape')]
+    if architecture:
+        phases=('upper','upper-teachings','natal-materials','asura','regional-calendar','organizations','audit-fixes')
+        logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
@@ -59,6 +63,14 @@ def main():
             require(marker in text,f'Missing current naming/material native coverage: {name}')
         if teachings:
             require('upper_teachings_scope' in text,f'Missing upper DLC native coverage: {name}')
+        if architecture:
+            markers={'upper':'upper_scope','upper-teachings':'upper_teachings_scope',
+                'natal-materials':'natal_materials_scope','asura':'asura_scope',
+                'regional-calendar':'regional_calendar_scope','organizations':'organizations_scope',
+                'audit-fixes':'audit_fixes_scope'}
+            # upper and upper-teachings share a prefix; prefer the longest phase.
+            phase=max((p for p in phases if name.startswith(f'build/android-{p}-')),key=len)
+            require(markers[phase] in text,f'Missing character architecture native coverage: {name}')
     sdk=Path('F:/CultivationLife-Android-Tools/sdk')
     signer=sorted(sdk.glob('build-tools/*/apksigner.bat'))[-1]
     apk=ROOT/'android/app/build/outputs/apk/release/app-release.apk'
@@ -87,6 +99,7 @@ def main():
     if secret:receipt['scope']='Independent secret arts, actual low-rank learning and grafting, original source ownership, stale-event recovery, six-entry paging and legacy elemental-art behavior; four themes and portrait/landscape'
     if goods:receipt['scope']='Fixed core healing, original common ore forging, finite talisman conversion/toggle, paid tiered auction and stale insufficient recovery; four themes and portrait/landscape'
     if regional:receipt['scope']='Guixu interruption, persistent travel credit, real resumed arrival and fleet network native clicks; four themes and portrait/landscape'
+    if architecture:receipt['scope']='Seven character/region/organization phases, four themes, portrait/landscape; actual signed release APK and current native test APK'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 

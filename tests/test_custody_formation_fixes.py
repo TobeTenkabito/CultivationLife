@@ -107,8 +107,8 @@ def test_spatial_year_defers_original_world_prison_until_catchup(api):
     # Its society and sentence freeze together, then settle the real year once.
     assert saved.intrigue_state['factions']['sect:audit_org']['prison'][0]['sentence_remaining']==2
     from cultivation_life.engine.world import regions
-    regions.synchronize(engine, saved, ['human'])
-    regions.synchronize(engine, saved, ['human'])
+    regions.synchronize(engine._dependencies.regions, saved, ['human'])
+    regions.synchronize(engine._dependencies.regions, saved, ['human'])
     assert saved.intrigue_state['factions']['sect:audit_org']['prison'][0]['sentence_remaining']==1
 
 

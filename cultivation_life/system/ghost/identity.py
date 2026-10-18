@@ -110,6 +110,8 @@ def ghost_constraint_action(deps: GhostIdentityDependencies, game_id: str, actio
     game = deps._load(game_id); player = game.player
     if not player.alive:
         raise ValueError("此生已经结束")
+    if game.pending_event or game.active_trial:
+        raise ValueError('请先处理当前事件或劫战，再处理拘魂禁制')
     if not player.ghost_captor:
         raise ValueError("当前并未受制于拘魂者")
     rng = decode_rng(game.seed, game.rng_state)
@@ -117,10 +119,13 @@ def ghost_constraint_action(deps: GhostIdentityDependencies, game_id: str, actio
     target_power = max(1.0, float(captor.get("combat_power", 1.0)))
     chance = max(0.05, min(0.9, combat_power(player) / (combat_power(player) + target_power)))
     if action == "wait":
+        origin = (player.world, player.location_id)
         advance_player_age(player)
         deps._advance_world_year(game, rng, [], encounters=False)
         if player.alive:
             deps._advance_soul_erosion_time(game, 1)
+        if (player.world, player.location_id) != origin:
+            deps._ensure_market(game, rng)
         result, summary = "waited", "你在拘魂禁制中熬过一年，并随拘魂者一同行动。"
     elif action == "resist":
         if rng.random() < chance:

@@ -199,6 +199,8 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
     simulated_npcs = [*game.world_npcs.values(), *game.notable_npcs.values()]
     if region(game) is not None:
         simulated_npcs.extend(n for s in game.sects.values() for n in s.npcs if n.world != s.world)
+        if game.family:
+            simulated_npcs.extend(n for n in game.family.npcs if n.world != game.family.world)
     only = getattr(game, '_regional_single_person', None)
     if only is not None:
         person = find_person(game, only, include_inactive=True)

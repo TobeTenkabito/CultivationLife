@@ -1,4 +1,5 @@
 """Persistent royal seats and elapsed-time governance, available without DLC."""
+from .character.dependencies import AsuraCourtDependencies
 import copy
 import hashlib
 
@@ -231,7 +232,7 @@ def tick(game, state):
     record(game, state, f'{npc.name}评估双方实力后递上换位战书；须在第 {unit+4} 单位前回王庭应战或让位。')
 
 
-def act(engine, game, state, action, target):
+def settle_action(deps: AsuraCourtDependencies, game, state, action, target):
     """Actions return a journal entry; caller persists the single transaction."""
     from ..runtime import decode_rng, encode_rng
     reconcile(game, state)
@@ -265,12 +266,12 @@ def act(engine, game, state, action, target):
         if game.player.hp < max_hp(game.player) * .25:
             raise ValueError('伤势过重，须恢复至至少四分之一气血才能应战')
         target_data = dict(npc_id=npc.id, faction_id=COURT, target_name=npc.name,
-            target_power=engine._npc_power(npc), target_realm_index=npc.realm_index,
+            target_power=deps._npc_power(npc), target_realm_index=npc.realm_index,
             target_layer=npc.layer, path=npc.path, race=npc.race, world=npc.world,
             combat_type='cultivator', objective='repel', enemy_objective='repel',
             player_defending=incoming, exclude_allied_ids=[npc.id])
         rng = decode_rng(game.seed, game.rng_state)
-        result, summary = engine._combat(game, target_data, False, rng)
+        result, summary = deps._combat(game, target_data, False, rng)
         game.rng_state = encode_rng(rng)
         court['last_duel'] = state['unit']
         # A nonlethal domain duel can stop at the engine's safety floor even
@@ -371,6 +372,12 @@ def act(engine, game, state, action, target):
         court['decree_at'] = state['unit']
         return f'颁行{title}：{description}。'
     raise ValueError('未知王庭事务')
+
+
+def act(engine, game, state, action, target):
+    from .character.wiring import bind_asura_court
+    return settle_action(bind_asura_court(engine), game, state, action, target)
+
 
 
 def public(game, state):

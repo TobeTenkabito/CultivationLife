@@ -69,7 +69,7 @@ def test_real_resident_settles_without_replacing_visitor(local, site):
     assert not research_assignment(settled, identity)
     assert settled.world_npcs[identity].age == before.world_npcs[identity].age+2
     from cultivation_life.engine.world import regions
-    regions.synchronize(engine, settled, [destination.world])
+    regions.synchronize(engine._dependencies.regions, settled, [destination.world])
     assert settled.world_npcs[identity].age == before.world_npcs[identity].age+3
     assert stones(settled) == stones(before) and settled.player.opportunity == before.player.opportunity
     assert set(settled.world_npcs) == set(before.world_npcs)
@@ -173,7 +173,7 @@ def test_real_lifespan_death_precedes_arrival_or_settlement(local, years):
         # applies real death, without clawing back an already completed task.
         assert row['status']=='completed' and saved.world_npcs[identity].alive
         from cultivation_life.engine.world import regions
-        regions.synchronize(local[0], saved, ['reincarnation'])
+        regions.synchronize(local[0]._dependencies.regions, saved, ['reincarnation'])
         assert not saved.world_npcs[identity].alive and '寿元' in saved.world_npcs[identity].death_reason
         assert row['spent']==4000 and row['refunded']==0
         return

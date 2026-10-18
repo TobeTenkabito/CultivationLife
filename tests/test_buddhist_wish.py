@@ -213,7 +213,18 @@ def test_party_violence_still_rejects_inaccessible_original(setup, elsewhere):
     if elsewhere == "world":
         game.player.dao_friends[0]["world"] = "spirit"
     else:
-        game.spatial_state["instances"] = {"remote": {"npc_ids":["away"]}}
+        from cultivation_life.relationship_records import find_person
+        from cultivation_life.spatial_people import instance_of
+        from cultivation_life.system import spatial
+        from cultivation_life.system.combat.npc_lifecycle import move_world
+        scene = spatial.create_instance(game, random.Random(111), 'secluded')
+        original = find_person(game, 'away')
+        move_world(original, 'rift', game.player.age, WORLD_SYSTEMS.get('transcendent_combat', {}))
+        original.location_id = scene['location_id']
+        scene.setdefault('npc_ids', []).append(original.id)
+        # A stale instance ID alone does not relocate a human-world person.
+        # Exercise a real, inaccessible original in its registered instance.
+        assert instance_of(game, original.id) == scene['id']
     engine.store.save(game)
     engine._load(game.id)  # Reconcile the departed party member before command atomicity.
     before = engine.store._path(game.id).read_bytes()
