@@ -69,7 +69,8 @@ def describe(row):
             'mixed':'这是一座混居之城，修士与未入道的居民在各自的街坊生活。'}[row.get('population','mixed')]
         content=city_content(row)
         flavor = content.get('flavor','') if level>=content.get('level',1) else ''
-        return f"你已经到了{display_name(row)}。{size}；{character}。{population}{flavor}{defenses}{restrictions}" + ('部分街区受损，尚待修复。' if row['status']=='damaged' else '')
+        facilities='、'.join(config()['city_facilities'][k]['name'] for k in row.get('facilities',[]))
+        return f"你已经到了{display_name(row)}。{size}；{character}。{population}{flavor}{defenses}{restrictions}" + (f'公共设施：{facilities}。' if facilities else '') + ('部分街区受损，尚待修复。' if row['status']=='damaged' else '')
     if row['status']=='destroyed':
         return f"你来到{row['name']}的旧址。建筑已经毁坏，原有设施停止使用，仍可在此勘看重建。"
     if row.get('subtype') == 'cave':

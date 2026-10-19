@@ -47,7 +47,7 @@ def test_two_unique_initial_cities_and_real_story_claims_in_every_world(tmp_path
     game=engine._load(created['id']);game.pending_event=None;engine.store.save(game)
     shown=engine.get_game(game.id)
     all_rows=[r for p in shown['map']['locations'] for r in p['buildings']]
-    assert len([r for r in all_rows if r['type']=='city'])==2
+    assert len([r for r in all_rows if r['type']=='city'])==4
     assert len([r for r in all_rows if r['type']=='scenery'])>=1
     assert not game.building_state
     for spec in config()['cities'][world]:
@@ -73,7 +73,7 @@ def test_two_unique_initial_cities_and_real_story_claims_in_every_world(tmp_path
         choose(engine,game.id,'leave')
         assert stable_time(engine.store.load(game.id))==before
     identities=[s['story']['title'] for rows in config()['cities'].values() for s in rows]
-    assert len(identities)==len(set(identities))==22
+    assert len(identities)==len(set(identities))==44
 
 
 def test_city_construction_consumes_actual_materials_and_starts_at_one(local):

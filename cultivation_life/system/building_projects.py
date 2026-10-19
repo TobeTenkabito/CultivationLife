@@ -33,6 +33,8 @@ def quote(game, purpose, row=None):
         rank=grade(world)
         for role, amounts in config()['city_materials'].items():
             materials[material_id(world,rank,role)]=amounts[level-1] if purpose!='govern' else max(1,amounts[0]//60)
+        if row and purpose in {'develop','govern'} and 'works' in row.get('facilities',[]):
+            materials={key:max(1,(n*4+4)//5) for key,n in materials.items()}
         coins=int(BASE_PRICES[rank-1]*config()['city_labor_units'][level-1])
         if purpose=='govern':coins=max(1,coins//20)
         if purpose=='city' and any(r['type']=='city' and r['address']==address(game)
@@ -101,7 +103,7 @@ def defense(row):
     if row['type']=='city':
         rank=min(cap,floor+row['level']-1)
         if row.get('population')=='mortal':rank=max(0,floor-1)
-        return expected_combat_power(rank,5 if rank else 1)*dict(military=1.5,economic=.8,comprehensive=1.)[row['subtype']]*row['level']
+        return expected_combat_power(rank,5 if rank else 1)*dict(military=1.5,economic=.8,comprehensive=1.)[row['subtype']]*row['level']*(1.25 if row['status']=='intact' and 'watch' in row.get('facilities',[]) else 1.)
     return expected_combat_power(floor,1)*row['level']
 
 

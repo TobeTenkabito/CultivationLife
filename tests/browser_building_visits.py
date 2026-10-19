@@ -17,8 +17,27 @@ from cultivation_life.building_rules import config
 from cultivation_life.rules import add_item
 from cultivation_life.system.buddhist.rules import buddhist_config
 from test_economy_enterprises import buy
-from browser_buildings import choice
 from scripts.browser_navigation import navigation_locator
+from fixtures.city_management_release import prepare_city_management, landscape_management, inspect_city_management
+
+
+def choice(page,identity):
+    page.wait_for_function("!busy&&!document.documentElement.classList.contains('theme-switching')")
+    old=page.evaluate('game.pending_event.id')
+    index=page.evaluate('id=>game.pending_event.choices.findIndex(c=>c.id===id)',identity)
+    assert index>=0,identity
+    try:
+        with page.expect_response(lambda r:r.request.method=='POST' and r.url.endswith('/choice')) as response:
+            page.locator('#event-choices button').nth(index).click()
+        actual=response.value
+        assert actual.ok,actual.text()
+        page.wait_for_function('id=>!busy&&game.pending_event?.id!==id',arg=old)
+    except Exception as error:
+        output=ROOT/'build/building-visits-browser'
+        page.screenshot(path=str(output/'failed-choice.png'),full_page=True)
+        snapshot=page.evaluate('JSON.stringify({busy,event:game?.pending_event,toast:document.querySelector("#toast")?.textContent,theme:document.documentElement.dataset.theme})')
+        (output/'failed-choice.json').write_text(snapshot,encoding='utf-8')
+        raise AssertionError(f'Actual choice {identity}: {error}; state={snapshot}') from error
 
 
 def open_map(page):
@@ -40,8 +59,34 @@ def fixture(engine):
 
 def enter(page,identity):
     open_map(page)
-    page.locator(f'#map-locations .current .building-row[data-building-id="{identity}"] [data-building-action=enter]').click()
+    escaped=page.evaluate('s=>CSS.escape(s)',identity)
+    page.locator(f'#map-locations .current .building-row[data-building-id="{escaped}"] [data-building-action=enter]').click()
     page.wait_for_function('!busy&&game.buildings.inside')
+
+
+def management_check(engine,page,output,theme,width):
+    from browser_city_buildings import click_prefix
+    game=engine.create_game('城市经营实测','heavenly','dao',2172,preset_id='core')
+    prepare_city_management(engine,game['id'])
+    page.evaluate('async id=>loadGame(id)',game['id']);open_map(page)
+    page.locator('#map-locations [data-building-action=city-plan]').click();page.wait_for_function('!busy&&game.buildings.inside')
+    choice(page,'city:economic');choice(page,'city:economic:mixed');click_prefix(page,'city:build:')
+    city=page.evaluate('game.buildings.rows.find(r=>r.id.startsWith("city:player:")).id')
+    choice(page,'civic:main');choice(page,'civic:facilities');choice(page,'civic:exchange');click_prefix(page,'civic:commit:')
+    choice(page,'civic:settle');assert page.locator('#event-choices button').first.is_disabled();choice(page,'leave')
+    age=page.evaluate('game.player.age');page.locator('[data-action=rest]').first.click()
+    page.wait_for_function('age=>!busy&&game.player.age>age',arg=age)
+    assert page.evaluate('game.player.age')==age+1
+    enter(page,city);choice(page,'civic:main');choice(page,'civic:settle');click_prefix(page,'civic:commit:')
+    page.screenshot(path=str(output/f'management-{theme}-{width}.png'))
+    choice(page,'civic:settle');assert page.locator('#event-choices button').first.is_disabled();choice(page,'leave')
+    landscape_management(engine,game['id']);page.evaluate('async id=>loadGame(id)',game['id'])
+    enter(page,'scenery:human:reed_letter')
+    choice(page,'explore:main');choice(page,'explore:route:0');choice(page,'explore:finish:0:1')
+    page.screenshot(path=str(output/f'landscape-story-{theme}-{width}.png'))
+    choice(page,'explore:main');choice(page,'explore:route:1');choice(page,'explore:finish:1:1');choice(page,'leave')
+    inspect_city_management(engine,game['id'])
+    assert not page.evaluate('busy') and not page.evaluate('document.documentElement.scrollWidth>innerWidth+1')
 
 
 def main():
@@ -64,7 +109,9 @@ def main():
                             page=browser.new_page(viewport=dict(width=width,height=height),reduced_motion='reduce')
                             page.on('pageerror',lambda e:errors.append(str(e)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData&&window.GameThemes')
+                            page.evaluate('GameThemes.ready')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            page.evaluate('GameThemes.saved')
                             page.evaluate('async id=>loadGame(id)',game.id);open_map(page)
                             overview=page.locator('#map-locations .current .building-overview')
                             assert overview.locator('.building-art').count()==3
@@ -107,6 +154,7 @@ def main():
                             assert engine.store.load(game.id).player.to_dict()==before
                             assert not page.evaluate('busy') and page.locator('[data-action=cultivate]').is_enabled()
                             report.append(dict(theme=theme,width=width,assets_nonblank=True,real_visits=True,claims_once=True))
+                            management_check(engine,page,output,theme,width)
                             page.close()
                     assert not errors,errors
                     browser.close()

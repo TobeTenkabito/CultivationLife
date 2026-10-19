@@ -129,6 +129,7 @@ REGIONAL_TESTS = list(dict.fromkeys(BUGFIX_TESTS + [
 
 
 BUILDING_VISIT_TESTS = [
+    'tests/test_city_management.py',
     'tests/test_building_visits.py','tests/test_building_system.py','tests/test_city_buildings.py',
     'tests/test_economy_enterprises.py','tests/test_economy_estate_audit.py','tests/test_economy_network.py',
     'tests/test_buddhist_dharma.py','tests/test_buddhist_wish.py','tests/test_upper_teachings.py',

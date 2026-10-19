@@ -6,6 +6,7 @@ from ..rules import expected_combat_power, max_hp, max_mp
 from ..runtime import decode_rng, encode_rng
 from ..models import HistoryRecord
 from . import building_projects as projects
+from . import building_management as management
 
 
 def option(identity,text,reason=''):
@@ -41,6 +42,7 @@ def arena_reason(game,row):
 
 
 def project(game,row,node):
+    if node.startswith('civic:'):return management.project(game,row,node)
     content=city_content(row)
     title=row['name']
     choices=[]
@@ -48,7 +50,7 @@ def project(game,row,node):
         body=describe(row)
         choices=[option('city:audience','拜访城府'),option('city:rumor','坊巷见闻'),
                  option('city:story',story(row)['title']),option('city:arena','参加演武')]
-        if projects.owns(game,row):choices.extend([option('city:govern','办理城务'),option('city:develop','发展城池')])
+        if projects.owns(game,row):choices.extend([option('civic:main','经营城池'),option('city:govern','办理城务'),option('city:develop','发展城池')])
         choices.append(option('management','勘看城防与营造'))
     elif node=='city:audience':
         title+=' · 城府'
@@ -120,12 +122,14 @@ def build(game,scene):
         level=1,development=0,status='intact',address=place,owner=dict(kind='player',id=game.id),
         users=[],public=True,features=[])
     ensure_state(game)['records'][identity]=row
+    ensure_state(game).setdefault('city_business',{})[identity]=dict(last_year=game.player.age,expense=0,income=0)
     game.history.append(HistoryRecord('SYS_CITY_FOUNDATION',1,game.player.age,'筑城',identity,'completed',
         f"在原地建成一级{row['name']}。",dict(cost=bill['coins'],materials=bill['materials']),['building','city']))
     scene.update(kind='visit',building_id=identity);scene.pop('project',None)
 
 
 def act(deps,game,row,choice):
+    if choice.startswith('civic:'):return management.act(game,row,choice)
     if choice.startswith('city:resolve:'):
         if usage(game,row).get('story'):raise ValueError('此城逸事已经完成')
         index=int(choice.rsplit(':',1)[1])

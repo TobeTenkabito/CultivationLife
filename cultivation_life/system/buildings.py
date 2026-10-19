@@ -13,6 +13,7 @@ from .buddhist.rules import buddhist_config, buddhist_active
 from .building_assets import rows_at, local_rows
 from . import building_cities as cities, building_projects as projects, building_destruction as destruction
 from . import building_visits as visits
+from . import building_exploration as exploration
 
 
 @dataclass(frozen=True)
@@ -306,9 +307,10 @@ def action(deps: BuildingDependencies, game_id, action, building_id='', event_id
             node=cities.act(deps,game,find(game,scene['building_id']),choice_id)
             navigate(game,scene,'main' if node=='back' else node)
             if following:game.pending_event['_followup_event']=following
-        elif choice_id.startswith('visit:'):
+        elif choice_id.startswith(('visit:','explore:')):
             following=game.pending_event.get('_followup_event')
-            node=visits.act(deps,game,find(game,scene['building_id']),choice_id)
+            row=find(game,scene['building_id'])
+            node=exploration.act(game,row,choice_id) if choice_id.startswith('explore:') else visits.act(deps,game,row,choice_id)
             navigate(game,scene,node)
             if following:game.pending_event['_followup_event']=following
         elif choice_id=='temple:upgrade' or choice_id.startswith('toggle:'):

@@ -4,6 +4,7 @@ from ..content_registry import REALMS, WORLD_SYSTEMS
 from ..models import HistoryRecord
 from .economy.enterprise_rules import capacity
 from .economy.enterprise_state import require_local
+from . import building_exploration as exploration
 
 
 SCENERY = {
@@ -68,7 +69,10 @@ def choices(row):
     labels = {'scenery': [('trail','循迹探幽'),('weather','静观天候'),('traces','寻访旧迹')],
         'industry': [('work','走访'+row['name']),('ledger','查点经营实况'),('lesson','请教经营心得')],
         'temple': [('bell','听钟问禅'),('pilgrims','香客见闻'),('lesson','一盏灯的问答')]}
-    return [option('visit:'+key, label) for key,label in labels.get(kind, [])]
+    actions=[option('visit:'+key, label) for key,label in labels.get(kind, [])]
+    if kind=='scenery' and exploration.content(row):
+        actions.insert(0,option('explore:main',exploration.content(row)['title']))
+    return actions
 
 
 def tale(row, activity):
@@ -88,6 +92,7 @@ def claimed(game, row):
 
 
 def project(game, row, node):
+    if node.startswith('explore:'):return exploration.project(game,row,node)
     if not node.startswith('visit:') or not category(row): return None
     parts = node.split(':')
     result = len(parts) == 5 and parts[1:3] == ['result','resolve']

@@ -27,8 +27,8 @@ def verify(base,folder):
             choice=next(c['id'] for c in offered['choices'] if c['id'].startswith(choice))
         game=call(path+'/choice',dict(choice_id=choice,event_id=offered['id']))
     game=call(path)
-    assert len([r for p in game['map']['locations'] for r in p['buildings'] if r['type']=='city'])==2
-    assert len([r for p in game['map']['locations'] for r in p['buildings'] if r['type']=='scenery'])==1
+    assert len([r for p in game['map']['locations'] for r in p['buildings'] if r['type']=='city'])==4
+    assert len([r for p in game['map']['locations'] for r in p['buildings'] if r['type']=='scenery'])==3
     game=call(path+'/building-action',dict(action='city-plan'))
     choose('city:military');choose('city:military:mixed');choose('city:build:')
     city=next(r for r in game['buildings']['rows'] if r['owner']==dict(kind='player',id=identity) and r['type']=='city')

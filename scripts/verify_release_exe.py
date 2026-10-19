@@ -432,8 +432,10 @@ def verify(with_dlc):
             buildings_verified=verify_buildings(base,folder)
             from scripts.verify_building_visits_exe import verify as verify_visits
             visits_verified=verify_visits(base,folder,with_dlc)
+            from scripts.verify_building_visits_exe import verify_management
+            management_verified=verify_management(base,folder)
             print(f"EXE verified: DLC={with_dlc}, version={config['base_game']['version']}, worlds={len(config['worlds'])}, buildings={buildings_verified}")
-            return {'with_dlc': with_dlc, 'exe_sha256': verified_digest, 'buildings_verified':buildings_verified,'building_visits_verified':visits_verified,
+            return {'with_dlc': with_dlc, 'exe_sha256': verified_digest, 'buildings_verified':buildings_verified,'building_visits_verified':visits_verified,'city_management_verified':management_verified,
                     'base_version': config['base_game']['version']}
         finally:
             subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"], capture_output=True, check=False)

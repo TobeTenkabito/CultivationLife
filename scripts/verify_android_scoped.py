@@ -56,6 +56,7 @@ def main():
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if buildings and '/android-buildings-' in name:require('buildings_scope' in text,f'Missing current native city coverage: {name}')
         if visits and '/android-building-visits-' in name:require('building_visits_scope' in text,f'Missing native illustrated visits: {name}')
+        if visits and '/android-building-visits-' in name:require('city_management_scope' in text,f'Missing native city management and authored landscape: {name}')
         if goods:require('common_goods_scope' in text,f'Missing common goods native coverage: {name}')
         if regional and 'regional-calendar' in name:require('regional_calendar_scope' in text,f'Missing regional native coverage: {name}')
         if secret:

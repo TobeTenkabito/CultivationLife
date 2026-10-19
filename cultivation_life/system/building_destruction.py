@@ -55,7 +55,7 @@ def rebuild(game,row,temple_action):
         else:
             original=projects.persist(game,row)
             original['status']='intact'
-            if row['type']=='city':original.update(level=1,development=0,features=[])
+            if row['type']=='city':original.update(level=1,development=0,features=[],facilities=[])
     game.history.append(HistoryRecord('SYS_BUILDING_REBUILD',1,game.player.age,'原址重建',row['id'],'completed',
         f"{row['name']}在原地重建，旧活动次数与原权属保留。",dict(building_id=row['id'],cost=bill['coins']),['building']))
 

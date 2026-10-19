@@ -21,11 +21,21 @@ def validate(config,maps,profiles):
     for field in ('city_story_opportunity_fraction','city_arena_opportunity_fraction','visit_insight_opportunity_fraction','war_destruction_chance'):
         n=config.get(field)
         require(type(n) in (int,float) and math.isfinite(n) and 0<=n<=1,'建筑概率或奖励比例无效')
+    facilities=config.get('city_facilities',{})
+    require(set(facilities)=={'exchange','works','watch'},'城市公共设施目录无效')
+    for spec in facilities.values():
+        require(isinstance(spec,dict) and all(isinstance(spec.get(k),str) and spec[k] for k in ('name','description')),'公共设施文本无效')
+        require(type(spec.get('labor_units')) is int and spec['labor_units']>0,'公共设施工费无效')
+        require(isinstance(spec.get('materials'),list) and len(spec['materials'])==3 and all(type(n) is int and n>0 for n in spec['materials']),'公共设施材料无效')
+    operation=config.get('city_operation',{})
+    require(all(type(operation.get(k)) is int and operation[k]>0 for k in ('cost_units','aid_units')),'城市经营开支无效')
+    receipts=operation.get('receipt_units',{})
+    require(isinstance(receipts,dict) and set(receipts)=={'military','economic','comprehensive'} and all(type(n) is int and 0<n for n in receipts.values()),'城市经营分成无效')
     for category in ('cities','scenery'):
         require(isinstance(config.get(category),dict),'建筑目录缺失')
         for world,rows in config[category].items():
             require(world in profiles and profiles[world].get('tier',0)>0 and world in maps['worlds'],'建筑引用未知界面')
-            require(isinstance(rows,list) and (len(rows)==2 if category=='cities' else len(rows)>0),'初始城市或景观数量无效')
+            require(isinstance(rows,list) and len(rows)>0,'初始城市或景观数量无效')
             seen=set()
             locations={p['id'] for p in maps['worlds'][world]['locations']}
             for row in rows:
@@ -34,6 +44,12 @@ def validate(config,maps,profiles):
                 require(isinstance(row.get('name'),str) and 1<=len(row['name'])<=40 and row.get('location_id') in locations,'建筑名称或地点无效')
                 if category=='scenery':
                     require(isinstance(row.get('description'),str) and bool(row['description']),'景色描述缺失')
+                    tale=row.get('exploration')
+                    if tale is not None:
+                        require(isinstance(tale,dict) and all(isinstance(tale.get(k),str) and tale[k] for k in ('title','body')),'景色剧情缺失')
+                        for key in ('actions','discoveries','finals','endings'):
+                            require(isinstance(tale.get(key),list) and len(tale[key])==2 and all(isinstance(s,str) and s for s in tale[key]),'景色剧情分支无效')
+                        require(tale.get('relic_id') is None or tale['relic_id']=='landscape_'+row['id'],'景色纪念物引用无效')
                     continue
                 require(row.get('subtype') in {'military','economic','comprehensive'} and row.get('population') in {'mortal','cultivator','mixed'},'城市属性无效')
                 require(type(row.get('level')) is int and 1<=row['level']<=3,'城市规模无效')

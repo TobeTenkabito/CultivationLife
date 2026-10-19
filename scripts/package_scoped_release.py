@@ -144,6 +144,8 @@ def main():
         require(all('buildings_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required if '/android-buildings-' in n),'Native city/building acceptance missing')
         require(all(c.get('buildings_verified') for c in evidence['cases']),'Actual compiled building commands required with and without DLC')
         if visits:
+            require(all(c.get('city_management_verified') for c in evidence['cases']),'Actual compiled city management and authored landscapes required')
+            require(all('city_management_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required if '/android-building-visits-' in n),'Native management and landscape scope missing')
             require(all(c.get('building_visits_verified') for c in evidence['cases']),'Actual compiled visit branches required with and without DLC')
             require(all('building_visits_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required if '/android-building-visits-' in n),'Native visit scope missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
@@ -159,7 +161,7 @@ def main():
         else:require(selected=={p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').rglob('test_*.py')},'Building feature release requires the complete repository test selection')
         require({'browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212'}<={r['name'] for r in scoped['runs']},'Building feature browsers incomplete')
         performance=json.loads((ROOT/'build/building-performance.json').read_text(encoding='utf-8'))
-        if visits:require(all(r.get('visit_claims')==r['buildings'] for r in performance['rows']),'Building visits performance must include persistent claim records')
+        if visits:require(all(r.get('visit_claims')==r['buildings'] and r.get('landscape_claims')==r['buildings'] and r.get('city_books')==r['buildings'] for r in performance['rows']),'Building visits performance must include persistent claim and finance records')
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
     dlcs={p.parent.name:json.loads(p.read_text(encoding='utf-8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],

@@ -86,7 +86,7 @@ def main():
                         page.evaluate('async id=>loadGame(id)',game.id);before=engine.store.load(game.id).player.to_dict()
                         open_map(page,atlas=True)
                         page.locator('[aria-label="地图地点"]').select_option(spec['location_id'])
-                        scenic=page.locator('#map-atlas .building-row[data-building-id^="scenery:"]')
+                        scenic=page.locator(f'#map-atlas .building-row[data-building-id="scenery:{world}:{spec["id"]}"]')
                         scenic.get_by_role('button',name='观景',exact=True).click();page.wait_for_function('!busy&&game.buildings.inside')
                         choice(page,'details');choice(page,'back');choice(page,'leave')
                         assert engine.store.load(game.id).player.to_dict()==before
@@ -140,7 +140,7 @@ def main():
                     browser.close()
             finally:httpd.shutdown();httpd.server_close()
     (output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
-    print('City buildings UI passed: 22 city stories, 11 scenery visits, 4 themes x desktop/mobile real construction, finite rewards, yearly gates, ruins, stale recovery and no time advance')
+    print('City buildings UI passed: 44 city stories, 11 original scenery visits, 4 themes x desktop/mobile real construction, finite rewards, yearly gates, ruins, stale recovery and no time advance')
 
 
 if __name__=='__main__':main()

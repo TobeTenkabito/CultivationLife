@@ -62,3 +62,41 @@ def verify(base,folder,with_dlc):
         with urllib.request.urlopen(base+'/'+asset,timeout=15) as response:assert response.read()
     print(f'Building visits EXE passed: DLC={with_dlc}, real branches, bounded insight, unchanged stock and scenery')
     return True
+
+
+def verify_management(base,folder):
+    from cultivation_life.models import GameState
+    from cultivation_life.rules import add_item
+    from cultivation_life.system.building_projects import quote
+    from cultivation_life.building_rules import config
+    def call(path,payload=None):
+        request=urllib.request.Request(base+path,data=json.dumps(payload).encode() if payload is not None else None,headers={'Content-Type':'application/json'})
+        with urllib.request.urlopen(request,timeout=45) as response:return json.load(response)
+    game=call('/api/games',dict(name='城务山河成品验收',spirit_root='heavenly',path='dao',preset_id='core',seed=2172))
+    path='/api/games/'+game['id'];save=folder/'data/saves'/f"{game['id']}.json"
+    raw=GameState.from_dict(json.loads(save.read_text(encoding='utf-8')));raw.pending_event=None
+    raw.settings.update(silent_events=True,guixu_event_popup=False,combat_popup=False);raw.player.next_tribulation_age=None
+    add_item(raw.player,'spirit_stone',10**12)
+    for key in quote(raw,'city')['materials']:add_item(raw.player,key,100000)
+    save.write_text(json.dumps(raw.to_dict(),ensure_ascii=False),encoding='utf-8')
+    def choose(prefix):
+        nonlocal game
+        selected=next(c['id'] for c in game['pending_event']['choices'] if c['id']==prefix or c['id'].startswith(prefix))
+        game=call(path+'/choice',dict(choice_id=selected,event_id=game['pending_event']['id']))
+    game=call(path+'/building-action',dict(action='city-plan'));choose('city:economic');choose('city:economic:mixed');choose('city:build:')
+    city=next(r['id'] for r in game['buildings']['rows'] if r['id'].startswith('city:player:'))
+    choose('civic:main');choose('civic:facilities');choose('civic:exchange');choose('civic:commit:');choose('civic:settle')
+    assert not game['pending_event']['choices'][0]['enabled'];choose('leave')
+    age=game['player']['age'];game=call(path+'/advance',dict(action='rest',years=1));assert game['player']['age']==age+1
+    game=call(path+'/building-action',dict(action='enter',building_id=city));choose('civic:main');choose('civic:settle');choose('civic:commit:')
+    choose('civic:settle');assert not game['pending_event']['choices'][0]['enabled'];choose('leave')
+    raw=GameState.from_dict(json.loads(save.read_text(encoding='utf-8')))
+    book=raw.building_state['city_business'][city];assert book['income']==2000 and book['expense']==13200
+    raw.player.location_id=config()['scenery']['human'][1]['location_id'];save.write_text(json.dumps(raw.to_dict(),ensure_ascii=False),encoding='utf-8')
+    game=call(path+'/building-action',dict(action='enter',building_id='scenery:human:reed_letter'))
+    choose('explore:main');choose('explore:route:0');choose('explore:finish:0:1');choose('explore:main');choose('explore:route:1');choose('explore:finish:1:1');choose('leave')
+    raw=GameState.from_dict(json.loads(save.read_text(encoding='utf-8')))
+    assert sum(i.quantity for i in raw.player.inventory if i.id=='landscape_reed_letter')==1
+    assert raw.building_state['landscape_usage']['scenery:human:reed_letter']==dict(ending='0:1')
+    print('City management EXE passed: real facilities, annual cash, no repeat payout and authored two-stage landscape relic')
+    return True

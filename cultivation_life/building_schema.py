@@ -69,10 +69,25 @@ def decode_state(value):
         if row['type'] == 'city' and row.get('subtype') not in {'military', 'economic', 'comprehensive'}:
             raise ValueError('城市类型无效')
         if row['type'] == 'city':
+            facilities=row.get('facilities',[])
+            if (not isinstance(facilities,list) or len(facilities)>row['level'] or
+                    any(not isinstance(k,str) or k not in {'exchange','works','watch'} for k in facilities) or len(set(facilities))!=len(facilities)):
+                raise ValueError('城市公共设施无效')
             if row.get('population', 'mixed') not in CITY_POPULATIONS:
                 raise ValueError('城市居民属性无效')
             if type(row.get('development', 0)) is not int or not 0 <= row.get('development', 0) <= 12:
                 raise ValueError('城市发展进度无效')
+    business=value.get('city_business',{})
+    if not isinstance(business,dict) or len(business)>4096:raise ValueError('城市经营记录无效')
+    for identity,used in business.items():
+        if (not isinstance(identity,str) or not identity or not isinstance(used,dict) or set(used)!={'last_year','expense','income'}
+                or any(type(n) is not int or not 0<=n<=10**24 for n in used.values())):
+            raise ValueError('城市经营账无效')
+    landscapes=value.get('landscape_usage',{})
+    if not isinstance(landscapes,dict) or len(landscapes)>8192:raise ValueError('景色阅历记录无效')
+    for identity,used in landscapes.items():
+        if (not isinstance(identity,str) or not identity or not isinstance(used,dict) or set(used)!={'ending'}
+                or not isinstance(used['ending'],str) or used['ending'] not in {'0:0','0:1','1:0','1:1'}):raise ValueError('景色初次结局无效')
     usage = value.get('city_usage', {})
     if not isinstance(usage, dict) or len(usage) > 4096:
         raise ValueError('城市活动记录无效')

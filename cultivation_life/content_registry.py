@@ -283,6 +283,9 @@ class ContentRegistry:
         races_doc = copy.deepcopy(documents["races.json"])
         world_npcs_doc = copy.deepcopy(documents["world_npcs.json"])
         story_combat_doc = copy.deepcopy(documents["story_combat_scenarios.json"])
+        from .building_expansion_content import expand as expand_buildings, relic_items
+        expand_buildings(world_doc['systems']['building_system'])
+        items_doc['items'].extend(relic_items())
         monster_bloodline_doc = copy.deepcopy(documents.get("monster_bloodlines.json", {"schema_version": 1}))
 
         from .puppet_content import item_definitions
@@ -1852,7 +1855,7 @@ def restricted_acquisition(kind: str, content_id: str) -> bool:
         return True
     if kind == "technique":
         return content_id in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
-    return (content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "qilin_blessing_elixir"
+    return (content_id.startswith('landscape_') or content_id in GUIXU_EXCLUSIVE_ITEM_IDS or content_id == "qilin_blessing_elixir"
             or limited_trade_item(content_id))
 
 

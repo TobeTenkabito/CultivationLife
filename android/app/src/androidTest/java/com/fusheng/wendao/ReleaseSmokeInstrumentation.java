@@ -359,7 +359,39 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(Boolean.TRUE.equals(js("!busy&&!document.querySelector('[data-action=cultivate]').disabled&&document.documentElement.scrollWidth<=innerWidth+2")),"Native busy recovery and narrow layout");
             python(fixture+"\nfrom cultivation_life import server\ninspect_visits(server.ENGINE,"+JSONObject.quote(id)+")");
         }
+        verifyCityManagement(result);
         result.putString("building_visits_scope","Four themes, text gazetteer and illustrated details, native scenery/industry/temple branches, two bounded insight claims, original books, earned followup and zero-year menus");
+    }
+
+    private void verifyCityManagement(Bundle result) throws Exception {
+        String fixture=assetText("city_management_release.py");
+        for(String theme:new String[]{"a","b","d","f"}) {
+            String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'城市经营原生验收',spirit_root:'heavenly',path:'dao',preset_id:'core',seed:2172})});return g.id;})()");
+            python(fixture+"\nfrom cultivation_life import server\nprepare_city_management(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");
+            js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();true");async("GameThemes.saved");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+            tapSelector("#map-locations [data-building-action=city-plan]");waitForJs("!busy&&game.buildings.inside","Native city plan");
+            chooseBuilding("city:economic");chooseBuilding("city:economic:mixed");chooseBuilding("city:build:");
+            chooseBuilding("civic:main");chooseBuilding("civic:facilities");chooseBuilding("civic:exchange");chooseBuilding("civic:commit:");
+            chooseBuilding("civic:settle");check(Boolean.TRUE.equals(js("!game.pending_event.choices[0].enabled")),"Native first year cannot collect");chooseBuilding("leave");
+            Object age=js("game.player.age");tapSelector("[data-action=rest]");
+            waitForJs("!busy&&game.player.age>"+age,"Native real rest year",60000);
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+            tapSelector("#map-locations .current [data-building-id^='city:player:'] [data-building-action=enter]");waitForJs("!busy&&game.buildings.inside","Native owned city entry");
+            chooseBuilding("civic:main");chooseBuilding("civic:settle");chooseBuilding("civic:commit:");
+            capture("city-management-"+theme+"-"+arguments.getString("orientation","portrait"));
+            chooseBuilding("civic:settle");check(Boolean.TRUE.equals(js("!game.pending_event.choices[0].enabled")),"Native city income once per real year");chooseBuilding("leave");
+            python(fixture+"\nfrom cultivation_life import server\nlandscape_management(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+            tapSelector("#map-locations .current [data-building-id='scenery:human:reed_letter'] [data-building-action=enter]");waitForJs("!busy&&game.buildings.inside","Native authored scenery");
+            chooseBuilding("explore:main");chooseBuilding("explore:route:0");chooseBuilding("explore:finish:0:1");
+            capture("landscape-story-"+theme+"-"+arguments.getString("orientation","portrait"));
+            chooseBuilding("explore:main");chooseBuilding("explore:route:1");chooseBuilding("explore:finish:1:1");chooseBuilding("leave");
+            check(Boolean.TRUE.equals(js("!busy&&document.documentElement.scrollWidth<=innerWidth+2")),"Native city/story narrow layout and recovery");
+            python(fixture+"\nfrom cultivation_life import server\ninspect_city_management(server.ENGINE,"+JSONObject.quote(id)+")");
+        }
+        result.putString("city_management_scope","Four themes: actual city foundation, facility cost, real rest year, original-account income once, authored landscape branches, persistent first ending and one unique keepsake");
     }
 
     private void verifyBuildings(Bundle result) throws Exception {

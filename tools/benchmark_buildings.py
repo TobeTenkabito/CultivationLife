@@ -48,6 +48,8 @@ def main():
                             users=[],public=False,invested=800,address=place)
                     state['cultivation'][address_key(address(game))]='bench-0'
                     state['visit_usage']={f'estate:bench-{i}':dict(insight=1) for i in range(count)}
+                    state['landscape_usage']={f'scenery:bench-{i}':dict(ending='0:1') for i in range(count)}
+                    state['city_business']={f'city:bench-{i}':dict(last_year=game.player.age,expense=12000,income=0) for i in range(count)}
                 engine.store.save(game)
                 sequence=itertools.count()
                 def fresh_id():
@@ -64,7 +66,7 @@ def main():
             started=time.perf_counter()
             for _ in range(100000):qi_multiplier(final.player)
             lookup_us=(time.perf_counter()-started)*10
-            result.append(dict(buildings=count,visit_claims=count,action_median_ms=round(statistics.median(samples),2),
+            result.append(dict(buildings=count,visit_claims=count,landscape_claims=count,city_books=count,action_median_ms=round(statistics.median(samples),2),
                 qi_lookup_us=round(lookup_us,2),economy_identical=True))
     output=ROOT/'build/building-performance.json'
     assert inputs_digest(ROOT)==fingerprint,'Sources changed during performance acceptance'
