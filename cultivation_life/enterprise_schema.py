@@ -27,6 +27,10 @@ def validate_estates(value, require, document):
         require(row['buy_limit'] <= 10**12 and row['sell_limit'] <= 10**12)
         require(type(row.get('sale_quota', 1000000)) is int and 0 <= row.get('sale_quota', 1000000) <= 1000000)
         require(type(row.get('entrusted', False)) is bool)
+        require(row.get('building_status','intact') in {'intact','destroyed'})
+        if row.get('building_status')=='destroyed':
+            require(type(row.get('building_destroyed_age')) is int and row['building_destroyed_age']>=0)
+            require(not any(row.get(k) for k in ('enabled','entrusted','auto_buy','auto_sell')) and 'trust_config' not in row)
         for field in ('turnover', 'turnover_since'):
             if field in row: require(type(row[field]) is int and row[field] >= 0)
         if 'trust_profit_base' in row:

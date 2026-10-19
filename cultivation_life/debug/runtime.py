@@ -353,6 +353,7 @@ class Runtime:
 
     @staticmethod
     def guard(engine, game_id, operation):
+        engine.assert_building_operation_allowed(game_id, operation)
         capability = BY_OPERATION.get(operation)
         if capability and capability.dlc:
             if not available(capability.dlc):

@@ -320,6 +320,11 @@ def _convert_to_puppet(
         "source": str(target.get("source", "combat")),
         "source_npc_id": str(target.get("npc_id") or target["id"]),
     }
+    if kind == 'corpse':
+        from ...achievement_facts import leader_sect_before_capture
+        former_sect = leader_sect_before_capture(game, puppet['source_npc_id'])
+        if former_sect:
+            puppet['former_leader_sect_id'] = former_sect
     player.puppets.append(puppet)
     source = str(target.get("source", ""))
     if kind == "corpse" and source == "relationship:companion":

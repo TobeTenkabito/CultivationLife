@@ -63,6 +63,22 @@ def _detach(game, npc):
             group.npcs[:] = [entry for entry in group.npcs if entry.id != npc.id]
     game.encounter_npc_cache[:] = [row for row in game.encounter_npc_cache if row.get('id') != npc.id]
     game.player.party[:] = [row for row in game.player.party if row.get('id') != npc.id]
+    # Preserve original office provenance before political preparation clears it.
+    for sect in game.sects.values():
+        if sect.kind != 'sect' or sect.extinct or npc.world != sect.world:
+            continue
+        if npc.faction_id != sect.id and not any(o.get('container') == 'sect' and o.get('id') == sect.id for o in origins):
+            continue
+        record = game.intrigue_state.get('factions', {}).get(f'sect:{sect.id}', {})
+        positions = record.get('positions', {})
+        if (npc.id == positions.get('guest_elder')
+                or any(row.get('npc_id') == npc.id for row in record.get('guests', []))
+                or npc.id in game.intrigue_state.get('npc_prisons', {})):
+            continue
+        was_leader = positions.get('leader') == npc.id if 'leader' in positions else npc.title in {'掌门', '宗主'}
+        if origins and was_leader:
+            origins[0]['leader_sect_id'] = sect.id
+            break
     return origins
 
 

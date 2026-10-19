@@ -45,6 +45,8 @@ def command(game, maps, payload):
         acquire(game, maps, p.world, p.location_id, kind, owner_kind, identity, source, p.realm_index, payload.get('cost'))
         return
     row = require_local(game, payload.get('estate_id'))
+    if row.get('building_status')=='destroyed' and action in {'configure','entrust','start','upgrade','purchase','sell','transfer','release'}:
+        raise ValueError('产业设施已毁坏，请从地图建筑原址重建；原仓储与账户保留')
     if type(payload.get('revision')) is not int or payload['revision'] != row['revision']:
         raise ValueError('产业状态已经变化，请刷新后重新操作')
     key = cash_ready(game, row)

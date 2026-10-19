@@ -7,6 +7,7 @@ from ...runtime import decode_rng, encode_rng, now_iso
 from ..dependencies import ChoiceDependencies
 from ...system import generated_events
 from ...system import trial_sites
+from ...system import buildings
 from ...system.ghost.progression import reincarnation_block_reason
 
 
@@ -17,6 +18,8 @@ def choose(deps: ChoiceDependencies, game_id: str, choice_id: str, *, event_id: 
     pending = game.pending_event
     if not pending:
         raise ValueError("当前没有待处理事件")
+    if buildings.is_event(pending):
+        return deps._building_action(game_id, 'choose', choice_id=choice_id, event_id=event_id)
     if trial_sites.is_trial(pending):
         _, floor = trial_sites.current(game)
         if not floor:

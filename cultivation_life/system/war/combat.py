@@ -181,6 +181,7 @@ def _resolve_personal_round(
         "faction_id": deps._npc_faction_id(game, npc.id), "path": npc.path, "race": npc.race,
     } for npc in opponents]
     target = {
+        "war_id": war["id"],
         "target_name": f"{deps._war_side_name(game, war['kind'], war[f'{enemy}_id'])}会战队",
         "player_defending": side == "defender",
         "war_supply_player": logistics.factor(war, side), "war_supply_enemy": logistics.factor(war, enemy),
@@ -245,6 +246,7 @@ def _resolve_war_vanguard(deps: WarCombatDependencies, game: GameState, pending:
         "faction_id": deps._npc_faction_id(game, npc.id), "path": npc.path, "race": npc.race,
     } for npc in opponents]
     result, combat_text = deps._combat(game, {
+        "war_id": war["id"],
         "target_name": enemy_name, "target_power": required,
         "player_defending": side == "defender",
         "war_supply_player": logistics.factor(war, side), "war_supply_enemy": logistics.factor(war, enemy),

@@ -53,6 +53,7 @@ def acquire(game, maps, world, location, kind, owner_kind, identity, source, rea
 
 
 def upgrade(game, maps, row, expected_cost=None):
+    if row.get('building_status')=='destroyed':raise ValueError('产业设施已毁坏，不能扩建')
     from .enterprise_rules import MAX_LEVEL
     from .organization_accounts import estate_cost
     if row['level'] >= MAX_LEVEL:

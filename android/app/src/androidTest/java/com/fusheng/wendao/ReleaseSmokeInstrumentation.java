@@ -312,6 +312,71 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         android.util.Log.i("ReleaseSmoke", "Capture complete: " + name);
     }
 
+    private void chooseBuilding(String prefix) throws Exception {
+        String old=(String)js("game.pending_event.id");
+        check(Boolean.TRUE.equals(js("(()=>{const p="+JSONObject.quote(prefix)+",i=game.pending_event.choices.findIndex(c=>c.id===p||c.id.startsWith(p));if(i<0||game.pending_event.choices[i].enabled===false)return false;document.querySelectorAll('[data-native-building-choice]').forEach(n=>n.removeAttribute('data-native-building-choice'));document.querySelectorAll('#event-choices button')[i].setAttribute('data-native-building-choice','1');return true;})()")),"Building choice unavailable: "+prefix);
+        tapSelector("[data-native-building-choice]");
+        waitForJs("!busy && game.pending_event?.id!=="+JSONObject.quote(old),"Native building choice did not settle: "+prefix,60000);
+    }
+
+    private void verifyBuildings(Bundle result) throws Exception {
+        String fixture=assetText("building_cities_release.py");
+        for(String theme:new String[]{"a","b","d","f"}) {
+            String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'城郭原生验收',spirit_root:'supreme_metal',path:'dao',preset_id:'core',seed:2170})});return g.id;})()");
+            python(fixture+"\nfrom cultivation_life import server\nprepare_buildings(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");
+            js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();true");async("GameThemes.saved");
+            Object age=js("game.player.age");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+            tapSelector("#map-locations [data-building-action=city-plan]");waitForJs("!busy&&game.buildings.inside","Native city plan");
+            chooseBuilding("city:military");chooseBuilding("city:military:mixed");
+            if(theme.equals("a")) {
+                python(fixture+"\nfrom cultivation_life import server\nshortage_buildings(server.ENGINE,"+JSONObject.quote(id)+")");
+                tapSelector("#event-choices button");waitForJs("!busy&&!game.pending_event.choices[0].enabled","Native stale ore recovery");
+                check(Boolean.TRUE.equals(js("document.querySelector('#event-choices button').disabled")),"Unavailable construction remains disabled");
+                python(fixture+"\nfrom cultivation_life import server\nshortage_buildings(server.ENGINE,"+JSONObject.quote(id)+",True)");
+                async("loadGame("+JSONObject.quote(id)+")");
+            }
+            chooseBuilding("city:build:");
+            check(Boolean.TRUE.equals(js("game.buildings.rows.some(r=>r.type==='city'&&r.owner.kind==='player'&&r.level===1)")),"Native city starts at one");
+            chooseBuilding("city:govern");chooseBuilding("city:commit:");chooseBuilding("city:govern");
+            check(Boolean.TRUE.equals(js("!game.pending_event.choices[0].enabled")),"Native yearly government cap");chooseBuilding("back");
+            chooseBuilding("city:story");chooseBuilding("city:resolve:0");chooseBuilding("back");
+            capture("buildings-city-"+theme+"-"+arguments.getString("orientation","portrait"));
+            chooseBuilding("management");chooseBuilding("destroy");chooseBuilding("destroy:");chooseBuilding("leave");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-atlas]");
+            check(Boolean.TRUE.equals(js("Array.from(document.querySelectorAll('#map-atlas .building-row')).some(n=>n.dataset.buildingId.startsWith('city:player:')&&n.textContent.includes('遗址'))")),"Native named city ruins on overview");
+            capture("buildings-ruins-"+theme+"-"+arguments.getString("orientation","portrait"));
+            tapSelector("#map-atlas .building-row[data-building-id^='city:player:'] [data-building-action=manage]");
+            waitForJs("!busy&&game.buildings.inside","Native ruin inspection");chooseBuilding("rebuild");chooseBuilding("rebuild:");chooseBuilding("back");
+            chooseBuilding("city:story");check(Boolean.TRUE.equals(js("!game.pending_event.choices[0].enabled")),"Native rebuild cannot reset story reward");
+            python(fixture+"\nfrom cultivation_life import server\nbuilding_followup(server.ENGINE,"+JSONObject.quote(id)+")");
+            chooseBuilding("leave");
+            check(Boolean.TRUE.equals(js("game.pending_event.id==='EVT_SECT_FIRST_WARNING_001'")),"Native earned followup retained");
+            tapSelector("#event-choices button");waitForJs("!busy&&!game.pending_event","Native real followup submit");
+            check(age.equals(js("game.player.age")),"Native building menus must not advance years");
+            check(Boolean.TRUE.equals(js("!document.querySelector('[data-action=cultivate]').disabled && document.documentElement.scrollWidth<=innerWidth+2")),"Native busy recovery and layout");
+            python(fixture+"\nfrom cultivation_life import server\ninspect_buildings(server.ENGINE,"+JSONObject.quote(id)+")");
+        }
+        int count=0;
+        for(String world:new String[]{"human","spirit","demon","true_demon","monster_realm","phantom_underworld","hell","celestial","asura","nether","reincarnation"}) {
+            int rank=(world.equals("human")||world.equals("demon"))?3:(world.equals("celestial")||world.equals("asura")||world.equals("nether")||world.equals("reincarnation"))?9:6;
+            String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'十一界城事',spirit_root:'supreme_metal',path:'dao',seed:2170,custom_start:{world:"+JSONObject.quote(world)+",realm_index:"+rank+"}})});return g.id;})()");
+            for(int index=0;index<2;index++) {
+                python(fixture+"\nfrom cultivation_life import server\nvisit_initial_city(server.ENGINE,"+JSONObject.quote(id)+","+index+")");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.map.locations.flatMap(p=>p.buildings).filter(r=>r.type==='city').length===2")),"Two initial cities in "+world);
+                tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+                tapSelector("#map-locations .map-location.current [data-building-action=enter]");waitForJs("!busy&&game.buildings.inside","Native initial city entry");
+                chooseBuilding("city:rumor");chooseBuilding("back");chooseBuilding("city:story");chooseBuilding("city:resolve:1");chooseBuilding("back");chooseBuilding("city:story");
+                check(Boolean.TRUE.equals(js("!game.pending_event.choices[0].enabled")),"Initial city reward limited in "+world);
+                chooseBuilding("leave");count++;
+            }
+        }
+        check(count==22,"Native eleven-world city coverage");
+        result.putString("buildings_scope","22 city stories, four themes, real city construction and original inventory, stale material recovery, yearly government cap, named ruins, identity-preserving rebuild, bounded rewards and earned event followup; zero menu years");
+    }
+
     @Override public void onStart() {
         Bundle result=new Bundle();
         File dlcPreferences=null;byte[] previousDlcPreferences=null;
@@ -1369,6 +1434,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     if(Boolean.TRUE.equals(js("document.querySelector('#map-card').classList.contains('panel-open')")))tapSelector("#map-toggle");
                 }
                 result.putString("regional_calendar_scope","Real Guixu interruption and choices, reloaded saved progress, disabled travel and exact total years, original regional finance; four themes");
+            } else if(phase.equals("buildings")) {
+                verifyBuildings(result);
             } else if(phase.equals("common-goods")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'商品原生验收',spirit_root:'supreme_metal',path:'dao',seed:2151,preset_id:'nascent'})});return g.id;})()");

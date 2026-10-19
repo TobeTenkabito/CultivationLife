@@ -7,6 +7,7 @@ from ...models import GameState, HistoryRecord
 from .dependencies import EventsPreparationDependencies
 from ...system import generated_events
 from ...system import trial_sites
+from ...system import buildings
 from ...system.ghost.progression import reincarnation_block_reason
 
 
@@ -16,6 +17,13 @@ def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool
     retained = []
     while head:
         following = head.get('_followup_event')
+        if buildings.is_event(head):
+            projected = buildings.prepare(game)
+            if projected:
+                retained.append(projected)
+            changed = changed or projected != {key:value for key,value in head.items() if key != '_followup_event'}
+            head = following
+            continue
         if trial_sites.is_trial(head):
             projected = trial_sites.project_event(game)
             if projected and not any(row.get('id') == projected['id'] for row in retained):
@@ -92,6 +100,13 @@ def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool
             retained.append(head)
         head = following
     active_generated = game.generated_event_state.get('active')
+    if game.building_state.get('scene'):
+        projected = buildings.prepare(game)
+        if projected and not any(row.get('id') == projected['id'] for row in retained):
+            retained.append(projected)
+            changed = True
+        elif projected is None:
+            changed = True
     if active_generated and not any(row.get('id') == active_generated['id'] for row in retained):
         # Restore only the saved discovery, behind any existing authorized
         # event. Never regenerate its situation, reward or random sequence.

@@ -236,6 +236,7 @@ class Handler(BaseHTTPRequestHandler):
             if len(parts) != 4 or parts[:2] != ["api", "games"]:
                 raise NotFoundError("接口不存在")
             game_id, operation = parts[2], parts[3]
+            ENGINE.assert_building_operation_allowed(game_id, operation)
             payload = normalize_content_references(payload)
             if operation in {'tianji-debug-reveal-all', 'merchant-debug-hq'} and not self.headers.get('X-Cultivation-Debug'):
                 raise NotFoundError('请先通过开发者控制台进入独立调试副本')
@@ -247,6 +248,10 @@ class Handler(BaseHTTPRequestHandler):
                 ENGINE.assert_buddhist_operation_allowed(game_id, operation)
             if operation == "advance":
                 result = ENGINE.advance(game_id, payload.get("action", "cultivate"), payload.get("years", 1))
+            elif operation == 'building-action':
+                result = ENGINE.building_action(game_id, str(payload.get('action','')),
+                    building_id=str(payload.get('building_id','')), event_id=payload.get('event_id'),
+                    choice_id=str(payload.get('choice_id','')))
             elif operation == 'heavens-view':
                 result = ENGINE.heavens_view(game_id, payload.get('view', 'known'), payload.get('target_id'))
             elif operation == 'civilizations-view':

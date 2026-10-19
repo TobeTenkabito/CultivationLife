@@ -35,6 +35,7 @@ def bind_event_runtime(engine: GameEngine) -> EventDependencies:
 
 def bind_choices(engine: GameEngine) -> ChoiceDependencies:
     return ChoiceDependencies(
+        _building_action=lambda *args, **kwargs: engine.building_action(*args, **kwargs),
         _trial_site_action=lambda *args, **kwargs: engine.trial_site_action(*args, **kwargs),
         _condition=lambda *args, **kwargs: engine._condition(*args, **kwargs),
         _diff=lambda *args, **kwargs: engine._diff(*args, **kwargs),

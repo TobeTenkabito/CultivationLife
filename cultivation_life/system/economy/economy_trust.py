@@ -21,6 +21,7 @@ def release_all(game):
 
 
 def prepare(game, row):
+    if row.get('building_status')=='destroyed':return False
     active = (game.settings.get('economy_trust', False) and game.player.alive
               and owner_allowed(game, row['owner_kind'], row['owner_id'], row['world']))
     if not active:
@@ -34,6 +35,7 @@ def prepare(game, row):
 
 def grow(game, maps, row, market):
     """One decision per five world years, no year replay or search over maps."""
+    if row.get('building_status')=='destroyed':return
     if not game.settings.get('economy_trust') or not game.player.alive or not owner_allowed(game, row['owner_kind'], row['owner_id'], row['world']):
         return
     if row['arrears'] or row['job'] or row['income'] <= row['expense']:
@@ -68,6 +70,7 @@ def grow(game, maps, row, market):
     for kind in ('farm', 'mine', 'hunt', 'alchemy', 'forge'):
         identity = f'{row["world"]}:{row["location"]}:{kind}'
         existing = estates(game).get(identity)
+        if existing and existing.get('building_status')=='destroyed':continue
         if existing and existing['owner_kind'] != 'background':
             continue
         offer = dict(world=row['world'], location=row['location'], kind=kind, level=existing['level'] if existing else 1,

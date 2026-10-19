@@ -2,6 +2,30 @@
   "schema_version": 1,
   "achievements": [
     {
+      "id": "demonic_former_leader_campaign", "name": "先帝还在创业", "category": "cultivation",
+      "description": "将某位掌门炼成炼尸，并使其实际参加一场其原宗门参与的战役；原宗门可为任意一方或其盟友。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "former_leader_corpse_campaign", "value": 1}}
+    },
+    {
+      "id": "family_descendant_sect_leaders", "name": "教父", "category": "cultivation",
+      "description": "自己的后代分别担任至少两个不同宗门的掌门。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"descendant_sect_leaders": 2}
+    },
+    {
+      "id": "family_all_kin_fallen", "name": "满门忠烈", "category": "cultivation",
+      "description": "家族中除自己以外的本家成员全部战死，外姓成员不计；至少有一名本家成员战死。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"family_kin_all_fallen": true}
+    },
+    {
+      "id": "merchant_post_to_own_alliance", "name": "黑钱洗白", "category": "cultivation",
+      "description": "向自己已加入的商盟成功发布一次委托。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "posted_to_own_alliance", "value": 1}}
+    },
+    {
       "id": "cultivation_upper_immortal", "name": "长生初成", "category": "cultivation",
       "description": "在三级界面修至真仙或同等境界。",
       "source": {"kind": "base", "id": "base", "name": "游戏本体"},

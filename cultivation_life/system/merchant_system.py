@@ -137,6 +137,8 @@ def _merchant_post(deps: MerchantActionDependencies, game, alliance, payload):
         "deadline": game.player.age + years * 4, "status": "open",
         "accept_chance": min(.85, .3 + .15 * quote["principal"] / quote["minimum"]),
     })
+    if member_of(game, alliance):
+        game.player.milestones['posted_to_own_alliance'] = 1
     terminal = [row for row in state["posted"] if row["status"] not in {"open", "working"} and not row.get('delivery_goods')]
     for old in terminal[:-30]:
         state["posted"].remove(old)

@@ -533,6 +533,12 @@ class ContentRegistry:
             from .system.map_definition import MapDefinition
 
             MapDefinition(documents["maps.json"], set(registry.world_systems.get("world_profiles", {})))
+            if registry.world_systems.get('building_system'):
+                from .building_content_validation import validate as validate_buildings
+                try:
+                    validate_buildings(registry.world_systems['building_system'],documents['maps.json'],registry.world_systems['world_profiles'])
+                except (ValueError,KeyError,TypeError) as error:
+                    raise ContentError(f'建筑配置不合法：{error}') from error
             for site in registry.world_systems.get('heavens_framework', {}).get('contact_sites', []):
                 profile = registry.world_systems['world_profiles'][site['world']]
                 locations = documents['maps.json']['worlds'][site['world']]['locations']

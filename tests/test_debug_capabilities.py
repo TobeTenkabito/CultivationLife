@@ -207,6 +207,37 @@ def test_market_inventory_equipment_settings_and_field_workflow(environment):
     assert source == {p.name: p.read_bytes() for p in engine.store.directory.glob('*.json')}
 
 
+def test_building_commands_use_real_costs_events_guards_and_isolation(environment):
+    engine, manager, sid, _ = environment
+    source = {p.name: p.read_bytes() for p in engine.store.directory.glob('*.json')}
+    def run(text):
+        return manager.execute(text, session_id=sid)['data']
+    run('player set spirit_stones 10000')
+    before = copy.deepcopy(manager.load(sid)['current']['game'])
+    event = run('building action construct')['pending_event']
+    blocked = copy.deepcopy(manager.load(sid)['current'])
+    with pytest.raises(RuntimeError) as error:
+        run('market buy missing-offer')
+    assert '建筑' in str(error.value.__cause__)
+    assert manager.load(sid)['current'] == blocked
+    for choice in ('level:1', 'plan:1:professional'):
+        event = run(f"building action choose null {event['id']} {choice}")['pending_event']
+    stale = event['id']
+    event = run(f"building action choose null {stale} confirm")['pending_event']
+    built = copy.deepcopy(manager.load(sid)['current'])
+    with pytest.raises(RuntimeError) as error:
+        run(f'building action choose null {stale} confirm')
+    assert '变化' in str(error.value.__cause__)
+    assert manager.load(sid)['current'] == built
+    saved = built['game']
+    assert saved['player']['age'] == before['player']['age']
+    assert len(saved['building_state']['records']) == 1
+    coins = lambda g: sum(row['quantity'] for row in g['player']['inventory'] if row['id'] == 'spirit_stone')
+    assert coins(before) - coins(saved) == 800
+    assert run(f"building action choose null {event['id']} leave")['pending_event'] is None
+    assert source == {p.name: p.read_bytes() for p in engine.store.directory.glob('*.json')}
+
+
 def test_preview_is_pure_even_when_engine_writes_or_raises(environment, monkeypatch):
     _, manager, sid, _ = environment
     before = manager._path(sid).read_bytes()
@@ -224,7 +255,7 @@ def test_preview_is_pure_even_when_engine_writes_or_raises(environment, monkeypa
     assert manager._path(sid).read_bytes() == before
 
 
-@pytest.mark.parametrize('guard_name', ['assert_ghost_operation_allowed', 'assert_guixu_operation_allowed',
+@pytest.mark.parametrize('guard_name', ['assert_building_operation_allowed', 'assert_ghost_operation_allowed', 'assert_guixu_operation_allowed',
                                        'assert_buddhist_operation_allowed'])
 def test_new_operations_respect_each_formal_guard(environment, monkeypatch, guard_name):
     manager, sid = environment[1:3]

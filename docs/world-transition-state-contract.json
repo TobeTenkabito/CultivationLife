@@ -1,6 +1,14 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "GameState.building_state.scene.result_text / records.*.features": "session / global：result_text仅保存本次城市非致命演武的已结算文本，恢复事件只读显示，不重放战斗、奖励或随机数；离开会话一并清除。features随固定地址城池保留，只描述实际营造的护城禁制，不复制或迁移原地面阵法库存、NPC或玩家装备；一级重建清除高阶城防描述。",
+    "GameState.building_state.city_usage / records.*.population / development / content_id": "global：初始城市与景色只读原内容目录，自建或改变状态时按原固定地址保存唯一覆盖记录。城市居民属性与发展进度归原城市；city_usage按城市稳定编号记录一次逸事、最多三次演武、一次首胜和本城上次治理真实年龄，读档、切界、摧毁或重建均不刷新。不构造居民NPC副本，不增加年度城市经济扫描。",
+    "GameState.economy_v2.estates.*.building_status / building_destroyed_age": "scope：原产业设施状态与实际毁坏年份；原仓储、周转金、在途货物和储量保持唯一，毁坏暂停新经营与已付批次，养护照常，重建将原任务完工时刻顺延实际停工年份，不补发过去产量。",
+    "GameState.buddhist_state.worlds.*.sites.*.temple_ruin_level / wars.*.building_damage_round": "scope：寺庙毁坏仅将原活动等级归零并登记原废墟等级，信众与世界加持不复制，原入口付费从一级重建后清除废墟标记；DLC关闭冻结原记录。战役按原世界地点及实际会战序号仅判一次非城市建筑损毁，冻结地区沿原战役补算，城市与自然景色不参加自动损毁，不改玩家位置或新增死亡事实。",
+    "GameState.building_state.records / cultivation": "global：固定建筑按原world、instance_id、location_id登记唯一编号、类型、等级、品质、状态、所有权和使用权；仅洞府持有本体新地产记录，产业和寺庙视图引用原economic estates与buddhist_state，不复制库存、资金、信众或人物。cultivation只引用各地址一座洞府，按当下原所有权及许可复验，不叠加，不携带地面设施。洞府只放大原地图气经验，不增加机缘、气种或免费年份。",
+    "GameState.building_state.scene / sequence": "session：室内及室外营造对话绑定原建筑、原地址、节点和单调序号；复用pending_event投影及choice提交，所有节点和付款不推进年份或行动单位。出入建筑不改玩家地址；过期页面拒绝，读档不重发奖励、不投骰。依赖关闭或原地址失效只摘除本会话并保留后续事件及原地产；普通跨界仍沿原入口，室内须先离开。",
+    "SectNpc.roster_origin.*.leader_sect_id / Player.puppets.*.former_leader_sect_id": "history：拘禁移出原名册前记录实际掌门所属宗门 ID；政治职务存在时以 leader 席位为准，未建立职务时才读取原名册掌门／宗主称号。成功炼尸沿原人物 ID 继承这一来源，仅用于成就，不保留职权、不复制人物。跨界与存读档保留；无可靠来源的既有炼尸不凭同名或当前控制权补造历史。",
+    "Player.milestones.former_leader_corpse_campaign / posted_to_own_alliance": "history：原掌门炼尸在其原宗门以任意一方或盟友身份参与的实际战役中出阵，以及向已加入本盟成功发布委托的单次事实。沿原战报和付款建单成功点记录，查看、报价、失败与仅携带不记录；跨界保留，不增加战力、钱货、通行权限或年度结算。",
     "Player.spirit_field.owner / settled_year": "scope：原灵田唯一地块绑定首次开垦 world、instance_id、location_id，普通地图内沿用原操持方式；切换普通界面或独立实例不携带土地，不开放远程开垦、播种、灌溉、收获。普通灵田只在所属地区原年度入口成长，冻结后按地区原历法补算；空间灵田只随当前原实例年度成长，休眠期间不补长，settled_year 防重。已采收库存仍随本人保留并沿原使用、交易入口处理。既有结构10无归属的实有地块在下一次正式加载、通行前绑定当前地址一次，不推测历史产地、不追发过去药龄，不转换结构1–9。",
     "GameState.world_simulation.ghost_parades / GameState.ghost_parade.settled_year / realm_index / unit_years": "global：每个普通界面唯一百鬼夜行。ghost_parade 保留当前选中记录，其余按原 world 存入至多十项 ghost_parades，不保存同一事件的副本；只随所属地区原年度结算，历史补算不移动玩家、不重发个人收益。生成时绑定原境界和单位年数，旧结构10按当前已观察年份采用一次，不追补已运行历史；独立空间不创建普通社会夜行。",
     "SectNpc.roster_origin.container=spatial / id / index": "global：原人物的名册来源引用，不含人物副本。拘禁前固化既有实例家族编号分组，再移除 npc_ids，避免自由名册缩短导致其他族人换族；已受控旧结构10引用在原绑定入口采用并移除。释放按原人物实际 world 及当前实例恢复自由名册，同一原实例可保留原宗籍和名册位置，异界或其他实例不保留旧空间归属。死亡不恢复人物，实例家族原成员编号不复制或移入另一实例。",
@@ -337,6 +345,7 @@
     "npc_formations": "global",
     "intrigue_state": "global",
     "buddhist_state": "scope",
+    "building_state": "global",
     "sage_state": "scope",
     "guixu_state": "session",
     "heavens_state": "scope",

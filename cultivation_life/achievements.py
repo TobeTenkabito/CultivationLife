@@ -261,6 +261,12 @@ class AchievementSystem:
         if "milestone_at_least" in condition:
             expected = condition["milestone_at_least"]
             return int(player.milestones.get(str(expected["id"]), 0)) >= int(expected.get("value", 1))
+        if "descendant_sect_leaders" in condition:
+            from .achievement_facts import descendants_lead_sects
+            return descendants_lead_sects(game, int(condition['descendant_sect_leaders']))
+        if "family_kin_all_fallen" in condition:
+            from .achievement_facts import family_kin_all_fallen
+            return family_kin_all_fallen(game)
         if "wanted_target" in condition:
             threshold = 100.0
             try:

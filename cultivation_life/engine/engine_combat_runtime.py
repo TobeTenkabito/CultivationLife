@@ -125,6 +125,8 @@ def _record_player_combat(
         "age": game.player.age,
     })
     game.last_combat_report = report
+    from ..achievement_facts import record_corpse_campaign
+    record_corpse_campaign(game, target.get('war_id'), report.get('player_roster', []), report.get('rounds', []))
     longest_enemy_streak = 0
     current_enemy_streak = 0
     for combat_round in report.get("rounds", []):

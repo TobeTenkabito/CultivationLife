@@ -1,0 +1,121 @@
+{
+  "base_version": "2.17.0",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.1.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.0",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.5.0",
+    "tianji-artifacts": "2.2.0",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "Full repository regression, eleven-world cities, building projects, finite event rewards, estates and real event browser acceptance",
+  "tests": 5782,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_buildings",
+      "log": "build\\browser_buildings-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_city_buildings",
+      "log": "build\\browser_city_buildings-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_economy_enterprises",
+      "log": "build\\browser_economy_enterprises-2170.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-2170.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-2170.log",
+  "inputs_sha256": "92f44ce9f5b964c9ee530301aa74073f42388f8b382c85faa423f8d2d15ff9a6",
+  "performance": {
+    "version": "2.17.0",
+    "source_sha256": "92f44ce9f5b964c9ee530301aa74073f42388f8b382c85faa423f8d2d15ff9a6",
+    "scenario": "same save, one real rest action, 1 warmup + 3 samples",
+    "note": "End-to-end includes save validation and map rendering; not a before-feature benchmark.",
+    "rows": [
+      {
+        "buildings": 0,
+        "action_median_ms": 223.62,
+        "qi_lookup_us": 3.59,
+        "economy_identical": true
+      },
+      {
+        "buildings": 1,
+        "action_median_ms": 234.11,
+        "qi_lookup_us": 4.6,
+        "economy_identical": true
+      },
+      {
+        "buildings": 128,
+        "action_median_ms": 275.89,
+        "qi_lookup_us": 5.75,
+        "economy_identical": true
+      }
+    ]
+  },
+  "platform": "Windows",
+  "exe_sha256": "e5a698f9a50da167d32896226f576e47ef705f1778f966e9af240163db6b39a9",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

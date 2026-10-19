@@ -14,6 +14,7 @@
 | 玩家与修炼 | 数据修改、正常行动、修为/炼体/神识突破、秘法、道统、元府 | `player fields`、`game view /breakthrough`、`game view /secret_arts` |
 | 功法、物品、本命法宝 | 使用、装备、升级、玉简合并、变身、本命法宝绑定与养成 | `game view /player/known_techniques`、`game view /natal_artifact` |
 | 地图与跨界 | 普通旅行、传送、跨界、灵界与两类上界飞升 | `game view /map`、`game view /world_travel` |
+| 建筑与城池 | 洞府营造、城市筹建、入内、勘看及带真实事件编号的选项；保留工料与忙碌守卫 | `game view /building_system`、`help building action` |
 | 商业 | 坊市购买/锁定、拍卖、寄售、匿名身份、私下交易、交换会、黑市、商盟委托 | `game view /market`、`game view /auction_system`、`game view /merchant_system` |
 | 生产 | 灵田开垦/种植/灌溉/收获、灵植使用、炼丹、炼器预览/图谱/制作、阵法与地阵、机械傀儡 | `game view /spirit_field`、`game view /crafting_system`、`game view /formation_system` |
 | NPC 与关系 | 交往、道友/道侣、师徒、请求/馈赠、组队、退出关系、真实俘虏及侍妾流程 | `npc find "" 0`、`game view /world_npcs`、`game view /dao_companion` |
@@ -37,6 +38,7 @@
 | --- | --- | --- |
 | `strategic war <action> <command_id> <command_seq> ...` | `strategic-war` | simulation |
 | `action advance <action> <units>` | `advance` | simulation |
+| `building action <action> [building_id] [event_id] [choice_id]` | `building-action` | simulation |
 | `organization action <action> <kind> <owner_id> <location_id> [policy] [rival_id] [goal]` | `organization-action` | simulation |
 | `event choose <choice_id>` | `choice` | simulation |
 | `npc contact <npc_id> <action>` | `npc-contact` | simulation |

@@ -740,6 +740,8 @@ def grant_qi_experience(
     player: Player, opportunity_gain: float, location_efficiencies: dict[str, float],
 ) -> dict[str, float]:
     """主修与辅修各自按源权重吸收气经验，战斗/炼体槽不参与。"""
+    from .building_rules import qi_multiplier
+    cave_multiplier = qi_multiplier(player)
     gains = {source: 0.0 for source in QI_SOURCE_NAMES}
     if opportunity_gain <= 0:
         return gains
@@ -747,7 +749,7 @@ def grant_qi_experience(
         if technique is None:
             continue
         for source, weight in technique.sources.items():
-            gained = float(opportunity_gain) * weight * max(0.0, float(location_efficiencies.get(source, 0.0)))
+            gained = float(opportunity_gain) * weight * max(0.0, float(location_efficiencies.get(source, 0.0))) * cave_multiplier
             player.qi_experience[source] = player.qi_experience.get(source, 0.0) + gained
             gains[source] += gained
     return gains

@@ -89,6 +89,10 @@ class Capability:
 
 
 CAPABILITIES = (
+    Capability('building action', 'building-action',
+        (S('action', choices=('enter', 'construct', 'temple-plan', 'city-plan', 'manage', 'choose')),
+         S('building_id', required=False), S('event_id', required=False), S('choice_id', required=False)),
+        lambda e,g,p:e.building_action(g, **p)),
     Capability('trial site', 'trial-site-action',
         (S('action', choices=('enter', 'fight', 'pause', 'claim')),
          S('world', required=False, choices=('human','demon','spirit','true_demon','monster_realm','phantom_underworld','hell','celestial','asura','nether','reincarnation')),

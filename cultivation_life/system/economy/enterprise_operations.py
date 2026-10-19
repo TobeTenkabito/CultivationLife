@@ -55,6 +55,8 @@ def market_trade(game, row, market, item, number, side):
 
 
 def start_job(game, maps, row, *, automatic=False):
+    if row.get('building_status')=='destroyed':
+        raise ValueError('产业设施已毁坏，请先原址重建')
     if row['job'] or row['kind'] == 'shop':
         raise ValueError('已有在制批次，或该产业不从事生产')
     if row['arrears']:
@@ -165,7 +167,8 @@ def advance_estates(game, maps):
         row['revision'] += 1
         if row['owner_kind'] == 'background':
             continue
-        managed = prepare(game, row)
+        destroyed=row.get('building_status')=='destroyed'
+        managed = prepare(game, row) if not destroyed else False
         if row['owner_kind'] in {'sect', 'family'}:
             entity = game.family if row['owner_kind'] == 'family' else game.sects.get(row['owner_id'])
             if not entity or entity.extinct or entity.world != row['world']:
@@ -183,6 +186,8 @@ def advance_estates(game, maps):
         estate_cost(game,row,paid)
         row['expense'] += paid
         row['arrears'] = due - paid
+        if destroyed:
+            continue
         if row['job'] and game.player.age >= row['job']['finish']:
             job = row['job']
             row['job'] = None

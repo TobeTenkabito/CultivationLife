@@ -54,6 +54,7 @@ from .presentation import world as world_view
 from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
 from .transactions import serialized_commands
+from ..system import buildings
 from ..system.heavens import operations as heavens_operations
 from ..system.court import state as court_state
 from ..system.court import governance as court_governance
@@ -550,6 +551,18 @@ class GameEngine:
 
     def buddhist_action(self, game_id, action, **payload):
         return buddhist_actions.buddhist_action(self._dependencies.buddhist_flows.actions, game_id, action, **payload)
+
+    def building_action(self, game_id, action, **payload):
+        deps = buildings.BuildingDependencies(self._load, self.store.save, self.present,
+            lambda game, command, values: buddhist_actions.apply_action(
+                self._dependencies.buddhist_flows.actions, game, command, values),
+            self._add_opportunity,self._combat)
+        return buildings.action(deps, game_id, action, **payload)
+
+    def assert_building_operation_allowed(self, game_id, operation):
+        if self._load(game_id).building_state.get('scene') and operation not in {
+                'choice', 'building-action', 'settings', 'setting'}:
+            raise ValueError('请先处理建筑内事件或离开建筑')
 
     def _continue_buddhist_assembly(self, game, rng):
         return buddhist_assembly._continue_buddhist_assembly(self._dependencies.buddhist_flows.assembly, game, rng)
@@ -2642,6 +2655,8 @@ class GameEngine:
         return formation_ground._sect_guard_power(self._dependencies.formation.ground, game, sect_id, world=world, location_id=location_id)
 
     def _wear_war_guard_arrays(self, game: GameState, war: dict[str, Any], amount: float | None = None) -> None:
+        from ..system.building_destruction import war_damage
+        war_damage(game,war)
         return formation_ground._wear_war_guard_arrays(self._dependencies.formation.ground, game, war, amount)
 
     def _npc_formation_profile(

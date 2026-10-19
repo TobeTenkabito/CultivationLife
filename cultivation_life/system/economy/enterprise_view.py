@@ -30,7 +30,7 @@ def public_estates(game, maps):
     for kind, name in KINDS.items():
         identity = f'{p.world}:{p.location_id}:{kind}'
         row = estates(game).get(identity)
-        offers.append(dict(kind=kind, name=name, cost=price(kind, row['level'] if row else 1),
+        offers.append(dict(kind=kind, name=name+('遗址产权（另需重建）' if row and row.get('building_status')=='destroyed' else ''), cost=price(kind, row['level'] if row else 1),
                            occupied=bool(row and row['owner_kind'] != 'background'),
                            site_maintenance=maintenance_breakdown(dict(world=p.world, kind=kind,
                                level=row['level'] if row else 1, stock={}), market)['site'],
@@ -40,6 +40,7 @@ def public_estates(game, maps):
         record = {k:row[k] for k in ('id', 'kind', 'level', 'recipe', 'reserve', 'produced', 'income', 'expense',
             'arrears', 'enabled', 'auto_buy', 'auto_sell', 'batches', 'buy_limit', 'sell_limit', 'revision', 'owner_kind')}
         record.update(entrusted=row.get("entrusted", False), name=name, sale_quota=row.get('sale_quota', 1000000), capacity=capacity(row), used=used(row), cash=balance(game, payer(row)),
+            building_status=row.get('building_status','intact'),
             reserve_cash=row.get('reserve_cash',100),expense_limit=row.get('expense_limit',100000),
             stock=[dict(id=k, name=ITEM_CATALOG[k].name, quantity=n) for k,n in row['stock'].items()],
             job=dict(row['job']) if row['job'] else None, history=list(row['history']),

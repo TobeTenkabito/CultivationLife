@@ -6,6 +6,7 @@ from typing import Any
 
 from .generated_event_schema import decode_state as decode_generated_event_state
 from .trial_site_schema import decode_state as decode_trial_site_state
+from .building_schema import decode_state as decode_building_state, bind_context as bind_buildings
 from .version import BASE_GAME_VERSION
 from .save_schema import SAVE_SCHEMA_VERSION
 from .content_identifiers import normalize_content_references
@@ -955,6 +956,7 @@ class GameState:
     # Additive DLC container: old saves default to an empty state and disabling
     # the package freezes it byte-for-byte.
     buddhist_state: dict[str, Any] = field(default_factory=dict)
+    building_state: dict[str, Any] = field(default_factory=dict)
     sage_state: dict[str, Any] = field(default_factory=dict)
     # Optional Guixu Tide DLC state. All cycle, roster, treasure ownership and
     # active-session data lives under this one additive container so disabling
@@ -984,6 +986,7 @@ class GameState:
     map_war_last_encounter_unit: int = -2
 
     def __post_init__(self):
+        self.building_state = decode_building_state(self.building_state)
         validate_heavens_state(self.heavens_state)
         from .strategic_war_schema import validate_state as validate_strategic_war
         validate_strategic_war(self.strategic_war_state, self.wars)
@@ -991,6 +994,7 @@ class GameState:
         validate_state(self.monster_civilization_state)
         # Runtime-only reference: no duplicated derived bonuses enter save data.
         self.player._modifier_context = self.buddhist_state
+        bind_buildings(self)
         from .spatial_people import bind as bind_spatial_people
         bind_spatial_people(self, SectNpc)
         bind_custody(self, SectNpc)
@@ -1005,6 +1009,7 @@ class GameState:
 
     def to_dict(self) -> dict[str, Any]:
         validate_heavens_state(self.heavens_state)
+        decode_building_state(self.building_state)
         from .strategic_war_schema import validate_state as validate_strategic_war
         validate_strategic_war(self.strategic_war_state, self.wars)
         validate_heavens_references(self)
@@ -1061,6 +1066,7 @@ class GameState:
             "npc_formations": self.npc_formations,
             "intrigue_state": self.intrigue_state,
             "buddhist_state": self.buddhist_state,
+            "building_state": self.building_state,
             "sage_state": self.sage_state,
             "guixu_state": self.guixu_state,
             "heavens_state": decode_heavens_state(self.heavens_state),
@@ -1155,6 +1161,7 @@ class GameState:
             intrigue_state=copy.deepcopy(value.get("intrigue_state", {}))
             if isinstance(value.get("intrigue_state", {}), dict) else {},
             buddhist_state=copy.deepcopy(value.get("buddhist_state", {})) if isinstance(value.get("buddhist_state", {}), dict) else {},
+            building_state=decode_building_state(value.get("building_state", {})),
             sage_state=copy.deepcopy(value.get("sage_state", {}))
             if isinstance(value.get("sage_state", {}), dict) else {},
             guixu_state=copy.deepcopy(value.get("guixu_state", {}))

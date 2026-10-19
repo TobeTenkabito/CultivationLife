@@ -520,6 +520,7 @@ class RelationshipActionDependencies:
 
 @dataclass(frozen=True, slots=True)
 class ChoiceDependencies:
+    _building_action: Callable[..., dict[str, Any]]
     _trial_site_action: Callable[..., dict[str, Any]]
     _condition: Callable[..., bool]
     _diff: Callable[..., dict[str, Any]]

@@ -35,6 +35,9 @@ from .dependencies import ViewPreparationDependencies
 from ..relationship_records import RelationshipRecord
 from ..spatial_people import accessible
 from ..npc_custody import is_free
+from ..system import buildings
+from ..building_rules import qi_multiplier as cave_qi_multiplier
+from ..building_schema import bind_context as bind_buildings
 
 
 def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str, Any]:
@@ -363,6 +366,11 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
         result['player']['qi_gain_efficiencies'] = spatial.current_qi(game)
         result['map'] = spatial.public_map(game)
         result['market'] = []
+    bind_buildings(game)
+    result['buildings'] = buildings.public(game)
+    buildings.attach_overview(game, result['map'])
+    result['player']['qi_gain_efficiencies'] = {source:value*cave_qi_multiplier(game.player)
+        for source,value in result['player']['qi_gain_efficiencies'].items()}
     return result
 
 

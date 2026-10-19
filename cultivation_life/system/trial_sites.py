@@ -20,6 +20,7 @@ LOCAL_COMMANDS = frozenset({
     'get_game', 'present', 'choose', 'trial_site_action', 'use_item', 'equip_known_technique',
     'update_combat_plan', 'activate_formation', 'deactivate_formation', 'update_setting',
     'assert_ghost_operation_allowed', 'assert_guixu_operation_allowed', 'assert_buddhist_operation_allowed',
+    'assert_building_operation_allowed',
 })
 
 

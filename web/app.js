@@ -2751,7 +2751,12 @@ function renderMap(map, auction) {
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
   const list = $('#map-locations'); list.innerHTML = '';
   let atlas=document.querySelector('#map-atlas');if(!atlas){atlas=document.createElement('section');atlas.id='map-atlas';list.before(atlas);}
-  window.MapAtlas?.render(map,game,payload=>mutate(`/api/games/${game.id}/organization-action`,payload),()=>busy||!game||!!game.pending_event||!!game.imprisonment||game?.ghost_system?.phase_two?.state==='controlled'||!game.player.alive);
+  const mapLocked=()=>busy||!game||!!game.pending_event||!!game.imprisonment||game?.ghost_system?.phase_two?.state==='controlled'||!game.player.alive;
+  window.BuildingPanel?.bind(game,async payload=>{
+    await mutate(`/api/games/${game.id}/building-action`,payload);
+    if(game?.buildings?.inside)window.UtilityPanels?.close('map');
+  },mapLocked);
+  window.MapAtlas?.render(map,game,payload=>mutate(`/api/games/${game.id}/organization-action`,payload),mapLocked);
   const tp=map.teleport;
   for(const plan of tp?.construction||[]){
     const box=document.createElement('details');box.className='teleport-controls';
@@ -2828,6 +2833,7 @@ function renderMap(map, auction) {
     window.TrialSitePanel?.badge(location, row);
     const links = directoryLinks(location); if (links) row.append(links);
     row.append(qiEfficiency, route, button);
+    window.BuildingPanel?.overview(row,location);
     const array=map.teleport?.arrays.find(a=>a.id===location.id);
     if(array){const badge=document.createElement('small');badge.textContent=`传送阵 · ${array.owner_name} · ${array.licensed?'已许可':'未许可'}`;row.append(badge);}
     list.appendChild(row);

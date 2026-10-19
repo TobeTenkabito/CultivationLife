@@ -10,8 +10,8 @@ from .dependencies import BuddhistActionDependencies
 from .rules import buddhist_active, buddhist_config, site_state
 
 
-def buddhist_action(deps: BuddhistActionDependencies, game_id, action, **payload):
-    game = deps._load(game_id)
+def apply_action(deps: BuddhistActionDependencies, game, action, payload):
+    """One authority for both the original command and a local temple event."""
     if not buddhist_active(game) or not game.player.alive or game.player.imprisonment:
         raise ValueError("当前无法主持佛修事务")
     deps._ensure_buddhist_state(game)
@@ -41,6 +41,7 @@ def buddhist_action(deps: BuddhistActionDependencies, game_id, action, **payload
         if not remove_item(player, "spirit_stone", cost):
             raise ValueError(f"需要 {cost} 灵石")
         site["temple"] += 1
+        site.pop('temple_ruin_level',None)
         site["followers"] = max(site["followers"], config["temples"][site["temple"]]["floor"])
         deps._buddhist_record(game, f"在{local_names(game, deps.maps, scope_key(game), site_key(game))[1]}修建了{site['temple']}级寺庙。")
     elif action == "permission":
@@ -73,6 +74,12 @@ def buddhist_action(deps: BuddhistActionDependencies, game_id, action, **payload
         deps._finish_buddhist_assembly(game, forced_failure=True)
     else:
         raise ValueError("未知佛修操作")
+    return rng
+
+
+def buddhist_action(deps: BuddhistActionDependencies, game_id, action, **payload):
+    game = deps._load(game_id)
+    rng = apply_action(deps, game, action, payload)
     deps._ensure_market(game, rng)
     game.rng_state = encode_rng(rng)
     game.updated_at = now_iso()

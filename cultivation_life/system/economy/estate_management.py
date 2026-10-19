@@ -36,6 +36,9 @@ def recruitment_ready(game, entity):
 
 def plan(game, maps, row, *, funds=None, optimize_batches=False):
     """A resident steward configures at most one real batch per annual tick."""
+    if row.get('building_status')=='destroyed':
+        row.update(enabled=False,auto_buy=False,auto_sell=False,entrusted=False)
+        return
     # Paid batches have fixed inputs/output; reassess after they finish.
     if row['job']:
         row.update(enabled=True, auto_sell=True)
@@ -116,6 +119,7 @@ def invest_surplus(game, maps, entity, finance):
     for asset in ('farm', 'mine', 'hunt', 'alchemy', 'forge'):
         identity = f'{entity.world}:{location}:{asset}'
         existing = estates(game).get(identity)
+        if existing and existing.get('building_status')=='destroyed':continue
         if existing and existing['owner_kind'] != 'background':
             continue
         offer = existing or dict(world=entity.world, location=location, kind=asset, level=1)

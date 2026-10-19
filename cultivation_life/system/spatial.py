@@ -24,6 +24,7 @@ LOCAL_COMMANDS = frozenset(
         "assert_ghost_operation_allowed",
         "assert_buddhist_operation_allowed",
         "assert_guixu_operation_allowed",
+        "assert_building_operation_allowed",
         "get_game",
         "present",
         "advance",
