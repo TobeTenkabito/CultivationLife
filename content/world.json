@@ -413,6 +413,7 @@
       "city_development": [6, 12],
       "city_story_opportunity_fraction": 0.02,
       "city_arena_opportunity_fraction": 0.01,
+      "visit_insight_opportunity_fraction": 0.005,
       "city_arena_attempts": 3,
       "war_destruction_chance": 0.08,
       "cities": {

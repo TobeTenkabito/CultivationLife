@@ -319,6 +319,49 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         waitForJs("!busy && game.pending_event?.id!=="+JSONObject.quote(old),"Native building choice did not settle: "+prefix,60000);
     }
 
+    private void verifyBuildingVisits(Bundle result) throws Exception {
+        String fixture=assetText("building_visits_release.py");
+        for(String theme:new String[]{"a","b","d","f"}) {
+            String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'山河原生游历',spirit_root:'heavenly',path:'dao',preset_id:'core',seed:2171})});return g.id;})()");
+            python(fixture+"\nfrom cultivation_life import server\nprepare_visits(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");
+            js("document.querySelector('[data-theme-picker=dialog] [data-theme-choice="+theme+"]').click();true");async("GameThemes.saved");
+            Object age=js("game.player.age");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+            tapSelector("#map-locations [data-building-action=temple-plan]");waitForJs("!busy&&game.buildings.inside","Native temple plan");chooseBuilding("confirm");chooseBuilding("leave");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+            check(Boolean.TRUE.equals(js("document.querySelectorAll('#map-locations .current .building-row').length===3")),"Native text gazetteer entries");
+            js("document.querySelector('#map-locations .current .building-overview').scrollIntoView({block:'start'});true");
+            capture("building-visits-list-"+theme+"-"+arguments.getString("orientation","portrait"));
+            tapSelector("#map-locations .current .building-row[data-building-id^='city:'] .building-title strong");
+            check(Boolean.TRUE.equals(js("document.querySelector('#map-locations .current .building-row[data-building-id^=\"city:\"]').open")),"Native illustrated detail expanded");
+            check(Boolean.TRUE.equals(async("(async()=>{const im=new Image();im.src='/assets/building-gazetteer-2171.png';await im.decode();return im.width===1536&&im.height===1024;})()")),"Native building atlas asset loaded");
+            capture("building-visits-detail-"+theme+"-"+arguments.getString("orientation","portrait"));
+            tapSelector("#map-locations .current .building-row[data-building-id^='estate:'] [data-building-action=enter]");waitForJs("!busy&&game.buildings.inside","Native industry visit");
+            chooseBuilding("visit:ledger");chooseBuilding("back");chooseBuilding("visit:work");chooseBuilding("visit:resolve:work:0");chooseBuilding("back");
+            chooseBuilding("visit:lesson");chooseBuilding("visit:resolve:lesson:1");chooseBuilding("back");chooseBuilding("visit:lesson");
+            check(Boolean.TRUE.equals(js("!game.pending_event.choices[0].enabled&&!game.pending_event.choices[1].enabled")),"Native industry insight once");
+            python(assetText("building_cities_release.py")+"\nfrom cultivation_life import server\nbuilding_followup(server.ENGINE,"+JSONObject.quote(id)+")");chooseBuilding("leave");
+            check(Boolean.TRUE.equals(js("game.pending_event.id==='EVT_SECT_FIRST_WARNING_001'")),"Native earned followup survives visit");
+            tapSelector("#event-choices button");waitForJs("!busy&&!game.pending_event","Native followup submitted");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+            tapSelector("#map-locations .current .building-row[data-building-id^='temple:'] [data-building-action=enter]");waitForJs("!busy&&game.buildings.inside","Native temple visit");
+            for(String activity:new String[]{"bell","pilgrims","lesson"}) {chooseBuilding("visit:"+activity);chooseBuilding("visit:resolve:"+activity+":0");chooseBuilding("back");}
+            chooseBuilding("visit:lesson");check(Boolean.TRUE.equals(js("!game.pending_event.choices[0].enabled")),"Native temple insight once");chooseBuilding("leave");
+            python(fixture+"\nfrom cultivation_life import server\nscenic_visit(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");
+            String before=(String)js("JSON.stringify([game.player.age,game.player.hp,game.player.mp,game.player.opportunity,game.player.inventory])");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-locations]");
+            tapSelector("#map-locations .current .building-row[data-building-id^='scenery:'] [data-building-action=enter]");waitForJs("!busy&&game.buildings.inside","Native scenic exploration");
+            for(String activity:new String[]{"trail","weather","traces"}) {chooseBuilding("visit:"+activity);chooseBuilding("visit:resolve:"+activity+":1");chooseBuilding("back");}
+            chooseBuilding("leave");
+            check(before.equals(js("JSON.stringify([game.player.age,game.player.hp,game.player.mp,game.player.opportunity,game.player.inventory])")),"Native scenery grants no resources");
+            check(age.equals(js("game.player.age")),"Native visits consume no years");
+            check(Boolean.TRUE.equals(js("!busy&&!document.querySelector('[data-action=cultivate]').disabled&&document.documentElement.scrollWidth<=innerWidth+2")),"Native busy recovery and narrow layout");
+            python(fixture+"\nfrom cultivation_life import server\ninspect_visits(server.ENGINE,"+JSONObject.quote(id)+")");
+        }
+        result.putString("building_visits_scope","Four themes, text gazetteer and illustrated details, native scenery/industry/temple branches, two bounded insight claims, original books, earned followup and zero-year menus");
+    }
+
     private void verifyBuildings(Bundle result) throws Exception {
         String fixture=assetText("building_cities_release.py");
         for(String theme:new String[]{"a","b","d","f"}) {
@@ -1434,6 +1477,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     if(Boolean.TRUE.equals(js("document.querySelector('#map-card').classList.contains('panel-open')")))tapSelector("#map-toggle");
                 }
                 result.putString("regional_calendar_scope","Real Guixu interruption and choices, reloaded saved progress, disabled travel and exact total years, original regional finance; four themes");
+            } else if(phase.equals("building-visits")) {
+                verifyBuildingVisits(result);
             } else if(phase.equals("buildings")) {
                 verifyBuildings(result);
             } else if(phase.equals("common-goods")) {

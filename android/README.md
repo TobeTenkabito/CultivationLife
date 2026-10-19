@@ -1,6 +1,8 @@
 # 浮生问道 · Android
 
-维护基线：2026-10-19，本体 **v2.17.0**。Gradle 配置的版本名为 **2.17.0-android.71**，versionCode **71**，沿用 `com.fusheng.wendao` 包名和正式签名。
+维护基线：2026-10-19，本体 **v2.17.1**。Gradle 配置的版本名为 **2.17.1-android.72**，versionCode **72**，沿用 `com.fusheng.wendao` 包名和正式签名。
+
+v2.17.1 使用 building-visits 相关领域配置，不做全仓：建筑名录与展开绘图、景色探索、产业与寺庙有限事件、原经营及旧事件页面；同版 Windows EXE 有／无 DLC，签名 Android 12 的 building-visits / economy-enterprises 横竖屏四主题原生验收。最终范围以同版清单为准。
 
 v2.17.0 使用 buildings 发行配置：全仓回归、十一界城市与建筑真实页面、Windows 同一 EXE 有／无 DLC，以及签名 Android 12 的建筑、产业与旧事件横竖屏原生验收。最终通过范围与包哈希以 `dist/` 同版发行清单为准；玩法见[建筑系统](../docs/building-system.md)。
 

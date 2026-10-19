@@ -128,8 +128,20 @@ REGIONAL_TESTS = list(dict.fromkeys(BUGFIX_TESTS + [
 ] + [str(p.relative_to(ROOT)).replace('\\','/') for p in sorted((ROOT/'tests').glob('test_heavens*.py'))]))
 
 
+BUILDING_VISIT_TESTS = [
+    'tests/test_building_visits.py','tests/test_building_system.py','tests/test_city_buildings.py',
+    'tests/test_economy_enterprises.py','tests/test_economy_estate_audit.py','tests/test_economy_network.py',
+    'tests/test_buddhist_dharma.py','tests/test_buddhist_wish.py','tests/test_upper_teachings.py',
+    'tests/test_debug_capabilities.py','tests/test_debug_console.py','tests/test_persistence_pipeline.py',
+    'tests/test_content_registry.py','tests/test_world_transition_system.py','tests/test_spatial_talismans.py',
+    'tests/test_release_211.py','tests/test_release_212.py','tests/test_base_game_version.py',
+    'tests/test_android_packaging.py','tests/test_windows_release_evidence.py','tests/test_android_release_checks.py',
+    'tests/test_module_dependencies.py','tests/test_save_transfer.py',
+]
+
+
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits'],default='legacy')
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     options=parser.parse_args()
@@ -145,7 +157,8 @@ def main():
     if profile in {'architecture','buildings'}:
         modules=[str(p.relative_to(ROOT)).replace('\\','/') for p in sorted((ROOT/'tests').rglob('test_*.py'))]
         selected=[modules[i::options.shards] for i in range(options.shards)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings'}:
+    if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
@@ -180,6 +193,8 @@ def main():
                   'browser_custody_formation_fixes']
     if profile=='buildings':
         browsers=['browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212']
+    if profile=='building-visits':
+        browsers=['browser_building_visits','browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     if profile=='common-goods':
         jobs.append(('combat-upstream',['tools/verify_combat_upstream_2151.py']))
@@ -193,14 +208,14 @@ def main():
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         print(name+' passed',flush=True)
         return dict(name=name,log=str(log.relative_to(ROOT)),status='passed')
-    if profile in {'secret-arts','common-goods','regional','architecture','buildings'}:
+    if profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits'}:
         # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

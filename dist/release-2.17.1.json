@@ -1,5 +1,5 @@
 {
-  "base_version": "2.17.0",
+  "base_version": "2.17.1",
   "save_schema": 10,
   "compatible_save_schemas": [
     10
@@ -17,105 +17,98 @@
     "tianji-artifacts": "2.2.0",
     "trial-sites": "1.1.0"
   },
-  "validation_scope": "Full repository regression, eleven-world cities, building projects, finite event rewards, estates and real event browser acceptance",
-  "tests": 5782,
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 803,
   "runs": [
     {
       "name": "related-tests-0",
-      "log": "build\\related-tests-0-2170.log",
+      "log": "build\\related-tests-0-2171.log",
       "status": "passed"
     },
     {
       "name": "related-tests-1",
-      "log": "build\\related-tests-1-2170.log",
+      "log": "build\\related-tests-1-2171.log",
       "status": "passed"
     },
     {
       "name": "related-tests-2",
-      "log": "build\\related-tests-2-2170.log",
-      "status": "passed"
-    },
-    {
-      "name": "related-tests-3",
-      "log": "build\\related-tests-3-2170.log",
-      "status": "passed"
-    },
-    {
-      "name": "related-tests-4",
-      "log": "build\\related-tests-4-2170.log",
-      "status": "passed"
-    },
-    {
-      "name": "related-tests-5",
-      "log": "build\\related-tests-5-2170.log",
+      "log": "build\\related-tests-2-2171.log",
       "status": "passed"
     },
     {
       "name": "check_world_transition_contract",
-      "log": "build\\check_world_transition_contract-2170.log",
+      "log": "build\\check_world_transition_contract-2171.log",
       "status": "passed"
     },
     {
       "name": "check_module_dependencies",
-      "log": "build\\check_module_dependencies-2170.log",
+      "log": "build\\check_module_dependencies-2171.log",
       "status": "passed"
     },
     {
       "name": "check_documentation",
-      "log": "build\\check_documentation-2170.log",
+      "log": "build\\check_documentation-2171.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_building_visits",
+      "log": "build\\browser_building_visits-2171.log",
       "status": "passed"
     },
     {
       "name": "browser_buildings",
-      "log": "build\\browser_buildings-2170.log",
+      "log": "build\\browser_buildings-2171.log",
       "status": "passed"
     },
     {
       "name": "browser_city_buildings",
-      "log": "build\\browser_city_buildings-2170.log",
+      "log": "build\\browser_city_buildings-2171.log",
       "status": "passed"
     },
     {
       "name": "browser_economy_enterprises",
-      "log": "build\\browser_economy_enterprises-2170.log",
+      "log": "build\\browser_economy_enterprises-2171.log",
       "status": "passed"
     },
     {
       "name": "browser_events_212",
-      "log": "build\\browser_events_212-2170.log",
+      "log": "build\\browser_events_212-2171.log",
       "status": "passed"
     }
   ],
-  "save_transfer_log": "build/save-transfer-2170.log",
-  "inputs_sha256": "92f44ce9f5b964c9ee530301aa74073f42388f8b382c85faa423f8d2d15ff9a6",
+  "save_transfer_log": "build/save-transfer-2171.log",
+  "inputs_sha256": "0309e315a51383184c74a8cf3ca89645ab767d8eca8327a9e768f328ae938a12",
   "performance": {
-    "version": "2.17.0",
-    "source_sha256": "92f44ce9f5b964c9ee530301aa74073f42388f8b382c85faa423f8d2d15ff9a6",
+    "version": "2.17.1",
+    "source_sha256": "0309e315a51383184c74a8cf3ca89645ab767d8eca8327a9e768f328ae938a12",
     "scenario": "same save, one real rest action, 1 warmup + 3 samples",
     "note": "End-to-end includes save validation and map rendering; not a before-feature benchmark.",
     "rows": [
       {
         "buildings": 0,
-        "action_median_ms": 223.62,
-        "qi_lookup_us": 3.59,
+        "visit_claims": 0,
+        "action_median_ms": 313.85,
+        "qi_lookup_us": 4.3,
         "economy_identical": true
       },
       {
         "buildings": 1,
-        "action_median_ms": 234.11,
-        "qi_lookup_us": 4.6,
+        "visit_claims": 1,
+        "action_median_ms": 426.52,
+        "qi_lookup_us": 7.83,
         "economy_identical": true
       },
       {
         "buildings": 128,
-        "action_median_ms": 275.89,
-        "qi_lookup_us": 5.75,
+        "visit_claims": 128,
+        "action_median_ms": 432.08,
+        "qi_lookup_us": 7.11,
         "economy_identical": true
       }
     ]
   },
   "platform": "Windows",
-  "exe_sha256": "e5a698f9a50da167d32896226f576e47ef705f1778f966e9af240163db6b39a9",
+  "exe_sha256": "547aef9e91c8a30238ebdae52b28367642c22ac7ec79e78426ec769bed35b4e7",
   "with_and_without_dlc_verified": true,
   "root_launcher_updated": true
 }

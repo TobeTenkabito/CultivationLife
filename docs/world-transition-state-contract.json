@@ -1,6 +1,7 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "GameState.building_state.visit_usage": "global：产业与寺庙按原固定建筑编号登记一次insight领悟；只在本地实际选项结算后写入，原机缘入口处理奖励。读档、跨界、产权变化、DLC关闭重开与原址重建均不刷新。无原库存、府库、信众或人物副本，不新增年度扫描；景色探索无收益且不持久化次数。",
     "GameState.building_state.scene.result_text / records.*.features": "session / global：result_text仅保存本次城市非致命演武的已结算文本，恢复事件只读显示，不重放战斗、奖励或随机数；离开会话一并清除。features随固定地址城池保留，只描述实际营造的护城禁制，不复制或迁移原地面阵法库存、NPC或玩家装备；一级重建清除高阶城防描述。",
     "GameState.building_state.city_usage / records.*.population / development / content_id": "global：初始城市与景色只读原内容目录，自建或改变状态时按原固定地址保存唯一覆盖记录。城市居民属性与发展进度归原城市；city_usage按城市稳定编号记录一次逸事、最多三次演武、一次首胜和本城上次治理真实年龄，读档、切界、摧毁或重建均不刷新。不构造居民NPC副本，不增加年度城市经济扫描。",
     "GameState.economy_v2.estates.*.building_status / building_destroyed_age": "scope：原产业设施状态与实际毁坏年份；原仓储、周转金、在途货物和储量保持唯一，毁坏暂停新经营与已付批次，养护照常，重建将原任务完工时刻顺延实际停工年份，不补发过去产量。",

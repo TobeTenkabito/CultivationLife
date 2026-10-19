@@ -82,6 +82,13 @@ def decode_state(value):
             raise ValueError('城市活动记录身份无效')
         if any(type(n) is not int or not 0 <= n <= limits[key] for key, n in used.items()):
             raise ValueError('城市活动次数无效')
+    visits = value.get('visit_usage', {})
+    if not isinstance(visits, dict) or len(visits) > 8192:
+        raise ValueError('建筑阅历记录无效或过大')
+    for identity, used in visits.items():
+        if (not isinstance(identity,str) or not identity or len(identity)>512 or not isinstance(used,dict)
+                or set(used) != {'insight'} or type(used['insight']) is not int or used['insight'] != 1):
+            raise ValueError('建筑领悟次数无效')
     for key, identity in cultivation.items():
         row = records.get(identity)
         if not row or row.get('subtype') != 'cave' or key != address_key(row['address']):

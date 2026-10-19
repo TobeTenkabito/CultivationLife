@@ -12,6 +12,7 @@ from ..rules import remove_item
 from .buddhist.rules import buddhist_config, buddhist_active
 from .building_assets import rows_at, local_rows
 from . import building_cities as cities, building_projects as projects, building_destruction as destruction
+from . import building_visits as visits
 
 
 @dataclass(frozen=True)
@@ -114,6 +115,8 @@ def event(game):
     elif scene['kind']=='management':projected=management(game,find(game,scene['building_id']),node)
     elif scene['kind']=='visit' and find(game,scene['building_id'])['type']=='city':
         projected=cities.project(game,find(game,scene['building_id']),node)
+    elif scene['kind']=='visit':
+        projected=visits.project(game,find(game,scene['building_id']),node)
     if projected is not None:
         return dict(id=f"SYS_BUILDING_{scene['revision']}",**projected)
     choices = []
@@ -147,7 +150,7 @@ def event(game):
         row=find(game,scene['building_id']);title=display_name(row)
         body=describe(row)
         if node=='main':
-            choices=[_choice('details','察看此处')]
+            choices=visits.choices(row)+[_choice('details','察看此处')]
             if row.get('subtype')=='cave':
                 choices += [_choice('qi','察看聚气布置'),_choice('renovate','整修洞府')]
             elif row.get('subtype')=='temple' and buddhist_active(game):
@@ -302,6 +305,11 @@ def action(deps: BuildingDependencies, game_id, action, building_id='', event_id
             following=game.pending_event.get('_followup_event')
             node=cities.act(deps,game,find(game,scene['building_id']),choice_id)
             navigate(game,scene,'main' if node=='back' else node)
+            if following:game.pending_event['_followup_event']=following
+        elif choice_id.startswith('visit:'):
+            following=game.pending_event.get('_followup_event')
+            node=visits.act(deps,game,find(game,scene['building_id']),choice_id)
+            navigate(game,scene,node)
             if following:game.pending_event['_followup_event']=following
         elif choice_id=='temple:upgrade' or choice_id.startswith('toggle:'):
             temple_change(deps,game,scene,'temple' if choice_id=='temple:upgrade' else 'blessing',

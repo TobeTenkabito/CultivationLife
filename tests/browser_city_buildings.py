@@ -14,6 +14,7 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from cultivation_life.building_rules import config
 from cultivation_life.content_registry import WORLD_SYSTEMS
+from cultivation_life.version import BASE_GAME_VERSION
 from cultivation_life.rules import add_item,remove_item
 from cultivation_life.system.building_projects import quote
 from browser_buildings import choice
@@ -26,7 +27,8 @@ def click_prefix(page,prefix):
 
 
 def open_map(page,atlas=False):
-    navigation_locator(page,'[data-panel-target=map]').click()
+    if not page.locator('#map-view-tabs').is_visible():
+        navigation_locator(page,'[data-panel-target=map]').click()
     page.locator('#map-view-tabs [aria-controls='+('map-atlas' if atlas else 'map-locations')+']').click()
 
 
@@ -44,7 +46,7 @@ def prepare(engine,world,name='城市游历'):
 
 
 def main():
-    output=ROOT/'build/city-browser-2170';output.mkdir(parents=True,exist_ok=True)
+    output=ROOT/f'build/city-browser-{BASE_GAME_VERSION.replace(".", "")}';output.mkdir(parents=True,exist_ok=True)
     report=[]
     with tempfile.TemporaryDirectory() as folder:
         engine=GameEngine(ROOT,Path(folder)/'saves')
@@ -95,8 +97,13 @@ def main():
                             page=browser.new_page(viewport=dict(width=width,height=height),reduced_motion='reduce')
                             page.on('pageerror',lambda e:errors.append(str(e)))
                             page.goto(f'http://127.0.0.1:{httpd.server_port}');page.wait_for_function('configData&&window.GameThemes')
+                            page.evaluate('GameThemes.ready')
                             page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
-                            page.evaluate('async id=>loadGame(id)',game.id);open_map(page)
+                            page.evaluate('GameThemes.saved')
+                            page.evaluate('async id=>loadGame(id)',game.id)
+                            assert not errors,errors
+                            assert page.evaluate('id=>game?.id===id&&!busy&&document.body.classList.contains("in-game")&&!document.querySelector("#game-screen").classList.contains("hidden")',game.id),page.locator('#toast').inner_text()
+                            open_map(page)
                             page.locator('#map-locations [data-building-action=city-plan]').click()
                             page.wait_for_function('!busy&&game.pending_event?.title==="择地筑城"')
                             choice(page,'city:military');choice(page,'city:military:mixed')

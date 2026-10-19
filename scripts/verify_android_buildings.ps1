@@ -1,10 +1,11 @@
-param([string]$Serial='emulator-5580')
+param([string]$Serial='emulator-5580',[switch]$Visits)
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'android_environment.ps1')
 $root=Split-Path $PSScriptRoot -Parent
 $version=(Get-Content (Join-Path $root 'cultivation_life/version.py') | Select-String 'BASE_GAME_VERSION = "([^"]+)"').Matches[0].Groups[1].Value
 $tag=$version.Replace('.','')
-foreach($phase in @('buildings','economy-enterprises')) {
+$buildingPhase=if($Visits){'building-visits'}else{'buildings'}
+foreach($phase in @($buildingPhase,'economy-enterprises')) {
     foreach($orientation in @('portrait','landscape')) {
         $path=Join-Path $root "build/android-$phase-$orientation-$tag.log"
         & $androidAdb -s $Serial shell am instrument -w -r -e phase $phase -e orientation $orientation com.fusheng.wendao.test/com.fusheng.wendao.ReleaseSmokeInstrumentation *> $path

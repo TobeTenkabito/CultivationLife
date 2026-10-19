@@ -135,21 +135,31 @@ def main():
         require(architecture['status']=='passed' and architecture['inputs_sha256']==inputs_digest(ROOT), 'Architecture equivalence evidence differs from final source')
         require(architecture['algorithm_bodies']==119 and architecture['checkpoints']==413 and architecture['protected_files_unchanged'], 'Incomplete architecture equivalence/protected file evidence')
         require(all(file_digest(ROOT/name)==digest for name,digest in architecture['log_hashes'].items()), 'Architecture evidence changed')
-    if scoped.get('profile')=='buildings':
-        required={f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('buildings','economy-enterprises') for orientation in ('portrait','landscape')}
+    if scoped.get('profile') in {'buildings','building-visits'}:
+        visits=scoped['profile']=='building-visits'
+        phase='building-visits' if visits else 'buildings'
+        required={f'build/android-{name}-{orientation}-{tag}.log' for name in (phase,'economy-enterprises') for orientation in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Native building scope incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test APK changed')
         require(all('buildings_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required if '/android-buildings-' in n),'Native city/building acceptance missing')
         require(all(c.get('buildings_verified') for c in evidence['cases']),'Actual compiled building commands required with and without DLC')
+        if visits:
+            require(all(c.get('building_visits_verified') for c in evidence['cases']),'Actual compiled visit branches required with and without DLC')
+            require(all('building_visits_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required if '/android-building-visits-' in n),'Native visit scope missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
         code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
         selected={name for shard in scoped['tests'] for name in shard}
-        require(selected=={p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').rglob('test_*.py')},'Building feature release requires the complete repository test selection')
+        if visits:
+            from scripts.verify_scoped_release import BUILDING_VISIT_TESTS
+            require(selected==set(BUILDING_VISIT_TESTS),'Building visit domain selection incomplete')
+            require('browser_building_visits' in {r['name'] for r in scoped['runs']},'Four-theme visit browser required')
+        else:require(selected=={p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').rglob('test_*.py')},'Building feature release requires the complete repository test selection')
         require({'browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212'}<={r['name'] for r in scoped['runs']},'Building feature browsers incomplete')
         performance=json.loads((ROOT/'build/building-performance.json').read_text(encoding='utf-8'))
+        if visits:require(all(r.get('visit_claims')==r['buildings'] for r in performance['rows']),'Building visits performance must include persistent claim records')
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
     dlcs={p.parent.name:json.loads(p.read_text(encoding='utf-8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],
@@ -162,7 +172,7 @@ def main():
         base['performance']=performance
         base['web_performance']=web_performance
         base['rift_audit']=rift_audit
-    if scoped.get('profile')=='buildings':base['performance']=performance
+    if scoped.get('profile') in {'buildings','building-visits'}:base['performance']=performance
     if scoped.get('profile') == 'common-goods':
         upstream=json.loads((ROOT/'build/combat-engine-upstream-2151.json').read_text(encoding='utf-8'))
         require(upstream['inputs_sha256']==base['inputs_sha256'] and upstream['status']=='passed'

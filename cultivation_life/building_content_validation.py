@@ -18,7 +18,7 @@ def validate(config,maps,profiles):
     require(config.get('city_material_grade')=={'1':1,'2':5,'3':9},'城市材料须使用原本界品阶')
     values=config.get('city_labor_units')
     require(isinstance(values,list) and len(values)==3 and all(type(n) is int and n>0 for n in values),'城市工费无效')
-    for field in ('city_story_opportunity_fraction','city_arena_opportunity_fraction','war_destruction_chance'):
+    for field in ('city_story_opportunity_fraction','city_arena_opportunity_fraction','visit_insight_opportunity_fraction','war_destruction_chance'):
         n=config.get(field)
         require(type(n) in (int,float) and math.isfinite(n) and 0<=n<=1,'建筑概率或奖励比例无效')
     for category in ('cities','scenery'):

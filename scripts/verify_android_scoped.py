@@ -23,6 +23,7 @@ def main():
     regional = '--regional' in sys.argv[2:]
     architecture = '--architecture' in sys.argv[2:]
     buildings = '--buildings' in sys.argv[2:]
+    visits = '--building-visits' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
@@ -48,10 +49,13 @@ def main():
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
     if buildings:
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('buildings','economy-enterprises') for orientation in ('portrait','landscape')]
+    if visits:
+        logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('building-visits','economy-enterprises') for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if buildings and '/android-buildings-' in name:require('buildings_scope' in text,f'Missing current native city coverage: {name}')
+        if visits and '/android-building-visits-' in name:require('building_visits_scope' in text,f'Missing native illustrated visits: {name}')
         if goods:require('common_goods_scope' in text,f'Missing common goods native coverage: {name}')
         if regional and 'regional-calendar' in name:require('regional_calendar_scope' in text,f'Missing regional native coverage: {name}')
         if secret:
@@ -105,6 +109,7 @@ def main():
     if regional:receipt['scope']='Guixu interruption, persistent travel credit, real resumed arrival and fleet network native clicks; four themes and portrait/landscape'
     if architecture:receipt['scope']='Seven character/region/organization phases, four themes, portrait/landscape; actual signed release APK and current native test APK'
     if buildings:receipt['scope']='Eleven-world initial cities, four-theme native construction, stale material recovery, bounded story rewards, yearly governance, ruins and rebuild, earned followup plus original production; portrait/landscape'
+    if visits:receipt['scope']='Four-theme text gazetteer and expanded illustrations, real scenery/industry/temple visits, bounded insight, earned followup and original estate production; portrait/landscape'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 
