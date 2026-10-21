@@ -13,7 +13,7 @@ import zlib
 from .models import GameState
 from .errors import NotFoundError
 from .runtime import decode_rng
-from .version import BASE_GAME_VERSION
+from .version import BASE_GAME_VERSION, release_order
 from .save_schema import migrate_document
 
 MAX_RAW = 64 * 1024 * 1024
@@ -40,9 +40,7 @@ def _validate(document):
     if not isinstance(document, dict) or document.get("format") != "fusheng-save" or document.get("format_version") != 1:
         raise ValueError("这不是支持的浮生问道存档码")
     version = document.get("game_version", "")
-    if not isinstance(version, str) or not re.fullmatch(r"\d{1,4}\.\d{1,4}\.\d{1,4}", version):
-        raise ValueError("存档版本无效")
-    if tuple(map(int, version.split('.'))) > tuple(map(int, BASE_GAME_VERSION.split('.'))):
+    if release_order(version) > release_order(BASE_GAME_VERSION):
         raise ValueError("此存档来自更高版本，请先更新游戏")
     data = document.get("save")
     data = migrate_document(data)

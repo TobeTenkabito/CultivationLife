@@ -452,6 +452,62 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("buildings_scope","22 city stories, four themes, real city construction and original inventory, stale material recovery, yearly government cap, named ruins, identity-preserving rebuild, bounded rewards and earned event followup; zero menu years");
     }
 
+    private void runVisualUi(Bundle result) throws Exception {
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'新版原生验收',spirit_root:'heavenly',path:'dao',seed:322,preset_id:'core'})}).then(g=>g.id)");
+        python(assetText("visual_release.py")+"\nfrom cultivation_life import server\nprepare_visual_release(server.ENGINE,"+JSONObject.quote(id)+")");
+        async("loadGame("+JSONObject.quote(id)+")");
+        js("window.__visualBefore=JSON.stringify(game);true");
+        tapSelector("#theme-open");
+        if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        waitForJs("!!PixelLibrary.catalog","Native asset catalog");
+        check(Boolean.TRUE.equals(js("JSON.stringify(game)===__visualBefore")),"New view must not change gameplay state");
+        tapSelector("[data-panel-target=inventory]");tapSelector("[data-pixel-item=guixu_canghai_equipment_01]");
+        waitForJs("document.querySelector('.pixel-item-sheet .pixel-bag-art img')?.naturalWidth===32","Native extension-owned bitmap loaded");
+        check(Boolean.TRUE.equals(js("document.querySelector('.pixel-item-sheet .pixel-bag-art img').getAttribute('src').startsWith('/extension-assets/official.guixu-tide/')")),"Native DLC image must come from its own pack");
+        tapSelector(".pixel-item-sheet>header button");tapSelector("#inventory-toggle");
+        for(String theme:new String[]{"a","b","d","f"}) {
+            tapSelector("#theme-open");tapSelector("[data-theme-picker=dialog] [data-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector("[data-panel-target=inventory]");
+            waitForJs("!document.querySelector('#pixel-inventory').hidden","Native new inventory");
+            check(Boolean.TRUE.equals(js("document.querySelectorAll('[data-pixel-item]').length===game.player.inventory.length && document.querySelector('#inventory-card').scrollWidth<=document.querySelector('#inventory-card').clientWidth+2")),"Native bag layout and complete inventory");
+            tapSelector("[data-pixel-item=healing_pill]");
+            check(Boolean.TRUE.equals(js("!!document.querySelector('.pixel-item-sheet[open] .item-use') && document.querySelector('.pixel-item-sheet[open]').scrollWidth<=document.querySelector('.pixel-item-sheet[open]').clientWidth+2")),"Native item detail sheet");
+            capture("visual-bag-"+theme+"-"+arguments.getString("orientation"));
+            tapSelector(".pixel-item-sheet>header button");tapSelector("#inventory-toggle");
+        }
+        tapSelector("[data-panel-target=inventory]");tapSelector("[data-pixel-item=healing_pill]");js("window.__visualHp=game.player.hp;window.__visualQty=game.player.inventory.find(i=>i.id==='healing_pill').quantity;true");tapSelector(".pixel-item-sheet .item-use");
+        waitForJs("!busy&&game.player.hp>__visualHp","Native original healing command");
+        check(Boolean.TRUE.equals(js("game.player.inventory.find(i=>i.id==='healing_pill').quantity===__visualQty-1&&!document.querySelector('.pixel-item-sheet').open")),"Native exact item consumption and sheet close");tapSelector("#inventory-toggle");
+        tapSelector("[data-panel-target=natal-artifact]");
+        check(Boolean.TRUE.equals(js("document.querySelector('.pixel-natal-art img').dataset.asset==='gear.umbrella'")),"Native true natal shape");
+        tapSelector(".natal-slot.slot-0");tapSelector(".natal-material-choice");waitForJs("!busy&&!!game.natal_artifact.slots[0].material_id","Native pixel material socket");
+        check(Boolean.TRUE.equals(js("!!document.querySelector('.natal-slot.slot-0 img').getAttribute('src')")),"Native material icon");
+        tapSelector(".natal-slot.slot-0");waitForJs("!busy&&!game.natal_artifact.slots[0].material_id","Native exact material return");tapSelector("#natal-artifact-toggle");
+        tapSelector(".hud-identity");waitForJs("!document.querySelector('.pixel-natal-on-actor').hidden","Native character natal visual");capture("visual-character-"+arguments.getString("orientation"));tapSelector("[data-close-dialog=player-details-dialog]");
+        js("window.__visualBuildingAge=game.player.age;true");tapSelector("#pixel-scenery-toggle");
+        tapSelector("#pixel-buildings [data-building-action=enter]:not(:disabled)");
+        waitForJs("!busy&&!!game.buildings.inside&&!document.querySelector('#pixel-scenery-drawer').open","Native home building entrance closes drawer");
+        check(Boolean.TRUE.equals(js("document.querySelector('#event-card').getBoundingClientRect().height>=200")),"Native event retains readable height on short landscape");
+        capture("visual-home-event-"+arguments.getString("orientation"));chooseBuilding("leave");
+        check(Boolean.TRUE.equals(js("!game.buildings.inside&&game.player.age===__visualBuildingAge")),"Native home building visit is zero-year");
+        for(String world:new String[]{"human","demon","spirit","true_demon","monster_realm","phantom_underworld","hell","celestial","asura","nether","reincarnation"}) {
+            int rank=(world.equals("human")||world.equals("demon"))?4:(world.equals("celestial")||world.equals("asura")||world.equals("nether")||world.equals("reincarnation"))?9:7;
+            String mapId=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'原生山河',spirit_root:'supreme_metal',path:'dao',seed:322,custom_start:{world:"+JSONObject.quote(world)+",realm_index:"+rank+"}})}).then(g=>g.id)");async("loadGame("+JSONObject.quote(mapId)+")");
+            js("window.__visualMapBefore=JSON.stringify(game);true");tapSelector("#pixel-scenery-toggle");
+            waitForJs("document.querySelector('#pixel-home .pixel-background')?.naturalWidth===768","Native home realm painting loaded");
+            check(Boolean.TRUE.equals(js("document.querySelector('#pixel-home .pixel-background').getAttribute('src').endsWith('/"+world+".png')")),"Native correct home realm art");
+            js("window.__visualCamera=document.querySelector('.pixel-world-plane').style.transform;true");tapSelector(".pixel-world-tools [aria-label='放大绘景']");
+            check(Boolean.TRUE.equals(js("document.querySelector('.pixel-world-plane').style.transform!==__visualCamera&&JSON.stringify(game)===__visualMapBefore")),"Native bounded home camera is read only");capture("visual-home-"+world+"-"+arguments.getString("orientation"));tapSelector("#pixel-scenery-drawer .pixel-drawer-heading button");
+            tapSelector("[data-panel-target=map]");tapSelector("#map-view-tabs [aria-controls=map-atlas]");
+            check(Boolean.TRUE.equals(js("!!document.querySelector('[data-atlas-mode]')&&!document.querySelector('#map-atlas .pixel-background')")),"Native original node atlas retained in new UI");tapSelector("#map-toggle");
+        }
+        tapSelector("#theme-open");tapSelector("#theme-dialog [data-pixel-setting]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        tapSelector("[data-panel-target=inventory]");
+        check(Boolean.TRUE.equals(js("document.querySelector('#pixel-inventory').hidden&&!document.querySelector('#inventory-list').hidden&&document.querySelectorAll('#inventory-list .item').length===game.player.inventory.length")),"Native restored legacy inventory");tapSelector("#inventory-toggle");
+        result.putString("visual_ui_scope","Four themes, native portrait/landscape clicks, extension-owned bitmap, original healing and exact material return, true natal character/slots, eleven home paintings, bounded immutable camera, original node atlas and legacy fallback; no combat animation");
+    }
+
     @Override public void onStart() {
         Bundle result=new Bundle();
         File dlcPreferences=null;byte[] previousDlcPreferences=null;
@@ -498,7 +554,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("maps-2131") || phase.equals("maps-2132") || phase.equals("maps-2133")) {
+            if(phase.equals("visual-ui")) {
+                runVisualUi(result);
+            } else if(phase.equals("maps-2131") || phase.equals("maps-2132") || phase.equals("maps-2133")) {
                 int mapCases=0;
                 for(String world:new String[]{"human","demon","spirit","true_demon","monster_realm","phantom_underworld","hell","celestial","asura","nether","reincarnation"}) {
                     int rank=(world.equals("human")||world.equals("demon"))?4:(world.equals("celestial")||world.equals("asura")||world.equals("nether")||world.equals("reincarnation"))?9:7;

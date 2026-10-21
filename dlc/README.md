@@ -63,7 +63,7 @@ dlc/
 | [修罗显圣：无法无天](asura-manifestation/README.md) | 1.2.1 | `official.asura-manifestation` |
 | [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.1.0 | `official.buddhist-dharma` |
 | [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.9.1 | `official.ghost-reincarnation` |
-| [归墟之潮：九死一生](guixu-tide/README.md) | 2.7.0 | `official.guixu-tide` |
+| [归墟之潮：九死一生](guixu-tide/README.md) | 2.7.1 | `official.guixu-tide` |
 | [明争暗斗：合纵连横](intrigue-coalitions/README.md) | 1.5.0 | `official.intrigue-coalitions` |
 | [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.15.2 | `official.monster-bloodlines` |
 | [万灵争衡：百族兴衰](monster-civilizations/README.md) | 1.0.0 | `official.monster-civilizations` |

@@ -62,6 +62,24 @@ def test_export_does_not_migrate_or_touch_original(snapshot):
     assert source._path(game_id).read_bytes() == original
 
 
+@pytest.mark.parametrize('version', ['2.17.2', '3.0.0-alpha.1'])
+def test_struct10_previous_release_and_current_alpha_codes(snapshot, version):
+    source, game_id, target = snapshot
+    doc, _ = decode_snapshot(export_snapshot(source, game_id)['payload'])
+    doc['game_version'] = version
+    import_snapshot(target, encode(doc), None)
+    assert json.loads(target._path(game_id).read_bytes()) == doc['save']
+
+
+@pytest.mark.parametrize('version', ['3.0.0-alpha.2','3.0.0-beta.1','3.0.0-rc.1','3.0.0','3.-alpha-1'])
+def test_future_or_nonstandard_prerelease_code_rejected(snapshot, version):
+    source, game_id, target = snapshot
+    doc, _ = decode_snapshot(export_snapshot(source, game_id)['payload'])
+    doc['game_version'] = version
+    with pytest.raises(ValueError):import_snapshot(target, encode(doc), None)
+    assert not list(target.directory.glob('*.json'))
+
+
 @pytest.mark.parametrize('mutation', ['future', 'path', 'rank', 'rng', 'missing_player', 'wrong_format'])
 def test_invalid_data_never_creates_save(snapshot, mutation):
     source, game_id, target = snapshot

@@ -80,6 +80,7 @@
     footer.firstElementChild.textContent=`${names[theme][0]}`;footer.lastElementChild.textContent=names[theme][1];
     if(current)updateWorld();
     updateTimes();
+    window.PixelHome?.arrange();
   }
   function updateWorld(){const p=current.player;world.querySelector('b').textContent=`${p.world_name} / ${p.location_name}`;world.querySelector('small').textContent=`第 ${p.world_age??p.age} 年 · ${p.realm_name}`;
     const power=$('#hud-power'),base=power.textContent.split(' · ')[0];

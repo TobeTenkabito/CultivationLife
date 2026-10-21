@@ -38,6 +38,7 @@ from .runtime_config import load_runtime_config
 from .version import BASE_GAME_VERSION, base_game_metadata
 from .ui_preferences import load_ui_preferences, write_ui_preferences
 from .save_transfer import export_snapshot, preview_snapshot, import_snapshot
+from .visual_assets import public_catalog, extension_asset
 
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
@@ -159,6 +160,8 @@ class Handler(BaseHTTPRequestHandler):
                 })
             elif path == "/api/ui-preferences":
                 self._json(load_ui_preferences(PERSISTENCE_ROOT))
+            elif path == "/api/visual-assets":
+                self._json(public_catalog(ENGINE_ROOT, EXTENSION_REPORT))
             elif path == "/api/games":
                 self._json({"games": ENGINE.list_games()})
             elif path == "/api/achievements":
@@ -725,9 +728,12 @@ class Handler(BaseHTTPRequestHandler):
 
     def _static(self, path: str) -> None:
         relative = "index.html" if path == "/" else unquote(path.lstrip("/"))
-        target = (WEB_ROOT / relative).resolve()
-        if WEB_ROOT.resolve() not in target.parents and target != WEB_ROOT.resolve():
-            raise NotFoundError("文件不存在")
+        if path.startswith('/extension-assets/'):
+            target = extension_asset(ENGINE_ROOT, APP_ROOT, EXTENSION_REPORT, unquote(path))
+        else:
+            target = (WEB_ROOT / relative).resolve()
+            if WEB_ROOT.resolve() not in target.parents and target != WEB_ROOT.resolve():
+                raise NotFoundError("文件不存在")
         if not target.is_file():
             raise NotFoundError("文件不存在")
         body = target.read_bytes()

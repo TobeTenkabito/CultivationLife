@@ -9,7 +9,7 @@ from pathlib import Path
 from threading import RLock
 
 THEMES = frozenset("abdf")
-DEFAULTS = {"theme": "a", "reduced_motion": False}
+DEFAULTS = {"theme": "a", "reduced_motion": False, "pixel_art": False}
 _LOCK = RLock()
 
 def _navigation(value):
@@ -37,6 +37,7 @@ def load_ui_preferences(root: Path) -> dict:
         result = {
             "theme": ({"c": "a", "e": "f"}.get(data["theme"], data["theme"])) if isinstance(data.get("theme"), str) and data["theme"] in THEMES | {"c", "e"} else "a",
             "reduced_motion": data.get("reduced_motion") if isinstance(data.get("reduced_motion"), bool) else False,
+            "pixel_art": data.get("pixel_art") is True,
         }
         if 'navigation' in data:
             try:
@@ -48,11 +49,13 @@ def load_ui_preferences(root: Path) -> dict:
 
 def write_ui_preferences(root: Path, payload: dict) -> dict:
     if not isinstance(payload, dict) or not payload or set(payload) - (DEFAULTS.keys() | {'navigation'}):
-        raise ValueError("界面偏好仅支持 theme、reduced_motion 与 navigation")
+        raise ValueError("界面偏好仅支持 theme、reduced_motion、pixel_art 与 navigation")
     if "theme" in payload and (not isinstance(payload["theme"], str) or payload["theme"] not in THEMES):
         raise ValueError("请选择松烟书院、月下观星、丹砂金阙或竹简纪年")
     if "reduced_motion" in payload and not isinstance(payload["reduced_motion"], bool):
         raise ValueError("减弱动态效果必须为布尔值")
+    if "pixel_art" in payload and not isinstance(payload["pixel_art"], bool):
+        raise ValueError("像素绘景必须为布尔值")
     if 'navigation' in payload:
         payload = payload | {'navigation': _navigation(payload['navigation'])}
     with _LOCK:

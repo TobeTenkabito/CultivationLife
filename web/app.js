@@ -704,6 +704,7 @@ function render(data) {
   UtilityPanels.schedule('inventory',()=>{renderInventory(p.inventory);window.PanelPages?.refresh(data.id);}); renderArtSkills(data.art_skills || []); UtilityPanels.schedule('spirit-field',()=>renderSpiritField(data.spirit_field || {})); renderDemonicSystem(data.demonic_system || {}); renderAsura(data.asura || {}); UtilityPanels.schedule('map',()=>{renderMap(data.map, data.auction_system);window.ExplorationPanel?.renderMap(data,mutate);}); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:!!configData?.console_available && !!window.DebugConsole?.active(), debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent(); window.ExplorationPanel?.render(data, mutate);
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
+  bindBuildingControls();
   window.GameThemes?.render(data);
   renderPostBattlePossession();
   renderButtons();
@@ -1185,6 +1186,7 @@ function renderNatalMaterialPicker(picker, system, slotIndex, closePicker) {
       detail.textContent=`${material.world_name} · ${material.minimum_realm_name}起${material.specialization?' · '+material.specialization:''}`;
       effect.textContent=material.description;
       option.append(title,detail,effect);
+      window.PixelNatal?.material(option,material,game);
       option.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'socket',item_id:material.item_id,slot_index:slotIndex});
       choices.appendChild(option);
     });
@@ -1204,6 +1206,7 @@ function renderNatalArtifact(system) {
   panel.classList.toggle('hidden',!system.visible); dock?.classList.toggle('hidden',!system.visible);
   if(!system.visible){window.UtilityPanels?.close('natal-artifact');return;}
   const root=$('#natal-artifact-content');root.innerHTML='';
+  root.classList.toggle('pixel-natal-content',!!window.PixelLibrary?.active());
   if(!system.bound){
     $('#natal-artifact-heading').textContent='结丹后开放';
     const lead=document.createElement('p');lead.className='muted';lead.textContent='选择一件传统法宝收入丹田。认主后不可交易，其原有属性将随祭炼等级持续成长；组合炼器成品可直接在包裹中设置本命。';root.appendChild(lead);
@@ -1223,8 +1226,9 @@ function renderNatalArtifact(system) {
   if(system.is_tianji){const note=document.createElement('p');note.className='muted natal-tianji-cap';note.textContent=`神机原始战力 ${number(system.bonuses.base_combat_bonus)}；培养与镶嵌加成 +${number(system.bonuses.cultivation_combat_bonus)}；合计 ${number(system.bonuses.raw_combat_bonus)}；${system.bonuses.combat_cap==null?'当前界面完全解放':`当前界面单件上限 ${number(system.bonuses.combat_cap)}`}，实际计入 ${number(system.bonuses.combat_bonus)}。继续温养不会绕过界面上限，其他属性与器理 Buff 不受压制。`;root.appendChild(note);}
   const unbind=document.createElement('button');unbind.className='natal-action';unbind.textContent='移除本命 · 下次突破 −10%';unbind.onclick=()=>openGameConfirm({title:'移除本命法宝',body:'法宝与镶材归还，温养等级清除。损耗大量本源，下次修为突破概率降低10个百分点，重复移除累加。是否继续？',confirmText:'损耗本源并移除',onConfirm:()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'unbind'})});refineTools.appendChild(unbind);
   const visual=document.createElement('div');visual.className='natal-artifact-visual';
-  const swordShadow=document.createElement('img');swordShadow.className='natal-sword-shadow';swordShadow.src='/assets/natal-artifact-ancient-sword.png?v=20260912-1';swordShadow.alt='';swordShadow.setAttribute('aria-hidden','true');
-  const sword=document.createElement('img');sword.className='natal-sword natal-sword-body';sword.src='/assets/natal-artifact-ancient-sword.png?v=20260912-1';sword.alt='';sword.setAttribute('aria-hidden','true');
+  const swordShadow=document.createElement('img');swordShadow.className='natal-sword-shadow';swordShadow.alt='';swordShadow.setAttribute('aria-hidden','true');
+  const sword=document.createElement('img');sword.className='natal-sword natal-sword-body';sword.alt='';sword.setAttribute('aria-hidden','true');
+  if(!window.PixelLibrary?.active()){swordShadow.src=sword.src='/assets/natal-artifact-ancient-sword.png?v=20260912-1';}
   visual.append(swordShadow,sword);
   const slotLayer=document.createElement('div');slotLayer.className='natal-slot-layer';
   const picker=document.createElement('div');picker.className='natal-material-picker hidden';visual.append(slotLayer,picker);
@@ -1235,6 +1239,7 @@ function renderNatalArtifact(system) {
     slotLayer.appendChild(button);});
   root.appendChild(visual);
   const hint=document.createElement('p');hint.className='natal-hint';hint.textContent=`已解锁 ${system.unlocked_slots} 槽，下一个槽位于 ${system.next_slot_level} 级开放。槽位与祭炼等级均无上限；修炼时本命法宝会随周天自动积累祭炼经验。`;root.appendChild(hint);
+  window.PixelNatal?.decorate(system,game);
 }
 
 function renderHeavenlyCourt(court) {
@@ -2744,6 +2749,16 @@ function renderExchange(system) {
   });
 }
 
+function bindBuildingControls() {
+  const mapLocked=()=>busy||!game||!!game.pending_event||!!game.imprisonment||game?.ghost_system?.phase_two?.state==='controlled'||!game.player.alive;
+  window.BuildingPanel?.bind(game,async payload=>{
+    window.PixelHome?.closeDrawer();
+    await mutate(`/api/games/${game.id}/building-action`,payload);
+    if(game?.buildings?.inside)window.UtilityPanels?.close('map');
+  },mapLocked);
+  return mapLocked;
+}
+
 function renderMap(map, auction) {
   if (!map) return;
   $('#map-title').textContent = `${map.world_name}地图`;
@@ -2751,11 +2766,7 @@ function renderMap(map, auction) {
   $('#map-description').textContent = '移动按最短路线消耗时间；坊市、探宝与四种气经验获取效率均受当前地域影响。世界与 NPC 会在旅途中逐年演化。';
   const list = $('#map-locations'); list.innerHTML = '';
   let atlas=document.querySelector('#map-atlas');if(!atlas){atlas=document.createElement('section');atlas.id='map-atlas';list.before(atlas);}
-  const mapLocked=()=>busy||!game||!!game.pending_event||!!game.imprisonment||game?.ghost_system?.phase_two?.state==='controlled'||!game.player.alive;
-  window.BuildingPanel?.bind(game,async payload=>{
-    await mutate(`/api/games/${game.id}/building-action`,payload);
-    if(game?.buildings?.inside)window.UtilityPanels?.close('map');
-  },mapLocked);
+  const mapLocked=bindBuildingControls();
   window.MapAtlas?.render(map,game,payload=>mutate(`/api/games/${game.id}/organization-action`,payload),mapLocked);
   const tp=map.teleport;
   for(const plan of tp?.construction||[]){
@@ -3178,8 +3189,9 @@ function renderSpiritField(field) {
 }
 
 function renderInventory(items) {
+  window.PixelInventory?.reset();
   const list = $('#inventory-list'); list.innerHTML = '';
-  if (!items.length) { list.innerHTML = '<p class="empty">袖中空空，唯有清风。</p>'; return; }
+  if (!items.length) { list.innerHTML = '<p class="empty">袖中空空，唯有清风。</p>'; window.PixelInventory?.render(game); return; }
   const definitions = [
     ['功法传承玉简', item => item.tags?.includes('technique_manual') || !!item.technique_id],
     ['丹药与突破材料', item => item.breakthrough_bonus > 0 || item.tags?.includes('pill') || item.tags?.includes('breakthrough')],
@@ -3202,6 +3214,7 @@ function renderInventory(items) {
       ? (game?.crafting_system?.artifacts || []).find(entry => entry.id === item.crafted_artifact_id)
       : null;
     const row = document.createElement('div'); row.className = `item${item.is_natal_artifact ? ' natal-artifact-item' : ''}${artifact ? ' crafted-artifact-item' : ''}`;
+    row.dataset.itemId = item.id;
     const text = document.createElement('span');
     const name = document.createElement('b'); name.textContent = `${item.is_natal_artifact || artifact?.is_natal ? '本命 · ' : ''}${item.name} × ${item.quantity}`;
     const effect = document.createElement('small'); effect.textContent = item.description || '可用于特定事件。';
@@ -3293,6 +3306,7 @@ function renderInventory(items) {
     });
     list.appendChild(section);
   });
+  window.PixelInventory?.render(game);
 }
 
 function renderDemonicSystem(system) {
@@ -4340,6 +4354,7 @@ document.addEventListener('keydown', event => {
   }
 });
 
+window.addEventListener('game:theme-change',()=>{if(game?.natal_artifact)renderNatalArtifact(game.natal_artifact);if(game?.map)renderMap(game.map,game.auction_system);renderButtons();});
 boot().catch(error => toast(error.message));
 
 function violenceButton(kind, person, label) {

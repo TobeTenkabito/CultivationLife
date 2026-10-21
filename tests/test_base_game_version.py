@@ -14,6 +14,7 @@ from cultivation_life.version import (
     BASE_GAME_VERSION,
     BASE_GAME_VERSION_TUPLE,
     base_game_metadata,
+    release_order,
 )
 
 
@@ -21,9 +22,16 @@ SOURCE_ROOT = Path(__file__).resolve().parent.parent
 
 
 class BaseGameVersionTests(unittest.TestCase):
-    def test_base_version_is_semantic_and_has_one_public_metadata_shape(self):
-        self.assertRegex(BASE_GAME_VERSION, r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
-        self.assertEqual(tuple(map(int, BASE_GAME_VERSION.split("."))), BASE_GAME_VERSION_TUPLE)
+    def test_alpha_version_preserves_public_label_and_numeric_windows_metadata(self):
+        self.assertEqual(BASE_GAME_VERSION, '3.0.0-alpha.1')
+        self.assertEqual(BASE_GAME_VERSION_TUPLE, (3,0,0))
+        self.assertLess(release_order('2.17.2'),release_order(BASE_GAME_VERSION))
+        self.assertLess(release_order(BASE_GAME_VERSION),release_order('3.0.0'))
+        self.assertLess(release_order(BASE_GAME_VERSION),release_order('3.0.0-alpha.2'))
+        self.assertLess(release_order('3.0.0-alpha.99'),release_order('3.0.0-beta.1'))
+        self.assertLess(release_order('3.0.0-beta.9'),release_order('3.0.0-rc.1'))
+        for value in ['3.-alpha-1','bad',None,'3.0',{},'3.0.0.exe','3.0.0-alpha.0']:
+            with self.assertRaises(ValueError):release_order(value)
         self.assertEqual(cultivation_life.__version__, BASE_GAME_VERSION)
         self.assertEqual(base_game_metadata(), {
             "id": BASE_GAME_ID,

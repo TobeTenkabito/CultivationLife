@@ -69,5 +69,11 @@
     listing(box,place);
     host.append(box);
   }
-  window.BuildingPanel = {bind:(data, command, lock) => {state=data;send=command;locked=lock;}, region, marker, overview};
+  function entrance(id) {
+    const place=state?.map?.locations?.find(row=>row.id===state.map.current);
+    const row=place?.buildings?.find(row=>row.id===id);
+    if(!row)return null;
+    return command(row.name,{action:'enter',building_id:row.id},!row.can_enter||row.status==='destroyed');
+  }
+  window.BuildingPanel = {bind:(data, command, lock) => {state=data;send=command;locked=lock;}, region, marker, overview, entrance};
 })();

@@ -163,6 +163,21 @@ def main():
         performance=json.loads((ROOT/'build/building-performance.json').read_text(encoding='utf-8'))
         if visits:require(all(r.get('visit_claims')==r['buildings'] and r.get('landscape_claims')==r['buildings'] and r.get('city_books')==r['buildings'] for r in performance['rows']),'Building visits performance must include persistent claim and finance records')
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
+    if scoped.get('profile')=='visual':
+        selected={name for shard in scoped['tests'] for name in shard}
+        require(selected=={p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').rglob('test_*.py')},'Visual release requires full regression selection')
+        require({'browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits'}<={r['name'] for r in scoped['runs']},'Visual/legacy browsers incomplete')
+        require(all(c.get('visual_ui_verified') for c in evidence['cases']),'Actual compiled optional UI required with and without DLC')
+        require(all(c.get('dlc_visual_verified') for c in evidence['cases']),'Compiled DLC image ownership and disabled fallback required')
+        required={f'build/android-visual-ui-{orientation}-{tag}.log' for orientation in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Android 12 visual native scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native visual test APK changed')
+        require(all('visual_ui_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Native visual marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     dlcs={p.parent.name:json.loads(p.read_text(encoding='utf-8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],
               incompatible_save_schemas='1–9; no migration',dlc_versions=dlcs,
@@ -238,15 +253,17 @@ def main():
             z.write(ROOT/'build/common-goods-performance/report.md',f'performance-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.md',f'combat-calibration-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.json',f'combat-calibration-{VERSION}.json')
-    if scoped.get('profile') == 'teachings':
-        for package, title in [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]:
+    if scoped.get('profile') in {'teachings','visual'}:
+        updates=[('guixu-tide','归墟之潮')] if scoped['profile']=='visual' else [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]
+        for package, title in updates:
             version = dlcs[package]
             destination = ROOT / f'dist/{title}-v{version}.zip'
             with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
                 for p in sorted((ROOT/'dlc'/package).rglob('*')):
                     if p.is_file() and '__pycache__' not in p.parts:
                         z.write(p,p.relative_to(ROOT).as_posix())
-                z.write(ROOT/'docs/upper-teachings.md','docs/upper-teachings.md')
+                note='docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
+                z.write(ROOT/note,note)
                 z.writestr('安装说明.txt',f'配套本体 v{VERSION}，仅支持结构 10。解压至游戏根目录，覆盖对应 dlc/{package} 文件夹；重启生效。旧本体需先升级；Android 请安装同版签名 APK。用户开关与存档不会被本包覆盖。\n')
                 z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc=package,version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
             with zipfile.ZipFile(destination) as z:

@@ -144,5 +144,5 @@ def test_system_war_tiers_and_player_exception(local):
 def test_retired_theme_migration_preserves_motion(tmp_path,old,new):
     (tmp_path/'data').mkdir()
     (tmp_path/'data/ui_preferences.json').write_text(json.dumps(dict(theme=old,reduced_motion=True)))
-    assert load_ui_preferences(tmp_path)==dict(theme=new,reduced_motion=True)
+    assert load_ui_preferences(tmp_path)==dict(theme=new,reduced_motion=True,pixel_art=False)
     with pytest.raises(ValueError):write_ui_preferences(tmp_path,dict(theme=old))

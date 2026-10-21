@@ -27,6 +27,8 @@
   <link rel="stylesheet" href="/war-logistics.css?v=290">
   <link rel="stylesheet" href="/strategic-war-panel.css?v=1">
   <link rel="stylesheet" href="/navigation.css?v=desktop-1">
+  <link rel="stylesheet" href="/pixel-home.css?v=1">
+  <link rel="stylesheet" href="/pixel-interface.css?v=3-alpha-1">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -472,7 +474,7 @@
         </article>
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
-          <section class="settings-appearance"><h3>界面主题</h3><div class="theme-choices" data-theme-picker="settings"></div><label class="settings-row"><span><b>减弱动态效果</b><small>减少星月、山水字幕和翻页动效，不影响游戏进度。</small></span><input type="checkbox" data-motion-setting></label></section>
+          <section class="settings-appearance"><h3>界面主题</h3><div class="theme-choices" data-theme-picker="settings"></div><label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label><label class="settings-row"><span><b>减弱动态效果</b><small>减少星月、山水字幕和翻页动效，不影响游戏进度。</small></span><input type="checkbox" data-motion-setting></label></section>
           <section class="settings-save-transfer"><h3>存档传承</h3><p class="muted">进度已自动保存。导出当前修行卷，或用存档码恢复另一段旅程。</p><div class="transfer-actions"><button type="button" data-save-export-current>导出当前存档</button><button type="button" data-save-import>导入存档</button></div></section>
           <div class="settings-list">
             <label class="settings-row"><span><b>经济托管</b><small>自动经营有权限的产业和商队，补足护卫；保留手动商队订单。托管后新增盈利每五年最多尝试投资或扩建一处产业，使用经营资金并保留养护储备，不自动扣行囊。关闭后恢复原产业方案；已付批次与在途货物继续交割。</small></span><input id="setting-economy-trust" type="checkbox"></label>
@@ -573,6 +575,7 @@
     <p class="muted">主题会立即应用并记住选择。「松烟书院」是默认主题。</p>
     <div class="theme-choices" data-theme-picker="dialog"></div>
     <label class="settings-row"><span><b>减弱动态效果</b><small>保留静态主题与全部操作，系统的减弱动态设置也会生效。</small></span><input type="checkbox" data-motion-setting></label>
+    <label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label>
     <p class="theme-save-status" role="status" aria-live="polite"></p>
   </dialog>
   <dialog id="player-details-dialog" class="appearance-dialog player-details-dialog" aria-labelledby="player-details-title">
@@ -603,6 +606,13 @@
   <script src="/upper-energy.js?v=1.55.0"></script>
   <script src="/theme-manager.js?v=2.1.0"></script>
   <script src="/theme-composition.js?v=2.1.0"></script>
+  <script src="/assets/pixel/v1/catalog.js?v=1"></script>
+  <script src="/visual-assets.js?v=1"></script>
+  <script src="/pixel-library.js?v=3-alpha-1"></script>
+  <script src="/pixel-map.js?v=3-alpha-1"></script>
+  <script src="/pixel-inventory.js?v=3-alpha-1"></script>
+  <script src="/pixel-natal.js?v=3-alpha-1"></script>
+  <script src="/pixel-home.js?v=1"></script>
   <script src="/organization-finance.js?v=1"></script>
   <script src="/organization-depot.js?v=290"></script>
   <script src="/organization-heritage.js?v=290"></script>
@@ -648,7 +658,7 @@
   <script src="/map-scene.js?v=2133"></script>
   <link rel="stylesheet" href="/building-panel.css?v=2171">
   <script src="/building-panel.js?v=2171"></script>
-  <script src="/map-atlas.js?v=buildings-1"></script>
+  <script src="/map-atlas.js?v=3-alpha-1"></script>
   <link rel="stylesheet" href="/trial-site-panel.css?v=2120">
   <script src="/trial-site-panel.js?v=2120"></script>
   <link rel="stylesheet" href="/panel-pages.css?v=3000">
@@ -656,7 +666,7 @@
   <script src="/strategic-war-panel.js?v=1"></script>
   <link rel="stylesheet" href="/secret-art-panel.css?v=1">
   <script src="/secret-art-panel.js?v=1"></script>
-  <script src="/app.js?v=strategic-war-1"></script>
+  <script src="/app.js?v=3-alpha-1"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

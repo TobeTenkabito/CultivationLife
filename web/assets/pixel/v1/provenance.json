@@ -1,0 +1,18 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "approval": "User approved C v2 and character pack v1 with female v2",
+  "character_source": "pixel-assets-v1-20261020",
+  "scene_source": "pixel-ui-concepts-20261020/assets/atlas-cultivator-v2.png",
+  "scene_crop": [
+    0,
+    0,
+    768,
+    300
+  ],
+  "usage": "Illustrative human-world reverie, not literal geography or an accessible temple",
+  "source_hashes": {
+    "atlas-cultivator-v2.png": "dfd72cd7129721c9ee109dee5d75d0369a6882b1ce7536355f2c1dd31cba9e37",
+    "manifest.json": "0e1d6f26423e81f7591d1e5826659c8866dd7d962dc3fe485ba780058150c922",
+    "provenance.json": "455b7a6a790ec2949d3a870b075f0e4c88e678f21b4d6f99977ad98a65c362fb"
+  }
+}

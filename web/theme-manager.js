@@ -11,7 +11,7 @@
   ];
   const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
   const narrowQuery = matchMedia('(max-width: 1000px)');
-  let preferences = {theme:root.dataset.theme || 'a', reduced_motion:root.dataset.motion === 'reduced'};
+  let preferences = {theme:root.dataset.theme || 'a', reduced_motion:root.dataset.motion === 'reduced', pixel_art:root.dataset.visual === 'pixel'};
   let revision = 0, saveQueue = Promise.resolve(), current = null, feedbackTimer = null;
   const stage = document.createElement('section'); stage.className = 'theme-play-area';
   stage.setAttribute('aria-label','修行与生平纪事');
@@ -66,10 +66,12 @@
     root.classList.add('theme-switching');
     root.dataset.theme=preferences.theme;
     root.dataset.motion=preferences.reduced_motion?'reduced':'full';
+    root.dataset.visual=preferences.pixel_art?'pixel':'text';
     const theme=themes.find(t=>t.id===preferences.theme);
-    $('#theme-open').textContent=`主题 · ${theme.name}`;
+    $('#theme-open').textContent=preferences.pixel_art?'绘景 · 山海图志':`主题 · ${theme.name}`;
     document.querySelectorAll('[data-theme-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.themeChoice===preferences.theme)));
     document.querySelectorAll('[data-motion-setting]').forEach(i=>i.checked=preferences.reduced_motion);
+    document.querySelectorAll('[data-pixel-setting]').forEach(i=>i.checked=preferences.pixel_art);
     $('.theme-motto').textContent=theme.motto;
     reflow();cache();
     void root.offsetWidth;
@@ -83,7 +85,7 @@
     saveQueue=saveQueue.catch(()=>{}).then(async()=>{
       const response=await fetch('/api/ui-preferences',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});
       if(!response.ok)throw new Error('外观已切换，但偏好保存失败，请稍后重试。');
-      if(state.theme===preferences.theme&&state.reduced_motion===preferences.reduced_motion)status.textContent='外观偏好已保存，下次启动仍会保留。';
+      if(state.theme===preferences.theme&&state.reduced_motion===preferences.reduced_motion&&state.pixel_art===preferences.pixel_art)status.textContent='外观偏好已保存，下次启动仍会保留。';
     }).catch(error=>{status.textContent=error.message;const t=$('#toast');t.textContent=error.message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);});
     return saveQueue;
   }
@@ -93,6 +95,7 @@
       b.addEventListener('click',()=>save({theme:t.id}));container.append(b);}
   });
   document.querySelectorAll('[data-motion-setting]').forEach(i=>i.addEventListener('change',()=>save({reduced_motion:i.checked})));
+  document.querySelectorAll('[data-pixel-setting]').forEach(i=>i.addEventListener('change',()=>save({pixel_art:i.checked})));
   const dlc={guixu:'guixu','ghost-soul':'ghost','ghost-attachment':'ghost','ghost-parade':'ghost',sage:'sage','sage-inner-outer':'sage',bloodline:'bloodline',intrigue:'intrigue',tianji:'tianji'};
   for(const [name,family] of Object.entries(dlc)){const b=$(`[data-panel-target="${name}"]`);if(b){b.dataset.dlc=family;b.title=`${b.title} · DLC`;}}
   const precise=value=>Number.isFinite(Number(value))?Number(value).toLocaleString('zh-CN',{maximumFractionDigits:2}):'—';
@@ -155,6 +158,7 @@
     $('#hud-notice').textContent=notices.join(' · ');$('#hud-notice').classList.toggle('hidden',!notices.length);
     if(data.pending_event)closeDialogs();
     window.ThemeComposition?.render(data);
+    window.PixelHome?.render(data);
     if(previous?.id===data.id&&(previous.player.world_age??previous.player.age)!==(p.world_age??p.age))feedback();
   }
   function showStart(){current=null;closeDialogs();document.body.classList.remove('in-game');$('#theme-entry').classList.remove('hidden');}
@@ -164,6 +168,6 @@
   window.addEventListener('game:panel-open',e=>{if(preferences.theme==='f')feedback(e.detail.target);});
   apply();
   const initialRevision=revision;
-  const ready=fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(saved=>{if(revision===initialRevision){preferences={theme:themes.some(t=>t.id===saved.theme)?saved.theme:'a',reduced_motion:saved.reduced_motion===true};apply();}}).catch(()=>{});
+  const ready=fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(saved=>{if(revision===initialRevision){preferences={theme:themes.some(t=>t.id===saved.theme)?saved.theme:'a',reduced_motion:saved.reduced_motion===true,pixel_art:saved.pixel_art===true};apply();}}).catch(()=>{});
   window.GameThemes={render,showStart,ready,get preferences(){return {...preferences};},get saved(){return saveQueue;}};
 })();

@@ -5,4 +5,5 @@
   value.theme = ({c:'a',e:'f'})[value.theme] || value.theme;
   document.documentElement.dataset.theme = /^[abdf]$/.test(value.theme || '') ? value.theme : 'a';
   document.documentElement.dataset.motion = value.reduced_motion === true ? 'reduced' : 'full';
+  document.documentElement.dataset.visual = value.pixel_art === true ? 'pixel' : 'text';
 })();
