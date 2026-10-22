@@ -1,0 +1,1244 @@
+{
+  "SERPENT_BASE": {
+    "parents": [],
+    "sha256": "1e91338c81b389025f8536fa3badee5400c1146013c09272afbe9b55461ce065"
+  },
+  "SERPENT_SPIRIT": {
+    "parents": [
+      "SERPENT_BASE"
+    ],
+    "sha256": "4ab1c568bacc5a7b9bbd566fba7dbfe8329d1cd084dc06b7b51efad5b2c2d172"
+  },
+  "SERPENT_MYSTIC": {
+    "parents": [
+      "SERPENT_SPIRIT"
+    ],
+    "sha256": "2b6068a6afd1142fc812cb54ea53f5490072756b5041313b5e2d095f46299735"
+  },
+  "SERPENT_WATER": {
+    "parents": [
+      "SERPENT_SPIRIT"
+    ],
+    "sha256": "6de07c687eff26378c58f543469c08c2a8fc68a217278e7aa6bc0da9c4718a30"
+  },
+  "SERPENT_THUNDER": {
+    "parents": [
+      "SERPENT_SPIRIT"
+    ],
+    "sha256": "98ab129c26635dbbe490ec4391270b95c6f7b41a5c8ebbf195578333fe03ad07"
+  },
+  "SERPENT_GREAT_MYSTIC": {
+    "parents": [
+      "SERPENT_MYSTIC"
+    ],
+    "sha256": "6199c3e89322f9ed7e4267952f7a5d43cc5b9622026867954e73ae584ebb6bae"
+  },
+  "SERPENT_ROCK_PYTHON": {
+    "parents": [
+      "SERPENT_MYSTIC"
+    ],
+    "sha256": "b1f953858dcef30bc49a18c874bb7a9e5cdf6f967698b16af5a384afd1a1d0b2"
+  },
+  "SERPENT_ABYSS": {
+    "parents": [
+      "SERPENT_WATER"
+    ],
+    "sha256": "3542cba17d14d54152d45fec657261cbe100663b6a990b4f6e4209ca63168ae7"
+  },
+  "SERPENT_FLOOD_DRAGON": {
+    "parents": [
+      "SERPENT_WATER"
+    ],
+    "sha256": "03f3ce2338e57a7d72682e6c01c974adbd82285b50bc4ca855a0cb7b06d3939f"
+  },
+  "SERPENT_THUNDER_KUI": {
+    "parents": [
+      "SERPENT_THUNDER"
+    ],
+    "sha256": "967eac3e0b59eec73ab06b38d1b06756413291c73d5e81eb39ccbe0f12c1ed49"
+  },
+  "SERPENT_SKY_DRAGON": {
+    "parents": [
+      "SERPENT_THUNDER"
+    ],
+    "sha256": "477a6d92570167833311e57bd741e9bc4196784598b0710aad02edae01c46361"
+  },
+  "AVIAN_BASE": {
+    "parents": [],
+    "sha256": "29360ac6bea22bcfd397c8f74cd3837b39b4a7bebf4cdfde73a381962dcfaa3c"
+  },
+  "AVIAN_SPIRIT": {
+    "parents": [
+      "AVIAN_BASE"
+    ],
+    "sha256": "41b87e3829fb8f9eb0b8fc297b983f08aef6b441fd86b463862457ac46467c14"
+  },
+  "AVIAN_AZURE": {
+    "parents": [
+      "AVIAN_SPIRIT"
+    ],
+    "sha256": "8cce766d357de272bed2aa563777e8ff103295316a2f01651500614d897494d2"
+  },
+  "AVIAN_THUNDER": {
+    "parents": [
+      "AVIAN_SPIRIT"
+    ],
+    "sha256": "03ecc83d1915a8b54f1754502a3f2034483db802691c58d85520aff1d59c779c"
+  },
+  "AVIAN_FIRE": {
+    "parents": [
+      "AVIAN_SPIRIT"
+    ],
+    "sha256": "2f7d56228c40d1d75b19210d6a05dafcabaa0fba21dde4309a683a567b2d7298"
+  },
+  "AVIAN_SKY": {
+    "parents": [
+      "AVIAN_AZURE"
+    ],
+    "sha256": "635a10ac64c9ca3378133246988f9e8a9d80bdd33bf7b8f9b834a174e8fd621e"
+  },
+  "AVIAN_PENG": {
+    "parents": [
+      "AVIAN_AZURE"
+    ],
+    "sha256": "b80bc593dd12afdff09c87521771f9401910afb4866ef9443ee153a72051aa99"
+  },
+  "AVIAN_STORM": {
+    "parents": [
+      "AVIAN_THUNDER"
+    ],
+    "sha256": "88bc58abda56d4da04a131f9e792d5f59a46ff532d6d407547a33e90868fad6d"
+  },
+  "AVIAN_THUNDER_PHOENIX": {
+    "parents": [
+      "AVIAN_THUNDER"
+    ],
+    "sha256": "bac71f03489dd03ba54089c406499aed9467ef41ab41d3712a2e49311c562bc4"
+  },
+  "AVIAN_VERMILION": {
+    "parents": [
+      "AVIAN_FIRE"
+    ],
+    "sha256": "51068eb36cf5212732ffab68b9bdcd48d4b6a3823b2701720feba45f38fa884c"
+  },
+  "AVIAN_PHOENIX": {
+    "parents": [
+      "AVIAN_FIRE"
+    ],
+    "sha256": "939fe9c206cedf6bf83cbba4a3108d73ad98e059341afadc9ee0cf9f577fe547"
+  },
+  "APE_BASE": {
+    "parents": [],
+    "sha256": "38ac592530697b140a31213b40a105871dc06df2c3fa4c9d0c5d605140c05fe2"
+  },
+  "APE_SPIRIT": {
+    "parents": [
+      "APE_BASE"
+    ],
+    "sha256": "d0ab848b82b469c864503a70342b1a55c826ccd02acf3a12d30b8f4e88287b5e"
+  },
+  "APE_GIANT": {
+    "parents": [
+      "APE_SPIRIT"
+    ],
+    "sha256": "f7bd4621e3b17e6c424b3c87139c10723cbbc7f67424ef5dcddaec091e263ba3"
+  },
+  "APE_MOUNTAIN": {
+    "parents": [
+      "APE_SPIRIT"
+    ],
+    "sha256": "26db195541fa77dd400083f356065d43d2479cf98471d46131f92125f215b67b"
+  },
+  "APE_PRIMORDIAL": {
+    "parents": [
+      "APE_SPIRIT"
+    ],
+    "sha256": "34f189a9459c7938afed0cf2ca4999de52b6de84aaa637d54a2bead67d63b8af"
+  },
+  "APE_KING": {
+    "parents": [
+      "APE_GIANT"
+    ],
+    "sha256": "9d6b058d24461e54f707423bba74083c322eb32c3ddf8dfc48b9d39dfd4cd1ba"
+  },
+  "APE_FOREST_SAGE": {
+    "parents": [
+      "APE_GIANT"
+    ],
+    "sha256": "84593bc76e618e83db5b938588935b57c4e3cd2e8c75b75d39e195d46a9619c7"
+  },
+  "APE_MOUNTAIN_KING": {
+    "parents": [
+      "APE_MOUNTAIN"
+    ],
+    "sha256": "4da7e18267fc0f70964be5e7d51c97bc9c2567d4b3a8349b1b86682f81edf792"
+  },
+  "APE_EARTHSHAKER": {
+    "parents": [
+      "APE_MOUNTAIN"
+    ],
+    "sha256": "33128b5792df723ccc085b8f35c49bfe00e5525b77864824448f9a6e6ef3f5f2"
+  },
+  "APE_ANCIENT": {
+    "parents": [
+      "APE_PRIMORDIAL"
+    ],
+    "sha256": "dcafcd0e6b59c5cc5f0663bb9480e92804c56a04c81d93aed3e1a8b18cc66429"
+  },
+  "APE_SELF_ANCESTOR": {
+    "parents": [
+      "APE_PRIMORDIAL"
+    ],
+    "sha256": "51e80565b801ae64aa90ddeab2d4df755fcb326b57cd95bc9362e1fbcead2e7b"
+  },
+  "SERPENT_SEA_SOVEREIGN": {
+    "parents": [
+      "SERPENT_ABYSS",
+      "SERPENT_FLOOD_DRAGON"
+    ],
+    "sha256": "492e7de7da5145e9336b506498a30c237c59fedf08c109e11bd350cc9c6d5d9f"
+  },
+  "SERPENT_STORM_SOVEREIGN": {
+    "parents": [
+      "SERPENT_THUNDER_KUI",
+      "SERPENT_SKY_DRAGON"
+    ],
+    "sha256": "db643da8507a906271c405c70b82c454a12dc5121518e5fe5cf561e0544538c9"
+  },
+  "SERPENT_EARTH_DEVOURER": {
+    "parents": [
+      "SERPENT_GREAT_MYSTIC",
+      "SERPENT_ROCK_PYTHON"
+    ],
+    "sha256": "e9a9cd19609cca8d394fc9cd8fe0fd3f20de9d5760e7b66315554a3c6a9daeb7"
+  },
+  "SERPENT_CELESTIAL_DRAGON": {
+    "parents": [
+      "SERPENT_SEA_SOVEREIGN",
+      "SERPENT_STORM_SOVEREIGN"
+    ],
+    "sha256": "848cd2d3476b9ce220279e50556329c1dcefce44581c9e5c4f43df82825c1f24"
+  },
+  "SERPENT_WORLD_COIL": {
+    "parents": [
+      "SERPENT_SEA_SOVEREIGN",
+      "SERPENT_STORM_SOVEREIGN",
+      "SERPENT_EARTH_DEVOURER"
+    ],
+    "sha256": "da353430ebe0c4136e57ba7aaa59be174e076f07408dafc4b0a5ea337f0b1319"
+  },
+  "SERPENT_TRUE_DRAGON": {
+    "parents": [
+      "SERPENT_CELESTIAL_DRAGON"
+    ],
+    "sha256": "5d5fcc44e2024a1e0263cfae31090d07937d562c51f9abb894ff2213d839cf0b"
+  },
+  "SERPENT_VOID_OROBOROS": {
+    "parents": [
+      "SERPENT_CELESTIAL_DRAGON",
+      "SERPENT_WORLD_COIL"
+    ],
+    "sha256": "74d0174ac57855fc4ee378771070a7ccad59190154b7dd7dc27637d848210e26"
+  },
+  "SERPENT_ANCESTRAL_DRAGON": {
+    "parents": [
+      "SERPENT_TRUE_DRAGON"
+    ],
+    "sha256": "57a581c7009b7a4c4054bb048e54822d8836f9e5f69ac50bdd310770bbb997c2"
+  },
+  "SERPENT_COSMIC_ANCESTOR": {
+    "parents": [
+      "SERPENT_TRUE_DRAGON",
+      "SERPENT_VOID_OROBOROS"
+    ],
+    "sha256": "4b5f87ff04ece2af1a78d9f6a30df880744a29b38b024961ee66b3471d26a2a8"
+  },
+  "SERPENT_MAHAYANA_DRAGON": {
+    "parents": [
+      "SERPENT_ANCESTRAL_DRAGON"
+    ],
+    "sha256": "7987944f0fadb8c44a996d533ee12ef1f9f4b5d2db224ab05f6b472f2b5cb18c"
+  },
+  "SERPENT_MAHAYANA_ORIGIN": {
+    "parents": [
+      "SERPENT_ANCESTRAL_DRAGON",
+      "SERPENT_COSMIC_ANCESTOR"
+    ],
+    "sha256": "ae98fae509a773a2273c4fe7eb8f3424808dddcdd46308da0b78ebc85473a585"
+  },
+  "AVIAN_AZURE_SOVEREIGN": {
+    "parents": [
+      "AVIAN_SKY",
+      "AVIAN_PENG"
+    ],
+    "sha256": "1ab27a6ad5b1169314eeb1eb4b7607f5e39063750f22747dfbb978da994be2c4"
+  },
+  "AVIAN_STORM_SOVEREIGN": {
+    "parents": [
+      "AVIAN_STORM",
+      "AVIAN_THUNDER_PHOENIX"
+    ],
+    "sha256": "337b49216e4861f672ceafa6d9e4f85d1f0a7b08862841ac6947ae61c6b35b2c"
+  },
+  "AVIAN_FLAME_SOVEREIGN": {
+    "parents": [
+      "AVIAN_VERMILION",
+      "AVIAN_PHOENIX"
+    ],
+    "sha256": "a0d9b7eb8061121d859fb542ae7e0a8d5288c8c18bbbdd85e89e386ebc4a5190"
+  },
+  "AVIAN_GALE_EMPEROR": {
+    "parents": [
+      "AVIAN_AZURE_SOVEREIGN",
+      "AVIAN_STORM_SOVEREIGN"
+    ],
+    "sha256": "fef93265c891513a551199b863b4d94e18fa8344a7c81866bff2e2caa1399075"
+  },
+  "AVIAN_IMMORTAL_FLAME": {
+    "parents": [
+      "AVIAN_AZURE_SOVEREIGN",
+      "AVIAN_STORM_SOVEREIGN",
+      "AVIAN_FLAME_SOVEREIGN"
+    ],
+    "sha256": "cf3ff97e616fab4f6907f8aa8488fc27b0ae33293231b5da75bfa3aa76478888"
+  },
+  "AVIAN_KUNPENG": {
+    "parents": [
+      "AVIAN_GALE_EMPEROR"
+    ],
+    "sha256": "b62e76def568e930624d6ba3d62c608de77c004b260ca539dfce587cc24b09ef"
+  },
+  "AVIAN_SOLAR_PHOENIX": {
+    "parents": [
+      "AVIAN_GALE_EMPEROR",
+      "AVIAN_IMMORTAL_FLAME"
+    ],
+    "sha256": "eb18e5649ca61301c7805c1c797b9c5b6a3b15ab4e9e5d685ec3977f0653b0b7"
+  },
+  "AVIAN_PRIMORDIAL_PENG": {
+    "parents": [
+      "AVIAN_KUNPENG"
+    ],
+    "sha256": "003d2dde4e7f5e1f4db825c5cbd577b51af2fe23819c3c30a83c68e723f559fc"
+  },
+  "AVIAN_ANCESTRAL_PHOENIX": {
+    "parents": [
+      "AVIAN_KUNPENG",
+      "AVIAN_SOLAR_PHOENIX"
+    ],
+    "sha256": "fe1d918b60e20679cbb7216020cc38d1b8c663d6303bcf35f8c9d5b345602edb"
+  },
+  "AVIAN_MAHAYANA_KUNPENG": {
+    "parents": [
+      "AVIAN_PRIMORDIAL_PENG"
+    ],
+    "sha256": "32120601631bf8b04bb6eb63de89dcba734e1f4a6df160f2da8f3c2f9b2f150d"
+  },
+  "AVIAN_MAHAYANA_PHOENIX": {
+    "parents": [
+      "AVIAN_PRIMORDIAL_PENG",
+      "AVIAN_ANCESTRAL_PHOENIX"
+    ],
+    "sha256": "6e4a798117c08e9d3c14042ac65e62ec6b4ce03d05b4a8b6e0c4cde91076249d"
+  },
+  "APE_WISDOM_SOVEREIGN": {
+    "parents": [
+      "APE_KING",
+      "APE_FOREST_SAGE"
+    ],
+    "sha256": "bb20a66a3dc170462f34f0530910ff05af3319cb17aebad3103ceb57c12f0d8a"
+  },
+  "APE_MOUNTAIN_SOVEREIGN": {
+    "parents": [
+      "APE_MOUNTAIN_KING",
+      "APE_EARTHSHAKER"
+    ],
+    "sha256": "c707c65874e749707469c7345331b80c3caee94d7e25b1ce06bfef2ac628dbf4"
+  },
+  "APE_PRIMORDIAL_SOVEREIGN": {
+    "parents": [
+      "APE_ANCIENT",
+      "APE_SELF_ANCESTOR"
+    ],
+    "sha256": "49936e5206512cdcb60b6b7480e4bb6c19ca58a4bcfbe22621cc9ffcb5a1d490"
+  },
+  "APE_HEAVEN_PILLAR": {
+    "parents": [
+      "APE_WISDOM_SOVEREIGN",
+      "APE_MOUNTAIN_SOVEREIGN"
+    ],
+    "sha256": "d2123dcf8ce68ab270ba2580cab7e7292be9da66ab135fe7584fd7744771c031"
+  },
+  "APE_MYRIAD_MOUNTAIN_ANCESTOR": {
+    "parents": [
+      "APE_WISDOM_SOVEREIGN",
+      "APE_MOUNTAIN_SOVEREIGN",
+      "APE_PRIMORDIAL_SOVEREIGN"
+    ],
+    "sha256": "7b6ab2d9a0e5ee3d062e03623a56ab2adc9400f6e0dc653b6b20b992c1b7ce4e"
+  },
+  "APE_CHAOS_WAR_GOD": {
+    "parents": [
+      "APE_HEAVEN_PILLAR"
+    ],
+    "sha256": "f9b72066484bb6ddc49b02fa61071fe5e355563a2945b0f54dbcef82b0627de8"
+  },
+  "APE_WORLD_BEARER": {
+    "parents": [
+      "APE_HEAVEN_PILLAR",
+      "APE_MYRIAD_MOUNTAIN_ANCESTOR"
+    ],
+    "sha256": "8ea8e7f933e3dec810aa9a32f39dcf26cfd6352f4060f3b3def0d2fb5aa00794"
+  },
+  "APE_PRIMORDIAL_BATTLE_ANCESTOR": {
+    "parents": [
+      "APE_CHAOS_WAR_GOD"
+    ],
+    "sha256": "b4ccd94600f6655c75ce6e002b2db58884121067f3e9565e1c1bc20780718840"
+  },
+  "APE_NEW_ANCESTOR": {
+    "parents": [
+      "APE_CHAOS_WAR_GOD",
+      "APE_WORLD_BEARER"
+    ],
+    "sha256": "0d6891a6c339082a20a08690d879ecc99fe6d77a44dd1719b5e646e571593a8c"
+  },
+  "APE_MAHAYANA_WAR_GOD": {
+    "parents": [
+      "APE_PRIMORDIAL_BATTLE_ANCESTOR"
+    ],
+    "sha256": "b84fdabc42f05d29f12ef7db970ef9e706112abeb952993457bb6111914bc789"
+  },
+  "APE_MAHAYANA_ANCESTOR": {
+    "parents": [
+      "APE_PRIMORDIAL_BATTLE_ANCESTOR",
+      "APE_NEW_ANCESTOR"
+    ],
+    "sha256": "ed8ef3e731cb1649b834a73cb6e01e4c1fb9aebb0f4793bd456942f104cc26f0"
+  },
+  "FOX_BASE": {
+    "parents": [],
+    "sha256": "f0afd1d75afed211bcb0240a3af0e806185e72a76b5f4ef20e04f9096f676cfd"
+  },
+  "FOX_SPIRIT": {
+    "parents": [
+      "FOX_BASE"
+    ],
+    "sha256": "c660d7ff2d77c940dfdd5feede21b9ce24a00dcb654d1273720e2f98aab4b92f"
+  },
+  "FOX_MYSTIC": {
+    "parents": [
+      "FOX_SPIRIT"
+    ],
+    "sha256": "5a7a4a512c5bc1d9391ff026ac25fecb9af81e42761407cd79b3dd4c3bdb2756"
+  },
+  "FOX_MOON": {
+    "parents": [
+      "FOX_SPIRIT"
+    ],
+    "sha256": "d2d8d7319ead270d7163dae4d1b885cbab6f8d34f217829cc2ce4f59f8ef0e33"
+  },
+  "FOX_DREAM": {
+    "parents": [
+      "FOX_SPIRIT"
+    ],
+    "sha256": "4664e1f8a02cfdb3ef706ab7b428c4c6d6829aaaf6fc87e5e96997fc2400bd99"
+  },
+  "FOX_KING": {
+    "parents": [
+      "FOX_MYSTIC"
+    ],
+    "sha256": "e224367b39395453b52f17a970057522238ff72a56030e087cf5c7c0b7e2bbaf"
+  },
+  "FOX_MOON_DREAM": {
+    "parents": [
+      "FOX_MOON",
+      "FOX_DREAM"
+    ],
+    "sha256": "e8c57d3dfd5dca7293a935419d017916768c0f82c378a1faa34ae8209cb98d61"
+  },
+  "FOX_NINE_TAIL": {
+    "parents": [
+      "FOX_MOON",
+      "FOX_DREAM"
+    ],
+    "sha256": "8b7c2084e219eac3c8e786b716676a35926ef3edcd6d98b2c9f097a48b48dd26"
+  },
+  "FOX_ILLUSION_LORD": {
+    "parents": [
+      "FOX_KING",
+      "FOX_MOON_DREAM",
+      "FOX_NINE_TAIL"
+    ],
+    "sha256": "1950a11957a95c336abba9b2f497fe78b40964acc3f67c71f88af0a0c1cb93a0"
+  },
+  "FOX_NINE_FLAME_SOVEREIGN": {
+    "parents": [
+      "FOX_NINE_TAIL"
+    ],
+    "sha256": "ddb8d1433d62fa933a385c8761bf57eeaaf7605ee1ef02b02107cdaa391f8aac"
+  },
+  "FOX_DREAM_EMPEROR": {
+    "parents": [
+      "FOX_ILLUSION_LORD",
+      "FOX_NINE_FLAME_SOVEREIGN"
+    ],
+    "sha256": "46bc127d3e9093b8567471ec122d5019b06f8e10a1d6cf9eb888ec38ae0b354f"
+  },
+  "FOX_VOID_NINE_TAIL": {
+    "parents": [
+      "FOX_DREAM_EMPEROR"
+    ],
+    "sha256": "b10ae813ad4e1f8ba97c1b05607fd1d94324f53d6f1689e40c2da1873f4eb613"
+  },
+  "FOX_ANCESTRAL_DREAM": {
+    "parents": [
+      "FOX_VOID_NINE_TAIL"
+    ],
+    "sha256": "73734aff945ee035bd1007866c2a63b5fbf20df471d80e9409aea2ab6c40f0f1"
+  },
+  "FOX_MAHAYANA_HEAVENLY": {
+    "parents": [
+      "FOX_ANCESTRAL_DREAM"
+    ],
+    "sha256": "934b9e8ebd798a695919a460549e016ab45837a60f0d203cce3d938e92cb495e"
+  },
+  "TURTLE_BASE": {
+    "parents": [],
+    "sha256": "880db658970837f8ab6b516c9d02668c82297cb945ff602ffd8a8bcb78041069"
+  },
+  "TURTLE_SPIRIT": {
+    "parents": [
+      "TURTLE_BASE"
+    ],
+    "sha256": "5f7bcefc874e6ddb1864024decde1cee628d219569154d9b80092c24db84a1e6"
+  },
+  "TURTLE_STONE": {
+    "parents": [
+      "TURTLE_SPIRIT"
+    ],
+    "sha256": "0b60901ffbef05dd5030355aad1a538ffbe304f8668e9481464e37c3fa11ca0d"
+  },
+  "TURTLE_TIDE": {
+    "parents": [
+      "TURTLE_SPIRIT"
+    ],
+    "sha256": "875db36ad6356eb5f6434cc3ca109d59b97a9c02282f0df41bab2b0f95b72d07"
+  },
+  "TURTLE_FROST": {
+    "parents": [
+      "TURTLE_SPIRIT"
+    ],
+    "sha256": "b6110e8ccc3cb8a68476ddaea5ddfbfff44e530f73e41457ea90f7621aa7b27c"
+  },
+  "TURTLE_MOUNTAIN": {
+    "parents": [
+      "TURTLE_STONE"
+    ],
+    "sha256": "7456e8a6d04e11e666b082be1a0503e573f2355cd81fdb3e45c18adaf7f2bc8c"
+  },
+  "TURTLE_DEEP_SEA": {
+    "parents": [
+      "TURTLE_TIDE",
+      "TURTLE_FROST"
+    ],
+    "sha256": "9c7dd2b093921365c59258b215cc4af84e8ca9af0b35b2e1b0e93e54e88336cb"
+  },
+  "TURTLE_XUANWU": {
+    "parents": [
+      "TURTLE_TIDE",
+      "TURTLE_FROST"
+    ],
+    "sha256": "4e114a12c4a2bc4bd37543e4239daa01e71dc04693cd8a5ae03c8a956158e4eb"
+  },
+  "TURTLE_SHELL_SOVEREIGN": {
+    "parents": [
+      "TURTLE_MOUNTAIN",
+      "TURTLE_DEEP_SEA",
+      "TURTLE_XUANWU"
+    ],
+    "sha256": "532dc976d2dc4d3e4d3c8bc6ef45628cc6985e38a2517e7a894d14a84d750e0e"
+  },
+  "TURTLE_XUANWU_SOVEREIGN": {
+    "parents": [
+      "TURTLE_XUANWU"
+    ],
+    "sha256": "434f27056ab41f08b0038235f9de965ebb6d9e1a66369950dcc310362f3cab55"
+  },
+  "TURTLE_OCEAN_EMPEROR": {
+    "parents": [
+      "TURTLE_SHELL_SOVEREIGN",
+      "TURTLE_XUANWU_SOVEREIGN"
+    ],
+    "sha256": "9dbdde27489243197fbe062a1d6b6cb7865e6dc65a558698475373718db74746"
+  },
+  "TURTLE_WORLD_SHELL": {
+    "parents": [
+      "TURTLE_OCEAN_EMPEROR"
+    ],
+    "sha256": "bfeb4773e0f80ac248415c20ba41bdd0c5252be54f260f4ed6c8fe9ea353a0a1"
+  },
+  "TURTLE_ANCESTRAL_XUANWU": {
+    "parents": [
+      "TURTLE_WORLD_SHELL"
+    ],
+    "sha256": "e7516f9257e731d17c0ad59975c85064bb7664d4f6c385e8b770665c45de7bde"
+  },
+  "TURTLE_MAHAYANA_WORLD": {
+    "parents": [
+      "TURTLE_ANCESTRAL_XUANWU"
+    ],
+    "sha256": "b0018870189664742aa0df24eb423f88a4584bac855e63b051fa2b305a347629"
+  },
+  "INSECT_BASE": {
+    "parents": [],
+    "sha256": "a9dd2020fbb68987de60ad80e44a75798430b07ed09a57b685442444c2784138"
+  },
+  "INSECT_SPIRIT": {
+    "parents": [
+      "INSECT_BASE"
+    ],
+    "sha256": "087352b20669d08cc2f5d21a150bdb6f60e10bb5f32d7aed32cb698bd5364e6d"
+  },
+  "INSECT_GOLD": {
+    "parents": [
+      "INSECT_SPIRIT"
+    ],
+    "sha256": "4800de4b64cd93b1b0746b3e6d42cf30fa5d799e7b4b2aed035a4e506d2be312"
+  },
+  "INSECT_THUNDER": {
+    "parents": [
+      "INSECT_SPIRIT"
+    ],
+    "sha256": "c47be7affb1c37783bcde6b6746960c57940c12d748254a3432128e5fe748ab7"
+  },
+  "INSECT_SWARM": {
+    "parents": [
+      "INSECT_SPIRIT"
+    ],
+    "sha256": "7d11b91611e1695c64d1f77099637a260160e5d165f377e0f11987c49de78e1b"
+  },
+  "INSECT_KING": {
+    "parents": [
+      "INSECT_GOLD"
+    ],
+    "sha256": "f785ee1d322ebeec5b9fe06c8d668ebf3e67ae5e0c5a5a58589c9812c26756de"
+  },
+  "INSECT_VOID_CICADA": {
+    "parents": [
+      "INSECT_THUNDER",
+      "INSECT_SWARM"
+    ],
+    "sha256": "f314c068bb3725efdd8d227943f6fa84b6f247be94008f723ba4e98d1e52943e"
+  },
+  "INSECT_MOTHER_SEED": {
+    "parents": [
+      "INSECT_THUNDER",
+      "INSECT_SWARM"
+    ],
+    "sha256": "98f23a9684ea783804c1f2e8ba187954dc4050471a521af223568e936d2668da"
+  },
+  "INSECT_HUNDRED_FORM": {
+    "parents": [
+      "INSECT_KING",
+      "INSECT_VOID_CICADA",
+      "INSECT_MOTHER_SEED"
+    ],
+    "sha256": "dde391c73f5463a07247a89b25d9416e68d785fcf4000e050d9f5963468a9187"
+  },
+  "INSECT_MOTHER_SOVEREIGN": {
+    "parents": [
+      "INSECT_MOTHER_SEED"
+    ],
+    "sha256": "126a58b793e97e100a885d956ba3af094a79737c4077a647cd4384b41c2204d9"
+  },
+  "INSECT_MYRIAD_EMPEROR": {
+    "parents": [
+      "INSECT_HUNDRED_FORM",
+      "INSECT_MOTHER_SOVEREIGN"
+    ],
+    "sha256": "176daabcc5e2c0ca8a8e460317cc14f3445815f4e6c1d4ea9ede08f82e6b19fa"
+  },
+  "INSECT_VOID_HIVE": {
+    "parents": [
+      "INSECT_MYRIAD_EMPEROR"
+    ],
+    "sha256": "65789d4d9cb1fa22c02d5c8f9ad032749d03b1becd9252a36e46b8c0b6d0838f"
+  },
+  "INSECT_ANCESTRAL_MOTHER": {
+    "parents": [
+      "INSECT_VOID_HIVE"
+    ],
+    "sha256": "e7581b8980463ab8d83aca4701ce181829924a66188ebed35e3f26a165522948"
+  },
+  "INSECT_MAHAYANA_SWARM": {
+    "parents": [
+      "INSECT_ANCESTRAL_MOTHER"
+    ],
+    "sha256": "902f1ca871a23f588d632fc3ab478068d275141d26d9c7b8ef9b5d6bfe583ce3"
+  },
+  "AQUATIC_BASE": {
+    "parents": [],
+    "sha256": "a5880dd9a8615091d74043faa9ddf625d02882e6f0c8d812d05d6dee4bb07901"
+  },
+  "AQUATIC_SPIRIT": {
+    "parents": [
+      "AQUATIC_BASE"
+    ],
+    "sha256": "26aed57b25e681f9a7a5a96b3a5340ebcc0fe069883606577c84ffb97aab5082"
+  },
+  "AQUATIC_KOI": {
+    "parents": [
+      "AQUATIC_SPIRIT"
+    ],
+    "sha256": "267741fe7ba43de25b33e010254c47a23180b0d901b2825317c17851b5d0239f"
+  },
+  "AQUATIC_FROST": {
+    "parents": [
+      "AQUATIC_SPIRIT"
+    ],
+    "sha256": "038ade8b5a8872a2dcbbf4a5b786a0cebc522e57b9ff535ab73033861b745a69"
+  },
+  "AQUATIC_PHANTOM": {
+    "parents": [
+      "AQUATIC_SPIRIT"
+    ],
+    "sha256": "81142d87f64ed3c1227709025aac632a5f8dd8eb0f3d4a993eaa3b0b97c565ad"
+  },
+  "AQUATIC_DRAGON_KOI": {
+    "parents": [
+      "AQUATIC_KOI"
+    ],
+    "sha256": "0c8b06c23b50bc2ea54eab55f71f632974bfec61b06ee949c1dc8e2cef576989"
+  },
+  "AQUATIC_ABYSS_WHALE": {
+    "parents": [
+      "AQUATIC_FROST",
+      "AQUATIC_PHANTOM"
+    ],
+    "sha256": "8b38f32fc7b2ccd3742d1dd0a4ab3a0b9addc5004a14508506718ecf27986264"
+  },
+  "AQUATIC_YOUNG_KUN": {
+    "parents": [
+      "AQUATIC_FROST",
+      "AQUATIC_PHANTOM"
+    ],
+    "sha256": "db019cea60e27ff34f2d153736165078c50496147a26ef298c7d73e411ce5b8c"
+  },
+  "AQUATIC_SEA_SOVEREIGN": {
+    "parents": [
+      "AQUATIC_DRAGON_KOI",
+      "AQUATIC_ABYSS_WHALE",
+      "AQUATIC_YOUNG_KUN"
+    ],
+    "sha256": "c7f4eaa2c11ee699789ec944ef96ab48ff1a8316f8f580551cc72337acce94b0"
+  },
+  "AQUATIC_KUN_SOVEREIGN": {
+    "parents": [
+      "AQUATIC_YOUNG_KUN"
+    ],
+    "sha256": "cbb36fa1b32445258f3f3822955d467745e198b20e9df69bd94b6c381eb290b1"
+  },
+  "AQUATIC_OCEAN_EMPEROR": {
+    "parents": [
+      "AQUATIC_SEA_SOVEREIGN",
+      "AQUATIC_KUN_SOVEREIGN"
+    ],
+    "sha256": "f65c9697e8df723de530aa43f192a469489b047623a101f35dffaab82c4f44d0"
+  },
+  "AQUATIC_WORLD_KUN": {
+    "parents": [
+      "AQUATIC_OCEAN_EMPEROR"
+    ],
+    "sha256": "8ecb1348351bdc34889dadd78393ad97f49822e99a1c6e1d6b81ec7cfc9defda"
+  },
+  "AQUATIC_ANCESTRAL_KUN": {
+    "parents": [
+      "AQUATIC_WORLD_KUN"
+    ],
+    "sha256": "b22ead8900bf7826c44ee8981c5844d05d335918f11c054fa61d1a59116c56b3"
+  },
+  "AQUATIC_MAHAYANA_KUN": {
+    "parents": [
+      "AQUATIC_ANCESTRAL_KUN"
+    ],
+    "sha256": "787bd0ded114a628f39513f1dab4630b608ede64815aea43dc547e4786bf9ae3"
+  },
+  "FLORA_BASE": {
+    "parents": [],
+    "sha256": "d04d2d96e6374b072c82088a77bf66df8f9dc32065f580b2e5b2d84ca77e56e9"
+  },
+  "FLORA_SPIRIT": {
+    "parents": [
+      "FLORA_BASE"
+    ],
+    "sha256": "54b89a261e49296b30b1c49c291ff0862d813cf898d12b205171f785bfb64dcd"
+  },
+  "FLORA_ANCIENT_TREE": {
+    "parents": [
+      "FLORA_SPIRIT"
+    ],
+    "sha256": "15947d16f6e16b30c1bd00411a419af67884af8080c1a5e04921c6945d901366"
+  },
+  "FLORA_MOON_FLOWER": {
+    "parents": [
+      "FLORA_SPIRIT"
+    ],
+    "sha256": "0635f703a8bb4d1e13d27bb232d3279ae9c4f8c658a698ad8d41fda58010a8bd"
+  },
+  "FLORA_IRON_THORN": {
+    "parents": [
+      "FLORA_SPIRIT"
+    ],
+    "sha256": "4cba642fcd98d2da3b58fbb3285fd67b7fdabd1a43a103d86d4df6c4d819f369"
+  },
+  "FLORA_TREE_LORD": {
+    "parents": [
+      "FLORA_ANCIENT_TREE"
+    ],
+    "sha256": "11b781fd90511282577dd0adbb3c1a87c2b131e11afc5b6e79d833820b0ca74c"
+  },
+  "FLORA_DREAM_GARDEN": {
+    "parents": [
+      "FLORA_MOON_FLOWER",
+      "FLORA_IRON_THORN"
+    ],
+    "sha256": "8fe076960ad97d3c86ab125443e870fb97e83935cdb9bf1ddfb7c4607dcd1353"
+  },
+  "FLORA_WORLD_TREE_SEED": {
+    "parents": [
+      "FLORA_MOON_FLOWER",
+      "FLORA_IRON_THORN"
+    ],
+    "sha256": "3445bf87c23f7fdb457d31052b65366b6d707ad0206ca71cd6638816d8f2a3dd"
+  },
+  "FLORA_SHAPED_SOVEREIGN": {
+    "parents": [
+      "FLORA_TREE_LORD",
+      "FLORA_DREAM_GARDEN",
+      "FLORA_WORLD_TREE_SEED"
+    ],
+    "sha256": "8616257436242df934679ac48c6c0ea94c5524599ddf0f5dc7848feaff878a46"
+  },
+  "FLORA_WORLD_TREE_LORD": {
+    "parents": [
+      "FLORA_WORLD_TREE_SEED"
+    ],
+    "sha256": "b7456568b8d011782cfeed37f5171d003567841744780369002d2719d52ea2d2"
+  },
+  "FLORA_EVERGREEN_EMPEROR": {
+    "parents": [
+      "FLORA_SHAPED_SOVEREIGN",
+      "FLORA_WORLD_TREE_LORD"
+    ],
+    "sha256": "54696f0199751195deefd7d72dd9d93683bf273cedc2d3ba225de5cf7aa62b99"
+  },
+  "FLORA_WORLD_CANOPY": {
+    "parents": [
+      "FLORA_EVERGREEN_EMPEROR"
+    ],
+    "sha256": "9cd9352fc33b08962fa07c0b6498bd47a87479aeded4324f8dda8b2a6b5c90e5"
+  },
+  "FLORA_ANCESTRAL_WORLD_TREE": {
+    "parents": [
+      "FLORA_WORLD_CANOPY"
+    ],
+    "sha256": "d32a7c25032256dd89a2ea30bd6a8246498a54ff8b832570769e395c2fe5cdd7"
+  },
+  "FLORA_MAHAYANA_ORIGIN_TREE": {
+    "parents": [
+      "FLORA_ANCESTRAL_WORLD_TREE"
+    ],
+    "sha256": "ee64e104045eeddff9188bc34a7bd14bf5660ae81f9edb4fedd4a55ab201f2e2"
+  },
+  "SERPENT_NETHER_TRUE_1": {
+    "parents": [
+      "SERPENT_MAHAYANA_DRAGON",
+      "SERPENT_MAHAYANA_ORIGIN"
+    ],
+    "sha256": "c28b0ff6383695ce9adb6ac8e760b576e55b1ed4e86e47ee813fddc0a1d0884d"
+  },
+  "SERPENT_NETHER_TRUE_2": {
+    "parents": [
+      "SERPENT_NETHER_TRUE_1"
+    ],
+    "sha256": "7b07cf7d690c5349eb0b37204ca4e1e387ed16d31345c7cc5d9161b9489c1780"
+  },
+  "SERPENT_NETHER_TRUE_3": {
+    "parents": [
+      "SERPENT_NETHER_TRUE_2"
+    ],
+    "sha256": "d1a17c5bcf9102384e78b3d98a515df0ee7db835b071f6cfddc6e11492229027"
+  },
+  "SERPENT_NETHER_TRUE_4": {
+    "parents": [
+      "SERPENT_NETHER_TRUE_3"
+    ],
+    "sha256": "716f88f4cbed59c151b09db4b6a11c87618405939dd876f94eb62c52252a0de8"
+  },
+  "SERPENT_NETHER_SELF_1": {
+    "parents": [
+      "SERPENT_MAHAYANA_DRAGON",
+      "SERPENT_MAHAYANA_ORIGIN"
+    ],
+    "sha256": "b56590bb9ff57e36f5167cc1bd535085edaac876745920918802ae0709a32e6c"
+  },
+  "SERPENT_NETHER_SELF_2": {
+    "parents": [
+      "SERPENT_NETHER_SELF_1"
+    ],
+    "sha256": "eea345b45daf58f2a045d5251561b206176a27976774e5f212542ce149acfd30"
+  },
+  "SERPENT_NETHER_SELF_3": {
+    "parents": [
+      "SERPENT_NETHER_SELF_2"
+    ],
+    "sha256": "b2aafb181de47914bf2db26f7af023296427900c0c4e67cbd97e5fadb2d9cbab"
+  },
+  "SERPENT_NETHER_SELF_4": {
+    "parents": [
+      "SERPENT_NETHER_SELF_3"
+    ],
+    "sha256": "8203abce7926b0a17821bab8dfaf7504e895c9a08a6ea76b70075a9c691dd965"
+  },
+  "AVIAN_NETHER_TRUE_1": {
+    "parents": [
+      "AVIAN_MAHAYANA_KUNPENG",
+      "AVIAN_MAHAYANA_PHOENIX"
+    ],
+    "sha256": "939b28e5e953e5d2bf82c2aab761b14fa3fb719784a95ac63a4abb1c983037a2"
+  },
+  "AVIAN_NETHER_TRUE_2": {
+    "parents": [
+      "AVIAN_NETHER_TRUE_1"
+    ],
+    "sha256": "1a724daaac041ebe929267a1938b09b4025ec5daeb7027cd76891e8fa8e7d2a7"
+  },
+  "AVIAN_NETHER_TRUE_3": {
+    "parents": [
+      "AVIAN_NETHER_TRUE_2"
+    ],
+    "sha256": "319e3af4b7e73dc516ccf7fd5758e7686d1470e113be37686b39a938950d1151"
+  },
+  "AVIAN_NETHER_TRUE_4": {
+    "parents": [
+      "AVIAN_NETHER_TRUE_3"
+    ],
+    "sha256": "1cd8f2d0b36907b74ea8a9a39b6341381f927a7d693faf777fa00de8754abfab"
+  },
+  "AVIAN_NETHER_SELF_1": {
+    "parents": [
+      "AVIAN_MAHAYANA_KUNPENG",
+      "AVIAN_MAHAYANA_PHOENIX"
+    ],
+    "sha256": "f479892739f511d943bf2b514844f1c2e0280200aa5298dea0b9788bc0e877e3"
+  },
+  "AVIAN_NETHER_SELF_2": {
+    "parents": [
+      "AVIAN_NETHER_SELF_1"
+    ],
+    "sha256": "1063e09fbbdbe482a7e0f7ca3173841f81943f50a556da20e72883a4876dad4f"
+  },
+  "AVIAN_NETHER_SELF_3": {
+    "parents": [
+      "AVIAN_NETHER_SELF_2"
+    ],
+    "sha256": "4ac76e79098414c9a9c69136c6a7f2afd6020624530bc8032c74bb69b9be7e06"
+  },
+  "AVIAN_NETHER_SELF_4": {
+    "parents": [
+      "AVIAN_NETHER_SELF_3"
+    ],
+    "sha256": "05f4f59793a4844848404e7ae8d174ccf0898fee86dc4639265c589dc3dc24b0"
+  },
+  "APE_NETHER_TRUE_1": {
+    "parents": [
+      "APE_MAHAYANA_WAR_GOD",
+      "APE_MAHAYANA_ANCESTOR"
+    ],
+    "sha256": "aae47a5903c26e5027fc54f022c2d6a5254f00892fae342fa6cb4cecbbecaeec"
+  },
+  "APE_NETHER_TRUE_2": {
+    "parents": [
+      "APE_NETHER_TRUE_1"
+    ],
+    "sha256": "bc025395e83a7147d1f19d91b428283727e2f7356a7ae8b12afdf0ec3a091e14"
+  },
+  "APE_NETHER_TRUE_3": {
+    "parents": [
+      "APE_NETHER_TRUE_2"
+    ],
+    "sha256": "da8ceb93f275798206e21bd8138879faf453501dc3051177b0751a5439c2ce64"
+  },
+  "APE_NETHER_TRUE_4": {
+    "parents": [
+      "APE_NETHER_TRUE_3"
+    ],
+    "sha256": "e7d8274aa985d46e14e12692a963726c3a10c3e7d8f7ee6f80a9b63e67072879"
+  },
+  "APE_NETHER_SELF_1": {
+    "parents": [
+      "APE_MAHAYANA_WAR_GOD",
+      "APE_MAHAYANA_ANCESTOR"
+    ],
+    "sha256": "44a2c5ca61791d02dbb4d9e4060535bc7f5bb33ab25b85c7fdbb31e5b6e1fede"
+  },
+  "APE_NETHER_SELF_2": {
+    "parents": [
+      "APE_NETHER_SELF_1"
+    ],
+    "sha256": "36945a8fd968df95e23b78c5aba9d4013fbb82f92f406f662ea9416c56bb6328"
+  },
+  "APE_NETHER_SELF_3": {
+    "parents": [
+      "APE_NETHER_SELF_2"
+    ],
+    "sha256": "906a2ca2e909bb841ad4f2fcb55f264827069553e02aaa64c242f0309f6a4b28"
+  },
+  "APE_NETHER_SELF_4": {
+    "parents": [
+      "APE_NETHER_SELF_3"
+    ],
+    "sha256": "fbc3488a2d932d9542aeeeff867f0f8ed7b5b459e77d932130ef83bc63315c47"
+  },
+  "FOX_NETHER_TRUE_1": {
+    "parents": [
+      "FOX_MAHAYANA_HEAVENLY"
+    ],
+    "sha256": "0824f5de2fc7b55e05061859f7e1b77454b07748cd092f73eb479115cd862e39"
+  },
+  "FOX_NETHER_TRUE_2": {
+    "parents": [
+      "FOX_NETHER_TRUE_1"
+    ],
+    "sha256": "eb5dc6e8bb1a252a237b3cf949d508e4e69aec3ecfc98dbf91b8a1c08d155e78"
+  },
+  "FOX_NETHER_TRUE_3": {
+    "parents": [
+      "FOX_NETHER_TRUE_2"
+    ],
+    "sha256": "79b659ae5039e12999e5c42789c8781c1610e8fcf3f1fb060de1412417a7b7cf"
+  },
+  "FOX_NETHER_TRUE_4": {
+    "parents": [
+      "FOX_NETHER_TRUE_3"
+    ],
+    "sha256": "efd40258de24c177c37b8e8010b5c8ecf6e12e8921de4bad00e2cffc8247a844"
+  },
+  "FOX_NETHER_SELF_1": {
+    "parents": [
+      "FOX_MAHAYANA_HEAVENLY"
+    ],
+    "sha256": "a2748d4c451be7cb5dee9aabbd9ecff24f8ae6ebc256475ba10927906be14e8a"
+  },
+  "FOX_NETHER_SELF_2": {
+    "parents": [
+      "FOX_NETHER_SELF_1"
+    ],
+    "sha256": "5e5f793456d86b2d41ecb20252a557deae9245c638e3c3a15adbcaae7afbd2fc"
+  },
+  "FOX_NETHER_SELF_3": {
+    "parents": [
+      "FOX_NETHER_SELF_2"
+    ],
+    "sha256": "4575508041ffdc4d91dc6e01bd47570ad9f80e6d64b0289f2b0d937768725199"
+  },
+  "FOX_NETHER_SELF_4": {
+    "parents": [
+      "FOX_NETHER_SELF_3"
+    ],
+    "sha256": "f89bd35039d890e27d7d2a4e4f709b5f2c6f4b618eaba4ac3577c3843e27d459"
+  },
+  "TURTLE_NETHER_TRUE_1": {
+    "parents": [
+      "TURTLE_MAHAYANA_WORLD"
+    ],
+    "sha256": "37c8e72d4e83dfaf752f88239771d5e63e75b7d6641c659e1b6bcf4e4f2c74c5"
+  },
+  "TURTLE_NETHER_TRUE_2": {
+    "parents": [
+      "TURTLE_NETHER_TRUE_1"
+    ],
+    "sha256": "f90dd7a85a9436b5379c218b92dad9e00edebed330c5cc2605976e9c445e8366"
+  },
+  "TURTLE_NETHER_TRUE_3": {
+    "parents": [
+      "TURTLE_NETHER_TRUE_2"
+    ],
+    "sha256": "ae0253395ef7730e9ae47ef902c0691ae83bb005f4400dba5c0ceec144cc4355"
+  },
+  "TURTLE_NETHER_TRUE_4": {
+    "parents": [
+      "TURTLE_NETHER_TRUE_3"
+    ],
+    "sha256": "877b03cb08ba9532db3209d5b9f49dd56b088ea1fd3810823c27b10b66e22c32"
+  },
+  "TURTLE_NETHER_SELF_1": {
+    "parents": [
+      "TURTLE_MAHAYANA_WORLD"
+    ],
+    "sha256": "320017b9cff3b28a0a71b59b830279ee322cc3fd1d2688a9da176b6aa962fb01"
+  },
+  "TURTLE_NETHER_SELF_2": {
+    "parents": [
+      "TURTLE_NETHER_SELF_1"
+    ],
+    "sha256": "1784e1a6887894443636f8a11dd48566843e6055e096c3708ea7ab8eb61217f3"
+  },
+  "TURTLE_NETHER_SELF_3": {
+    "parents": [
+      "TURTLE_NETHER_SELF_2"
+    ],
+    "sha256": "e4b4b319a2523dea7bfe13b5b8b56b661932dc3a80559328393f6135cf505ee5"
+  },
+  "TURTLE_NETHER_SELF_4": {
+    "parents": [
+      "TURTLE_NETHER_SELF_3"
+    ],
+    "sha256": "09faecca74f0d92cd56c6294a57e56da7f54944d3f5dea5a008adce503a73168"
+  },
+  "INSECT_NETHER_TRUE_1": {
+    "parents": [
+      "INSECT_MAHAYANA_SWARM"
+    ],
+    "sha256": "a024ba603ce92d2777fa7f7cf351979c7451832f79b8a3c0ed5023229bc78f45"
+  },
+  "INSECT_NETHER_TRUE_2": {
+    "parents": [
+      "INSECT_NETHER_TRUE_1"
+    ],
+    "sha256": "f9550dc484f73c2c6b0be7318df171c0ed3f7c2b1398635d2fd78a1150f05132"
+  },
+  "INSECT_NETHER_TRUE_3": {
+    "parents": [
+      "INSECT_NETHER_TRUE_2"
+    ],
+    "sha256": "30521c6fa4b05fc797aa08a17451c29ae22191fa12a2f95a84baf5f5e5b847c4"
+  },
+  "INSECT_NETHER_TRUE_4": {
+    "parents": [
+      "INSECT_NETHER_TRUE_3"
+    ],
+    "sha256": "bec32b38d055458cad1bcbda39c3ea5f353c7d1fe9e04f8d07443e0d0322c7ea"
+  },
+  "INSECT_NETHER_SELF_1": {
+    "parents": [
+      "INSECT_MAHAYANA_SWARM"
+    ],
+    "sha256": "93cad10e332d355ffeaa1a00cac5a63e8a31a4fd22b1169094452b078a71be76"
+  },
+  "INSECT_NETHER_SELF_2": {
+    "parents": [
+      "INSECT_NETHER_SELF_1"
+    ],
+    "sha256": "0e8f6e3e25344ced638d36b061a2ac0ae54213e1d12319063870650b56ee1563"
+  },
+  "INSECT_NETHER_SELF_3": {
+    "parents": [
+      "INSECT_NETHER_SELF_2"
+    ],
+    "sha256": "4ad82d297756d69f72277a7c74cace5bd1813d58afc3c6c673ede098af90c5ba"
+  },
+  "INSECT_NETHER_SELF_4": {
+    "parents": [
+      "INSECT_NETHER_SELF_3"
+    ],
+    "sha256": "ed1a9416df293dc21081baf1e927b3db2af49237d316ac8ef5f7207d30fa87fc"
+  },
+  "AQUATIC_NETHER_TRUE_1": {
+    "parents": [
+      "AQUATIC_MAHAYANA_KUN"
+    ],
+    "sha256": "28fc6de9731aae8256ebc1f162e385d753b13ee3dea64ea7d869815aa01374e1"
+  },
+  "AQUATIC_NETHER_TRUE_2": {
+    "parents": [
+      "AQUATIC_NETHER_TRUE_1"
+    ],
+    "sha256": "ad0ee83f36d3efc16e51b83339a88588c9897bf032f200c1de6b11f766dca4eb"
+  },
+  "AQUATIC_NETHER_TRUE_3": {
+    "parents": [
+      "AQUATIC_NETHER_TRUE_2"
+    ],
+    "sha256": "98376cf495e6c95d15d0c8813eb84e2fda28b6d0f987e54a8e5699af6108231d"
+  },
+  "AQUATIC_NETHER_TRUE_4": {
+    "parents": [
+      "AQUATIC_NETHER_TRUE_3"
+    ],
+    "sha256": "9f6f38c2cf7a49a3722e21b3e5db829d06cd8c5e6cbd587125fb6e08b128a4fa"
+  },
+  "AQUATIC_NETHER_SELF_1": {
+    "parents": [
+      "AQUATIC_MAHAYANA_KUN"
+    ],
+    "sha256": "88a8e263e896b6532b6eaced29f748fc17f18a10ad6a2dc71f7411d25203a4f2"
+  },
+  "AQUATIC_NETHER_SELF_2": {
+    "parents": [
+      "AQUATIC_NETHER_SELF_1"
+    ],
+    "sha256": "556b3dee2ca795ba1f622e18a94ef0428c518346281d26bdf08a6cf7b1eea40e"
+  },
+  "AQUATIC_NETHER_SELF_3": {
+    "parents": [
+      "AQUATIC_NETHER_SELF_2"
+    ],
+    "sha256": "7f5cd4b1539bfa5ae19bf4428237f8b93cb634fe621f8ffc615fb525f8e884de"
+  },
+  "AQUATIC_NETHER_SELF_4": {
+    "parents": [
+      "AQUATIC_NETHER_SELF_3"
+    ],
+    "sha256": "04487c733478cde96f3ec8a589f1cd0fa8173e333029df470c2c95cccfbf8185"
+  },
+  "FLORA_NETHER_TRUE_1": {
+    "parents": [
+      "FLORA_MAHAYANA_ORIGIN_TREE"
+    ],
+    "sha256": "0b2516303c4e276283b6b4afa4189904b3ab164537b318e9f894bea8c21f6238"
+  },
+  "FLORA_NETHER_TRUE_2": {
+    "parents": [
+      "FLORA_NETHER_TRUE_1"
+    ],
+    "sha256": "827ce39312d3595636a0c3a235a2d8936c2d1432035ad2d493f4baf57cc44164"
+  },
+  "FLORA_NETHER_TRUE_3": {
+    "parents": [
+      "FLORA_NETHER_TRUE_2"
+    ],
+    "sha256": "701ed2281c77bd4d709f55f7fbbb01c75ea93b118488d7605b678e2eef1490a7"
+  },
+  "FLORA_NETHER_TRUE_4": {
+    "parents": [
+      "FLORA_NETHER_TRUE_3"
+    ],
+    "sha256": "7b526b020f3fcc3a8227d5b5142c0b412c37bbd3fb5d9cfe3a2cb22a4fe265e2"
+  },
+  "FLORA_NETHER_SELF_1": {
+    "parents": [
+      "FLORA_MAHAYANA_ORIGIN_TREE"
+    ],
+    "sha256": "1273efd8a3492ba4e4da31b62b0ec1d99219faf1dda16098a390a113232f6d65"
+  },
+  "FLORA_NETHER_SELF_2": {
+    "parents": [
+      "FLORA_NETHER_SELF_1"
+    ],
+    "sha256": "cfc8a944df1ea4d793fdf73e578e1578c32900b756bc42b592eec6369ac1ed14"
+  },
+  "FLORA_NETHER_SELF_3": {
+    "parents": [
+      "FLORA_NETHER_SELF_2"
+    ],
+    "sha256": "8dccd99bb4222ea23419f556bc5017e4262040ef04c93deb4c845434584a1f09"
+  },
+  "FLORA_NETHER_SELF_4": {
+    "parents": [
+      "FLORA_NETHER_SELF_3"
+    ],
+    "sha256": "7dac5e4fb64c726c801747a7467f3ccbca4b835d4a624c7d86731dd53ba643dd"
+  }
+}
