@@ -18,7 +18,7 @@
     "trial-sites": "1.1.0"
   },
   "validation_scope": "User-requested alpha.3 presentation, combat and persistence upstream tests; not full repository regression",
-  "tests": 645,
+  "tests": 646,
   "runs": [
     {
       "name": "related-tests-0",
@@ -102,9 +102,9 @@
     }
   ],
   "save_transfer_log": "build/save-transfer-300-alpha3.log",
-  "inputs_sha256": "dfea7948fbcd19ecbb88b39fba8231e4f9a160800e7c1ef409a27a1a8222aa0c",
+  "inputs_sha256": "2497b8ea046e9b425bf19c89f8de0cf1a078f5e7c1077c293214491485d3bcfc",
   "platform": "Windows",
-  "exe_sha256": "b6e82783e3b37d82e5580bdf2c402ec5172e032a9acbf48d9c503373f11ce613",
+  "exe_sha256": "2558c2892fb2d868beaa6418e7dcf7ab6859a8786aceaf2957ba1ccbbf609a96",
   "with_and_without_dlc_verified": true,
   "root_launcher_updated": true
 }

@@ -60,7 +60,7 @@ def main():
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
-        if visual:require(all(marker in text for marker in ('visual_ui_scope','visual_additions_scope','domain_replay_scope')),f'Missing native UI/social/domain coverage: {name}')
+        if visual:require(all(marker in text for marker in ('visual_ui_scope','visual_additions_scope','domain_replay_scope','protagonist_static_scope')),f'Missing native UI/social/domain/protagonist coverage: {name}')
         if combat:require('combat_alpha_scope' in text,f'Missing native combat and DLC acceptance: {name}')
         if buildings and '/android-buildings-' in name:require('buildings_scope' in text,f'Missing current native city coverage: {name}')
         if visits and '/android-building-visits-' in name:require('building_visits_scope' in text,f'Missing native illustrated visits: {name}')

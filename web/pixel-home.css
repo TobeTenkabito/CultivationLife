@@ -7,9 +7,9 @@
 :root[data-visual=pixel] .has-pixel-figure .pixel-character-summary { display:grid; grid-template-columns:minmax(0,1fr) 256px; gap:16px 24px; margin-bottom:22px; }
 :root[data-visual=pixel] .has-pixel-figure .pixel-character-summary>.character-head { grid-column:1; grid-row:1; min-width:0; margin:0; }
 :root[data-visual=pixel] .has-pixel-figure .pixel-character-summary>.realm { grid-column:1; grid-row:2; min-width:0; margin:0; }
-/* Keep integer sprite scaling; only transparent side margins leave the art slot. */
-:root[data-visual=pixel] .pixel-details-art { grid-column:2; grid-row:1/3; align-self:center; display:flex; align-items:center; justify-content:center; min-width:0; height:224px; margin:0; overflow:hidden; }
-:root[data-visual=pixel] .pixel-details-art canvas { display:block; flex:none; width:288px; height:288px; image-rendering:pixelated; }
+/* Native static figure on desktop, half-size on compact screens; preserve aspect ratio. */
+:root[data-visual=pixel] .pixel-details-art { grid-column:2; grid-row:1/3; align-self:center; display:flex; align-items:center; justify-content:center; min-width:0; height:288px; margin:0; overflow:hidden; }
+:root[data-visual=pixel] .pixel-details-art canvas { display:block; flex:none; width:256px; height:288px; image-rendering:pixelated; }
 :root[data-visual=pixel] .has-pixel-figure .character-card { min-width:0; }
 :root[data-visual=pixel] .has-pixel-figure .character-head .avatar { display:none; }
 :root[data-visual=pixel] .has-pixel-figure .character-head h2 { overflow-wrap:anywhere; }
@@ -18,8 +18,8 @@
   :root[data-visual=pixel] .has-pixel-figure .pixel-character-summary>.realm { padding:12px; overflow-wrap:anywhere; }
   :root[data-visual=pixel] .has-pixel-figure .pixel-character-summary>.realm strong { font-size:16px; }
   :root[data-visual=pixel] .has-pixel-figure .pixel-character-summary>.realm small { font-size:12px; }
-  :root[data-visual=pixel] .pixel-details-art { height:192px; }
-  :root[data-visual=pixel] .pixel-details-art canvas { width:192px; height:192px; }
+  :root[data-visual=pixel] .pixel-details-art { height:144px; }
+  :root[data-visual=pixel] .pixel-details-art canvas { width:128px; height:144px; }
 }
 @media(max-width:360px) {
   :root[data-visual=pixel] .has-pixel-figure .pixel-character-summary>.realm strong { font-size:14px; }

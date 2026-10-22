@@ -32,5 +32,83 @@
       15
     ],
     "usage": "Base-game human demonic male/female; static idle_s only, no combat animation adoption"
+  },
+  "protagonist_static_redraws": {
+    "approval": "2026-10-23 user explicitly requires the new protagonist portraits and full-body art",
+    "processing": "Byte-for-byte selected pixel exports; separate static figures, action atlases unchanged",
+    "assets": {
+      "actor.human.dao.male.figure": {
+        "file": "dao-male-static-figure.png",
+        "size": [
+          256,
+          288
+        ],
+        "sha256": "998a5f1398dbc58951ce6e080bc533b1cd33c502c9ba2b1423503287015cf58b",
+        "source": "design/dao-basic-redraw-20261022/pixel/figures/dao-male.png"
+      },
+      "actor.human.dao.male.portrait": {
+        "file": "dao-male-static-portrait.png",
+        "size": [
+          128,
+          128
+        ],
+        "sha256": "d2fff01e03db386608616d664c0ab33993e6ec889cc3043ff21ae2be6b37282a",
+        "source": "design/dao-basic-redraw-20261022/pixel/portraits/dao-male.png"
+      },
+      "actor.human.dao.female.figure": {
+        "file": "dao-female-static-figure.png",
+        "size": [
+          256,
+          288
+        ],
+        "sha256": "ecff917772738c3ead6f587082a4c939852d482602eea5afdd8523a7e0996bf4",
+        "source": "design/dao-basic-redraw-20261022/pixel/figures/dao-female.png"
+      },
+      "actor.human.dao.female.portrait": {
+        "file": "dao-female-static-portrait.png",
+        "size": [
+          128,
+          128
+        ],
+        "sha256": "8f9bbd700f20280dee30bcb1f03716e7d286a68bbfae3637c013c1a620fa9de3",
+        "source": "design/dao-basic-redraw-20261022/pixel/portraits/dao-female.png"
+      },
+      "actor.human.demonic.male.figure": {
+        "file": "demonic-male-static-figure.png",
+        "size": [
+          256,
+          288
+        ],
+        "sha256": "31397b527b03d35acc53ce2c7b89a5f3b4b56284dedd3b46ae29bfe11082cb6d",
+        "source": "design/demonic-basic-redraw-20261022/pixel/figures/demonic-male.png"
+      },
+      "actor.human.demonic.male.portrait": {
+        "file": "demonic-male-static-portrait.png",
+        "size": [
+          128,
+          128
+        ],
+        "sha256": "619b0c96302121f79b7a443e2c117e1f124bb7a6e1285e691078e14701df814c",
+        "source": "design/demonic-basic-redraw-20261022/pixel/portraits/demonic-male.png"
+      },
+      "actor.human.demonic.female.figure": {
+        "file": "demonic-female-static-figure.png",
+        "size": [
+          256,
+          288
+        ],
+        "sha256": "59d11ba2b14b386d8d397403226883ca51cf61aed9f62dc2b600555494772679",
+        "source": "design/demonic-basic-redraw-20261022/pixel/figures/demonic-female.png"
+      },
+      "actor.human.demonic.female.portrait": {
+        "file": "demonic-female-static-portrait.png",
+        "size": [
+          128,
+          128
+        ],
+        "sha256": "e6ab7c801c4622b41facef412f08b3e7d262c9a3448c193255552c9995285325",
+        "source": "design/demonic-basic-redraw-20261022/pixel/portraits/demonic-female.png"
+      }
+    }
   }
 }

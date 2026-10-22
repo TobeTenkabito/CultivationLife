@@ -1,5 +1,6 @@
 """Real loading, appearance switching, canvas, original actions and stale events."""
 import json
+import hashlib
 import random
 import sys
 import tempfile
@@ -7,12 +8,14 @@ import threading
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from unittest.mock import patch
+from urllib.parse import urljoin
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from playwright.sync_api import sync_playwright
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
+from test_pixel_assets import STATIC_REDRAWS
 
 
 def verify_details(page, output, gender, width, height, path='dao'):
@@ -24,14 +27,21 @@ def verify_details(page, output, gender, width, height, path='dao'):
     page.locator('.pixel-details-art').wait_for(state='visible')
     canvas = page.locator('.pixel-details-art canvas')
     assert canvas.get_attribute('data-actor') == f'actor.human.{path}.{gender}'
-    assert f'{path}-{gender}-portrait.png' in page.locator('.pixel-portrait').get_attribute('src')
-    assert canvas.evaluate('''c => c.getContext('2d').getImageData(0,0,96,96).data.filter((v,i)=>i%4===3&&v>0).length>500''')
+    assert f'{path}-{gender}-static-portrait.png' in page.locator('.pixel-portrait').get_attribute('src')
+    assert page.locator('.pixel-portrait').evaluate('i=>i.naturalWidth===128&&i.naturalHeight===128')
+    assert canvas.evaluate('c=>c.width===256&&c.height===288')
+    for kind in ('figure','portrait'):
+        src=page.evaluate("id=>{const c=PixelAssetCatalog;return c.base+c.assets[id].file}",f'actor.human.{path}.{gender}.{kind}')
+        response=page.request.get(urljoin(page.url,src))
+        assert response.ok
+        assert hashlib.sha256(response.body()).hexdigest()==STATIC_REDRAWS[f'{path}.{gender}.{kind}']
+    assert canvas.evaluate('''c => c.getContext('2d').getImageData(0,0,c.width,c.height).data.filter((v,i)=>i%4===3&&v>0).length>500''')
     assert canvas.evaluate('''async c => {
-      const bitmap=await VisualAssets.load(c.dataset.actor+'.atlas');
-      const expected=document.createElement('canvas');expected.width=expected.height=96;
-      expected.getContext('2d').drawImage(bitmap,0,0,96,96,0,0,96,96);
-      const a=c.getContext('2d').getImageData(0,0,96,96).data;
-      const b=expected.getContext('2d').getImageData(0,0,96,96).data;
+      const bitmap=await VisualAssets.load(c.dataset.actor+'.figure');
+      const expected=document.createElement('canvas');expected.width=256;expected.height=288;
+      expected.getContext('2d').drawImage(bitmap,0,0);
+      const a=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+      const b=expected.getContext('2d').getImageData(0,0,c.width,c.height).data;
       return a.every((value,i)=>value===b[i]);
     }''')
     figure = page.locator('.pixel-details-art').bounding_box()
@@ -45,11 +55,11 @@ def verify_details(page, output, gender, width, height, path='dao'):
     assert resources['y'] >= summary['y'] + summary['height']
     assert abs(resources['width'] - data['width']) <= 1
     assert canvas.evaluate('''c => {
-      const pixels=c.getContext('2d').getImageData(0,0,96,96).data;
+      const pixels=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
       const r=c.getBoundingClientRect(),f=c.parentElement.getBoundingClientRect();
-      for(let y=0;y<96;y++)for(let x=0;x<96;x++)if(pixels[(y*96+x)*4+3]){
-        if(r.left+x*r.width/96<f.left-1 || r.left+(x+1)*r.width/96>f.right+1 ||
-           r.top+y*r.height/96<f.top-1 || r.top+(y+1)*r.height/96>f.bottom+1)return false;
+      for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(pixels[(y*c.width+x)*4+3]){
+        if(r.left+x*r.width/c.width<f.left-1 || r.left+(x+1)*r.width/c.width>f.right+1 ||
+           r.top+y*r.height/c.height<f.top-1 || r.top+(y+1)*r.height/c.height>f.bottom+1)return false;
       }return true;
     }''')
     assert page.locator('#player-details-dialog').evaluate('(d) => d.scrollWidth <= d.clientWidth + 1')

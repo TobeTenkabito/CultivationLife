@@ -546,6 +546,16 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         check(Boolean.TRUE.equals(js("!CombatReplay.diagnostics().active&&!CombatReplay.diagnostics().raf&&JSON.stringify(game)===__domainBefore")),"Native domain replay no mutation and disposal");
         result.putString("domain_replay_scope","Real mutual domination battle, open/control/effects/release, custom appearance, final state, native replay and disposal");
         result.putString("visual_additions_scope","Demonic female avatar/figure, real NPC card, thirteen-component editor with identity, custom color, save/reopen and no game state changes");
+        for(String path:new String[]{"dao","demonic"})for(String gender:new String[]{"male","female"}) {
+            String hero=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'新版主角原生验收',spirit_root:'heavenly',path:"+JSONObject.quote(path)+",gender:"+JSONObject.quote(gender)+",seed:326,preset_id:"+JSONObject.quote(path.equals("demonic")?"demonic_core":"core")+"})}).then(g=>g.id)");
+            async("loadGame("+JSONObject.quote(hero)+")");
+            js("window.__heroBefore=JSON.stringify(game);true");tapSelector(".hud-identity");
+            waitForJs("document.querySelector('.pixel-details-art canvas')?.dataset.actor==="+JSONObject.quote("actor.human."+path+"."+gender),"Native selected static figure");
+            check(Boolean.TRUE.equals(async("(async()=>{const c=document.querySelector('.pixel-details-art canvas'),p=document.querySelector('.pixel-portrait'),b=await VisualAssets.load(c.dataset.actor+'.figure'),e=document.createElement('canvas');e.width=256;e.height=288;e.getContext('2d').drawImage(b,0,0);const a=c.getContext('2d').getImageData(0,0,c.width,c.height).data,d=e.getContext('2d').getImageData(0,0,256,288).data;return c.width===256&&c.height===288&&a.every((v,i)=>v===d[i])&&p.naturalWidth===128&&p.src.includes('-static-portrait.png')&&JSON.stringify(game)===__heroBefore})()")),"Native new source pixels and avatar");
+            capture("alpha3-static-"+path+"-"+gender+"-"+arguments.getString("orientation"));
+            tapSelector("[data-close-dialog=player-details-dialog]");
+        }
+        result.putString("protagonist_static_scope","All four selected Dao/Demonic male/female 256x288 static figures pixel-equal, 128x128 portraits, native detail clicks and no state writes");
     }
 
     private void runCombatAlpha(Bundle result) throws Exception {

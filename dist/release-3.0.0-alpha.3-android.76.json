@@ -18,7 +18,7 @@
     "trial-sites": "1.1.0"
   },
   "validation_scope": "User-requested alpha.3 presentation, combat and persistence upstream tests; not full repository regression",
-  "tests": 645,
+  "tests": 646,
   "runs": [
     {
       "name": "related-tests-0",
@@ -102,14 +102,14 @@
     }
   ],
   "save_transfer_log": "build/save-transfer-300-alpha3.log",
-  "inputs_sha256": "dfea7948fbcd19ecbb88b39fba8231e4f9a160800e7c1ef409a27a1a8222aa0c",
+  "inputs_sha256": "2497b8ea046e9b425bf19c89f8de0cf1a078f5e7c1077c293214491485d3bcfc",
   "platform": "Android 12",
   "android_version": "3.0.0-alpha.3-android.76",
   "version_code": 76,
-  "apk_sha256": "dd7889d3f670d1fd929194cfc9b5b0b23690317685e5a05efb7e61a7cc0ee164",
+  "apk_sha256": "a42da4e02df82c042008d4cba99deee9d7e18681abdda90d058b4a206df235ee",
   "native": {
     "version": "3.0.0-alpha.3",
-    "apk_sha256": "dd7889d3f670d1fd929194cfc9b5b0b23690317685e5a05efb7e61a7cc0ee164",
+    "apk_sha256": "a42da4e02df82c042008d4cba99deee9d7e18681abdda90d058b4a206df235ee",
     "status": "passed",
     "signed": true,
     "device": "emulator-5580",
@@ -119,10 +119,10 @@
       "build/android-visual-ui-portrait-300-alpha3.log",
       "build/android-visual-ui-landscape-300-alpha3.log"
     ],
-    "test_apk_sha256": "454aeb15a9324ada1b0d90d6447c0bc8c99d34b94b23c67c03a96561f707aeb5",
+    "test_apk_sha256": "9339e9ef22449a67e7487f0b447c0bd13db5bf72196b849c60ba4b74ac22629a",
     "log_hashes": {
-      "build/android-visual-ui-portrait-300-alpha3.log": "8f7ee440b5aa33bf97845a7303a4b29f7853e05a9b8f4b4fc77d8d9634c0362d",
-      "build/android-visual-ui-landscape-300-alpha3.log": "8f7ee440b5aa33bf97845a7303a4b29f7853e05a9b8f4b4fc77d8d9634c0362d"
+      "build/android-visual-ui-portrait-300-alpha3.log": "882c10c43ef1afef1c757921f8ecf4220e86a81f060dd34a38dc11d9c406e484",
+      "build/android-visual-ui-landscape-300-alpha3.log": "882c10c43ef1afef1c757921f8ecf4220e86a81f060dd34a38dc11d9c406e484"
     },
     "scope": "Optional pixel UI, original inventory commands, true natal sockets, eleven world maps, social portraits, domain editor and real domain battle replay; four themes, native portrait/landscape"
   },

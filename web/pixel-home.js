@@ -34,7 +34,7 @@
   const figure = document.createElement('figure');
   figure.className = 'pixel-details-art'; figure.hidden = true;
   const figureCanvas = document.createElement('canvas');
-  figureCanvas.width = figureCanvas.height = 96; figureCanvas.setAttribute('role','img');
+  figureCanvas.width = 256; figureCanvas.height = 288; figureCanvas.setAttribute('role','img');
   figure.append(figureCanvas);
   const natalFigure=document.createElement('img');natalFigure.className='pixel-natal-on-actor pixel-item-icon';natalFigure.alt='本命法宝';natalFigure.hidden=true;figure.append(natalFigure);
   const summary = document.createElement('div'); summary.className = 'pixel-character-summary';
@@ -55,13 +55,15 @@
     if (!identity || identity !== figureIdentity) {
       figureRevision++; figureIdentity = null;
       figure.hidden = true; detailsContent.classList.remove('has-pixel-figure');
-      figureContext.clearRect(0,0,96,96); delete figureCanvas.dataset.actor;
+      figureContext.clearRect(0,0,figureCanvas.width,figureCanvas.height); delete figureCanvas.dataset.actor;
     }
     if (!identity || !details.open || identity === figureIdentity) return;
     const ticket = ++figureRevision;
-    const bitmap = await VisualAssets.load(identity + '.atlas');
+    const bitmap = await VisualAssets.load(identity + '.figure');
     if (ticket !== figureRevision || !details.open || !active() || VisualAssets.actor(current?.player) !== identity || !bitmap) return;
-    VisualAssets.frame(figureContext,bitmap,'idle_s');
+    figureContext.clearRect(0,0,figureCanvas.width,figureCanvas.height);
+    figureContext.imageSmoothingEnabled = false;
+    figureContext.drawImage(bitmap,0,0);
     figureIdentity = identity; figureCanvas.dataset.actor = identity;
     figure.hidden = false; detailsContent.classList.add('has-pixel-figure');
   }

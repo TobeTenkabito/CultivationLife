@@ -15,7 +15,7 @@ def verify(page, identity, output):
     page.locator('#npc-art-dialog header button').click()
     page.locator('.hud-identity').click()
     page.wait_for_function("document.querySelector('.pixel-details-art canvas')?.dataset.actor==='actor.human.demonic.female'")
-    assert page.locator('.pixel-details-art canvas').evaluate("c=>c.getContext('2d').getImageData(0,0,96,96).data.filter((v,i)=>i%4===3&&v>0).length>500")
+    assert page.locator('.pixel-details-art canvas').evaluate("c=>c.width===256&&c.height===288&&c.getContext('2d').getImageData(0,0,c.width,c.height).data.filter((v,i)=>i%4===3&&v>0).length>500")
     page.locator('[data-close-dialog=player-details-dialog]').click()
     navigation_locator(page,'[data-panel-target=settings]').click()
     page.locator('[data-voisinage-editor]').click()
