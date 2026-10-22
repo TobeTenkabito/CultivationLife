@@ -12,6 +12,23 @@ THEMES = frozenset("abdf")
 DEFAULTS = {"theme": "a", "reduced_motion": False, "pixel_art": False}
 _LOCK = RLock()
 
+
+def _voisinage_appearance(value):
+    styles = {'mist', 'star', 'frost', 'lotus', 'sword', 'seal', 'water', 'mountain', 'wood', 'thunder', 'moon', 'void', 'time'}
+    allowed = {'outline': styles, 'pattern': styles,
+               'palette': {'rose', 'peach', 'gold', 'lime', 'green', 'jade', 'cyan', 'blue', 'indigo', 'violet', 'lilac', 'pink'},
+               'control': {'rings', 'talismans', 'stars', 'lotus', 'pillars', 'crystal'}}
+    if not isinstance(value, dict) or set(value) != set(allowed) | {'density'}:
+        raise ValueError('邻域外观须包含轮廓、意象、配色、控制样式与质感')
+    for key, choices in allowed.items():
+        if key == 'palette' and isinstance(value[key], str) and re.fullmatch(r'#[0-9a-fA-F]{6}', value[key]):
+            continue
+        if not isinstance(value[key], str) or value[key] not in choices:
+            raise ValueError('请选择有效的邻域外观组件')
+    if type(value['density']) is not int or not 20 <= value['density'] <= 100:
+        raise ValueError('邻域质感须为20至100的整数')
+    return dict(value) | {'palette': value['palette'].lower()}
+
 def _navigation(value):
     if not isinstance(value, dict) or set(value) != {'pins', 'recent'}:
         raise ValueError('导航偏好须包含常用与最近记录')
@@ -44,12 +61,17 @@ def load_ui_preferences(root: Path) -> dict:
                 result['navigation'] = _navigation(data['navigation'])
             except ValueError:
                 pass
+        if 'voisinage_appearance' in data:
+            try:
+                result['voisinage_appearance'] = _voisinage_appearance(data['voisinage_appearance'])
+            except ValueError:
+                pass
         return result
 
 
 def write_ui_preferences(root: Path, payload: dict) -> dict:
-    if not isinstance(payload, dict) or not payload or set(payload) - (DEFAULTS.keys() | {'navigation'}):
-        raise ValueError("界面偏好仅支持 theme、reduced_motion、pixel_art 与 navigation")
+    if not isinstance(payload, dict) or not payload or set(payload) - (DEFAULTS.keys() | {'navigation', 'voisinage_appearance'}):
+        raise ValueError("界面偏好仅支持 theme、reduced_motion、pixel_art、navigation 与 voisinage_appearance")
     if "theme" in payload and (not isinstance(payload["theme"], str) or payload["theme"] not in THEMES):
         raise ValueError("请选择松烟书院、月下观星、丹砂金阙或竹简纪年")
     if "reduced_motion" in payload and not isinstance(payload["reduced_motion"], bool):
@@ -58,6 +80,8 @@ def write_ui_preferences(root: Path, payload: dict) -> dict:
         raise ValueError("像素绘景必须为布尔值")
     if 'navigation' in payload:
         payload = payload | {'navigation': _navigation(payload['navigation'])}
+    if 'voisinage_appearance' in payload:
+        payload = payload | {'voisinage_appearance': _voisinage_appearance(payload['voisinage_appearance'])}
     with _LOCK:
         value = load_ui_preferences(root) | payload
         destination = root / "data" / "ui_preferences.json"

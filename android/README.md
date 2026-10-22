@@ -1,8 +1,8 @@
 # 浮生问道 · Android
 
-维护基线：本体 **v3.0.0-alpha.2**。Gradle 配置的版本名为 **3.0.0-alpha.2-android.75**，versionCode **75**，沿用 `com.fusheng.wendao` 包名和正式签名。本轮采用 `combat-alpha` 关键领域发行配置，不做全仓；实际成品验收与签名以同版发行清单为准。
+维护基线：本体 **v3.0.0-alpha.3**。Gradle 配置的版本名为 **3.0.0-alpha.3-android.76**，versionCode **76**，沿用 `com.fusheng.wendao` 包名和正式签名。本轮按要求采用 `visual --focused-visual` 改动领域／必要上游配置，不做全仓；包含NPC、邻域编辑与正式邻域动画验证；实际成品验收与签名以同版发行清单为准。
 
-本轮验证普通及多人战报、战败动画、归墟物品说明与真体／仿制品交战情报，保留原四主题与默认关闭的新版界面。签名Android 12横竖屏使用隔离模拟器真实点击，并核对关闭后资源释放；Windows同一EXE有／无DLC分别验收。绘景仍在默认收起的左侧抽屉，不挤占首屏行动；详见[alpha.2发行范围](../docs/alpha2-release.md)。
+本轮验证魔修头像、NPC人物卡、十三组邻域外观编辑器与真实邻域战报，保留原四主题与默认关闭的新版界面。签名Android 12横竖屏使用隔离模拟器真实点击，并核对关闭后资源释放；Windows同一EXE有／无DLC分别验收。绘景仍在默认收起的左侧抽屉，不挤占首屏行动；详见[alpha.3发行范围](../docs/alpha3-release.md)。
 
 v2.17.2 使用 building-visits 相关领域配置，不做全仓：公共设施、年度城市经营、专属景色故事与有限遗物，以及原建筑、产业、佛寺和旧事件页面；同版 Windows EXE 有／无 DLC，签名 Android 12 的 building-visits / economy-enterprises 横竖屏四主题原生验收。最终范围以同版清单为准。
 

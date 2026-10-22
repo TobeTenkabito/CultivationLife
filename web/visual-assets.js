@@ -14,11 +14,11 @@
     return cache.get(id);
   }
   function actor(player) {
-    if (!player || player.race !== 'human' || player.path !== 'dao' || player.ghost_host_body ||
+    if (!player || player.race !== 'human' || !['dao', 'demonic'].includes(player.path) || player.ghost_host_body ||
         player.ghost_attachment || (player.lineage_race && player.lineage_race !== 'human') ||
         player.transformation_loadouts?.[player.transformation_technique?.id]?.active?.length ||
         !['male', 'female'].includes(player.gender)) return null;
-    return `actor.human.dao.${player.gender}`;
+    return `actor.human.${player.path}.${player.gender}`;
   }
   function frame(context, bitmap, name) {
     const i = catalog.frames.indexOf(name);

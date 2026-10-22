@@ -505,7 +505,47 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         tapSelector("#theme-open");tapSelector("#theme-dialog [data-pixel-setting]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
         tapSelector("[data-panel-target=inventory]");
         check(Boolean.TRUE.equals(js("document.querySelector('#pixel-inventory').hidden&&!document.querySelector('#inventory-list').hidden&&document.querySelectorAll('#inventory-list .item').length===game.player.inventory.length")),"Native restored legacy inventory");tapSelector("#inventory-toggle");
-        result.putString("visual_ui_scope","Four themes, native portrait/landscape clicks, extension-owned bitmap, original healing and exact material return, true natal character/slots, eleven home paintings, bounded immutable camera, original node atlas and legacy fallback; no combat animation");
+        runVisualAdditions(result);
+        result.putString("visual_ui_scope","Four themes, native portrait/landscape clicks, extension-owned bitmap, original healing and exact material return, true natal character/slots, eleven home paintings, bounded immutable camera, original node atlas and legacy fallback; alpha.3 social portraits, domain editor and real domain battle replay");
+    }
+
+    private void runVisualAdditions(Bundle result) throws Exception {
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'新增外观原生验收',spirit_root:'heavenly',path:'demonic',gender:'female',seed:323,preset_id:'core'})}).then(g=>g.id)");
+        python(assetText("visual_additions.py")+"\nfrom cultivation_life import server\nprepare_visual_additions(server.ENGINE,"+JSONObject.quote(id)+")");
+        async("loadGame("+JSONObject.quote(id)+")");
+        tapSelector("#theme-open");
+        if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        js("window.__additionsBefore=JSON.stringify(game);true");
+        waitForJs("document.querySelector('#npc-event-art img')?.naturalWidth>0","Native social figure");
+        tapSelector(".npc-event-person");waitForJs("document.querySelector('#npc-art-dialog img')?.naturalWidth>0","Native NPC card");
+        capture("alpha3-npc-"+arguments.getString("orientation"));tapSelector("#npc-art-dialog header button");
+        tapSelector(".hud-identity");waitForJs("document.querySelector('.pixel-details-art canvas')?.dataset.actor==='actor.human.demonic.female'","Native demonic player figure");
+        check(Boolean.TRUE.equals(js("document.querySelector('.pixel-portrait').src.includes('demonic-female')")),"Native demonic avatar");
+        tapSelector("[data-close-dialog=player-details-dialog]");tapSelector("[data-panel-target=settings]");tapSelector("[data-voisinage-editor]");
+        waitForJs("VoisinageEditor.status().ready","Native domain editor");
+        check(Boolean.TRUE.equals(js("VoisinageEditor.status().previewActor==='demonic-female'&&document.querySelectorAll('#ve-pattern option').length===13")),"Native preview identity and thirteen styles");
+        js("for(const [key,value] of [['outline','time'],['pattern','time'],['color-hex','#98baca']]){const e=document.querySelector('#ve-'+key);e.value=value;e.dispatchEvent(new Event('input',{bubbles:true}));}true");
+        tapSelector("#ve-save");waitForJs("!VoisinageEditor.status().busy&&document.querySelector('#ve-status').textContent.includes('已保存')","Native appearance save");
+        check(Boolean.TRUE.equals(js("document.querySelector('#voisinage-editor').scrollWidth<=document.querySelector('#voisinage-editor').clientWidth+1")),"Native editor overflow");
+        capture("alpha3-editor-"+arguments.getString("orientation"));tapSelector("#ve-close");
+        tapSelector("[data-voisinage-editor]");waitForJs("VoisinageEditor.status().ready","Native appearance reopen");
+        check(Boolean.TRUE.equals(js("VoisinageEditor.status().draft.palette==='#98baca'&&VoisinageEditor.status().draft.pattern==='time'&&JSON.stringify(game)===__additionsBefore")),"Native persisted appearance and no game mutation");
+        tapSelector("#ve-close");tapSelector("#settings-toggle");
+        python(assetText("visual_additions.py")+"\nfrom cultivation_life import server\nprepare_domain_battle(server.ENGINE,"+JSONObject.quote(id)+",'mutual')");
+        async("loadGame("+JSONObject.quote(id)+")");tapSelector("#battle-report-open");
+        waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native domain battle ready");
+        js("window.__domainBefore=JSON.stringify(game);true");
+        check(Boolean.TRUE.equals(js("CombatReplay.diagnostics().domainStages.some(s=>s.phase==='effect')&&game.last_combat_report.visual.domains.player.palette==='#98baca'")),"Native domain phases and saved custom color");
+        js("for(const s of CombatReplay.diagnostics().domainStages)CombatReplay.seek((s.start+s.end)/2);const s=CombatReplay.diagnostics().domainStages.find(s=>s.phase==='control');CombatReplay.seek(s.start+.8);true");
+        capture("alpha3-domain-"+arguments.getString("orientation"));
+        check(Boolean.TRUE.equals(js("document.querySelector('#battle-report-card').scrollWidth<=document.querySelector('#battle-report-card').clientWidth+1")),"Native domain battle overflow");
+        js("CombatReplay.seek(CombatReplay.diagnostics().duration);true");
+        check(Boolean.TRUE.equals(js("Math.abs(document.querySelector('[data-combat-meter=hero] progress').value-game.last_combat_report.player_combat_state)<.01&&Math.abs(document.querySelector('[data-combat-meter=npc] progress').value-game.last_combat_report.enemy_combat_state)<.01")),"Native domain final authoritative state");
+        tapSelector("[data-combat-replay]");tapSelector("#battle-report-toggle");
+        check(Boolean.TRUE.equals(js("!CombatReplay.diagnostics().active&&!CombatReplay.diagnostics().raf&&JSON.stringify(game)===__domainBefore")),"Native domain replay no mutation and disposal");
+        result.putString("domain_replay_scope","Real mutual domination battle, open/control/effects/release, custom appearance, final state, native replay and disposal");
+        result.putString("visual_additions_scope","Demonic female avatar/figure, real NPC card, thirteen-component editor with identity, custom color, save/reopen and no game state changes");
     }
 
     private void runCombatAlpha(Bundle result) throws Exception {

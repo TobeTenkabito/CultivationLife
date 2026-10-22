@@ -1,0 +1,130 @@
+{
+  "base_version": "3.0.0-alpha.3",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.1.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.2",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.5.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested alpha.3 presentation, combat and persistence upstream tests; not full repository regression",
+  "tests": 645,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_visual_release",
+      "log": "build\\browser_visual_release-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_pixel_ui",
+      "log": "build\\browser_pixel_ui-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_themes_139",
+      "log": "build\\browser_themes_139-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_building_visits",
+      "log": "build\\browser_building_visits-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_npc_art",
+      "log": "build\\browser_npc_art-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_voisinage_editor",
+      "log": "build\\browser_voisinage_editor-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_domain_replay",
+      "log": "build\\browser_domain_replay-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_replay",
+      "log": "build\\browser_combat_replay-300-alpha3.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_groups",
+      "log": "build\\browser_combat_groups-300-alpha3.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-300-alpha3.log",
+  "inputs_sha256": "dfea7948fbcd19ecbb88b39fba8231e4f9a160800e7c1ef409a27a1a8222aa0c",
+  "platform": "Android 12",
+  "android_version": "3.0.0-alpha.3-android.76",
+  "version_code": 76,
+  "apk_sha256": "dd7889d3f670d1fd929194cfc9b5b0b23690317685e5a05efb7e61a7cc0ee164",
+  "native": {
+    "version": "3.0.0-alpha.3",
+    "apk_sha256": "dd7889d3f670d1fd929194cfc9b5b0b23690317685e5a05efb7e61a7cc0ee164",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-visual-ui-portrait-300-alpha3.log",
+      "build/android-visual-ui-landscape-300-alpha3.log"
+    ],
+    "test_apk_sha256": "454aeb15a9324ada1b0d90d6447c0bc8c99d34b94b23c67c03a96561f707aeb5",
+    "log_hashes": {
+      "build/android-visual-ui-portrait-300-alpha3.log": "8f7ee440b5aa33bf97845a7303a4b29f7853e05a9b8f4b4fc77d8d9634c0362d",
+      "build/android-visual-ui-landscape-300-alpha3.log": "8f7ee440b5aa33bf97845a7303a4b29f7853e05a9b8f4b4fc77d8d9634c0362d"
+    },
+    "scope": "Optional pixel UI, original inventory commands, true natal sockets, eleven world maps, social portraits, domain editor and real domain battle replay; four themes, native portrait/landscape"
+  },
+  "physical_device_tested": false
+}

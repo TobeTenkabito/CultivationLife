@@ -14,5 +14,23 @@
     "atlas-cultivator-v2.png": "dfd72cd7129721c9ee109dee5d75d0369a6882b1ce7536355f2c1dd31cba9e37",
     "manifest.json": "0e1d6f26423e81f7591d1e5826659c8866dd7d962dc3fe485ba780058150c922",
     "provenance.json": "455b7a6a790ec2949d3a870b075f0e4c88e678f21b4d6f99977ad98a65c362fb"
+  },
+  "demonic_characters": {
+    "source": "demonic-basic-variants-20261021",
+    "approval": "2026-10-22 user requested existing demonic protagonists in HUD and character details",
+    "processing": "Byte-for-byte copy of selected final atlases and same-source portraits; no redraw",
+    "manifest_sha256": "2c433b614cef43ab9593f8f8c60cc0b63100110c1cc9d2004c2de49c923dc606",
+    "source_hashes": {
+      "demonic-male-atlas.png": "776e6350bd574c87110050a4216d09903d7829e13c160ed3ff8d67e2f141e78c",
+      "demonic-male-portrait.png": "f1cedf1a87d719f76591ec091240746f11089d4deebcdd09ea99ccd3c32d5c6d",
+      "demonic-female-atlas.png": "85aa3d0efa6b79002f166b540720ba7bdaa1df9f51fb82bace49a8490666cefc",
+      "demonic-female-portrait.png": "69636b33b746a53261821c3fe1ccf757151d2c1aa2e16351d7c27bfe0bb572ea"
+    },
+    "reserved_empty_slots": [
+      13,
+      14,
+      15
+    ],
+    "usage": "Base-game human demonic male/female; static idle_s only, no combat animation adoption"
   }
 }

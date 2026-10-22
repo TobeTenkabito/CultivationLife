@@ -463,6 +463,7 @@ function showStart() {
 
 function render(data) {
   game = data;
+  window.NpcArt?.context(data);
   window.TrialSitePanel?.update(data, mutate, () => busy);
   window.HeavensPanel?.render(data,{api,toast,confirm:openGameConfirm,busy:()=>busy,
     refresh:async()=>render(await api(`/api/games/${game.id}`)),command:async(id,payload)=>{
@@ -1874,6 +1875,8 @@ function renderFaction(faction) {
     if (npc.main_technique_name) addStatus('主修功法', `${npc.main_technique_name} Lv.${npc.main_technique_level || 1}`);
     if (npc.combat_artifact_name) addStatus('主战法宝', npc.combat_artifact_name);
     identity.appendChild(status);
+    if (npc.is_player) window.NpcArt?.selfAvatar(identity,game.player,()=>$('#player-details-dialog').showModal());
+    else window.NpcArt?.avatar(identity,npc);
     const controls = document.createElement('div'); controls.className = 'relationship-actions';
     if (npc.can_request_master) controls.appendChild(relationshipButton(npc, 'master', '拜师'));
     if (npc.can_accept_disciple) controls.appendChild(relationshipButton(npc, 'disciple', '收徒'));
@@ -2201,7 +2204,7 @@ function renderWorldNpcs(npcs) {
       button.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:npc.id, action:'recruit'});
       controls.appendChild(button);
     }
-    info.append(name, detail); row.append(info, controls); list.appendChild(row);
+    info.append(name, detail); window.NpcArt?.avatar(info,npc); row.append(info, controls); list.appendChild(row);
   });
 }
 
@@ -3663,6 +3666,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     const detail = document.createElement('small');
     detail.textContent = `${person.gender_name || '性别未明'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.spirit_root_name || '灵根未明'} · ${person.age} 岁 / 寿元 ${person.lifespan == null ? '无尽' : person.lifespan} · ${person.source === 'event' ? '游历结缘' : '宗门结缘'}`;
     row.append(name, detail);
+    window.NpcArt?.avatar(row,person);
     if (role === '师父' && isFreeRelationship(person)) row.appendChild(masterActions(person));
     if (role === '弟子' && isFreeRelationship(person)) row.appendChild(discipleActions(person));
     list.appendChild(row);
@@ -3678,7 +3682,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
       interactionButton('收入门下', person.can_interact ? '1' : '0', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:true})),
       interactionButton('婉拒', '1', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:false})),
     );
-    row.append(name, detail, actions); list.appendChild(row);
+    row.append(name, detail, actions); window.NpcArt?.avatar(row,person); list.appendChild(row);
   });
   if (!master && !disciples.length && !requests.length) list.innerHTML = '<p class="empty">尚无师徒缘分；可通过事件或宗门名单结缘。</p>';
 
@@ -3749,6 +3753,7 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
   const row = document.createElement('div'); row.className = `companion-row${companion.alive ? '' : ' fallen'}`;
   const same = companion.same_cultivation ? ` · 同法同境，突破 +${percent(companion.breakthrough_bonus)}` : '';
   row.innerHTML = htmlText`<b>${companion.name}${relationshipStateLabel(companion)}</b><small>${companion.gender_name || '性别未明'} · ${companion.realm_name} · ${companion.spirit_root_name} · ${companion.age} 岁 / 寿元 ${companion.lifespan == null ? '无尽' : companion.lifespan}</small><small>战力 ${number(companion.combat_power || 0)} · 主修《${companion.main_technique_name}》 · 好感 ${number(companion.affinity || 0)}${same}</small>`;
+  window.NpcArt?.avatar(row,companion);
   if (game?.player?.guaranteed_progeny) {
     const medicine = document.createElement('p'); medicine.className = 'section-note';
     medicine.textContent = '英姿神武药力：下一次有效缠绵100%有后代，必为单灵根或变异灵根，无视境界不育。';
@@ -3822,6 +3827,7 @@ function renderDaoFriends(friends) {
     const row = document.createElement('div'); row.className = `friend-row${friend.alive ? '' : ' fallen'}`;
     const status = friend.alive ? (friend.world === game.player.world ? '' : ` · 身在${friend.world === 'spirit' ? '灵界' : '人界'}`) : ` · ${friend.death_reason || '已经陨落'}`;
     row.innerHTML = htmlText`<b>${friend.name}${relationshipStateLabel(friend)}</b><small>${friend.gender_name || '性别未明'} · ${friend.realm_name} · ${friend.spirit_root_name || '灵根未明'} · ${friend.age} 岁 / 寿元 ${friend.lifespan == null ? '无尽' : friend.lifespan}${status}</small><small>战力 ${number(friend.combat_power)} · 主修《${friend.main_technique_name}》 · 好感 ${number(friend.affinity || 0)}</small>`;
+    window.NpcArt?.avatar(row,friend);
     if (isFreeRelationship(friend) && friend.world === game.player.world) {
       const tools = document.createElement('div'); tools.className = 'friend-tools';
       const last = friend.last_interactions || {};
@@ -3867,6 +3873,7 @@ function renderPersonalRelations(relations) {
       const name = document.createElement('b'); name.textContent = `${person.name} · ${person.relationship}`;
       const detail = document.createElement('small'); detail.textContent = `${person.gender_name || '性别未明'} · ${person.realm_name} · 好感 ${number(person.affinity)} / ${person.attitude}${person.faction_name ? ` · ${person.faction_name}` : ''}`;
       row.append(name,detail);
+      window.NpcArt?.avatar(row,person);
       if (person.can_recruit_concubine) {
         const button = document.createElement('button'); button.className = 'relationship-interaction'; button.textContent = '纳为侍妾';
         button.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'recruit'});
@@ -3921,6 +3928,7 @@ function renderConcubines(system) {
     const life = person.lifespan == null ? '无尽' : person.lifespan;
     const whereabouts = !person.alive ? ` · ${person.death_reason || '已经陨落'}` : person.same_world ? '' : ' · 身处其他界面';
     row.innerHTML = htmlText`<b>${person.name}${relationshipStateLabel(person)}</b><small>${person.gender_name || '女'} · ${person.realm_name} · ${person.path_name || '道统未明'} · ${person.race_name || '种族未明'}${whereabouts}</small><small>${person.spirit_root_name || '灵根未明'} · ${number(person.age)} 岁 / 寿元 ${life} · 战力 ${number(person.combat_power)} · 炉鼎次数 ${number(person.cauldron_uses || 0)}</small>`;
+    window.NpcArt?.avatar(row,person);
     const tools = document.createElement('div'); tools.className = 'relationship-tools';
     const cauldron = document.createElement('button'); cauldron.textContent = person.can_use_cauldron ? '当作炉鼎' : '本期已用'; cauldron.disabled = !person.can_use_cauldron;
     cauldron.onclick = () => mutate(`/api/games/${game.id}/concubine-action`, {target_id:person.id, action:'cauldron'});
@@ -4084,6 +4092,7 @@ function renderBattleRoundProgress(report, shouldPlay) {
 
 function renderEvent() {
   const event = game.pending_event || game.tutorial?.guide.event;
+  window.NpcArt?.event(event);
   const postBattlePossession = event?.id === 'SYS_POST_BATTLE_POSSESSION';
   $('#event-card').classList.toggle('hidden', !event || postBattlePossession);
   $('#action-card').classList.toggle('hidden', !!event || !game.player.alive);
@@ -4360,7 +4369,23 @@ document.addEventListener('keydown', event => {
   }
 });
 
-window.addEventListener('game:theme-change',()=>{if(game?.natal_artifact)renderNatalArtifact(game.natal_artifact);if(game?.map)renderMap(game.map,game.auction_system);renderButtons();});
+window.addEventListener('game:theme-change',()=>{
+  if(game?.natal_artifact)renderNatalArtifact(game.natal_artifact);
+  if(game?.map)renderMap(game.map,game.auction_system);
+  if(game){
+    window.NpcArt?.close();
+    renderFaction(game.faction);
+    renderWorldNpcs(game.world_npcs||[]);
+    renderRelationships(game.player.master,game.player.disciples||[],game.player.disciple_requests||[],game.player.inventory||[],game.player.known_techniques||[]);
+    renderDaoCompanion(game.dao_companion,game.player.inventory||[],game.player.known_techniques||[],Number(game.player.next_companion_conception_bonus||0));
+    renderDaoFriends(game.dao_friends||[]);
+    renderPersonalRelations(game.personal_relations||{high:[],low:[]});
+    renderConcubines(game.concubine_system||{});
+    renderEvent();
+    window.PanelPages?.refresh(game.id);
+  }
+  renderButtons();
+});
 boot().catch(error => toast(error.message));
 
 function violenceButton(kind, person, label) {

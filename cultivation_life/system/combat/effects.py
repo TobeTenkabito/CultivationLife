@@ -138,6 +138,9 @@ class VoisinageEffects:
                     self._disrupted.add(intent.field.owner)
                     self.units[intent.field.owner].active_voisinage = None
                 self.frame.events.append(f'{protector.unit.name}以明确的特殊能力介入，阻止对{target.unit.name}的邻域效果。')
+                if self.animation is not None:
+                    self.animation['interventions'].append(dict(owner=key, target=victim,
+                        attacker=intent.field.owner, kind=response.kind))
                 self._semantic_event(key, 'intervention_resolved', intent.field.owner, 'protector', intervention=response.kind)
                 self._semantic_event(intent.field.owner, 'intervention_resolved', key, 'caster', intervention=response.kind)
                 return True
@@ -266,6 +269,13 @@ class VoisinageEffects:
         self._semantic_effect_result(intent, key, before, body_before)
 
     def _semantic_effect_result(self, intent, key, before, body_before):
+        if self.animation is not None:
+            target = self.units[key]
+            self.animation['effects'].append(dict(owner=intent.field.owner, target=key,
+                kind=intent.effect.kind, restriction=intent.effect.restriction or '',
+                source='ordinary' if intent.ordinary else 'field',
+                loss=max(0., before-target.vitality), body_loss=max(0., body_before-target.body),
+                restored=max(0., target.vitality-before)))
         if self.semantics is None:
             return
         target = self.units[key]

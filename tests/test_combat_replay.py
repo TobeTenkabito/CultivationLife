@@ -143,7 +143,7 @@ def test_field_only_opening_then_ordinary_stages_remain_replayable(engine):
     assert report_visuals(game,target,resolution.to_dict())['enemy'] == 'avian'
 
 
-def test_trial_rows_capture_ordinary_stages_and_leave_backlash_unanimated():
+def test_trial_rows_capture_ordinary_and_domain_stages():
     from scripts.calibrate_immortal_trials import fixture
     from cultivation_life.engine.progression.immortal_trials import initialize
     from cultivation_life.system.combat.trials import run_batch
@@ -153,7 +153,7 @@ def test_trial_rows_capture_ordinary_stages_and_leave_backlash_unanimated():
         _, rows = run_batch(battle, game.active_trial['battle_state'], random.Random(1))
         if kind == 'voisinage_backlash':
             assert all('ordinary_exchange' not in row for row in rows)
-            assert report_visuals(game, game.active_trial['target'], dict(rounds=rows)) is None
+            assert report_visuals(game, game.active_trial['target'], dict(rounds=rows))['domains']
         else:
             assert any(row.get('ordinary_exchange') for row in rows)
             assert report_visuals(game, game.active_trial['target'], dict(rounds=rows))

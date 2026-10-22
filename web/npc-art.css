@@ -1,0 +1,18 @@
+.npc-art-avatar{float:left;width:48px;height:48px;margin:0 10px 6px 0;padding:0;border:1px solid var(--line);background:transparent;cursor:pointer;flex-shrink:0}
+.npc-art-portrait{width:48px;height:48px;object-fit:contain;image-rendering:pixelated;display:block}
+.npc-art-figure{width:256px;height:auto;max-width:100%;object-fit:contain;image-rendering:pixelated;display:block}
+.npc-art-portrait[hidden],.npc-art-figure[hidden],#npc-event-art[hidden]{display:none}
+.npc-art-person .npc-art-portrait{float:left;margin:0 8px 4px 0}
+.roster-identity:has(>.npc-art-avatar){display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:10px}.roster-identity>.npc-art-avatar{grid-column:1;grid-row:1;margin:0}.roster-identity:has(>.npc-art-avatar)>.roster-heading{grid-column:2;min-width:0}.roster-identity:has(>.npc-art-avatar)>.roster-biography,.roster-identity:has(>.npc-art-avatar)>.roster-status{grid-column:1/-1}
+.contact-seal[hidden]{display:none}.npc-art-avatar~.relationship-tools,.npc-art-avatar~.companion-tools{clear:both}
+.concubine-row:has(.npc-art-avatar){grid-template-columns:48px minmax(0,1fr);column-gap:10px}.concubine-row>.npc-art-avatar{grid-column:1;grid-row:1/4;margin:0}.concubine-row:has(.npc-art-avatar)>b,.concubine-row:has(.npc-art-avatar)>small{grid-column:2}.concubine-row:has(.npc-art-avatar)>.relationship-tools{grid-column:1/-1}
+.npc-art-contact-figure{border:0;background:transparent;padding:0;flex:0 0 128px;cursor:pointer;color:inherit}
+.npc-art-contact-figure .npc-art-figure{width:128px}
+.npc-art-dialog{width:min(690px,calc(100% - 24px));max-height:90dvh;overflow:auto;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:20px}
+.npc-art-dialog::backdrop{background:#14251f99}.npc-art-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px}.npc-art-heading h2{margin:0;font-size:24px;overflow-wrap:anywhere}.npc-art-heading button{flex-shrink:0;white-space:nowrap;min-height:40px}
+.npc-art-profile{display:grid;grid-template-columns:256px minmax(0,1fr);gap:20px;align-items:start}.npc-art-profile p{overflow-wrap:anywhere}.npc-art-profile .npc-art-figure{background:color-mix(in srgb,var(--pine) 5%,transparent)}
+#npc-event-layout.has-npc-art{display:grid;grid-template-columns:128px minmax(0,1fr);gap:14px;align-items:start}#npc-event-layout #event-body{min-width:0}
+.npc-event-person{width:128px;border:0;background:transparent;color:inherit;padding:0;cursor:pointer}.npc-event-person .npc-art-figure{width:128px}.npc-event-person span{display:block;font-size:13px;margin-top:5px}
+.npc-event-participants{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.npc-event-participants button{padding:2px;border:1px solid var(--line);background:transparent}.npc-event-participants button[aria-pressed=true]{border-color:var(--gold)}.npc-event-participants img{width:32px;height:32px}
+html:not([data-visual=pixel]) .npc-art-avatar,html:not([data-visual=pixel]) .npc-art-contact-figure{display:none}
+@media(max-width:600px){.npc-art-dialog{padding:14px}.npc-art-profile{grid-template-columns:128px minmax(0,1fr);gap:12px}.npc-art-profile .npc-art-figure{width:128px}.npc-art-profile p{font-size:12px}.npc-art-heading h2{font-size:20px}#npc-event-layout.has-npc-art{grid-template-columns:96px minmax(0,1fr);gap:10px}.npc-event-person,.npc-event-person .npc-art-figure{width:96px}.contact-hero:has(.npc-art-contact-figure){flex-wrap:wrap}}

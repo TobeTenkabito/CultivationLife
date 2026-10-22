@@ -1,0 +1,16 @@
+{
+  "scope": "settings editor preview, no battle replay integration",
+  "method": "byte-for-byte program component promotion",
+  "components": [
+    {
+      "source": "design/immortal-domain-library-20261022/field-components.js",
+      "runtime": "web/voisinage-fields.js",
+      "sha256": "49e36bee21a1b5d6476b75741f6385153440a7f2f91d2ca275106cb962555432"
+    },
+    {
+      "source": "design/immortal-domain-overlap-20261022/control-effects.js",
+      "runtime": "web/voisinage-controls.js",
+      "sha256": "bd122fbc34a401fb63adee9501199fb6ca6a2cfb10eb2b67850050c89a80f054"
+    }
+  ]
+}

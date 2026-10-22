@@ -15,7 +15,7 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 
 
-def verify_details(page, output, gender, width, height):
+def verify_details(page, output, gender, width, height, path='dao'):
     page.set_viewport_size({'width':width, 'height':height})
     page.wait_for_timeout(100)
     before = page.evaluate('JSON.stringify(game)')
@@ -23,9 +23,17 @@ def verify_details(page, output, gender, width, height):
     page.locator('.hud-identity').click()
     page.locator('.pixel-details-art').wait_for(state='visible')
     canvas = page.locator('.pixel-details-art canvas')
-    assert canvas.get_attribute('data-actor') == f'actor.human.dao.{gender}'
-    assert page.locator('.pixel-portrait').get_attribute('src').find(gender) >= 0
+    assert canvas.get_attribute('data-actor') == f'actor.human.{path}.{gender}'
+    assert f'{path}-{gender}-portrait.png' in page.locator('.pixel-portrait').get_attribute('src')
     assert canvas.evaluate('''c => c.getContext('2d').getImageData(0,0,96,96).data.filter((v,i)=>i%4===3&&v>0).length>500''')
+    assert canvas.evaluate('''async c => {
+      const bitmap=await VisualAssets.load(c.dataset.actor+'.atlas');
+      const expected=document.createElement('canvas');expected.width=expected.height=96;
+      expected.getContext('2d').drawImage(bitmap,0,0,96,96,0,0,96,96);
+      const a=c.getContext('2d').getImageData(0,0,96,96).data;
+      const b=expected.getContext('2d').getImageData(0,0,96,96).data;
+      return a.every((value,i)=>value===b[i]);
+    }''')
     figure = page.locator('.pixel-details-art').bounding_box()
     data = page.locator('#player-details-content .character-card').bounding_box()
     summary = page.locator('.pixel-character-summary').bounding_box()
@@ -47,7 +55,7 @@ def verify_details(page, output, gender, width, height):
     assert page.locator('#player-details-dialog').evaluate('(d) => d.scrollWidth <= d.clientWidth + 1')
     assert page.evaluate("window.__techniqueList===document.querySelector('#technique-list')")
     assert page.evaluate('JSON.stringify(game)') == before
-    page.screenshot(path=str(output / f'details-{gender}-{width}.png'))
+    page.screenshot(path=str(output / f'details-{path}-{gender}-{width}.png'))
     page.keyboard.press('Escape')
 
 
@@ -60,6 +68,9 @@ def main():
         engine = GameEngine(ROOT, root / 'saves')
         male = engine.create_game('沈清和', 'heavenly', 'dao', 137, preset_id='core')['id']
         female = engine.create_game('云知微', 'heavenly', 'dao', 138, preset_id='core', gender='female')['id']
+        demonic = {gender: engine.create_game('魔修立绘' + gender, 'heavenly', 'demonic', 139,
+                                             preset_id='demonic_core', gender=gender)['id']
+                   for gender in ('male', 'female')}
         class Handler(server.Handler):
             def log_message(self, *args):
                 pass
@@ -170,6 +181,34 @@ def main():
                     page.set_viewport_size({'width':390, 'height':844})
                     page.evaluate('scrollTo(0,0)')
                     page.screenshot(path=str(output / 'female-390.png'))
+                    # Real demonic saves use their own selected portrait and idle pixels.
+                    for gender, identity in demonic.items():
+                        page.evaluate('async id => loadGame(id)', identity)
+                        assert page.evaluate('game.player.path') == 'demonic'
+                        page.wait_for_function("gender => !document.querySelector('.pixel-portrait').hidden && document.querySelector('.pixel-portrait').src.includes('demonic-'+gender)", arg=gender)
+                        saved = engine.store._path(identity).read_bytes()
+                        for theme in 'abdf':
+                            page.locator('#theme-open').click()
+                            page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
+                            page.evaluate('GameThemes.saved')
+                            page.locator('[data-close-dialog=theme-dialog]').click()
+                            for width, height in [(1440,960),(390,844),(320,740)]:
+                                verify_details(page, output, gender, width, height, 'demonic')
+                        assert engine.store._path(identity).read_bytes() == saved
+                        toggle(False)
+                        assert not page.locator('.pixel-portrait').is_visible()
+                        toggle(True)
+                        page.wait_for_function("!document.querySelector('.pixel-portrait').hidden")
+                        assert page.evaluate('''() => {
+                          const p=game.player,a=VisualAssets.actor;
+                          return a({...p,ghost_attachment:{id:'vessel'}})===null &&
+                            a({...p,ghost_host_body:{id:'host'}})===null &&
+                            a({...p,race:'monster'})===null && a({...p,gender:'unknown'})===null &&
+                            a({...p,lineage_race:'monster'})===null &&
+                            a({...p,transformation_technique:{id:'book'},transformation_loadouts:{book:{active:['bird']}}})===null;
+                        }''')
+                    page.evaluate('async id => loadGame(id)', female)
+                    page.wait_for_function("!document.querySelector('.pixel-portrait').hidden && document.querySelector('.pixel-portrait').src.includes('dao-female')")
                     assert page.evaluate('''() => {
                       const p=game.player,a=VisualAssets.actor;
                       return a({...p,race:'unknown'})===null && a({...p,gender:'unknown'})===null &&
@@ -249,6 +288,15 @@ def main():
                     assert not broken.locator('.pixel-details-art').is_visible()
                     assert broken.locator('#avatar').is_visible()
                     broken.keyboard.press('Escape')
+                    for gender, identity in demonic.items():
+                        broken.evaluate('async id => loadGame(id)', identity)
+                        broken.locator('.hud-identity').click()
+                        assert broken.evaluate(f"VisualAssets.load('actor.human.demonic.{gender}.atlas')") is None
+                        assert broken.evaluate(f"VisualAssets.load('actor.human.demonic.{gender}.portrait')") is None
+                        assert not broken.locator('.pixel-details-art').is_visible()
+                        assert not broken.locator('.pixel-portrait').is_visible()
+                        assert broken.locator('#avatar').is_visible()
+                        broken.keyboard.press('Escape')
                     broken.screenshot(path=str(output / 'missing-assets-android-390.png'))
                     assert broken.evaluate('document.documentElement.dataset.pixelDrawer') == 'true'
                     broken.set_viewport_size({'width':1100, 'height':620})

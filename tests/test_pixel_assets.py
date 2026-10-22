@@ -18,7 +18,7 @@ def test_reviewed_runtime_catalog_and_pixels():
     assert len(catalog['frames']) == len(set(catalog['frames'])) == 16
     assert catalog['frames'][0] == 'idle_s'
     assert catalog['frames'][12:] == ['meditate', 'cast', 'hit', 'guard']
-    assert len(catalog['assets']) == 5
+    assert len(catalog['assets']) == 9
     for asset in catalog['assets'].values():
         path = PACK / asset['file']
         assert path.resolve().parent == PACK.resolve()
@@ -30,7 +30,16 @@ def test_reviewed_runtime_catalog_and_pixels():
                 assert set(image.getchannel('A').getdata()) == {0, 255}
                 for i in range(16):
                     frame = image.crop((i % 4 * 96, i // 4 * 96, i % 4 * 96 + 96, i // 4 * 96 + 96))
-                    assert frame.getbbox() is not None
+                    if catalog['frames'][i] in asset.get('frames', catalog['frames']):
+                        assert frame.getbbox() is not None
+                    else:
+                        assert frame.getbbox() is None
+    demonic = json.loads((PACK / 'provenance.json').read_text())['demonic_characters']
+    for gender in ('male', 'female'):
+        for kind in ('atlas', 'portrait'):
+            row = catalog['assets'][f'actor.human.demonic.{gender}.{kind}']
+            assert row['sha256'] == demonic['source_hashes'][row['file']]
+        assert catalog['assets'][f'actor.human.demonic.{gender}.atlas']['frames'] == catalog['frames'][:13]
     assert 'not literal geography' in json.loads((PACK / 'provenance.json').read_text())['usage']
 
 

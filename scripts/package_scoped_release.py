@@ -165,14 +165,22 @@ def main():
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
     if scoped.get('profile')=='visual':
         selected={name for shard in scoped['tests'] for name in shard}
-        require(selected=={p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').rglob('test_*.py')},'Visual release requires full regression selection')
+        if scoped.get('regression_scope') == 'alpha3-focused':
+            from scripts.verify_scoped_release import VISUAL_ALPHA3_TESTS
+            require(selected==set(VISUAL_ALPHA3_TESTS), 'Focused alpha.3 domain/upstream selection incomplete')
+            require('not full repository regression' in scoped.get('scope',''), 'Focused scope must be declared')
+        else:
+            require(selected=={p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').rglob('test_*.py')},'Visual release requires full regression selection')
         require({'browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits'}<={r['name'] for r in scoped['runs']},'Visual/legacy browsers incomplete')
         require(all(c.get('visual_ui_verified') for c in evidence['cases']),'Actual compiled optional UI required with and without DLC')
         require(all(c.get('dlc_visual_verified') for c in evidence['cases']),'Compiled DLC image ownership and disabled fallback required')
+        require(all(c.get('visual_additions_verified') and c.get('domain_replay_verified') for c in evidence['cases']),'Compiled NPC and domain editor acceptance required')
+        require({'browser_npc_art','browser_voisinage_editor','browser_domain_replay','browser_combat_replay','browser_combat_groups'}<={r['name'] for r in scoped['runs']},'Social art and domain editor browsers incomplete')
         required={f'build/android-visual-ui-{orientation}-{tag}.log' for orientation in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Android 12 visual native scope incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native visual test APK changed')
         require(all('visual_ui_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Native visual marker missing')
+        require(all(all(marker in (ROOT/n).read_text(encoding='utf-8-sig') for marker in ['visual_additions_scope','domain_replay_scope']) for n in required),'Native NPC and domain editor marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')

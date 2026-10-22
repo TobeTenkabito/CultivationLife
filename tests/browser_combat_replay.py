@@ -229,8 +229,12 @@ def main():
                             page.evaluate('CombatReplay.seek(10000)')
                             assert page.locator('[data-combat-meter=hero] progress').evaluate('p=>p.value')==report['player_combat_state']
                         else:
-                            assert 'visual' not in report and all('ordinary_exchange' not in r for r in report['rounds'])
-                            assert page.locator('#battle-animation').is_hidden()
+                            assert report['visual']['domains'] and all('ordinary_exchange' not in r for r in report['rounds'])
+                            page.wait_for_function('CombatReplay.diagnostics().active && !document.querySelector("[data-combat-replay]").disabled')
+                            assert page.evaluate('CombatReplay.diagnostics().rounds') == 0
+                            assert page.evaluate('CombatReplay.diagnostics().domainStages.length') > 0
+                            page.evaluate('CombatReplay.seek(10000)')
+                            assert page.locator('[data-combat-meter=hero] progress').evaluate('p=>p.value') == report['player_combat_state']
                         results['mixed'].append(dict(mode=mode,rounds=len(report['rounds'])))
                         page.keyboard.press('Escape')
                     # Successful endurance trials do not imply that the enemy

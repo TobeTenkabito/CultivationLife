@@ -482,6 +482,7 @@
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
           <section class="settings-appearance"><h3>界面主题</h3><div class="theme-choices" data-theme-picker="settings"></div><label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label><label class="settings-row"><span><b>减弱动态效果</b><small>减少星月、山水字幕和翻页动效，不影响游戏进度。</small></span><input type="checkbox" data-motion-setting></label></section>
+          <section class="settings-appearance"><h3>邻域外观</h3><p class="muted">搭配自己的邻域轮廓、意象、配色与控制样式。</p><button type="button" data-voisinage-editor>邻域编辑器</button></section>
           <section class="settings-save-transfer"><h3>存档传承</h3><p class="muted">进度已自动保存。导出当前修行卷，或用存档码恢复另一段旅程。</p><div class="transfer-actions"><button type="button" data-save-export-current>导出当前存档</button><button type="button" data-save-import>导入存档</button></div></section>
           <div class="settings-list">
             <label class="settings-row"><span><b>经济托管</b><small>自动经营有权限的产业和商队，补足护卫；保留手动商队订单。托管后新增盈利每五年最多尝试投资或扩建一处产业，使用经营资金并保留养护储备，不自动扣行囊。关闭后恢复原产业方案；已付批次与在途货物继续交割。</small></span><input id="setting-economy-trust" type="checkbox"></label>
@@ -612,6 +613,9 @@
   <script src="/map-directory.js?v=territory-ui2"></script>
   <script src="/upper-energy.js?v=1.55.0"></script>
   <script src="/theme-manager.js?v=2.1.0"></script>
+  <link rel="stylesheet" href="/voisinage-editor.css?v=2">
+  <script src="/voisinage-appearance.js?v=1"></script>
+  <script src="/voisinage-editor.js?v=alpha3"></script>
   <script src="/theme-composition.js?v=2.1.0"></script>
   <script src="/assets/pixel/v1/catalog.js?v=1"></script>
   <script src="/visual-assets.js?v=3-alpha-2"></script>
@@ -643,6 +647,9 @@
   <script src="/tutorial-steps.js?v=desktop-1"></script>
   <script src="/tutorial.js?v=2.0.1"></script>
   <script src="/immortal-economy-panel.js?v=1"></script>
+  <link rel="stylesheet" href="/npc-art.css?v=1">
+  <script src="/assets/pixel/social/catalog.js?v=1"></script>
+  <script src="/npc-art.js?v=1"></script>
   <script src="/npc-contacts.js?v=1.51.1"></script>
   <link rel="stylesheet" href="/exploration-panel.css?v=2.0.1">
   <script src="/exploration-panel.js?v=2.0.1"></script>
@@ -673,9 +680,12 @@
   <script src="/strategic-war-panel.js?v=1"></script>
   <link rel="stylesheet" href="/secret-art-panel.css?v=1">
   <script src="/secret-art-panel.js?v=1"></script>
-  <script src="/combat-renderer.js?v=3-alpha-2"></script>
+  <script src="/voisinage-fields.js?v=alpha3"></script>
+  <script src="/voisinage-controls.js?v=alpha3"></script>
+  <script src="/combat-domains.js?v=alpha3"></script>
+  <script src="/combat-renderer.js?v=alpha3"></script>
   <script src="/combat-beasts.js?v=3-alpha-2"></script>
-  <script src="/combat-replay.js?v=3-alpha-2"></script>
+  <script src="/combat-replay.js?v=alpha3"></script>
   <script src="/app.js?v=3-alpha-2"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>

@@ -6,7 +6,7 @@
   const cache=new Map(),pending=new Map(),maxCache=36;
   const abort=new AbortController();
   let disposed=false;
-  const layers=['background','hero','npc','rear','front','projectile','energy','stage'];
+  const layers=['background','hero','npc','rear','front','projectile','energy','stage','domainRear','domainFront'];
   const make=()=>document.createElement('canvas');
   const context=c=>c.getContext('2d',{willReadFrequently:true});
   function load(path){
@@ -378,6 +378,7 @@
     for(const side of ['hero','npc'])for(const [slot,member] of plan.teams[side].entries()){
       const id=member.asset,actor=A.actors[id];
       const moves=actor.role==='hero'?[...new Set(plan.rounds.filter(r=>r.side===side&&r.actorIndex===slot).map(r=>r.action))]:['attack'];
+      if(plan.domains?.length)moves.push(actor.role==='hero'?(id.startsWith('demonic')?'blast':'dragon'):'attack');
       for(const mode of ['idle','hit','brace',...moves])needed.push(actor.animations[mode].sheet);
       if(plan.defeat?.side===side)needed.push(actor.animations.defeat.sheet);
     }
@@ -409,6 +410,7 @@
       }else bg.drawImage(terrace,0,0,s.width,s.height);
     }
     const ground=context(s.stage);
+    if(state.domain){ground.fillStyle='#06192248';ground.fillRect(0,0,s.width,s.height);}
     for(const condition of plan.conditions){
       ground.save();ground.globalAlpha=.18;
       if(condition==='大阵'){
@@ -429,7 +431,10 @@
       drawBody(context(s[v.side]),v,s);
       if(options.effects!==false)guard(s,v,time);
     }
-    if(options.effects!==false)effects(s,m,state);
+    if(options.effects!==false){effects(s,m,state);
+      window.CombatDomains?.draw(context(s.domainRear),s,m,state.domain,time,false);
+      window.CombatDomains?.draw(context(s.domainFront),s,m,state.domain,time,true);
+    }
     // Smoke behind bodies is occluded; energy opacity stays capped after composition.
     const rear=context(s.rear);rear.globalCompositeOperation='destination-out';rear.drawImage(s.hero,0,0);rear.drawImage(s.npc,0,0);rear.globalCompositeOperation='source-over';
     const energy=context(s.energy);for(const key of ['rear','projectile','front'])energy.drawImage(s[key],0,0);
@@ -441,7 +446,7 @@
       const age=state.time-(state.landed[state.landed.length-1]?.t??-Infinity);
       if(age>=0&&age<.18)offset=Math.round(Math.sin(age*150)*2*(1-age/.18));
     }
-    out.save();out.translate(offset,0);for(const k of ['stage','hero','npc','energy'])out.drawImage(s[k],0,0);out.restore();
+    out.save();out.translate(offset,0);for(const k of ['stage','domainRear','hero','npc','domainFront','energy'])out.drawImage(s[k],0,0);out.restore();
     out.setTransform(1,0,0,1,0,0);s.cameraOffset=offset;return state;
   }
   function dispose(s){

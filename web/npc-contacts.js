@@ -37,6 +37,7 @@ window.NpcContacts = (() => {
         send({npc_id:n.id,action});
       };tools.append(button);
     }
+    window.NpcArt?.contactFigure(header,n);
     target.append(tools);
   }
   function render(value, callback) {
@@ -70,6 +71,7 @@ window.NpcContacts = (() => {
       for(const n of slice){
         const b=el('button',undefined,'contact-person');b.type='button';b.dataset.npcId=n.id;b.setAttribute('aria-pressed',String(n.id===selected));
         b.append(el('b',n.name),el('small',`${n.realm_name} · ${relation(n)||'相识'}`));
+        window.NpcArt?.contactPortrait(b,n);
         b.onclick=()=>{selected=n.id;list();if(innerWidth<=600)detail.scrollIntoView({block:'start',behavior:'instant'});};directory.append(b);
       }
       if(!rows.length)directory.append(el('p','此页尚无相应人物。','empty'));

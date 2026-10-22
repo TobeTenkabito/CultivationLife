@@ -16,6 +16,9 @@ from cultivation_life.version import BASE_GAME_VERSION as VERSION
 from cultivation_life.engine import GameEngine
 from fixtures.visual_release import prepare_visual_release
 from browser_visual_release import verify
+from fixtures.visual_additions import prepare_visual_additions, prepare_domain_battle
+from domain_replay_acceptance import verify as verify_domains
+from visual_additions_acceptance import verify as verify_additions
 from scripts.release_evidence import inputs_digest,file_digest,require
 
 
@@ -49,6 +52,15 @@ def run(with_dlc):
                 fixture=GameEngine(ROOT,folder/'data/saves');prepare_visual_release(fixture,made['id'])
                 assert not any('/assets/pixel/' in p and '.png' in p for p in requests)
                 verify(page,made['id'],output)
+                page.set_viewport_size(dict(width=1440,height=960));page.goto(base);page.wait_for_function('!!configData')
+                added=page.evaluate("api('/api/games',{method:'POST',body:JSON.stringify({name:'新增外观验收',spirit_root:'heavenly',path:'demonic',gender:'female',seed:323,preset_id:'core'})})")
+                prepare_visual_additions(fixture,added['id'])
+                verify_additions(page,added['id'],output)
+                page.locator('#ve-close').click()
+                from unittest.mock import patch
+                with patch('cultivation_life.runtime.persistence_root', return_value=folder):
+                    prepare_domain_battle(fixture,added['id'],'mutual')
+                verify_domains(page,added['id'],output)
                 private='/extension-assets/official.guixu-tide/visual/icons/treasure.guixu_canghai_equipment_01.png'
                 image=page.request.get(base+private)
                 assert image.status==(200 if with_dlc else 404)
@@ -56,7 +68,7 @@ def run(with_dlc):
                 if not with_dlc:assert not any('/extension-assets/' in p for p in requests)
                 browser.close()
             print(f'Compiled optional UI passed: DLC={with_dlc}',flush=True)
-            return dict(with_dlc=with_dlc,base_version=VERSION,exe_sha256=file_digest(folder/'launcher.exe'),visual_ui_verified=True,dlc_visual_verified=True)
+            return dict(with_dlc=with_dlc,base_version=VERSION,exe_sha256=file_digest(folder/'launcher.exe'),visual_ui_verified=True,dlc_visual_verified=True,visual_additions_verified=True,domain_replay_verified=True)
         finally:
             subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],capture_output=True)
             process.wait(timeout=20)

@@ -30,6 +30,20 @@ COMBAT_ALPHA_TESTS = [
     'tests/test_android_release_checks.py',
 ]
 
+# Explicit alpha.3 user scope: changed presentation and its combat/persistence
+# upstreams. Keep the original full visual profile available by default.
+VISUAL_ALPHA3_TESTS = [
+    'tests/test_domain_replay.py','tests/test_domain_combat.py','tests/test_voisinage_effects.py',
+    'tests/test_combat_semantics.py','tests/test_player_combat_system.py','tests/test_combat_replay.py',
+    'tests/test_immortal_trials.py','tests/test_asura_manifestation.py','tests/test_upper_voisinages.py',
+    'tests/test_voisinage_appearance.py','tests/test_ui_preferences.py','tests/test_npc_social_assets.py',
+    'tests/test_pixel_assets.py','tests/test_visual_release.py','tests/test_visual_selection.py','tests/test_npc_social_update.py',
+    'tests/test_base_game_version.py','tests/test_save_transfer.py','tests/test_release_212.py',
+    'tests/test_android_packaging.py','tests/test_windows_release_evidence.py','tests/test_android_release_checks.py',
+    'tests/test_module_dependencies.py','tests/test_world_transition_system.py',
+    'tests/test_spatial_talismans.py','tests/test_release_211.py',
+]
+
 ECONOMY_TESTS = ['tests/test_economy_trust.py','tests/test_economy_estate_audit.py',
     'tests/test_economy_enterprises.py','tests/test_economy_network.py','tests/test_economy_governance.py',
     'tests/test_organization_economy.py','tests/test_organization_balance.py',
@@ -177,8 +191,11 @@ def main():
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     parser.add_argument('--balance-tests',action='store_true',help='Schedule full regressions by prior XML timings; never reuse prior results')
+    parser.add_argument('--focused-visual',action='store_true',help='Explicit alpha.3 changed-domain/upstream scope; no full regression claim')
     options=parser.parse_args()
     profile=options.profile
+    if options.focused_visual and profile!='visual':
+        parser.error('--focused-visual requires --profile visual')
     tag=BASE_GAME_VERSION.replace('.','');before=inputs_digest(ROOT);runs=[]
     selected=TEACHINGS_TESTS if profile=='teachings' else NATAL_TESTS if profile=='natal' else NAMING_TESTS if profile=='naming' else BUGFIX_TESTS if profile=='bugfix' else ECONOMY_TESTS if profile=='economy' else TESTS
     if profile=='common-techniques':selected=COMMON_TECHNIQUES_TESTS
@@ -194,6 +211,8 @@ def main():
         if options.balance_tests:
             selected=balanced_test_shards(modules,options.shards,[ROOT/f'build/scoped-{tag}-{i}.xml' for i in range(options.shards)])
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
+    if options.focused_visual:
+        selected=[VISUAL_ALPHA3_TESTS[i::options.shards] for i in range(options.shards)]
     if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
@@ -232,7 +251,7 @@ def main():
     if profile=='building-visits':
         browsers=['browser_building_visits','browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212']
     if profile=='visual':
-        browsers=['browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits']
+        browsers=['browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits','browser_npc_art','browser_voisinage_editor','browser_domain_replay','browser_combat_replay','browser_combat_groups']
     if profile=='combat-alpha':
         browsers=['browser_alpha2_dlc_fixes','browser_combat_replay','browser_combat_groups','browser_events_212']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
@@ -261,7 +280,7 @@ def main():
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)
         ET.ElementTree(combined).write(ROOT/f'build/scoped-{tag}.xml',encoding='utf-8',xml_declaration=True)
     (ROOT/f'build/scoped-{tag}.json').write_text(json.dumps(dict(version=BASE_GAME_VERSION,inputs_sha256=before,
-        profile=profile,scope='Full repository regression, optional pixel UI and original four-theme controls, real inventory/natal, eleven maps and event browser acceptance' if profile=='visual' else 'Full repository regression, eleven-world cities, building projects, finite event rewards, estates and real event browser acceptance' if profile=='buildings' else 'Full repository regression plus character, event and regional browser acceptance; explicit character composition' if profile=='architecture' else 'Full repository regression plus secret-art, common-technique and real event browser acceptance' if profile=='secret-arts' else 'User-requested economic, related interaction and release tests only; not full repository regression' if profile=='economy' else 'User-requested related and upstream tests only; not full repository regression',tests=selected,runs=runs),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        profile=profile,regression_scope='alpha3-focused' if options.focused_visual else 'standard',scope='User-requested alpha.3 presentation, combat and persistence upstream tests; not full repository regression' if options.focused_visual else 'Full repository regression, optional pixel UI and original four-theme controls, real inventory/natal, eleven maps and event browser acceptance' if profile=='visual' else 'Full repository regression, eleven-world cities, building projects, finite event rewards, estates and real event browser acceptance' if profile=='buildings' else 'Full repository regression plus character, event and regional browser acceptance; explicit character composition' if profile=='architecture' else 'Full repository regression plus secret-art, common-technique and real event browser acceptance' if profile=='secret-arts' else 'User-requested economic, related interaction and release tests only; not full repository regression' if profile=='economy' else 'User-requested related and upstream tests only; not full repository regression',tests=selected,runs=runs),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
 if __name__=='__main__':main()

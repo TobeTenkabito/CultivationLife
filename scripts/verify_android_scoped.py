@@ -60,7 +60,7 @@ def main():
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
-        if visual:require('visual_ui_scope' in text,f'Missing native optional UI coverage: {name}')
+        if visual:require(all(marker in text for marker in ('visual_ui_scope','visual_additions_scope','domain_replay_scope')),f'Missing native UI/social/domain coverage: {name}')
         if combat:require('combat_alpha_scope' in text,f'Missing native combat and DLC acceptance: {name}')
         if buildings and '/android-buildings-' in name:require('buildings_scope' in text,f'Missing current native city coverage: {name}')
         if visits and '/android-building-visits-' in name:require('building_visits_scope' in text,f'Missing native illustrated visits: {name}')
@@ -119,7 +119,7 @@ def main():
     if architecture:receipt['scope']='Seven character/region/organization phases, four themes, portrait/landscape; actual signed release APK and current native test APK'
     if buildings:receipt['scope']='Eleven-world initial cities, four-theme native construction, stale material recovery, bounded story rewards, yearly governance, ruins and rebuild, earned followup plus original production; portrait/landscape'
     if visits:receipt['scope']='Four-theme text gazetteer and expanded illustrations, real scenery/industry/temple visits, bounded insight, earned followup and original estate production; portrait/landscape'
-    if visual:receipt['scope']='Optional pixel UI, original inventory commands, true natal sockets, eleven world maps and legacy fallback; four themes, native portrait/landscape'
+    if visual:receipt['scope']='Optional pixel UI, original inventory commands, true natal sockets, eleven world maps, social portraits, domain editor and real domain battle replay; four themes, native portrait/landscape'
     if combat:receipt['scope']='User-requested focused combat CG, single/group defeat, Guixu factual use, true/replica intelligence, read-only replay and disposal; four themes, native portrait/landscape, not full repository'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')

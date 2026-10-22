@@ -1,4 +1,4 @@
-/* Read-only projection of settled ordinary exchanges. No game actions or writes. */
+/* Read-only projection of settled combat phases. No game actions or writes. */
 (() => {
   'use strict';
   const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
@@ -28,17 +28,39 @@
         (!member.gender||!A.actors[member.asset].sex||member.gender===A.actors[member.asset].sex)&&
         typeof member.name==='string'&&member.name.length<=64&&Number.isFinite(member.weight)&&member.weight>0)))return null;
     const ordinary=report.rounds.filter(r=>r.ordinary_exchange&&['player','enemy'].includes(r.initiative));
-    if(!ordinary.length)return null;
+    const hasDomains=report.rounds.some(row=>CombatDomains.facts(row,visual));
+    if(!ordinary.length&&!hasDomains)return null;
     const maxima={hero:Number(report.player_combat_state_max),npc:Number(report.enemy_combat_state_max)};
     if(!Object.values(maxima).every(v=>Number.isFinite(v)&&v>0))return null;
-    const opening=ordinary[0].ordinary_exchange.opening;
+    const firstDomain=CombatDomains.facts(report.rounds[0],visual);
+    const opening=firstDomain?firstDomain.opening.map((v,i)=>v*maxima[i?'npc':'hero']):ordinary[0]?.ordinary_exchange.opening;
     if(!Array.isArray(opening)||opening.length!==2||!opening.every(Number.isFinite))return null;
     const initial={hero:opening[0],npc:opening[1]};
-    const rounds=[],events=[],checkpoints=[];
+    const rounds=[],events=[],checkpoints=[],domains=[];
     let start=.5,seed=hash(JSON.stringify([visual,report.age,report.rounds]));
     const choose=list=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return list[(seed>>>0)%list.length];};
-    for(const row of ordinary){
+    for(const [rowIndex,row] of report.rounds.entries()){
+      const phases=CombatDomains.stages(row,visual,start);
+      const release=()=>{
+        if(!phases.length)return;
+        const next=CombatDomains.facts(report.rounds[rowIndex+1]??{},visual);
+        const leaving=phases[0].a.fields.filter(f=>!next?.fields.some(n=>n.owner===f.owner&&n.voisinage_id===f.voisinage_id));
+        if(leaving.length){domains.push({...tail(phases),releasing:leaving.map(f=>f.owner),phase:'release',label:'收域',start,end:start+1.2});start+=1.2;}
+      };
+      domains.push(...phases);
+      if(phases.length){
+        const a=phases[0].a;
+        checkpoints.push({t:start,values:{hero:a.opening[0]*maxima.hero,npc:a.opening[1]*maxima.npc}});
+        start=tail(phases).end;
+        checkpoints.push({t:start,values:{hero:a.after[0]*maxima.hero,npc:a.after[1]*maxima.npc}});
+      }
       const exchange=row.ordinary_exchange;
+      if(!exchange||!['player','enemy'].includes(row.initiative)){
+        release();
+        checkpoints.push({t:start,values:{hero:Number(row.player_combat_state),npc:Number(row.enemy_combat_state)}});
+        continue;
+      }
+      const ordinaryStart=start;
       if(![exchange.opening,exchange.before,exchange.after].every(a=>Array.isArray(a)&&a.length===2&&a.every(Number.isFinite)))return null;
       checkpoints.push({t:start,values:{hero:exchange.before[0],npc:exchange.before[1]}});
       start+=.3;
@@ -65,10 +87,14 @@
           start=r.end+.2;
         }
       }
+      if(phases.length){
+        domains.push({...tail(phases),phase:'ordinary',label:'邻域维持 · 普通交锋',start:ordinaryStart,end:start});
+        release();
+      }
       checkpoints.push({t:start,values:{hero:Number(row.player_combat_state),npc:Number(row.enemy_combat_state)}});
       start+=.35;
     }
-    if(!rounds.length)return null;
+    if(!rounds.length&&!domains.length)return null;
     const lastRow=tail(report.rounds),lastRound=tail(rounds);
     let defeat=null,finisher=null;
     let outcome=report.outcome??({killed:'victory',captured:'victory',victory:'victory',victory_escape:'victory',dead:'defeat',defeat:'defeat',defeat_survived:'defeat'}[report.result]);
@@ -104,7 +130,7 @@
     const battlefield=A.battlefields?.[mode]?.[report.natural_terrain]??null;
     const conditions=(report.artificial_conditions??[]).filter(name=>['禁空','禁神识','大阵'].includes(name)).slice(0,3);
     return {hero,npc,teams,teamCounts:visual.team_counts??{hero:1,npc:1},battlefield,conditions,rounds,events,operations,initial,maxima,natalIcon,defeat,finisher,
-      mixed:report.rounds.some(row=>row.voisinage),duration:start+.4};
+      domains,domainSettings:visual.domains??{},mixed:report.rounds.some(row=>row.voisinage),duration:start+.4};
   }
   function sample(plan,time){
     time=clamp(time,0,plan.duration);
@@ -132,11 +158,20 @@
       phase=plan.defeat.side==='hero'?'你方失利 · 伏地收势':'敌方失利 · 伏地收势';
       if(time>=plan.duration)phase='战报回放结束';
     }
-    if(plan.mixed)phase='普通交锋 · '+phase;
+    const domain=CombatDomains.state(plan,time);
+    if(domain){
+      if(!r)phase=`第 ${domain.number} 轮 · ${domain.label}`;
+      if(['open','effect'].includes(domain.phase)){
+        const owners=new Set(domain.phase==='effect'?domain.a.effects.map(e=>e.owner):domain.a.fields.map(f=>f.owner));
+        for(const side of ['hero','npc'])for(const a of teams[side])if(owners.has(a.unitId)){
+          a.mode=side==='hero'&&a.id===plan.hero?(a.id.startsWith('demonic')?'blast':'dragon'):'attack';a.local=Math.min(1.6,domain.local);
+        }
+      }
+    }
     const health={...plan.initial};
     for(const op of plan.operations){if(op.t>time)break;Object.assign(health,op.values);}
     for(const k of ['hero','npc'])health[k]=clamp(health[k],0,plan.maxima[k]);
-    return {time,round:r??null,actors,teams,phase,health,landed:plan.events.filter(e=>e.t<=time)};
+    return {time,domain,round:r??null,actors,teams,phase,health,landed:plan.events.filter(e=>e.t<=time)};
   }
   function timer(A){return {clamp,mix,between,sample,spring(age){
     if(age<0)return {shield:0,body:0,strain:0,energy:0};
@@ -156,7 +191,7 @@
       if(output.textContent!==text)output.textContent=text;
     }
     const finished=clock>=context.plan.duration;
-    const round=state.round?.number??tail(context.plan.rounds.filter(r=>r.start<=clock))?.number??0;
+    const round=state.domain?.number??state.round?.number??tail(context.plan.rounds.filter(r=>r.start<=clock))?.number??0;
     const marker=`${round}:${finished}`;
     if(context.round!==marker){document.querySelectorAll('#battle-round-progress>span').forEach((node,i)=>{node.className=i+1<round||finished?'complete':i+1===round?'active':'future';});context.round=marker;}
     pause.setAttribute('aria-pressed',String(!playing));pause.title=playing?'暂停回放':'继续回放';pause.setAttribute('aria-label',pause.title);
@@ -214,7 +249,7 @@
   }
   function sync(report,open){
     if(!open||!PixelLibrary.active()||!report?.visual||!Array.isArray(report.rounds)||report.rounds.length>72||
-      !report.rounds.some(row=>row.ordinary_exchange&&['player','enemy'].includes(row.initiative))){
+      !report.rounds.some(row=>(row.ordinary_exchange&&['player','enemy'].includes(row.initiative))||CombatDomains.facts(row,report.visual))){
       current={report,open,key:null};dispose();return false;
     }
     const key=report?JSON.stringify([report.age,report.title,report.result,report.rounds,report.visual]):'';
@@ -261,6 +296,7 @@
   window.CombatReplay=Object.freeze({sync,close(){if(current)current.open=false;dispose();},build,sample,
     diagnostics:()=>({active:!!context,playing,onscreen,raf:!!raf,cache:context?.renderer.cacheSize()??0,
       decodedBytes:context?.renderer.decodedBytes()??0,time:clock,duration:context?.plan.duration??0,
+      domain:context?sample(context.plan,clock).domain:null,domainStages:context?.plan.domains.map(({start,end,phase,number})=>({start,end,phase,number}))??[],
       rounds:context?.plan.rounds.length??0,defeat:context?.plan.defeat??null,
       actors:context?sample(context.plan,clock).actors:null,teams:context?sample(context.plan,clock).teams:null,bounds:bodyBounds(),participants:participantBounds(),
       battlefield:context?.plan.battlefield??null,conditions:context?.plan.conditions??[],

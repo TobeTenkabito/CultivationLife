@@ -99,15 +99,33 @@ def combat_identity(game, target, *, player_units=None):
 
 
 def report_visuals(game, target, report, *, identity=None):
-    # Eligibility is per ordinary stage, not per battle or participant path.
+    domains = any(row.get('voisinage', {}).get('animation', {}).get('fields')
+                  for row in report.get('rounds', []))
     if not any(row.get('ordinary_exchange') and row.get('initiative') in {'player', 'enemy'}
-               for row in report.get('rounds', [])):
+               for row in report.get('rounds', [])) and not domains:
         return None
-    if identity is not None:
-        return identity
     roster = report.get('player_roster')
     # Trial summaries intentionally expose only the player's name and power,
     # not BattleUnit IDs. Their authoritative participant is still the player.
     if not roster or not all('id' in row and 'kind' in row for row in roster):
         roster = None
-    return combat_identity(game, target, player_units=roster)
+    if identity is not None and not domains:
+        return identity
+    visual = dict(identity) if identity is not None else combat_identity(game, target, player_units=roster)
+    if domains:
+        # Local presentation preferences and OS entropy never consume combat RNG.
+        from .runtime import persistence_root
+        from .ui_preferences import load_ui_preferences
+        from secrets import choice
+        defaults = dict(outline='mist', pattern='mist', palette='jade', control='rings', density=65)
+        settings = load_ui_preferences(persistence_root()).get('voisinage_appearance', defaults)
+        owners = dict.fromkeys(f['owner'] for row in report['rounds']
+            for f in row.get('voisinage', {}).get('animation', {}).get('fields', []))
+        existing = report.get('visual', {}).get('domains', {})
+        visual['domains'] = {owner: existing.get(owner) or (dict(settings) if owner == 'player' else
+            dict(defaults, palette=choice(('rose','peach','gold','lime','green','jade','cyan','blue',
+                                         'indigo','violet','lilac','pink')),
+                 outline=choice(('mist','star','frost','lotus','sword','seal','water','mountain','wood','thunder','moon','void','time')),
+                 pattern=choice(('mist','star','frost','lotus','sword','seal','water','mountain','wood','thunder','moon','void','time')),
+                 control=choice(('rings','talismans','stars','lotus','pillars','crystal')))) for owner in list(owners)[:64]}
+    return visual

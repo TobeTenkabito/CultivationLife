@@ -75,6 +75,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
         self.totals = {side: max(1.0, sum(u.power for u in units if u.side == side))
                        for side in ("player", "enemy")}
         self.fields: list[Field] = []
+        self.animation = None
         self.frame = PhaseRound(0)
         self._ordinary_acted: set[str] = set()
         self._dominated: dict[str, str] = {}
@@ -182,6 +183,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
                     player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None) -> PhaseRound:
         self.frame = PhaseRound(round_no)
+        self.animation = {'version': 1, 'opening': [max(0., 1 - self.ordinary_loss(side))
+                          for side in ('player', 'enemy')], 'effects': [], 'interventions': []}
         self._ordinary_acted.clear()
         self._released.clear()
         self._disrupted.clear()
@@ -287,7 +290,12 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
         for key, relation in self.frame.relations.items():
             if relation['relation'] in {'pressed', 'dominated'} and self.units[key].active_voisinage:
                 self.units[key].field_strain = min(.5, self.units[key].field_strain + .05)
+        # Capture established coverage before effects can release or destroy it.
+        # This is a bounded report projection, never an input to settlement.
+        self.animation['fields'] = self.report()['fields']
+        self.animation['relations'] = {key: dict(value) for key, value in self.frame.relations.items()}
         self._resolve_effects(previous)
+        self.animation['after'] = [max(0., 1 - self.ordinary_loss(side)) for side in ('player', 'enemy')]
         for side in ('player', 'enemy'):
             members = [s for s in self.units.values() if s.unit.side == side]
             # Lingering disruption survives loss of the field, within this battle.
@@ -486,6 +494,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
 
     def report(self) -> dict[str, Any]:
         return {
+            **({'animation': self.animation} if self.animation and self.animation.get('fields') else {}),
             **({'semantics': self.semantic_report()} if self.semantics is not None else {}),
             "relations": self.frame.relations,
             "restrictions": {k: list(s.restrictions) for k, s in self.units.items() if s.controls},
