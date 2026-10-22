@@ -29,6 +29,9 @@
   }
   // Unmodified Lucide 0.468.0 icon nodes; see assets/pixel/LUCIDE-LICENSE.
   const icons = {
+    replay: [['path',{d:'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'}],['path',{d:'M3 3v5h5'}]],
+    pause: [['rect',{x:'14',y:'4',width:'4',height:'16',rx:'1'}],['rect',{x:'6',y:'4',width:'4',height:'16',rx:'1'}]],
+    play: [['polygon',{points:'6 3 20 12 6 21 6 3'}]],
     panel: [['rect',{width:'18',height:'18',x:'3',y:'3',rx:'2'}],['path',{d:'M9 3v18'}],['path',{d:'m14 9 3 3-3 3'}]],
     close: [['path',{d:'M18 6 6 18'}],['path',{d:'m6 6 12 12'}]],
     plus: [['path',{d:'M5 12h14'}],['path',{d:'M12 5v14'}]],

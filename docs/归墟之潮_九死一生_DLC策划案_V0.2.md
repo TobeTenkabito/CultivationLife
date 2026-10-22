@@ -1,6 +1,6 @@
 # 归墟之潮：九死一生 · 当前实现规格
 
-维护基线：本体 v3.0.0-alpha.1 / DLC 2.7.1。2.7.1 仅将归墟专属图稿纳入独立扩展资源包，关闭时不加载专属图片，副本与宝池规则不变。沿用旧文件名保持引用；早期“两座副本首版计划”已被十一界实现取代，原策划可从 Git 历史查阅。本页以 `dlc/guixu-tide/content/guixu_tide.json` 和 `cultivation_life/system/guixu/` 为依据。
+维护基线：本体 v3.0.0-alpha.2 / DLC 2.7.2。2.7.2 补全440件物品的实际用途说明，与服用／炼器共用原公式，不改副本与宝池规则；2.7.1加入的专属图稿仍独立管理，关闭时不加载。沿用旧文件名保持引用；早期“两座副本首版计划”已被十一界实现取代，原策划可从 Git 历史查阅。本页以 `dlc/guixu-tide/content/guixu_tide.json` 和 `cultivation_life/system/guixu/` 为依据。
 
 ## 副本与配置
 

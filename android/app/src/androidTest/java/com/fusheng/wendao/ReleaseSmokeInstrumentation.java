@@ -159,7 +159,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
 
     private void tapSelector(String selector) throws Exception {
         String quoted=JSONObject.quote(selector);
-        if(selector.contains("data-panel-target")) {
+        if(selector.contains("data-panel-target") || selector.equals("#battle-report-open")) {
             String group=(String)js("document.querySelector("+quoted+")?.dataset.navigationGroup||''");
             if(!group.isEmpty()) {
                 if(Boolean.TRUE.equals(js("document.querySelector('#navigation-menu').open"))) {
@@ -508,6 +508,64 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("visual_ui_scope","Four themes, native portrait/landscape clicks, extension-owned bitmap, original healing and exact material return, true natal character/slots, eleven home paintings, bounded immutable camera, original node atlas and legacy fallback; no combat animation");
     }
 
+    private void runCombatAlpha(Bundle result) throws Exception {
+        String fixture=assetText("alpha2_release.py");
+        for(String theme:new String[]{"a","b","d","f"}) {
+            String kind=(theme.equals("a")||theme.equals("d"))?"true_body":"replica";
+            String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'原生交锋验收',spirit_root:'heavenly',path:'dao',seed:622,preset_id:'core'})}).then(g=>g.id)");
+            python(fixture+"\nfrom cultivation_life import server\nserver._alpha2_expected=prepare_alpha2(server.ENGINE,"+JSONObject.quote(id)+","+JSONObject.quote(kind)+")");
+            async("loadGame("+JSONObject.quote(id)+")");
+            tapSelector("#theme-open");tapSelector("[data-theme-picker=dialog] [data-theme-choice="+theme+"]");
+            if(Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+            async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector("[data-panel-target=inventory]");
+            check(Boolean.TRUE.equals(js("game.player.inventory.find(i=>i.id==='guixu_canghai_equipment_01').description.includes('HP上限 +18')&&game.player.inventory.find(i=>i.id==='guixu_canghai_consumable_01').description.includes('21.50%')")),"Native Guixu factual descriptions");
+            tapSelector("#inventory-list [data-item-id=guixu_canghai_consumable_01] .item-use");
+            waitForJs("!busy&&game.player.inventory.find(i=>i.id==='guixu_canghai_consumable_01').quantity===1","Native original Guixu consumption");
+            capture("alpha2-items-"+theme+"-"+arguments.getString("orientation"));tapSelector("#inventory-toggle");
+            tapSelector("#theme-open");tapSelector("#theme-dialog [data-pixel-setting]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector("[data-panel-target=relationship]");
+            check(Boolean.TRUE.equals(js("NpcContacts.open(game.world_npcs.find(n=>n.name==='验收持宝道友').id)")),"Native select actual holder");
+            AtomicReference<Throwable> confirmError=new AtomicReference<>();
+            android.accessibilityservice.AccessibilityServiceInfo serviceInfo=getUiAutomation().getServiceInfo();
+            serviceInfo.flags|=android.accessibilityservice.AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
+            getUiAutomation().setServiceInfo(serviceInfo);
+            Thread confirmation=new Thread(()->{
+                try {
+                    long until=System.currentTimeMillis()+20000;
+                    while(System.currentTimeMillis()<until) {
+                        android.view.accessibility.AccessibilityNodeInfo root=getUiAutomation().getRootInActiveWindow();
+                        if(root!=null) {
+                            java.util.List<android.view.accessibility.AccessibilityNodeInfo> buttons=root.findAccessibilityNodeInfosByViewId("android:id/button1");
+                            if(!buttons.isEmpty()&&buttons.get(0).performAction(android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK))return;
+                        }
+                        Thread.sleep(100);
+                    }
+                    throw new AssertionError("Native combat confirmation did not appear");
+                } catch(Throwable error) {confirmError.set(error);}
+            },"alpha2-native-confirm");
+            confirmation.start();tapSelector("[data-contact-action=slay]");confirmation.join(22000);
+            check(!confirmation.isAlive()&&confirmError.get()==null,"Native combat confirmation failed: "+confirmError.get());
+            waitForJs("!busy&&!!game.last_combat_report&&CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native real combat CG",60000);
+            python(fixture+"\nfrom cultivation_life import server\ninspect_alpha2(server.ENGINE,server._alpha2_expected)\nserver._alpha2_saved=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+            js("CombatReplay.seek(10000);true");
+            check(Boolean.TRUE.equals(js("CombatReplay.diagnostics().defeat!==null&&CombatReplay.diagnostics().decodedBytes<67108864&&document.querySelector('#battle-report-card').scrollWidth<=document.querySelector('#battle-report-card').clientWidth+1")),"Native defeat, memory budget and layout");
+            capture("alpha2-defeat-"+theme+"-"+arguments.getString("orientation"));
+            tapSelector("[data-combat-replay]");Thread.sleep(300);tapSelector("#battle-report-toggle");
+            check(Boolean.TRUE.equals(js("!CombatReplay.diagnostics().active&&!CombatReplay.diagnostics().raf&&CombatReplay.diagnostics().cache===0")),"Native CG disposal");
+            python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._alpha2_saved");
+            tapSelector("#relationship-toggle");
+        }
+        String group=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'原生群战验收',spirit_root:'heavenly',path:'dao',seed:772,preset_id:'core'})}).then(g=>g.id)");
+        python(fixture+"\nfrom cultivation_life import server\nprepare_alpha2_group(server.ENGINE,"+JSONObject.quote(group)+")");async("loadGame("+JSONObject.quote(group)+")");
+        tapSelector("#battle-report-open");
+        waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native group CG",60000);
+        js("CombatReplay.seek(10000);true");
+        check(Boolean.TRUE.equals(js("CombatReplay.diagnostics().participants.length===6&&CombatReplay.diagnostics().defeat.side==='hero'&&CombatReplay.diagnostics().teams.hero.every(m=>m.mode==='defeat')&&CombatReplay.diagnostics().decodedBytes<100663296")),"Native three-per-side true group defeat");
+        capture("alpha2-group-"+arguments.getString("orientation"));tapSelector("#battle-report-toggle");
+        result.putString("combat_alpha_scope","Four themes: actual native Guixu consumption and descriptions, true and replica holder combat +1 to Lv5, original combat settlement, single and 3v3 CG defeat, replay read-only, bounded decode and disposal; portrait/landscape, not full repository");
+    }
+
     @Override public void onStart() {
         Bundle result=new Bundle();
         File dlcPreferences=null;byte[] previousDlcPreferences=null;
@@ -554,7 +612,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("visual-ui")) {
+            if(phase.equals("combat-alpha")) {
+                runCombatAlpha(result);
+            } else if(phase.equals("visual-ui")) {
                 runVisualUi(result);
             } else if(phase.equals("maps-2131") || phase.equals("maps-2132") || phase.equals("maps-2133")) {
                 int mapCases=0;

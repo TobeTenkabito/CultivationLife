@@ -38,6 +38,7 @@ from ...system.transformation_system import (
     transformation_technique_limits,
 )
 from ...runtime import now_iso
+from ...guixu_items import recovery_profile
 from ...system.ghost_system import (
     ensure_ghost_cultivation_state,
     ghost_cultivation_active,
@@ -139,10 +140,10 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         ))
     elif "guixu_consumable" in item.tags:
         remove_item(game.player, item_id)
-        potency = max(1, int(item_id.rsplit("_", 1)[-1]))
-        hp_gain = max_hp(game.player) * min(.55, .18 + potency * .035)
-        mp_gain = max_mp(game.player) * min(.55, .18 + potency * .035)
-        opportunity_gain = REALMS[game.player.realm_index].opportunity_base * (.20 + potency * .04)
+        recovery, opportunity = recovery_profile(item)
+        hp_gain = max_hp(game.player) * recovery
+        mp_gain = max_mp(game.player) * recovery
+        opportunity_gain = REALMS[game.player.realm_index].opportunity_base * opportunity
         game.player.hp = min(max_hp(game.player), game.player.hp + hp_gain)
         game.player.mp = min(max_mp(game.player), game.player.mp + mp_gain)
         opportunity_gain = deps._add_opportunity(game.player, opportunity_gain)
@@ -155,10 +156,10 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
         ))
     elif "guixu_tide" in item.tags and "spirit_plant" in item.tags:
         remove_item(game.player, item_id)
-        potency = max(1.0, math.log10(max(10.0, float(item.plant_value or 10))))
-        hp_gain = max_hp(game.player) * min(.45, .08 + potency * .04)
-        mp_gain = max_mp(game.player) * min(.45, .08 + potency * .04)
-        opportunity_gain = REALMS[game.player.realm_index].opportunity_base * min(.90, .10 + potency * .06)
+        recovery, opportunity = recovery_profile(item)
+        hp_gain = max_hp(game.player) * recovery
+        mp_gain = max_mp(game.player) * recovery
+        opportunity_gain = REALMS[game.player.realm_index].opportunity_base * opportunity
         game.player.hp = min(max_hp(game.player), game.player.hp + hp_gain)
         game.player.mp = min(max_mp(game.player), game.player.mp + mp_gain)
         opportunity_gain = deps._add_opportunity(game.player, opportunity_gain)

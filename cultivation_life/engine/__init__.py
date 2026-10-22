@@ -2086,6 +2086,9 @@ class GameEngine:
             self._dependencies.tianji.npcs, game, target
         )
 
+    def _tianji_combat_clues(self, game: GameState, roster: list[dict[str, Any]]) -> None:
+        return tianji_npcs._tianji_combat_clues(self._dependencies.tianji.npcs, game, roster)
+
     def _tianji_observe_npc(self, game: GameState, npc_id: str) -> None:
         return tianji_npcs._tianji_observe_npc(
             self._dependencies.tianji.npcs, game, npc_id

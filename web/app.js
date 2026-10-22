@@ -457,6 +457,7 @@ function showStart() {
   ['asura-conversion','asura-body','asura-veins','asura-route','asura-domain','asura-powers','talisman', 'puppet-workshop','map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'personal-economy', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'].forEach(name => window.UtilityPanels?.close(name));
   formationDraftProfile = null;
   battleReportOpen = false;
+  window.CombatReplay?.close();
   renderButtons();
 }
 
@@ -3966,10 +3967,11 @@ function renderBattleReport(report) {
   const card = $('#battle-report-card');
   card.classList.toggle('hidden', !report);
   if (!report) {
+    window.CombatReplay?.sync(null,false);
     if (battlePlaybackKey === null) battlePlaybackKey = 'none';
     return;
   }
-  const reportKey = `${report.age}:${report.title}:${report.result}:${report.total_rounds || report.rounds?.length || 0}`;
+  const reportKey = JSON.stringify([game.id, report]);
   const shouldPlay = battlePlaybackKey !== null && battlePlaybackKey !== reportKey;
   battlePlaybackKey = reportKey;
   if (shouldPlay) battleReportOpen = game?.settings?.combat_popup !== false;
@@ -4006,7 +4008,8 @@ function renderBattleReport(report) {
     });
     rosters.appendChild(group);
   });
-  renderBattleRoundProgress(report, shouldPlay);
+  const animated = window.CombatReplay?.sync(report,battleReportOpen);
+  renderBattleRoundProgress(report, shouldPlay && !animated);
 
   const keyList = $('#battle-key-events'); keyList.innerHTML = '';
   (report.key_events || []).forEach(text => {
@@ -4339,6 +4342,7 @@ $('#secret-suppress-cancel').onclick = () => mutate(`/api/games/${game.id}/secre
 });
 
 $('#battle-report-toggle').onclick = () => {
+  window.CombatReplay?.close();
   battleReportOpen = false;
   $('#battle-report-card').classList.add('report-closed');
 };
@@ -4346,10 +4350,12 @@ $('#battle-report-open').onclick = () => {
   if (!game?.last_combat_report) { toast('尚无战报'); return; }
   battleReportOpen = true;
   $('#battle-report-card').classList.remove('report-closed');
+  window.CombatReplay?.sync(game.last_combat_report,true);
 };
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && !document.querySelector('.appearance-dialog[open]')) {
     battleReportOpen = false;
+    window.CombatReplay?.close();
     $('#battle-report-card').classList.add('report-closed');
   }
 });

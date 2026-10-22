@@ -34,6 +34,7 @@ from ..system.formation_system import (
 )
 from .dependencies import CombatDependencies
 from ..system.combat_adapter import bind_capabilities
+from ..combat_visuals import combat_identity, report_visuals
 
 
 def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict[str, Any] | None = None) -> list[BattleUnit]:
@@ -124,6 +125,9 @@ def _record_player_combat(
         "stat_comparison": stat_comparison(resolution),
         "age": game.player.age,
     })
+    visual = report_visuals(game, target, report, identity=getattr(resolution, '_visual_identity', None))
+    if visual:
+        report['visual'] = visual
     game.last_combat_report = report
     from ..achievement_facts import record_corpse_campaign
     record_corpse_campaign(game, target.get('war_id'), report.get('player_roster', []), report.get('rounds', []))
@@ -244,6 +248,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     ]
     opponent_realm, opponent_layer = max(opponent_ranks)
     capabilities = bind_capabilities(game, player_units, target, WORLD_SYSTEMS.get("transcendent_combat", {}))
+    visual_identity = combat_identity(game, target, player_units=player_units)
     resolution = PlayerCombatSystem.resolve(
         player, player_units, target, lethal, rng,
         current_hp_ratio=player.hp / max(1.0, hp_max),
@@ -255,6 +260,10 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             player, opponent_realm, opponent_layer,
         ),
     )
+    # Ephemeral presentation data; dataclass.to_dict deliberately excludes it.
+    resolution._visual_identity = visual_identity
+    if resolution.rounds:
+        deps._tianji_combat_clues(game, resolution.enemy_roster)
     used_formation = (
         target.get("allied_formation_profile", {})
         if ground_array else portable_formation

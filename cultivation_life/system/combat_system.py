@@ -488,6 +488,7 @@ class PlayerCombatSystem:
         for round_no in range(1, max_rounds + 1):
             phase = None
             ordinary_start_player, ordinary_start_enemy = player_hp, enemy_hp
+            replay_opening = [round(player_power_max * player_hp, 1), round(enemy_power * enemy_hp, 1)]
             if phases is not None:
                 phase = phases.begin_round(
                     round_no, player_condition=player_hp, enemy_condition=enemy_hp,
@@ -539,6 +540,7 @@ class PlayerCombatSystem:
                     if phases.verdict() is not None:
                         break
                     continue
+                replay_opening = [round(player_power_max * player_hp, 1), round(enemy_power * enemy_hp, 1)]
             rule_runtime.begin_round(round_no, {
                 "player": {
                     "player_state": player_hp, "enemy_state": enemy_hp, "player_mp": player_mp,
@@ -957,7 +959,11 @@ class PlayerCombatSystem:
                                         player_morale=player_morale, enemy_morale=enemy_morale)
                 phases.sync_resources(player_mp=player_mp, enemy_mp=enemy_mp)
                 event_count = len(phase.events)
+                replay_before = [round(player_power_max * (1-phases.ordinary_loss('player')), 1),
+                                 round(enemy_power * (1-phases.ordinary_loss('enemy')), 1)]
                 dealt, received = phases.ordinary_damage(dealt, received)
+                replay_after = [round(player_power_max * (1-phases.ordinary_loss('player')), 1),
+                                round(enemy_power * (1-phases.ordinary_loss('enemy')), 1)]
                 events.extend(phase.events[event_count:])
                 player_mp = phases.mp_ratio("player", player_mp)
                 enemy_mp = phases.mp_ratio("enemy", enemy_mp)
@@ -974,8 +980,12 @@ class PlayerCombatSystem:
                                   else phases.primary_ordinary_loss * 0.46)
             actual_received = (received if phases is not None else
                                0.0 if round_no == 1 and "first_round_full_state" in transformation_traits else max(0.012, received))
+            if phases is None:
+                replay_before = [round(player_power_max * player_hp, 1), round(enemy_power * enemy_hp, 1)]
             enemy_hp = max(0.0, enemy_hp - dealt)
             player_hp = max(0.0, player_hp - actual_received)
+            if phases is None:
+                replay_after = [round(player_power_max * player_hp, 1), round(enemy_power * enemy_hp, 1)]
             if "噬灵" in soul_traits and dealt > 0 and devouring_soul_stacks < 3:
                 devouring_soul_stacks += 1
             if actual_received >= 0.12 and bloodline_active("damage_taken_counterforce"):
@@ -1282,6 +1292,9 @@ class PlayerCombatSystem:
             rounds.append({
                 "round": round_no,
                 "initiative": "player" if player_first else "enemy",
+                "ordinary_exchange": dict(opening=replay_opening, before=replay_before, after=replay_after,
+                    actors={'player': phase.ordinary_player if phase else True,
+                            'enemy': phase.ordinary_enemy if phase else True}),
                 "events": events,
                 "player_hp_ratio": round(player_hp, 4),
                 "player_mp_ratio": round(player_mp, 4),
@@ -1328,8 +1341,9 @@ class PlayerCombatSystem:
                 key_events.extend(f"第{round_no}轮，{event}" for event in phase.events)
                 if phases.verdict() is not None:
                     break
-            elif enemy_hp <= 0.12 or enemy_morale <= 8 or player_hp <= 0 or player_morale <= 5:
-                break
+            else:
+                if enemy_hp <= 0.12 or enemy_morale <= 8 or player_hp <= 0 or player_morale <= 5:
+                    break
 
         if quick and ratio >= 3.0:
             enemy_hp = min(enemy_hp, 0.08)

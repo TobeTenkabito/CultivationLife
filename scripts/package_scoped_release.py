@@ -178,6 +178,21 @@ def main():
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
         code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
+    if scoped.get('profile')=='combat-alpha':
+        from scripts.verify_scoped_release import COMBAT_ALPHA_TESTS
+        selected={name for shard in scoped['tests'] for name in shard}
+        require(selected==set(COMBAT_ALPHA_TESTS),'Focused combat/DLC regressions incomplete')
+        require({'browser_alpha2_dlc_fixes','browser_combat_replay','browser_combat_groups','browser_events_212'}<={r['name'] for r in scoped['runs']},'Focused combat/DLC browser evidence incomplete')
+        require(all(c.get('combat_alpha_verified') and c.get('dlc_fixes_verified') for c in evidence['cases']),'Compiled combat/DLC acceptance required with and without DLC')
+        required={f'build/android-combat-alpha-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Android 12 focused combat scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native combat test APK changed')
+        require(all('combat_alpha_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Native combat/DLC marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     dlcs={p.parent.name:json.loads(p.read_text(encoding='utf-8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],
               incompatible_save_schemas='1–9; no migration',dlc_versions=dlcs,
@@ -253,8 +268,8 @@ def main():
             z.write(ROOT/'build/common-goods-performance/report.md',f'performance-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.md',f'combat-calibration-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.json',f'combat-calibration-{VERSION}.json')
-    if scoped.get('profile') in {'teachings','visual'}:
-        updates=[('guixu-tide','归墟之潮')] if scoped['profile']=='visual' else [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]
+    if scoped.get('profile') in {'teachings','visual','combat-alpha'}:
+        updates=[('guixu-tide','归墟之潮'),('tianji-artifacts','巧夺天工')] if scoped['profile']=='combat-alpha' else [('guixu-tide','归墟之潮')] if scoped['profile']=='visual' else [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]
         for package, title in updates:
             version = dlcs[package]
             destination = ROOT / f'dist/{title}-v{version}.zip'
@@ -262,7 +277,7 @@ def main():
                 for p in sorted((ROOT/'dlc'/package).rglob('*')):
                     if p.is_file() and '__pycache__' not in p.parts:
                         z.write(p,p.relative_to(ROOT).as_posix())
-                note='docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
+                note='docs/alpha2-release.md' if scoped['profile']=='combat-alpha' else 'docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
                 z.write(ROOT/note,note)
                 z.writestr('安装说明.txt',f'配套本体 v{VERSION}，仅支持结构 10。解压至游戏根目录，覆盖对应 dlc/{package} 文件夹；重启生效。旧本体需先升级；Android 请安装同版签名 APK。用户开关与存档不会被本包覆盖。\n')
                 z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc=package,version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))

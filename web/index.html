@@ -29,6 +29,7 @@
   <link rel="stylesheet" href="/navigation.css?v=desktop-1">
   <link rel="stylesheet" href="/pixel-home.css?v=1">
   <link rel="stylesheet" href="/pixel-interface.css?v=3-alpha-1">
+  <link rel="stylesheet" href="/combat-replay.css?v=3-alpha-2">
 </head>
 <body>
   <div class="mist mist-a"></div><div class="mist mist-b"></div>
@@ -117,6 +118,12 @@
         <article id="battle-report-card" class="paper battle-report-card battle-report-popup hidden" aria-live="polite" role="dialog" aria-modal="false">
           <div class="section-title"><div><p class="eyebrow">自动斗法</p><h2 id="battle-report-title">最近战报</h2></div><div class="battle-report-heading"><div id="battle-report-grade" class="battle-grade"></div><button id="battle-report-toggle" type="button">关闭</button></div></div>
           <p id="battle-report-summary" class="muted"></p>
+          <section id="battle-animation" class="battle-animation" hidden aria-label="逐轮战斗态势回放">
+            <div class="combat-stance"><div data-combat-meter="hero"><b>你方态势</b><output></output><progress aria-label="你方战斗态势"></progress></div><div data-combat-meter="npc"><b>敌方态势</b><output></output><progress aria-label="敌方战斗态势"></progress></div></div>
+            <canvas role="img" aria-label="双方交锋动画"></canvas>
+            <div class="combat-lineup"><div data-combat-lineup="hero"></div><div data-combat-lineup="npc"></div></div>
+            <div class="combat-playback-controls"><span data-combat-status></span><button type="button" data-combat-replay title="重播战报" aria-label="重播战报"></button><button type="button" data-combat-pause title="暂停回放" aria-label="暂停回放" aria-pressed="false"></button><select aria-label="回放速度"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select></div>
+          </section>
           <div id="battle-rosters" class="battle-rosters"></div>
           <div id="battle-round-progress" class="battle-round-progress" aria-label="战斗轮次进度"></div>
           <div id="battle-key-events" class="battle-key-events"></div>
@@ -607,7 +614,7 @@
   <script src="/theme-manager.js?v=2.1.0"></script>
   <script src="/theme-composition.js?v=2.1.0"></script>
   <script src="/assets/pixel/v1/catalog.js?v=1"></script>
-  <script src="/visual-assets.js?v=1"></script>
+  <script src="/visual-assets.js?v=3-alpha-2"></script>
   <script src="/pixel-library.js?v=3-alpha-1"></script>
   <script src="/pixel-map.js?v=3-alpha-1"></script>
   <script src="/pixel-inventory.js?v=3-alpha-1"></script>
@@ -666,7 +673,10 @@
   <script src="/strategic-war-panel.js?v=1"></script>
   <link rel="stylesheet" href="/secret-art-panel.css?v=1">
   <script src="/secret-art-panel.js?v=1"></script>
-  <script src="/app.js?v=3-alpha-1"></script>
+  <script src="/combat-renderer.js?v=3-alpha-2"></script>
+  <script src="/combat-beasts.js?v=3-alpha-2"></script>
+  <script src="/combat-replay.js?v=3-alpha-2"></script>
+  <script src="/app.js?v=3-alpha-2"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

@@ -248,7 +248,9 @@ def test_npc_holder_combat_injection_and_drop(tianji_game: tuple[GameEngine, str
         int(artifact["base_combat_power"]) * float(holder["replica_ratio"]), 99_999,
     )
     assert target["target_power"] == 1_000 + expected_bonus
-    assert game.tianji_state["knowledge"][artifact_id] >= 2
+    assert game.tianji_state["knowledge"].get(artifact_id, 0) == 0
+    engine._tianji_combat_clues(game, [{'id': holder['npc_id']}])
+    assert game.tianji_state["knowledge"][artifact_id] == 1
     text = engine._tianji_handle_npc_kill(game, holder["npc_id"])
     assert "天工神机" in text
     assert artifact_id not in game.tianji_state["holders"]

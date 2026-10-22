@@ -122,6 +122,10 @@ def resolve(deps: AsuraTrialDependencies, game, step, rng):
         enemy_combat_state=battle.totals['enemy']*(1-battle.ordinary_loss('enemy')), enemy_combat_state_max=battle.totals['enemy'],
         player_morale=own.morale, enemy_morale=100, enemy_hp_ratio=1-battle.ordinary_loss('enemy'),
         assessment='双方禁止逃跑，无轮数上限', capability_updates=battle.updates())
+    from ...combat_visuals import report_visuals
+    visual = report_visuals(game, trial['target'], game.last_combat_report)
+    if visual:
+        game.last_combat_report['visual'] = visual
     if result == 'ongoing':
         queue(deps, game)
         return 'trial_step_success', f'已连续交战 {state["round"]} 轮，战斗尚未结束。'

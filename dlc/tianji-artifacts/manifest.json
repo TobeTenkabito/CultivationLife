@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.tianji-artifacts",
   "name": "神机百变：巧夺天工",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "kind": "dlc",
   "enabled": true,
   "load_order": 45,

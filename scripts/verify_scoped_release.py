@@ -18,6 +18,18 @@ TESTS=['tests/test_release_260.py','tests/test_release_251.py','tests/test_upper
        'tests/test_ghost_reincarnation_dlc.py','tests/test_monster_bloodline_system.py',
        'tests/test_release_212.py','tests/test_module_dependencies.py']
 
+COMBAT_ALPHA_TESTS = [
+    'tests/test_alpha2_dlc_fixes.py','tests/test_tianji_artifacts.py','tests/test_tianji_theme_rules.py',
+    'tests/test_guixu_tide.py','tests/test_guixu_companions.py','tests/test_crafting_system.py',
+    'tests/test_formation_system.py','tests/test_combat_replay.py','tests/test_visual_selection.py',
+    'tests/test_player_combat_system.py','tests/test_combat_semantics.py','tests/test_domain_combat.py',
+    'tests/test_visual_release.py','tests/test_pixel_assets.py','tests/test_ui_preferences.py',
+    'tests/test_content_registry.py','tests/test_base_game_version.py','tests/test_module_dependencies.py',
+    'tests/test_world_transition_system.py','tests/test_spatial_talismans.py','tests/test_release_211.py',
+    'tests/test_release_212.py','tests/test_android_packaging.py','tests/test_windows_release_evidence.py',
+    'tests/test_android_release_checks.py',
+]
+
 ECONOMY_TESTS = ['tests/test_economy_trust.py','tests/test_economy_estate_audit.py',
     'tests/test_economy_enterprises.py','tests/test_economy_network.py','tests/test_economy_governance.py',
     'tests/test_organization_economy.py','tests/test_organization_balance.py',
@@ -161,7 +173,7 @@ def balanced_test_shards(modules, count, histories):
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha'],default='legacy')
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     parser.add_argument('--balance-tests',action='store_true',help='Schedule full regressions by prior XML timings; never reuse prior results')
@@ -170,6 +182,7 @@ def main():
     tag=BASE_GAME_VERSION.replace('.','');before=inputs_digest(ROOT);runs=[]
     selected=TEACHINGS_TESTS if profile=='teachings' else NATAL_TESTS if profile=='natal' else NAMING_TESTS if profile=='naming' else BUGFIX_TESTS if profile=='bugfix' else ECONOMY_TESTS if profile=='economy' else TESTS
     if profile=='common-techniques':selected=COMMON_TECHNIQUES_TESTS
+    if profile=='combat-alpha':selected=[COMBAT_ALPHA_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='common-goods':selected=[COMMON_GOODS_TESTS[i::3] for i in range(3)]
     if profile=='regional':selected=[REGIONAL_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='secret-arts':
@@ -181,7 +194,7 @@ def main():
         if options.balance_tests:
             selected=balanced_test_shards(modules,options.shards,[ROOT/f'build/scoped-{tag}-{i}.xml' for i in range(options.shards)])
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
@@ -220,6 +233,8 @@ def main():
         browsers=['browser_building_visits','browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212']
     if profile=='visual':
         browsers=['browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits']
+    if profile=='combat-alpha':
+        browsers=['browser_alpha2_dlc_fixes','browser_combat_replay','browser_combat_groups','browser_events_212']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     if profile=='common-goods':
         jobs.append(('combat-upstream',['tools/verify_combat_upstream_2151.py']))
@@ -233,14 +248,14 @@ def main():
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         print(name+' passed',flush=True)
         return dict(name=name,log=str(log.relative_to(ROOT)),status='passed')
-    if profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual'}:
+    if profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha'}:
         # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

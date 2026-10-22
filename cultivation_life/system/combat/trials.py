@@ -78,6 +78,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
                                    player_mp=state['mp_ratio'], enemy_mp=1)
         dealt = received = 0
         initiative = 'voisinage'
+        exchange = None
         if not only_fields and player.fighting:
             # Incapacitation is not a kill. A living, free caster must still
             # possess a valid attack before finishing an immobilized corpse.
@@ -119,7 +120,14 @@ def run_batch(battle, state, rng, *, batch_size=24):
                 received *= .75
             dealt *= 1.05 if first else .97
             received *= .96 if first else 1.04
+            before = [player.unit.power*player.vitality,
+                      battle.totals['enemy']*(1-battle.ordinary_loss('enemy'))]
             dealt, received = battle.ordinary_damage(dealt, received)
+            if frame.ordinary:
+                exchange = dict(opening=before, before=before,
+                    after=[player.unit.power*player.vitality,
+                           battle.totals['enemy']*(1-battle.ordinary_loss('enemy'))],
+                    actors={'player': frame.ordinary_player, 'enemy': frame.ordinary_enemy})
             if frame.ordinary_player:
                 state['mp_ratio'] = max(0, state['mp_ratio'] - .035)
             frame.events.append(f'本轮普通交锋：敌方态势损耗 {dealt:.1%}，己方态势损耗 {received:.1%}。')
@@ -134,6 +142,8 @@ def run_batch(battle, state, rng, *, batch_size=24):
                      'player_combat_state_max': player.unit.power,
                      'enemy_combat_state': battle.totals['enemy'] * max(0, 1 - battle.ordinary_loss('enemy')),
                      'enemy_combat_state_max': battle.totals['enemy']})
+        if exchange is not None:
+            rows[-1]['ordinary_exchange'] = exchange
         if asura_trial and player.suppressed and player.body > 0:
             # Suppression alone is not a lethal victory. An actual opponent
             # with a sufficient attack tier must execute the immobilized body.

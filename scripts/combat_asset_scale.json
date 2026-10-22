@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "Reviewed nominal cranial units in canonical pixels, excluding hair buns, plumes and trailing cloth. Standing humanoid reference height is 176. Each painted fall stage uses one fixed uniform correction, never per-frame bounding-box fitting. Creatures retain their own species reference.",
+  "actors": {
+    "dao-male": {"reference_head": 30, "fall_heads": [38, 39, 40, 40]},
+    "dao-female": {"reference_head": 30, "fall_heads": [39, 43, 47, 47]},
+    "demonic-male": {"reference_head": 31, "fall_heads": [38, 38, 39, 39]},
+    "demonic-female": {"reference_head": 31, "fall_heads": [39, 40, 40, 40]},
+    "dao-1-m": {"reference_head": 31, "fall_heads": [48]},
+    "dao-1-f": {"reference_head": 30, "fall_heads": [48]},
+    "dao-2-m": {"reference_head": 31, "fall_heads": [47]},
+    "dao-2-f": {"reference_head": 30, "fall_heads": [44]},
+    "dao-3-m": {"reference_head": 31, "fall_heads": [48]},
+    "dao-3-f": {"reference_head": 30, "fall_heads": [49]},
+    "demonic-1-m": {"reference_head": 31, "fall_heads": [47]},
+    "demonic-1-f": {"reference_head": 31, "fall_heads": [46]},
+    "demonic-2-m": {"reference_head": 30, "fall_heads": [46]},
+    "demonic-2-f": {"reference_head": 30, "fall_heads": [49]},
+    "demonic-3-m": {"reference_head": 31, "fall_heads": [48]},
+    "demonic-3-f": {"reference_head": 30, "fall_heads": [49]},
+    "avian": {"reference_head": 26, "fall_heads": [28, 28, 28, 28]},
+    "quadruped": {"reference_head": 30, "fall_heads": [36, 37, 38, 38]},
+    "insect": {"reference_head": 20, "fall_heads": [24, 24, 24, 24]},
+    "companion-male": {"reference_head": 30, "fall_heads": [28]},
+    "companion-female": {"reference_head": 30, "fall_heads": [31]},
+    "corpse-male": {"reference_head": 30, "fall_heads": [31]},
+    "corpse-female": {"reference_head": 30, "fall_heads": [30]},
+    "mechanical-puppet": {"reference_head": 30, "fall_heads": [28]}
+  }
+}

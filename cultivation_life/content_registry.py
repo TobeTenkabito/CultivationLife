@@ -303,6 +303,10 @@ class ContentRegistry:
         items_doc['items'].extend(secret_items)
         market_doc['goods'].extend(secret_goods)
         items = cls._index_models(items_doc, "items", Item)
+        from .guixu_items import describe as describe_guixu_item
+        for item in items.values():
+            if 'guixu_tide' in item.tags:
+                item.description = describe_guixu_item(item)
         source_defaults = techniques_doc.get("source_defaults_by_path", {})
         expected_source_paths = {"dao", "demonic", "ghost", "monster", "buddhist", "confucian"}
         if set(source_defaults) != expected_source_paths:

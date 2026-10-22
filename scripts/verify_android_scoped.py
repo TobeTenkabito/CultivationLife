@@ -25,6 +25,7 @@ def main():
     buildings = '--buildings' in sys.argv[2:]
     visits = '--building-visits' in sys.argv[2:]
     visual = '--visual' in sys.argv[2:]
+    combat = '--combat-alpha' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
@@ -54,10 +55,13 @@ def main():
         logs=[f'build/android-{phase}-{orientation}-{tag}.log' for phase in ('building-visits','economy-enterprises') for orientation in ('portrait','landscape')]
     if visual:
         logs=[f'build/android-visual-ui-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
+    if combat:
+        logs=[f'build/android-combat-alpha-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if visual:require('visual_ui_scope' in text,f'Missing native optional UI coverage: {name}')
+        if combat:require('combat_alpha_scope' in text,f'Missing native combat and DLC acceptance: {name}')
         if buildings and '/android-buildings-' in name:require('buildings_scope' in text,f'Missing current native city coverage: {name}')
         if visits and '/android-building-visits-' in name:require('building_visits_scope' in text,f'Missing native illustrated visits: {name}')
         if visits and '/android-building-visits-' in name:require('city_management_scope' in text,f'Missing native city management and authored landscape: {name}')
@@ -116,6 +120,7 @@ def main():
     if buildings:receipt['scope']='Eleven-world initial cities, four-theme native construction, stale material recovery, bounded story rewards, yearly governance, ruins and rebuild, earned followup plus original production; portrait/landscape'
     if visits:receipt['scope']='Four-theme text gazetteer and expanded illustrations, real scenery/industry/temple visits, bounded insight, earned followup and original estate production; portrait/landscape'
     if visual:receipt['scope']='Optional pixel UI, original inventory commands, true natal sockets, eleven world maps and legacy fallback; four themes, native portrait/landscape'
+    if combat:receipt['scope']='User-requested focused combat CG, single/group defeat, Guixu factual use, true/replica intelligence, read-only replay and disposal; four themes, native portrait/landscape, not full repository'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')
 

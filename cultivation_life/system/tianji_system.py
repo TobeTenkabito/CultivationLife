@@ -478,6 +478,9 @@ class TianjiSystemMixin:
             self._tianji_dependencies.npcs, game, target
         )
 
+    def _tianji_combat_clues(self, game: GameState, roster: list[dict[str, Any]]) -> None:
+        return tianji_npcs._tianji_combat_clues(self._tianji_dependencies.npcs, game, roster)
+
     def _tianji_observe_npc(self, game: GameState, npc_id: str) -> None:
         return tianji_npcs._tianji_observe_npc(
             self._tianji_dependencies.npcs, game, npc_id

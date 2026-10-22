@@ -1,6 +1,8 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "GameState.last_combat_report.visual.teams / team_counts": "session：仅从战前实际参战名单读取两方各至多三条有界视觉描述，保存原ID、名称、性别、单位性质、选定素材ID及有效战力权重，完整人数仍依原战报名单；原人物／炼尸与活傀来源性别优先于临时代理。合法候选由战斗投影提供，统一纯素材选择器跨双方优先未用、耗尽才复用，不为去重改变性别、类型或DLC资格。旧schema1仍仅单人表现，不推造旧参战事实。无新NPC、个人HP、伤害、库存或账本副本；沿原session跨界清理，重播不写档、不消耗RNG、不重新结算。",
+    "GameState.last_combat_report.visual / rounds.*.ordinary_exchange": "session：原玩家战报内的有限视觉身份、本命物品ID或形制，以及现有至多72轮报告中实际普通阶段的轮初、扣减前后态势及有普通行动权的双方。纯邻域阶段不记普通采样；混合及劫关战斗只读普通交锋权威状态，普通阶段后的邻域结算只作检查点，不归给攻击动画。非魔修暂用同性道修示意，不复制NPC、装备实例或资源账本，不保存动画帧、随机流或播放器进度；跨界沿原战报session清理，重播不重新结算。旧报告缺失时回退文字，不补造历史。",
     "GameState.building_state.city_business / records.*.facilities": "global：公共设施与原固定地址城市同属，不携带；设施消耗原行囊与原营造账户，完好时生效，重建清空。city_business按稳定城市编号记录上次实际经营年龄、实付成本与实收款，跨界、读档与重建均保留；只在现场每真实年最多结算一笔，既有地方operator账户实款不足即拒绝，不新增城库、不补领历年、不增加年度扫描。",
     "GameState.building_state.landscape_usage": "global：每处景色按稳定编号保留初次结局，首次选择带走才沿原add_item发放一件已注册无属性纪念物；放弃、出售、遗失、读档、跨界、重访都不再发。后续重读仅叙事，无时间、随机数、人物或经济副本。",
     "GameState.building_state.visit_usage": "global：产业与寺庙按原固定建筑编号登记一次insight领悟；只在本地实际选项结算后写入，原机缘入口处理奖励。读档、跨界、产权变化、DLC关闭重开与原址重建均不刷新。无原库存、府库、信众或人物副本，不新增年度扫描；通用景色探索仍无收益。",

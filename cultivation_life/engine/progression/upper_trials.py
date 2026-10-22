@@ -13,6 +13,7 @@ from ...system.upper_voisinage_rules import player_source
 from ...system.immortal_aperture import commit_energy
 from ...system import ghost_soul_form
 from ...system.possession_system import is_possessed
+from ...combat_visuals import report_visuals
 
 KINDS = {'monster_upper', 'ghost_upper'}
 TITLES = {'monster_upper': ('蜕形劫', '祖性劫', '万象劫'), 'ghost_upper': ('辨魂劫', '前尘劫', '轮回劫')}
@@ -116,6 +117,9 @@ def resolve(deps: Dependencies, game, step, rng):
         enemy_hp_ratio=1-battle.ordinary_loss('enemy'), player_morale=own.morale, enemy_morale=100,
         battlefield_tags=['开阔'], natural_terrain='开阔', artificial_conditions=[], capability_updates=battle.updates())
     game.last_combat_report = report
+    visual = report_visuals(game, t['target'], report)
+    if visual:
+        report['visual'] = visual
     if result == 'ongoing':
         queue(deps, game)
         return 'trial_step_success', f'已交战 {state["round"]} 轮，损耗保存，请继续迎劫。'

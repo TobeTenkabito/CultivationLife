@@ -1,0 +1,80 @@
+{
+  "base_version": "3.0.0-alpha.2",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.1.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.2",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.15.2",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.5.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 576,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_alpha2_dlc_fixes",
+      "log": "build\\browser_alpha2_dlc_fixes-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_replay",
+      "log": "build\\browser_combat_replay-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_groups",
+      "log": "build\\browser_combat_groups-300-alpha2.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-300-alpha2.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-300-alpha2.log",
+  "inputs_sha256": "183d0ff7a1481f327a1c7993718cbd88fbc0a27291efeb65d7f3a883f0f8b9b5",
+  "platform": "Windows",
+  "exe_sha256": "757666e3c91591bfe44e708a4dae4fb7069aa8aa6d80dedb2a0e5d9bb377f40d",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

@@ -101,6 +101,7 @@ class CombatDependencies:
     _handle_same_sect_kill: Callable[..., None]
     _hostility_key: Callable[..., str]
     _inject_tianji_npc_artifacts: Callable[..., None]
+    _tianji_combat_clues: Callable[..., None]
     _instantiate_event: Callable[..., dict[str, Any]]
     _is_wartime_opponent: Callable[..., bool]
     _kill_generates_hostility: Callable[..., bool]

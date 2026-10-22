@@ -75,7 +75,6 @@ def _inject_tianji_npc_artifacts(deps: TianjiNpcsDependencies, game: GameState, 
             total_bonus += bonus
         combat, _ = deps._scaled_effects(artifact["effects"], ratio)
         enemy_effects.extend(combat)
-        deps._tianji_reveal(game, artifact_id, 2, f"与持有者{npc_id}交战")
         for member in target.get("members", []):
             if str(member.get("npc_id", "")) == npc_id:
                 if not power_already_injected:
@@ -86,6 +85,21 @@ def _inject_tianji_npc_artifacts(deps: TianjiNpcsDependencies, game: GameState, 
         target["enemy_artifact_effects"] = enemy_effects
     elif enemy_effects:
         target["enemy_artifact_effects"] = enemy_effects
+
+
+def _tianji_combat_clues(deps: TianjiNpcsDependencies, game: GameState, roster: list[dict[str, Any]]) -> None:
+    """Observe actual opponents once after resolution, before any loot transfer."""
+    if not deps.tianji_content_available() or not game.tianji_state:
+        return
+    opponents = {str(row['id']) for row in roster if row.get('id')}
+    state = game.tianji_state
+    for artifact_id, holder in state.get('holders', {}).items():
+        npc_id = str(holder.get('npc_id', ''))
+        if npc_id not in opponents or holder.get('kind') not in {'true_body', 'replica'}:
+            continue
+        old = int(state['knowledge'].get(artifact_id, 0))
+        kind = '真体' if holder['kind'] == 'true_body' else '仿制品'
+        deps._tianji_reveal(game, artifact_id, old + 1, f'与{kind}持有者{npc_id}实际交战')
 
 
 def _tianji_observe_npc(deps: TianjiNpcsDependencies, game: GameState, npc_id: str) -> None:

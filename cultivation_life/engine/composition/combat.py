@@ -43,6 +43,7 @@ def bind_combat_runtime(engine: GameEngine) -> CombatDependencies:
         _handle_same_sect_kill=lambda *args, **kwargs: engine._handle_same_sect_kill(*args, **kwargs),
         _hostility_key=lambda *args, **kwargs: engine._hostility_key(*args, **kwargs),
         _inject_tianji_npc_artifacts=lambda *args, **kwargs: engine._inject_tianji_npc_artifacts(*args, **kwargs),
+        _tianji_combat_clues=lambda *args, **kwargs: engine._tianji_combat_clues(*args, **kwargs),
         _instantiate_event=lambda *args, **kwargs: engine._instantiate_event(*args, **kwargs),
         _is_wartime_opponent=lambda *args, **kwargs: engine._is_wartime_opponent(*args, **kwargs),
         _kill_generates_hostility=lambda *args, **kwargs: engine._kill_generates_hostility(*args, **kwargs),

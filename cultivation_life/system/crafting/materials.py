@@ -8,6 +8,7 @@ from collections import Counter
 from ...content_registry import CONTENT_DOCUMENTS, GUIXU_TIDE_CONTENT
 from .dependencies import CraftingMaterialsDependencies
 from ...economy_content import specification, BASE_PRICES
+from ...guixu_items import material_potency
 
 
 @lru_cache(maxsize=1)
@@ -122,16 +123,7 @@ def _crafting_material_candidates(
             or source_rank is None
         ):
             continue
-        potency = max(
-            0.02,
-            min(
-                0.30,
-                math.log10(
-                    max(10.0, float(item.plant_value or item.combat_bonus or 10))
-                )
-                * 0.035,
-            ),
-        )
+        potency = material_potency(item)
         roles = ["primary", "secondary", "quench"]
         role_effects = {
             "primary": {
