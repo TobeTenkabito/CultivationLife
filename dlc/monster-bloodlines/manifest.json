@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.monster-bloodlines",
   "name": "万妖归宗：血脉进化",
-  "version": "4.16.0",
+  "version": "4.17.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 100,
   "requires": [],
-  "description": "八源血脉进化：补全狐、龟甲、虫、水族与草木的大乘分支，共265个节点；返祖、自成血脉与本相铸域沿原入口独立启停。"
+  "description": "八源265节点血脉进化；狐族练气、结丹、元婴与合体分支立绘及战斗动作实装，返祖、自成血脉与本相铸域沿原入口独立启停。"
 }

@@ -82,6 +82,16 @@ def main():
         catalog['assets'][identity] = dict(file=f'/assets/pixel/v2/maps/{world["id"]}.png',size=[768,576],
             sha256=hashlib.sha256(target.read_bytes()).hexdigest(),requires=[])
         catalog['maps'][world['id']] = dict(asset=identity,places={p['id']:{k:p[k] for k in ['x','y','major']} for p in world['places']})
+    # Independently promoted DLC character packs survive an icon/map re-export.
+    for owner,package in packages.items():
+        for path in (package/'assets/visual').glob('*/registry.json'):
+            for key,row in json.loads(path.read_text(encoding='utf-8'))['assets'].items():
+                assert row['requires']==[owner] and row['file'].startswith(f'/extension-assets/{owner}/')
+                assert key not in catalog['assets'], key
+                target=package/'assets'/row['file'].split('/',3)[3]
+                assert target.resolve().is_relative_to((package/'assets').resolve())
+                assert hashlib.sha256(target.read_bytes()).hexdigest()==row['sha256']
+                catalog['assets'][key]=row
     (ROOT/'content/visual_assets.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(f"Promoted {len(icons['assets'])} icons and {len(worlds)} maps; source studies remain unchanged.")
 

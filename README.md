@@ -129,7 +129,7 @@ Windows ZIP 附带 `scripts/debug_agent.py` 及最小标准库客户端。CLI／
 | --- | --- | --- |
 | [修罗显圣：无法无天](dlc/asura-manifestation/README.md) | 1.2.1 | 煞元转化、魔脉、八部凝身、魔域神通与心魔劫 |
 | [诸法无我：众生为镜](dlc/buddhist-dharma/README.md) | 1.1.0 | 四上界弘法与愿力、三阶段法会、地图信众、寺庙、正负业力、六项加持与佛修双飞升路线 |
-| [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.16.0 | 妖修八源血脉；后五族大乘分支补全、族血规则与本相铸域 |
+| [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.17.0 | 妖修八源血脉；五族分支补全、狐族分境立绘与战斗动作、族血规则与本相铸域 |
 | [万灵争衡：百族兴衰](dlc/monster-civilizations/README.md) | 1.0.0 | 独立生态、氏族、王庭与万灵志 |
 | [百鬼夜行：往生轮回](dlc/ghost-reincarnation/README.md) | 3.9.1 | 鬼修魂魄、魂蚀、往生与轮回 |
 | [明争暗斗：合纵连横](dlc/intrigue-coalitions/README.md) | 1.5.0 | NPC 性格、势力职位、客卿、议案与内政 |

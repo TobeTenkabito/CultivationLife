@@ -60,6 +60,8 @@ def _team_visuals(game, target, hero, player_units=None):
             if kind == 'player':
                 pool = [hero]
                 gender = hero.rsplit('-', 1)[1]
+                if gender == 'shared':
+                    gender = None
             elif kind == 'mechanical':
                 pool = ['mechanical-puppet']
                 gender = None
@@ -92,6 +94,10 @@ def combat_identity(game, target, *, player_units=None):
     natal = game.natal_artifact or {}
     artifact = next((a for a in player.crafted_artifacts if a.get('id') == natal.get('crafted_artifact_id')), None) if natal.get('crafted_artifact_id') else None
     hero = f'{hero_path}-{hero_gender}'
+    from .monster_visuals import fox_appearance
+    appearance = fox_appearance(player)
+    if appearance:
+        hero = appearance['combat']
     teams, counts = _team_visuals(game, target, hero, player_units)
     return dict(schema_version=2, hero=hero, enemy=teams['npc'][0]['asset'] if teams['npc'] else None,
                 teams=teams, team_counts=counts,

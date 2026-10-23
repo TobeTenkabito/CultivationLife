@@ -7,6 +7,7 @@
   const between=(t,a,b)=>{const x=clamp((t-a)/(b-a));return x*x*(3-2*x);};
   let catalogPromise=null,current=null,context=null,revision=0,raf=0,observer=null;
   let intersection=null,onscreen=true;
+  let foxCatalog=null,foxCatalogKey=null;
   let clock=0,last=0,painted=-Infinity,playing=false,speed=2,media=matchMedia('(prefers-reduced-motion: reduce)');
   const root=document.getElementById('battle-animation');
   const canvas=root.querySelector('canvas'),status=root.querySelector('[data-combat-status]');
@@ -73,9 +74,9 @@
         for(const [actorIndex,member] of teams[side].entries()){
           const actor=A.actors[member.asset],targetIndex=(row.round-1+actorIndex)%teams[target].length;
           const defender=A.actors[teams[target][targetIndex].asset];
-          const action=actor.role!=='hero'?actor.faction:choose(actor.faction==='dao'
+          const action=actor.attack_action ?? (actor.role!=='hero'?actor.faction:choose(actor.faction==='dao'
             ?(visual.natal_item_id||visual.natal_mold_id?['dragon','treasure']:['dragon'])
-            :(defender.creature?['blast','shadows']:['blast','shadows','melee']));
+            :(defender.creature?['blast','shadows']:['blast','shadows','melee'])));
           const spec=A.actions[action];if(!spec)return null;
           const contacts=spec.contacts.map(t=>start+t);
           const r={index:rounds.length,number:row.round,side,actorIndex,targetIndex,guard:loss===0,action,name:spec.name,start,contacts,
@@ -129,7 +130,7 @@
     const mode=teams.hero.length>1||teams.npc.length>1?'group':'single';
     const battlefield=A.battlefields?.[mode]?.[report.natural_terrain]??null;
     const conditions=(report.artificial_conditions??[]).filter(name=>['禁空','禁神识','大阵'].includes(name)).slice(0,3);
-    return {hero,npc,teams,teamCounts:visual.team_counts??{hero:1,npc:1},battlefield,conditions,rounds,events,operations,initial,maxima,natalIcon,defeat,finisher,
+    return {hero,npc,heroDomainAction:A.actors[hero].domain_action,teams,teamCounts:visual.team_counts??{hero:1,npc:1},battlefield,conditions,rounds,events,operations,initial,maxima,natalIcon,defeat,finisher,
       domains,domainSettings:visual.domains??{},mixed:report.rounds.some(row=>row.voisinage),duration:start+.4};
   }
   function sample(plan,time){
@@ -164,7 +165,7 @@
       if(['open','effect'].includes(domain.phase)){
         const owners=new Set(domain.phase==='effect'?domain.a.effects.map(e=>e.owner):domain.a.fields.map(f=>f.owner));
         for(const side of ['hero','npc'])for(const a of teams[side])if(owners.has(a.unitId)){
-          a.mode=side==='hero'&&a.id===plan.hero?(a.id.startsWith('demonic')?'blast':'dragon'):'attack';a.local=Math.min(1.6,domain.local);
+          a.mode=side==='hero'&&a.id===plan.hero?(plan.heroDomainAction??(a.id.startsWith('demonic')?'blast':'dragon')):'attack';a.local=Math.min(1.6,domain.local);
         }
       }
     }
@@ -222,7 +223,18 @@
     let renderer=null,scene=null;
     try{
       catalogPromise??=fetch('/assets/pixel/combat/manifest.json').then(r=>{if(!r.ok)throw Error('combat assets');return r.json();}).catch(e=>{catalogPromise=null;throw e;});
-      const [A,items]=await Promise.all([catalogPromise,PixelLibrary.ensure()]);
+      const [base,items]=await Promise.all([catalogPromise,PixelLibrary.ensure()]);
+      let A=base;
+      const fox=items?.assets['monster.fox.combat_manifest'];
+      if(report.visual.hero?.startsWith('fox-')&&fox){
+        const key=fox.file+':'+fox.sha256;
+        if(key!==foxCatalogKey||!foxCatalog){
+          foxCatalogKey=key;
+          foxCatalog=fetch(fox.file).then(r=>{if(!r.ok)throw Error('Fox combat assets');return r.json();}).catch(e=>{foxCatalog=null;throw e;});
+        }
+        const extra=await foxCatalog;
+        A={...base,actors:{...base.actors,...extra.actors},actions:{...base.actions,...extra.actions}};
+      }
       if(token!==revision||!visible())return;
       const v=report.visual,item=items?.items[v.natal_item_id],asset=item||items?.molds[v.natal_mold_id];
       const natalIcon=items?.assets[asset]?.file;

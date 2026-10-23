@@ -2,18 +2,22 @@
 (() => {
   'use strict';
   const catalog = window.PixelAssetCatalog || {assets:{}, frames:[], base:'/assets/pixel/v1/'}, cache = new Map();
-  function load(id) {
-    const entry = Object.prototype.hasOwnProperty.call(catalog.assets, id) ? catalog.assets[id] : null;
+  async function load(id) {
+    const extension = id.startsWith('actor.monster.');
+    const source = extension ? (await window.PixelLibrary?.ensure())?.assets : catalog.assets;
+    const entry = source && Object.prototype.hasOwnProperty.call(source, id) ? source[id] : null;
     if (!entry) return Promise.resolve(null);
     if (!cache.has(id)) cache.set(id, new Promise(resolve => {
       const bitmap = new Image();
       bitmap.onload = () => resolve(bitmap.naturalWidth === entry.size[0] && bitmap.naturalHeight === entry.size[1] ? bitmap : null);
       bitmap.onerror = () => resolve(null);
-      bitmap.src = catalog.base + entry.file;
+      bitmap.src = extension ? entry.file : catalog.base + entry.file;
     }));
+    while (cache.size > 32) cache.delete(cache.keys().next().value);
     return cache.get(id);
   }
   function actor(player) {
+    if (player?.path === 'monster' && player.visual_actor?.startsWith('actor.monster.fox-')) return player.visual_actor;
     if (!player || player.race !== 'human' || !['dao', 'demonic'].includes(player.path) || player.ghost_host_body ||
         player.ghost_attachment || (player.lineage_race && player.lineage_race !== 'human') ||
         player.transformation_loadouts?.[player.transformation_technique?.id]?.active?.length ||

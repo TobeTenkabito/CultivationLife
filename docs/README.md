@@ -95,6 +95,7 @@
 
 - [万妖归宗本相铸域与开局适配](monster-true-forms.md)
 - [万妖归宗五族分支补全](monster-branch-expansion.md)：狐、龟甲、虫、水族与草木至大乘的独立路线、数值预算和旧档兼容。
+- [狐族素材接入](monster-fox-visuals.md)：DLC 4.17.0分境头像、立绘、缩略与战斗动作，资源归属、血脉历史选择及回放验收。
 
 ## 战争开发
 

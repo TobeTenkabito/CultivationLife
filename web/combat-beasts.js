@@ -24,7 +24,7 @@
     }
   }
   function guard(s,v,t,{context,line,ring}){
-    if(!v.actor.creature)return false;
+    if(!v.actor.creature||!colors[v.id])return false;
     const b=v.barrier,c=context(s.front),rear=context(s.rear),k=s.scale,dir=v.dir;
     const color=colors[v.id];c.save();rear.save();c.globalAlpha=b.opacity*.58;rear.globalAlpha=b.opacity*.3;
     const edge=(a)=>[b.cx+dir*(b.rx*Math.cos(a)-b.shield*1.7*k*Math.exp(-a*a/.24)),b.cy+b.ry*Math.sin(a)];
@@ -50,7 +50,7 @@
     c.restore();rear.restore();return true;
   }
   function effects(s,m,state,{context,line,ring,projectClip}){
-    const a=m.attacker;if(!a?.actor.creature)return false;
+    const a=m.attacker;if(!a?.actor.creature||!colors[a.id])return false;
     const r=state.round,t=state.time-r.start,k=s.scale,dir=a.dir,c=context(s.projectile),x=m.contact,cy=m.hitY;
     projectClip(c,m,s,()=>{
       if(a.id==='quadruped'){

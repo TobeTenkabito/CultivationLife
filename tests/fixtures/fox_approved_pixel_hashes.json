@@ -1,0 +1,32 @@
+{
+  "nine-female": {
+    "portrait": "3661c699cfe18e7f9120211fde8bb4bd2503d79f190eb5024f852df7143ee09a",
+    "figure": "3bd997561d800e2e2a71e4c9742bfce04958314edc00dfc07bfa0d5b6e072cd9",
+    "thumbnail": "6013f4ef54981de58d2084d738f968475e438f8adf36f0100bcce103f000ca79"
+  },
+  "nine-male": {
+    "portrait": "b51acb7c967037fcb3324f73f192bae0287336de617573036b77a1f7dd72352d",
+    "figure": "23ffd4ee9a635abb943b5aae357b9ab2843f79d76442de0456aff42a3d9cf1cd",
+    "thumbnail": "2986a0edb5bc3d24961d6c54bdc7e07953fb72e0c9e3a0c14fe5f5bf675d2281"
+  },
+  "mystic-female": {
+    "portrait": "98ed5884dbfab5ee0079c10b58f5f0f16492207fb37e346428675546a135cbb4",
+    "figure": "ab5bcef0d592d852857ea1fdc2d11173da9dfc15d88bde085caa0bc28de3fd49",
+    "thumbnail": "0813b543f67b7b3e7820e97112f46bf964f1f9203c2aaf6d3bbab46e506f3bdc"
+  },
+  "mystic-male": {
+    "portrait": "b89ecb79a89f1e92ff347265d326a7bfca500b2024a42c0bb14406cbaad35090",
+    "figure": "085130ebe2e6c15a6af9ff2977a54353d627ea119f49743805882cfef9cb4f78",
+    "thumbnail": "a21a62e06618f16558fcb150499a4401436efd468135470568769f7392d241e2"
+  },
+  "moon-female": {
+    "portrait": "2b19b57417f25743af228ff0dd12a26ba6d4bb47a64369a0442a147409fa104f",
+    "figure": "840d5bb396136f8fb438d9f622dfccba247528696c7699fecf94cdf9c719e859",
+    "thumbnail": "1d029ff7fb66a1b7bc3ea81b4e4dca8fc202c73d57da39bdcd03efece97e0c78"
+  },
+  "moon-male": {
+    "portrait": "0e44b951a4a993ed58a5fad8abfaccfd5259e04cf4a145684b5c198bad2b15ae",
+    "figure": "5a188ee07758569d994cd4d9438e1ac93c2ce620d092ead4a55cb69d79847972",
+    "thumbnail": "4f5358178dde05e59a36bb1441b532b767d5d314de4cc6c7fdbbcd518f8c3362"
+  }
+}

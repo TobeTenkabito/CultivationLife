@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def test_shipped_reviewed_assets_are_self_contained():
     source=catalog(ROOT)
-    assert len(source['assets'])==818 and len(source['maps'])==11
+    assert len(source['assets'])==895 and len(source['maps'])==11
     assert len(source['items'])==1165
     packages={json.loads(p.read_text(encoding='utf-8'))['id']:p.parent for p in (ROOT/'dlc').glob('*/manifest.json')}
     for identity,row in source['assets'].items():
@@ -25,9 +25,15 @@ def test_shipped_reviewed_assets_are_self_contained():
         else:path=ROOT/'web'/row['file'].lstrip('/')
         assert path.is_file(), identity
         assert hashlib.sha256(path.read_bytes()).hexdigest()==row['sha256']
+        if identity=='monster.fox.combat_manifest':
+            assert json.loads(path.read_text(encoding='utf-8'))['owner']=='official.monster-bloodlines'
+            continue
         with Image.open(path) as image:
             assert list(image.size)==row['size']
-            if identity.startswith('map.'):assert image.size==(768,576)
+            if 'official.monster-bloodlines' in row.get('requires',[]):
+                assert image.mode=='RGBA'
+                assert identity.startswith(('actor.monster.fox-','fox-'))
+            elif identity.startswith('map.'):assert image.size==(768,576)
             else:
                 assert image.mode=='RGBA' and image.size==(32,32)
                 assert set(image.getchannel('A').getdata()) <= {0,255}

@@ -131,7 +131,7 @@
     const b=v.barrier;if(b.opacity<.01)return;
     if(extension.guard?.(s,v,t,{context,line,ring})===true)return;
     const rear=context(s.rear),front=context(s.front),factor=s.scale;
-    if(['companion','corpse','mechanical'].includes(v.actor.faction)){
+    if(['companion','corpse','mechanical','fox'].includes(v.actor.faction)){
       const color=v.actor.energy_color,accent=v.actor.faction==='corpse'?'#51405f':v.actor.faction==='mechanical'?'#ede1bd':'#d5f0da';
       for(const [c,back] of [[rear,true],[front,false]]){
         c.save();c.globalAlpha=(back?.28:.62)*b.opacity;
@@ -190,10 +190,10 @@
   }
   function supportEffects(s,m,state){
     const a=m.attacker,kind=a.actor.faction;
-    if(!['companion','corpse','mechanical'].includes(kind))return false;
+    if(!['companion','corpse','mechanical','fox'].includes(kind))return false;
     const r=state.round,local=state.time-r.start,k=s.scale,dir=a.dir,c=context(s.projectile),front=context(s.front);
     const hit=r.contacts[0]-r.start,launch=1.25,origin=a.hand;
-    const color=a.actor.energy_color,light=kind==='companion'?'#def2d4':kind==='corpse'?'#c2abc8':'#f0d9a0';
+    const color=a.actor.energy_color,light=kind==='fox'?'#f3e8f7':kind==='companion'?'#def2d4':kind==='corpse'?'#c2abc8':'#f0d9a0';
     const charge=between(local,.4,1.1)*(1-between(local,1.3,1.7));
     front.save();front.globalAlpha=.65*charge;
     for(let j=0;j<3;j++){
@@ -378,7 +378,7 @@
     for(const side of ['hero','npc'])for(const [slot,member] of plan.teams[side].entries()){
       const id=member.asset,actor=A.actors[id];
       const moves=actor.role==='hero'?[...new Set(plan.rounds.filter(r=>r.side===side&&r.actorIndex===slot).map(r=>r.action))]:['attack'];
-      if(plan.domains?.length)moves.push(actor.role==='hero'?(id.startsWith('demonic')?'blast':'dragon'):'attack');
+      if(plan.domains?.length)moves.push(actor.role==='hero'?(actor.domain_action??(id.startsWith('demonic')?'blast':'dragon')):'attack');
       for(const mode of ['idle','hit','brace',...moves])needed.push(actor.animations[mode].sheet);
       if(plan.defeat?.side===side)needed.push(actor.animations.defeat.sheet);
     }

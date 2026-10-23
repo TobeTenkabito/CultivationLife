@@ -1,0 +1,248 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "authorization": "再补充狐狸时期的各个动作，然后将这一部分素材并入妖修dlc1中，并更新妖修dlc版本，暂不打包。",
+  "export": "nearest-neighbour; original soft alpha; nascent approved pixel files copied byte-for-byte",
+  "painted_keyposes": 144,
+  "animation_clips": 112,
+  "static_forms": 20,
+  "combat_forms": 16,
+  "sources": [
+    {
+      "kind": "static",
+      "file": "design/fox-growth-alpha4-20261023/source/fox-base-v1.png",
+      "sha256": "de72c5ac102607366dcb0144c7363fe877d8bfc9ad09a6084e9487249a42da05",
+      "identity": "fox-base-shared"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-growth-alpha4-20261023/source/fox-spirit-v1.png",
+      "sha256": "1ebf3a6860d0844eb0dfa77e63b57eaf7a5f2830d280fd1729c7cbe4a1399672",
+      "identity": "fox-spirit-shared"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-growth-alpha4-20261023/source/fox-mystic-v1.png",
+      "sha256": "6137bebfe291f5ae0664842f38be8ed3b06f4d8926647832411e28712d341db7",
+      "identity": "fox-mystic-shared"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-growth-alpha4-20261023/source/fox-moon-v1.png",
+      "sha256": "179dc30ae342660d744b390b1f026a7a8e5ab66e16afc99a569860ce316b8781",
+      "identity": "fox-moon-shared"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-growth-alpha4-20261023/source/fox-dream-v1.png",
+      "sha256": "e94c01e807b9762002343158d532c4cf69c262c2b735bac0458355727eb6f783",
+      "identity": "fox-dream-shared"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-growth-alpha4-20261023/source/fox-king-v1.png",
+      "sha256": "eb4796f90a6fd107b6f85363a6459cad9caf9f6d52940e4b9cea937b991e39a7",
+      "identity": "fox-king-shared"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-growth-alpha4-20261023/source/fox-moon-dream-v1.png",
+      "sha256": "d8330f6f9c49ca8f8d2cc632fcc14678f4e183e9aee49509eb82b68627fe8b7a",
+      "identity": "fox-moon-dream-shared"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-growth-alpha4-20261023/source/fox-nine-tail-v2.png",
+      "sha256": "3858752cec6d2f25247ddd7a3fe88b9840d147399e6cca1d45c296d222673959",
+      "identity": "fox-nine-tail-shared"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-nascent-alpha4-20261023/source/fox-nine-female-v2.png",
+      "sha256": "44174d331cd7ab48f3f347aad9d2a8eeaab1b19b2e241b38e8bbeae50796e41a",
+      "identity": "fox-nascent-nine-female"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-nascent-alpha4-20261023/source/fox-nine-male-v2.png",
+      "sha256": "6d94166304e753336d45b5be3ce29f37e1cf3066f77b1e4db440a7b80ab60b04",
+      "identity": "fox-nascent-nine-male"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-nascent-alpha4-20261023/source/fox-mystic-female-v1.png",
+      "sha256": "e7c4dce2cd71baac483300dd964fb33282be2bb05e1eeb54b8f0d19679eda5cd",
+      "identity": "fox-nascent-mystic-female"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-nascent-alpha4-20261023/source/fox-mystic-male-v1.png",
+      "sha256": "13b83bdeb58cea18ae22410347e943852f9e52d07d30f1467213f68b145fed64",
+      "identity": "fox-nascent-mystic-male"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-nascent-alpha4-20261023/source/fox-moon-female-v2.png",
+      "sha256": "c59f90dd9b848deb741cb684e60010eea9703c734d734ac77b7c08a23883217e",
+      "identity": "fox-nascent-moon-female"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-nascent-alpha4-20261023/source/fox-moon-male-v1.png",
+      "sha256": "c3e67d755ffb6b39d90e1e7a90a572f8335569285b7f0d86e56f93096422496c",
+      "identity": "fox-nascent-moon-male"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-integration-alpha4-20261023/source/fox-nine-female-v2.png",
+      "sha256": "cb3b1cac6fe79ed70212aeb456a180922c8cc72847b9243c368f777df28aceec",
+      "identity": "fox-integration-nine-female"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-integration-alpha4-20261023/source/fox-nine-male-v1.png",
+      "sha256": "11405067b193f38a8c9a76ff9911836db9b34864fd6833799455530de16bb117",
+      "identity": "fox-integration-nine-male"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-integration-alpha4-20261023/source/fox-moon-male-v1.png",
+      "sha256": "26fa2d2b1542038e26a18b3f548f54e6557c2364bc07c6ed374c203385b338f7",
+      "identity": "fox-integration-moon-male"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-integration-alpha4-20261023/source/fox-moon-female-v1.png",
+      "sha256": "1cb8ef98d9eebbdba05ef33ce478531e0742a764524a288986399b5ff169550f",
+      "identity": "fox-integration-moon-female"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-integration-alpha4-20261023/source/fox-mystic-female-v1.png",
+      "sha256": "2d8810fb094084a34b551d107300ed018517a963e72122d4406570bcb8c88649",
+      "identity": "fox-integration-mystic-female"
+    },
+    {
+      "kind": "static",
+      "file": "design/fox-integration-alpha4-20261023/source/fox-mystic-male-v1.png",
+      "sha256": "ddac2913f8445c3ed262ca3af74a2a2067310fa17756339bcc358cd275c87dbf",
+      "identity": "fox-integration-mystic-male"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-beast-combat-alpha4-20261023/source/fox_king-actions-v1.png",
+      "sha256": "0c2f85de19db2306c327f1c2d3a224797cf478e7a36a6bbd6c90ae2c45034b07",
+      "identity": "fox-king-shared",
+      "node": "FOX_KING"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-beast-combat-alpha4-20261023/source/fox_moon_dream-actions-v1.png",
+      "sha256": "9a607c6a98b71718ace8719c2565fd63779648b201c56b3141ee165718ad6476",
+      "identity": "fox-moon-dream-shared",
+      "node": "FOX_MOON_DREAM"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-beast-combat-alpha4-20261023/source/fox_nine_tail-actions-v1.png",
+      "sha256": "03f1b1b89233de925c729bb8e147229078fa922c51b1f6ac21fb19b12b7371e8",
+      "identity": "fox-nine-tail-shared",
+      "node": "FOX_NINE_TAIL"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-beast-combat-alpha4-20261023/source/fox_spirit-actions-v2.png",
+      "sha256": "539c26d11eb67375dd3aa4e778a5dc43bde3252e89bfc6f4f352af2379843687",
+      "identity": "fox-spirit-shared",
+      "node": "FOX_SPIRIT"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-combat-alpha4-20261023/source/nine-female-actions-v1.png",
+      "sha256": "d511f506b1afe8cd0a217e844b59e2e4937dea9f0d2b57432cbe75e03dd4cdf5",
+      "identity": "fox-nascent-nine-female",
+      "node": "FOX_NINE_FLAME_SOVEREIGN"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-combat-alpha4-20261023/source/nine-male-actions-v1.png",
+      "sha256": "ff362da0e79cf5035fd9441793d47e2f27dd9c6177ff7a6498e32da0b4bf31cf",
+      "identity": "fox-nascent-nine-male",
+      "node": "FOX_NINE_FLAME_SOVEREIGN"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-combat-alpha4-20261023/source/mystic-female-actions-v1.png",
+      "sha256": "b988ae75b88490cb9ce6c0545c995eec023db8c01fa23ddd0b7c293f5e592f6a",
+      "identity": "fox-nascent-mystic-female",
+      "node": "FOX_ILLUSION_LORD"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-combat-alpha4-20261023/source/mystic-male-actions-v1.png",
+      "sha256": "6876c267ac966da88e5c8ca46a46e9cbf7e54a583e4a89b25339664ebb872c16",
+      "identity": "fox-nascent-mystic-male",
+      "node": "FOX_ILLUSION_LORD"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-combat-alpha4-20261023/source/moon-female-actions-v1.png",
+      "sha256": "0614810f82b238234a59ec07cdb8d5a19e6bdd6498c1420f09a94854fcff0193",
+      "identity": "fox-nascent-moon-female",
+      "node": "FOX_MOON_SOVEREIGN"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-combat-alpha4-20261023/source/moon-male-actions-v1.png",
+      "sha256": "4a6c363552b870626b14a81861e456f408a79c37fe92c37e39afa70a839e8f8b",
+      "identity": "fox-nascent-moon-male",
+      "node": "FOX_MOON_SOVEREIGN"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-integration-combat-alpha4-20261023/source/nine-female-actions-v1.png",
+      "sha256": "f55cbf92f255314a6bfcd833fcc255ee220a3ac65b2369a78a68b069547f9970",
+      "identity": "fox-integration-nine-female",
+      "node": "FOX_ANCESTRAL_DREAM"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-integration-combat-alpha4-20261023/source/nine-male-actions-v1.png",
+      "sha256": "75d27f321b9228b2471c4931016eeed0c7767178c498935fd94e5a8a16c38425",
+      "identity": "fox-integration-nine-male",
+      "node": "FOX_ANCESTRAL_DREAM"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-integration-combat-alpha4-20261023/source/moon-male-actions-v1.png",
+      "sha256": "ded3ec57f89b33573afa411018f3f4fdbe84673e5729a09a296661063e66f03e",
+      "identity": "fox-integration-moon-male",
+      "node": "FOX_MOON_7"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-integration-combat-alpha4-20261023/source/moon-female-actions-v1.png",
+      "sha256": "df9665f06c40f9d7982cfe702ebbbe0685fc21da58941cc3f61d1723a868d887",
+      "identity": "fox-integration-moon-female",
+      "node": "FOX_MOON_7"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-integration-combat-alpha4-20261023/source/mystic-female-actions-v1.png",
+      "sha256": "1341994639afd838d9704c44b140be8dfbe9152766e7c337ccc11173d6ca8866",
+      "identity": "fox-integration-mystic-female",
+      "node": "FOX_MYSTIC_7"
+    },
+    {
+      "kind": "actions",
+      "file": "design/fox-integration-combat-alpha4-20261023/source/mystic-male-actions-v1.png",
+      "sha256": "a4a221f407d5cbb795a33d5e1546dc45f00bf2ae1f55fbe2fc8ad59e4d7bf34d",
+      "identity": "fox-integration-mystic-male",
+      "node": "FOX_MYSTIC_7"
+    }
+  ],
+  "prompts": [
+    "design/fox-beast-combat-alpha4-20261023/prompts.json",
+    "design/fox-integration-combat-alpha4-20261023/prompts.json",
+    "design/fox-combat-alpha4-20261023/prompts.json"
+  ]
+}
