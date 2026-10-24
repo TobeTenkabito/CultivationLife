@@ -1,0 +1,509 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "authorization": "仿照前面的流程一次性完成水属；天海神鲲路线江南水乡风格，鲤鱼路线和式锦鲤风格；合体锦鲤按用户要求重设计以体现修为差距",
+  "export": "Nearest-neighbour with original soft alpha; common action scale; self-contained DLC runtime files",
+  "static_forms": 19,
+  "combat_forms": 19,
+  "painted_keyposes": 171,
+  "animation_clips": 126,
+  "sources": [
+    {
+      "kind": "static",
+      "identity": "aquatic-spirit-shared",
+      "file": "design/aquatic-growth-alpha4-20261024/source/spirit-v1.png",
+      "sha256": "941db06124930789454894a75d6a5568f560597110811c189fd367e077739897",
+      "subject_bounds": [
+        [
+          24,
+          112,
+          934,
+          925
+        ],
+        [
+          1034,
+          220,
+          1504,
+          832
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-spirit-shared",
+      "file": "design/aquatic-combat-alpha4-20261024/source/spirit-actions-v1.png",
+      "sha256": "f98a0e7261f1825917b16404213ffa290ae11a09286a17b3b348e868775fe372"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-dragon-koi-shared",
+      "file": "design/aquatic-growth-alpha4-20261024/source/dragon-koi-v1.png",
+      "sha256": "f1ce12e04ed0da185c9126378245e2ee10048920440e5871a583951d94ec4d42",
+      "subject_bounds": [
+        [
+          7,
+          76,
+          994,
+          978
+        ],
+        [
+          1051,
+          211,
+          1520,
+          887
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-dragon-koi-shared",
+      "file": "design/aquatic-combat-alpha4-20261024/source/dragon-koi-actions-v1.png",
+      "sha256": "a1c3c8638514bf95283f1e6213897719bcfbd6bfe1352ae9ba892ad39bccf9c1"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-abyss-whale-shared",
+      "file": "design/aquatic-growth-alpha4-20261024/source/abyss-whale-v1.png",
+      "sha256": "cfe119c4b74902a812929203f886411abfc0a7f5e7abda969082aca7593e0770",
+      "subject_bounds": [
+        [
+          6,
+          226,
+          979,
+          818
+        ],
+        [
+          1030,
+          303,
+          1536,
+          792
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-abyss-whale-shared",
+      "file": "design/aquatic-combat-alpha4-20261024/source/abyss-whale-actions-v1.png",
+      "sha256": "d0bfb0f70823131163bd67ee16be285f64c4ce4107ecda8a0012eef34b4b9505"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-young-kun-shared",
+      "file": "design/aquatic-growth-alpha4-20261024/source/young-kun-v1.png",
+      "sha256": "1ce43c12f36fbf026cc12cda020850c840fe39cedab588a0cfc19cd300e1f006",
+      "subject_bounds": [
+        [
+          9,
+          95,
+          1018,
+          916
+        ],
+        [
+          1051,
+          282,
+          1527,
+          801
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-young-kun-shared",
+      "file": "design/aquatic-combat-alpha4-20261024/source/young-kun-actions-v1.png",
+      "sha256": "9c13b3d4877c20d08b70853c07dbe04b1a38a34a584ab7f9752ec869bacbf966"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-golden-leaper-shared",
+      "file": "design/aquatic-growth-alpha4-20261024/source/golden-leaper-v1.png",
+      "sha256": "ef8638fc3fb305a62419e3193353fe351c692cf4bb893bb820620a815f67535f",
+      "subject_bounds": [
+        [
+          17,
+          53,
+          873,
+          958
+        ],
+        [
+          981,
+          200,
+          1492,
+          944
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-golden-leaper-shared",
+      "file": "design/aquatic-combat-alpha4-20261024/source/golden-leaper-actions-v1.png",
+      "sha256": "0bea5e0401d7caa35c86c0e3fc9fa68cfc324b73efb3c103ae4da1436720e22a"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-glacial-whale-shared",
+      "file": "design/aquatic-growth-alpha4-20261024/source/glacial-whale-v1.png",
+      "sha256": "ff57d709416f8b89f437e26f47edd7d4959a4c6231c2e1885141444ddc7e55b0",
+      "subject_bounds": [
+        [
+          7,
+          207,
+          1040,
+          817
+        ],
+        [
+          1054,
+          274,
+          1531,
+          826
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-glacial-whale-shared",
+      "file": "design/aquatic-combat-alpha4-20261024/source/glacial-whale-actions-v1.png",
+      "sha256": "5827eb1b301d5fd470df775d7f30a378402108dbda6bd39b5f9ff6e6a7892fcf"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-mirage-whale-shared",
+      "file": "design/aquatic-growth-alpha4-20261024/source/mirage-whale-v1.png",
+      "sha256": "95d7833667ca12865b97a9321b70b38ead52e1314ebb4bb1ca5e2e45649619eb",
+      "subject_bounds": [
+        [
+          11,
+          167,
+          1008,
+          866
+        ],
+        [
+          1086,
+          296,
+          1528,
+          954
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-mirage-whale-shared",
+      "file": "design/aquatic-combat-alpha4-20261024/source/mirage-whale-actions-v1.png",
+      "sha256": "857e92c83d7749b245656cf51a33a8965fd603e728238faa7033bb139edbde03"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-nascent-koi-female",
+      "file": "design/aquatic-growth-alpha4-20261024/source/nascent-koi-female-v1.png",
+      "sha256": "0e027dcf64bd5127e807b7b8a3c520493140e4976f92f404287396ab4a7fb04c",
+      "subject_bounds": [
+        [
+          77,
+          8,
+          772,
+          1011
+        ],
+        [
+          882,
+          169,
+          1503,
+          992
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-nascent-koi-female",
+      "file": "design/aquatic-combat-alpha4-20261024/source/nascent-koi-female-actions-v1.png",
+      "sha256": "294e7a60e2e813707192c80754ea9079e96dc682de8bb24d8246d0f853f7f058"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-nascent-koi-male",
+      "file": "design/aquatic-growth-alpha4-20261024/source/nascent-koi-male-v1.png",
+      "sha256": "d822dab09351fbe0a9e17942216c9da7dd1171d1998a2be998d62d48b8a53db1",
+      "subject_bounds": [
+        [
+          24,
+          1,
+          949,
+          1010
+        ],
+        [
+          945,
+          96,
+          1518,
+          950
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-nascent-koi-male",
+      "file": "design/aquatic-combat-alpha4-20261024/source/nascent-koi-male-actions-v1.png",
+      "sha256": "7f4c9e4fc19cb1fdf41f735a91c773a350617ac62da4554dfebaf33340d39790"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-nascent-kun-female",
+      "file": "design/aquatic-growth-alpha4-20261024/source/nascent-kun-female-v2.png",
+      "sha256": "ba7f39062ad80369e07f2852c5d561a564122998b8537ef83992601e1e3a1a18",
+      "subject_bounds": [
+        [
+          10,
+          8,
+          894,
+          1009
+        ],
+        [
+          934,
+          107,
+          1520,
+          933
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-nascent-kun-female",
+      "file": "design/aquatic-combat-alpha4-20261024/source/nascent-kun-female-actions-v1.png",
+      "sha256": "5b9429989f21aaad00d2d2db223b5a5d8ce0fd44e152fe89cf12dcea9d7208bd"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-nascent-kun-male",
+      "file": "design/aquatic-growth-alpha4-20261024/source/nascent-kun-male-v1.png",
+      "sha256": "260a31f8b285d45ff4d7895dce8ca3a8a3438cc0e6de4e92a8f58967dbde38c8",
+      "subject_bounds": [
+        [
+          13,
+          10,
+          923,
+          1017
+        ],
+        [
+          971,
+          108,
+          1518,
+          889
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-nascent-kun-male",
+      "file": "design/aquatic-combat-alpha4-20261024/source/nascent-kun-male-actions-v1.png",
+      "sha256": "f4fc008f46a58268b52a4788e899506904b988d1c18455205899ced418862dd2"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-nascent-whale-female",
+      "file": "design/aquatic-growth-alpha4-20261024/source/nascent-whale-female-v1.png",
+      "sha256": "33cdbb555f04dd69597d23dd524a92b688e1ed5e3f9cd52186e338d33e1eb7eb",
+      "subject_bounds": [
+        [
+          26,
+          4,
+          792,
+          1012
+        ],
+        [
+          946,
+          177,
+          1526,
+          974
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-nascent-whale-female",
+      "file": "design/aquatic-combat-alpha4-20261024/source/nascent-whale-female-actions-v1.png",
+      "sha256": "16a1089520392fa73968fb3221f441ce75daad951b96bf3cc437c222f7295066"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-nascent-whale-male",
+      "file": "design/aquatic-growth-alpha4-20261024/source/nascent-whale-male-v1.png",
+      "sha256": "1d5b3e25b29f13fd21a06616a8d3e2b18b46b0d03ccfbb965b00f020bae241db",
+      "subject_bounds": [
+        [
+          34,
+          7,
+          805,
+          1019
+        ],
+        [
+          894,
+          221,
+          1508,
+          929
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-nascent-whale-male",
+      "file": "design/aquatic-combat-alpha4-20261024/source/nascent-whale-male-actions-v1.png",
+      "sha256": "a47a869bdc96047fb9914157c44296ca96cb054af3d836711b6b7cb279ebcd9b"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-integration-koi-female",
+      "file": "design/aquatic-growth-alpha4-20261024/source/integration-koi-female-v4.png",
+      "sha256": "276ec3d12cc9e594f0925c743b16126fe715c00891b03b4fb331610b60e1ad49",
+      "subject_bounds": [
+        [
+          14,
+          2,
+          883,
+          1014
+        ],
+        [
+          891,
+          21,
+          1519,
+          969
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-integration-koi-female",
+      "file": "design/aquatic-combat-alpha4-20261024/source/integration-koi-female-actions-v2.png",
+      "sha256": "f17e664146d4bc324c690c7d19f3abe40d172228c0611793fde072de983c8d05"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-integration-koi-male",
+      "file": "design/aquatic-growth-alpha4-20261024/source/integration-koi-male-v4.png",
+      "sha256": "02347aac24e95092a6c11045aa51c481071256ba0052ef3160c8f327687d005d",
+      "subject_bounds": [
+        [
+          16,
+          0,
+          976,
+          1007
+        ],
+        [
+          929,
+          39,
+          1520,
+          932
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-integration-koi-male",
+      "file": "design/aquatic-combat-alpha4-20261024/source/integration-koi-male-actions-v4.png",
+      "sha256": "734aecd6013b166e25a4206b5ecf8859187e82c078476f20285e557e5c63a791"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-integration-kun-female",
+      "file": "design/aquatic-growth-alpha4-20261024/source/integration-kun-female-v1.png",
+      "sha256": "fe64d6f5e716cae790281ae6107eb9329363ec02f51b5a82fecde5ee271e422a",
+      "subject_bounds": [
+        [
+          8,
+          3,
+          929,
+          1008
+        ],
+        [
+          946,
+          102,
+          1527,
+          947
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-integration-kun-female",
+      "file": "design/aquatic-combat-alpha4-20261024/source/integration-kun-female-actions-v1.png",
+      "sha256": "e6f313fa45ba2be367da29f6a163610dff2260f86cd2539ab7e9a2694c4d7807"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-integration-kun-male",
+      "file": "design/aquatic-growth-alpha4-20261024/source/integration-kun-male-v1.png",
+      "sha256": "174db1a35d2ac375a9616a942c8531fca5732acc1f5222a7bb8e27252a5418e7",
+      "subject_bounds": [
+        [
+          15,
+          9,
+          927,
+          1019
+        ],
+        [
+          961,
+          118,
+          1524,
+          905
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-integration-kun-male",
+      "file": "design/aquatic-combat-alpha4-20261024/source/integration-kun-male-actions-v1.png",
+      "sha256": "4739be0cd333c3dd143c30ec7a7663731a94385807e617567903289b00b377c2"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-integration-whale-female",
+      "file": "design/aquatic-growth-alpha4-20261024/source/integration-whale-female-v1.png",
+      "sha256": "16f34bf1c54333ba0482cea20958b71c9f65b8df0d95bf9319d7d8bc38654669",
+      "subject_bounds": [
+        [
+          18,
+          3,
+          843,
+          1017
+        ],
+        [
+          914,
+          173,
+          1522,
+          955
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-integration-whale-female",
+      "file": "design/aquatic-combat-alpha4-20261024/source/integration-whale-female-actions-v1.png",
+      "sha256": "024ff05998c2ad173929e0e210b4c5040bfddd91ca7f6dbfa8e0c625a83c7595"
+    },
+    {
+      "kind": "static",
+      "identity": "aquatic-integration-whale-male",
+      "file": "design/aquatic-growth-alpha4-20261024/source/integration-whale-male-v1.png",
+      "sha256": "156c55af9953e058594a4b211f8af5eadf4c2d7f791f118270c28c982a825385",
+      "subject_bounds": [
+        [
+          19,
+          0,
+          849,
+          1020
+        ],
+        [
+          923,
+          206,
+          1523,
+          931
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "aquatic-integration-whale-male",
+      "file": "design/aquatic-combat-alpha4-20261024/source/integration-whale-male-actions-v1.png",
+      "sha256": "a6f4f9a5c677ffc14ecf0667624ad00df72e92d923d5211b002164256eab14d1"
+    }
+  ],
+  "prompts": [
+    "design/aquatic-growth-alpha4-20261024/prompts.json",
+    "design/aquatic-combat-alpha4-20261024/prompts.json"
+  ]
+}

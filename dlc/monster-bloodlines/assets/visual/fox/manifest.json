@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "owner": "official.monster-bloodlines",
-  "version": "4.17.0",
+  "version": "4.19.0",
   "fps": 20,
   "actors": {
     "fox-king-shared": {
@@ -9016,7 +9016,8 @@
           ],
           "body_sample_fps": 0
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-moon-dream-shared": {
       "name": "月梦灵狐",
@@ -18030,7 +18031,8 @@
           ],
           "body_sample_fps": 0
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-nine-tail-shared": {
       "name": "幼生九尾",
@@ -27044,7 +27046,8 @@
           ],
           "body_sample_fps": 0
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-spirit-shared": {
       "name": "灵狐",
@@ -36058,7 +36061,8 @@
           ],
           "body_sample_fps": 0
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-nascent-nine-female": {
       "name": "九焰天狐 · 女",
@@ -45072,7 +45076,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-nascent-nine-male": {
       "name": "九焰天狐 · 男",
@@ -54086,7 +54091,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-nascent-mystic-female": {
       "name": "万相狐君 · 女",
@@ -63100,7 +63106,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-nascent-mystic-male": {
       "name": "万相狐君 · 男",
@@ -72114,7 +72121,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-nascent-moon-female": {
       "name": "月梦狐君 · 女",
@@ -81128,7 +81136,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-nascent-moon-male": {
       "name": "月梦狐君 · 男",
@@ -90142,7 +90151,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-integration-nine-female": {
       "name": "太古梦狐祖 · 女",
@@ -99156,7 +99166,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-integration-nine-male": {
       "name": "太古梦狐祖 · 男",
@@ -108170,7 +108181,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-integration-moon-male": {
       "name": "太古月梦祖 · 男",
@@ -117184,7 +117196,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-integration-moon-female": {
       "name": "太古月梦祖 · 女",
@@ -126198,7 +126211,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-integration-mystic-female": {
       "name": "太古玄狐祖 · 女",
@@ -135212,7 +135226,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     },
     "fox-integration-mystic-male": {
       "name": "太古玄狐祖 · 男",
@@ -144226,7 +144241,8 @@
           ],
           "body_sample_fps": 10
         }
-      }
+      },
+      "energy_effect": true
     }
   },
   "nodes": {
@@ -144403,5 +144419,911 @@
         2.1
       ]
     }
-  }
+  },
+  "realm_forms": [
+    {
+      "branch": "FOX_BASE",
+      "min_realm": 0,
+      "appearance": {
+        "static": "actor.monster.fox-base-shared",
+        "combat": "fox-spirit-shared"
+      }
+    },
+    {
+      "branch": "FOX_SPIRIT",
+      "min_realm": 1,
+      "appearance": {
+        "static": "actor.monster.fox-spirit-shared",
+        "combat": "fox-spirit-shared"
+      }
+    },
+    {
+      "branch": "FOX_MYSTIC",
+      "min_realm": 2,
+      "appearance": {
+        "static": "actor.monster.fox-mystic-shared",
+        "combat": "fox-spirit-shared"
+      }
+    },
+    {
+      "branch": "FOX_MOON",
+      "min_realm": 2,
+      "appearance": {
+        "static": "actor.monster.fox-moon-shared",
+        "combat": "fox-spirit-shared"
+      }
+    },
+    {
+      "branch": "FOX_DREAM",
+      "min_realm": 2,
+      "appearance": {
+        "static": "actor.monster.fox-dream-shared",
+        "combat": "fox-spirit-shared"
+      }
+    },
+    {
+      "branch": "FOX_KING",
+      "min_realm": 3,
+      "appearance": {
+        "static": "actor.monster.fox-king-shared",
+        "combat": "fox-king-shared"
+      }
+    },
+    {
+      "branch": "FOX_MOON_DREAM",
+      "min_realm": 3,
+      "appearance": {
+        "static": "actor.monster.fox-moon-dream-shared",
+        "combat": "fox-moon-dream-shared"
+      }
+    },
+    {
+      "branch": "FOX_NINE_TAIL",
+      "min_realm": 3,
+      "appearance": {
+        "static": "actor.monster.fox-nine-tail-shared",
+        "combat": "fox-nine-tail-shared"
+      }
+    },
+    {
+      "branch": "FOX_ILLUSION_LORD",
+      "min_realm": 4,
+      "history_variants": {
+        "FOX_MYSTIC": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_KING": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MOUNTAIN_KING": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_5": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_6": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_7": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_8": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MOON": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_ORACLE": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_DREAM_WEAVER": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_SOVEREIGN": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_5": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_6": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_7": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_8": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_NINE_TAIL": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_NINE_FLAME_SOVEREIGN": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_ANCESTRAL_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_MAHAYANA_HEAVENLY": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        }
+      }
+    },
+    {
+      "branch": "FOX_NINE_FLAME_SOVEREIGN",
+      "min_realm": 4,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-nascent-nine-male",
+          "combat": "fox-nascent-nine-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-nascent-nine-female",
+          "combat": "fox-nascent-nine-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_DREAM_EMPEROR",
+      "min_realm": 5,
+      "history_variants": {
+        "FOX_MYSTIC": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_KING": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MOUNTAIN_KING": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_5": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_6": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_7": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_8": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MOON": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_ORACLE": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_DREAM_WEAVER": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_SOVEREIGN": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_5": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_6": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_7": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_8": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_NINE_TAIL": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_NINE_FLAME_SOVEREIGN": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_ANCESTRAL_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_MAHAYANA_HEAVENLY": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        }
+      }
+    },
+    {
+      "branch": "FOX_VOID_NINE_TAIL",
+      "min_realm": 6,
+      "history_variants": {
+        "FOX_MYSTIC": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_KING": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MOUNTAIN_KING": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_5": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_6": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_7": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MYSTIC_8": {
+          "male": {
+            "static": "actor.monster.fox-nascent-mystic-male",
+            "combat": "fox-nascent-mystic-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-mystic-female",
+            "combat": "fox-nascent-mystic-female"
+          }
+        },
+        "FOX_MOON": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_ORACLE": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_DREAM_WEAVER": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_SOVEREIGN": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_5": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_6": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_7": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_MOON_8": {
+          "male": {
+            "static": "actor.monster.fox-nascent-moon-male",
+            "combat": "fox-nascent-moon-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-moon-female",
+            "combat": "fox-nascent-moon-female"
+          }
+        },
+        "FOX_NINE_TAIL": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_NINE_FLAME_SOVEREIGN": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_ANCESTRAL_DREAM": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        },
+        "FOX_MAHAYANA_HEAVENLY": {
+          "male": {
+            "static": "actor.monster.fox-nascent-nine-male",
+            "combat": "fox-nascent-nine-male"
+          },
+          "female": {
+            "static": "actor.monster.fox-nascent-nine-female",
+            "combat": "fox-nascent-nine-female"
+          }
+        }
+      }
+    },
+    {
+      "branch": "FOX_ANCESTRAL_DREAM",
+      "min_realm": 7,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-integration-nine-male",
+          "combat": "fox-integration-nine-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-integration-nine-female",
+          "combat": "fox-integration-nine-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MAHAYANA_HEAVENLY",
+      "min_realm": 8,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-integration-nine-male",
+          "combat": "fox-integration-nine-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-integration-nine-female",
+          "combat": "fox-integration-nine-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MOUNTAIN_KING",
+      "min_realm": 3,
+      "appearance": {
+        "static": "actor.monster.fox-king-shared",
+        "combat": "fox-king-shared"
+      }
+    },
+    {
+      "branch": "FOX_MOON_ORACLE",
+      "min_realm": 3,
+      "appearance": {
+        "static": "actor.monster.fox-moon-dream-shared",
+        "combat": "fox-moon-dream-shared"
+      }
+    },
+    {
+      "branch": "FOX_DREAM_WEAVER",
+      "min_realm": 3,
+      "appearance": {
+        "static": "actor.monster.fox-moon-dream-shared",
+        "combat": "fox-moon-dream-shared"
+      }
+    },
+    {
+      "branch": "FOX_MOON_SOVEREIGN",
+      "min_realm": 4,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-nascent-moon-male",
+          "combat": "fox-nascent-moon-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-nascent-moon-female",
+          "combat": "fox-nascent-moon-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MYSTIC_5",
+      "min_realm": 5,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-nascent-mystic-male",
+          "combat": "fox-nascent-mystic-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-nascent-mystic-female",
+          "combat": "fox-nascent-mystic-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MYSTIC_6",
+      "min_realm": 6,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-nascent-mystic-male",
+          "combat": "fox-nascent-mystic-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-nascent-mystic-female",
+          "combat": "fox-nascent-mystic-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MYSTIC_7",
+      "min_realm": 7,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-integration-mystic-male",
+          "combat": "fox-integration-mystic-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-integration-mystic-female",
+          "combat": "fox-integration-mystic-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MYSTIC_8",
+      "min_realm": 8,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-integration-mystic-male",
+          "combat": "fox-integration-mystic-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-integration-mystic-female",
+          "combat": "fox-integration-mystic-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MOON_5",
+      "min_realm": 5,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-nascent-moon-male",
+          "combat": "fox-nascent-moon-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-nascent-moon-female",
+          "combat": "fox-nascent-moon-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MOON_6",
+      "min_realm": 6,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-nascent-moon-male",
+          "combat": "fox-nascent-moon-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-nascent-moon-female",
+          "combat": "fox-nascent-moon-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MOON_7",
+      "min_realm": 7,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-integration-moon-male",
+          "combat": "fox-integration-moon-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-integration-moon-female",
+          "combat": "fox-integration-moon-female"
+        }
+      }
+    },
+    {
+      "branch": "FOX_MOON_8",
+      "min_realm": 8,
+      "variants": {
+        "male": {
+          "static": "actor.monster.fox-integration-moon-male",
+          "combat": "fox-integration-moon-male"
+        },
+        "female": {
+          "static": "actor.monster.fox-integration-moon-female",
+          "combat": "fox-integration-moon-female"
+        }
+      }
+    }
+  ]
 }

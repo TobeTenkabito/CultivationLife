@@ -165,7 +165,14 @@ def main():
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
     if scoped.get('profile')=='visual':
         selected={name for shard in scoped['tests'] for name in shard}
-        if scoped.get('regression_scope') == 'alpha3-focused':
+        if scoped.get('regression_scope') == 'alpha4-focused':
+            from scripts.verify_scoped_release import VISUAL_ALPHA4_TESTS
+            require(selected==set(VISUAL_ALPHA4_TESTS),'Focused alpha.4 selection incomplete')
+            require('not full repository regression' in scoped.get('scope',''),'Focused scope must be declared')
+            require({'browser_monster_release','browser_monster_flora_visuals'}<={r['name'] for r in scoped['runs']},'Monster browser acceptance required')
+            require(all(c.get('monster_visuals_verified') for c in evidence['cases']),'Compiled monster assets with/without DLC required')
+            require(all('monster_visual_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in native['logs']),'Native monster appearance/action acceptance required')
+        elif scoped.get('regression_scope') == 'alpha3-focused':
             from scripts.verify_scoped_release import VISUAL_ALPHA3_TESTS
             require(selected==set(VISUAL_ALPHA3_TESTS), 'Focused alpha.3 domain/upstream selection incomplete')
             require('not full repository regression' in scoped.get('scope',''), 'Focused scope must be declared')
@@ -279,6 +286,7 @@ def main():
             z.write(ROOT/'build/combat-calibration-2151/report.json',f'combat-calibration-{VERSION}.json')
     if scoped.get('profile') in {'teachings','visual','combat-alpha'}:
         updates=[('guixu-tide','归墟之潮'),('tianji-artifacts','巧夺天工')] if scoped['profile']=='combat-alpha' else [('guixu-tide','归墟之潮')] if scoped['profile']=='visual' else [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]
+        if scoped.get('regression_scope')=='alpha4-focused':updates.append(('monster-bloodlines','万妖归宗'))
         for package, title in updates:
             version = dlcs[package]
             destination = ROOT / f'dist/{title}-v{version}.zip'
@@ -287,6 +295,7 @@ def main():
                     if p.is_file() and '__pycache__' not in p.parts:
                         z.write(p,p.relative_to(ROOT).as_posix())
                 note='docs/alpha2-release.md' if scoped['profile']=='combat-alpha' else 'docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
+                if package=='monster-bloodlines':note='docs/alpha4-release.md'
                 z.write(ROOT/note,note)
                 z.writestr('安装说明.txt',f'配套本体 v{VERSION}，仅支持结构 10。解压至游戏根目录，覆盖对应 dlc/{package} 文件夹；重启生效。旧本体需先升级；Android 请安装同版签名 APK。用户开关与存档不会被本包覆盖。\n')
                 z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc=package,version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))

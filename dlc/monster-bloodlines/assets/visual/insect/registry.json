@@ -1,0 +1,869 @@
+{
+  "assets": {
+    "actor.monster.insect-spirit-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-spirit-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "2543a211d2956b7ec97352f83378d498c26835633487c77628075862735a93eb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-spirit-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-spirit-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9bfd2bcf0bad1eedfc72a07ea6bd6047284c383390ce73ce7403595f9f4d8a7a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-spirit-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-spirit-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "ab82d8688b34c6320fefef536a08e47bb8a1ee693cd668d1901d0889f0fa4881",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-spirit-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-spirit-shared-actions.png",
+      "size": [
+        1080,
+        108
+      ],
+      "sha256": "3ef4522c84e9a49f5a513e8712653f87dbd3dda70960aae25874acd75d93b8bc",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-king-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-king-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "767c29d522400a30546ae8204c0917a43c3d14a973a71d216fda9f8938e2bfab",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-king-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-king-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "d430938dfc228c65f3509bb62c305393646d6d5ae357d27a779885cbb85eb39a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-king-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-king-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "d7fcfbed72dd0313d12519e8a34be8a41267286f62fcceabb033a86236b1dedd",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-king-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-king-shared-actions.png",
+      "size": [
+        1584,
+        158
+      ],
+      "sha256": "2a1d35133864181885da76e5005eb8358d5206ffe579fc6cc41ab0d624eb10ba",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-void-cicada-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-void-cicada-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "833f40167cff0733ef1e3ffe90129df63ad4c873845a954866120bc3d0ef905c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-void-cicada-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-void-cicada-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "4af7861b747157038214f7b20fcf69ace18059d36e4938b058545cd7d4874f3c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-void-cicada-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-void-cicada-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "6cba5c970910515f8cd6f0ee4d64047b1445763f52a9a5a8cef78c7e536df5c4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-void-cicada-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-void-cicada-shared-actions.png",
+      "size": [
+        1656,
+        157
+      ],
+      "sha256": "297372e38e53cc6fb281ecaf2ab99568020114448963d0dca456fa799fd37318",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-mother-seed-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-mother-seed-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b5eae8920e6d96c58079358c6c58b29b8476b925d877f03894a8d61cf5da84ca",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-mother-seed-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-mother-seed-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "61b1533210c788cbba2278045048c94d64f3028476c5d0ddf69364115fa0aa3c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-mother-seed-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-mother-seed-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "f2c2ff3e8bc967edae6faf75d91e509c4dcf30b4c1ae06ac5ee3fa1a9a68a230",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-mother-seed-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-mother-seed-shared-actions.png",
+      "size": [
+        1494,
+        150
+      ],
+      "sha256": "392b045e19f56c84281a271cb363881bad2881a9435e9045c4fcca8cea1b340e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-violet-armor-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-violet-armor-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "538031fe1f49e78dafa9f5016805c391f8853fe77fc350a374f76b977929637b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-violet-armor-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-violet-armor-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "ddda95c2d0d8bf626520f9060d747e1e09e6fa432776a9a0338e25c7cce810a5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-violet-armor-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-violet-armor-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "b8dab91fe7efd4f3e542aff0c4ad3e3d5d7402658fccc2d92bef45b4abe45df8",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-violet-armor-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-violet-armor-shared-actions.png",
+      "size": [
+        1458,
+        148
+      ],
+      "sha256": "20c3c6ebd6d210a305f011596b2d6b6f51fd64aa1fe4823031e2cfeb67f769a5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-thunder-singer-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-thunder-singer-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "d8d22a46874d119182f64ffcc276c0bcbc276e3c23537d0f0563d6dfab0d777b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-thunder-singer-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-thunder-singer-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "3b91f40025786b7771fa6c043849f00fb33610eb9ea3d501c391dc3d613b4b04",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-thunder-singer-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-thunder-singer-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "95148f37c84c3846d18266149c3736ee99cf11dffe7cae90928ee6045be79b10",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-thunder-singer-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-thunder-singer-shared-actions.png",
+      "size": [
+        1413,
+        147
+      ],
+      "sha256": "e28af5846273748399244a84ebf66bfd8f475196c63a3b321e7a35f5fe1dc0ba",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-phantom-moth-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-phantom-moth-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "1e62d62415ebadf252bee78a2ce9afb545677cb584311f615ee01864a6de8b1b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-phantom-moth-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-phantom-moth-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "67520ebc647422bfd16a508c290dff3d70c3ee522846ec07cea922b06a0fdd2f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-phantom-moth-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-phantom-moth-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "03f9ab84ab2d83198b157d38902ee6fa833bf87db9ab294887c6bf12ab8bc3de",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-phantom-moth-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-phantom-moth-shared-actions.png",
+      "size": [
+        1395,
+        160
+      ],
+      "sha256": "4f2d7262fae7cf39275dff1584b6f508262ae645ed6ca0c4e7434db6c620aa82",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-armor-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-armor-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "e93026cd1ace02e500dec42b107424338d81e5f928152396ef3c21accadfb80f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-armor-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-armor-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "3aeea629d7fc515dc894de0fef0983937f88ad92a9a55d7c33b5dabd68c543b1",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-armor-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-armor-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "6b232cfb61cf3c71ee80a30e5b783a2644049c68e8b2b72a6a94b516b2fc5274",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-nascent-armor-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-armor-female-actions.png",
+      "size": [
+        1584,
+        176
+      ],
+      "sha256": "7eb94566622d220ba06124e75d111a484de3f7410ac1ca05c4e4d27390891c78",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-armor-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-armor-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "07f05ce81af63157cf6093c9ec2273768f21f3ca243faf3ed6244d459fb01513",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-armor-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-armor-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "d605d93368f5d26e8b6ee9fd968893dc428298d982e48b6e695c3e80f5f5d87c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-armor-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-armor-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "a8c5255e63c4578743782d675aef39fa3b551e52d061563b47cb362921056e2c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-nascent-armor-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-armor-male-actions.png",
+      "size": [
+        1539,
+        176
+      ],
+      "sha256": "1768e4456d5ffc4924d1d46972b2077ab7210178755f63d6331d8a2931e813dd",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-swarm-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-swarm-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "bab3733cd9fd6d2d684ee799b62bb1e01c035c87bea77a8843a2d2a4099f90d9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-swarm-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-swarm-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "0e7c1760ab39a7d16e4067f4b5a823070c059d70d61ea636b1328da6f46a6729",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-swarm-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-swarm-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "3cfebfb8b35f7e020f92a8330ed1003ef3f9591d2e45bccb8ae5c37ed0571fb5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-nascent-swarm-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-swarm-female-actions.png",
+      "size": [
+        1449,
+        175
+      ],
+      "sha256": "7dded37d42afbe3ebe63b6eda1a829750f2979185f6cf357cd09e6040684514a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-swarm-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-swarm-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "06a58ba6e9c33be3a50e8c83a091895c6923724101753d9cf63f7b6f78bc3a15",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-swarm-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-swarm-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "e99186f2f8ed8017fde002a0aeb43ebc51c3475a2fcd20844d0bb7e6f4b28831",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-swarm-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-swarm-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "3e0a1cbab27facd491ce381f41eda26fa1eb64bee4e01a392ec7cdc5929eed43",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-nascent-swarm-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-swarm-male-actions.png",
+      "size": [
+        1485,
+        176
+      ],
+      "sha256": "5033978f6084f9532febcaf95549488817f4631a0084ab2cc5a733d2be831147",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-cicada-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-cicada-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "3221d622f8ac908e9a3e3308f17a906566d4119629b8012c68feac6e4de6bd24",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-cicada-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-cicada-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f6df833f39e5aa9ad96253bdb1c1ee7a44b9ecc670f25e250aa59a84c5c2486e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-cicada-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-cicada-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "4dfad98fae46bc575b898cd22242ab59857e0f2575b10e978e2e1133e04b32e3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-nascent-cicada-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-cicada-female-actions.png",
+      "size": [
+        1710,
+        176
+      ],
+      "sha256": "8c5c2ba6da4ff9141bc679c7696fee970e3d940344d37828935e18f9f56f7e74",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-cicada-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-cicada-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "a08ea05b15e19d9dc7f9982105caf3f075076f58006b34a4f91535fc17a39c7a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-cicada-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-cicada-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "6ef9858adc002fd67450cfdcf4195169bca049d1200a89f5e18c3690eb2b82eb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-nascent-cicada-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-cicada-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "bcf10af913b601a69e79d10b8655a38d3fba8bdab1d51f832f98a79e15d226c4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-nascent-cicada-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-nascent-cicada-male-actions.png",
+      "size": [
+        1557,
+        176
+      ],
+      "sha256": "6d757aa22eb6a2fee1a38a0d6137b8a488279dbc416166cdaca8291bbd034d73",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-armor-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-armor-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "d639662e291752a4341165f96246230fea5b175b497d6c2cead1e236b4487da2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-armor-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-armor-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "fb1231852df25d3b92678a88c519a10abb89c604f77af3e08552ac4facef8360",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-armor-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-armor-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "019fe00251dbfc078f38ac13306288e38cd7815b70c3b6da5c9bb11f7e859c39",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-integration-armor-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-armor-female-actions.png",
+      "size": [
+        1566,
+        176
+      ],
+      "sha256": "f9f34212909532b3540c25b6876383ebee4688d51247156d08dc9db43ef0cac9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-armor-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-armor-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "7530cf622a6b0f5754a387c7cfd8f7d7e8ad9466cd23f756e464317757552720",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-armor-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-armor-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "04c882c2ebd226d975b4df7c20019048330a83c46fa3737875e5bdc10c1b21a8",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-armor-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-armor-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "64ee4720bf37b510eec6d2d9587a2e1e8441aee1c3d39a6e083f3b3d84cbe07b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-integration-armor-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-armor-male-actions.png",
+      "size": [
+        1548,
+        176
+      ],
+      "sha256": "61d4640536994cc7733afa58bf2c913c450438e67b1e939ce9d2c51cd03e69cf",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-swarm-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-swarm-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ed31f84760a0bb466bdf68794772688ae102297d6ce38a2365aa425ab275b05a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-swarm-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-swarm-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a23093128e7845e220c55e79a2c258773847293bea70b7dc4eae3184d856aa09",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-swarm-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-swarm-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "1da71f962a4ee51daa4b57b0c99b7f639db4aef78595ef8fd07a2930c1e657b6",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-integration-swarm-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-swarm-female-actions.png",
+      "size": [
+        1458,
+        176
+      ],
+      "sha256": "4332fa828f0c576cbfc9915b357a693923238a7e872660716762707eccaa892d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-swarm-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-swarm-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "6c620b18542ad76b4d507f9d687fbc3070d8da041a9eeb9fa989258cdeb36e69",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-swarm-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-swarm-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "e0d0d2745a970b8be262e6d3196f12bb5e1b3b2ba7f2cb58554e21215937595f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-swarm-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-swarm-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "a51e2dd71496d6e80d06e53c7a328f5ed964510c1e8973a0158d17ae9945530c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-integration-swarm-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-swarm-male-actions.png",
+      "size": [
+        1530,
+        176
+      ],
+      "sha256": "a447b03fe2ab1d8e61b9599d471e389f82bb895a16c3176883e4398b0e12b2d5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-cicada-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-cicada-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b656c35cfeb6074dffaa87b82465bf574f84b4bf3b812a9ff7a06d0a45e1324f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-cicada-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-cicada-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "044739452183780c68f2989d5de54a8ee9ad102e6035c01a43a00c9c6f4d441a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-cicada-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-cicada-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "20a6c46195825743817852b53db9469db62ab7e206ade2ce27189ff84e0b2237",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-integration-cicada-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-cicada-female-actions.png",
+      "size": [
+        1656,
+        176
+      ],
+      "sha256": "2ae2400deb345a8692e9ce676edbc7e503be556354a1767d3dff431ba71c9818",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-cicada-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-cicada-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "0cf9b7712d5b0d8a08039a6cfd4f68cbdd527ac6ef98e1582e2d4e86415a6e38",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-cicada-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-cicada-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "fcab24af07475856d5199a31d2feaa956d71a889f60f8805597fb6313be279ae",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.insect-integration-cicada-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-cicada-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "21f97d469a8f065a0718e7c81645c5b639c514559c8b69e3627bb6d3bd747511",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "insect-integration-cicada-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/insect-integration-cicada-male-actions.png",
+      "size": [
+        1584,
+        176
+      ],
+      "sha256": "f8661a9b2bad6ce66942535be324ecfaaf4760f82b39819d63339919f5c98f23",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster.insect.combat_manifest": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/insect/manifest.json",
+      "requires": [
+        "official.monster-bloodlines"
+      ],
+      "sha256": "205dfc01a89b2bcd54c3971e39d389533fcc466ef8456d2e1214e81262dae806",
+      "combat_actors": [
+        "insect-spirit-shared",
+        "insect-king-shared",
+        "insect-void-cicada-shared",
+        "insect-mother-seed-shared",
+        "insect-violet-armor-shared",
+        "insect-thunder-singer-shared",
+        "insect-phantom-moth-shared",
+        "insect-nascent-armor-female",
+        "insect-nascent-armor-male",
+        "insect-nascent-swarm-female",
+        "insect-nascent-swarm-male",
+        "insect-nascent-cicada-female",
+        "insect-nascent-cicada-male",
+        "insect-integration-armor-female",
+        "insect-integration-armor-male",
+        "insect-integration-swarm-female",
+        "insect-integration-swarm-male",
+        "insect-integration-cicada-female",
+        "insect-integration-cicada-male"
+      ],
+      "appearance_key": "insect"
+    }
+  }
+}

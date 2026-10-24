@@ -1,0 +1,509 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "authorization": "仿照前面的流程一次性完成龟甲属",
+  "export": "Nearest-neighbour with original soft alpha; common action scale; self-contained DLC runtime files",
+  "static_forms": 19,
+  "combat_forms": 19,
+  "painted_keyposes": 171,
+  "animation_clips": 126,
+  "sources": [
+    {
+      "kind": "static",
+      "identity": "turtle-spirit-shared",
+      "file": "design/turtle-growth-alpha4-20261024/source/spirit-v1.png",
+      "sha256": "8b8e54b47040030622ac0dd725f8df21545cfcc8d40c2168689dc0df53f4ff75",
+      "subject_bounds": [
+        [
+          42,
+          273,
+          958,
+          890
+        ],
+        [
+          1025,
+          300,
+          1508,
+          848
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-spirit-shared",
+      "file": "design/turtle-combat-alpha4-20261024/source/spirit-actions-v1.png",
+      "sha256": "0e3aa315592b6a62c2beb8381f28391b0545aa0f0a29c18a25749e5f95ba363b"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-mountain-shared",
+      "file": "design/turtle-growth-alpha4-20261024/source/mountain-v1.png",
+      "sha256": "e1c71e377eab6681453e5c492f59e5a245491f63a0767cf9605ef882a7f11912",
+      "subject_bounds": [
+        [
+          30,
+          217,
+          1026,
+          920
+        ],
+        [
+          1046,
+          271,
+          1512,
+          834
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-mountain-shared",
+      "file": "design/turtle-combat-alpha4-20261024/source/mountain-actions-v1.png",
+      "sha256": "69ba78d7307a4ab733ed0a4ee34f369ffba595950dddc481251a17d81f9270d9"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-deep-sea-shared",
+      "file": "design/turtle-growth-alpha4-20261024/source/deep-sea-v1.png",
+      "sha256": "10aed230df240be813c9c3580089999a6b31040773f291071280c12db6c660aa",
+      "subject_bounds": [
+        [
+          32,
+          188,
+          1016,
+          911
+        ],
+        [
+          999,
+          197,
+          1516,
+          836
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-deep-sea-shared",
+      "file": "design/turtle-combat-alpha4-20261024/source/deep-sea-actions-v1.png",
+      "sha256": "76727b708f1465c1229fad479144685d7d5890f5a4e0cc68e9de246a5a74ff9c"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-xuanwu-shared",
+      "file": "design/turtle-growth-alpha4-20261024/source/xuanwu-v1.png",
+      "sha256": "32fe791d08c474c00107fd2d2cb4f4a32dd4ca6d2346171680ccf03e5d3ad00c",
+      "subject_bounds": [
+        [
+          12,
+          206,
+          984,
+          903
+        ],
+        [
+          1018,
+          292,
+          1536,
+          848
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-xuanwu-shared",
+      "file": "design/turtle-combat-alpha4-20261024/source/xuanwu-actions-v1.png",
+      "sha256": "a10f92382bf9e827fcbbb6b6c89eb2dfb54a8890050dd27539711d22bcb0c3c1"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-iron-shared",
+      "file": "design/turtle-growth-alpha4-20261024/source/iron-v2.png",
+      "sha256": "24d480cb9c74449dd6181d3999e401ee3efd957a0521a022f2c3a9ce21b04e6d",
+      "subject_bounds": [
+        [
+          15,
+          185,
+          1029,
+          868
+        ],
+        [
+          1067,
+          230,
+          1518,
+          840
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-iron-shared",
+      "file": "design/turtle-combat-alpha4-20261024/source/iron-actions-v2.png",
+      "sha256": "d58e4308819df8e673d5f4503622ea4901590ee6321e9440d9e6d318ee1ae2c2"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-tidal-shared",
+      "file": "design/turtle-growth-alpha4-20261024/source/tidal-v2.png",
+      "sha256": "c829c4e362466f637f2f4facbe5b94cfe8e6eed0e173615b95b718008a72ebd1",
+      "subject_bounds": [
+        [
+          4,
+          166,
+          1090,
+          888
+        ],
+        [
+          1022,
+          192,
+          1532,
+          882
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-tidal-shared",
+      "file": "design/turtle-combat-alpha4-20261024/source/tidal-actions-v1.png",
+      "sha256": "3041ace2ee02607bb23ab61c439a6b59c98a3325d901968373c5f8496e0bcc54"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-ice-shared",
+      "file": "design/turtle-growth-alpha4-20261024/source/ice-v1.png",
+      "sha256": "a94d8d501ee1880e1258e079a7321489294e7b9286c3dd9a3805a4644e8a53bf",
+      "subject_bounds": [
+        [
+          3,
+          167,
+          1018,
+          868
+        ],
+        [
+          1060,
+          264,
+          1522,
+          879
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-ice-shared",
+      "file": "design/turtle-combat-alpha4-20261024/source/ice-actions-v1.png",
+      "sha256": "29007a080110b946df4061a562cdda1a2f5d690c4c1e7520403b0933e1fe1c63"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-nascent-mountain-female",
+      "file": "design/turtle-growth-alpha4-20261024/source/nascent-mountain-female-v1.png",
+      "sha256": "a4feb9a9908cb889bd06d995040c911bef5b81db04b7fa02a22cc4a538790393",
+      "subject_bounds": [
+        [
+          64,
+          4,
+          774,
+          1020
+        ],
+        [
+          823,
+          159,
+          1517,
+          907
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-nascent-mountain-female",
+      "file": "design/turtle-combat-alpha4-20261024/source/nascent-mountain-female-actions-v1.png",
+      "sha256": "c665d5f33e283095d784a1b47206fd33011a3b8b65da8feb5df1a22e27120b8b"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-nascent-mountain-male",
+      "file": "design/turtle-growth-alpha4-20261024/source/nascent-mountain-male-v1.png",
+      "sha256": "3e2ab1b0e5248d1988f3b09483daa5697f5426ef4219ee241f96614ff1967bbc",
+      "subject_bounds": [
+        [
+          34,
+          6,
+          762,
+          1011
+        ],
+        [
+          863,
+          154,
+          1503,
+          925
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-nascent-mountain-male",
+      "file": "design/turtle-combat-alpha4-20261024/source/nascent-mountain-male-actions-v1.png",
+      "sha256": "315f60fe960fb3df3de67a8df1c1c706c0191c573b7f1c820a6b41a894909bff"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-nascent-tide-female",
+      "file": "design/turtle-growth-alpha4-20261024/source/nascent-tide-female-v2.png",
+      "sha256": "8eedeb9cd7f75a44c3d54afc9f7d83553724be807f981854ebbff0d540485c6b",
+      "subject_bounds": [
+        [
+          49,
+          2,
+          817,
+          1015
+        ],
+        [
+          796,
+          67,
+          1519,
+          951
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-nascent-tide-female",
+      "file": "design/turtle-combat-alpha4-20261024/source/nascent-tide-female-actions-v1.png",
+      "sha256": "215ff03eb050d61fa8c0f96a77e7cf3e76f83fd7c5be04508b211541d6c7e708"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-nascent-tide-male",
+      "file": "design/turtle-growth-alpha4-20261024/source/nascent-tide-male-v1.png",
+      "sha256": "164e91d08cd98650266e1085eb1af7fc9d7a759a9a706e9f825377b749f47690",
+      "subject_bounds": [
+        [
+          25,
+          8,
+          882,
+          1021
+        ],
+        [
+          825,
+          126,
+          1536,
+          914
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-nascent-tide-male",
+      "file": "design/turtle-combat-alpha4-20261024/source/nascent-tide-male-actions-v1.png",
+      "sha256": "9bac9530bf5f1653d9d8dbf82f7aac48f485139277e858211891ceff69cfef97"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-nascent-xuanwu-female",
+      "file": "design/turtle-growth-alpha4-20261024/source/nascent-xuanwu-female-v1.png",
+      "sha256": "b8217ec951100dec51dd90ce4121f76319d3d3e9a792c22af6b97c019fa89db4",
+      "subject_bounds": [
+        [
+          40,
+          0,
+          785,
+          1020
+        ],
+        [
+          800,
+          53,
+          1504,
+          962
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-nascent-xuanwu-female",
+      "file": "design/turtle-combat-alpha4-20261024/source/nascent-xuanwu-female-actions-v1.png",
+      "sha256": "ec1fb11d97c2a09c4cde3a72a480155ad678919ed150837176d0966f59f2c8e5"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-nascent-xuanwu-male",
+      "file": "design/turtle-growth-alpha4-20261024/source/nascent-xuanwu-male-v1.png",
+      "sha256": "b9a25cbfbc514f1293c2868b58b3db737da85d10e5dfad0fcb9ff0e8f584fc1c",
+      "subject_bounds": [
+        [
+          26,
+          6,
+          756,
+          1018
+        ],
+        [
+          759,
+          88,
+          1527,
+          958
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-nascent-xuanwu-male",
+      "file": "design/turtle-combat-alpha4-20261024/source/nascent-xuanwu-male-actions-v1.png",
+      "sha256": "9c36a111324d78318ca99cde7098efca0d00e8ad6799f8524bb99c1096b4b4f6"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-integration-mountain-female",
+      "file": "design/turtle-growth-alpha4-20261024/source/integration-mountain-female-v1.png",
+      "sha256": "2ea701548ebaeed713a908b677ae5c5d72136a0c27e69bbd17fab6d3fe09518b",
+      "subject_bounds": [
+        [
+          41,
+          1,
+          780,
+          1021
+        ],
+        [
+          808,
+          103,
+          1520,
+          910
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-integration-mountain-female",
+      "file": "design/turtle-combat-alpha4-20261024/source/integration-mountain-female-actions-v1.png",
+      "sha256": "ab9fe0f232ed84d0b41d538bb454652330975bf144abf980509af438bbf9e0a3"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-integration-mountain-male",
+      "file": "design/turtle-growth-alpha4-20261024/source/integration-mountain-male-v1.png",
+      "sha256": "0100466051922a08d18ac31f35226fd143106894a5bd121eee0f3e8bdf225e07",
+      "subject_bounds": [
+        [
+          29,
+          2,
+          773,
+          1012
+        ],
+        [
+          833,
+          159,
+          1508,
+          946
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-integration-mountain-male",
+      "file": "design/turtle-combat-alpha4-20261024/source/integration-mountain-male-actions-v1.png",
+      "sha256": "d408687f2d671ddef0dccf0ab84e4d0a548d51c43e713211c5bfe59d3067bf5f"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-integration-tide-female",
+      "file": "design/turtle-growth-alpha4-20261024/source/integration-tide-female-v2.png",
+      "sha256": "dc0eb007f50a2f3d4cd9077bb22f2197962f4d5f6b5be58cc27a3081267460bc",
+      "subject_bounds": [
+        [
+          24,
+          1,
+          863,
+          1017
+        ],
+        [
+          811,
+          41,
+          1522,
+          968
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-integration-tide-female",
+      "file": "design/turtle-combat-alpha4-20261024/source/integration-tide-female-actions-v1.png",
+      "sha256": "49f7a6d37be02b6b32ff10a9823f77fdc15050d8d175d91cf88a7fc8a6490647"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-integration-tide-male",
+      "file": "design/turtle-growth-alpha4-20261024/source/integration-tide-male-v1.png",
+      "sha256": "240d376723d217985079ac09ff2f3abf1ff083cbc4643bd19639590629fc7ada",
+      "subject_bounds": [
+        [
+          21,
+          0,
+          884,
+          1021
+        ],
+        [
+          848,
+          104,
+          1536,
+          914
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-integration-tide-male",
+      "file": "design/turtle-combat-alpha4-20261024/source/integration-tide-male-actions-v1.png",
+      "sha256": "cde4a49a2350841c4ae92ddd68f66236d1b8ea18a10bb3a674b039e6b32fab0f"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-integration-xuanwu-female",
+      "file": "design/turtle-growth-alpha4-20261024/source/integration-xuanwu-female-v1.png",
+      "sha256": "95831e1155c3647001e2eeb2faa6110e1b2ea8a31f2fdae110e3b349b8ab46d0",
+      "subject_bounds": [
+        [
+          29,
+          0,
+          794,
+          1018
+        ],
+        [
+          799,
+          95,
+          1517,
+          986
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-integration-xuanwu-female",
+      "file": "design/turtle-combat-alpha4-20261024/source/integration-xuanwu-female-actions-v1.png",
+      "sha256": "99a2796bfc9d7fbb82a1a94ef3a35d18f295bddd21a9c4a214986733a15fd737"
+    },
+    {
+      "kind": "static",
+      "identity": "turtle-integration-xuanwu-male",
+      "file": "design/turtle-growth-alpha4-20261024/source/integration-xuanwu-male-v1.png",
+      "sha256": "ccc05eb924dc27c7b196d8f880b8887b55faa3e6322b036c6b2134d0e5bf8bac",
+      "subject_bounds": [
+        [
+          24,
+          0,
+          799,
+          1022
+        ],
+        [
+          767,
+          62,
+          1522,
+          985
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "turtle-integration-xuanwu-male",
+      "file": "design/turtle-combat-alpha4-20261024/source/integration-xuanwu-male-actions-v1.png",
+      "sha256": "a1e860aedbeeeff0ae403019c8be9864a2758a19ebde936eda19b6ad89d100d4"
+    }
+  ],
+  "prompts": [
+    "design/turtle-growth-alpha4-20261024/prompts.json",
+    "design/turtle-combat-alpha4-20261024/prompts.json"
+  ]
+}

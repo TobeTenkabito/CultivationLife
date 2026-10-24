@@ -1,0 +1,689 @@
+{
+  "assets": {
+    "actor.monster.flora-spirit-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-spirit-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "066706588a1171467ff311df5057084e50ad00c3722f7fe10baffb323bfe3b37",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-spirit-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-spirit-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "e92a90f2d7bdbba66bfbab2521ad18f3a7c18c1d163e59306acb552eec005f28",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-spirit-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-spirit-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "f53be6bc8ef9e3b92da003997f9d236b462a04588517686e73e99c0b1773730d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-spirit-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-spirit-shared-actions.png",
+      "size": [
+        918,
+        108
+      ],
+      "sha256": "0e229d1f1e9cc85626962747234ba350ac59315afce59ce2a67ec606400f102b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-tree-lord-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-tree-lord-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "84133678e762e1abe20fa1f0e9c1c11b0f177e719f631e64624154facd730c17",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-tree-lord-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-tree-lord-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "0a762bd5f9bc73ee10b1dd4986871e95b1297bb539d353f7dd1f1f5d451e3b14",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-tree-lord-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-tree-lord-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "36d0f96c8ace97946046eb7c23e71d2b4cd4ff454a3a90a7f93230cd50fa3c3b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-tree-lord-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-tree-lord-shared-actions.png",
+      "size": [
+        1350,
+        148
+      ],
+      "sha256": "b98a69f1fbd0c6ddc126c27a8389fa94248bc9f0271850bf8726d9c85927cf31",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-ironroot-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-ironroot-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "51727cc3ce09d2377d7a6c38c10f43d01517cc1e53312dd517b810a5db5c4531",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-ironroot-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-ironroot-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "8b27fdde3168ad0ba9639b9cf0e616590c5226b47d1cf4229897e64d634c791c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-ironroot-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-ironroot-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "8e3ebe1ce036df4cdf4d74a8c5ac0a6742d9bd66e2e508dd7f7e38be689fff43",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-ironroot-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-ironroot-shared-actions.png",
+      "size": [
+        1476,
+        149
+      ],
+      "sha256": "a13f8710bafd5214a0c9467a4d3951dd77433a742093e163d3316cffd3be18fa",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-dream-garden-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-dream-garden-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "8f12280156c54bd944ee48ba3f82810bd01ace9c600208230a9f50b3aded8430",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-dream-garden-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-dream-garden-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "b5384da3c74db9ccd1587f89fde0c1f5cd694f99505277c408ddd4bfc1be7dad",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-dream-garden-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-dream-garden-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "8c3b49a52e3f4700e2212a1cbb1f2e2782fab940c06aa35f7cc9e04ff4cb2f61",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-dream-garden-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-dream-garden-shared-actions.png",
+      "size": [
+        1341,
+        148
+      ],
+      "sha256": "3a078c372bf9bebb6ddf74ce66e10b64505216c47489fa3b7b936fbeeedf5fdf",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-moon-blossom-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-moon-blossom-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ab2d950e13d32171f565aaa56c5cd0edcd1df40bfcceb6590681fb4ca758655a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-moon-blossom-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-moon-blossom-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "4764754b7a848b7fb9732cf00f172f9f61eedf0ca38d148a585779a9526aa00f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-moon-blossom-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-moon-blossom-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "b9e3f59f7b74d52c740ef585890c10c37085778347765929659d97d1f6d6dbdf",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-moon-blossom-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-moon-blossom-shared-actions.png",
+      "size": [
+        1233,
+        148
+      ],
+      "sha256": "22be06b9dbd71c497164256fc04c11970f5592ab0cdf8127164cfc53c5be3875",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-blaze-thorn-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-blaze-thorn-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "628004f22749887a6cc2fe3398e82f5ed358230d40ccc95df7d17bc68c47e5c8",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-blaze-thorn-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-blaze-thorn-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "8435ff5e2f2c2fa245c2795008e75bc4d40cd3698ad987acd754dc1d47617fe8",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-blaze-thorn-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-blaze-thorn-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "2af8801a3460c2743fa659cc0402772df4a125abdf468de4dd61dd2e5c2c7c51",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-blaze-thorn-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-blaze-thorn-shared-actions.png",
+      "size": [
+        1206,
+        150
+      ],
+      "sha256": "02d928c590c9d020dfccb99cfd664d795f278dae4694036458d5bf45b697f915",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-world-seed-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-world-seed-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b4fc9a021b1d44ff2a9538e1847569da852f2e57a90ec0bb5bc22e531f9d27ac",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-world-seed-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-world-seed-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "0b2e9c4cf633e9565b8b460525c051d734ec512ffec861a591598c5508437fc6",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-world-seed-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-world-seed-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "9056a1db9ef3860154a962911d19a5591abf62f06527cbc6e4b756f4a4a9234d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-world-seed-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-world-seed-shared-actions.png",
+      "size": [
+        1287,
+        148
+      ],
+      "sha256": "fa077d1d95abd302ee98327edab0d5865bfa5e407095a01aec80aa8756068549",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-ancient-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-ancient-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "945282f02590d3cebf5a20358ed6006b864f10766a26e8a9cb9b1d670dbbf1fa",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-ancient-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-ancient-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "0d0faaeba93decf7e4f72a52c74558028315369911c960055b420c05bf4fc44a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-ancient-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-ancient-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "f85b1288e03cb4434385dfd30fa8a45496518c2c92815cd98aa2303d1b1bdf3d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-nascent-ancient-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-ancient-shared-actions.png",
+      "size": [
+        1575,
+        176
+      ],
+      "sha256": "c66f8b570d3d5a68f8fead6ab0c944e14241be3a4151c7e53894a55cc3175e2a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-flower-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-flower-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "2c6c6a3e5b8d0d1be508be5e6e147ab4a1491d51abfa3098da9f15ca4cd10009",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-flower-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-flower-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "20b924cce34d07262814bc4927284bbde8769b34e35b37dfb42e696489b07ae9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-flower-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-flower-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "a0ab4709e8307dd7eff7a42324031c571eab83368d4cb28364f98741aa9b9ce2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-nascent-flower-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-flower-shared-actions.png",
+      "size": [
+        1629,
+        176
+      ],
+      "sha256": "2a9283f818e5619c33c3bdaaa0091adea91d889071589f541347941d3c346d63",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-thorn-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-thorn-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "62fc1e626c137716ca7cee8dae5985482479201d672b874a2dc675d85349d7cc",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-thorn-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-thorn-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "0b49f852374670d00a2893c2dfcf9d8740be42ce814da7685295e6622da90210",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-thorn-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-thorn-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "1358664d03a5c68a91c732c94e6f31f35788aefde033721584d384d153d49440",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-nascent-thorn-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-thorn-shared-actions.png",
+      "size": [
+        1593,
+        176
+      ],
+      "sha256": "3eab15e91c37fc15789cff4538c323b306c45ccd30eed1550d09d4ea3b812cf1",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-world-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-world-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "d306cda7255e97c4d18ea1242461dfb554baca77934ea99ee4d2c5bda6f72d5a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-world-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-world-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "2e0d8a80f1d91fe43ce485c944d49787960d759830166004be0a321c67f98fbc",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-nascent-world-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-world-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "7de75288ed989ae34fe9ebb115abbaf064a256be15de8aa4734c5e0ef8843b6b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-nascent-world-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-nascent-world-shared-actions.png",
+      "size": [
+        1953,
+        176
+      ],
+      "sha256": "cf78c01b33324d88cc3ad991f0e62c53d5c07ff2d4ca0a72ff7c55260f506d13",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-ancient-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-ancient-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "58d18967e7d76a9d6780b2f24c10e5b306e6cf68a744aa1b38b769013c1de651",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-ancient-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-ancient-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "475823d598660416b8580b369b9362d522d3203ce1bcdeb02c44b85f0414c408",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-ancient-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-ancient-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "7c43f72f5d82455c5ea07270eea47b17a4994f17a2acc37a9008433d799ff3f0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-integration-ancient-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-ancient-shared-actions.png",
+      "size": [
+        1665,
+        176
+      ],
+      "sha256": "b5e7192a1d5a4dc8eb2b319355df16e60402dbe244a843b48bcec03d09b506b5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-flower-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-flower-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "1c7f46afaf609bea8a0162096deed46c958a77e9238393f00457593d2c1172e5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-flower-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-flower-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "869586e758705d0b59693037b0ae8cba117783d8ecfad04c37b78e634146b5d2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-flower-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-flower-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "de8197fe44a7cce6369fd00e30efb2ea40b89e43f01482a3e54cd0d9957775ba",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-integration-flower-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-flower-shared-actions.png",
+      "size": [
+        1602,
+        176
+      ],
+      "sha256": "ba2dca55fc8c728459041a3d718ed0c2f42b856b0342c6acaecdd0b2aa9c7f44",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-thorn-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-thorn-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "78e4fa949114a074d4bf0d9752f577e5706863c65a41498757b2a01cfaefe520",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-thorn-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-thorn-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "2b2a6442de9303fef578669e95d6e5ddcafd89a559ab96090b1b0ec3534faff6",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-thorn-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-thorn-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "5509e6bb71e089cfe9ef5b8f5ff9a8c7631a4c2f0993be50c0ac27d93c37057a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-integration-thorn-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-thorn-shared-actions.png",
+      "size": [
+        1674,
+        176
+      ],
+      "sha256": "c8e10a4384128588f28278415940841a4cc7de21c96e0b54fd7e5a642ea31ca1",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-world-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-world-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "41a38463a290b1957bac5b07c7443ced09c64b9c14ca033cde61451449d4ee07",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-world-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-world-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "689cf03ab62739876244b59d2da47f9a7aafbad9a01185e384c4a6ce109d1919",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.flora-integration-world-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-world-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "22632d0681907906578710600a1d9bd6f4439a188daa3053771b2e4bb71c752b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "flora-integration-world-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/flora-integration-world-shared-actions.png",
+      "size": [
+        1566,
+        176
+      ],
+      "sha256": "8847d9ce81666550ec47c2c613696c74532d91af4014e8b0cdc08541ee3c8e00",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster.flora.combat_manifest": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/flora/manifest.json",
+      "requires": [
+        "official.monster-bloodlines"
+      ],
+      "sha256": "5cbf2ffd721cbc17d1f2561e26bb73e3cff51e7c65f3e89fdaf7954d02b633b6",
+      "combat_actors": [
+        "flora-spirit-shared",
+        "flora-tree-lord-shared",
+        "flora-ironroot-shared",
+        "flora-dream-garden-shared",
+        "flora-moon-blossom-shared",
+        "flora-blaze-thorn-shared",
+        "flora-world-seed-shared",
+        "flora-nascent-ancient-shared",
+        "flora-nascent-flower-shared",
+        "flora-nascent-thorn-shared",
+        "flora-nascent-world-shared",
+        "flora-integration-ancient-shared",
+        "flora-integration-flower-shared",
+        "flora-integration-thorn-shared",
+        "flora-integration-world-shared"
+      ],
+      "appearance_key": "flora"
+    }
+  }
+}

@@ -1,0 +1,779 @@
+{
+  "assets": {
+    "actor.monster.avian-low-spirit-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-spirit-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "2b502fe1aab927f6b5ff3069f14a97ea1f12932a36390fba92f23e2f390d39d1",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-spirit-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-spirit-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "390486e4208919ffe64d64153985492a241470154736ce3826c7a19e9a1c8e0c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-spirit-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-spirit-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "a5a265f5d422479814f5af77084a94fffad14638c3dede2dc015a2a8541a4c22",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-sky-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-sky-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "e36e640c807b8b06c8770593ef6e3824b4bbe4fdcb71568b98c54c4cb5e6ff96",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-sky-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-sky-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a5b4ddf15b194310c1bbc2efc283db56f859c76489b2e9e3f5562a7bbbb68711",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-sky-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-sky-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "6ca3383b9b77aa1ef2aee59a4dbbd7aaa1f8ea15419b4fc6dd6df9874dfd2a08",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-peng-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-peng-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "33edb26c53e6a3d987c057c8e1f4c152554bd78e5ebe6e1af6d004041447e83d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-peng-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-peng-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f6520e530c99aa65c4bd2c9838e51966ef85967c5d1769a0a54d9c710318ec90",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-peng-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-peng-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "91b7f7a0fc1b5015a379b1b10938765a8ee65c1bb5b024bf532d084701ea294d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-storm-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-storm-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b0882378f38fb57e1e461a50223d49bd27f225f986eb05e93f683348197bf791",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-storm-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-storm-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "962eb938c22aeccf64f827a5ab88e81b741b6b9cec93473f5ed64626a732e811",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-storm-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-storm-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "4d0b5a6ff717d26b4242f4f115ab63180bce10ad65c040b9884841871dd0263a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-thunder-phoenix-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-thunder-phoenix-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "25080c05c79f6ab0dcc3bbb73f195964995f5be5861e264c21ded65ccdf24f7e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-thunder-phoenix-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-thunder-phoenix-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "8279752b0038028ef9bcaa2aec208a6719d9d23060cafc7a943ca62fb99ea633",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-thunder-phoenix-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-thunder-phoenix-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "140b3822a8711cfa8cf344acfd70397f48dffbc7af62291b1a9e95b805fcf83b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-vermilion-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-vermilion-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "27b2518d690456e24a7519373b0bafe895681dab13d96399cfacf74711f6d16e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-vermilion-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-vermilion-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "e774f29b002333ee7029420006edfbff97f94e5928dedd99e70bfb123cf05c88",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-vermilion-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-vermilion-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "66948f9612dcdfeba81b54b3ffde47edc80823b8ab867f174f6464136291847a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-phoenix-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-phoenix-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "fcecd7f474906496f43ab624c433da7ea0f44cc4ad58dbff9a0e8827d0502141",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-phoenix-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-phoenix-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "86c9ec6fc470e2c31e73f59a5a5c581d56c09651d6b8bcb6cfeaf4dfb29b5ffd",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-low-phoenix-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-phoenix-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "0ab4996fd0e7321efd71f4aa82c697d23cc6107a2a7e8330740d6ca5f1c64730",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-azure-sovereign-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-azure-sovereign-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "bc8e96a4933b60a4bf097d7575f764675231d081feaef727e99901882640c968",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-azure-sovereign-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-azure-sovereign-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "777a0dae293d21563993f5414f6ce4495a0c94457c789918465503c33bb2185f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-azure-sovereign-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-azure-sovereign-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "aa976a21f50e098c134f0bfdab460c9d999ae20f6ba9cb1355085ddc2d1709b7",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-azure-sovereign-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-azure-sovereign-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "666d577bf9ef7dffc3ae73a619f8b5f2c9a32104ff5eeed8ed44484462d0b4a9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-azure-sovereign-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-azure-sovereign-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9adc0c124fc8c5682cc37e5d3f95cb16631c21756b38cdd65a0937e6b7416be9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-azure-sovereign-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-azure-sovereign-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "5efc28ce08c726ebb16c3f83ba47beac8b45fa0c9b4f8164a5586de61e78ad2c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-storm-sovereign-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-storm-sovereign-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "939e29f0e3933698dd367bb40708f5ac454263e1738e2408169358d4c91cc001",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-storm-sovereign-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-storm-sovereign-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "32c03aa6f3f6565a641bcc4ef5d7d20b00f55c46ca9fad7231068def2d33bafb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-storm-sovereign-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-storm-sovereign-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "363b1dc72dcecf051142ffcc75744fe502e1fc963e6544534625e1cbac6d11d0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-storm-sovereign-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-storm-sovereign-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "c7fcaa6dbd34dff66b21a2c82c85644de73add485ad054deadbb8f8d9f2ff2a4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-storm-sovereign-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-storm-sovereign-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "1d819caa25b9dd1a72fd424481b8da4f19f09ec4e019f9358d61c273045d5d04",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-storm-sovereign-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-storm-sovereign-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "992d7528dfe621d99039f69b6fbd26df89e2cf1c36e1b191fa6503dba2140c70",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-flame-sovereign-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-flame-sovereign-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "09428759427cc3901c490b04ff39d60f2769af6d601bdc26527b73d86b629f3b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-flame-sovereign-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-flame-sovereign-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "71fe04928ba414f9392a5c15045d3b6342cf858037534a3fdb5662892edfdef4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-flame-sovereign-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-flame-sovereign-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "4a5f806e3803ecc139c0bc056f787b29862957f78b35230b3454bf2138473103",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-flame-sovereign-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-flame-sovereign-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "127a4b292c47f86dbe7eb4983d86f3634712591a3c6ad0bc6e536bcf926e59ea",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-flame-sovereign-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-flame-sovereign-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "6cc299e78c65d80fd374806b590cd29f4c4f51492d571facd61fcd9b11fa21a3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-nascent-flame-sovereign-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-flame-sovereign-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "035936cf6646aefa17c182e44b57dfbf149e45b6a72a80589ffb6c0aaf573bae",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-primordial-peng-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-primordial-peng-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "3fafd6d7117cd213049d662243938b45a6af7af476995e67fba7d0128fb51e53",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-primordial-peng-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-primordial-peng-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a389625d7d9072496517bb4991179118467aa60386deb261927ee3dc67e252df",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-primordial-peng-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-primordial-peng-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "72bcdaf49abfb38924c2c64ecc9df378cab808e7bbc9029bf02fa7a07e696eba",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-primordial-peng-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-primordial-peng-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "3a6352b4163d43b29ba2d59945c1f19c8c5f9b9312344f5b44149ccc3f700f4a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-primordial-peng-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-primordial-peng-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "eeb5283d87ae5f50215ca1b29e522a999eb2484e7da60ca5da80abf5535de6e2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-primordial-peng-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-primordial-peng-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "77154bd2317e2a2dc1b0b3b61b7117302f2544de34d036bc395e1d66b62e9263",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-ancestral-phoenix-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-ancestral-phoenix-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "87e3f0a3b2ee6b80fbac561e6e0d5e2b9fe7db650a368c32066995f47bb5befb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-ancestral-phoenix-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-ancestral-phoenix-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9f7fab57af1cc93d847abd781ec47b768f36d77741987037113a06a62193923f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-ancestral-phoenix-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-ancestral-phoenix-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "651a71f06efce3d70869678d356dc4951e42eed6fdfd2e757fa8b1362ca62216",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-ancestral-phoenix-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-ancestral-phoenix-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "4d93bdc62a48ef19ea44a85a0dcaf8fd4f4f25f646543cde184a665eb5891297",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-ancestral-phoenix-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-ancestral-phoenix-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "665cdd3f09263d1401b2a1d8bba7f04a9f5bc4ddc6b1a847a99a6b481d257ab9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.avian-integration-ancestral-phoenix-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-ancestral-phoenix-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "4ed7a58e2af809f0a7c01a7879c22c3a0eeeca8c1a106c6d69a8b423ebcb770c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-low-spirit-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-spirit-shared-actions.png",
+      "size": [
+        1116,
+        122
+      ],
+      "sha256": "b5b4748202abac5d1cbf5141cd22dadb40374ef37648bea2a689f1c256f7f36c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-low-sky-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-sky-shared-actions.png",
+      "size": [
+        1422,
+        149
+      ],
+      "sha256": "4b9d87f7d1a4fdb79547dbfc46f1c67e07ba5173ac776117b1e7ea6d73db6fac",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-low-peng-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-peng-shared-actions.png",
+      "size": [
+        1557,
+        158
+      ],
+      "sha256": "9399762ff56daae08ee0bfd64dbfe8da43155a20d405811c0579b20fb0c8dfb2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-low-storm-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-storm-shared-actions.png",
+      "size": [
+        1485,
+        161
+      ],
+      "sha256": "22c367773b5b326d3e96c40486c4e86884dfb7b877ee77ce632f6c85d087bd3c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-low-thunder-phoenix-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-thunder-phoenix-shared-actions.png",
+      "size": [
+        1620,
+        150
+      ],
+      "sha256": "e157fe3d6dd4f49f10cb60e75cfbd7902a7d259ca2f95a8c153a2594a435bfcb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-low-vermilion-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-vermilion-shared-actions.png",
+      "size": [
+        1431,
+        148
+      ],
+      "sha256": "ff7315fdeab4fdef5145b1b4faeada529cc1147fb0ce75562904f64d7d6030c2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-low-phoenix-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-low-phoenix-shared-actions.png",
+      "size": [
+        1458,
+        156
+      ],
+      "sha256": "457f596f1fe58d74a46bbe8158df1bcf62a18e6013357638581cc5f2aaf2653c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-nascent-azure-sovereign-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-azure-sovereign-female-actions.png",
+      "size": [
+        1620,
+        176
+      ],
+      "sha256": "192f0bf378770ec613b18cdcb267f31a275e45ed6b8f5a6a0c55b9c97d8f1320",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-nascent-azure-sovereign-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-azure-sovereign-male-actions.png",
+      "size": [
+        1584,
+        176
+      ],
+      "sha256": "bfe0c2355b9aa9e27ac9ab3a234e502b37a60beb644a5babad421327fee7903c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-nascent-storm-sovereign-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-storm-sovereign-female-actions.png",
+      "size": [
+        1557,
+        176
+      ],
+      "sha256": "60bac9da636cec44147099f4b7b1ac65c3f235a3955c69e356d13e4c6d79fab4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-nascent-storm-sovereign-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-storm-sovereign-male-actions.png",
+      "size": [
+        1566,
+        178
+      ],
+      "sha256": "13cd5a13f51fde8e8921c1500573209c0042e9af672bc8e0863d9a10c7c707d6",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-nascent-flame-sovereign-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-flame-sovereign-female-actions.png",
+      "size": [
+        1719,
+        178
+      ],
+      "sha256": "bd0fcb216cd490de2309f9f2d09069236b9d82042c3ac95c032a61cdce1f8703",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-nascent-flame-sovereign-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-nascent-flame-sovereign-male-actions.png",
+      "size": [
+        1674,
+        176
+      ],
+      "sha256": "3d187f7cbe705f723613d5e9101b1a2f318d47a71d0378e7f8ccaa593bf14ea6",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-integration-primordial-peng-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-primordial-peng-female-actions.png",
+      "size": [
+        1647,
+        176
+      ],
+      "sha256": "d6e6786015f47fc8097d4783fd21a5da4425adfbf9af658bd13d4324dc952f4a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-integration-primordial-peng-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-primordial-peng-male-actions.png",
+      "size": [
+        1674,
+        176
+      ],
+      "sha256": "e5ba76d7eaa568a9898a66de80d3f3eea93ddede1cd792b5f1f6c349a51e2c8c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-integration-ancestral-phoenix-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-ancestral-phoenix-female-actions.png",
+      "size": [
+        1629,
+        176
+      ],
+      "sha256": "bb22bc09dc9edac8de76e7acdd08973be3f8e26aacb8671616fa96c8606044c9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "avian-integration-ancestral-phoenix-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/avian-integration-ancestral-phoenix-male-actions.png",
+      "size": [
+        1638,
+        176
+      ],
+      "sha256": "080f0bce2ea5581c2a013af9a0ab96e4a0206a88115c8b78da47746bc35f7b7f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster.avian.combat_manifest": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/avian/manifest.json",
+      "requires": [
+        "official.monster-bloodlines"
+      ],
+      "sha256": "fae9cd8726e599f0431f3fb27bd7af571d176b8386786d7acd2f6b773a50aa05",
+      "combat_actors": [
+        "avian-low-spirit-shared",
+        "avian-low-sky-shared",
+        "avian-low-peng-shared",
+        "avian-low-storm-shared",
+        "avian-low-thunder-phoenix-shared",
+        "avian-low-vermilion-shared",
+        "avian-low-phoenix-shared",
+        "avian-nascent-azure-sovereign-female",
+        "avian-nascent-azure-sovereign-male",
+        "avian-nascent-storm-sovereign-female",
+        "avian-nascent-storm-sovereign-male",
+        "avian-nascent-flame-sovereign-female",
+        "avian-nascent-flame-sovereign-male",
+        "avian-integration-primordial-peng-female",
+        "avian-integration-primordial-peng-male",
+        "avian-integration-ancestral-phoenix-female",
+        "avian-integration-ancestral-phoenix-male"
+      ],
+      "appearance_key": "avian"
+    }
+  }
+}

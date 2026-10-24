@@ -1,0 +1,509 @@
+{
+  "assets": {
+    "serpent-spirit-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-spirit-shared-actions.png",
+      "size": [
+        1188,
+        114
+      ],
+      "sha256": "e9c452b9c7bd872d660e97ad6880c33c583857b42fff1901d05bdd33694f9b43",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-great-mystic-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-great-mystic-shared-actions.png",
+      "size": [
+        1404,
+        148
+      ],
+      "sha256": "925accc19c12a97d452da0e92399d199bef507697f606e235a8e0670c4224e5c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-rock-python-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-rock-python-shared-actions.png",
+      "size": [
+        1548,
+        154
+      ],
+      "sha256": "90b6396d288eb2f62aaf0a873de12a35d03bd5b78ad6c3518afe49138be9bcc5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-abyss-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-abyss-shared-actions.png",
+      "size": [
+        1629,
+        148
+      ],
+      "sha256": "854d0ed7a07145c2eacd47d8097799c7a4f4b4329ce3e99742cf135142bf5913",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-flood-dragon-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-flood-dragon-shared-actions.png",
+      "size": [
+        1539,
+        148
+      ],
+      "sha256": "b7f4a1877c9e6d2743f0a9ee849369e2493c57544b6204c4e236ab94009315b4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-thunder-kui-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-thunder-kui-shared-actions.png",
+      "size": [
+        1422,
+        148
+      ],
+      "sha256": "658713cf9edff689237715dda0c97a860edf37362195d83c9394d2e8dda49767",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-sky-dragon-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-sky-dragon-shared-actions.png",
+      "size": [
+        1449,
+        152
+      ],
+      "sha256": "1f3627fc3015512ae872f49ec98b17cc108cbad70beb1aa7f8a772f23da1aebc",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-integration-dragon-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-dragon-female-actions.png",
+      "size": [
+        2013,
+        728
+      ],
+      "sha256": "367495a58ca1587fe7df0a9bb1a82b64f7ff2bb80abc7c7d5b5ca43a56703c35",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-integration-dragon-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-dragon-male-actions.png",
+      "size": [
+        2013,
+        716
+      ],
+      "sha256": "b1f1a05d8d271ff3b1c97794c187882d0a1e88193ec6cada99430ace9eb239dd",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-integration-serpent-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-serpent-female-actions.png",
+      "size": [
+        2002,
+        720
+      ],
+      "sha256": "df32117577da90cec6c9f4a1dc60a722c3d45b571d8c15a94caae04052b7eb93",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "serpent-integration-serpent-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-serpent-male-actions.png",
+      "size": [
+        1991,
+        720
+      ],
+      "sha256": "0da9416549f27a440dda91e1f53f83d51e8283c3ed03d853ab56ab0e1600a416",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-spirit-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-spirit-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "b149725a2e96708b7388c23252a96f9e042c56f36b35aa7312f2522e71679127",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-spirit-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-spirit-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "3a505139faab184f5f53dfe3e9a2666d32dd4c505c3dd93ee47015623f976642",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-spirit-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-spirit-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "21b670a6e2031d71bed7703c0ce9a3d2aa4c25ed110f602ce818890cf53a1e96",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-great-mystic-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-great-mystic-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "c4cb0342e265136bed6f9cffe637ff9d780e879b28e5d2ef3c159b0bdd83e757",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-great-mystic-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-great-mystic-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "0bee7a5535235a608e29fb77dd8994902ca5bb298a1db1f07714a8ce0f689f02",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-great-mystic-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-great-mystic-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "78dbea6abf2f67e9a4b99dd20a128259cc141421e5ccece74795716cd05d9ecf",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-rock-python-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-rock-python-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "583b5ca53ef9560c9b0cdd6d9ae1e226dab8f5c0024c7900880be7669d78a522",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-rock-python-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-rock-python-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "d9b4552975d0ccbeb705fa82a98cc18b430626da6e14bc56ed6b552f4ba805e8",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-rock-python-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-rock-python-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "167118ce07e3851f05bd8dd20f478e109fc96b9d2525d250a3d90643f75701e8",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-abyss-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-abyss-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "5a63859b70cd25325f2c67fe143edc849fce5a84ea12ac73cb6668c6245fe123",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-abyss-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-abyss-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "de81448457b73dc2a060fede37b7c055b3376d2d77f720779429e0d2d56bf58e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-abyss-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-abyss-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "eafa7bf83e04ec940b22df465a5fd4d6ebff82008c55c0af4f769cd7826cf525",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-flood-dragon-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-flood-dragon-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "36249604c76baaf3f68d01fffef61d5f3cd06c907b8773ca69cf6bd39de1dd21",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-flood-dragon-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-flood-dragon-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "5ff48e38e906f7d9cd913b5fc9f290adf3f5477ea91badd1ad1bbe4f98c7d5e9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-flood-dragon-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-flood-dragon-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "679471adf8fdc58d85efefb204910582cdd40410df7bed57dc4ccbcaacbb3151",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-thunder-kui-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-thunder-kui-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9e55f8afdc15d4bf0464aad88f0c0c25b988d5ce4e07bfdc0c9fc3a895c2126a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-thunder-kui-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-thunder-kui-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "2e67ba941d348e0d742f680849a2ae874899cf5d94a1ef0eade7b0376f52ed1d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-thunder-kui-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-thunder-kui-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "9ee8601036fb5f1b3cd02b054489fca92d06580abdeb16e752a6eb7572fce6a0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-sky-dragon-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-sky-dragon-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "dd341134ac711fb0a5a345383b4407472a1aa0cf8840daf322b63b0f314f5cfe",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-sky-dragon-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-sky-dragon-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b0064a56e9edbc8d798374db66bf7f62903de63f4a473f5385a50834e8762656",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-sky-dragon-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-sky-dragon-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "83f58e3f10aa457a8ebb51e76b1cea4f3d85fed899c288ec2a40adce6366deda",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-dragon-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-dragon-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "03708849d4d40b848f26515962c85a9ac31765c8c5c972366543f774e26e7f0c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-dragon-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-dragon-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "2e00d2d852c1a9b04c897967576db4d8400bd4dbf334661bd51d60d7a6f4d47e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-dragon-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-dragon-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "e78cc1993e4ef8910f8356583d9d8557191d5a1629b29e94f79d62345afda538",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-dragon-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-dragon-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9671d5e4e74d55acf08ad1da6fbe10b6c5a69b05a03cf9d325416438b316794d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-dragon-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-dragon-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "4b9856dd24c2897b2c5d20009aaae8ada7564a0e478addeb91bcf8a8d2066213",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-dragon-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-dragon-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "657c2fcb9abd61b8ca79a56196658ef9dfc6f942a44bd4220686191234c4cc94",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-serpent-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-serpent-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "b3d2841dc338c41c951f9cb6f3ca25eedaabbf18bacd95cd7ebaf14161b15e95",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-serpent-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-serpent-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "8408c89740a312f7c3e9e65e2067b61988bb347e23538265d44c8a4b89597802",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-serpent-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-serpent-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "97f4b5cabfe2000cd99e42374d617a5c9783d4268aa9590732884c8b054305eb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-serpent-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-serpent-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "71ca9789abded5bff326676c095cdc5275bd801bae6d11a461b38f61aa465856",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-serpent-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-serpent-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "1c043a7bee4a1c394c1cc2294d541176fcc0ae82039008f4d79d1b16757e1459",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.serpent-integration-serpent-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/serpent-integration-serpent-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "d2182f0a13d14ef15d863a95a154b5f848e856b5df7890ece0871cccdc99e396",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster.serpent.combat_manifest": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/serpent/manifest.json",
+      "requires": [
+        "official.monster-bloodlines"
+      ],
+      "sha256": "fcc95da96091ebd26435c6536c23de19efb3f7cbf38fe7121da55b8aee44bd89",
+      "combat_actors": [
+        "serpent-spirit-shared",
+        "serpent-great-mystic-shared",
+        "serpent-rock-python-shared",
+        "serpent-abyss-shared",
+        "serpent-flood-dragon-shared",
+        "serpent-thunder-kui-shared",
+        "serpent-sky-dragon-shared",
+        "serpent-integration-dragon-female",
+        "serpent-integration-dragon-male",
+        "serpent-integration-serpent-female",
+        "serpent-integration-serpent-male"
+      ],
+      "appearance_key": "serpent"
+    }
+  }
+}

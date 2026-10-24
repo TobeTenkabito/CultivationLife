@@ -87,7 +87,7 @@ def beast_frames(source):
     return frames, clips
 
 
-def static_exports(identity, source, existing=None):
+def static_exports(identity, source, existing=None, parts=None):
     result = {}
     if existing:
         for kind, item in existing.items():
@@ -96,7 +96,9 @@ def static_exports(identity, source, existing=None):
             shutil.copyfile(item[0], path)
             result[kind] = dict(file=URL+path.name, size=list(Image.open(path).size), sha256=sha(path), requires=[OWNER])
         return result
-    if source.name == 'fox-nine-female-v2.png' and 'fox-integration' in str(source):
+    if parts is not None:
+        pass  # Caller supplied a verified split of its own paired source.
+    elif source.name == 'fox-nine-female-v2.png' and 'fox-integration' in str(source):
         # The two approved figures almost touch. Cut only their faint alpha gap,
         # using a continuous least-alpha seam; do not threshold the spirit tails.
         rgba=np.asarray(Image.open(source).convert('RGBA'))
@@ -234,13 +236,16 @@ def main():
     write(OUT/'manifest.json',data)
     catalog['assets']['monster.fox.combat_manifest']=dict(file=URL+'manifest.json',requires=[OWNER],sha256=sha(OUT/'manifest.json'))
     write(OUT/'registry.json',{'assets':{k:v for k,v in catalog['assets'].items() if v['file'].startswith(URL)}})
-    write(ROOT/'content/visual_assets.json',catalog)
+    None  # Registry is assembled inside the DLC, never written into core content.
     write(OUT/'provenance.json',dict(generator='OpenAI built-in image_gen',authorization='再补充狐狸时期的各个动作，然后将这一部分素材并入妖修dlc1中，并更新妖修dlc版本，暂不打包。',
         export='nearest-neighbour; original soft alpha; nascent approved pixel files copied byte-for-byte',
         painted_keyposes=144,animation_clips=112,static_forms=20,combat_forms=16,sources=provenance,
         prompts=['design/fox-beast-combat-alpha4-20261023/prompts.json','design/fox-integration-combat-alpha4-20261023/prompts.json','design/fox-combat-alpha4-20261023/prompts.json']))
     print(f'{len(actors)} combat forms, {len(statics)} static forms promoted to {OUT}')
 
+
+    from scripts.prepare_monster_release_assets import assemble
+    assemble()
 
 if __name__=='__main__':
     main()

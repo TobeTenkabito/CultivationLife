@@ -930,8 +930,8 @@ def intrinsic_resource_breakdown(player: Player) -> dict[str, Any]:
 def public_player(player: Player) -> dict[str, Any]:
     ensure_technique_set(player)
     data = player.to_dict()
-    from .monster_visuals import fox_appearance
-    appearance = fox_appearance(player)
+    from .monster_visuals import monster_appearance
+    appearance = monster_appearance(player)
     data['visual_actor'] = appearance['static'] if appearance else None
     data["world_age"] = player.age
     data["age"] = current_body_age(player)

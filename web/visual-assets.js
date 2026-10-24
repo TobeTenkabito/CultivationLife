@@ -17,7 +17,7 @@
     return cache.get(id);
   }
   function actor(player) {
-    if (player?.path === 'monster' && player.visual_actor?.startsWith('actor.monster.fox-')) return player.visual_actor;
+    if (player?.path === 'monster' && /^actor\.monster\.[a-z0-9][a-z0-9-]*$/.test(player.visual_actor || '')) return player.visual_actor;
     if (!player || player.race !== 'human' || !['dao', 'demonic'].includes(player.path) || player.ghost_host_body ||
         player.ghost_attachment || (player.lineage_race && player.lineage_race !== 'human') ||
         player.transformation_loadouts?.[player.transformation_technique?.id]?.active?.length ||

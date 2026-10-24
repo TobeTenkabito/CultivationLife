@@ -1,0 +1,703 @@
+{
+  "authorization": "从狐狸到猿属都还没有把原稿进行像素缩略化吧，也就是真正能在游戏里显示的那种头像，请补上。",
+  "processing": "deterministic component extraction and nearest-neighbour resize; original soft alpha",
+  "original_generator": "OpenAI built-in image_gen",
+  "new_generation": false,
+  "source_recipe": "scripts/monster_static_sources.json",
+  "static_forms": 23,
+  "sources": [
+    {
+      "identity": "ape-low-spirit-shared",
+      "node": "APE_SPIRIT",
+      "name": "灵猿",
+      "realm": 1,
+      "gender": "shared",
+      "file": "design/ape-growth-alpha4-20261023/source/ape-spirit-v1.png",
+      "sha256": "1f3716e523793033b928cbef07f6d5c8c0ba63202dc5dc63f9c5eca9f7efc7cd",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          170,
+          3,
+          615,
+          1008
+        ],
+        [
+          716,
+          71,
+          1499,
+          968
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-king-female",
+      "node": "APE_KING",
+      "name": "通灵猿王·女",
+      "realm": 3,
+      "gender": "female",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_king-female-v1.png",
+      "sha256": "fc70227b59fef3f4fd4eff38a6d4a0b9a70d4f0e938bcf226a08f82cb0189a4d",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          62,
+          2,
+          755,
+          1020
+        ],
+        [
+          762,
+          49,
+          1516,
+          987
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-king-male",
+      "node": "APE_KING",
+      "name": "通灵猿王·男",
+      "realm": 3,
+      "gender": "male",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_king-male-v1.png",
+      "sha256": "f1ee6ece707ebec52f60813e0b3cccf308c23ec3a2a9171ff22ae0dd7bbe09cb",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          66,
+          9,
+          728,
+          1006
+        ],
+        [
+          782,
+          96,
+          1502,
+          997
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-forest-sage-female",
+      "node": "APE_FOREST_SAGE",
+      "name": "古林灵猿·女",
+      "realm": 3,
+      "gender": "female",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_forest_sage-female-v1.png",
+      "sha256": "cd5b53ae25609c6ad56075e482ac085b737e64527801add0a8c81cb33b14c94f",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          72,
+          10,
+          655,
+          1008
+        ],
+        [
+          766,
+          93,
+          1475,
+          987
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-forest-sage-male",
+      "node": "APE_FOREST_SAGE",
+      "name": "古林灵猿·男",
+      "realm": 3,
+      "gender": "male",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_forest_sage-male-v1.png",
+      "sha256": "d7363f9db63f484c667a2e88c01b67a446e7c887b6161610d4606a4e60414e05",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          90,
+          0,
+          721,
+          1012
+        ],
+        [
+          787,
+          56,
+          1524,
+          977
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-mountain-king-female",
+      "node": "APE_MOUNTAIN_KING",
+      "name": "镇岳妖王·女",
+      "realm": 3,
+      "gender": "female",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_mountain_king-female-v1.png",
+      "sha256": "9e5deda95ce2956f515ae3554787eaff8b7f10298cf7d3335d32f067eea6aba0",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          126,
+          11,
+          610,
+          1016
+        ],
+        [
+          716,
+          59,
+          1487,
+          999
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-mountain-king-male",
+      "node": "APE_MOUNTAIN_KING",
+      "name": "镇岳妖王·男",
+      "realm": 3,
+      "gender": "male",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_mountain_king-male-v1.png",
+      "sha256": "fd75a4d17eaa51904d6330b110cc00010d741fed008b626aa4986dd34df785da",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          72,
+          11,
+          668,
+          1008
+        ],
+        [
+          716,
+          110,
+          1490,
+          960
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-earthshaker-female",
+      "node": "APE_EARTHSHAKER",
+      "name": "撼地巨猿·女",
+      "realm": 3,
+      "gender": "female",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_earthshaker-female-v1.png",
+      "sha256": "cf6d32ce500b8f31b5d0e60081c4237df8ccb2192f2824dd128deaa7d3080279",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          191,
+          6,
+          641,
+          1010
+        ],
+        [
+          777,
+          75,
+          1490,
+          976
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-earthshaker-male",
+      "node": "APE_EARTHSHAKER",
+      "name": "撼地巨猿·男",
+      "realm": 3,
+      "gender": "male",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_earthshaker-male-v1.png",
+      "sha256": "b22fec3899e2364f6d0d88c95343afce8c7a7c3a0e667cf7afa2c676beb53965",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          162,
+          4,
+          611,
+          1018
+        ],
+        [
+          784,
+          145,
+          1486,
+          959
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-ancient-female",
+      "node": "APE_ANCIENT",
+      "name": "太古妖猿·女",
+      "realm": 3,
+      "gender": "female",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_ancient-female-v1.png",
+      "sha256": "5699a3f488e5df98177e1613af2ea3e53a854c3832b181683d118c18fb4d0c52",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          80,
+          0,
+          682,
+          1013
+        ],
+        [
+          762,
+          52,
+          1486,
+          978
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-ancient-male",
+      "node": "APE_ANCIENT",
+      "name": "太古妖猿·男",
+      "realm": 3,
+      "gender": "male",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_ancient-male-v1.png",
+      "sha256": "a577e7ec1212baf44fb171ddf9bb185225bc8a768bc6ca007db817bc862de4db",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          100,
+          9,
+          640,
+          1008
+        ],
+        [
+          771,
+          94,
+          1496,
+          984
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-self-ancestor-female",
+      "node": "APE_SELF_ANCESTOR",
+      "name": "万山妖祖·女",
+      "realm": 3,
+      "gender": "female",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_self_ancestor-female-v1.png",
+      "sha256": "e6f33a75836eefb7552a578d4ed3f928403f26a6f969924d7b567f5dd88f99a6",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          87,
+          2,
+          650,
+          1018
+        ],
+        [
+          770,
+          95,
+          1481,
+          978
+        ]
+      ]
+    },
+    {
+      "identity": "ape-low-self-ancestor-male",
+      "node": "APE_SELF_ANCESTOR",
+      "name": "万山妖祖·男",
+      "realm": 3,
+      "gender": "male",
+      "file": "design/ape-growth-alpha4-20261023/source/ape_self_ancestor-male-v1.png",
+      "sha256": "7e607de37580b16aa36371ec46015c5b46c3f6c7805ddcbe8bf97a8fd2121cf7",
+      "prompts": "design/ape-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          81,
+          5,
+          743,
+          1020
+        ],
+        [
+          785,
+          90,
+          1490,
+          980
+        ]
+      ]
+    },
+    {
+      "identity": "ape-nascent-wisdom-sovereign-female",
+      "node": "APE_WISDOM_SOVEREIGN",
+      "name": "通天灵猿·女",
+      "realm": 4,
+      "gender": "female",
+      "file": "design/ape-nascent-alpha4-20261024/source/wisdom-female-v1.png",
+      "sha256": "02cbba639c81779438aa08ca4e24c13d5a063c4410416363575cb9f14c710e69",
+      "prompts": "design/ape-nascent-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          33,
+          4,
+          796,
+          1023
+        ],
+        [
+          791,
+          70,
+          1525,
+          976
+        ]
+      ]
+    },
+    {
+      "identity": "ape-nascent-wisdom-sovereign-male",
+      "node": "APE_WISDOM_SOVEREIGN",
+      "name": "通天灵猿·男",
+      "realm": 4,
+      "gender": "male",
+      "file": "design/ape-nascent-alpha4-20261024/source/wisdom-male-v1.png",
+      "sha256": "bd54c21bdfb5aa4884a1ae0f1b584ae61eca26773b033bb525d4b49511ecfe50",
+      "prompts": "design/ape-nascent-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          33,
+          5,
+          768,
+          1011
+        ],
+        [
+          737,
+          99,
+          1502,
+          1011
+        ]
+      ]
+    },
+    {
+      "identity": "ape-nascent-mountain-sovereign-female",
+      "node": "APE_MOUNTAIN_SOVEREIGN",
+      "name": "搬山圣猿·女",
+      "realm": 4,
+      "gender": "female",
+      "file": "design/ape-nascent-alpha4-20261024/source/mountain-female-v1.png",
+      "sha256": "7389cab8088fe408e52cb7160af772e0f25f374c7d6a7c099074258be8dd380d",
+      "prompts": "design/ape-nascent-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          59,
+          11,
+          661,
+          1010
+        ],
+        [
+          702,
+          33,
+          1505,
+          999
+        ]
+      ]
+    },
+    {
+      "identity": "ape-nascent-mountain-sovereign-male",
+      "node": "APE_MOUNTAIN_SOVEREIGN",
+      "name": "搬山圣猿·男",
+      "realm": 4,
+      "gender": "male",
+      "file": "design/ape-nascent-alpha4-20261024/source/mountain-male-v1.png",
+      "sha256": "460b2dbb29a4e9a5e91b90459dcffdc753ad703c8273ec5f7256ffe54c299238",
+      "prompts": "design/ape-nascent-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          32,
+          3,
+          736,
+          1017
+        ],
+        [
+          707,
+          58,
+          1509,
+          928
+        ]
+      ]
+    },
+    {
+      "identity": "ape-nascent-primordial-sovereign-female",
+      "node": "APE_PRIMORDIAL_SOVEREIGN",
+      "name": "太荒战猿·女",
+      "realm": 4,
+      "gender": "female",
+      "file": "design/ape-nascent-alpha4-20261024/source/primordial-female-v1.png",
+      "sha256": "a881ee6be3346c2ed34b332c73dabdaae17cfaa23ac4642ba0593d6514dae102",
+      "prompts": "design/ape-nascent-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          90,
+          0,
+          740,
+          1016
+        ],
+        [
+          738,
+          39,
+          1456,
+          986
+        ]
+      ]
+    },
+    {
+      "identity": "ape-nascent-primordial-sovereign-male",
+      "node": "APE_PRIMORDIAL_SOVEREIGN",
+      "name": "太荒战猿·男",
+      "realm": 4,
+      "gender": "male",
+      "file": "design/ape-nascent-alpha4-20261024/source/primordial-male-v1.png",
+      "sha256": "506dd473da4c06ecc3f9aeca60754c8669c65030c4051297be7a17939f3a469f",
+      "prompts": "design/ape-nascent-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          81,
+          4,
+          732,
+          1021
+        ],
+        [
+          737,
+          79,
+          1505,
+          976
+        ]
+      ]
+    },
+    {
+      "identity": "ape-integration-primordial-battle-ancestor-female",
+      "node": "APE_PRIMORDIAL_BATTLE_ANCESTOR",
+      "name": "太古斗战祖·女",
+      "realm": 7,
+      "gender": "female",
+      "file": "design/ape-integration-alpha4-20261024/source/battle-female-v1.png",
+      "sha256": "1c689c057c47370c74e864e8203bf278778886585de739f539f3245239922549",
+      "prompts": "design/ape-integration-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          23,
+          0,
+          770,
+          1020
+        ],
+        [
+          769,
+          61,
+          1519,
+          979
+        ]
+      ]
+    },
+    {
+      "identity": "ape-integration-primordial-battle-ancestor-male",
+      "node": "APE_PRIMORDIAL_BATTLE_ANCESTOR",
+      "name": "太古斗战祖·男",
+      "realm": 7,
+      "gender": "male",
+      "file": "design/ape-integration-alpha4-20261024/source/battle-male-v1.png",
+      "sha256": "455da7e13b689582abade9cec91cf30141d4804d2ac045937eee09620e05bb7d",
+      "prompts": "design/ape-integration-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          34,
+          1,
+          740,
+          1020
+        ],
+        [
+          736,
+          57,
+          1507,
+          947
+        ]
+      ]
+    },
+    {
+      "identity": "ape-integration-new-ancestor-female",
+      "node": "APE_NEW_ANCESTOR",
+      "name": "今世万灵祖·女",
+      "realm": 7,
+      "gender": "female",
+      "file": "design/ape-integration-alpha4-20261024/source/mentor-female-v1.png",
+      "sha256": "0bb186f193d4745ff37570ba61bd5217436e1508f50437a3dd0cc36a1abfa0aa",
+      "prompts": "design/ape-integration-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          16,
+          4,
+          786,
+          1018
+        ],
+        [
+          788,
+          79,
+          1520,
+          966
+        ]
+      ]
+    },
+    {
+      "identity": "ape-integration-new-ancestor-male",
+      "node": "APE_NEW_ANCESTOR",
+      "name": "今世万灵祖·男",
+      "realm": 7,
+      "gender": "male",
+      "file": "design/ape-integration-alpha4-20261024/source/mentor-male-v1.png",
+      "sha256": "607bc516c603cde1c1218c178b4fb41393a5af30b9c22b24af7255a19a1dbd9b",
+      "prompts": "design/ape-integration-alpha4-20261024/prompts.json",
+      "subject_bounds": [
+        [
+          43,
+          3,
+          767,
+          1012
+        ],
+        [
+          745,
+          92,
+          1514,
+          961
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-spirit-shared",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape-spirit-actions-v1.png",
+      "sha256": "194baa4f175c62e7a55f892a9c48fc201c47bcb8c9a8402583d23324b3e517f4"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-king-female",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_king-female-actions-v1.png",
+      "sha256": "7865392d66eda8e000837427f6ca9d3d4704a982c1e5ee97d1e2090fc5c9a9ec"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-king-male",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_king-male-actions-v1.png",
+      "sha256": "727fb5c7bb5590757e9129743472f38e909c350eff9241cf035561c977f278f1"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-forest-sage-female",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_forest_sage-female-actions-v1.png",
+      "sha256": "983b995130f43ba0695de0fa8f9b6fa2a1b8cc70689c3921bf911f7a23018413"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-forest-sage-male",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_forest_sage-male-actions-v1.png",
+      "sha256": "8a356fb3d491ca0a92ea2c65b5398715b86bace64356e9ab166348e8767208b3"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-mountain-king-female",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_mountain_king-female-actions-v1.png",
+      "sha256": "8f751dbbec0e58046739df527f81a0184d6b31561a77def1a6f81a0ae186a2ac"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-mountain-king-male",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_mountain_king-male-actions-v1.png",
+      "sha256": "9876618f638195e3e36b908885999a05f5545acfc59947174ebaeac65c825874"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-earthshaker-female",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_earthshaker-female-actions-v1.png",
+      "sha256": "524255906ecca158faf58ad8e9990f5b35a86b0df762ff826fd88ea409d97af7"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-earthshaker-male",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_earthshaker-male-actions-v1.png",
+      "sha256": "68d663c09d17edd7e552e844d8df73fd3c6599476c33ae155ad65866695eeb10"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-ancient-female",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_ancient-female-actions-v1.png",
+      "sha256": "eda3be6cef840ffa16146efe9d15aa7bc57bf11f69e011ca164129bc74df847a"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-ancient-male",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_ancient-male-actions-v1.png",
+      "sha256": "da2dcf828b7aad333cf0af24d921c065b5c075bce244f32313ef866b35db6757"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-self-ancestor-female",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_self_ancestor-female-actions-v1.png",
+      "sha256": "c2f033834af50c6012fcc92d8cd9d1fc130407bdbf90ca103514a138e0c0d931"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-low-self-ancestor-male",
+      "file": "design/ape-combat-alpha4-20261024/source/low-ape_self_ancestor-male-actions-v1.png",
+      "sha256": "1ab217df8f788942c65d92bdaaea6705b6f1aa121e2e04284517c6041da22d36"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-nascent-wisdom-sovereign-female",
+      "file": "design/ape-combat-alpha4-20261024/source/nascent-wisdom-female-actions-v1.png",
+      "sha256": "dd43df3aa2dbc3fe3e22b3458d671bd0bac1811941824e12e832d43aaa19a384"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-nascent-wisdom-sovereign-male",
+      "file": "design/ape-combat-alpha4-20261024/source/nascent-wisdom-male-actions-v1.png",
+      "sha256": "332707d2bd23d74edda9e34b67e9ea90a2d6b26580e4214d72065527c545f1ca"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-nascent-mountain-sovereign-female",
+      "file": "design/ape-combat-alpha4-20261024/source/nascent-mountain-female-actions-v1.png",
+      "sha256": "2dc7141e691208a2175d3ad90e6bb7a44e445f9b176ce6f2cd2d051aab23ca82"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-nascent-mountain-sovereign-male",
+      "file": "design/ape-combat-alpha4-20261024/source/nascent-mountain-male-actions-v1.png",
+      "sha256": "43135f0dd58a666b5e020836d82d8c57b4688c3482c792b6aeb3a9dfb695dfc7"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-nascent-primordial-sovereign-female",
+      "file": "design/ape-combat-alpha4-20261024/source/nascent-primordial-female-actions-v1.png",
+      "sha256": "ab330e69934d3b93e93ffc4ce6977aa3c8c97aeb8520ddd2532932dd91e35cec"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-nascent-primordial-sovereign-male",
+      "file": "design/ape-combat-alpha4-20261024/source/nascent-primordial-male-actions-v1.png",
+      "sha256": "4306f971f515dba4ee33d8c5d16b8feadcb2451d191589a6a38d869094ac643b"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-integration-primordial-battle-ancestor-female",
+      "file": "design/ape-combat-alpha4-20261024/source/integration-battle-female-actions-v1.png",
+      "sha256": "2ce9fd7645a27d5087a90ff7772b9f77efc54fdde9765e8f465e604de2e3921e"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-integration-primordial-battle-ancestor-male",
+      "file": "design/ape-combat-alpha4-20261024/source/integration-battle-male-actions-v1.png",
+      "sha256": "e63dd2a5e7c63ec22dec42883d78d0780dd472ddefbdfae464a8cec8b8b53d36"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-integration-new-ancestor-female",
+      "file": "design/ape-combat-alpha4-20261024/source/integration-mentor-female-actions-v1.png",
+      "sha256": "2c8bcbbe378e7ffc5e5ba89fd2740b598e487beffda513afffbd8077de9707a5"
+    },
+    {
+      "kind": "actions",
+      "identity": "ape-integration-new-ancestor-male",
+      "file": "design/ape-combat-alpha4-20261024/source/integration-mentor-male-actions-v1.png",
+      "sha256": "cc1d04770c3c51200fc50cc48542d4b7c0872576be2869f6049e6ff105365a31"
+    }
+  ],
+  "combat_forms": 23,
+  "painted_keyposes": 207,
+  "animation_clips": 148
+}

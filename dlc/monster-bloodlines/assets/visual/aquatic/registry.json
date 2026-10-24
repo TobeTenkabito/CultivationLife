@@ -1,0 +1,869 @@
+{
+  "assets": {
+    "actor.monster.aquatic-spirit-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-spirit-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "21636e0d7571d11967776eaf81d61f11812742f8f00ad8186713b9459360de3b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-spirit-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-spirit-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "6d69a7bb13176bccd3540ecd06c882d08f8fd9858cd268a5ea734c3ae5151ab2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-spirit-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-spirit-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "a72378bcc137cca7064dcdf00a8ba75e002f42ac6c0cab97b1045878f2de3c68",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-spirit-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-spirit-shared-actions.png",
+      "size": [
+        1719,
+        148
+      ],
+      "sha256": "4cfd4311bf72c6aba0bca5dab1f5abd78097e1f3fe1676b05db901d5fc93440e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-dragon-koi-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-dragon-koi-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "134e8ee5be9ed49ecf2290e5682f8b04330770191bab3af95cc13512ea641c2d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-dragon-koi-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-dragon-koi-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f31c7a56e15600886e329f2bd1c3d9a9d719a2df5a885bd5ab38949cd22506ab",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-dragon-koi-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-dragon-koi-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "7435256c45c3b8e3b60480cf961133a8d75b9b910926b41609febb725d54525f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-dragon-koi-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-dragon-koi-shared-actions.png",
+      "size": [
+        1856,
+        360
+      ],
+      "sha256": "3923ff99b1efbb7d425298dda5d4dc1d79c4c3c7616f936d44e32a4b19ed08c3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-abyss-whale-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-abyss-whale-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "79cfabf566dacfc178dd05695a6c4d7ec2becb03163c91e0ad2f5ce0b520f8d7",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-abyss-whale-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-abyss-whale-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "6140d9884e2a8749ed27379dc8ab30ac16b288300a4029ca035bd6b13a4a55e7",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-abyss-whale-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-abyss-whale-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "61be7ede58e9c19d96a388414b05b7477d861dfeb8f50705472b27f6616c15d3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-abyss-whale-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-abyss-whale-shared-actions.png",
+      "size": [
+        2016,
+        360
+      ],
+      "sha256": "7e6ead11867f4a1dda4989c9e29bc444a92d22e71cbd66c679bd57db431c1165",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-young-kun-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-young-kun-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ba96900bda7f8b74f99ffd6ac40d97df47c66c8e2d3555afc17e3e403ffeb54a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-young-kun-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-young-kun-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "4102c7243c2362a416df9ad291a668c709704619f2c81b413b324b0320b9414d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-young-kun-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-young-kun-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "5463febd92e9fdc2afb4933658344b496077c38d8ec94ef12d5f2a4bb0b77c60",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-young-kun-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-young-kun-shared-actions.png",
+      "size": [
+        1746,
+        148
+      ],
+      "sha256": "5857201e469e35640ba8606bb4895f8d196d9b7bae7cb0bc7baa1791317868d9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-golden-leaper-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-golden-leaper-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "a7abd890d537bcf9c5772fdcb6d21c62ac3d8f99eda3528e2ab7bce96ff7d3e3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-golden-leaper-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-golden-leaper-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "51ffcceea1d17e67f48ba3a1f6af37c6e1db2c908fe2851f79263710c0d39cb7",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-golden-leaper-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-golden-leaper-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "2e33bd6c421be477e5ad81ff97fa33b8ce7ce761a88a1e02ba7704195444d7a8",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-golden-leaper-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-golden-leaper-shared-actions.png",
+      "size": [
+        1755,
+        153
+      ],
+      "sha256": "0b205bab3d47784b1e906973478c703d6e0701cb79d20e358568e35e69284252",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-glacial-whale-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-glacial-whale-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "c629f786d97ac8db07612181958b6376d6a88d4c925dfea4649fadc6e33626a1",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-glacial-whale-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-glacial-whale-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "1df7719635661c2453c855330d68c66dc1f7c7390b7545712c8ac173db0a2eeb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-glacial-whale-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-glacial-whale-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "9cccf3d1fb1f2800eea7d2047f596827449aaed75bb91e41eeb0eb70bbf11f14",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-glacial-whale-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-glacial-whale-shared-actions.png",
+      "size": [
+        1799,
+        360
+      ],
+      "sha256": "6a628f2009cbc4c40df5c09c94e096aec406186fdf8acdfbc34b23fa7a1e4a98",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-mirage-whale-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-mirage-whale-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "e382eeb7fe8b19adf9dee67c2158b1cacc61ae23d84f3ae891b0973407fb66f4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-mirage-whale-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-mirage-whale-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "0f40fe368adf74b6100d8d1279bf60c528c214b78bc77d75b538c99bc51706cb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-mirage-whale-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-mirage-whale-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "0584dfe866ef1fa243cd7fac6877df6de1575a26189366f08498f9872b8232dd",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-mirage-whale-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-mirage-whale-shared-actions.png",
+      "size": [
+        1872,
+        348
+      ],
+      "sha256": "7154606783944679341edde29fe2192b7c7870fa1805d4ad9bad717cd91691ac",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-koi-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-koi-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "a40bb0370a2e265c6592b3e0f878ea9f8cc3b86868ab7049cdab8a7f596272d4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-koi-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-koi-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "1782500b120670a90511407d7dea921240e2de353b3be3dce5c40650efa7e742",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-koi-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-koi-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "bf9ffd583f7ba87b9643c8a486ef46be6b06c40ed0739bb4ed4f6d2cceb30cea",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-nascent-koi-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-koi-female-actions.png",
+      "size": [
+        1611,
+        176
+      ],
+      "sha256": "0c342052e7a8130740ba1c4276cdcaa29a5b83a6ec11f3f974edc84c8afc6ce2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-koi-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-koi-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "c5ea4333b0533b2eaa8372afc5316ccd52e46b26040a65147a58bca2a2730582",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-koi-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-koi-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "773a3c4b1fad888e03998fbcce1f09c7ae72d6dc3270f928cb16eca248517118",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-koi-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-koi-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "e93f688c51f63bf8e37f8f7a4c009a0c884112592ce1c75af1bfd95af76a0ad4",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-nascent-koi-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-koi-male-actions.png",
+      "size": [
+        1584,
+        176
+      ],
+      "sha256": "0c340267e415d4cf8de8822b7f13eb8092a60c70ec3f8c9be0cf1f640b934150",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-kun-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-kun-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "aea057a648794cea8590e45a0e68074ab697907a3696767706b06dbdd8c5b6c0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-kun-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-kun-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a23fcc4103204631bb81d02afa2873d19aa4adc10d17cc04ba370e049688352c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-kun-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-kun-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "3c19750ff93435ede84b362c56a48501f7f5544298e13bbc57674d047a52084f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-nascent-kun-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-kun-female-actions.png",
+      "size": [
+        1638,
+        176
+      ],
+      "sha256": "f543555d060778ae5f42a72d836d475d22632a6ca5fb79a7df874c02c6aa8f1f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-kun-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-kun-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "3d52d3ad32bd46b43dda739d1260e791516df8af072340a65e62689b9deee2ef",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-kun-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-kun-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "e06002569c04d0de1fb7894452b92970a6c89812cf3f7b89f6722ddbaba34ebf",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-kun-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-kun-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "f2ecff41d3991fba164a25e970ce363346deff8c1321b6a41dd61150c92db2ca",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-nascent-kun-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-kun-male-actions.png",
+      "size": [
+        1593,
+        179
+      ],
+      "sha256": "b00ab8a9a5bef78b3877df3c1c0581379548b35f8be331867070f1f100b734ef",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-whale-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-whale-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "5762ff0e6aeb802b8022861d1a7ff5c03b2516b70c3d2466b60b8df8ae6abd5e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-whale-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-whale-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "62ccc207d52578dee6acfe3f590ec173edd7a9371df26959dd4e118fd3089ff5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-whale-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-whale-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "ef4b73fb1de5aacb897169f7e69b8802560c3ac16d60d4880dd66b99c2b4409f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-nascent-whale-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-whale-female-actions.png",
+      "size": [
+        1476,
+        176
+      ],
+      "sha256": "153359c15083befffec5bb16a065d178245f59c73eafce390ba8d88bf5ff8eee",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-whale-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-whale-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "80ab9bdb8b7eb400c2c307501e6a70be95b093fb21f5d7237ba4ae83f8b236ae",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-whale-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-whale-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "15a005099cd6e656aa32f5abe91a6625e398c0559e19790b7519069b733c7065",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-nascent-whale-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-whale-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "691dbe4cd615e04837b1dcd9f851ec905a407017a68bcb230f91fff40caedad8",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-nascent-whale-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-nascent-whale-male-actions.png",
+      "size": [
+        1593,
+        176
+      ],
+      "sha256": "c0fe0b9e6e5fd8098b23c12ce4ff0029faeb1e4d47000aac88d440e5b1ba380a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-koi-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-koi-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "fa14d596af67ad9b2bb0a2290469fb0bffab593be84f0f04d090327afb5da60a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-koi-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-koi-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "1a78926893a834dd3c37c9386f470d2f75dae28df411a4e926b711dc55bb1c86",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-koi-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-koi-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "3b083a72080a4ab32cbe1ff2728db53ca00d3523bf1d702645dac79bcdb6b95e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-integration-koi-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-koi-female-actions.png",
+      "size": [
+        1539,
+        176
+      ],
+      "sha256": "f040a20786a5401412ce3e46e1cef4f0dd6a814e6dd4c68d1fe9a32e6e8c4351",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-koi-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-koi-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "c83825be0a26dd2aad2d24d094e557c8ed028f669908e553331916f26ca77e9c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-koi-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-koi-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "3df6d0d4737a9770c5c591fae8ea88c9ce274294ab4501bf9b8867c8b552e44b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-koi-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-koi-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "fc4981c12b6c8f00787482bb782147eae5838ae5078912cf5b91237d2a71f315",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-integration-koi-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-koi-male-actions.png",
+      "size": [
+        1728,
+        176
+      ],
+      "sha256": "f30383a605abe2968410a0416436a2518d3fe8c078d6482de07b74c0fd744ae2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-kun-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-kun-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "7ee8437096ad71cc2a80c3ab6edbc0666074707775517a5731955d1502b90c46",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-kun-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-kun-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "2e603809ea03798b356a024864ebd39e64c424a96e2157318a58f740cecca353",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-kun-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-kun-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "b5c5d4350383458341c8420618649f13947c460a625cf6951507c2c93a586e52",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-integration-kun-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-kun-female-actions.png",
+      "size": [
+        1620,
+        176
+      ],
+      "sha256": "0b99107f777db8e3525347bc7825a3e32aae92b297950b2e328b5d9426f0a581",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-kun-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-kun-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "f2441ef079d525a4cabb470e20ade76414f2e18179e778b2b4492872fd85dca5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-kun-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-kun-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9bb2fc4dc3a841db99e4390f0549385440603041514cdb6ad0497ac7521b76c5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-kun-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-kun-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "4963428e53d39fa92353238fa87f5d14762b913d9cd7735a2aba2daa76f9252d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-integration-kun-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-kun-male-actions.png",
+      "size": [
+        1593,
+        176
+      ],
+      "sha256": "190924ba35e54c1d0592b6014888943800968230a075b0d8b8d8c47353866607",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-whale-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-whale-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "c487fbcc30bcab10fc437547618696c3a8fdf36ff92d7e319a1cff1e7ca47c4b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-whale-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-whale-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "45a0716aeb648b1d52fa68385f78769c73d3d27fcd6cee48424502568e4fc7a9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-whale-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-whale-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "372d8587f26134825c73e4304c4c0cfb157a002a88a17799b0497c33ee95e438",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-integration-whale-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-whale-female-actions.png",
+      "size": [
+        1647,
+        180
+      ],
+      "sha256": "3f083e45092dbc36f6aaebc65732ec88e47f1fdf51133c8d5cdd0b6c82f0a526",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-whale-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-whale-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "db341e2c82a46ba2e661b9572dcda331d09f42ff9cb603916e2eb7dbda8355f2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-whale-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-whale-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9a7f1ba3b1fef1a24298ff1b46a8abc94c7c5100232ff04a752a43b1b4161b38",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.aquatic-integration-whale-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-whale-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "0a08b2e25e7aed4ab4bd68320bfbf745292cd9e45035ab5bf3bce1ffa7ee9bd1",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "aquatic-integration-whale-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/aquatic-integration-whale-male-actions.png",
+      "size": [
+        1584,
+        176
+      ],
+      "sha256": "90ffdda58739e4d00b9d7c816d90c8e3c6d29e31386ac11a547327cdadce7db0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster.aquatic.combat_manifest": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/aquatic/manifest.json",
+      "requires": [
+        "official.monster-bloodlines"
+      ],
+      "sha256": "c1da81619f23017bfcc57b75e209007df9f6a8333c08086fe06d52f3ecff68db",
+      "combat_actors": [
+        "aquatic-spirit-shared",
+        "aquatic-dragon-koi-shared",
+        "aquatic-abyss-whale-shared",
+        "aquatic-young-kun-shared",
+        "aquatic-golden-leaper-shared",
+        "aquatic-glacial-whale-shared",
+        "aquatic-mirage-whale-shared",
+        "aquatic-nascent-koi-female",
+        "aquatic-nascent-koi-male",
+        "aquatic-nascent-kun-female",
+        "aquatic-nascent-kun-male",
+        "aquatic-nascent-whale-female",
+        "aquatic-nascent-whale-male",
+        "aquatic-integration-koi-female",
+        "aquatic-integration-koi-male",
+        "aquatic-integration-kun-female",
+        "aquatic-integration-kun-male",
+        "aquatic-integration-whale-female",
+        "aquatic-integration-whale-male"
+      ],
+      "appearance_key": "aquatic"
+    }
+  }
+}

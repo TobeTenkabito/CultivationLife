@@ -28,7 +28,7 @@ def test_android_bundle_contains_complete_desktop_content(tmp_path):
     archive = tmp_path / 'game-assets.zip'
     assert hashlib.sha256(archive.read_bytes()).hexdigest() == (tmp_path/'game-assets.sha256').read_text()
     with zipfile.ZipFile(archive) as bundle:
-        manifests = [n for n in bundle.namelist() if n.startswith('dlc/') and n.endswith('/manifest.json')]
+        manifests = [n for n in bundle.namelist() if n.startswith('dlc/') and n.endswith('/manifest.json') and len(n.split('/')) == 3]
         assert len(manifests) == len(list((ROOT/'dlc').glob('*/manifest.json')))
         for directory in ('content','dlc'):
             for path in (ROOT/directory).rglob('*.json'):

@@ -7,7 +7,7 @@
   const between=(t,a,b)=>{const x=clamp((t-a)/(b-a));return x*x*(3-2*x);};
   let catalogPromise=null,current=null,context=null,revision=0,raf=0,observer=null;
   let intersection=null,onscreen=true;
-  let foxCatalog=null,foxCatalogKey=null;
+  let monsterCatalog=null,monsterCatalogKey=null;
   let clock=0,last=0,painted=-Infinity,playing=false,speed=2,media=matchMedia('(prefers-reduced-motion: reduce)');
   const root=document.getElementById('battle-animation');
   const canvas=root.querySelector('canvas'),status=root.querySelector('[data-combat-status]');
@@ -225,14 +225,14 @@
       catalogPromise??=fetch('/assets/pixel/combat/manifest.json').then(r=>{if(!r.ok)throw Error('combat assets');return r.json();}).catch(e=>{catalogPromise=null;throw e;});
       const [base,items]=await Promise.all([catalogPromise,PixelLibrary.ensure()]);
       let A=base;
-      const fox=items?.assets['monster.fox.combat_manifest'];
-      if(report.visual.hero?.startsWith('fox-')&&fox){
-        const key=fox.file+':'+fox.sha256;
-        if(key!==foxCatalogKey||!foxCatalog){
-          foxCatalogKey=key;
-          foxCatalog=fetch(fox.file).then(r=>{if(!r.ok)throw Error('Fox combat assets');return r.json();}).catch(e=>{foxCatalog=null;throw e;});
+      const extraCatalog=Object.values(items?.assets || {}).find(row=>row.combat_actors?.includes(report.visual.hero));
+      if(extraCatalog){
+        const key=extraCatalog.file+':'+extraCatalog.sha256;
+        if(key!==monsterCatalogKey||!monsterCatalog){
+          monsterCatalogKey=key;
+          monsterCatalog=fetch(extraCatalog.file).then(r=>{if(!r.ok)throw Error('Monster combat assets');return r.json();}).catch(e=>{monsterCatalog=null;throw e;});
         }
-        const extra=await foxCatalog;
+        const extra=await monsterCatalog;
         A={...base,actors:{...base.actors,...extra.actors},actions:{...base.actions,...extra.actions}};
       }
       if(token!==revision||!visible())return;

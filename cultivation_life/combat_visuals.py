@@ -94,9 +94,9 @@ def combat_identity(game, target, *, player_units=None):
     natal = game.natal_artifact or {}
     artifact = next((a for a in player.crafted_artifacts if a.get('id') == natal.get('crafted_artifact_id')), None) if natal.get('crafted_artifact_id') else None
     hero = f'{hero_path}-{hero_gender}'
-    from .monster_visuals import fox_appearance
-    appearance = fox_appearance(player)
-    if appearance:
+    from .monster_visuals import monster_appearance
+    appearance = monster_appearance(player)
+    if appearance and appearance.get('combat'):
         hero = appearance['combat']
     teams, counts = _team_visuals(game, target, hero, player_units)
     return dict(schema_version=2, hero=hero, enemy=teams['npc'][0]['asset'] if teams['npc'] else None,

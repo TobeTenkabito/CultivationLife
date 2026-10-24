@@ -1,0 +1,120 @@
+{
+  "base_version": "3.0.0-alpha.4",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.1.0",
+    "ghost-reincarnation": "3.9.1",
+    "guixu-tide": "2.7.2",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.19.0",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.5.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested alpha.4 eight-species realm appearance, optional asset isolation and presentation/combat/persistence upstreams; not full repository regression",
+  "tests": 1071,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_visual_release",
+      "log": "build\\browser_visual_release-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_pixel_ui",
+      "log": "build\\browser_pixel_ui-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_themes_139",
+      "log": "build\\browser_themes_139-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_building_visits",
+      "log": "build\\browser_building_visits-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_npc_art",
+      "log": "build\\browser_npc_art-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_voisinage_editor",
+      "log": "build\\browser_voisinage_editor-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_domain_replay",
+      "log": "build\\browser_domain_replay-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_replay",
+      "log": "build\\browser_combat_replay-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_groups",
+      "log": "build\\browser_combat_groups-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_monster_release",
+      "log": "build\\browser_monster_release-300-alpha4.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_monster_flora_visuals",
+      "log": "build\\browser_monster_flora_visuals-300-alpha4.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-300-alpha4.log",
+  "inputs_sha256": "b0ed16a0098e49f0a2d69ea4ee4d702c0b51c57838073ca40bd663710bd9774b",
+  "platform": "Windows",
+  "exe_sha256": "711d8ccc646902221ba87abd6ac46210840584874a8b6ed5379e16e6aeabe325",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

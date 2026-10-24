@@ -161,7 +161,7 @@ class Handler(BaseHTTPRequestHandler):
             elif path == "/api/ui-preferences":
                 self._json(load_ui_preferences(PERSISTENCE_ROOT))
             elif path == "/api/visual-assets":
-                self._json(public_catalog(ENGINE_ROOT, EXTENSION_REPORT))
+                self._json(public_catalog(ENGINE_ROOT, EXTENSION_REPORT, APP_ROOT))
             elif path == "/api/games":
                 self._json({"games": ENGINE.list_games()})
             elif path == "/api/achievements":

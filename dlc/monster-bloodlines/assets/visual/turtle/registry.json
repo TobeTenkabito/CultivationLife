@@ -1,0 +1,869 @@
+{
+  "assets": {
+    "actor.monster.turtle-spirit-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-spirit-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ba30e4393d3e33f8c6a4383533a35cb955bb5bb5bfc2c68c8f159b3952a8be8c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-spirit-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-spirit-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "ea4a2224ea0c6381788f3e3a158ce869ac2d3a8ee8ece22fd33a055d6c7c634b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-spirit-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-spirit-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "f3254d61495a210e3961c6b721aea649369133cef468fa0c1e2130cf3c2739a0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-spirit-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-spirit-shared-actions.png",
+      "size": [
+        1440,
+        126
+      ],
+      "sha256": "57a17b432d7c3e406690cef16732c5ccfd6ed0c56fbeff2c00b58fdd681cfbfa",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-mountain-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-mountain-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "5fa69c3e63cc23eee5838aaf22a28643eeca02276b122e42e56fd813be88639e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-mountain-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-mountain-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f699003d8ab71c7c3c1513057b975a8460850d2de63cc32accd0c5464e07f684",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-mountain-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-mountain-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "ca7f9a0408e72631395eafa3d0a9449dab0d5a5380d7e4140d22c5d71e96cf30",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-mountain-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-mountain-shared-actions.png",
+      "size": [
+        1944,
+        164
+      ],
+      "sha256": "13367f658278cb5becb74a9e239fcd3a8aa02637985e1c4dbfa7c89cb561bab0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-deep-sea-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-deep-sea-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b529d469de8456ed193407d4255b0bc7b8555d2236b0b4acfbaeda45ca25f953",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-deep-sea-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-deep-sea-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9504a122add73bd1feefda198847af3c43bff74e33990f59c68ca19baf950731",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-deep-sea-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-deep-sea-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "c1ba7b98ba5ee386f921e1efc93c3e4914208d50a927fc727eb76acba327a8dc",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-deep-sea-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-deep-sea-shared-actions.png",
+      "size": [
+        1575,
+        148
+      ],
+      "sha256": "0402830a32a72dcd71b62f5eac39a4b1f8987ae7846280f9a9fd6c697acee1eb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-xuanwu-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-xuanwu-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "3f2d4b9dea57dde9506794f939be225bef30dcb591756bb1c1b556a3aa330a01",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-xuanwu-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-xuanwu-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f0e0b0445afe4660e8c81ff5f60d1c24a9c5370655e16996cf748b7a647f6e90",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-xuanwu-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-xuanwu-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "e0bbbc52bcc24c57b61925a0c1097e06737d926f84483b1b31ac9eb22e138fbb",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-xuanwu-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-xuanwu-shared-actions.png",
+      "size": [
+        1782,
+        148
+      ],
+      "sha256": "9b22b3b99f9b0154e674bde8d80cf48ec9cf492d23c658bb574c3537fb1e79ca",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-iron-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-iron-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "223552746c4a9ec3fcf608d239426c287b8ca3e2fe9f475a3ed01148b037094d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-iron-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-iron-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "7bad4c9e04b5670a5cf2834d7476c7cf099214b2746a2042b30382f8da9aed6d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-iron-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-iron-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "e489c5ea7618b1ca1ba9986c59a5961a4efa78e57c6df1c9df29cee6a4a42be7",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-iron-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-iron-shared-actions.png",
+      "size": [
+        1863,
+        148
+      ],
+      "sha256": "80c9a4656a41d32b98ca31fa0c957b55c8a350a0b639759740a82dcbaebe75ec",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-tidal-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-tidal-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "eb126abbdf383a4c98896fcf3d285be1935e807dd468a4a478c8bcab15a75135",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-tidal-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-tidal-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "59eb1a1e7445ddb33a480c0b6cc13defc8639ee3dbb89f9aec4ff75cc9355871",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-tidal-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-tidal-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "89b88b63a566dfc541312bf9e46cb75c51b66cd933719ffd7a5cf7ef9c211558",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-tidal-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-tidal-shared-actions.png",
+      "size": [
+        1683,
+        155
+      ],
+      "sha256": "a0477c17ed9b3d3f82292bf3f0c92f04439873ad3036adad0e5eb2abc5b530b5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-ice-shared.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-ice-shared-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "e5f9f8f1e576bba1d3881e57beacf47d12f35daf5107d99b0b5c159c817890fc",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-ice-shared.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-ice-shared-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "6f237efe8dfe1f0608d944515bf369734e394d11407580f0a68cfb74429fd53f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-ice-shared.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-ice-shared-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "dd2232ca19327dda5521b572d2a56e1b2ae16cedb4df93be45c7da062c782fd3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-ice-shared.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-ice-shared-actions.png",
+      "size": [
+        1728,
+        155
+      ],
+      "sha256": "eb23ed4cb5613591260765900d0e3ad8737901992196efa9cfb8870b97c0b091",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-mountain-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-mountain-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "6190f2d4b8423269a629bc34d7f64eb4a48de2574c762646545e66ce797ee82d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-mountain-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-mountain-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "ad598571b8eedbd13c2de1df5eb79d23737e5cb7eda1655c58e7c20f7aaa2885",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-mountain-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-mountain-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "b62e0093fa5170b2efe85fcd5e3e59098390db292a439ffa8e39a4162bbad4e6",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-nascent-mountain-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-mountain-female-actions.png",
+      "size": [
+        1494,
+        176
+      ],
+      "sha256": "9740f05746c843974e1f7899dca87beeea2bbea282091b8dea28bf7c41bc1df0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-mountain-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-mountain-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "f539bc7c8594e4fd6ad8b682a28d0b4acdc2d506cb31b33895e4013eb62a163e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-mountain-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-mountain-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "5fc72d59cd5d249fb90931d57cdf471daea9e0b589e2c3d1efc5b2eb03bbb332",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-mountain-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-mountain-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "1c4c2c6f197a682cc4e924c2ad57b819cfeff8645149d32f57c01f489c237197",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-nascent-mountain-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-mountain-male-actions.png",
+      "size": [
+        1485,
+        176
+      ],
+      "sha256": "0874dcd1886e213b74db5e7b953a29e6b84c97bdfbcda4cf2ef3b9fa2dc03e2d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-tide-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-tide-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "2e734d07d9bb78e9dd1c86901ccf787c69ef79f97caaf620fcb755b41e769ee0",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-tide-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-tide-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "0f482e7251dda986bb8481c5848ddb7b27d8f9f0976ce310557338d8ce7ef980",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-tide-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-tide-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "c1d6de7c0682e40bc8a9f27fb7131abd160dbff37acc568e652247fcf2fbae1c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-nascent-tide-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-tide-female-actions.png",
+      "size": [
+        1620,
+        176
+      ],
+      "sha256": "76574877603341d11f1202772f6a588bd369f814ee8fb33347a8258ecbc51ef7",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-tide-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-tide-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "3c9aea2075d1d7d3fb809ff2a0ede0ee17deadcd1f5114439f984540b6ee372a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-tide-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-tide-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9cad2c450e01284f3fa54bb873308a8dbca43fe2e1d41da39211010fd7e75ab2",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-tide-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-tide-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "0670492c2a8b3e911786f0eec32e79795cab7f6af0b6b7efe38de746a0d52505",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-nascent-tide-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-tide-male-actions.png",
+      "size": [
+        1530,
+        176
+      ],
+      "sha256": "9818146b2c6dd12ee00ef81ccbf4d4c493443e5a58512b568af1c7ce2e191287",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-xuanwu-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-xuanwu-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "0ccd760ce5e3d9c4ee56f9712051873a50b6485031c4a61a488dafdb3ad08f82",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-xuanwu-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-xuanwu-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "3f3ab31c5fdbc4fbfcf8597aea51c1b174ff241868e6d44e4e9c5f0f5924615c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-xuanwu-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-xuanwu-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "7a0de629a2b1fb3842dbd1663ba70275aef44a1f82899a53b9da95bddbf8087a",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-nascent-xuanwu-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-xuanwu-female-actions.png",
+      "size": [
+        1620,
+        175
+      ],
+      "sha256": "fa1031a61e428d46aa07d672f498fdf73c103f80706ed451054d9e4a0cb126b7",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-xuanwu-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-xuanwu-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "0652559490403caa99568ee9e539382bc112f7c631dfd6f97ce9609e63653ec3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-xuanwu-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-xuanwu-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "fae5deb05bc263228eb2d770c5c363b13bd312d2791f96cb5699d8d762829b42",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-nascent-xuanwu-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-xuanwu-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "691347356a0baa8cd762795bdeada276b9bea4368d60bd1805af4e0b48c233ca",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-nascent-xuanwu-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-nascent-xuanwu-male-actions.png",
+      "size": [
+        1494,
+        176
+      ],
+      "sha256": "981c9a85f8e6c823acc0928286445e9637c8ddd436bd096bdd99f200f08b7c90",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-mountain-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-mountain-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "fe82a50a59dfb91faa0507475d1c3e33394260c4bb4dba5aadba1751e5486d85",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-mountain-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-mountain-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "58ae2cd85f2cc004b5078e1e0a2e48d9909e52aaceae7ffec6774f7d8890b5e1",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-mountain-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-mountain-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "824b561316e35c319c633f87feb32c7e3b3c1b5359286320f8346ba467d532ff",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-integration-mountain-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-mountain-female-actions.png",
+      "size": [
+        1494,
+        176
+      ],
+      "sha256": "4800b0c86cadbd6f108516932b552eed2a1f7c3332842d2b58754af54ff1dc3b",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-mountain-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-mountain-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "a55f74e7e2c76ca17538f415d198cada941539fe78868287b0c34c4ba07c4323",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-mountain-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-mountain-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "ce958edbe23490856c98e71191763801c41c8eaeb8200306d52756506fe938e5",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-mountain-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-mountain-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "6da404362e99c8bf75ee99f6555e974c556abd9ac15a0b7cf777cd3d0bdc18a3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-integration-mountain-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-mountain-male-actions.png",
+      "size": [
+        1638,
+        176
+      ],
+      "sha256": "ad3fe20a7138c98292036030b14ba118897a7ea19da06b2c9d920235d7823afa",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-tide-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-tide-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "69164e00de45a6cb2ed08cd3553c32b8ba5bdba2fe56a2c1e7aefc0340ccd71d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-tide-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-tide-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a0efd4ca6bbad73e423b12187f98c855edf8ae9f8c59f9fde86fd09a70d81891",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-tide-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-tide-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "9f54f8c3e64d4c9730deca7f922f572ff9dbf80a7fd324f8a4c1b1226aaaa069",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-integration-tide-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-tide-female-actions.png",
+      "size": [
+        1512,
+        176
+      ],
+      "sha256": "5b270d9bb5743f924062ac9618ceb6bd30be87d1ef6a792be4adc3d5e0af1573",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-tide-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-tide-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "d6bfdc539ae5c13de984d2af42a91ee5d1db730999526aeddd9b79197dfa220f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-tide-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-tide-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a1721531f356e3110698ce4d77e466046efa417b2c8e7dd25493a72537015e2e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-tide-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-tide-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "bf7c458af8066eaa7b4da49555b80a26b8d21075d172553a5bac9cb24f7efcb3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-integration-tide-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-tide-male-actions.png",
+      "size": [
+        1512,
+        176
+      ],
+      "sha256": "ebe5f79c06b7a79f7981b97b6b61ff5cb684318dfd453b5d66da512250c48a94",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-xuanwu-female.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-xuanwu-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "6cc4c29a60b4dae53bae0964faedc3202ec3f4d0e3e1f34a03271e8b03905b1d",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-xuanwu-female.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-xuanwu-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "5e65fec1f3cc50a5a3100b147b03c497e0d5efded5306ae197a3af3cc453f213",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-xuanwu-female.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-xuanwu-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "9d0d28004633f6935364817eb01d68c12b807aafde5a5839977c6c85ae30f27c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-integration-xuanwu-female.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-xuanwu-female-actions.png",
+      "size": [
+        1674,
+        176
+      ],
+      "sha256": "3e983350ca9edb4537a953b4ceb01cec71ace514a051c3556c9f32df3bd3fa79",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-xuanwu-male.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-xuanwu-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "06e3827af7f457d2ee64203f4ea789bfb9f175ac333a702b98d4ea9ddc638b65",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-xuanwu-male.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-xuanwu-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "5095372e985d834ee18350112e002c987604e5c51bcb215a8f4997a651ca1c5f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.monster.turtle-integration-xuanwu-male.thumbnail": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-xuanwu-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "4113741799118824165e32d0dd25977ede7181d01691b585b2c2c5064998ba0c",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "turtle-integration-xuanwu-male.actions": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/turtle-integration-xuanwu-male-actions.png",
+      "size": [
+        1710,
+        176
+      ],
+      "sha256": "62a51f60c62b7995c4ee3765b5be9cc2f8ad757b1f411c71a16a3dc3af4deaab",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster.turtle.combat_manifest": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/turtle/manifest.json",
+      "requires": [
+        "official.monster-bloodlines"
+      ],
+      "sha256": "dff30e435b870520cc8fc015160bb66527a47211bbb95ac1692d3dcd2cd1db53",
+      "combat_actors": [
+        "turtle-spirit-shared",
+        "turtle-mountain-shared",
+        "turtle-deep-sea-shared",
+        "turtle-xuanwu-shared",
+        "turtle-iron-shared",
+        "turtle-tidal-shared",
+        "turtle-ice-shared",
+        "turtle-nascent-mountain-female",
+        "turtle-nascent-mountain-male",
+        "turtle-nascent-tide-female",
+        "turtle-nascent-tide-male",
+        "turtle-nascent-xuanwu-female",
+        "turtle-nascent-xuanwu-male",
+        "turtle-integration-mountain-female",
+        "turtle-integration-mountain-male",
+        "turtle-integration-tide-female",
+        "turtle-integration-tide-male",
+        "turtle-integration-xuanwu-female",
+        "turtle-integration-xuanwu-male"
+      ],
+      "appearance_key": "turtle"
+    }
+  }
+}

@@ -44,6 +44,13 @@ VISUAL_ALPHA3_TESTS = [
     'tests/test_spatial_talismans.py','tests/test_release_211.py',
 ]
 
+VISUAL_ALPHA4_TESTS = list(dict.fromkeys(VISUAL_ALPHA3_TESTS + [
+    'tests/test_realm_appearance.py','tests/test_monster_fox_visuals.py','tests/test_monster_serpent_visuals.py',
+    'tests/test_monster_static_assets.py','tests/test_monster_turtle_visuals.py','tests/test_monster_insect_visuals.py',
+    'tests/test_monster_aquatic_visuals.py','tests/test_monster_flora_visuals.py','tests/test_monster_bloodline_system.py',
+    'tests/test_extension_system.py','tests/test_content_registry.py',
+]))
+
 ECONOMY_TESTS = ['tests/test_economy_trust.py','tests/test_economy_estate_audit.py',
     'tests/test_economy_enterprises.py','tests/test_economy_network.py','tests/test_economy_governance.py',
     'tests/test_organization_economy.py','tests/test_organization_balance.py',
@@ -192,7 +199,10 @@ def main():
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     parser.add_argument('--balance-tests',action='store_true',help='Schedule full regressions by prior XML timings; never reuse prior results')
     parser.add_argument('--focused-visual',action='store_true',help='Explicit alpha.3 changed-domain/upstream scope; no full regression claim')
+    parser.add_argument('--monster-visuals',action='store_true',help='Alpha.4 eight-species appearance/combat and package isolation scope')
     options=parser.parse_args()
+    if options.monster_visuals and (not options.focused_visual or options.profile!='visual'):
+        parser.error('--monster-visuals requires --profile visual --focused-visual')
     profile=options.profile
     if options.focused_visual and profile!='visual':
         parser.error('--focused-visual requires --profile visual')
@@ -212,7 +222,7 @@ def main():
             selected=balanced_test_shards(modules,options.shards,[ROOT/f'build/scoped-{tag}-{i}.xml' for i in range(options.shards)])
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
     if options.focused_visual:
-        selected=[VISUAL_ALPHA3_TESTS[i::options.shards] for i in range(options.shards)]
+        selected=[(VISUAL_ALPHA4_TESTS if options.monster_visuals else VISUAL_ALPHA3_TESTS)[i::options.shards] for i in range(options.shards)]
     if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
@@ -254,6 +264,7 @@ def main():
         browsers=['browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits','browser_npc_art','browser_voisinage_editor','browser_domain_replay','browser_combat_replay','browser_combat_groups']
     if profile=='combat-alpha':
         browsers=['browser_alpha2_dlc_fixes','browser_combat_replay','browser_combat_groups','browser_events_212']
+    if options.monster_visuals:browsers += ['browser_monster_release','browser_monster_flora_visuals']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     if profile=='common-goods':
         jobs.append(('combat-upstream',['tools/verify_combat_upstream_2151.py']))
@@ -280,7 +291,7 @@ def main():
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)
         ET.ElementTree(combined).write(ROOT/f'build/scoped-{tag}.xml',encoding='utf-8',xml_declaration=True)
     (ROOT/f'build/scoped-{tag}.json').write_text(json.dumps(dict(version=BASE_GAME_VERSION,inputs_sha256=before,
-        profile=profile,regression_scope='alpha3-focused' if options.focused_visual else 'standard',scope='User-requested alpha.3 presentation, combat and persistence upstream tests; not full repository regression' if options.focused_visual else 'Full repository regression, optional pixel UI and original four-theme controls, real inventory/natal, eleven maps and event browser acceptance' if profile=='visual' else 'Full repository regression, eleven-world cities, building projects, finite event rewards, estates and real event browser acceptance' if profile=='buildings' else 'Full repository regression plus character, event and regional browser acceptance; explicit character composition' if profile=='architecture' else 'Full repository regression plus secret-art, common-technique and real event browser acceptance' if profile=='secret-arts' else 'User-requested economic, related interaction and release tests only; not full repository regression' if profile=='economy' else 'User-requested related and upstream tests only; not full repository regression',tests=selected,runs=runs),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        profile=profile,regression_scope='alpha4-focused' if options.monster_visuals else 'alpha3-focused' if options.focused_visual else 'standard',scope='User-requested alpha.4 eight-species realm appearance, optional asset isolation and presentation/combat/persistence upstreams; not full repository regression' if options.monster_visuals else 'User-requested alpha.3 presentation, combat and persistence upstream tests; not full repository regression' if options.focused_visual else 'Full repository regression, optional pixel UI and original four-theme controls, real inventory/natal, eleven maps and event browser acceptance' if profile=='visual' else 'Full repository regression, eleven-world cities, building projects, finite event rewards, estates and real event browser acceptance' if profile=='buildings' else 'Full repository regression plus character, event and regional browser acceptance; explicit character composition' if profile=='architecture' else 'Full repository regression plus secret-art, common-technique and real event browser acceptance' if profile=='secret-arts' else 'User-requested economic, related interaction and release tests only; not full repository regression' if profile=='economy' else 'User-requested related and upstream tests only; not full repository regression',tests=selected,runs=runs),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
 if __name__=='__main__':main()

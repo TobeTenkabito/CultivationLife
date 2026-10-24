@@ -1,0 +1,412 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "authorization": "仿照原有流程完成草木属；元婴开始化人形；所有阶段及分支男女共用立绘，游戏性别与血脉规则不变",
+  "export": "Nearest-neighbour with original soft alpha; common action scale; self-contained DLC runtime files",
+  "static_forms": 15,
+  "combat_forms": 15,
+  "painted_keyposes": 135,
+  "animation_clips": 98,
+  "sources": [
+    {
+      "kind": "static",
+      "identity": "flora-spirit-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/spirit-v1.png",
+      "sha256": "086aff52834ff31d8cc9840ae83ce8241e2ee58046b7d0fb6b45102debe354c1",
+      "subject_bounds": [
+        [
+          91,
+          40,
+          838,
+          1004
+        ],
+        [
+          897,
+          66,
+          1506,
+          978
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-spirit-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/spirit-actions-v1.png",
+      "sha256": "51d437dd7f08fe8054be7cf12fc6646a265876e1dda1e7fcf2116c84837bf5f4"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-tree-lord-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/tree-lord-v1.png",
+      "sha256": "f95aa658e7108d045417763d96592424fdab873588b6c84b218e072738b269f1",
+      "subject_bounds": [
+        [
+          9,
+          7,
+          938,
+          1019
+        ],
+        [
+          939,
+          96,
+          1525,
+          994
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-tree-lord-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/tree-lord-actions-v1.png",
+      "sha256": "6db02b5e10574b31cb82151e1c60f29fef948844cf215c1445e3848f41d6a0af"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-ironroot-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/ironroot-v1.png",
+      "sha256": "8222bbef412b661182dc69037420f2f75e5f280adce653b6ecb0bbd5b6210c51",
+      "subject_bounds": [
+        [
+          17,
+          18,
+          1005,
+          1005
+        ],
+        [
+          1015,
+          84,
+          1521,
+          997
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-ironroot-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/ironroot-actions-v1.png",
+      "sha256": "de0555b312a155a44eeab03af0b82250a25727187e06afedd563ac2c82486131"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-dream-garden-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/dream-garden-v1.png",
+      "sha256": "b1c87c3df474709b15814c5d6326b5c284761d496655de76d7c31fca15dac803",
+      "subject_bounds": [
+        [
+          92,
+          6,
+          779,
+          1021
+        ],
+        [
+          834,
+          189,
+          1530,
+          1011
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-dream-garden-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/dream-garden-actions-v1.png",
+      "sha256": "fc8e70c8b19beecacb4cec0f2e6248a2d6beb8b87646ac5b853d37f51c3b18b6"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-moon-blossom-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/moon-blossom-v2.png",
+      "sha256": "81bb46a46a4cf93d2dabf1336abdfd69c93b88057bcc83aa3f8f229266122cb7",
+      "subject_bounds": [
+        [
+          117,
+          61,
+          734,
+          959
+        ],
+        [
+          800,
+          197,
+          1443,
+          949
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-moon-blossom-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/moon-blossom-actions-v1.png",
+      "sha256": "c53b6c5bf9c5111a5f9f074bc7e97d4c939f6daa8d188ca870172d1b26bc385b"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-blaze-thorn-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/blaze-thorn-v1.png",
+      "sha256": "efdee1a6a558fa180639506a93946f4cca43b2d257ed3c47b8e3b0af6a982350",
+      "subject_bounds": [
+        [
+          121,
+          6,
+          861,
+          1013
+        ],
+        [
+          847,
+          5,
+          1527,
+          1014
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-blaze-thorn-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/blaze-thorn-actions-v1.png",
+      "sha256": "2e4d457f778e86b2733656f9f8f912a761952b975d2389aa9d7013896f6a5cc5"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-world-seed-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/world-seed-v1.png",
+      "sha256": "ce88758adbca5a3f68c3a1be8ee2325a560d28aa9ef9a6da9b2b2d8c2f6a6908",
+      "subject_bounds": [
+        [
+          17,
+          7,
+          902,
+          1010
+        ],
+        [
+          1022,
+          7,
+          1536,
+          1019
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-world-seed-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/world-seed-actions-v1.png",
+      "sha256": "cf05cdf5e063d9aa5f59eba878e40666d2c9890a7886fd1b132ad0111572a51f"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-nascent-ancient-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/nascent-ancient-v1.png",
+      "sha256": "83418d5114d1a6e29c926bf37a7ff7ef683544c270fde29a7fe3d4ab6263f255",
+      "subject_bounds": [
+        [
+          46,
+          10,
+          682,
+          1011
+        ],
+        [
+          829,
+          109,
+          1512,
+          994
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-nascent-ancient-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/nascent-ancient-actions-v1.png",
+      "sha256": "4dbdfb1efccb630294e867d5f51da72c855e8f8593c92c5c0ce60d4304a19e0e"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-nascent-flower-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/nascent-flower-v1.png",
+      "sha256": "9693cee6b80573f54143090968522e0102973fa051b4c0f195e11b32ab5e4e50",
+      "subject_bounds": [
+        [
+          20,
+          5,
+          816,
+          1023
+        ],
+        [
+          845,
+          53,
+          1516,
+          1005
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-nascent-flower-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/nascent-flower-actions-v1.png",
+      "sha256": "538663ed949bbeb0679901508b3965dd36a55cfd09854cd3fd24a836f9da9111"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-nascent-thorn-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/nascent-thorn-v1.png",
+      "sha256": "7720c73059ec20ce626ac1895822669515bed1190428031bb43d739da21d8a74",
+      "subject_bounds": [
+        [
+          50,
+          2,
+          785,
+          1015
+        ],
+        [
+          883,
+          77,
+          1522,
+          990
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-nascent-thorn-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/nascent-thorn-actions-v1.png",
+      "sha256": "fb77f897b92b92163214cd0071fc2fa91475eef1152e561125e98789f01383b4"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-nascent-world-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/nascent-world-v1.png",
+      "sha256": "a6b7d243985be8de6f9e94b739f2697c7caf45b48e2a719bea6b6b83d9e0f876",
+      "subject_bounds": [
+        [
+          30,
+          5,
+          797,
+          1012
+        ],
+        [
+          862,
+          81,
+          1494,
+          1011
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-nascent-world-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/nascent-world-actions-v1.png",
+      "sha256": "24cf904862fc180b16f2e23131e4cc900aad1b7d4b51e746902d7c961957577d"
+    },
+    {
+      "kind": "pose-override",
+      "pose": "stagger",
+      "identity": "flora-nascent-world-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/nascent-world-stagger-v2.png",
+      "sha256": "1bb5ce1211acf546492bde4bdac9be54bc8f64a3328828c65f9235d13e70de27"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-integration-ancient-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/integration-ancient-v2.png",
+      "sha256": "d50e81509fde89011910833201385ce85760384f1c2d4744c76e5dc500afcfc8",
+      "subject_bounds": [
+        [
+          20,
+          9,
+          826,
+          1013
+        ],
+        [
+          817,
+          51,
+          1520,
+          970
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-integration-ancient-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/integration-ancient-actions-v1.png",
+      "sha256": "a9d4b30700ba0566c7d805a498f233ac2b16b08458c541db6fd822d09e73e601"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-integration-flower-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/integration-flower-v1.png",
+      "sha256": "07ed023008a81b1a0df805804ccee40de19944e1e8723315472226cbfa5713cc",
+      "subject_bounds": [
+        [
+          8,
+          0,
+          899,
+          1023
+        ],
+        [
+          902,
+          3,
+          1521,
+          994
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-integration-flower-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/integration-flower-actions-v1.png",
+      "sha256": "747b3dd9197180e65b84c838bcc29d309a16c88788ceccb0c78ac92bd7daaa45"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-integration-thorn-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/integration-thorn-v1.png",
+      "sha256": "8d416346e161dd05ed9ab23bf0058bf68ded7c4b355f462ea4168288a76b1fb5",
+      "subject_bounds": [
+        [
+          9,
+          0,
+          826,
+          1012
+        ],
+        [
+          878,
+          48,
+          1527,
+          992
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-integration-thorn-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/integration-thorn-actions-v1.png",
+      "sha256": "3367ea2a57c5ccbaa2bbab6aaed1ba55a60d8f8fc4115994b6845474d7bdf828"
+    },
+    {
+      "kind": "static",
+      "identity": "flora-integration-world-shared",
+      "file": "design/flora-growth-alpha4-20261024/source/integration-world-v1.png",
+      "sha256": "8b00b94f75d250054e4662043eed7c844775ffe80df46960ff4aa56c417fa7e4",
+      "subject_bounds": [
+        [
+          14,
+          0,
+          834,
+          1020
+        ],
+        [
+          870,
+          51,
+          1525,
+          1009
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "flora-integration-world-shared",
+      "file": "design/flora-combat-alpha4-20261024/source/integration-world-actions-v1.png",
+      "sha256": "4954bea9ac8d43429fc685eaf6259ad95a26fc3363a7a4a1ab6a44de92dd8645"
+    }
+  ],
+  "prompts": [
+    "design/flora-growth-alpha4-20261024/prompts.json",
+    "design/flora-combat-alpha4-20261024/prompts.json"
+  ]
+}

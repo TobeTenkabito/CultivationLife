@@ -1,6 +1,6 @@
 # 浮生问道 · Android
 
-维护基线：本体 **v3.0.0-alpha.3**。Gradle 配置的版本名为 **3.0.0-alpha.3-android.76**，versionCode **76**，沿用 `com.fusheng.wendao` 包名和正式签名。本轮按要求采用 `visual --focused-visual` 改动领域／必要上游配置，不做全仓；包含NPC、邻域编辑与正式邻域动画验证；实际成品验收与签名以同版发行清单为准。
+维护基线：本体 **v3.0.0-alpha.3**。Gradle 配置的版本名为 **3.0.0-alpha.4-android.77**，versionCode **76**，沿用 `com.fusheng.wendao` 包名和正式签名。本轮按要求采用 `visual --focused-visual` 改动领域／必要上游配置，不做全仓；包含NPC、邻域编辑与正式邻域动画验证；实际成品验收与签名以同版发行清单为准。
 
 本轮验证魔修头像、NPC人物卡、十三组邻域外观编辑器与真实邻域战报，保留原四主题与默认关闭的新版界面。签名Android 12横竖屏使用隔离模拟器真实点击，并核对关闭后资源释放；Windows同一EXE有／无DLC分别验收。绘景仍在默认收起的左侧抽屉，不挤占首屏行动；详见[alpha.3发行范围](../docs/alpha3-release.md)。
 

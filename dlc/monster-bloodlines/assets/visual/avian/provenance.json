@@ -1,0 +1,525 @@
+{
+  "authorization": "从狐狸到猿属都还没有把原稿进行像素缩略化吧，也就是真正能在游戏里显示的那种头像，请补上。",
+  "processing": "deterministic component extraction and nearest-neighbour resize; original soft alpha",
+  "original_generator": "OpenAI built-in image_gen",
+  "new_generation": false,
+  "source_recipe": "scripts/monster_static_sources.json",
+  "static_forms": 17,
+  "sources": [
+    {
+      "identity": "avian-low-spirit-shared",
+      "node": "AVIAN_SPIRIT",
+      "name": "灵禽",
+      "realm": 1,
+      "gender": "shared",
+      "file": "design/avian-growth-alpha4-20261023/source/avian_spirit-v1.png",
+      "sha256": "3c4263715d5cff9a43e7b2e5c79ae60f31e99735ef025e5a5d924459490df99a",
+      "prompts": "design/avian-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          34,
+          21,
+          864,
+          1002
+        ],
+        [
+          943,
+          40,
+          1524,
+          956
+        ]
+      ]
+    },
+    {
+      "identity": "avian-low-sky-shared",
+      "node": "AVIAN_SKY",
+      "name": "天青鸾",
+      "realm": 3,
+      "gender": "shared",
+      "file": "design/avian-growth-alpha4-20261023/source/avian_sky-v1.png",
+      "sha256": "2bc00cc7887cd701455ae48f61d144f29b57211c263e03368088999324339b62",
+      "prompts": "design/avian-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          26,
+          6,
+          871,
+          1002
+        ],
+        [
+          1006,
+          65,
+          1516,
+          1006
+        ]
+      ]
+    },
+    {
+      "identity": "avian-low-peng-shared",
+      "node": "AVIAN_PENG",
+      "name": "风鹏",
+      "realm": 3,
+      "gender": "shared",
+      "file": "design/avian-growth-alpha4-20261023/source/avian_peng-v1.png",
+      "sha256": "c921dfedae6225823538c8d5b4a1c7b1916b5216132af32c7bda7085f802f5a5",
+      "prompts": "design/avian-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          18,
+          81,
+          1007,
+          959
+        ],
+        [
+          1029,
+          189,
+          1526,
+          872
+        ]
+      ]
+    },
+    {
+      "identity": "avian-low-storm-shared",
+      "node": "AVIAN_STORM",
+      "name": "九霄雷禽",
+      "realm": 3,
+      "gender": "shared",
+      "file": "design/avian-growth-alpha4-20261023/source/avian_storm-v1.png",
+      "sha256": "34f0030fa0dd4bbda58210ebb958d51992b14d763ece6a4b9f83fae590a66d5c",
+      "prompts": "design/avian-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          4,
+          16,
+          907,
+          1009
+        ],
+        [
+          978,
+          27,
+          1532,
+          1013
+        ]
+      ]
+    },
+    {
+      "identity": "avian-low-thunder-phoenix-shared",
+      "node": "AVIAN_THUNDER_PHOENIX",
+      "name": "雷火鸾",
+      "realm": 3,
+      "gender": "shared",
+      "file": "design/avian-growth-alpha4-20261023/source/avian_thunder_phoenix-v1.png",
+      "sha256": "df4830532eaeb8d5fba397a486c0a7d45e0b8fcc75fa65bff94c0929a53be5b8",
+      "prompts": "design/avian-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          22,
+          20,
+          947,
+          994
+        ],
+        [
+          1007,
+          109,
+          1514,
+          928
+        ]
+      ]
+    },
+    {
+      "identity": "avian-low-vermilion-shared",
+      "node": "AVIAN_VERMILION",
+      "name": "朱焰鸾鸟",
+      "realm": 3,
+      "gender": "shared",
+      "file": "design/avian-growth-alpha4-20261023/source/avian_vermilion-v1.png",
+      "sha256": "7c29569d96ea680a58ccd23ea55cb94cef4805c269c02aae9a57464c5882826d",
+      "prompts": "design/avian-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          4,
+          19,
+          981,
+          1006
+        ],
+        [
+          1055,
+          63,
+          1528,
+          1008
+        ]
+      ]
+    },
+    {
+      "identity": "avian-low-phoenix-shared",
+      "node": "AVIAN_PHOENIX",
+      "name": "幼生凤凰",
+      "realm": 3,
+      "gender": "shared",
+      "file": "design/avian-growth-alpha4-20261023/source/avian_phoenix-v1.png",
+      "sha256": "aaa284f7db3146f8dfa95e9686a4f71a66291f3ed6ec363ae5bbdf33f1871a91",
+      "prompts": "design/avian-growth-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          30,
+          16,
+          992,
+          1009
+        ],
+        [
+          1057,
+          31,
+          1522,
+          976
+        ]
+      ]
+    },
+    {
+      "identity": "avian-nascent-azure-sovereign-female",
+      "node": "AVIAN_AZURE_SOVEREIGN",
+      "name": "青霄鸾王 · 女",
+      "realm": 4,
+      "gender": "female",
+      "file": "design/avian-nascent-alpha4-20261023/source/azure-female-v1.png",
+      "sha256": "2de91a78c1a68848719ada925f4f2b762741cbe14a31578a66bfe55014cc64bd",
+      "prompts": "design/avian-nascent-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          24,
+          0,
+          956,
+          1019
+        ],
+        [
+          945,
+          164,
+          1529,
+          993
+        ]
+      ]
+    },
+    {
+      "identity": "avian-nascent-azure-sovereign-male",
+      "node": "AVIAN_AZURE_SOVEREIGN",
+      "name": "青霄鸾王 · 男",
+      "realm": 4,
+      "gender": "male",
+      "file": "design/avian-nascent-alpha4-20261023/source/azure-male-v2.png",
+      "sha256": "ccc78951a423657078f22d3c3d1052e1f82a393e9a108cb95d7d6bb7a7865c49",
+      "prompts": "design/avian-nascent-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          17,
+          17,
+          899,
+          1007
+        ],
+        [
+          889,
+          90,
+          1520,
+          955
+        ]
+      ]
+    },
+    {
+      "identity": "avian-nascent-storm-sovereign-female",
+      "node": "AVIAN_STORM_SOVEREIGN",
+      "name": "劫羽雷皇 · 女",
+      "realm": 4,
+      "gender": "female",
+      "file": "design/avian-nascent-alpha4-20261023/source/storm-female-v1.png",
+      "sha256": "b481adbf9fbbb9e015ed8a1365d5c0d143c305e73bd1dc6278cd915da8f424cf",
+      "prompts": "design/avian-nascent-alpha4-20261023/prompts.json",
+      "component_threshold": 32,
+      "split_note": "Only subject identification uses alpha 32 to separate the faint glow bridge. Output keeps original alpha, with a four-pixel fringe; no binary opacity conversion.",
+      "subject_bounds": [
+        [
+          18,
+          3,
+          886,
+          1009
+        ],
+        [
+          871,
+          136,
+          1532,
+          976
+        ]
+      ]
+    },
+    {
+      "identity": "avian-nascent-storm-sovereign-male",
+      "node": "AVIAN_STORM_SOVEREIGN",
+      "name": "劫羽雷皇 · 男",
+      "realm": 4,
+      "gender": "male",
+      "file": "design/avian-nascent-alpha4-20261023/source/storm-male-v1.png",
+      "sha256": "17d8b9faf7565ef994c6ef1f86a83e07764ea72a80b19665161da129c0837c85",
+      "prompts": "design/avian-nascent-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          28,
+          0,
+          862,
+          1014
+        ],
+        [
+          833,
+          66,
+          1524,
+          944
+        ]
+      ]
+    },
+    {
+      "identity": "avian-nascent-flame-sovereign-female",
+      "node": "AVIAN_FLAME_SOVEREIGN",
+      "name": "涅火凤君 · 女",
+      "realm": 4,
+      "gender": "female",
+      "file": "design/avian-nascent-alpha4-20261023/source/phoenix-female-v2.png",
+      "sha256": "f7bb882558e13f533304f9a70cc920692b3d884dbb10dc321b1114e3ce046ee7",
+      "prompts": "design/avian-nascent-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          21,
+          0,
+          864,
+          1006
+        ],
+        [
+          816,
+          101,
+          1529,
+          995
+        ]
+      ]
+    },
+    {
+      "identity": "avian-nascent-flame-sovereign-male",
+      "node": "AVIAN_FLAME_SOVEREIGN",
+      "name": "涅火凤君 · 男",
+      "realm": 4,
+      "gender": "male",
+      "file": "design/avian-nascent-alpha4-20261023/source/phoenix-male-v2.png",
+      "sha256": "57dc22c7d7afa939be69709c3133f1a94c48c41e173bb3fa1baa5e148ecc6435",
+      "prompts": "design/avian-nascent-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          9,
+          11,
+          908,
+          1003
+        ],
+        [
+          925,
+          94,
+          1523,
+          919
+        ]
+      ]
+    },
+    {
+      "identity": "avian-integration-primordial-peng-female",
+      "node": "AVIAN_PRIMORDIAL_PENG",
+      "name": "太古神鹏 · 女",
+      "realm": 7,
+      "gender": "female",
+      "file": "design/avian-integration-alpha4-20261023/source/peng-female-v1.png",
+      "sha256": "ad12f05706468059c080a295e1ab74173ec51b961b8e8b96de03c6bbbe165497",
+      "prompts": "design/avian-integration-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          24,
+          4,
+          943,
+          1010
+        ],
+        [
+          955,
+          107,
+          1522,
+          973
+        ]
+      ]
+    },
+    {
+      "identity": "avian-integration-primordial-peng-male",
+      "node": "AVIAN_PRIMORDIAL_PENG",
+      "name": "太古神鹏 · 男",
+      "realm": 7,
+      "gender": "male",
+      "file": "design/avian-integration-alpha4-20261023/source/peng-male-v1.png",
+      "sha256": "d8565304d29ef99057bb1778de2dca361b60d3107fffb5ebcb12cef17dadf014",
+      "prompts": "design/avian-integration-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          9,
+          4,
+          912,
+          1018
+        ],
+        [
+          896,
+          85,
+          1524,
+          961
+        ]
+      ]
+    },
+    {
+      "identity": "avian-integration-ancestral-phoenix-female",
+      "node": "AVIAN_ANCESTRAL_PHOENIX",
+      "name": "太古真凰 · 女",
+      "realm": 7,
+      "gender": "female",
+      "file": "design/avian-integration-alpha4-20261023/source/phoenix-female-v1.png",
+      "sha256": "cdba78c673ef689b75dc05d27ec0a70ab962e9fa423cf4c284300a7d035d03f5",
+      "prompts": "design/avian-integration-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          21,
+          2,
+          861,
+          1010
+        ],
+        [
+          865,
+          89,
+          1532,
+          988
+        ]
+      ]
+    },
+    {
+      "identity": "avian-integration-ancestral-phoenix-male",
+      "node": "AVIAN_ANCESTRAL_PHOENIX",
+      "name": "太古真凰 · 男",
+      "realm": 7,
+      "gender": "male",
+      "file": "design/avian-integration-alpha4-20261023/source/phoenix-male-v1.png",
+      "sha256": "5991e617b135642b20a283da048fbebcf6d95b6a93a9de7b9b3116dbd13933f7",
+      "prompts": "design/avian-integration-alpha4-20261023/prompts.json",
+      "subject_bounds": [
+        [
+          15,
+          5,
+          900,
+          1007
+        ],
+        [
+          944,
+          82,
+          1523,
+          942
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-low-spirit-shared",
+      "file": "design/avian-combat-alpha4-20261023/source/beast-avian_spirit-actions-v1.png",
+      "sha256": "b68f03458fe3432b18d472fc3d446e6873d09e61aac40188e14bf8118554e6d3"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-low-sky-shared",
+      "file": "design/avian-combat-alpha4-20261023/source/beast-avian_sky-actions-v1.png",
+      "sha256": "016e9eb7163463e4b66c7ed52375039265bc17f25da038c23f4270764b00f531"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-low-peng-shared",
+      "file": "design/avian-combat-alpha4-20261023/source/beast-avian_peng-actions-v1.png",
+      "sha256": "c70ebe2acc91ad744d20c1ba4584186d4c2e654e7aeaf22e65cd6b720485040f"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-low-storm-shared",
+      "file": "design/avian-combat-alpha4-20261023/source/beast-avian_storm-actions-v1.png",
+      "sha256": "941f8235011fc18782e052b25fabcdd436aa91e23b053317934ae246e37353bf"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-low-thunder-phoenix-shared",
+      "file": "design/avian-combat-alpha4-20261023/source/beast-avian_thunder_phoenix-actions-v1.png",
+      "sha256": "92bfdb7f8b9e643e3f2ac349de7c6747d992f6e0641384c4e204f50b24b6679d"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-low-vermilion-shared",
+      "file": "design/avian-combat-alpha4-20261023/source/beast-avian_vermilion-actions-v1.png",
+      "sha256": "ecbd111ec2c8af8bd64b9528308a9ba1a72538ccb73456da72ba23a42bb7b607"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-low-phoenix-shared",
+      "file": "design/avian-combat-alpha4-20261023/source/beast-avian_phoenix-actions-v1.png",
+      "sha256": "28f745e08ca71c2f97340bb8f2d312e933329f9073b51af1da80023e6922d8d1"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-nascent-azure-sovereign-female",
+      "file": "design/avian-combat-alpha4-20261023/source/nascent-azure-female-actions-v1.png",
+      "sha256": "7f83405ee81912be1a66218e5e8cf8942e0e7ccd9913829597014da56b26845a"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-nascent-azure-sovereign-male",
+      "file": "design/avian-combat-alpha4-20261023/source/nascent-azure-male-actions-v1.png",
+      "sha256": "7405d7298cc55fea4f4eb8be7161089885fc7e502044fd429db9c61907b42a6c"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-nascent-storm-sovereign-female",
+      "file": "design/avian-combat-alpha4-20261023/source/nascent-storm-female-actions-v1.png",
+      "sha256": "19a2d9ceb04ed3f0a96eef9252c6444d1b3e698876b1166b5fa45bb7d3eaff23"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-nascent-storm-sovereign-male",
+      "file": "design/avian-combat-alpha4-20261023/source/nascent-storm-male-actions-v1.png",
+      "sha256": "e84f190b4e20878987ae5e986dc3f904978f8bed82998f42295d17c6e769db82"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-nascent-flame-sovereign-female",
+      "file": "design/avian-combat-alpha4-20261023/source/nascent-phoenix-female-actions-v1.png",
+      "sha256": "485bef9177ffea60ff866844fbee5d4440cbac49f61d5f05ab1789a8373e328e"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-nascent-flame-sovereign-male",
+      "file": "design/avian-combat-alpha4-20261023/source/nascent-phoenix-male-actions-v1.png",
+      "sha256": "9bc27cd509dab31b4b0baee72c94ad72ba8b2f9f805e85cb04c80fd3ba3aa874"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-integration-primordial-peng-female",
+      "file": "design/avian-combat-alpha4-20261023/source/integration-peng-female-actions-v1.png",
+      "sha256": "add6f31c6dc317728aa1fe4ba4fd637cde47eeb3286d478c5e4f5aea7c380d71"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-integration-primordial-peng-male",
+      "file": "design/avian-combat-alpha4-20261023/source/integration-peng-male-actions-v1.png",
+      "sha256": "890a5f21aa11c1f2dc0ea1cbbf4d74fd20406f77255becf3baf7cd94efcbce2e"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-integration-ancestral-phoenix-female",
+      "file": "design/avian-combat-alpha4-20261023/source/integration-phoenix-female-actions-v1.png",
+      "sha256": "402a84ebdc9c6b4253654645da629940f0c52a17c931687734d967dd34f562b6"
+    },
+    {
+      "kind": "actions",
+      "identity": "avian-integration-ancestral-phoenix-male",
+      "file": "design/avian-combat-alpha4-20261023/source/integration-phoenix-male-actions-v2.png",
+      "sha256": "e78b296f278ac338afc7bac3b819ac960d627dcc20100a9ca71b842722b44fac"
+    }
+  ],
+  "combat_forms": 17,
+  "painted_keyposes": 153,
+  "animation_clips": 112
+}

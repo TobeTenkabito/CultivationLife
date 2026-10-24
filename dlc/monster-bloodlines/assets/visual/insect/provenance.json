@@ -1,0 +1,509 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "authorization": "仿照前面的流程一次性完成虫属；合体虫群女为苗疆少女意象，金甲女为蛇蝎美人气质",
+  "export": "Nearest-neighbour with original soft alpha; common action scale; self-contained DLC runtime files",
+  "static_forms": 19,
+  "combat_forms": 19,
+  "painted_keyposes": 171,
+  "animation_clips": 126,
+  "sources": [
+    {
+      "kind": "static",
+      "identity": "insect-spirit-shared",
+      "file": "design/insect-growth-alpha4-20261024/source/spirit-v1.png",
+      "sha256": "d73fe8d82a98f31172124672eda6869f627e95225ed2c24a6467ef85c2829d06",
+      "subject_bounds": [
+        [
+          29,
+          132,
+          802,
+          898
+        ],
+        [
+          938,
+          138,
+          1516,
+          900
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-spirit-shared",
+      "file": "design/insect-combat-alpha4-20261024/source/spirit-actions-v1.png",
+      "sha256": "869a132fe8fef5ef15222e34fdd396137123257fd299067338fb1b9ba34a6a3f"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-king-shared",
+      "file": "design/insect-growth-alpha4-20261024/source/king-v1.png",
+      "sha256": "a8dadb996cfa48cfb94175fe41fbfd912a818f0081307fece0666a55cec4c8ed",
+      "subject_bounds": [
+        [
+          19,
+          104,
+          1011,
+          924
+        ],
+        [
+          1040,
+          189,
+          1531,
+          914
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-king-shared",
+      "file": "design/insect-combat-alpha4-20261024/source/king-actions-v1.png",
+      "sha256": "ffae32d417e738fddf0916fd29fd032a09c1b5418bbdb281eda1cc6a6db44a30"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-void-cicada-shared",
+      "file": "design/insect-growth-alpha4-20261024/source/void-cicada-v1.png",
+      "sha256": "4cca2ef9177d443cf6ee7f54cadd1ea0485c209f777bd72d90c05cfb3626aa7e",
+      "subject_bounds": [
+        [
+          23,
+          94,
+          900,
+          913
+        ],
+        [
+          974,
+          154,
+          1522,
+          849
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-void-cicada-shared",
+      "file": "design/insect-combat-alpha4-20261024/source/void-cicada-actions-v1.png",
+      "sha256": "ea22d9628a4fa34155d0a9fabcae8b9bc6a1692e71f55ad45fe9bd07aa935ec2"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-mother-seed-shared",
+      "file": "design/insect-growth-alpha4-20261024/source/mother-seed-v2.png",
+      "sha256": "695750998ac47bdc3f39fc1eb530384142278c3c1d9e0cbdc4d790145f8bf641",
+      "subject_bounds": [
+        [
+          69,
+          100,
+          994,
+          946
+        ],
+        [
+          953,
+          165,
+          1506,
+          876
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-mother-seed-shared",
+      "file": "design/insect-combat-alpha4-20261024/source/mother-seed-actions-v1.png",
+      "sha256": "c77014040976146adc7e5a370bd8914c72665d6836011ff28ad626c7cf940a3f"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-violet-armor-shared",
+      "file": "design/insect-growth-alpha4-20261024/source/violet-armor-v1.png",
+      "sha256": "ca2db093dc00d305b24122b7b19f40721fca0e5835923a8d99fe8109a9070848",
+      "subject_bounds": [
+        [
+          39,
+          150,
+          934,
+          885
+        ],
+        [
+          1054,
+          134,
+          1505,
+          838
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-violet-armor-shared",
+      "file": "design/insect-combat-alpha4-20261024/source/violet-armor-actions-v1.png",
+      "sha256": "d9e4bfef56021cdc2a6320d5aae54abef06f473ecc7d2c24dcf27e2cf618b282"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-thunder-singer-shared",
+      "file": "design/insect-growth-alpha4-20261024/source/thunder-singer-v1.png",
+      "sha256": "e12d4d7ab31dab8d11a004e9bb73b64a7f95c35eb9ceb5d4207196d584609a06",
+      "subject_bounds": [
+        [
+          18,
+          101,
+          963,
+          975
+        ],
+        [
+          1018,
+          112,
+          1510,
+          913
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-thunder-singer-shared",
+      "file": "design/insect-combat-alpha4-20261024/source/thunder-singer-actions-v1.png",
+      "sha256": "83c9f69c196bd269c6730b77e231d5ab76c63aa0a3828c7bba9f49b58a7eed12"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-phantom-moth-shared",
+      "file": "design/insect-growth-alpha4-20261024/source/phantom-moth-v1.png",
+      "sha256": "da895e3080a33ced2c45e64b25624a790d4bac718925ef3a46513919095c7094",
+      "subject_bounds": [
+        [
+          17,
+          61,
+          979,
+          957
+        ],
+        [
+          1011,
+          71,
+          1522,
+          985
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-phantom-moth-shared",
+      "file": "design/insect-combat-alpha4-20261024/source/phantom-moth-actions-v1.png",
+      "sha256": "7f2e229fb94038cd9d82b8993dd5543a70c633cdca0c169b58f5ab7083026c0d"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-nascent-armor-female",
+      "file": "design/insect-growth-alpha4-20261024/source/nascent-armor-female-v1.png",
+      "sha256": "fb19f87c183f34a0ba1d7f65a0675393d412216017b1ae6ff77be631f6c1568e",
+      "subject_bounds": [
+        [
+          46,
+          7,
+          682,
+          1010
+        ],
+        [
+          751,
+          82,
+          1526,
+          961
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-nascent-armor-female",
+      "file": "design/insect-combat-alpha4-20261024/source/nascent-armor-female-actions-v1.png",
+      "sha256": "9079e8d4bf5b69fe39fa8eaf0acacec3cdbc1c80a9f38274432cea91c9b8374f"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-nascent-armor-male",
+      "file": "design/insect-growth-alpha4-20261024/source/nascent-armor-male-v1.png",
+      "sha256": "011ae7a04711634002f2b2f198001ea96802e1517112ca7e22c0431143c514b3",
+      "subject_bounds": [
+        [
+          26,
+          0,
+          734,
+          1020
+        ],
+        [
+          821,
+          92,
+          1515,
+          952
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-nascent-armor-male",
+      "file": "design/insect-combat-alpha4-20261024/source/nascent-armor-male-actions-v1.png",
+      "sha256": "9250caa477044d974b325a17c227342f29c11e43a2054e80c83d08ad561b1616"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-nascent-swarm-female",
+      "file": "design/insect-growth-alpha4-20261024/source/nascent-swarm-female-v1.png",
+      "sha256": "7a97251c3da494bcae39cf558d1e246367bd81a0cffe4cb0e35b93f79b690209",
+      "subject_bounds": [
+        [
+          30,
+          3,
+          836,
+          1021
+        ],
+        [
+          837,
+          62,
+          1487,
+          996
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-nascent-swarm-female",
+      "file": "design/insect-combat-alpha4-20261024/source/nascent-swarm-female-actions-v1.png",
+      "sha256": "027bcf7bb8e858bf9ca1f4f47d8b6a30b401087b0c472abf90778fd89c5ddd08"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-nascent-swarm-male",
+      "file": "design/insect-growth-alpha4-20261024/source/nascent-swarm-male-v1.png",
+      "sha256": "c25b5f3bc8923c0961deebbcbd63d5cf338ac3a1b0ed2c5854db68d2ad3ecffc",
+      "subject_bounds": [
+        [
+          35,
+          5,
+          796,
+          1012
+        ],
+        [
+          821,
+          62,
+          1534,
+          974
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-nascent-swarm-male",
+      "file": "design/insect-combat-alpha4-20261024/source/nascent-swarm-male-actions-v1.png",
+      "sha256": "1396ff5cb94c3783de30e4cac4c141d82c610a705620b24c60d6e37f75484c51"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-nascent-cicada-female",
+      "file": "design/insect-growth-alpha4-20261024/source/nascent-cicada-female-v1.png",
+      "sha256": "d794151772a2765e10f12449ec20acc70d77728836dd00e33ed27b6c75db445e",
+      "subject_bounds": [
+        [
+          27,
+          8,
+          874,
+          1010
+        ],
+        [
+          949,
+          27,
+          1529,
+          993
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-nascent-cicada-female",
+      "file": "design/insect-combat-alpha4-20261024/source/nascent-cicada-female-actions-v1.png",
+      "sha256": "9c0857c69575ab50d958ff78bb115160d0dd8361df9576b446e270d55c01235b"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-nascent-cicada-male",
+      "file": "design/insect-growth-alpha4-20261024/source/nascent-cicada-male-v1.png",
+      "sha256": "c4d996636f6c5365eb54e994278db9d8e1307aaab8fad86efceba71b1b721682",
+      "subject_bounds": [
+        [
+          36,
+          0,
+          839,
+          1014
+        ],
+        [
+          875,
+          78,
+          1505,
+          953
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-nascent-cicada-male",
+      "file": "design/insect-combat-alpha4-20261024/source/nascent-cicada-male-actions-v1.png",
+      "sha256": "e731f71ddc30120fa7dc14ba165a3fa58eff2d789c23328212b45d5592f36edc"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-integration-armor-female",
+      "file": "design/insect-growth-alpha4-20261024/source/integration-armor-female-v2.png",
+      "sha256": "6828a3159c689c5dbd6aca9d3a0ad8e6af3a995a71fc3ae458dfc5ea7314f7d8",
+      "subject_bounds": [
+        [
+          23,
+          0,
+          768,
+          1022
+        ],
+        [
+          709,
+          45,
+          1536,
+          994
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-integration-armor-female",
+      "file": "design/insect-combat-alpha4-20261024/source/integration-armor-female-actions-v1.png",
+      "sha256": "5faac95a19d01f157134cd105f65e282798b534792477aa6c5b457c938578ec1"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-integration-armor-male",
+      "file": "design/insect-growth-alpha4-20261024/source/integration-armor-male-v1.png",
+      "sha256": "2b19857f18496334d9c2e3f67c6db2f81867420946882393556e880c841e4185",
+      "subject_bounds": [
+        [
+          15,
+          0,
+          786,
+          1021
+        ],
+        [
+          813,
+          88,
+          1523,
+          947
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-integration-armor-male",
+      "file": "design/insect-combat-alpha4-20261024/source/integration-armor-male-actions-v1.png",
+      "sha256": "00f5da0187cd0f21456c2abc9b3fc46d3ed0c135af840ac979f81395bda78027"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-integration-swarm-female",
+      "file": "design/insect-growth-alpha4-20261024/source/integration-swarm-female-v1.png",
+      "sha256": "612d09d00ac9e777b50f33b68bfbcded66b47410772ececbe79f6d38fb548299",
+      "subject_bounds": [
+        [
+          132,
+          0,
+          711,
+          1022
+        ],
+        [
+          828,
+          68,
+          1490,
+          1008
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-integration-swarm-female",
+      "file": "design/insect-combat-alpha4-20261024/source/integration-swarm-female-actions-v1.png",
+      "sha256": "6254578d0ffbeabdcf7d5d7dc6d76a92fc8ab80586feb74bc235402c1e804522"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-integration-swarm-male",
+      "file": "design/insect-growth-alpha4-20261024/source/integration-swarm-male-v1.png",
+      "sha256": "5ced08cb314b75bc116f72d56d23f0cc90e3bf7453b787462ae815ea536d5d93",
+      "subject_bounds": [
+        [
+          38,
+          3,
+          699,
+          1018
+        ],
+        [
+          843,
+          61,
+          1528,
+          969
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-integration-swarm-male",
+      "file": "design/insect-combat-alpha4-20261024/source/integration-swarm-male-actions-v1.png",
+      "sha256": "8fd59387608c4935b1029a40746b9d699549cd335b1cfe15282939c29e28aaf0"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-integration-cicada-female",
+      "file": "design/insect-growth-alpha4-20261024/source/integration-cicada-female-v1.png",
+      "sha256": "106517d6228767d8d655a1788923c6b2a39206f55baacda94e9828767b367c37",
+      "subject_bounds": [
+        [
+          26,
+          7,
+          881,
+          1015
+        ],
+        [
+          946,
+          29,
+          1525,
+          997
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-integration-cicada-female",
+      "file": "design/insect-combat-alpha4-20261024/source/integration-cicada-female-actions-v1.png",
+      "sha256": "5bb4c67681452e0f7bf8ad7fcd4155cf691b87d13e874bab238d4f784f46652a"
+    },
+    {
+      "kind": "static",
+      "identity": "insect-integration-cicada-male",
+      "file": "design/insect-growth-alpha4-20261024/source/integration-cicada-male-v1.png",
+      "sha256": "b8a0dd4a9c06e7c6ace9429c54d0bb93da4f579a0d15b8b31866edb9eb391599",
+      "subject_bounds": [
+        [
+          33,
+          0,
+          860,
+          1015
+        ],
+        [
+          877,
+          77,
+          1508,
+          960
+        ]
+      ]
+    },
+    {
+      "kind": "actions",
+      "identity": "insect-integration-cicada-male",
+      "file": "design/insect-combat-alpha4-20261024/source/integration-cicada-male-actions-v1.png",
+      "sha256": "0ea4f5439f5df060dff4cb8d0358b75779df70c86f4c87eb383e0e09a49bb37e"
+    }
+  ],
+  "prompts": [
+    "design/insect-growth-alpha4-20261024/prompts.json",
+    "design/insect-combat-alpha4-20261024/prompts.json"
+  ]
+}

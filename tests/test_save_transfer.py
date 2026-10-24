@@ -71,7 +71,7 @@ def test_struct10_previous_release_and_current_alpha_codes(snapshot, version):
     assert json.loads(target._path(game_id).read_bytes()) == doc['save']
 
 
-@pytest.mark.parametrize('version', ['3.0.0-alpha.4','3.0.0-beta.1','3.0.0-rc.1','3.0.0','3.-alpha-1'])
+@pytest.mark.parametrize('version', ['3.0.0-alpha.5','3.0.0-beta.1','3.0.0-rc.1','3.0.0','3.-alpha-1'])
 def test_future_or_nonstandard_prerelease_code_rejected(snapshot, version):
     source, game_id, target = snapshot
     doc, _ = decode_snapshot(export_snapshot(source, game_id)['payload'])

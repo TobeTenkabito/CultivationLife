@@ -841,7 +841,26 @@
       "requires": [
         "official.monster-bloodlines"
       ],
-      "sha256": "84c2f6a798541b546829420437308e434bb3b62b6eb8d6a073040b9bf859aee6"
+      "sha256": "c38134abae3b01aa68905d6740e873f62f908fb72d8145350dc1861c0998d2fd",
+      "combat_actors": [
+        "fox-king-shared",
+        "fox-moon-dream-shared",
+        "fox-nine-tail-shared",
+        "fox-spirit-shared",
+        "fox-nascent-nine-female",
+        "fox-nascent-nine-male",
+        "fox-nascent-mystic-female",
+        "fox-nascent-mystic-male",
+        "fox-nascent-moon-female",
+        "fox-nascent-moon-male",
+        "fox-integration-nine-female",
+        "fox-integration-nine-male",
+        "fox-integration-moon-male",
+        "fox-integration-moon-female",
+        "fox-integration-mystic-female",
+        "fox-integration-mystic-male"
+      ],
+      "appearance_key": "fox"
     }
   }
 }

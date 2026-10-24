@@ -2,7 +2,9 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v3.0.0-alpha.3**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v3.0.0-alpha.4**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+
+v3.0.0-alpha.4 实装妖修八族分境外观、143 套像素静态形象与 139 套战斗形象，妖修素材和注册规则独立归属 DLC；境界外观接口、兼容边界及验证范围见[alpha.4 说明](docs/alpha4-release.md)。
 
 v3.0.0-alpha.3 补齐魔修头像与人物详情、NPC交互与名册立绘，以及十三组邻域外观编辑组件。支持自由取色、轮廓／意象／控制混搭与本机保存，修复预览人物身份和混搭边缘联动。本版正式接入邻域战报动画，按真实展开、支配、施权、收域衔接普通交锋；NPC按战斗抽淡色，主角使用设置中的搭配，重播保持历史外观。存档仅支持结构10；发行范围见[alpha.3发行说明](docs/alpha3-release.md)。
 
@@ -129,7 +131,7 @@ Windows ZIP 附带 `scripts/debug_agent.py` 及最小标准库客户端。CLI／
 | --- | --- | --- |
 | [修罗显圣：无法无天](dlc/asura-manifestation/README.md) | 1.2.1 | 煞元转化、魔脉、八部凝身、魔域神通与心魔劫 |
 | [诸法无我：众生为镜](dlc/buddhist-dharma/README.md) | 1.1.0 | 四上界弘法与愿力、三阶段法会、地图信众、寺庙、正负业力、六项加持与佛修双飞升路线 |
-| [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.17.0 | 妖修八源血脉；五族分支补全、狐族分境立绘与战斗动作、族血规则与本相铸域 |
+| [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.19.0 | 妖修八源血脉；五族分支补全、狐族与蛇族分境立绘及战斗动作、族血规则与本相铸域 |
 | [万灵争衡：百族兴衰](dlc/monster-civilizations/README.md) | 1.0.0 | 独立生态、氏族、王庭与万灵志 |
 | [百鬼夜行：往生轮回](dlc/ghost-reincarnation/README.md) | 3.9.1 | 鬼修魂魄、魂蚀、往生与轮回 |
 | [明争暗斗：合纵连横](dlc/intrigue-coalitions/README.md) | 1.5.0 | NPC 性格、势力职位、客卿、议案与内政 |

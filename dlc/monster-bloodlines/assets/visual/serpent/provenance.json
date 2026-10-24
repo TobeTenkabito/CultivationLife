@@ -1,0 +1,153 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "authorization": "再补全先前境界的关键帧和动作动画；那就更新妖族dlc版本，并将素材放入",
+  "export": "nearest-neighbour; original soft alpha; separate source figures; no runtime design dependency",
+  "painted_keyposes": 99,
+  "animation_clips": 70,
+  "static_forms": 11,
+  "combat_forms": 11,
+  "sources": [
+    {
+      "kind": "static",
+      "identity": "serpent-spirit-shared",
+      "file": "design/serpent-growth-alpha4-20261023/source/serpent_spirit-v1.png",
+      "sha256": "64effcb161b00766f99fdd4d8d80ab5aa87204b4902d3b9c3c0f83432324d493"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-spirit-shared",
+      "file": "design/serpent-beast-combat-alpha4-20261023/source/serpent_spirit-actions-v1.png",
+      "sha256": "883a7bb4ac51bcbbf4f766968d66d5bcae0591f1c239a1833be814204b56f5af"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-great-mystic-shared",
+      "file": "design/serpent-growth-alpha4-20261023/source/serpent_great_mystic-v1.png",
+      "sha256": "bcf75b244c5cbd031590c4329809a4bad2ee18f633a05b67fbdc42c8247f341f"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-great-mystic-shared",
+      "file": "design/serpent-beast-combat-alpha4-20261023/source/serpent_great_mystic-actions-v1.png",
+      "sha256": "b27672d0f50870c0e451ec20422c818a4032025b2b2f483c74aef19fca57fcbc"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-rock-python-shared",
+      "file": "design/serpent-growth-alpha4-20261023/source/serpent_rock_python-v1.png",
+      "sha256": "1c7c7294d2a6fb02d229cdbecd7540576be5bdaed58c958e8d4687cff49e49cf"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-rock-python-shared",
+      "file": "design/serpent-beast-combat-alpha4-20261023/source/serpent_rock_python-actions-v1.png",
+      "sha256": "4507e6164b0096124ce2caa6bc503ca3befbd97898f3c14c85f308a55cea96b0"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-abyss-shared",
+      "file": "design/serpent-growth-alpha4-20261023/source/serpent_abyss-v2.png",
+      "sha256": "d88cfe97952ae7debde7bacbfbbceb89cc5d7c30f63332977aa4b40977264038"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-abyss-shared",
+      "file": "design/serpent-beast-combat-alpha4-20261023/source/serpent_abyss-actions-v1.png",
+      "sha256": "72c647e561b12bcac713a95291cc2d62bcd29405c068f871a89f0c1b5110ceed"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-flood-dragon-shared",
+      "file": "design/serpent-growth-alpha4-20261023/source/serpent_flood_dragon-v1.png",
+      "sha256": "4fbcf5b7ea0d813a48d31b8befd36eb857b086181322e09237db228bf8f63214"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-flood-dragon-shared",
+      "file": "design/serpent-beast-combat-alpha4-20261023/source/serpent_flood_dragon-actions-v1.png",
+      "sha256": "fdc0dd79a6b609b354f33aa22c88f4e8c1b29310bd1f2cc73689b73b1b3bbd20"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-thunder-kui-shared",
+      "file": "design/serpent-growth-alpha4-20261023/source/serpent_thunder_kui-v1.png",
+      "sha256": "293dff0d64380a9651cb50ecd6e060df0994c1c64fc7040ebeec8e4da8654bf1"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-thunder-kui-shared",
+      "file": "design/serpent-beast-combat-alpha4-20261023/source/serpent_thunder_kui-actions-v1.png",
+      "sha256": "481a9bb9a12518d9f4878965a6bae34c580acf44699a542a2f41afd417be6619"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-sky-dragon-shared",
+      "file": "design/serpent-growth-alpha4-20261023/source/serpent_sky_dragon-v1.png",
+      "sha256": "60ed382c4225768307ef998b448426a6481a8edb1971cc43ff27302cf34ccc2d"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-sky-dragon-shared",
+      "file": "design/serpent-beast-combat-alpha4-20261023/source/serpent_sky_dragon-actions-v1.png",
+      "sha256": "9ed67e25ffa89a86af326dc76b14be96e67a3431ac24ece9380a6ad38722ba8c"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-integration-dragon-female",
+      "file": "design/serpent-integration-alpha4-20261023/source/dragon-female-v1.png",
+      "sha256": "9f5e09d78103aa3323967faaf1e51e46f9a364e3c6349da58af3e9e0a24df599"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-integration-dragon-female",
+      "file": "design/serpent-integration-combat-alpha4-20261023/source/dragon-female-actions-v2.png",
+      "sha256": "c9be84589a8ffa79eafe421aa19d97bf762e5cbbe09ce10d3e95d1bb623996dd"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-integration-dragon-male",
+      "file": "design/serpent-integration-alpha4-20261023/source/dragon-male-v2.png",
+      "sha256": "e95606104a4b2a388e9157aef8b66f744d7caafda29dbacffee5b45e945f37d9"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-integration-dragon-male",
+      "file": "design/serpent-integration-combat-alpha4-20261023/source/dragon-male-actions-v1.png",
+      "sha256": "7333b16c93034a9434e24607546facde043dc41a73556583b7de3e1fa7e651eb"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-integration-serpent-female",
+      "file": "design/serpent-integration-alpha4-20261023/source/serpent-female-v1.png",
+      "sha256": "6be1ee2d06e947a3cc952a29adc97d2b585bc3dfd4cf363b16b230493503a6c8"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-integration-serpent-female",
+      "file": "design/serpent-integration-combat-alpha4-20261023/source/serpent-female-actions-v1.png",
+      "sha256": "428718b69595ce887aa65b8827a0ee43f7ba7d23e74f76220ddb7d0ea73f6e3f"
+    },
+    {
+      "kind": "static",
+      "identity": "serpent-integration-serpent-male",
+      "file": "design/serpent-integration-alpha4-20261023/source/serpent-male-v1.png",
+      "sha256": "4b221a41f339ad3add622f0465a81825453ca2d001921a2a4199d839f9081ede"
+    },
+    {
+      "kind": "actions",
+      "identity": "serpent-integration-serpent-male",
+      "file": "design/serpent-integration-combat-alpha4-20261023/source/serpent-male-actions-v1.png",
+      "sha256": "754a08a2c9802a7abe1f4bfc7da03109cc4db29555b046d7e5e0c4724d01b680"
+    }
+  ],
+  "prompts": [
+    "design/serpent-beast-combat-alpha4-20261023/prompts.json",
+    "design/serpent-integration-combat-alpha4-20261023/prompts.json"
+  ],
+  "unsupported_realms": [
+    4,
+    5,
+    6
+  ],
+  "note": "Nascent forms not drawn; preserve existing fallback, never show Integration art early."
+}

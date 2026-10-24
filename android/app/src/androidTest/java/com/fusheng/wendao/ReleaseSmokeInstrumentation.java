@@ -506,6 +506,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         tapSelector("[data-panel-target=inventory]");
         check(Boolean.TRUE.equals(js("document.querySelector('#pixel-inventory').hidden&&!document.querySelector('#inventory-list').hidden&&document.querySelectorAll('#inventory-list .item').length===game.player.inventory.length")),"Native restored legacy inventory");tapSelector("#inventory-toggle");
         runVisualAdditions(result);
+        runMonsterVisuals(result);
         result.putString("visual_ui_scope","Four themes, native portrait/landscape clicks, extension-owned bitmap, original healing and exact material return, true natal character/slots, eleven home paintings, bounded immutable camera, original node atlas and legacy fallback; alpha.3 social portraits, domain editor and real domain battle replay");
     }
 
@@ -556,6 +557,44 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             tapSelector("[data-close-dialog=player-details-dialog]");
         }
         result.putString("protagonist_static_scope","All four selected Dao/Demonic male/female 256x288 static figures pixel-equal, 128x128 portraits, native detail clicks and no state writes");
+    }
+
+
+    private void runMonsterVisuals(Bundle result) throws Exception {
+        String fixture=assetText("monster_visuals.py");
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'八族原生验收',spirit_root:'supreme_water',path:'monster',monster_species_id:'flora',start_world:'monster_realm',seed:4190})}).then(g=>g.id)");
+        python(fixture+"\nimport json\nfrom cultivation_life import server\nselected={}\nfor c in monster_visual_cases():\n    stage='high' if c['realm']>=7 else 'low'\n    if stage=='low' and c['realm']>1:continue\n    selected.setdefault((c['species'],stage),c)\nserver._release_monster_cases=json.dumps(list(selected.values()))");
+        org.json.JSONArray cases=new org.json.JSONArray(com.chaquo.python.Python.getInstance().getModule("cultivation_life.server").get("_release_monster_cases").toString());
+        check(cases.length()==16,"Eight species low/high native cases");
+        for(int i=0;i<cases.length();i++) {
+            JSONObject form=cases.getJSONObject(i);
+            python(fixture+"\nimport json\nfrom cultivation_life import server\nprepare_monster_visual(server.ENGINE,"+JSONObject.quote(id)+",json.loads("+JSONObject.quote(form.toString())+"))");
+            async("loadGame("+JSONObject.quote(id)+")");
+            waitForJs("game.player.visual_actor==="+JSONObject.quote(form.getString("static"))+"&&document.querySelector('.pixel-portrait')?.naturalWidth===128","Native monster avatar");
+            if(Boolean.TRUE.equals(js("document.querySelector('#battle-report-card').getClientRects().length>0")))tapSelector("#battle-report-toggle");
+            js("window.__monsterBefore=JSON.stringify(game);true");
+            tapSelector(".hud-identity");
+            waitForJs("document.querySelector('.pixel-details-art canvas')?.dataset.actor==="+JSONObject.quote(form.getString("static")),"Native realm figure");
+            tapSelector("[data-close-dialog=player-details-dialog]");tapSelector("#battle-report-open");
+            waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native monster action atlas",30000);
+            for(double at:new double[]{0,1.5,2.1,3,10000}) {
+                js("CombatReplay.seek("+at+");true");
+                check(Boolean.TRUE.equals(js("CombatReplay.diagnostics().actors.hero.id==="+JSONObject.quote(form.getString("combat"))+"&&CombatReplay.diagnostics().decodedBytes<64*1024*1024")),"Native exact monster combat identity and bounded memory");
+            }
+            check(Boolean.TRUE.equals(js("JSON.stringify(game)===__monsterBefore")),"Monster replay is read only");
+            if(i==0||i==cases.length()-1)capture("alpha4-monster-"+i+"-"+arguments.getString("orientation"));
+            tapSelector("#battle-report-toggle");
+            check(Boolean.TRUE.equals(js("CombatReplay.diagnostics().cache===0")),"Native monster cache disposal");
+        }
+        python(fixture+"\nfrom cultivation_life import server\nprepare_monster_evolution(server.ENGINE,"+JSONObject.quote(id)+")");
+        async("loadGame("+JSONObject.quote(id)+")");
+        check(Boolean.TRUE.equals(js("game.player.visual_actor==='actor.monster.flora-spirit-shared'")),"Native pre-evolution appearance");
+        tapSelector("[data-panel-target=bloodline]");
+        js("[...document.querySelectorAll('.bloodline-candidate')].find(n=>n.textContent.includes('万灵古树')).querySelector('button').setAttribute('data-native-evolve','1');true");
+        tapSelector("[data-native-evolve]");
+        waitForJs("!busy&&game.player.visual_actor==='actor.monster.flora-tree-lord-shared'","Native real evolution updates portrait");
+        tapSelector("#bloodline-toggle");
+        result.putString("monster_visual_scope","Eight species low/high figures and action atlases, actual evolution click changes appearance, immutable replay and cache disposal; native orientation");
     }
 
     private void runCombatAlpha(Bundle result) throws Exception {
