@@ -1,0 +1,227 @@
+{
+  "assets": {
+    "actor.path.buddhist-hero-female.portrait": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-hero-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "7e0e3132156e45d751a4c22d23efe8e1cb9a68fe339639ee5fbcf28bcf150b0f",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-hero-female.figure": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-hero-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "d6df23b3d1efb820f26fdfdb1986a13c7bd877dcf75c944ac1ea10eedba2c5c4",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-hero-female.thumbnail": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-hero-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "33e15ef79a7729f01c88362295164bab3ebbcead155c7cd2236b9b57721212d1",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "buddhist-hero-female.actions": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-hero-female-actions.png",
+      "size": [
+        1876,
+        352
+      ],
+      "sha256": "518c013d35185b1c96a3f1285a8123ecb154bc75f83fe1e196c51758c2b066b7",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-hero-male.portrait": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-hero-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ef7b8433c9431449a956bbd325bcdf2c6320828dd9e2bd6806fb795869dc3a86",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-hero-male.figure": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-hero-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "ce60742c9e3cb6ae2720f4d403d22071fd9089cd424b79854575ff1271a52bd1",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-hero-male.thumbnail": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-hero-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "dc4e0137e5e449399294b73931827208c88a5dbb142977ecd2528855ec743e2c",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "buddhist-hero-male.actions": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-hero-male-actions.png",
+      "size": [
+        1841,
+        352
+      ],
+      "sha256": "26b7679740b44b5bcceae2b19abb6c824a6a683091e05ddd4b538d3a132163df",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-npc-female.portrait": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-npc-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "74e5b3b7cf89097608f5cdba166963a8dc49061c2c9060ca24fca765b7a364c3",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-npc-female.figure": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-npc-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "c71cb7ad0d598a1f12b303e252f3f3ee05c76e0346b00fc62b424d16b231a81d",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-npc-female.thumbnail": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-npc-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "ea9fcfcc8afe057de0f28da9d334a612e074052a891f9b4c126cff4657e313ff",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "buddhist-npc-female.actions": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-npc-female-actions.png",
+      "size": [
+        1813,
+        352
+      ],
+      "sha256": "98b551a8caeed26fbdf881b198efda7c859f1eec754bbf37243d103d1f1ac420",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-npc-male.portrait": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-npc-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ed9cbe5dcc08cdb7d4745b8ccacc916d0afc94a6bbd5e7f5259754dbe1d774e2",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-npc-male.figure": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-npc-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a477322d78e232aef4cbd1c06b9bb282f1453ff091d0c92268f729a432a8b7c7",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.buddhist-npc-male.thumbnail": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-npc-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "582515e88b7d0e62f909769394026e75bab752745dcb26950ee03e6c5f30933b",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "buddhist-npc-male.actions": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/buddhist-npc-male-actions.png",
+      "size": [
+        1912,
+        352
+      ],
+      "sha256": "8156881ed52ea4365807a55cd1f32c4341006fbe52ab609dc2aec06bfd4b464c",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "buddhist.character_manifest": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/characters/manifest.json",
+      "sha256": "161d792754c0645b3168ce0bb506f3f1845bbcb7eaff14fd77a66671dcbdf054",
+      "requires": [
+        "official.buddhist-dharma"
+      ],
+      "combat_actors": [
+        "buddhist-hero-female",
+        "buddhist-hero-male",
+        "buddhist-npc-female",
+        "buddhist-npc-male"
+      ],
+      "character_forms": [
+        {
+          "path": "buddhist",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "static": "actor.path.buddhist-hero-female",
+          "combat": "buddhist-hero-female"
+        },
+        {
+          "path": "buddhist",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "static": "actor.path.buddhist-hero-male",
+          "combat": "buddhist-hero-male"
+        },
+        {
+          "path": "buddhist",
+          "race": "human",
+          "gender": "female",
+          "role": "npc",
+          "static": "actor.path.buddhist-npc-female",
+          "combat": "buddhist-npc-female"
+        },
+        {
+          "path": "buddhist",
+          "race": "human",
+          "gender": "male",
+          "role": "npc",
+          "static": "actor.path.buddhist-npc-male",
+          "combat": "buddhist-npc-male"
+        }
+      ]
+    }
+  }
+}

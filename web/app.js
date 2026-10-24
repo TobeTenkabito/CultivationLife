@@ -4369,7 +4369,7 @@ document.addEventListener('keydown', event => {
   }
 });
 
-window.addEventListener('game:theme-change',()=>{
+function refreshVisualPanels(){
   if(game?.natal_artifact)renderNatalArtifact(game.natal_artifact);
   if(game?.map)renderMap(game.map,game.auction_system);
   if(game){
@@ -4385,7 +4385,9 @@ window.addEventListener('game:theme-change',()=>{
     window.PanelPages?.refresh(game.id);
   }
   renderButtons();
-});
+}
+window.addEventListener('game:theme-change',refreshVisualPanels);
+window.addEventListener('game:visual-ready',refreshVisualPanels);
 boot().catch(error => toast(error.message));
 
 function violenceButton(kind, person, label) {

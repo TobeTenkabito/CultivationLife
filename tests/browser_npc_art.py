@@ -88,7 +88,7 @@ def main():
                         const n={id:'stable-person',name:'甲',race:'human',path,gender,age:22},key=NpcArt.select(n);
                         if(!c.pools[`human.${path}.${gender}`].includes(key))return false;
                         if(NpcArt.select({...n,name:'乙',world:'spirit',age:300})!==key)return false;
-                        for(const invalid of [{age:12},{race:'monster'},{gender:undefined},{path:'ghost'},{ghost_host_body:{id:'host'}},{transformed:true},{identity_known:false},{lineage_race:'monster'}])
+                        for(const invalid of [{age:12},{race:'monster'},{gender:undefined},{path:'unknown'},{ghost_host_body:{id:'host'}},{transformed:true},{identity_known:false},{lineage_race:'monster'}])
                           if(NpcArt.select({...n,...invalid})!==null)return false;
                       }
                       return NpcArt.select({id:'rank_xingmu',name:'望舒',race:'human',gender:'female',path:'dao',age:99})===null;

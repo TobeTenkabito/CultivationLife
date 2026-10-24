@@ -1,0 +1,227 @@
+{
+  "assets": {
+    "actor.path.ghost-hero-male.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-hero-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ec9af5c17b87397fe319e2fa479a833eef01a30f2a076ccd1e844811a28ef4b1",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-hero-male.figure": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-hero-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "e8c02e71613370e53bbdb3c3ab3739dbff851d25608b3f0ad83fb03d2bab655f",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-hero-male.thumbnail": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-hero-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "ba95c11006e7b6d756156515966c647b884a58e3a2c54b1368842671741092fe",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost-hero-male.actions": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-hero-male-actions.png",
+      "size": [
+        1832,
+        352
+      ],
+      "sha256": "39f1808dba1aa6130fbd2ad62c28821e529a4e89cb0a6421d90676e6c9968b9b",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-hero-female.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-hero-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "913ed86d305afc77af3d27fba54268347ea865c32eb8b71d4f36889e3f343ce3",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-hero-female.figure": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-hero-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "3a51d72562525427828a3f4426530a5436aff2c6b788ccf15991f34e2710584f",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-hero-female.thumbnail": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-hero-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "515a0362a0c5212181302d64557a74e87d739121808787dc4481a6a4c1c7e520",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost-hero-female.actions": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-hero-female-actions.png",
+      "size": [
+        2032,
+        352
+      ],
+      "sha256": "5abe33420cc8ba3217105d7cbe843f199df87e7a13483dd0b0b74c69a6a5c809",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-npc-male.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-npc-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "614d3864806d1a394a2cacda170d3b98d0fd5d6d33cb6c87a1b33a81bc613374",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-npc-male.figure": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-npc-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "c8e812ec1858d7011744175b968945403f11f3790e8f76bb76e78a81d511f21f",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-npc-male.thumbnail": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-npc-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "ffcc1845dd93823991c599ff6d5a1f45717d19f3f62e9fb0cefeac3029e6ab11",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost-npc-male.actions": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-npc-male-actions.png",
+      "size": [
+        1872,
+        352
+      ],
+      "sha256": "7959b8a36165cd3f12e12489e062b0b8e707be2b5f53781c8b310ed43f348c7b",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-npc-female.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-npc-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "18b8e5183a9d116db09f73ae6a402ee42286a3c68fd31c230a3f4bd73dab75da",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-npc-female.figure": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-npc-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "d4ae052a1195f71cedccef49c210491cc9ecdc50e922021657faaa68e01dc49a",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.ghost-npc-female.thumbnail": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-npc-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "b9faecc0c68f05b5f1b80867f8e44d715eb4fdd2fdbe66bc5a038552fa5caf67",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost-npc-female.actions": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/ghost-npc-female-actions.png",
+      "size": [
+        1928,
+        352
+      ],
+      "sha256": "bd390afc0907f337cb199382340f18d5b461fa2f2389c30e623bf84c61fbcdab",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost.character_manifest": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/characters/manifest.json",
+      "sha256": "09d42169d93616a4582d914cb17916f7095a102e7bd6c1ff19add6d0c5c87356",
+      "requires": [
+        "official.ghost-reincarnation"
+      ],
+      "combat_actors": [
+        "ghost-hero-male",
+        "ghost-hero-female",
+        "ghost-npc-male",
+        "ghost-npc-female"
+      ],
+      "character_forms": [
+        {
+          "path": "ghost",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "static": "actor.path.ghost-hero-male",
+          "combat": "ghost-hero-male"
+        },
+        {
+          "path": "ghost",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "static": "actor.path.ghost-hero-female",
+          "combat": "ghost-hero-female"
+        },
+        {
+          "path": "ghost",
+          "race": "human",
+          "gender": "male",
+          "role": "npc",
+          "static": "actor.path.ghost-npc-male",
+          "combat": "ghost-npc-male"
+        },
+        {
+          "path": "ghost",
+          "race": "human",
+          "gender": "female",
+          "role": "npc",
+          "static": "actor.path.ghost-npc-female",
+          "combat": "ghost-npc-female"
+        }
+      ]
+    }
+  }
+}

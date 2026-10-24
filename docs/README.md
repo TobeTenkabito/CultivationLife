@@ -139,3 +139,5 @@
 - [v2.15.1 战力、快速开局与剧情校准](combat-calibration-2151.md)
 
 - [蛇族素材接入](monster-serpent-visuals.md)：DLC 4.18.0蛇族11套头像、立绘与战斗图集，低阶及合体映射、元婴缺口回退与专项验收。
+
+- [alpha.5 鬼儒佛人物实装](alpha5-release.md)：三道途男女主角、NPC 与独立 DLC 动画。

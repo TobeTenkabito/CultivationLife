@@ -1,0 +1,586 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "prompts": "design/three-paths-alpha5-20261025/prompts.json",
+  "static_forms": 4,
+  "painted_keyposes": 36,
+  "animation_clips": 28,
+  "export": "nearest-neighbour, original soft alpha, common scale and foot anchor",
+  "sources": [
+    {
+      "identity": "ghost-hero-male",
+      "static_source": "source/ghost-hero-male.png",
+      "static_sha256": "74e2604d8791c1542fcc07864937c0569827c4a743b001d7d5e17545cd8f94f7",
+      "actions_source": "source/ghost-hero-male-actions.png",
+      "actions_sha256": "4f489820ab6455e48f9aaf34ba02a341a19706e6b6b3a62c8b37d30472b9e8b3",
+      "poses": {
+        "idle": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            58,
+            0,
+            451,
+            402
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            106,
+            80
+          ],
+          "sha256": "f5a09c9926160ff67feef1a7faeb0647d3a1535c50c84af60c5256998042b484"
+        },
+        "gather": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            539,
+            2,
+            951,
+            403
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            102,
+            80
+          ],
+          "sha256": "38fd14594806af48408e12676dab990a0c1013f16a2cc482ebfc2082c62b4921"
+        },
+        "release": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            1001,
+            4,
+            1521,
+            399
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            78,
+            83
+          ],
+          "sha256": "eb7e8ebf1367d128ebf212a96435258aa873ee053405657834d9f8718899181e"
+        },
+        "guard": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            29,
+            381,
+            484,
+            738
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            93,
+            100
+          ],
+          "sha256": "01e5117685a6d90e5371d1320f479a95ad8b623ea1e0dd67e5eb1e0f02575d01"
+        },
+        "brace": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            539,
+            413,
+            962,
+            730
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            100,
+            117
+          ],
+          "sha256": "64b5c2f8e1802a2cb30eaea96bd1a41b7f94ed23a0c3c00e5ede851904f574e6"
+        },
+        "hit": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            1027,
+            389,
+            1509,
+            739
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            87,
+            103
+          ],
+          "sha256": "dfc8637e1fc5c99d2f5e073c36d62696d0c409ec0fc4070033cdea8ca4a8178f"
+        },
+        "stagger": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            39,
+            734,
+            544,
+            1009
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            82,
+            136
+          ],
+          "sha256": "f95de7d78024558774bbe46f0d9d32b59ad309d99498272515369ed90b4b421d"
+        },
+        "kneel": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            548,
+            731,
+            989,
+            1010
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            96,
+            134
+          ],
+          "sha256": "fc7e1404786e29fb54fd6a6a9b3b8f1f8cfd4a79d427f5c1c37fd3784d05a9ef"
+        },
+        "down": {
+          "source": "source/ghost-hero-male-actions.png",
+          "source_rect": [
+            1000,
+            848,
+            1522,
+            1010
+          ],
+          "scale": 0.43781094527363185,
+          "offset": [
+            78,
+            185
+          ],
+          "sha256": "37776683d0d7b227053beb82d998fba09fb3b212e17c69c7dc28b4147ebdaf2f"
+        }
+      }
+    },
+    {
+      "identity": "ghost-hero-female",
+      "static_source": "source/ghost-npc-female.png",
+      "static_sha256": "f3abfdb53b9df42df33d48d8cb3ff6179c65f4d3eefb1fa09021e5f6f05dd3ec",
+      "actions_source": "source/ghost-npc-female-actions.png",
+      "actions_sha256": "9fc02e2b7eb10d8987cd466bde900f376963fa828ad0ac040cca292f3302bda2",
+      "poses": {
+        "idle": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            72,
+            0,
+            459,
+            381
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            103,
+            80
+          ],
+          "sha256": "bcd4beb78ef8b9262eac56bbda93d16283385b21c92bf5aff59e36258a7392b1"
+        },
+        "gather": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            542,
+            10,
+            959,
+            381
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            96,
+            85
+          ],
+          "sha256": "630380e55dcda993cd378e339d36a1a501bc4a14e6dce72ba9dbbb40d82f8e52"
+        },
+        "release": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            1022,
+            14,
+            1461,
+            382
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            91,
+            86
+          ],
+          "sha256": "6986a7aee40048ba85c0919f58205b1fff9927496d8b9f527739dfc2670d5a65"
+        },
+        "guard": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            55,
+            373,
+            509,
+            708
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            87,
+            101
+          ],
+          "sha256": "eb0be4f3658207b78d67e6a12debb162a00f899e5f875a325d4c4a8dc9b4a6c8"
+        },
+        "brace": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            560,
+            406,
+            971,
+            709
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            97,
+            116
+          ],
+          "sha256": "c00be18ad04f583def6f3f17176622165ee18353fe598d9ba72bb0a3899a67c8"
+        },
+        "hit": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            1050,
+            383,
+            1510,
+            723
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            86,
+            99
+          ],
+          "sha256": "e3f3fc57f63ed9d4d9107804664f1bdb24ec1b953e16be265194330200a470e9"
+        },
+        "stagger": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            70,
+            700,
+            522,
+            1019
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            88,
+            109
+          ],
+          "sha256": "4b6814c690278ba8a3fc65b459d4d6c23e5eb31449dc0aba930ab5911f5100a6"
+        },
+        "kneel": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            549,
+            738,
+            972,
+            1013
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            95,
+            129
+          ],
+          "sha256": "5461ed54341f83ce3b6db0fb1befaef8e069ea69ccc16314a8301b9aef950957"
+        },
+        "down": {
+          "source": "source/ghost-npc-female-actions.png",
+          "source_rect": [
+            973,
+            849,
+            1522,
+            1004
+          ],
+          "scale": 0.46194225721784776,
+          "offset": [
+            65,
+            184
+          ],
+          "sha256": "54e7631f100742184b35e20238e76752d7749d32250850678160b84d0c9343ec"
+        }
+      }
+    },
+    {
+      "identity": "ghost-npc-male",
+      "static_source": "source/ghost-npc-male.png",
+      "static_sha256": "416b83c87326c3f45a14df42c9f9a8cb7b287678e6d83f321ac89559ea89265d",
+      "actions_source": "source/ghost-npc-male-actions.png",
+      "actions_sha256": "0eccf9869cfb8234052dcde87bda5790da70ce2b52941335add2dfe828beb2e6",
+      "poses": {
+        "idle": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            124,
+            1,
+            421,
+            398
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            126,
+            80
+          ],
+          "sha256": "12a0b958fe3565463dd8bdddcbb5bbba18ac604f52eb0aa39d41efa0296ac20e"
+        },
+        "gather": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            582,
+            4,
+            939,
+            397
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            113,
+            82
+          ],
+          "sha256": "343d4f7b6c17aae0cc4599c2bf17c5e160b1a9c7a07f1051a55446d0ca194029"
+        },
+        "release": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            1058,
+            34,
+            1473,
+            394
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            100,
+            96
+          ],
+          "sha256": "ed0f0fd490a214c25f8f92e9b7fd9b54acf2188b0a057146616c606b3062e601"
+        },
+        "guard": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            88,
+            390,
+            436,
+            736
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            115,
+            103
+          ],
+          "sha256": "f0e7aab4e79fce7b4ad354a170a9f3d2022814af9be0ce31b0ef3cd2211128ff"
+        },
+        "brace": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            579,
+            415,
+            934,
+            737
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            114,
+            113
+          ],
+          "sha256": "4ae66bb73e44c1deff96456552769f9af6a48b156163687a8fb89a7bb5981b85"
+        },
+        "hit": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            1078,
+            397,
+            1503,
+            729
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            98,
+            109
+          ],
+          "sha256": "d29ebd48fa84feaca3d1379e71ac4f91fa58fe61f9517d3a5669f40809ad158e"
+        },
+        "stagger": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            45,
+            726,
+            478,
+            1008
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            96,
+            131
+          ],
+          "sha256": "83ecfd5134e155a7273bbc6d3b6a7b2ad5992a2137b4ef5f28532f08166278e0"
+        },
+        "kneel": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            514,
+            736,
+            981,
+            998
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            89,
+            140
+          ],
+          "sha256": "c92c94a4a9b955d867b4d8995ed8661c06e70283d93574057e456a62ac23309f"
+        },
+        "down": {
+          "source": "source/ghost-npc-male-actions.png",
+          "source_rect": [
+            995,
+            809,
+            1522,
+            993
+          ],
+          "scale": 0.4433249370277078,
+          "offset": [
+            75,
+            174
+          ],
+          "sha256": "d3ef32561ada80d0d770aca2d03046910259a7f40ed2c6ea5a7a0095dc284088"
+        }
+      }
+    },
+    {
+      "identity": "ghost-npc-female",
+      "static_source": "source/ghost-hero-female.png",
+      "static_sha256": "35a9f60a848680f2cd800403c52e72155bb0d9c0131c93ff58f89eb512aeef64",
+      "actions_source": "source/ghost-hero-female-actions.png",
+      "actions_sha256": "22048ba6433dba811e443e9e34ef028c584fe1493e8799ef6445f84414a7e56e",
+      "poses": {
+        "idle": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            81,
+            0,
+            504,
+            407
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            101,
+            80
+          ],
+          "sha256": "26b86beccdd08e911edffa4b233f39164888f20a019c810ef823a5a82c98bcab"
+        },
+        "gather": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            577,
+            4,
+            977,
+            412
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            106,
+            80
+          ],
+          "sha256": "706a798652152f174a27b97054d910db88fd83a122ac51f664949518f00bcbd4"
+        },
+        "release": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            1024,
+            13,
+            1456,
+            409
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            99,
+            85
+          ],
+          "sha256": "ac6e61ca22b9e7b44d579915d82d26440d7ef7856fa8b481ed4c69ac6e3d74ae"
+        },
+        "guard": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            61,
+            401,
+            492,
+            733
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            99,
+            112
+          ],
+          "sha256": "ae7de28d7eba2a61d2a32b4cde70358a0432505de03437fbd209a9ecea2ab176"
+        },
+        "brace": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            562,
+            429,
+            983,
+            735
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            101,
+            124
+          ],
+          "sha256": "666699591d5f44608cb0cfa76f44e7f43a0cb44d690231fc20b688976a1299dc"
+        },
+        "hit": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            1020,
+            398,
+            1482,
+            740
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            92,
+            108
+          ],
+          "sha256": "6ffad99356934ba5e4013c4e4ee9e35e5ee6f1fb44d4188b01585c1916b2d092"
+        },
+        "stagger": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            36,
+            727,
+            505,
+            1015
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            91,
+            131
+          ],
+          "sha256": "1d9565e08f1cf4a0b2d8073597e6f86df8bb12af5ec0c06ce13cb0a176b94f3f"
+        },
+        "kneel": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            488,
+            747,
+            956,
+            1008
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            91,
+            143
+          ],
+          "sha256": "0ce16fe35143742b6acf247b728f9705c9494db439af3b76791ce9bfa3f518b0"
+        },
+        "down": {
+          "source": "source/ghost-hero-female-actions.png",
+          "source_rect": [
+            962,
+            821,
+            1519,
+            996
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            72,
+            180
+          ],
+          "sha256": "a72dce828f1520822d9a233544ae43fa47c0dbfb5657e2a68d03c17c55161a62"
+        }
+      }
+    }
+  ]
+}

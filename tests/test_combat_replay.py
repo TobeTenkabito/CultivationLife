@@ -78,7 +78,7 @@ def test_only_field_stages_are_excluded_not_mixed_battles(engine):
     assert report_visuals(game, target, report) is None
     report = game.last_combat_report
     game.player.path = 'ghost'
-    assert report_visuals(game, target, report)['hero'] == 'dao-male'
+    assert report_visuals(game, target, report)['hero'] == 'ghost-hero-male'
     game.player.path = 'dao'
     game.player.ghost_host_body = {'name': '宿身'}
     assert report_visuals(game, target, report)['hero'] == 'dao-male'
@@ -91,7 +91,8 @@ def test_all_paths_have_gender_matched_fallback_without_rng(engine, path, gender
     game.player.path, game.player.gender = path, gender
     target = dict(target_name='匿名对手', combat_type='cultivator', path=path, gender=gender)
     before, random_state = copy.deepcopy(game.to_dict()), rng.getstate()
-    visual = report_visuals(game, target, game.last_combat_report)
+    with patch('cultivation_life.content_registry.EXTENSION_REPORT', []):
+        visual = report_visuals(game, target, game.last_combat_report)
     faction = 'demonic' if path == 'demonic' else 'dao'
     assert visual['hero'] == f'{faction}-{gender}'
     assert visual['enemy'].startswith(faction+'-') and visual['enemy'].endswith('-m' if gender == 'male' else '-f')
@@ -220,7 +221,8 @@ def test_six_participants_prefer_distinct_legal_portraits_then_reuse(engine, pat
     units = [BattleUnit(f'ally-{i}', f'同行{i}', 'companion', 10, 1, path) for i in range(3)]
     game.player.party = [dict(id=u.id, gender=gender, path=path) for u in units]
     members = [dict(npc_id=f'foe-{i}', name=f'对手{i}', power=10, path=path, gender=gender) for i in range(3)]
-    visual = combat_identity(game, dict(members=members), player_units=units)
+    with patch('cultivation_life.content_registry.EXTENSION_REPORT', []):
+        visual = combat_identity(game, dict(members=members), player_units=units)
     assert visual['schema_version'] == 2 and len(json.dumps(visual)) < 4096
     used = set()
     for side in ('hero', 'npc'):

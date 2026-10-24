@@ -19,7 +19,11 @@ window.NpcArt = (() => {
       return n.race===a.race&&n.path===a.path&&n.gender===a.gender?key:null;
     }
     // A pending named redesign must never silently acquire a generic face.
-    if(reserved.has(n.id)||n.race!=='human'||!['dao','demonic'].includes(n.path)||!['male','female'].includes(n.gender)||!(n.age>=18))return null;
+    if(reserved.has(n.id)||n.race!=='human'||!['male','female'].includes(n.gender)||!(n.age>=18))return null;
+    const extra=Object.values(window.PixelLibrary?.catalog?.assets||{}).flatMap(row=>row.character_forms||[])
+      .find(form=>form.role==='npc'&&form.path===n.path&&form.race===n.race&&form.gender===n.gender);
+    if(extra)return extra.static;
+    if(!['dao','demonic'].includes(n.path))return null;
     const pool=pack.pools[`human.${n.path}.${n.gender}`];if(!pool?.length)return null;
     // Stable identity hash, independent of ordering, world, page and game RNG.
     let hash=2166136261;for(const c of String(n.id)){hash=Math.imul(hash^c.codePointAt(0),16777619)>>>0;}
@@ -29,12 +33,14 @@ window.NpcArt = (() => {
   function image(n,kind,onFailure){
     const key=active()?select(n):null;if(!key)return null;
     const img=el('img',undefined,`npc-art-${kind}`);img.alt=`${n.name}${kind==='portrait'?'头像':'立绘'}`;
-    const asset=pack.actors[key][kind];
+    const extension=key.startsWith('actor.path.');
+    const asset=extension?window.PixelLibrary?.catalog?.assets[key+'.'+kind]:pack.actors[key][kind];
+    if(!asset)return null;
     [img.width,img.height]=asset.size;
     img.dataset.art=key;img.loading='lazy';img.decoding='async';img.style.visibility='hidden';
     img.onload=()=>{img.style.visibility='visible';};
     img.onerror=()=>{img.hidden=true;img.removeAttribute('src');onFailure?.();};
-    img.src=pack.base+asset.file;return img;
+    img.src=extension?asset.file:pack.base+asset.file;return img;
   }
   function context(value){
     data=value;people=new Map();if(dialog?.open)dialog.close();

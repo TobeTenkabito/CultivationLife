@@ -507,6 +507,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         check(Boolean.TRUE.equals(js("document.querySelector('#pixel-inventory').hidden&&!document.querySelector('#inventory-list').hidden&&document.querySelectorAll('#inventory-list .item').length===game.player.inventory.length")),"Native restored legacy inventory");tapSelector("#inventory-toggle");
         runVisualAdditions(result);
         runMonsterVisuals(result);
+        runPathCharacters(result);
         result.putString("visual_ui_scope","Four themes, native portrait/landscape clicks, extension-owned bitmap, original healing and exact material return, true natal character/slots, eleven home paintings, bounded immutable camera, original node atlas and legacy fallback; alpha.3 social portraits, domain editor and real domain battle replay");
     }
 
@@ -559,6 +560,37 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("protagonist_static_scope","All four selected Dao/Demonic male/female 256x288 static figures pixel-equal, 128x128 portraits, native detail clicks and no state writes");
     }
 
+
+    private void runPathCharacters(Bundle result) throws Exception {
+        String fixture=assetText("path_characters.py");
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'三道原生验收',spirit_root:'heavenly',path:'dao',seed:510,preset_id:'core'})}).then(g=>g.id)");
+        python(fixture+"\nimport json\nfrom cultivation_life import server\nserver._release_path_cases=json.dumps(path_character_cases())");
+        org.json.JSONArray cases=new org.json.JSONArray(com.chaquo.python.Python.getInstance().getModule("cultivation_life.server").get("_release_path_cases").toString());
+        check(cases.length()==6,"Three-path native cases");
+        for(int i=0;i<cases.length();i++) {
+            JSONObject form=cases.getJSONObject(i);
+            python(fixture+"\nimport json\nfrom cultivation_life import server\nprepare_path_character(server.ENGINE,"+JSONObject.quote(id)+",json.loads("+JSONObject.quote(form.toString())+"))");
+            async("loadGame("+JSONObject.quote(id)+")");
+            waitForJs("game.player.visual_actor==="+JSONObject.quote(form.getString("static"))+"&&document.querySelector('.pixel-portrait')?.naturalWidth===128","Native path avatar");
+            if(Boolean.TRUE.equals(js("document.querySelector('#battle-report-card').getClientRects().length>0")))tapSelector("#battle-report-toggle");
+            js("window.__pathBefore=JSON.stringify(game);true");tapSelector(".hud-identity");
+            waitForJs("document.querySelector('.pixel-details-art canvas')?.dataset.actor==="+JSONObject.quote(form.getString("static")),"Native path detail");
+            tapSelector("[data-close-dialog=player-details-dialog]");tapSelector("#battle-report-open");
+            waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native path battle",30000);
+            for(double at:new double[]{0,1.5,2.1,3,10000}) {
+                js("CombatReplay.seek("+at+");true");
+                check(Boolean.TRUE.equals(js("CombatReplay.diagnostics().actors.hero.id==="+JSONObject.quote(form.getString("combat"))+"&&CombatReplay.diagnostics().actors.npc.id==="+JSONObject.quote(form.getString("npc"))+"&&CombatReplay.diagnostics().decodedBytes<64*1024*1024")),"Native hero and enemy path actors");
+            }
+            capture("alpha5-"+form.getString("combat")+"-"+arguments.getString("orientation"));tapSelector("#battle-report-toggle");
+            tapSelector("[data-panel-target=relationship]");
+            js("(()=>{const s=document.querySelector('#npc-contacts input[type=search]');s.value='三道同道';s.dispatchEvent(new Event('input',{bubbles:true}));return true})()");
+            tapSelector(".contact-person");tapSelector(".npc-art-contact-figure");
+            waitForJs("(()=>{const im=document.querySelector('#npc-art-dialog .npc-art-figure');return im?.complete&&im.naturalWidth===256&&im.src.includes("+JSONObject.quote(form.getString("npc"))+")})()","Native NPC card");
+            tapSelector("#npc-art-dialog button");tapSelector("#relationship-toggle");
+            check(Boolean.TRUE.equals(js("JSON.stringify(game)===__pathBefore&&CombatReplay.diagnostics().cache===0")),"Native path views read only");
+        }
+        result.putString("path_character_scope","Six heroes and six NPCs: real portrait/detail/card taps, settled battle actors, cache disposal, no state writes; ghost red female selected");
+    }
 
     private void runMonsterVisuals(Bundle result) throws Exception {
         String fixture=assetText("monster_visuals.py");

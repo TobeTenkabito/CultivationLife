@@ -1,0 +1,135 @@
+{
+  "base_version": "3.0.0-alpha.5",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.2.1",
+    "buddhist-dharma": "1.2.0",
+    "ghost-reincarnation": "3.10.0",
+    "guixu-tide": "2.7.2",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.19.0",
+    "monster-civilizations": "1.0.0",
+    "sage-way": "1.6.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested alpha.5 ghost/Confucian/Buddhist hero and NPC art, optional package ownership and presentation/combat/persistence upstreams; not full repository regression",
+  "tests": 860,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_visual_release",
+      "log": "build\\browser_visual_release-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_pixel_ui",
+      "log": "build\\browser_pixel_ui-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_themes_139",
+      "log": "build\\browser_themes_139-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_building_visits",
+      "log": "build\\browser_building_visits-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_npc_art",
+      "log": "build\\browser_npc_art-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_voisinage_editor",
+      "log": "build\\browser_voisinage_editor-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_domain_replay",
+      "log": "build\\browser_domain_replay-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_replay",
+      "log": "build\\browser_combat_replay-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_groups",
+      "log": "build\\browser_combat_groups-300-alpha5.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_path_characters",
+      "log": "build\\browser_path_characters-300-alpha5.log",
+      "status": "passed"
+    }
+  ],
+  "save_transfer_log": "build/save-transfer-300-alpha5.log",
+  "inputs_sha256": "13df4657f7a5c277168edf16ffbf9dc3b56b4f635c53ed319662355c0597d774",
+  "platform": "Android 12",
+  "android_version": "3.0.0-alpha.5-android.78",
+  "version_code": 78,
+  "apk_sha256": "a0d7c06e99753bb6eee51391ac84b49fcdb98516b48e2bf817b58e99c0409053",
+  "native": {
+    "version": "3.0.0-alpha.5",
+    "apk_sha256": "a0d7c06e99753bb6eee51391ac84b49fcdb98516b48e2bf817b58e99c0409053",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-visual-ui-portrait-300-alpha5.log",
+      "build/android-visual-ui-landscape-300-alpha5.log"
+    ],
+    "test_apk_sha256": "8f446ecd1b0dc0786cd5646ed101cd3fe39581ffe82ce096897ce2b0c7d703ad",
+    "log_hashes": {
+      "build/android-visual-ui-portrait-300-alpha5.log": "1d3eb6bc0498285a96b4d6584de666cdfb7307c80f76eb1921b167987646873d",
+      "build/android-visual-ui-landscape-300-alpha5.log": "1d3eb6bc0498285a96b4d6584de666cdfb7307c80f76eb1921b167987646873d"
+    },
+    "scope": "Optional pixel UI, original inventory commands, true natal sockets, eleven world maps, social portraits, domain editor and real domain battle replay; four themes, native portrait/landscape"
+  },
+  "physical_device_tested": false
+}

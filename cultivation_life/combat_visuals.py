@@ -3,6 +3,7 @@ from hashlib import sha256
 
 from .relationship_records import find_person
 from .visual_selection import select_assets
+from .character_visuals import character_appearance
 
 
 def beast_kind(name):
@@ -72,6 +73,10 @@ def _team_visuals(game, target, hero, player_units=None):
                 gender = None
             else:
                 pool = _human_assets(path, gender, source_id or str(row.get('name', '')), companion=kind in {'companion', 'living'})
+                appearance = character_appearance(person or {**facts, **cached, 'path':path, 'gender':gender,
+                    'race':cached.get('race', facts.get('race', target.get('race', 'human')))}, role='npc')
+                if appearance:
+                    pool = [appearance['combat']]
             member = dict(id=key[:96], kind=kind, gender=gender,
                 name=str(row.get('name', '无名参战者'))[:64],
                 weight=round(max(.001, float(row.get('power', 1)) * float(row.get('integrity', 1))), 4))
@@ -95,7 +100,7 @@ def combat_identity(game, target, *, player_units=None):
     artifact = next((a for a in player.crafted_artifacts if a.get('id') == natal.get('crafted_artifact_id')), None) if natal.get('crafted_artifact_id') else None
     hero = f'{hero_path}-{hero_gender}'
     from .monster_visuals import monster_appearance
-    appearance = monster_appearance(player)
+    appearance = monster_appearance(player) or character_appearance(player)
     if appearance and appearance.get('combat'):
         hero = appearance['combat']
     teams, counts = _team_visuals(game, target, hero, player_units)

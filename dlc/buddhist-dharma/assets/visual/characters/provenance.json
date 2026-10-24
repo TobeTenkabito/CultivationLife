@@ -1,0 +1,586 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "prompts": "design/three-paths-alpha5-20261025/prompts.json",
+  "static_forms": 4,
+  "painted_keyposes": 36,
+  "animation_clips": 28,
+  "export": "nearest-neighbour, original soft alpha, common scale and foot anchor",
+  "sources": [
+    {
+      "identity": "buddhist-hero-female",
+      "static_source": "source/buddhist-hero-female-v3.png",
+      "static_sha256": "70db2012590fecc74c7083e128cdd2d6b04577dce3e884d6edc61a692b7e0524",
+      "actions_source": "source/buddhist-hero-female-actions.png",
+      "actions_sha256": "2772e0eacc28e5ad66f682317449df6becca4e2daaac41a024428e89559043d8",
+      "poses": {
+        "idle": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            79,
+            4,
+            408,
+            374
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            114,
+            80
+          ],
+          "sha256": "cc3c058ba5cc2af6c593e074aa6ea87454ce6f3862ed1f4c92da2c1bc99ef15c"
+        },
+        "gather": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            556,
+            4,
+            952,
+            372
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            98,
+            81
+          ],
+          "sha256": "28413ab0df800b73325028f18c93025279975ddc98b16ea7ea79f43c7b3be97e"
+        },
+        "release": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            1029,
+            5,
+            1486,
+            372
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            84,
+            81
+          ],
+          "sha256": "40ad1d96bd60b6ac621800daad70b59fd22543b4d7b8717f1a1014b28f7b9c1c"
+        },
+        "guard": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            48,
+            364,
+            454,
+            708
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            96,
+            92
+          ],
+          "sha256": "c4010cf2ca387afc063ca0fa88c8e003d83219959b1f8719a99e4c1fe1b28bf6"
+        },
+        "brace": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            550,
+            370,
+            989,
+            707
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            88,
+            96
+          ],
+          "sha256": "980ec6272998e6ef2027f86c07ddde602c1963119059e6d9f23391a3c06b11a7"
+        },
+        "hit": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            1070,
+            371,
+            1491,
+            711
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            92,
+            94
+          ],
+          "sha256": "b5adbb47089f54aaf8aa0b09ae043ea2bab1f1ff0aacb4e0be080806847f9340"
+        },
+        "stagger": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            56,
+            704,
+            492,
+            1015
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            89,
+            108
+          ],
+          "sha256": "b98eacf2fc604253420626ee7cbbf83c660fc1dc79edda6e3866bc760a5dc309"
+        },
+        "kneel": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            512,
+            719,
+            955,
+            1012
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            87,
+            117
+          ],
+          "sha256": "65d7462b9941c6120c4ba28f667199da11323b07570dc9f044b3dea0628948fb"
+        },
+        "down": {
+          "source": "source/buddhist-hero-female-actions.png",
+          "source_rect": [
+            962,
+            829,
+            1525,
+            992
+          ],
+          "scale": 0.4756756756756757,
+          "offset": [
+            58,
+            178
+          ],
+          "sha256": "bdb42ce8ff5d8ce44547638b4fb016e6f21bec0f2088ff4c4c943dbcdfa73c0a"
+        }
+      }
+    },
+    {
+      "identity": "buddhist-hero-male",
+      "static_source": "source/buddhist-hero-male.png",
+      "static_sha256": "c227c1afe36ef2ade18875bdfeab41f3611879368cce1bb6ff2f3b3dce7c6b89",
+      "actions_source": "source/buddhist-hero-male-actions.png",
+      "actions_sha256": "b866a21bbb11b24bc762fea1b256ce841a5acda971de6d4b62d4b02b1708f1a5",
+      "poses": {
+        "idle": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            127,
+            8,
+            429,
+            366
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            118,
+            80
+          ],
+          "sha256": "b6358180ab8e358446ccc1d995474064103601737693e86b42d732831ef06c98"
+        },
+        "gather": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            618,
+            12,
+            914,
+            365
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            119,
+            82
+          ],
+          "sha256": "d0258a98dddadea84c73760aa8cbc790fe4372d80062048259dedf98af66ec79"
+        },
+        "release": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            1045,
+            34,
+            1470,
+            357
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            88,
+            97
+          ],
+          "sha256": "31f5ab3a8007e60134995d27dc68f3fa5733f83ea090c6e0681430158367107a"
+        },
+        "guard": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            97,
+            362,
+            466,
+            695
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            102,
+            92
+          ],
+          "sha256": "855f07c7f46bafad624cf50e0c6e91981745c2b4925ebaa00f08ffa1a3ee39d3"
+        },
+        "brace": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            603,
+            408,
+            939,
+            690
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            110,
+            117
+          ],
+          "sha256": "073a140ae19da78a0c8e506a6b7853876ef339a42721fa0500b66a0af23a2c92"
+        },
+        "hit": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            1123,
+            370,
+            1461,
+            690
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            109,
+            99
+          ],
+          "sha256": "e453b863d8add739c07c7f37de61e1dc811e616984ebdabf12cd92edb1db20e7"
+        },
+        "stagger": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            93,
+            704,
+            507,
+            1003
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            90,
+            109
+          ],
+          "sha256": "9b267a151eba41d6a6fcba2f94a5c0e1f92f4c5b1d89308f85911a6cc353460f"
+        },
+        "kneel": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            562,
+            752,
+            927,
+            990
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            103,
+            139
+          ],
+          "sha256": "e63307ffc355922eb531c603f128a2e265fa4157c65c9b174d9ee5295115541b"
+        },
+        "down": {
+          "source": "source/buddhist-hero-male-actions.png",
+          "source_rect": [
+            986,
+            855,
+            1520,
+            980
+          ],
+          "scale": 0.49162011173184356,
+          "offset": [
+            61,
+            195
+          ],
+          "sha256": "b71d5b85bb19206a97ed5fc98351e79e62594cd280723c7e1edb977a3468ab80"
+        }
+      }
+    },
+    {
+      "identity": "buddhist-npc-female",
+      "static_source": "source/buddhist-npc-female.png",
+      "static_sha256": "fe843cae37fbf798253934753d8e0399f9447bc7fc450fd049724831a25ff94a",
+      "actions_source": "source/buddhist-npc-female-actions.png",
+      "actions_sha256": "52abb8ef2c3184bf18be9fef823990d757abf4bc14d1f58c6daf744513f8264c",
+      "poses": {
+        "idle": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            103,
+            6,
+            383,
+            383
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            127,
+            80
+          ],
+          "sha256": "7d1afb2e100d65e059b16398baca41d10a8b7fa620bef7cecdcbab75838a3393"
+        },
+        "gather": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            570,
+            14,
+            923,
+            385
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            110,
+            83
+          ],
+          "sha256": "b2df7addc1b429debfc57db3056fd06bfe43f891ba547b21e3c5995375cbe388"
+        },
+        "release": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            1033,
+            22,
+            1442,
+            386
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            97,
+            86
+          ],
+          "sha256": "ac39ef1ce8429c37063ed28d66a2a8bccea3c13af034375b2a7f99775640c91e"
+        },
+        "guard": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            63,
+            367,
+            446,
+            723
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            103,
+            90
+          ],
+          "sha256": "546198b13358b3b8c5338f5672c5bf5dcb39d25267726073bd404e64b56fd1b5"
+        },
+        "brace": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            593,
+            405,
+            931,
+            722
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            113,
+            108
+          ],
+          "sha256": "ff09ac231814549210adce68c829de4458aae0f0fb0b03dda6662ebfe2811bbe"
+        },
+        "hit": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            1038,
+            388,
+            1492,
+            722
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            86,
+            100
+          ],
+          "sha256": "8915860399d09301a623ed941a17964d6e7f7ffc1b9fb87deb1633846d9c8f94"
+        },
+        "stagger": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            46,
+            714,
+            507,
+            1010
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            85,
+            118
+          ],
+          "sha256": "a714ef6fc29e1f6d29724a77e2052f444b5709484eab3e9ca124fcd95db02ccc"
+        },
+        "kneel": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            538,
+            734,
+            940,
+            1006
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            98,
+            129
+          ],
+          "sha256": "2b65549d31c8e28a691c16ea0bc66243428127cd0b02b957af1119c3f57b37bd"
+        },
+        "down": {
+          "source": "source/buddhist-npc-female-actions.png",
+          "source_rect": [
+            964,
+            844,
+            1518,
+            999
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            63,
+            184
+          ],
+          "sha256": "7efd4a108d215c9b43c097d51caf5d272bf0c418696fb2a3b83592b36eaa7491"
+        }
+      }
+    },
+    {
+      "identity": "buddhist-npc-male",
+      "static_source": "source/buddhist-npc-male.png",
+      "static_sha256": "a89431eea0055a92a6563488b856796d2f218b138527856c2734dff98f971e1d",
+      "actions_source": "source/buddhist-npc-male-actions.png",
+      "actions_sha256": "cfe86e51648ee4fe75d813e764ea6335c00dad93bb74735901cd9cf15e437a82",
+      "poses": {
+        "idle": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            209,
+            10,
+            414,
+            376
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            143,
+            80
+          ],
+          "sha256": "66b822f27af321d3b354b7ed4a1b8b9f03c6ca5145f549b973dfc1f8385bc9a7"
+        },
+        "gather": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            645,
+            20,
+            921,
+            376
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            126,
+            85
+          ],
+          "sha256": "1cc1fe6e30530de852372a2d5a8edd90a5509fc6fd178ce2f5f5abe26325165f"
+        },
+        "release": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            1080,
+            35,
+            1451,
+            370
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            103,
+            95
+          ],
+          "sha256": "ee844b57c6f7b3fa9b6ffe54b1caffccaf73d05a7fa68c2cd206873fdf027251"
+        },
+        "guard": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            160,
+            379,
+            483,
+            716
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            115,
+            94
+          ],
+          "sha256": "dd92776fea9cbddecfd84cd70aab75f98d8d592cf2f563728c871181f39dadd9"
+        },
+        "brace": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            623,
+            433,
+            945,
+            706
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            115,
+            125
+          ],
+          "sha256": "be0aecd1c881735bae739bef211a7d4d6da0f49f72f090c1d0c5520f8ab406cc"
+        },
+        "hit": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            1148,
+            386,
+            1427,
+            715
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            125,
+            98
+          ],
+          "sha256": "cdd1dcf565df97a81fd1449fb85cc730a0887cfeda3460a7e5f55e184fbd4d75"
+        },
+        "stagger": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            111,
+            720,
+            530,
+            991
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            92,
+            126
+          ],
+          "sha256": "d25e39766f1928f9404aae33e74027ff55eba18276182d2892ac6b65541edb5d"
+        },
+        "kneel": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            618,
+            736,
+            960,
+            990
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            110,
+            134
+          ],
+          "sha256": "08f68b0dc88c8b9869c107336024b3f1ca208de6440d06fb263a2604974a6128"
+        },
+        "down": {
+          "source": "source/buddhist-npc-male-actions.png",
+          "source_rect": [
+            1026,
+            815,
+            1522,
+            960
+          ],
+          "scale": 0.4808743169398907,
+          "offset": [
+            73,
+            186
+          ],
+          "sha256": "9db33fa8512f818a3655a3e624c72e666b4055a554a8b434413faccb19e736ee"
+        }
+      }
+    }
+  ]
+}

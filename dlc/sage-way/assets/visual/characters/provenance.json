@@ -1,0 +1,586 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "prompts": "design/three-paths-alpha5-20261025/prompts.json",
+  "static_forms": 4,
+  "painted_keyposes": 36,
+  "animation_clips": 28,
+  "export": "nearest-neighbour, original soft alpha, common scale and foot anchor",
+  "sources": [
+    {
+      "identity": "confucian-hero-male",
+      "static_source": "source/confucian-hero-male.png",
+      "static_sha256": "f914d466f42ae270fa2bba027a4fccb4a0934eb028d661090c46dd1e1991d8b2",
+      "actions_source": "source/confucian-hero-male-actions.png",
+      "actions_sha256": "54aa12aa0c78cdaf353263df9dbb1d911cf510f44b15bfb7ee047a20303af8cb",
+      "poses": {
+        "idle": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            144,
+            0,
+            416,
+            368
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            127,
+            80
+          ],
+          "sha256": "4dcc656cb24fc465b320a8a309f3dea0210b9f4a266c34b95784eba7114d59de"
+        },
+        "gather": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            586,
+            13,
+            942,
+            367
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            107,
+            87
+          ],
+          "sha256": "8f874978574b1a9baead8c6d0d29cd2a5f47fb1d46d05238504e9c84d5c58195"
+        },
+        "release": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            1047,
+            29,
+            1462,
+            362
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            93,
+            97
+          ],
+          "sha256": "7a3a68393486a83f817f89b921944fd1bce93d1a9adc7eecc094e50631b74531"
+        },
+        "guard": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            105,
+            358,
+            471,
+            690
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            105,
+            97
+          ],
+          "sha256": "b9c4288cfa7f9ddb63f67de019d5baca7be21e0b6a30974f2c2e63f6eba2975a"
+        },
+        "brace": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            592,
+            394,
+            947,
+            684
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            107,
+            117
+          ],
+          "sha256": "ea370e0cf893e23f494d42577aa051263dd4a0f29ca65e040291c656e25fa3f2"
+        },
+        "hit": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            1039,
+            370,
+            1487,
+            680
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            85,
+            108
+          ],
+          "sha256": "867ea6be7a622c756e13c0f2d11176f6e2790d974f369fbdb995ee1141b6cecb"
+        },
+        "stagger": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            91,
+            688,
+            556,
+            999
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            81,
+            107
+          ],
+          "sha256": "974a0703528e772b63db117225173b80a594548feef3767610510930e59f263f"
+        },
+        "kneel": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            586,
+            700,
+            961,
+            974
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            103,
+            125
+          ],
+          "sha256": "50aa21df0e5b09a9ccf0b37688aaf32ba29dd1eeb598ca9001bf45b022eafb21"
+        },
+        "down": {
+          "source": "source/confucian-hero-male-actions.png",
+          "source_rect": [
+            1008,
+            804,
+            1536,
+            944
+          ],
+          "scale": 0.4782608695652174,
+          "offset": [
+            66,
+            189
+          ],
+          "sha256": "1d5866b87d38455e55e0750bc76d6b161e4a8355bf5c45bfe130dae454d193ed"
+        }
+      }
+    },
+    {
+      "identity": "confucian-hero-female",
+      "static_source": "source/confucian-hero-female.png",
+      "static_sha256": "7669c0bcacd5dbc27b64fe3b684d01c4b5828409d0e328c861f0525eeaf976a2",
+      "actions_source": "source/confucian-hero-female-actions.png",
+      "actions_sha256": "6e76eb8ec46126caaa90344cefd84e7b4f78371b20c5538f2ab331e82f2473cc",
+      "poses": {
+        "idle": {
+          "source": "source/confucian-hero-female-actions.png",
+          "source_rect": [
+            128,
+            5,
+            417,
+            382
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            125,
+            80
+          ],
+          "sha256": "1291e374dc5c545f43dbde6c8532f94f6b722d014cb7541bd370bf9771edec24"
+        },
+        "gather": {
+          "source": "source/confucian-hero-female-actions.png",
+          "source_rect": [
+            588,
+            11,
+            938,
+            379
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            111,
+            84
+          ],
+          "sha256": "aa5627cba60682c77543cb5d9478f6c7954d63211df34a211fe41c8a2addfc3d"
+        },
+        "release": {
+          "source": "source/confucian-hero-female-actions.png",
+          "source_rect": [
+            1024,
+            22,
+            1450,
+            379
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            93,
+            89
+          ],
+          "sha256": "e7ecc0d22e41a9cf5d1f307729cf14f7beecd2d8dd014e2b3e96e632d9adfd8e"
+        },
+        "guard": {
+          "source": "source/confucian-hero-female-actions.png",
+          "source_rect": [
+            85,
+            370,
+            454,
+            702
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            106,
+            101
+          ],
+          "sha256": "19bda9f380d60d240e3ea4295eeffce9aa93bbb4390227c41287e97d9ac1b5ce"
+        },
+        "brace": {
+          "source": "source/confucian-hero-female-actions-feet-v2.png",
+          "source_rect": [
+            187,
+            44,
+            1299,
+            915
+          ],
+          "scale": 0.15275591030767405,
+          "offset": [
+            107,
+            123
+          ],
+          "sha256": "f623f0b539b4d86b0ce143b9604d46b28e8fbed5ee1e44a4bed94285c8fb472c"
+        },
+        "hit": {
+          "source": "source/confucian-hero-female-actions.png",
+          "source_rect": [
+            1095,
+            398,
+            1476,
+            698
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            103,
+            116
+          ],
+          "sha256": "2d4ae941904e6a69e1f0c6444f56fd90a6995d96398068ccd9a0c900320607fa"
+        },
+        "stagger": {
+          "source": "source/confucian-hero-female-actions.png",
+          "source_rect": [
+            80,
+            720,
+            540,
+            1005
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            85,
+            123
+          ],
+          "sha256": "67d4913d42b7bdea5b84eef21555f2b80955320831e1335620023ed98f2ba1dd"
+        },
+        "kneel": {
+          "source": "source/confucian-hero-female-actions.png",
+          "source_rect": [
+            585,
+            725,
+            959,
+            996
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            105,
+            129
+          ],
+          "sha256": "919a6a6dea682db5794246013b8a9d508dd5b2b408bb12398dde31993e6a1090"
+        },
+        "down": {
+          "source": "source/confucian-hero-female-actions.png",
+          "source_rect": [
+            1008,
+            850,
+            1524,
+            980
+          ],
+          "scale": 0.46684350132625996,
+          "offset": [
+            72,
+            195
+          ],
+          "sha256": "878e9d74e80ffea32d7ba1308790929743814a61f53d77f60e73750d2838dec5"
+        }
+      }
+    },
+    {
+      "identity": "confucian-npc-male",
+      "static_source": "source/confucian-npc-male.png",
+      "static_sha256": "1054cc49dc012179fc7dcc0be40ce9ecc973b38621cd11c8403c4407a39d2046",
+      "actions_source": "source/confucian-npc-male-actions.png",
+      "actions_sha256": "60561a01e4346ce652e93d442b223f923daa4e6d98856bba0886eb2e5dbc70f4",
+      "poses": {
+        "idle": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            159,
+            7,
+            386,
+            355
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            135,
+            80
+          ],
+          "sha256": "b25bf2fc18fc37cd2aed05d4aaf40956fbba959132ad6eb71ea0d3414a773571"
+        },
+        "gather": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            619,
+            11,
+            899,
+            354
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            121,
+            83
+          ],
+          "sha256": "e6d12a5e6bc4ee3b010a5dcc3af381c3bf41d30b30d7f9d2f54af50879a9bd98"
+        },
+        "release": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            1089,
+            22,
+            1430,
+            354
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            106,
+            88
+          ],
+          "sha256": "3b80a1000536aa8b68f2a3ea1a12ba7d1e2eaab3698e3c12aff5d52b32f46f8e"
+        },
+        "guard": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            135,
+            353,
+            414,
+            691
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            122,
+            85
+          ],
+          "sha256": "9be8bf752af444f8ea2dcb13a221d2aafa7b10b9cd99b52cd05bc027a3f1ecd1"
+        },
+        "brace": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            639,
+            395,
+            916,
+            683
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            122,
+            110
+          ],
+          "sha256": "d56118eac98c4db281f35c8fab34dd5caf4421c4b5fd41d67f2c93a90bf994ad"
+        },
+        "hit": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            1145,
+            362,
+            1436,
+            689
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            119,
+            91
+          ],
+          "sha256": "0351959354944fa192de0e99a2322327179ebdec2140b5a1a3cb2beb540f1bfc"
+        },
+        "stagger": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            111,
+            694,
+            512,
+            984
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            91,
+            109
+          ],
+          "sha256": "51e7bb2591e435ddffbf3a3df67ef8d21ba24177189881b9f87a212078e8f051"
+        },
+        "kneel": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            623,
+            736,
+            944,
+            984
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            111,
+            131
+          ],
+          "sha256": "22ea6cbec867366ffd2b02b3d7d331a0742c8f2e4e76b7295567a4a128e4b7bb"
+        },
+        "down": {
+          "source": "source/confucian-npc-male-actions.png",
+          "source_rect": [
+            1014,
+            841,
+            1505,
+            978
+          ],
+          "scale": 0.5057471264367817,
+          "offset": [
+            68,
+            187
+          ],
+          "sha256": "972b204cc612d3098d68da0cbd724722e9e54eaedf3e841f3eff0da14291cff7"
+        }
+      }
+    },
+    {
+      "identity": "confucian-npc-female",
+      "static_source": "source/confucian-npc-female.png",
+      "static_sha256": "5eb266bb8d7af195fc29b1f83fc96548b42a993c05a8c2209d2f6e3145a517f3",
+      "actions_source": "source/confucian-npc-female-actions.png",
+      "actions_sha256": "d2febee184c66586290764f02477192440591b77cdf18f2ae60aa289ec39931b",
+      "poses": {
+        "idle": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            173,
+            3,
+            426,
+            399
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            136,
+            80
+          ],
+          "sha256": "4e35b4d1f1beb1c8820dfbfc753559de887584d6259e1c9ded881d5bfd2c6235"
+        },
+        "gather": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            612,
+            6,
+            944,
+            398
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            118,
+            82
+          ],
+          "sha256": "0b0bb151a8aa1c0466c6903ad114c2d639c4c3449e2d21c6a0eb471dc3c3d469"
+        },
+        "release": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            1083,
+            15,
+            1446,
+            393
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            112,
+            88
+          ],
+          "sha256": "9cad6e893f6c38b700e0e6e3433a2fb96d7f595775b5f2ecbf4263e54682ff79"
+        },
+        "guard": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            97,
+            400,
+            459,
+            727
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            112,
+            111
+          ],
+          "sha256": "f36a195c1d2febccc8e9e8961378a91ddd4aa133f825febac0873380d549ed89"
+        },
+        "brace": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            590,
+            407,
+            960,
+            721
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            110,
+            116
+          ],
+          "sha256": "61b53bfa12b6138d88199b7074f1349aeb5771f630d0e41db0cc423e731e71ee"
+        },
+        "hit": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            1103,
+            393,
+            1461,
+            737
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            113,
+            103
+          ],
+          "sha256": "3494f7e6c38fd6190af08093d000a7c9727b61c2cf9ee288eb27aded54b1f395"
+        },
+        "stagger": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            56,
+            731,
+            515,
+            989
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            90,
+            141
+          ],
+          "sha256": "4da51e680a0ffc4071192d9b01ddf013cf70fc6759d78a4d402f680aa63d65e6"
+        },
+        "kneel": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            562,
+            721,
+            942,
+            1010
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            108,
+            128
+          ],
+          "sha256": "87960b1a26269f3cd6d071d8651aefca593a993280799f3562b84763b6bb33d7"
+        },
+        "down": {
+          "source": "source/confucian-npc-female-actions.png",
+          "source_rect": [
+            1005,
+            862,
+            1516,
+            988
+          ],
+          "scale": 0.4444444444444444,
+          "offset": [
+            79,
+            200
+          ],
+          "sha256": "4bb4eaaf3ed1684aea08623bbdbef8c05c09906ca10845fa25cf0cb2a4f01cb4"
+        }
+      }
+    }
+  ]
+}

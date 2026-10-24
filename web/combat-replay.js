@@ -7,7 +7,7 @@
   const between=(t,a,b)=>{const x=clamp((t-a)/(b-a));return x*x*(3-2*x);};
   let catalogPromise=null,current=null,context=null,revision=0,raf=0,observer=null;
   let intersection=null,onscreen=true;
-  let monsterCatalog=null,monsterCatalogKey=null;
+  const extensionCatalogs=new Map();
   let clock=0,last=0,painted=-Infinity,playing=false,speed=2,media=matchMedia('(prefers-reduced-motion: reduce)');
   const root=document.getElementById('battle-animation');
   const canvas=root.querySelector('canvas'),status=root.querySelector('[data-combat-status]');
@@ -225,15 +225,16 @@
       catalogPromise??=fetch('/assets/pixel/combat/manifest.json').then(r=>{if(!r.ok)throw Error('combat assets');return r.json();}).catch(e=>{catalogPromise=null;throw e;});
       const [base,items]=await Promise.all([catalogPromise,PixelLibrary.ensure()]);
       let A=base;
-      const extraCatalog=Object.values(items?.assets || {}).find(row=>row.combat_actors?.includes(report.visual.hero));
-      if(extraCatalog){
+      const identities=new Set([report.visual.hero,report.visual.enemy,...Object.values(report.visual.teams||{}).flat().map(m=>m.asset)]);
+      const extraCatalogs=Object.values(items?.assets || {}).filter(row=>row.combat_actors?.some(id=>identities.has(id)));
+      for(const extraCatalog of extraCatalogs){
         const key=extraCatalog.file+':'+extraCatalog.sha256;
-        if(key!==monsterCatalogKey||!monsterCatalog){
-          monsterCatalogKey=key;
-          monsterCatalog=fetch(extraCatalog.file).then(r=>{if(!r.ok)throw Error('Monster combat assets');return r.json();}).catch(e=>{monsterCatalog=null;throw e;});
-        }
-        const extra=await monsterCatalog;
-        A={...base,actors:{...base.actors,...extra.actors},actions:{...base.actions,...extra.actions}};
+        if(!extensionCatalogs.has(key))extensionCatalogs.set(key,fetch(extraCatalog.file).then(r=>{if(!r.ok)throw Error('Extension combat assets');return r.json();}).catch(e=>{extensionCatalogs.delete(key);throw e;}));
+        while(extensionCatalogs.size>4)extensionCatalogs.delete(extensionCatalogs.keys().next().value);
+        const extra=await extensionCatalogs.get(key);
+        const actors=Object.fromEntries(Object.entries(extra.actors||{}).filter(([id])=>extraCatalog.combat_actors.includes(id)&&!A.actors[id]));
+        const actions=Object.fromEntries(Object.entries(extra.actions||{}).filter(([id])=>!A.actions[id]));
+        A={...A,actors:{...A.actors,...actors},actions:{...A.actions,...actions}};
       }
       if(token!==revision||!visible())return;
       const v=report.visual,item=items?.items[v.natal_item_id],asset=item||items?.molds[v.natal_mold_id];

@@ -14,7 +14,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_shipped_reviewed_assets_are_self_contained():
     from cultivation_life.content_registry import EXTENSION_REPORT
     source=dict(catalog(ROOT), assets=public_catalog(ROOT,EXTENSION_REPORT)['assets'])
-    assert len(source['assets'])==1394 and len(source['maps'])==11
+    assert len(source['assets'])==1445 and len(source['maps'])==11
     assert len(source['items'])==1165
     packages={json.loads(p.read_text(encoding='utf-8'))['id']:p.parent for p in (ROOT/'dlc').glob('*/manifest.json')}
     for identity,row in source['assets'].items():
@@ -26,9 +26,9 @@ def test_shipped_reviewed_assets_are_self_contained():
         else:path=ROOT/'web'/row['file'].lstrip('/')
         assert path.is_file(), identity
         assert hashlib.sha256(path.read_bytes()).hexdigest()==row['sha256']
-        if identity in {'monster.fox.combat_manifest','monster.serpent.combat_manifest','monster.turtle.combat_manifest','monster.insect.combat_manifest','monster.aquatic.combat_manifest','monster.flora.combat_manifest',
-                        'monster.avian.combat_manifest','monster.ape.combat_manifest'}:
-            assert json.loads(path.read_text(encoding='utf-8'))['owner']=='official.monster-bloodlines'
+        if path.suffix=='.json':
+            data=json.loads(path.read_text(encoding='utf-8'))
+            assert data['owner']==owner and set(data['actors'])==set(row['combat_actors'])
             continue
         with Image.open(path) as image:
             assert list(image.size)==row['size']
@@ -36,6 +36,11 @@ def test_shipped_reviewed_assets_are_self_contained():
                 assert image.mode=='RGBA'
                 assert identity.startswith(('actor.monster.fox-','fox-','actor.monster.serpent-','serpent-',
                                             'actor.monster.avian-','avian-','actor.monster.ape-','ape-','actor.monster.turtle-','turtle-','actor.monster.insect-','insect-','actor.monster.aquatic-','aquatic-','actor.monster.flora-','flora-'))
+            elif any(p in row.get('requires',[]) for p in ['official.ghost-reincarnation','official.sage-way','official.buddhist-dharma']):
+                assert image.mode=='RGBA' and image.getextrema()[-1][0]==0
+                if identity.startswith('actor.path.'):
+                    assert image.size=={'portrait':(128,128),'figure':(256,288),'thumbnail':(128,144)}[identity.rsplit('.',1)[1]]
+                else:assert identity.endswith('.actions') and max(image.size)<=2048
             elif identity.startswith('map.'):assert image.size==(768,576)
             else:
                 assert image.mode=='RGBA' and image.size==(32,32)

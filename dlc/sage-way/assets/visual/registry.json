@@ -1,0 +1,227 @@
+{
+  "assets": {
+    "actor.path.confucian-hero-male.portrait": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-hero-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "92f513db7b90568248781d73216d44757bed32ae42a385fce3f0e237b463b92a",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-hero-male.figure": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-hero-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "906583981a0fc227408ef404f8b7a20c429c895fc266a25cd0200ba347bf3bca",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-hero-male.thumbnail": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-hero-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "e445bb83e5a966285544de3c0c3326a97545743637ba02b159050647e200c1f1",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "confucian-hero-male.actions": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-hero-male-actions.png",
+      "size": [
+        2024,
+        352
+      ],
+      "sha256": "3d711c0a55afb90acf20624793fef5a190957397d12576eecb3b7f05fb458494",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-hero-female.portrait": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-hero-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "85e5321c1ec157bc50a146cfe9796c4213343b867471da40f14f86e38228314b",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-hero-female.figure": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-hero-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "90a74b96c098d746142ea19bb272f143e60e1ea14d5a6211154a444f073e4101",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-hero-female.thumbnail": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-hero-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "33e747a860760af8ef3b042cbc109e6a05f3355e6b14c70ebf10ad2e06f3d371",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "confucian-hero-female.actions": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-hero-female-actions.png",
+      "size": [
+        1928,
+        352
+      ],
+      "sha256": "1fa87d5bdc2862fceb71393e39f954d74a00283108c2b5bbb1642bc593a79a51",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-npc-male.portrait": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-npc-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "c0806c446417358dfd4e43f55b79556951ea715af0ce372b876fb820bd173ad3",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-npc-male.figure": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-npc-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "377f586a2d932a5317ec0f14b290aa70c2c9a6ab129b8c1ce026735f2169d5b6",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-npc-male.thumbnail": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-npc-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "aebbbcf6bf722b62413365eb077cab0e5f508b7595f5bc98dc3e50cfcd673e22",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "confucian-npc-male.actions": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-npc-male-actions.png",
+      "size": [
+        1984,
+        352
+      ],
+      "sha256": "2617869930704a473fea3f1c644dd7c12b7bfafa55e969d0a029994eb4c6f628",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-npc-female.portrait": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-npc-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "85f6f0d82784290edc831d117d7a955f44387b2a5ef08dead6dd125d1944b9aa",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-npc-female.figure": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-npc-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "dfeb9a93b593a5690d664af37af607a825db688ddd82be5067f3780d93f60189",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.confucian-npc-female.thumbnail": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-npc-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "3a18e763f56fa23d8aa5bf4e3171654195ab2196c8504fd0bb33541e4376da91",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "confucian-npc-female.actions": {
+      "file": "/extension-assets/official.sage-way/visual/characters/confucian-npc-female-actions.png",
+      "size": [
+        2043,
+        176
+      ],
+      "sha256": "a4f1be940005f40f34f8046dc15f6f8d8f2c1b1c5c49be3e4a9a66d6b5a3652b",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "confucian.character_manifest": {
+      "file": "/extension-assets/official.sage-way/visual/characters/manifest.json",
+      "sha256": "4ecbdf625a90768226212a1bab80677fd99c58b8cf8748017554a930b171e4ee",
+      "requires": [
+        "official.sage-way"
+      ],
+      "combat_actors": [
+        "confucian-hero-male",
+        "confucian-hero-female",
+        "confucian-npc-male",
+        "confucian-npc-female"
+      ],
+      "character_forms": [
+        {
+          "path": "confucian",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "static": "actor.path.confucian-hero-male",
+          "combat": "confucian-hero-male"
+        },
+        {
+          "path": "confucian",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "static": "actor.path.confucian-hero-female",
+          "combat": "confucian-hero-female"
+        },
+        {
+          "path": "confucian",
+          "race": "human",
+          "gender": "male",
+          "role": "npc",
+          "static": "actor.path.confucian-npc-male",
+          "combat": "confucian-npc-male"
+        },
+        {
+          "path": "confucian",
+          "race": "human",
+          "gender": "female",
+          "role": "npc",
+          "static": "actor.path.confucian-npc-female",
+          "combat": "confucian-npc-female"
+        }
+      ]
+    }
+  }
+}

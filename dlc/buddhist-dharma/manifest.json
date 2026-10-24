@@ -3,10 +3,11 @@
   "api_version": 1,
   "id": "official.buddhist-dharma",
   "name": "诸法无我：众生为镜",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 150,
   "requires": [],
-  "description": "以弘法聚信众，以寺庙留香火；以清净善行积累愿力，以涅槃突破小境界。正业加持修行，负业强化战斗。"
+  "description": "以弘法聚信众，以寺庙留香火；以清净善行积累愿力，以涅槃突破小境界。正业加持修行，负业强化战斗。",
+  "visual_registry": "visual/registry.json"
 }

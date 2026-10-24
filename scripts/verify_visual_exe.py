@@ -76,13 +76,21 @@ def run(with_dlc):
                     monster=page.evaluate("api('/api/games',{method:'POST',body:JSON.stringify({name:'成品妖修验收',spirit_root:'supreme_water',path:'monster',monster_species_id:'flora',start_world:'monster_realm',seed:4190})})")
                     verify_monsters(page,fixture,monster['id'],output,all_forms=False)
                 private='/extension-assets/official.guixu-tide/visual/icons/treasure.guixu_canghai_equipment_01.png'
+                for package,kind in [('ghost-reincarnation','ghost'),('sage-way','confucian'),('buddhist-dharma','buddhist')]:
+                    asset=f'/extension-assets/official.{package}/visual/characters/{kind}-hero-female-portrait.png'
+                    assert page.request.get(base+asset).status==(200 if with_dlc else 404)
+                if with_dlc:
+                    from browser_path_characters import verify as verify_paths
+                    page.goto(base);page.wait_for_function('typeof configData!=="undefined" && !!configData')
+                    path_game=page.evaluate("api('/api/games',{method:'POST',body:JSON.stringify({name:'三道成品验收',spirit_root:'heavenly',path:'dao',seed:510,preset_id:'core'})})")
+                    verify_paths(page,fixture,path_game['id'],output)
                 image=page.request.get(base+private)
                 assert image.status==(200 if with_dlc else 404)
                 assert not errors,errors
                 if not with_dlc:assert not any('/extension-assets/' in p for p in requests)
                 browser.close()
             print(f'Compiled optional UI passed: DLC={with_dlc}',flush=True)
-            return dict(with_dlc=with_dlc,base_version=VERSION,exe_sha256=file_digest(folder/'launcher.exe'),visual_ui_verified=True,dlc_visual_verified=True,visual_additions_verified=True,domain_replay_verified=True,protagonist_static_verified=True,monster_visuals_verified=True)
+            return dict(with_dlc=with_dlc,base_version=VERSION,exe_sha256=file_digest(folder/'launcher.exe'),visual_ui_verified=True,dlc_visual_verified=True,visual_additions_verified=True,domain_replay_verified=True,protagonist_static_verified=True,monster_visuals_verified=True,path_characters_verified=True)
         finally:
             subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],capture_output=True)
             process.wait(timeout=20)

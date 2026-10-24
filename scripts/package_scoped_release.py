@@ -165,7 +165,14 @@ def main():
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
     if scoped.get('profile')=='visual':
         selected={name for shard in scoped['tests'] for name in shard}
-        if scoped.get('regression_scope') == 'alpha4-focused':
+        if scoped.get('regression_scope') == 'alpha5-focused':
+            from scripts.verify_scoped_release import VISUAL_ALPHA5_TESTS
+            require(selected==set(VISUAL_ALPHA5_TESTS),'Focused alpha.5 selection incomplete')
+            require('not full repository regression' in scoped.get('scope',''),'Focused scope must be declared')
+            require('browser_path_characters' in {r['name'] for r in scoped['runs']},'Three-path browser required')
+            require(all(c.get('path_characters_verified') for c in evidence['cases']),'Compiled path characters with/without DLC required')
+            require(all('path_character_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in native['logs']),'Native three-path acceptance required')
+        elif scoped.get('regression_scope') == 'alpha4-focused':
             from scripts.verify_scoped_release import VISUAL_ALPHA4_TESTS
             require(selected==set(VISUAL_ALPHA4_TESTS),'Focused alpha.4 selection incomplete')
             require('not full repository regression' in scoped.get('scope',''),'Focused scope must be declared')
@@ -287,6 +294,7 @@ def main():
     if scoped.get('profile') in {'teachings','visual','combat-alpha'}:
         updates=[('guixu-tide','归墟之潮'),('tianji-artifacts','巧夺天工')] if scoped['profile']=='combat-alpha' else [('guixu-tide','归墟之潮')] if scoped['profile']=='visual' else [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]
         if scoped.get('regression_scope')=='alpha4-focused':updates.append(('monster-bloodlines','万妖归宗'))
+        if scoped.get('regression_scope')=='alpha5-focused':updates=[('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')]
         for package, title in updates:
             version = dlcs[package]
             destination = ROOT / f'dist/{title}-v{version}.zip'
@@ -296,6 +304,7 @@ def main():
                         z.write(p,p.relative_to(ROOT).as_posix())
                 note='docs/alpha2-release.md' if scoped['profile']=='combat-alpha' else 'docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
                 if package=='monster-bloodlines':note='docs/alpha4-release.md'
+                if scoped.get('regression_scope')=='alpha5-focused':note='docs/alpha5-release.md'
                 z.write(ROOT/note,note)
                 z.writestr('安装说明.txt',f'配套本体 v{VERSION}，仅支持结构 10。解压至游戏根目录，覆盖对应 dlc/{package} 文件夹；重启生效。旧本体需先升级；Android 请安装同版签名 APK。用户开关与存档不会被本包覆盖。\n')
                 z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc=package,version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
