@@ -42,7 +42,11 @@
   function info(v){
     const actor=A.actors[v.id],g=actor.animations[v.mode];if(!g)throw Error('Unbound duel clip '+v.id+'/'+v.mode);
     const duration=g.duration,index=Math.min(g.frames-1,Math.floor(clamp(v.local,0,duration)*A.fps+1e-7));
-    return {...v,group:g,index,actor,frame:g.poses[index],anchor:g.poses[index].anchor??A.anchor};
+    const frame=g.poses[index];
+    // Named keyposes are strings; String.prototype.anchor is an HTML helper,
+    // not a coordinate pair. Respect each optional actor's own foot anchor.
+    const anchor=typeof frame==='object'&&Array.isArray(frame?.anchor)?frame.anchor:(actor.anchor??A.anchor);
+    return {...v,group:g,index,actor,frame,anchor};
   }
   function barrier(v,s,state){
     const first=v.contacts?.[0]??Infinity,last=v.contacts?.[v.contacts.length-1]??Infinity;

@@ -1,0 +1,123 @@
+{
+  "assets": {
+    "actor.path.asura-hero-male.portrait": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/asura-hero-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b5c75ee8b5f6ebd3afd59f7c44b291f64da018761e37b0c492f636a30a5363e3",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "actor.path.asura-hero-male.figure": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/asura-hero-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "20eb91fe290d75662a3a614aa2439562c7b506de97e55e1c5e5702ddc2b7fa62",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "actor.path.asura-hero-male.thumbnail": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/asura-hero-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "f984354d80d72a66554f98deeb857b661816e7d1d978e5787953dea2e5ff5b72",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "asura-hero-male.actions": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/asura-hero-male-actions.png",
+      "size": [
+        1512,
+        176
+      ],
+      "sha256": "676e13582b2b16db1cacb38c7a86407280cc6205f582ca60319017e3584ef19f",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "actor.path.asura-hero-female.portrait": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/asura-hero-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "355571b3b4ef5f56fe351cf2b390d9e2b4f0cc99b2b3bb56dc53ee982fe8e207",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "actor.path.asura-hero-female.figure": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/asura-hero-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f0c0850e31d34d6c8d18d3633040120cd7bbbab9b7e4f6517b3830d9c53ec2a8",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "actor.path.asura-hero-female.thumbnail": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/asura-hero-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "5d65115c711d39c97696de1d860b179c22e51298a5a2d6ecf82eaaf6b549a505",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "asura-hero-female.actions": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/asura-hero-female-actions.png",
+      "size": [
+        1548,
+        177
+      ],
+      "sha256": "3ebe8283eb835d7c57dba5987181232fc014baa623206bd69adbfe690104e768",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "asura.character_manifest": {
+      "file": "/extension-assets/official.asura-manifestation/visual/characters/manifest.json",
+      "sha256": "3368eaf7da2ba37b831e7e91ea8bf7b9e70156e87f3187dd3d0a719ab86f11dd",
+      "requires": [
+        "official.asura-manifestation"
+      ],
+      "combat_actors": [
+        "asura-hero-male",
+        "asura-hero-female"
+      ],
+      "character_forms": [
+        {
+          "path": "demonic",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "min_realm_index": 9,
+          "static": "actor.path.asura-hero-male",
+          "combat": "asura-hero-male"
+        },
+        {
+          "path": "demonic",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "min_realm_index": 9,
+          "static": "actor.path.asura-hero-female",
+          "combat": "asura-hero-female"
+        }
+      ]
+    }
+  }
+}

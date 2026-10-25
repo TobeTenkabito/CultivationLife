@@ -22,6 +22,13 @@ def character_appearance(person, *, role='hero'):
                             registry.default_extension_root())['assets']
     for row in assets.values():
         for form in row.get('character_forms', []):
+            # Optional realm-based art follows attained cultivation, even while
+            # temporarily sealed below. Geography alone never grants a form.
+            if 'min_realm_index' in form:
+                seal = value('sealed_cultivation') or {}
+                realm = max(value('realm_index', 0), seal.get('realm_index', 0))
+                if realm < form['min_realm_index']:
+                    continue
             if (all(form.get(key) == value(key) for key in ('path','race','gender'))
                     and form.get('role') == role and form.get('combat') in row.get('combat_actors', [])
                     and form.get('static', '')+'.portrait' in assets

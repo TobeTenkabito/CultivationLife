@@ -133,7 +133,7 @@ Windows ZIP 附带 `scripts/debug_agent.py` 及最小标准库客户端。CLI／
 
 | 内容包 | 版本 | 主要内容 |
 | --- | --- | --- |
-| [修罗显圣：无法无天](dlc/asura-manifestation/README.md) | 1.2.1 | 煞元转化、魔脉、八部凝身、魔域神通与心魔劫 |
+| [修罗显圣：无法无天](dlc/asura-manifestation/README.md) | 1.3.0 | 煞元转化、魔脉、八部凝身、魔域神通、心魔劫与男女主角立绘动作 |
 | [诸法无我：众生为镜](dlc/buddhist-dharma/README.md) | 1.2.0 | 四上界弘法与愿力、三阶段法会、地图信众、寺庙、正负业力、六项加持与佛修双飞升路线 |
 | [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.19.0 | 妖修八源血脉；五族分支补全、狐族与蛇族分境立绘及战斗动作、族血规则与本相铸域 |
 | [万灵争衡：百族兴衰](dlc/monster-civilizations/README.md) | 1.0.0 | 独立生态、氏族、王庭与万灵志 |

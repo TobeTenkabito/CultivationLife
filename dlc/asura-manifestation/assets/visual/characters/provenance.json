@@ -1,0 +1,280 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "prompts": "design/asura-characters-20261025/redesign-prompts.json",
+  "static_forms": 2,
+  "painted_keyposes": 18,
+  "animation_clips": 14,
+  "export": "nearest-neighbour, original alpha, common scale and foot anchor",
+  "sources": [
+    {
+      "identity": "asura-hero-male",
+      "static_source": "source/asura-hero-male-v2.png",
+      "static_sha256": "ff8851c37743d4dee44307fa46aaaf5ba6916f4d469ceb686ef6e4b0455a8f53",
+      "actions_source": "source/asura-hero-male-v2-actions.png",
+      "actions_sha256": "0b7825c60216a524ac4dfe4e1054e9e6c423683b06ee6378e78d8cd947947e74",
+      "poses": {
+        "idle": {
+          "source_rect": [
+            50,
+            1,
+            388,
+            433
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            123,
+            80
+          ],
+          "sha256": "e4814a75680383ded34ca13f21e3e09ebc7bdb4e5c7cb1885fcbf68e9e271c6f"
+        },
+        "gather": {
+          "source_rect": [
+            449,
+            9,
+            810,
+            430
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            119,
+            84
+          ],
+          "sha256": "271d1989649b18396688b414e978db1cdd96c80b8023c00ccb5c82d21b300c7a"
+        },
+        "release": {
+          "source_rect": [
+            844,
+            29,
+            1252,
+            430
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            109,
+            93
+          ],
+          "sha256": "2ffbb6b3181c51f5732a5d6de731675a7f940d973d0410cfdb103509a3b079dd"
+        },
+        "guard": {
+          "source_rect": [
+            29,
+            431,
+            394,
+            838
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            118,
+            90
+          ],
+          "sha256": "e16c03a3b8f6b758a6a294e6208e26ff12cc50e0c93d68e73951a46dcca66ae7"
+        },
+        "brace": {
+          "source_rect": [
+            447,
+            518,
+            823,
+            830
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            116,
+            129
+          ],
+          "sha256": "33e73ee9057917000aee6f6a7f1809d50c88cb12be9996b90c1f708a369d981c"
+        },
+        "hit": {
+          "source_rect": [
+            861,
+            436,
+            1249,
+            826
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            113,
+            97
+          ],
+          "sha256": "a43c2bc896d18ef8719ce6df87e75ae4914a59449cabe784cef08d3da5604f3d"
+        },
+        "stagger": {
+          "source_rect": [
+            29,
+            826,
+            441,
+            1237
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            108,
+            89
+          ],
+          "sha256": "3c41e16c7b0f347afb2b8372a89f2b73a699e9f1c0f73744fe32aa1bd73e7450"
+        },
+        "kneel": {
+          "source_rect": [
+            444,
+            915,
+            828,
+            1192
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            114,
+            143
+          ],
+          "sha256": "c23fd90e077fd61353af9a11948283706ec1213357afa65026d20890d1e469f8"
+        },
+        "down": {
+          "source_rect": [
+            848,
+            1049,
+            1248,
+            1182
+          ],
+          "scale": 0.4074074074074074,
+          "offset": [
+            111,
+            202
+          ],
+          "sha256": "ae45dce468fa51af2e8ce290828a665e1f93d98000217dd3d814560f70fce8fb"
+        }
+      }
+    },
+    {
+      "identity": "asura-hero-female",
+      "static_source": "source/asura-hero-female-v2.png",
+      "static_sha256": "925e9e23f3f881a4d87eb753a1db908f367d3bc594d062ede70372b724a5bbaf",
+      "actions_source": "source/asura-hero-female-v2-actions-feet.png",
+      "actions_sha256": "542c94d26bce55dfb15c0429e01dee0ccd926ed70f48548e1dc74bd8222456ec",
+      "poses": {
+        "idle": {
+          "source_rect": [
+            31,
+            4,
+            420,
+            445
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            115,
+            80
+          ],
+          "sha256": "b1a8d50c26c61d3d2b757143adf951f4991c3ca1b311ca1f465c2f5a4edcb2ef"
+        },
+        "gather": {
+          "source_rect": [
+            435,
+            7,
+            834,
+            451
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            113,
+            79
+          ],
+          "sha256": "4a2d57b44db6b59f502c26a24b31e3c37e67c144a8f7d876201e15056d81a814"
+        },
+        "release": {
+          "source_rect": [
+            838,
+            4,
+            1247,
+            434
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            111,
+            84
+          ],
+          "sha256": "57b05a7153addbed4872c70e121a9c422e5a260a0563ba140d7bd95bdcf0a0f7"
+        },
+        "guard": {
+          "source_rect": [
+            32,
+            442,
+            408,
+            852
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            117,
+            92
+          ],
+          "sha256": "22f13809cfa1a30bae0c9f0b33ddb1eca6b79855b59135d5556d404f42c53a50"
+        },
+        "brace": {
+          "source_rect": [
+            419,
+            494,
+            836,
+            836
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            109,
+            120
+          ],
+          "sha256": "b5e9254c798fcf88b377afc515185247a3665593320ff2075befc4f442d4b7c9"
+        },
+        "hit": {
+          "source_rect": [
+            841,
+            438,
+            1249,
+            850
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            111,
+            92
+          ],
+          "sha256": "7ded4f6f3cb59c3e6a32066d569fa751d5fde6577008d5a3c45fd285a3f42808"
+        },
+        "stagger": {
+          "source_rect": [
+            23,
+            828,
+            408,
+            1241
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            115,
+            91
+          ],
+          "sha256": "1cfb7f44f1f6b5957a00a8d4cf8abffc8abeba3d8b26c1e9d90ce72a3bab0ba3"
+        },
+        "kneel": {
+          "source_rect": [
+            425,
+            915,
+            822,
+            1204
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            113,
+            141
+          ],
+          "sha256": "4a6358e8448bac78b58d5307500e9253e3bfd781f914487a5a57c93ef7708e6c"
+        },
+        "down": {
+          "source_rect": [
+            824,
+            1052,
+            1254,
+            1198
+          ],
+          "scale": 0.39909297052154197,
+          "offset": [
+            106,
+            198
+          ],
+          "sha256": "93101c1a5bec227c3da7dfbf6de0ae50aa6b5d6757135b6e8d982ae135d297ec"
+        }
+      }
+    }
+  ]
+}

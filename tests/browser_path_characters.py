@@ -1,5 +1,5 @@
 """Real HTTP, details/card clicks and real settled battle playback for three DLCs."""
-import json,sys,tempfile,threading
+import json,math,sys,tempfile,threading
 from pathlib import Path
 from http.server import ThreadingHTTPServer
 from unittest.mock import patch
@@ -29,6 +29,7 @@ def verify(page,engine,identity,out):
             page.evaluate('t=>CombatReplay.seek(t)',t);d=page.evaluate('CombatReplay.diagnostics()')
             assert d['actors']['hero']['id']==case['combat'] and d['actors']['npc']['id']==case['npc']
             assert d['decodedBytes']<64*1024*1024
+            assert all(isinstance(v,(int,float)) and math.isfinite(v) for p in d['participants'] for v in p['bounds']),d['participants']
         page.screenshot(path=str(out/(case['combat']+'.png')));page.locator('#battle-report-toggle').click()
         navigation_locator(page,'[data-panel-target=relationship]').click()
         search=page.locator('#npc-contacts input[type=search]');reveal_subpage(page,search);search.fill('三道同道')

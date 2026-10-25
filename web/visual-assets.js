@@ -17,7 +17,10 @@
     return cache.get(id);
   }
   function actor(player) {
-    if (player && player.visual_actor===`actor.path.${player.path}-hero-${player.gender}` &&
+    // The server selects optional forms from the loaded package's declarations.
+    // A realm form may have an identity distinct from the cultivation path.
+    if (player && /^actor\.path\.[a-z0-9][a-z0-9-]*-hero-(male|female)$/.test(player.visual_actor || '') &&
+        player.visual_actor.endsWith(`-hero-${player.gender}`) &&
         ['male','female'].includes(player.gender) && player.race==='human' && !player.ghost_host_body &&
         !player.ghost_attachment && !(player.lineage_race&&player.lineage_race!=='human') &&
         !player.transformation_loadouts?.[player.transformation_technique?.id]?.active?.length) return player.visual_actor;
