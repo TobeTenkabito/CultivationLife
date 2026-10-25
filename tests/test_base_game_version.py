@@ -23,12 +23,13 @@ SOURCE_ROOT = Path(__file__).resolve().parent.parent
 
 class BaseGameVersionTests(unittest.TestCase):
     def test_alpha_version_preserves_public_label_and_numeric_windows_metadata(self):
-        self.assertEqual(BASE_GAME_VERSION, '3.0.0-alpha.5')
+        self.assertEqual(BASE_GAME_VERSION, '3.0.0-alpha.6')
         self.assertEqual(BASE_GAME_VERSION_TUPLE, (3,0,0))
         self.assertLess(release_order('2.17.2'),release_order(BASE_GAME_VERSION))
         self.assertLess(release_order(BASE_GAME_VERSION),release_order('3.0.0'))
         self.assertLess(release_order('3.0.0-alpha.1'),release_order(BASE_GAME_VERSION))
-        self.assertLess(release_order(BASE_GAME_VERSION),release_order('3.0.0-alpha.6'))
+        next_alpha = BASE_GAME_VERSION.rsplit('.', 1)[0] + '.' + str(int(BASE_GAME_VERSION.rsplit('.', 1)[1]) + 1)
+        self.assertLess(release_order(BASE_GAME_VERSION),release_order(next_alpha))
         self.assertLess(release_order('3.0.0-alpha.99'),release_order('3.0.0-beta.1'))
         self.assertLess(release_order('3.0.0-beta.9'),release_order('3.0.0-rc.1'))
         for value in ['3.-alpha-1','bad',None,'3.0',{},'3.0.0.exe','3.0.0-alpha.0']:

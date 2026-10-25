@@ -17,6 +17,7 @@
     const view=el('div',null,'pixel-world-view');view.tabIndex=0;view.setAttribute('aria-label',map.world_name+'所在地绘景');
     const plane=el('div',null,'pixel-world-plane'),image=el('img',null,'pixel-background');
     image.alt=map.world_name+'山河绘景';image.src=asset.file;image.draggable=false;plane.append(image);view.append(plane);
+    const overlay=document.createElementNS('http://www.w3.org/2000/svg','svg');overlay.setAttribute('viewBox','0 0 768 576');overlay.classList.add('home-map-overlay');plane.append(overlay);
     const labels=el('div',null,'pixel-world-labels');view.append(labels);
     const tools=el('div',null,'pixel-world-tools');tools.setAttribute('role','toolbar');tools.setAttribute('aria-label','绘景视野');
     const select=el('select');select.setAttribute('aria-label','浏览绘景地域');
@@ -69,7 +70,22 @@
     view.onpointerup=view.onpointercancel=()=>{pointer=null;dragged=false;};
     view.onkeydown=e=>{if(e.target!==view||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home'].includes(e.key))return;e.preventDefault();if(e.key==='Home')center(map.current);else{camera.x+=e.key==='ArrowLeft'?40:e.key==='ArrowRight'?-40:0;camera.y+=e.key==='ArrowUp'?40:e.key==='ArrowDown'?-40:0;paint();}};
     const observer=new ResizeObserver(()=>{if(!view.clientWidth)return;if(!ready){ready=true;center(map.current,view.clientWidth<400?.5:1);}else paint();});observer.observe(view);
-    return {select:choose,dispose(){disposed=true;observer.disconnect();pointer=null;image.removeAttribute('src');}};
+    function project(next,mode,markers,lines=[]){
+      map=next;view.dataset.mode=mode;overlay.replaceChildren();
+      const svg=(tag,attrs)=>{const n=document.createElementNS(overlay.namespaceURI,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,String(v));overlay.append(n);return n;};
+      for(const road of lines){const a=data.places[road.from],b=data.places[road.to];if(!a||!b)continue;svg('line',{x1:a.x*7.68,y1:a.y*5.76,x2:b.x*7.68,y2:b.y*5.76,stroke:road.color||'#efd68d','stroke-width':3,'stroke-dasharray':'6 5'});}
+      for(const [id,b]of buttons){
+        const row=markers.get(id),p=data.places[id];b.querySelectorAll('.home-map-badge,.home-map-building').forEach(n=>n.remove());
+        b.classList.toggle('has-map-info',!!row);b.style.removeProperty('--map-color');
+        b.title=map.locations.find(place=>place.id===id)?.name||id;
+        if(!row)continue;
+        if(row.color){b.style.setProperty('--map-color',row.color);svg('circle',{cx:p.x*7.68,cy:p.y*5.76,r:29,fill:row.color,'fill-opacity':.32,stroke:row.color,'stroke-width':2});}
+        if(row.art){const img=el('img',null,'home-map-building');img.src=row.art;img.alt='';b.prepend(img);}
+        b.append(el('small',row.label,'home-map-badge'));b.title=row.detail||row.label;
+      }
+      paint();
+    }
+    return {select:choose,project,dispose(){disposed=true;observer.disconnect();pointer=null;image.removeAttribute('src');overlay.replaceChildren();}};
   }
   window.PixelMap=Object.freeze({mount,landscape,entry});
 })();

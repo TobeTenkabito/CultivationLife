@@ -426,9 +426,10 @@ document.querySelectorAll('#history-filters input').forEach(input => input.addEv
 async function mutate(path, payload) {
   if (busy) return;
   const sourceGameId = game?.id;
+  const eventScene=path.endsWith('/choice')&&payload?.event_id===game?.pending_event?.id?window.EventScenes?.capture(game):null;
   if(path==='/api/games')payload={...payload,tutorial_enabled:window.TutorialGuide?.enabledForNewGame()||false};
   busy = true; document.body.classList.add('busy'); renderButtons();
-  try { render(await api(path, {method:'POST', body:JSON.stringify(payload)})); }
+  try { const result=await api(path, {method:'POST', body:JSON.stringify(payload)});render(result);if(eventScene)window.EventScenes?.settled(eventScene,result); }
   catch (error) {
     if (!error.status) console.error('游戏操作或界面更新失败', error);
     // Reconcile a stale display once without repeating a failed mutation.
@@ -444,6 +445,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  window.EventScenes?.dispose();
   window.UtilityPanels?.close('trial-site');
   window.GameNavigation?.close({restoreFocus:false});
   window.UtilityPanels?.close('heavens');
@@ -2755,12 +2757,26 @@ function renderExchange(system) {
 
 function bindBuildingControls() {
   const mapLocked=()=>busy||!game||!!game.pending_event||!!game.imprisonment||game?.ghost_system?.phase_two?.state==='controlled'||!game.player.alive;
+  window.HomeMapModes?.bind(requestMapTravel,mapLocked);
   window.BuildingPanel?.bind(game,async payload=>{
     window.PixelHome?.closeDrawer();
     await mutate(`/api/games/${game.id}/building-action`,payload);
     if(game?.buildings?.inside)window.UtilityPanels?.close('map');
   },mapLocked);
   return mapLocked;
+}
+
+function requestMapTravel(destination) {
+  const location=game?.map?.locations?.find(row=>row.id===destination);
+  if(!location||location.current||busy||game.pending_event||game.imprisonment||!game.player.alive||game?.ghost_system?.phase_two?.state==='controlled'||!['ok','lethal'].includes(location.travel_status))return;
+  const id=game.id,world=game.player.world,origin=game.map.current;
+  const travel=()=>{
+    if(game?.id!==id||game.player.world!==world||game.map.current!==origin||busy||game.pending_event||game.imprisonment||!game.player.alive)return;
+    window.PixelHome?.closeDrawer();
+    return mutate(`/api/games/${id}/map-travel`,{destination});
+  };
+  if(location.travel_status==='lethal')openGameConfirm({title:'强行前往凶地',body:`${location.warning}。此行不是低概率冒险：一旦完成旅途并抵达目的地，角色必定死亡。`,confirmText:'仍然前往',onConfirm:travel});
+  else travel();
 }
 
 function renderMap(map, auction) {
@@ -2830,19 +2846,7 @@ function renderMap(map, auction) {
     button.textContent = location.current ? '所在地' : location.travel_status === 'lethal' ? '强行前往（必死）' : `${location.travel_progress ? '继续前往' : '前往'} · ${location.travel_years}年`;
     if (location.travel_progress) route.textContent += ` · 已走 ${location.travel_progress.completed}/${location.travel_progress.total} 年（更换目的地将放弃进度）`;
     button.disabled = busy || location.current || !!game.pending_event || !!game.imprisonment || game?.ghost_system?.phase_two?.state === 'controlled' || !game.player.alive;
-    button.onclick = () => {
-      const travel = () => mutate(`/api/games/${game.id}/map-travel`, {destination:location.id});
-      if (location.travel_status === 'lethal') {
-        openGameConfirm({
-          title:'强行前往凶地',
-          body:`${location.warning}。此行不是低概率冒险：一旦完成旅途并抵达目的地，角色必定死亡。`,
-          confirmText:'仍然前往',
-          onConfirm:travel,
-        });
-        return;
-      }
-      travel();
-    };
+    button.onclick = () => requestMapTravel(location.id);
     row.dataset.location = location.id; row.tabIndex = -1;
     row.append(heading, description);
     window.TrialSitePanel?.badge(location, row);
@@ -4091,6 +4095,7 @@ function renderBattleRoundProgress(report, shouldPlay) {
 }
 
 function renderEvent() {
+  window.EventScenes?.render(game);
   const event = game.pending_event || game.tutorial?.guide.event;
   window.NpcArt?.event(event);
   const postBattlePossession = event?.id === 'SYS_POST_BATTLE_POSSESSION';
@@ -4113,6 +4118,7 @@ function renderEvent() {
 }
 
 function renderButtons() {
+  window.HomeMapModes?.syncBusy();
   window.StrategicWarPanel?.syncBusy();
   window.MapAtlas?.syncBusy();
   window.TrialSitePanel?.syncBusy();

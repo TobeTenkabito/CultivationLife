@@ -19,13 +19,13 @@
   function hash(value){let n=2166136261;for(const c of value)n=Math.imul(n^c.charCodeAt(0),16777619);return n>>>0;}
   function build(report,A,natalIcon){
     const visual=report.visual,hero=visual?.hero,npc=visual?.enemy;
-    if(![1,2].includes(visual?.schema_version)||A.actors[hero]?.role!=='hero'||A.actors[npc]?.role!=='npc'||!report.rounds?.length||report.rounds.length>72)return null;
+    if(![1,2].includes(visual?.schema_version)||A.actors[hero]?.role!=='hero'||!(A.actors[npc]?.role==='npc'||npc===hero&&ActorVariants.valid(visual.teams?.npc?.[0]?.visual_variant))||!report.rounds?.length||report.rounds.length>72)return null;
     const teams=visual.schema_version===2?visual.teams:{
       hero:[{id:'player',asset:hero,name:report.player_roster?.[0]?.name??'你',kind:'player',weight:1}],
       npc:[{id:'enemy',asset:npc,name:report.target_name??'对手',kind:'cultivator',weight:1}]};
     if(!teams||!['hero','npc'].every(side=>Array.isArray(teams[side])&&teams[side].length>0&&teams[side].length<=3&&
       teams[side].every((member,i)=>A.actors[member.asset]&&
-        (A.actors[member.asset].role==='npc'||side==='hero'&&i===0&&member.asset===hero)&&
+        (A.actors[member.asset].role==='npc'||side==='hero'&&i===0&&member.asset===hero||side==='npc'&&member.asset===hero&&ActorVariants.valid(member.visual_variant))&&
         (!member.gender||!A.actors[member.asset].sex||member.gender===A.actors[member.asset].sex)&&
         typeof member.name==='string'&&member.name.length<=64&&Number.isFinite(member.weight)&&member.weight>0)))return null;
     const ordinary=report.rounds.filter(r=>r.ordinary_exchange&&['player','enemy'].includes(r.initiative));
@@ -138,12 +138,12 @@
     const r=plan.rounds.find(r=>time>=r.start&&time<r.end)??
       (plan.finisher&&time>=plan.finisher.start&&time<plan.finisher.end?plan.finisher:null);
     const teams=Object.fromEntries(['hero','npc'].map(side=>[side,plan.teams[side].map((member,slot)=>({
-      id:member.asset,unitId:member.id,name:member.name,side,slot,mode:'idle',local:time%4,dir:side==='hero'?1:-1}))]));
+      id:member.asset,unitId:member.id,name:member.name,visualVariant:member.visual_variant,side,slot,mode:'idle',local:time%4,dir:side==='hero'?1:-1}))]));
     const actors={hero:teams.hero[0],npc:teams.npc[0]};
     let phase=time>=plan.duration?'战报回放结束':'调息回位';
     if(r){
       const a=teams[r.side][r.actorIndex],d=teams[r.side==='hero'?'npc':'hero'][r.targetIndex],lastHit=tail(r.contacts.filter(t=>t<=time));
-      a.mode=a.id===plan.hero&&r.side==='hero'&&r.actorIndex===0?r.action:'attack';a.local=Math.min(time-r.start,r.duration);a.round=r;
+      a.mode=a.id===plan.hero?r.action:'attack';a.local=Math.min(time-r.start,r.duration);a.round=r;
       if(r.guard){
         const first=r.contacts[0];d.mode='brace';
         d.local=time<=first?1.85*clamp((time-r.start-.15)/(first-r.start-.15)):1.85+time-(lastHit??first);
@@ -165,7 +165,7 @@
       if(['open','effect'].includes(domain.phase)){
         const owners=new Set(domain.phase==='effect'?domain.a.effects.map(e=>e.owner):domain.a.fields.map(f=>f.owner));
         for(const side of ['hero','npc'])for(const a of teams[side])if(owners.has(a.unitId)){
-          a.mode=side==='hero'&&a.id===plan.hero?(plan.heroDomainAction??(a.id.startsWith('demonic')?'blast':'dragon')):'attack';a.local=Math.min(1.6,domain.local);
+          a.mode=a.id===plan.hero?(plan.heroDomainAction??(a.id.startsWith('demonic')?'blast':'dragon')):'attack';a.local=Math.min(1.6,domain.local);
         }
       }
     }

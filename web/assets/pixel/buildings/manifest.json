@@ -1,0 +1,696 @@
+{
+  "schema": 1,
+  "method": "nearest-neighbor isolated atlas cells",
+  "assets": {
+    "city-1.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        24,
+        81,
+        323,
+        269
+      ],
+      "sha256": "f17299cee6df90b8490d5b4286958d16b4a828913172414380aa64b28b5a4844",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "city-2.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        336,
+        32,
+        682,
+        281
+      ],
+      "sha256": "3f35c4d4baf63453b99d5fd254affe4b1369d69ef3cef2ee89946aba84638229",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "city-3.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        697,
+        5,
+        1082,
+        293
+      ],
+      "sha256": "57685eabd681e2eaa2d6de4ccd1d287cff4cc4db4850f07033e9d2fdf7891c6e",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "city-ruin.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        1091,
+        74,
+        1406,
+        292
+      ],
+      "sha256": "8bf2d5217277ce1788fb16652db4f6cde828e4ad6a112122b7630853d42abeb0",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "cave-1.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        18,
+        292,
+        325,
+        543
+      ],
+      "sha256": "1293263abe0fa3233d0701c7d61c04a50b73e05fcedab20bc3db09022fe645a7",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "cave-2.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        342,
+        280,
+        666,
+        555
+      ],
+      "sha256": "94a0b6bcd4ba0d39829244a38e511ba4b2ca24d00ca8698f2b94aa9438646130",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "cave-3.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        681,
+        293,
+        1085,
+        566
+      ],
+      "sha256": "9b86c71565d6da7114f15afea3dff4db88091972c6f6534953502d86787a15db",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "cave-ruin.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        1090,
+        301,
+        1406,
+        556
+      ],
+      "sha256": "1d2adc116f169c205f8b8bbe0f2b0545a04c3b59843e4eb61b4ae7d39fc56a90",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "industry-1.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        19,
+        596,
+        311,
+        814
+      ],
+      "sha256": "5a4d9422df64e4eeb8efb9a732cd6c0bcf29b84e9158f9d42daa6e29df59e3be",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "industry-2.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        331,
+        547,
+        677,
+        822
+      ],
+      "sha256": "99b20b9ae2d0d0fe61591ed4a5c16c64c83079b5daa7e406ca6741ec9d3eb345",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "industry-3.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        690,
+        566,
+        1085,
+        818
+      ],
+      "sha256": "43769049cae6ba3b747f458b8e1d6820d83ff72cb716d731edb3f3d2d3870e57",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "industry-ruin.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        1103,
+        585,
+        1404,
+        817
+      ],
+      "sha256": "c40bae58ccf37b12c691f5b74361c435deba38e8ccf1964737eb0124895db333",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "temple-1.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        7,
+        853,
+        276,
+        1075
+      ],
+      "sha256": "2975638c998e9e44163a8890ea47a418a113f5ba2a31a1d891a458f1471d5525",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "temple-2.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        331,
+        841,
+        657,
+        1088
+      ],
+      "sha256": "1375f6e18432cbd7945bb46139ed67f6db1a226ec954e6d89afd21b8933ca20b",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "temple-3.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        679,
+        814,
+        1072,
+        1104
+      ],
+      "sha256": "c9b4544ee74189663cfd2a3b13a09fa0d42331e846921ba3e933ab26e2004738",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "temple-ruin.png": {
+      "source": "buildings-source.png",
+      "source_sha256": "aef484b3bfa9f9008627efc59303737b91c2fc4e6ffaf8e87dba580ed80f1266",
+      "crop": [
+        1089,
+        814,
+        1415,
+        1088
+      ],
+      "sha256": "ab30d1e9e2b46db17dbe61a91836f217ceaa4acae1d8d6022fda0358b38adabf",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "farm-1.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        23,
+        62,
+        217,
+        199
+      ],
+      "sha256": "f36e7485b226a9e05dfd32be643a435b8770646a32b9f7d6f6a6eed6b03845ef",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "farm-2.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        256,
+        33,
+        474,
+        199
+      ],
+      "sha256": "d414b931371d44c24e10d5460a4f66eafe67fb27428d5d663501fb6892def4d3",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "farm-3.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        502,
+        18,
+        737,
+        210
+      ],
+      "sha256": "f4d2cc419fca84db9ec92a9a5b043c4f7221926993adbca0af5635267f049a4a",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "farm-4.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        763,
+        5,
+        999,
+        211
+      ],
+      "sha256": "13ffb37f1a6f850c2a6f33857c5eae25ec2c9f0737da8fe1fdc0fc23b6cd556c",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "farm-5.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        1020,
+        11,
+        1264,
+        209
+      ],
+      "sha256": "1f54f84d750fae68511eadb75e0996c4bf6b4b40d54cce01fc78d41702b7574c",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "mine-1.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        10,
+        254,
+        213,
+        405
+      ],
+      "sha256": "6576f204bea0c217227902bdbe9f86c226144d5c73c1c95d4ccee859c5835a04",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "mine-2.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        246,
+        229,
+        475,
+        407
+      ],
+      "sha256": "b6815649a006f74ac951bc86f6d7e0de46d2a4b9231a4c6b8e743eae2383d6a7",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "mine-3.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        493,
+        216,
+        736,
+        416
+      ],
+      "sha256": "8bafc796ec3b9deaa7086d9014b34c54c0fe03eaf602e636ef1c231a264d23af",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "mine-4.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        751,
+        222,
+        1011,
+        425
+      ],
+      "sha256": "ddb65184b1ced806a2d9f31290789fec4b59ff16e939ae830b818e80b70bf5a7",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "mine-5.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        1016,
+        201,
+        1269,
+        426
+      ],
+      "sha256": "d8c65c530ad892b7a1ab11755a4e4e49e251277cd1cc757adbb8e53584869abb",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "hunt-1.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        9,
+        468,
+        218,
+        624
+      ],
+      "sha256": "48d0174f7cf5cef5dea706c1ab28ceee6ab1252ae36ae309f6bd26df4baafa4c",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "hunt-2.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        241,
+        440,
+        477,
+        626
+      ],
+      "sha256": "231760b1abba074f838e8f0731822a0e836e80ada83ec20b8caadc61df9eea0d",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "hunt-3.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        494,
+        429,
+        738,
+        632
+      ],
+      "sha256": "17253f9411e92cddd679e18bbff6e6f9dfaba9c1c40fa124a129a0288029b9b4",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "hunt-4.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        755,
+        438,
+        1005,
+        630
+      ],
+      "sha256": "8acdef9f898b99c44e2c420023f2455f6c50b48a5fa641ef18cfb740b8e897ee",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "hunt-5.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        1017,
+        428,
+        1269,
+        632
+      ],
+      "sha256": "1945349ef06784b62cd1ca6abba9c46fae421bd7931ae373120d6f350fd75edc",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "alchemy-1.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        20,
+        679,
+        205,
+        823
+      ],
+      "sha256": "ae64610edc6c7288908d109d6ae749293551c0458efedc2e1d373984cb03fd5d",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "alchemy-2.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        246,
+        642,
+        468,
+        834
+      ],
+      "sha256": "5a16c94041827b3576f212c4bccd9515c2fbbb11c86cf1270c9ffc7e1f6156a8",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "alchemy-3.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        481,
+        635,
+        733,
+        834
+      ],
+      "sha256": "09a6d6af00ac274532a72a6739e9adc9a05d5a50c0ec56f7a13a907c0526fb27",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "alchemy-4.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        742,
+        625,
+        1007,
+        836
+      ],
+      "sha256": "eff91678a01cba4d88a61cf8a8fe1574f8f4c069065736b7790292d6b535ab2e",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "alchemy-5.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        1010,
+        632,
+        1276,
+        836
+      ],
+      "sha256": "262f8ee18fabe4c120cf530b823827a4b7f487f965d87da1251b41eb0fd51e47",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "forge-1.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        26,
+        865,
+        215,
+        1028
+      ],
+      "sha256": "1d9fd80774369b8a13504771ed4c61b80f4a2dff46ba8fe5b031d658c504d498",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "forge-2.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        249,
+        860,
+        470,
+        1039
+      ],
+      "sha256": "43a01e2f60fc7f375fd7f291ac9ec7613ca93b09c3277fe0c7bc7e868c7b06fe",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "forge-3.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        487,
+        823,
+        734,
+        1037
+      ],
+      "sha256": "16fac318adce115b6edbad369e95de41f1ffe76793d958578f5e1121e018b428",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "forge-4.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        747,
+        830,
+        1004,
+        1044
+      ],
+      "sha256": "5f5b257bda20e7d93c36b442b8f8ee19aa5982da737d47794c035cc2c04c07c7",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "forge-5.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        1010,
+        836,
+        1276,
+        1048
+      ],
+      "sha256": "1b895646fd05e29ec72077f5bc855a77e192fc3cbe41899712ae65f9e55a050b",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "shop-1.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        17,
+        1057,
+        216,
+        1205
+      ],
+      "sha256": "f78311f2edecaf1d6b0223757bdc82e8b897e056e1a3d16a21f9736ebc5e40a3",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "shop-2.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        246,
+        1052,
+        470,
+        1221
+      ],
+      "sha256": "bacf2f33df940263c3562391117b2ecb7c38fe69c75bb2fb68366f056e90c7a6",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "shop-3.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        485,
+        1053,
+        732,
+        1219
+      ],
+      "sha256": "6c93e80a2a75007a456de5a16be7f0db82543b1bc0666c73ed1845be7d5fb6e6",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "shop-4.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        743,
+        1050,
+        1001,
+        1222
+      ],
+      "sha256": "ee49f79ddea4ccbd0297bc787ec2e7fe9e427dacc835b916b674f585ea574074",
+      "size": [
+        96,
+        96
+      ]
+    },
+    "shop-5.png": {
+      "source": "industries-source.png",
+      "source_sha256": "e8e7e7454a4ea5a919fa093d0d83f54a4abc11c4e1a410c314bb40b38ba88989",
+      "crop": [
+        1010,
+        1048,
+        1278,
+        1230
+      ],
+      "sha256": "dc900b39499a50164262f83296243c13560aa6ba95bc1a39b91b40639da90ee3",
+      "size": [
+        96,
+        96
+      ]
+    }
+  }
+}

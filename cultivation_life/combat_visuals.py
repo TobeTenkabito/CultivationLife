@@ -5,6 +5,8 @@ from .relationship_records import find_person
 from .visual_selection import select_assets
 from .character_visuals import character_appearance
 
+MIRROR_VARIANTS = frozenset({'heart_demon', 'heavenly_demon', 'corpse_self', 'corpse_primal', 'corpse_superego'})
+
 
 def beast_kind(name):
     if any(word in name for word in ('鹰', '鹫', '鸟', '禽', '鹏', '鹤', '鸦', '隼')):
@@ -58,7 +60,13 @@ def _team_visuals(game, target, hero, player_units=None):
             path = person.path if person else cached.get('path', facts.get('path', target.get('path', 'dao')))
             original_gender = person.gender if person else cached.get('gender', facts.get('gender', target.get('gender', target.get('target_gender')) if side == 'npc' and len(rows) == 1 else None))
             gender = _gender(original_gender, source_id)
-            if kind == 'player':
+            variant = facts.get('visual_variant', target.get('visual_variant')) if side == 'npc' and target.get('combat_type') == 'trial' else None
+            if variant in MIRROR_VARIANTS:
+                pool = [hero]
+                gender = (game.player.ghost_host_body or {}).get('gender', game.player.gender)
+                if hero.endswith('-shared'):
+                    gender = None
+            elif kind == 'player':
                 pool = [hero]
                 gender = hero.rsplit('-', 1)[1]
                 if gender == 'shared':
@@ -80,6 +88,8 @@ def _team_visuals(game, target, hero, player_units=None):
             member = dict(id=key[:96], kind=kind, gender=gender,
                 name=str(row.get('name', '无名参战者'))[:64],
                 weight=round(max(.001, float(row.get('power', 1)) * float(row.get('integrity', 1))), 4))
+            if variant in MIRROR_VARIANTS:
+                member['visual_variant'] = variant
             team.append(member)
             pools.append(pool)
             requests.append(member)

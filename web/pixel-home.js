@@ -69,7 +69,7 @@
   }
   new MutationObserver(updateFigure).observe(details,{attributes:true,attributeFilter:['open']});
   function placement() {
-    if(active()&&hud.parentNode!==stage)stage.prepend(hud);
+    if(active())stage.prepend(hud);
     drawerMode = active() && (matchMedia('(max-width:900px)').matches || window.GameNavigation?.isCompact());
     root.dataset.pixelDrawer = String(!!drawerMode);
     toggle.hidden = !drawerMode || !current;
@@ -81,17 +81,17 @@
       for(const {node}of eventPanels)stage.insertBefore(node,action);
     } else {
       if (drawer.open) drawer.close();
-      if (active() && scene.parentNode !== stage) hud.after(scene);
-      if(active()) {workbench.append(action);for(const {node}of eventPanels)workbench.append(node);}
+      if (active()) hud.after(scene);
+      if(active()) {workbench.append(action);for(const {node}of eventPanels)stage.insertBefore(node,scene);}
       else {if(action.parentNode!==stage)stage.insertBefore(action,$('.journal-area'));for(const {node,anchor}of eventPanels)anchor.after(node);}
     }
+    const cinematic=$('#event-cinematic');if(active()&&cinematic)hud.after(cinematic);
   }
   function arrange() {
     scene.hidden = !active();
     updateFigure();
     placement();
     if (!active()) {revision++; scene.dataset.assetKey = ''; portrait.hidden = true; portrait.removeAttribute('src');clearPainting();return;}
-    stage.prepend(hud); if (!drawerMode) hud.after(scene);
     hud.append($('.hud-resources')); $('.hud-resources').append($('#hud-opportunity'));
     $('.primary-actions').prepend($('#cultivation-core'));
     for (const name of ['rest', 'befriend_neighbors']) $('.primary-actions').append($(`[data-action=${name}]`));
@@ -129,6 +129,7 @@
       node.append(note);return node;
     });
     if(!buildings.length){const li=document.createElement('li');li.textContent='此地暂无建筑记录';$('#pixel-buildings').append(li);}
+    window.HomeMapModes?.describe(current,id);
   }
   async function update() {
     const p = current.player;
@@ -157,6 +158,7 @@
     if (ticket !== revision || !active()) return;
     if(landscape&&current.map){
       if(paintedKey!==mapKey){clearPainting();painted=PixelMap.mount($('.pixel-landscape'),current.map,{onSelect:describe});paintedKey=mapKey;}
+      window.HomeMapModes?.render(current,painted);
       scene.dataset.art='illustrated';
     }else if(showArt)clearPainting();
     if (!identity) return;
@@ -169,6 +171,6 @@
   drawer.addEventListener('click', event => {if (event.target !== drawer) return; const r = drawer.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) drawer.close();});
   $('#pixel-open-map').onclick = () => {if (drawer.open) drawer.close(); const button = $('[data-panel-target=map]'); if (button && !button.disabled){button.click();window.MapDirectory?.openTerritory('influence',browsing);}};
   window.addEventListener('resize', () => {cancelAnimationFrame(layoutFrame); layoutFrame = requestAnimationFrame(() => {placement(); if (active() && current) update();});});
-  window.PixelHome = Object.freeze({arrange,closeDrawer(){if(drawer.open)drawer.close();},render(data) {current = data; placement(); updateFigure(); if (active()) update();}});
+  window.PixelHome = Object.freeze({arrange,closeDrawer(){if(drawer.open)drawer.close();},render(data) {current = data; placement(); updateFigure(); if (active()) {window.HomeMapModes?.render(data,painted);update();}}});
   arrange();
 })();

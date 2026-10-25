@@ -1,0 +1,37 @@
+/* Local container constraints also protect legacy DLC panels and future CGs. */
+:root[data-visual=pixel] .in-game #action-card.hidden { display:none!important; }
+:root[data-visual=pixel] .pixel-workbench .breakthrough-panel { display:flex; flex-direction:column; align-items:stretch; gap:12px; padding:12px; }
+:root[data-visual=pixel] .pixel-workbench .breakthrough-panel>div { min-width:0; max-width:100%; }
+:root[data-visual=pixel] .pixel-workbench .ghost-system-copy { flex:1 1 auto; width:100%; overflow-wrap:anywhere; }
+:root[data-visual=pixel] .pixel-workbench .ghost-system-actions { flex:1 1 auto; width:auto; padding:8px; justify-content:flex-start; }
+:root[data-visual=pixel] .pixel-workbench .ghost-system-actions button { flex:1 1 110px; min-width:0; white-space:normal; }
+:root[data-visual=pixel] .pixel-workbench .breakthrough-panel button { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+:root[data-visual=pixel] .pixel-workbench .special-actions button { min-width:0; flex-basis:130px; }
+:root[data-visual=pixel] .pixel-scene { align-self:start; min-width:0; }
+:root[data-visual=pixel] .theme-play-area>#event-card,
+:root[data-visual=pixel] .theme-play-area>#prison-card { min-width:0; width:100%; box-sizing:border-box; padding:22px; max-height:none; overflow:visible; }
+#event-card { overflow-wrap:anywhere; min-width:0; min-height:200px; }
+#event-card img { max-width:100%; object-fit:contain; }
+#event-card canvas,#event-card video { display:block; max-width:100%; height:auto; }
+#event-card .choices { min-width:0; }
+#event-card .choices button { min-width:0; white-space:normal; overflow-wrap:anywhere; }
+#npc-event-layout.has-npc-art { grid-template-columns:minmax(64px,128px) minmax(0,1fr); }
+.npc-event-person { max-width:100%; }
+.home-map-modes{display:flex;flex-wrap:wrap;gap:4px;padding:10px;background:var(--paper);border-bottom:1px solid var(--line)}
+.home-map-modes button{flex:1 1 55px;min-width:0;min-height:36px;padding:7px 9px;border:1px solid transparent;border-radius:3px;background:transparent;color:var(--muted);box-shadow:none;font-size:12px}
+.home-map-modes button[aria-pressed=true]{background:var(--pine);border-color:var(--pine);color:var(--paper)}
+.home-map-modes button:hover{border-color:var(--pine)}
+.home-map-overlay{position:absolute;inset:0;width:768px;height:576px;pointer-events:none}
+.pixel-world-place.has-map-info{border-left:3px solid var(--map-color,var(--gold));max-width:160px;white-space:normal;text-align:center}
+.home-map-badge{display:block;font-size:10px;max-width:150px;overflow-wrap:anywhere}
+.home-map-building{display:block;width:64px;height:64px;object-fit:contain;image-rendering:pixelated;margin:-48px auto 0;pointer-events:none}
+.pixel-world-tools{border-radius:5px;gap:3px;padding:5px;background:var(--paper)}
+.pixel-world-tools button{border-radius:3px}.pixel-world-tools button:hover{background:var(--tint)}
+.home-map-detail{min-width:0;overflow-wrap:anywhere}.home-map-detail h4{font-size:13px;margin:0 0 9px}.home-map-detail p{font-size:12px;line-height:1.65;margin:6px 0}.home-map-detail small{display:block;font-size:11px;color:var(--muted)}
+.home-map-travel{display:block;width:100%;min-height:42px;margin-top:12px;background:var(--pine);color:var(--paper);border:0;border-radius:3px;white-space:normal;box-shadow:none}
+.home-map-warning{color:var(--cinnabar)}.home-building-preview{width:80px;height:80px;object-fit:contain;image-rendering:pixelated}.home-building-preview.damaged{filter:grayscale(.65) brightness(.78)}
+.event-cinematic[hidden]{display:none!important}.event-cinematic{padding:0;min-width:0;overflow:hidden;align-self:stretch;border:1px solid var(--line);border-radius:4px;box-sizing:border-box}
+.event-cinematic canvas{display:block;width:100%;max-width:768px;height:auto;aspect-ratio:16/9;image-rendering:pixelated;margin:auto;background:#1f353c}
+.event-cinematic-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:10px 14px;background:var(--paper)}.event-cinematic-caption{flex:1 1 200px;min-width:0;font-size:12px;line-height:1.6;margin:0;overflow-wrap:anywhere}
+.event-cinematic-controls button{min-height:36px;padding:6px 12px;background:var(--paper);border:1px solid var(--line);border-radius:3px;box-shadow:none;font-size:12px}
+@media(max-width:600px){#npc-event-layout.has-npc-art { grid-template-columns:80px minmax(0,1fr); }.npc-event-person,.npc-event-person .npc-art-figure{width:80px;} :root[data-visual=pixel] .theme-play-area>#event-card {padding:16px;}}

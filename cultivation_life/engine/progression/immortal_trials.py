@@ -53,7 +53,7 @@ def target_for(game, trial):
             field = replace(field, id='trial:superego', attainment='superego', name='超我尸·' + field.name)
             definitions.append(asdict(field))
         members = [dict(name=f'{p.name}·{name}', power=trial['power'], realm_index=p.realm_index, layer=p.layer,
-                        path=p.path, kind='environment', transcendence=state_for(field if i == 2 else None))
+                        path=p.path, kind='environment', visual_variant=('corpse_self','corpse_primal','corpse_superego')[i], transcendence=state_for(field if i == 2 else None))
                    for i, name in enumerate(('自我尸', '本我尸', '超我尸'))]
     else:
         field = None

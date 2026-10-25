@@ -5,6 +5,7 @@
   const {clamp,between,mix}=T,TAU=Math.PI*2;
   const cache=new Map(),pending=new Map(),maxCache=36;
   const abort=new AbortController();
+  const variants=window.ActorVariants?.create();
   let disposed=false;
   const layers=['background','hero','npc','rear','front','projectile','energy','stage','domainRear','domainFront'];
   const make=()=>document.createElement('canvas');
@@ -428,7 +429,8 @@
     }
     for(const v of [...m.participants].sort((a,b)=>a.y-b.y)){
       const c=context(s.stage);c.save();c.globalAlpha=.18;ring(c,v.x,v.y,22*s.scale,3*s.scale,'#243c3b',0,TAU,2);c.restore();
-      drawBody(context(s[v.side]),v,s);
+      if(variants)variants.draw(context(s[v.side]),c=>drawBody(c,v,s),v.visualVariant,state.time);
+      else drawBody(context(s[v.side]),v,s);
       if(options.effects!==false)guard(s,v,time);
     }
     if(options.effects!==false){effects(s,m,state);
@@ -451,7 +453,7 @@
   }
   function dispose(s){
     if(disposed)return;
-    disposed=true;abort.abort();for(const im of cache.values())im.close();cache.clear();pending.clear();
+    disposed=true;abort.abort();variants?.dispose();for(const im of cache.values())im.close();cache.clear();pending.clear();
     if(s){for(const key of layers){s[key].width=s[key].height=0;}s.canvas.width=s.canvas.height=0;s.state=s.motion=null;}
   }
   return {create,resize,prepare,render,dispose,cacheSize:()=>cache.size,geometry,

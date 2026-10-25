@@ -2,7 +2,9 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v3.0.0-alpha.5**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v3.0.0-alpha.6**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+
+alpha.6 修复新版侧栏与事件展示，新增五种主页地图视图、46张建筑阶段像素图、玩家镜像特效与渡劫动画，见 [alpha.6 说明](docs/alpha6-release.md)。
 
 alpha.5 新增鬼修、儒修、佛修男女主角与通用 NPC 共 12 套，头像、立绘和战斗动作分别归属对应 DLC，详见 [alpha.5 说明](docs/alpha5-release.md)。
 

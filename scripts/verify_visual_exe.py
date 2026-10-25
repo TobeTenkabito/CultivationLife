@@ -86,11 +86,16 @@ def run(with_dlc):
                     verify_paths(page,fixture,path_game['id'],output)
                 image=page.request.get(base+private)
                 assert image.status==(200 if with_dlc else 404)
+                from browser_home_scenes import verify as verify_home
+                page.goto(base);page.wait_for_function('typeof configData!=="undefined" && !!configData')
+                home=page.evaluate("api('/api/games',{method:'POST',body:JSON.stringify({name:'主页成品验收',spirit_root:'heavenly',path:'dao',seed:606,preset_id:'core'})})")
+                saved=fixture.store.load(home['id']);saved.settings.update(silent_events=True,combat_popup=False);fixture.store.save(saved)
+                verify_home(page,fixture,home['id'],output,with_dlc=with_dlc)
                 assert not errors,errors
                 if not with_dlc:assert not any('/extension-assets/' in p for p in requests)
                 browser.close()
             print(f'Compiled optional UI passed: DLC={with_dlc}',flush=True)
-            return dict(with_dlc=with_dlc,base_version=VERSION,exe_sha256=file_digest(folder/'launcher.exe'),visual_ui_verified=True,dlc_visual_verified=True,visual_additions_verified=True,domain_replay_verified=True,protagonist_static_verified=True,monster_visuals_verified=True,path_characters_verified=True)
+            return dict(with_dlc=with_dlc,base_version=VERSION,exe_sha256=file_digest(folder/'launcher.exe'),visual_ui_verified=True,dlc_visual_verified=True,visual_additions_verified=True,domain_replay_verified=True,protagonist_static_verified=True,monster_visuals_verified=True,path_characters_verified=True,home_scenes_verified=True)
         finally:
             subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],capture_output=True)
             process.wait(timeout=20)

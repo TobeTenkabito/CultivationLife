@@ -109,7 +109,7 @@ def verify(page,identity,output):
         assert not page.locator('#pixel-scenery-drawer').is_visible()
         assert page.locator('#event-card').bounding_box()['height']>=200
         if not compact:
-            assert page.locator('#event-card').evaluate("n=>n.closest('.pixel-workbench')!==null")
+            assert page.locator('#event-card').evaluate("n=>n.parentElement.classList.contains('theme-play-area')&&n.getBoundingClientRect().width>=document.querySelector('#pixel-home').getBoundingClientRect().width-1")
             assert page.locator('.pixel-scene').is_visible()
         else:
             assert page.locator('#player-hud').bounding_box()['y']<page.locator('#event-card').bounding_box()['y']

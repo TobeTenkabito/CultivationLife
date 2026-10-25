@@ -140,4 +140,5 @@
 
 - [蛇族素材接入](monster-serpent-visuals.md)：DLC 4.18.0蛇族11套头像、立绘与战斗图集，低阶及合体映射、元婴缺口回退与专项验收。
 
+- [alpha.6 主页地图与劫象表现](alpha6-release.md)：五种地图视图、旧栏兼容、镜像特效、渡劫动画和46张建筑阶段图。
 - [alpha.5 鬼儒佛人物实装](alpha5-release.md)：三道途男女主角、NPC 与独立 DLC 动画。

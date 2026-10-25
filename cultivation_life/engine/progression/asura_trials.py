@@ -46,6 +46,9 @@ def initialize(game):
     }[p.realm_index]
     members = [dict(name=name, power=trial['power'] * ratio, realm_index=p.realm_index, layer=p.layer,
                     path=p.path, kind='environment') for name, ratio, field in specs]
+    if not fusion:
+        for index, member in enumerate(members):
+            member['visual_variant'] = 'heart_demon' if index == 0 else 'heavenly_demon'
     target = dict(target_name='凝练肉身' if fusion else '心魔天魔劫', target_power=sum(b['power'] for b in members),
         target_realm_index=p.realm_index, target_layer=p.layer, combat_type='trial',
         objective='capture' if fusion else 'kill', enemy_objective='kill', members=members)

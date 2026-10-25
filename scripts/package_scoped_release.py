@@ -165,7 +165,14 @@ def main():
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
     if scoped.get('profile')=='visual':
         selected={name for shard in scoped['tests'] for name in shard}
-        if scoped.get('regression_scope') == 'alpha5-focused':
+        if scoped.get('regression_scope') == 'alpha6-focused':
+            from scripts.verify_scoped_release import VISUAL_ALPHA6_TESTS
+            require(selected==set(VISUAL_ALPHA6_TESTS),'Focused alpha.6 selection incomplete')
+            require('not full repository regression' in scoped.get('scope',''),'Focused scope must be declared')
+            require('browser_home_scenes' in {r['name'] for r in scoped['runs']},'Home scene browser required')
+            require(all(c.get('home_scenes_verified') for c in evidence['cases']),'Compiled home scenes with/without DLC required')
+            require(all('home_scenes_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in native['logs']),'Native home scene acceptance required')
+        elif scoped.get('regression_scope') == 'alpha5-focused':
             from scripts.verify_scoped_release import VISUAL_ALPHA5_TESTS
             require(selected==set(VISUAL_ALPHA5_TESTS),'Focused alpha.5 selection incomplete')
             require('not full repository regression' in scoped.get('scope',''),'Focused scope must be declared')
@@ -295,6 +302,7 @@ def main():
         updates=[('guixu-tide','归墟之潮'),('tianji-artifacts','巧夺天工')] if scoped['profile']=='combat-alpha' else [('guixu-tide','归墟之潮')] if scoped['profile']=='visual' else [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]
         if scoped.get('regression_scope')=='alpha4-focused':updates.append(('monster-bloodlines','万妖归宗'))
         if scoped.get('regression_scope')=='alpha5-focused':updates=[('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')]
+        if scoped.get('regression_scope')=='alpha6-focused':updates=[]
         for package, title in updates:
             version = dlcs[package]
             destination = ROOT / f'dist/{title}-v{version}.zip'

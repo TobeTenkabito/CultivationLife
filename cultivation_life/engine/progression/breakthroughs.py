@@ -508,7 +508,7 @@ def _queue_heavenly_demon_battle(
         target_power = expected_combat_power(int(trial["target_realm"]), 1) * ratio
         event_id = "EVT_HEAVENLY_DEMON_TRIBULATION_001"
         label = f"第 {round_index + 1}/{int(config['base_rounds'])} 重域外天魔"
-        runtime = {"battle_kind":"outer_demon", "target_name":label, "target_power":round(target_power, 1)}
+        runtime = {"battle_kind":"outer_demon", "target_name":label, "target_power":round(target_power, 1), "visual_variant":"heavenly_demon"}
     else:
         realm_index = int(soul.get("realm_index", 1))
         inherited_power = float(soul.get("combat_power", 0))

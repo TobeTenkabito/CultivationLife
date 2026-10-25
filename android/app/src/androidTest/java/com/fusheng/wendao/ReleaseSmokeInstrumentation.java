@@ -508,6 +508,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         runVisualAdditions(result);
         runMonsterVisuals(result);
         runPathCharacters(result);
+        runHomeScenes(result);
         result.putString("visual_ui_scope","Four themes, native portrait/landscape clicks, extension-owned bitmap, original healing and exact material return, true natal character/slots, eleven home paintings, bounded immutable camera, original node atlas and legacy fallback; alpha.3 social portraits, domain editor and real domain battle replay");
     }
 
@@ -560,6 +561,40 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("protagonist_static_scope","All four selected Dao/Demonic male/female 256x288 static figures pixel-equal, 128x128 portraits, native detail clicks and no state writes");
     }
 
+
+    private void runHomeScenes(Bundle result) throws Exception {
+        String fixture=assetText("home_scenes.py");
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'主页原生验收',spirit_root:'mutated_yin',path:'ghost',seed:606})}).then(g=>g.id)");
+        python("from cultivation_life import server\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\ng.settings.update(silent_events=True,combat_popup=False)\nserver.ENGINE.store.save(g)");
+        async("loadGame("+JSONObject.quote(id)+")");
+        boolean compact=Boolean.TRUE.equals(js("document.documentElement.dataset.pixelDrawer==='true'"));
+        if(compact)tapSelector("#pixel-scenery-toggle");
+        waitForJs("!!document.querySelector('.pixel-world-view')","Home painting ready");
+        js("window.__homeBefore=JSON.stringify(game);true");
+        for(String mode:new String[]{"influence","events","caravans","buildings","terrain"}) {
+            tapSelector("[data-home-map-mode="+mode+"]");
+            check(Boolean.TRUE.equals(js("document.querySelector('.pixel-world-view').dataset.mode==='"+mode+"'")),"Native home mode "+mode);
+        }
+        check(Boolean.TRUE.equals(js("JSON.stringify(game)===__homeBefore&&document.documentElement.scrollWidth<=innerWidth+1")),"Native map read only and fits");
+        String destination=(String)js("game.map.locations.find(p=>!p.current&&p.travel_status==='ok').id");
+        js("(()=>{const s=document.querySelector('select[aria-label=\"浏览绘景地域\"]');s.value="+JSONObject.quote(destination)+";s.dispatchEvent(new Event('change'));return true})()");
+        tapSelector(".home-map-travel");waitForJs("!busy&&game.map.current==="+JSONObject.quote(destination),"Native home travel",30000);
+        python(fixture+"\nfrom cultivation_life import server\nthunder(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");
+        waitForJs("!document.querySelector('#event-cinematic').hidden&&!document.querySelector('#event-cinematic canvas').hidden","Native event scene");
+        check(Boolean.TRUE.equals(js("document.querySelector('#action-card').getClientRects().length===0&&document.documentElement.scrollWidth<=innerWidth+1")),"Native event layout");
+        tapSelector("#event-choices button");waitForJs("!busy&&game.trial.step===2","Native thunder submission");
+        waitForJs("document.querySelector('.event-cinematic-caption').textContent.includes('已结算')","Native settled CG");
+        capture("alpha6-thunder-"+arguments.getString("orientation"));
+        tapSelector("#event-cinematic button:last-child");check(Boolean.TRUE.equals(js("!EventScenes.inspect().frame")),"Native CG disposal");
+        for(int i=0;i<2;i++){tapSelector("#event-choices button");waitForJs("!busy","Native next thunder");}
+        check(Boolean.TRUE.equals(js("!game.trial.active&&document.querySelector('#action-card').getClientRects().length>0")),"Native trial completed");
+        python(fixture+"\nfrom cultivation_life import server\nmirrors(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");tapSelector("#battle-report-open");
+        waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native mirror replay",30000);
+        check(Boolean.TRUE.equals(js("for(let t=0;t<=CombatReplay.diagnostics().duration;t+=.5)CombatReplay.seek(t);true")),"Native complete mirror timeline");
+        js("CombatReplay.seek(2);true");check(Boolean.TRUE.equals(js("CombatReplay.diagnostics().teams.npc.length===3&&CombatReplay.diagnostics().teams.npc.every(n=>n.id===CombatReplay.diagnostics().actors.hero.id&&ActorVariants.valid(n.visualVariant))")),"Native three mirror actors");
+        capture("alpha6-mirrors-"+arguments.getString("orientation"));tapSelector("#battle-report-toggle");
+        result.putString("home_scenes_scope","Five map views, original travel, three real thunder choices, bounded CG disposal and three derived player actors; responsive native clicks");
+    }
 
     private void runPathCharacters(Bundle result) throws Exception {
         String fixture=assetText("path_characters.py");
@@ -737,6 +772,11 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 runCombatAlpha(result);
             } else if(phase.equals("visual-ui")) {
                 runVisualUi(result);
+            } else if(phase.equals("home-scenes")) {
+                tapSelector("#theme-open");
+                if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+                async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+                runHomeScenes(result);
             } else if(phase.equals("maps-2131") || phase.equals("maps-2132") || phase.equals("maps-2133")) {
                 int mapCases=0;
                 for(String world:new String[]{"human","demon","spirit","true_demon","monster_realm","phantom_underworld","hell","celestial","asura","nether","reincarnation"}) {
@@ -2546,6 +2586,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             if(dlcPreferences!=null){if(previousDlcPreferences!=null)java.nio.file.Files.write(dlcPreferences.toPath(),previousDlcPreferences);else java.nio.file.Files.deleteIfExists(dlcPreferences.toPath());}
             finish(Activity.RESULT_OK,result);
         } catch(Throwable failure) {
+            try { result.putString("combat_debug",(String)js("JSON.stringify({diagnostics:CombatReplay.diagnostics(),visual:game?.last_combat_report?.visual,pixel:PixelLibrary.active(),loading:document.querySelector('[data-combat-status]')?.textContent,hidden:document.hidden})")); } catch(Throwable ignored) {}
             try { result.putString("preset_status",(String)js("document.querySelector('.custom-preset-bar [role=status]')?.textContent||''")); } catch(Throwable ignored) {}
             android.util.Log.e("ReleaseVerification","Verification failed",failure);
             try {
