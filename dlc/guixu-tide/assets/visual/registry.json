@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "assets": {
+    "guixu-tide.domain_controls": {
+      "file": "/extension-assets/official.guixu-tide/visual/domain-controls.json",
+      "requires": [
+        "official.guixu-tide"
+      ],
+      "sha256": "6e6b94102f8d13e72cec2d118283b0658630ec8f1042ed2a04badc43cae5d505",
+      "domain_controls": [
+        {
+          "id": "guixu-erode",
+          "name": "归墟蚀环",
+          "path": null,
+          "motif": "abyss",
+          "owner": "official.guixu-tide"
+        }
+      ]
+    }
+  }
+}

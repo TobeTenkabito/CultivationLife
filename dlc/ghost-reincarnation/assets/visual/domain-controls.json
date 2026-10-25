@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "ghost-ferry",
+      "name": "黄泉引渡",
+      "path": "ghost",
+      "motif": "ferry",
+      "owner": "official.ghost-reincarnation"
+    }
+  ]
+}

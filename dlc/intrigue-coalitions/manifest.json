@@ -8,5 +8,6 @@
   "enabled": true,
   "load_order": 120,
   "requires": [],
-  "description": "NPC 性格与职位议事、宗门地方影响与据点、连续边界经营、地方政策、论道比试和边界袭扰、地区战争目标与同界迁址表决。"
+  "description": "NPC 性格与职位议事、宗门地方影响与据点、连续边界经营、地方政策、论道比试和边界袭扰、地区战争目标与同界迁址表决。",
+  "visual_registry": "visual/registry.json"
 }

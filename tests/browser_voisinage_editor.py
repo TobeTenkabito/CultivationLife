@@ -78,7 +78,7 @@ def main():
                     current=page.evaluate('VoisinageEditor.status().npc')
                     page.locator('#ve-motion').click();page.wait_for_timeout(400);page.locator('#ve-motion').click()
                     assert page.evaluate('VoisinageEditor.status().npc')==current
-                    theme_names=page.evaluate('DomainFields.catalog.map(row=>row.id)')
+                    theme_names=page.locator('#ve-outline option').evaluate_all('rows=>rows.map(row=>row.value)')
                     assert len(theme_names)==13
                     # Outline geometry must remain independent of the chosen inner motif.
                     assert page.evaluate('''()=>{const g={cx:385,cy:286,rx:354,ry:183};

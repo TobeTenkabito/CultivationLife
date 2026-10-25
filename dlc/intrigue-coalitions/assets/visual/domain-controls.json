@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "intrigue-board",
+      "name": "纵横棋局",
+      "path": null,
+      "motif": "chess",
+      "owner": "official.intrigue-coalitions"
+    }
+  ]
+}

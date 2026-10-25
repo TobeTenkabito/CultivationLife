@@ -1,0 +1,444 @@
+{
+  "styles": [
+    {
+      "id": "mist",
+      "name": "烟霞流岚",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/mist-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "59ded4c2829eec7257f7b30502681e00491b2775076e2479a9bb5ca05e738aae",
+        "ink": true,
+        "motion": "drift"
+      }
+    },
+    {
+      "id": "star",
+      "name": "周天星垣",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/star-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "63febb24c47eb5b1732870b37d9b72fc6d33d239032fc49b997de4aa08de0daa",
+        "ink": true,
+        "motion": "orbit"
+      }
+    },
+    {
+      "id": "frost",
+      "name": "寒玉霜华",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/frost-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "06ffbb7bcd730f1d00eabfd7f62d7e9be94d4bc3a69fdd4a1acee573e390e99c",
+        "ink": true,
+        "motion": "snow"
+      }
+    },
+    {
+      "id": "lotus",
+      "name": "净莲宝华",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/lotus-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "42fc5f0670145da4a3ce3c949865cf1decfd317f73f552ca95a9839d35cd7fc3",
+        "ink": true,
+        "motion": "bloom"
+      }
+    },
+    {
+      "id": "sword",
+      "name": "青锋剑境",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/sword-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "652f854d297656e9b6c80c2119e90dbb83f48b4cf004e8c816295b7115917cd2",
+        "ink": true,
+        "motion": "blades"
+      }
+    },
+    {
+      "id": "seal",
+      "name": "玉印禁垣",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/seal-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "ee8a98924544259132d4fc3d6ae92673051a40f750be98fb7f5095a8efdfdd7e",
+        "ink": true,
+        "motion": "pulse"
+      }
+    },
+    {
+      "id": "water",
+      "name": "沧溟回澜",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/water-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "70c66dbaca74b3099ed5480973f449d7ede5c12c9789377424f4c4889ef75cec",
+        "ink": true,
+        "motion": "tide"
+      }
+    },
+    {
+      "id": "mountain",
+      "name": "叠嶂仙山",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/mountain-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "5ef97d0cbad5c618cb7c624e37e5a2be2dd26ce7c56e46e8c13f78234e38f911",
+        "ink": true,
+        "motion": "drift"
+      }
+    },
+    {
+      "id": "wood",
+      "name": "扶桑灵木",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/wood-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "1ff893827dfa8d469624450a1e9377b6151d9a6a2f01a8925781e96b2256f001",
+        "ink": true,
+        "motion": "sway"
+      }
+    },
+    {
+      "id": "thunder",
+      "name": "九霄雷章",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/thunder-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "2fd724fcecc1199ca860c27dc4d76fad3139155da9612a8a925d3cdb1ae81936",
+        "ink": true,
+        "motion": "lightning"
+      }
+    },
+    {
+      "id": "moon",
+      "name": "望月清辉",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/moon-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "8a2906094173c6ce76e520351648d008d70ae45a0fd1b1d4eb971514e240c90a",
+        "ink": true,
+        "motion": "orbit"
+      }
+    },
+    {
+      "id": "void",
+      "name": "太虚折境",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/void-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "77c44309f1a38c4b6c21220c5f1d076cdfc9a7baeb1757a7f5281778190780c7",
+        "ink": true,
+        "motion": "fold"
+      }
+    },
+    {
+      "id": "time",
+      "name": "烛时之轮",
+      "path": null,
+      "scene": {
+        "file": "/assets/pixel/domains/time-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "36c23cb7188011cd3c77ca1518b1a03c7b6f8677c9e669e16102a27a9e2605ec",
+        "ink": true,
+        "motion": "clock",
+        "clock": [
+          0.49,
+          0.59,
+          0.113
+        ]
+      }
+    },
+    {
+      "id": "demon-flame",
+      "name": "魔焰狱海",
+      "path": "demonic",
+      "motif": "flame",
+      "power": 2.7,
+      "waves": 9,
+      "ripple": 0.085,
+      "skew": 0,
+      "control": "rings",
+      "theme": "魔焰狱海",
+      "note": "道途专属 · 魔焰狱海",
+      "scene": {
+        "file": "/assets/pixel/domains/demon-flame-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "3f74df1308e6cb225d5db869235b10589648af5b7d66a80e0bac771d0d2836cb",
+        "ink": true,
+        "motion": "flame"
+      }
+    },
+    {
+      "id": "demon-rift",
+      "name": "玄煞裂空",
+      "path": "demonic",
+      "motif": "rift",
+      "power": 1.7,
+      "waves": 6,
+      "ripple": 0.08,
+      "skew": 0.12,
+      "control": "rings",
+      "theme": "玄煞裂空",
+      "note": "道途专属 · 玄煞裂空",
+      "scene": {
+        "file": "/assets/pixel/domains/demon-rift-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "ff6cf1d32ec680cc38d5da34c6914340b8a0e16c3c038844a15e721566531574",
+        "ink": true,
+        "motion": "fold"
+      }
+    },
+    {
+      "id": "beast-grove",
+      "name": "万木生息",
+      "path": "monster",
+      "motif": "grove",
+      "power": 2.6,
+      "waves": 5,
+      "ripple": 0.1,
+      "skew": -0.05,
+      "control": "lotus",
+      "theme": "万木生息",
+      "note": "道途专属 · 万木生息",
+      "scene": {
+        "file": "/assets/pixel/domains/beast-grove-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "a53f1011bea0465ce2b349f1e528787e43c1411101e2607e3e3032add38fd93b",
+        "ink": true,
+        "motion": "sway"
+      }
+    },
+    {
+      "id": "beast-wilds",
+      "name": "荒兽山河",
+      "path": "monster",
+      "motif": "peaks",
+      "power": 3.1,
+      "waves": 7,
+      "ripple": 0.09,
+      "skew": 0,
+      "control": "lotus",
+      "theme": "荒兽山河",
+      "note": "道途专属 · 荒兽山河",
+      "scene": {
+        "file": "/assets/pixel/domains/beast-wilds-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "c292f5bbe7345859d5b23757a3ba5cfe1ee418dd76d44e479cffe0f9459d57bf",
+        "ink": true,
+        "motion": "drift"
+      }
+    },
+    {
+      "id": "ghost-lantern",
+      "name": "幽灯夜渡",
+      "path": "ghost",
+      "motif": "lantern",
+      "power": 2.3,
+      "waves": 6,
+      "ripple": 0.07,
+      "skew": 0,
+      "control": "rings",
+      "theme": "幽灯夜渡",
+      "note": "道途专属 · 幽灯夜渡",
+      "scene": {
+        "file": "/assets/pixel/domains/ghost-lantern-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "bdb41e145bf8304c425d6e187e3916aa666050cc445de728c396ada2560fd512",
+        "ink": true,
+        "motion": "lantern"
+      }
+    },
+    {
+      "id": "ghost-mist",
+      "name": "冥河寒雾",
+      "path": "ghost",
+      "motif": "river",
+      "power": 2.5,
+      "waves": 8,
+      "ripple": 0.08,
+      "skew": 0.06,
+      "control": "rings",
+      "theme": "冥河寒雾",
+      "note": "道途专属 · 冥河寒雾",
+      "scene": {
+        "file": "/assets/pixel/domains/ghost-mist-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "a4b41946ff64c0710db29bc37c8a2dd089fbee38190d042e6578d4520eb65f2d",
+        "ink": true,
+        "motion": "tide"
+      }
+    },
+    {
+      "id": "sage-scroll",
+      "name": "浩然书山",
+      "path": "confucian",
+      "motif": "scroll",
+      "power": 3.4,
+      "waves": 4,
+      "ripple": 0.025,
+      "skew": 0,
+      "control": "lotus",
+      "theme": "浩然书山",
+      "note": "道途专属 · 浩然书山",
+      "scene": {
+        "file": "/assets/pixel/domains/sage-scroll-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "a5e981caa31ab1a658f686828343f0810bb02b17795a526b4b0f6943ec0d5096",
+        "ink": true,
+        "motion": "scroll"
+      }
+    },
+    {
+      "id": "buddha-land",
+      "name": "莲台净土",
+      "path": "buddhist",
+      "motif": "lotus-palace",
+      "power": 2.3,
+      "waves": 8,
+      "ripple": 0.06,
+      "skew": 0,
+      "control": "lotus",
+      "theme": "莲台净土",
+      "note": "道途专属 · 莲台净土",
+      "scene": {
+        "file": "/assets/pixel/domains/buddha-land-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "5016ebc26ae8de6a33d4a0c9a1e6ce08fb1f314f829be59420318abcd05b9441",
+        "ink": true,
+        "motion": "bloom"
+      }
+    }
+  ],
+  "controls": [
+    {
+      "id": "rings",
+      "name": "三重束纹",
+      "path": null
+    },
+    {
+      "id": "talismans",
+      "name": "符箓围禁",
+      "path": null
+    },
+    {
+      "id": "stars",
+      "name": "星轨牵缚",
+      "path": null
+    },
+    {
+      "id": "lotus",
+      "name": "莲瓣合禁",
+      "path": null
+    },
+    {
+      "id": "pillars",
+      "name": "四柱锁界",
+      "path": null
+    },
+    {
+      "id": "crystal",
+      "name": "晶棱凝禁",
+      "path": null
+    },
+    {
+      "id": "anchor-chains",
+      "name": "锚链锁身",
+      "path": null,
+      "motif": "anchors"
+    },
+    {
+      "id": "mountain-press",
+      "name": "重岳压禁",
+      "path": null,
+      "motif": "weight"
+    },
+    {
+      "id": "tide-bind",
+      "name": "寒潮凝缚",
+      "path": null,
+      "motif": "tide"
+    },
+    {
+      "id": "sword-cage",
+      "name": "剑阵封行",
+      "path": null,
+      "motif": "blades"
+    }
+  ]
+}

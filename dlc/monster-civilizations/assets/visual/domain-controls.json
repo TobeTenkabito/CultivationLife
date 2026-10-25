@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "monster-totems",
+      "name": "图腾围猎",
+      "path": "monster",
+      "motif": "totems",
+      "owner": "official.monster-civilizations"
+    }
+  ]
+}

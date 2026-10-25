@@ -63,6 +63,8 @@ def main():
         if visual and BASE_GAME_VERSION=='3.0.0-alpha.4':require('monster_visual_scope' in text,f'Missing alpha.4 native monster scope: {name}')
         if visual and BASE_GAME_VERSION=='3.0.0-alpha.5':require('path_character_scope' in text,f'Missing alpha.5 native path scope: {name}')
         if visual and BASE_GAME_VERSION=='3.0.0-alpha.6':require('home_scenes_scope' in text,f'Missing alpha.6 native home scope: {name}')
+        if visual and BASE_GAME_VERSION=='3.0.0':
+            require(all(marker in text for marker in ('monster_visual_scope','path_character_scope','home_scenes_scope','domain_ink_scope')),f'Missing stable visual coverage: {name}')
         if visual:require(all(marker in text for marker in ('visual_ui_scope','visual_additions_scope','domain_replay_scope','protagonist_static_scope')),f'Missing native UI/social/domain/protagonist coverage: {name}')
         if combat:require('combat_alpha_scope' in text,f'Missing native combat and DLC acceptance: {name}')
         if buildings and '/android-buildings-' in name:require('buildings_scope' in text,f'Missing current native city coverage: {name}')

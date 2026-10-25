@@ -222,6 +222,139 @@
           "combat": "ghost-npc-female"
         }
       ]
+    },
+    "ghost-reincarnation.domain_styles": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/domain-styles.json",
+      "requires": [
+        "official.ghost-reincarnation"
+      ],
+      "sha256": "17349434d60be4fd4f089132681bac88825632ec105dd59643bfa5c74dbd4ca2",
+      "domain_styles": [
+        {
+          "id": "ghost-shore",
+          "name": "黄泉彼岸",
+          "path": "ghost",
+          "motif": "flowers",
+          "power": 2.3,
+          "waves": 7,
+          "ripple": 0.065,
+          "skew": 0,
+          "control": "rings",
+          "theme": "黄泉彼岸",
+          "note": "道途专属 · 黄泉彼岸",
+          "owner": "official.ghost-reincarnation",
+          "scene": {
+            "file": "/extension-assets/official.ghost-reincarnation/visual/domains/ghost-shore-outline.png",
+            "size": [
+              320,
+              512
+            ],
+            "sha256": "fd16c3c15a7435a7578b970f6f437a571dfc1eef6c46e9065cc40558218637be",
+            "ink": true,
+            "motion": "flowers"
+          }
+        },
+        {
+          "id": "ghost-procession",
+          "name": "百鬼夜行",
+          "path": "ghost",
+          "motif": "procession",
+          "power": 2.8,
+          "waves": 9,
+          "ripple": 0.07,
+          "skew": 0,
+          "control": "rings",
+          "theme": "百鬼夜行",
+          "note": "道途专属 · 百鬼夜行",
+          "owner": "official.ghost-reincarnation",
+          "scene": {
+            "file": "/extension-assets/official.ghost-reincarnation/visual/domains/ghost-procession-outline.png",
+            "size": [
+              640,
+              320
+            ],
+            "sha256": "4cafdfd54ad603ee2c319d08225cefda6672ccc9cdac8ea8c221704954cbcd3e",
+            "ink": true,
+            "motion": "lantern"
+          }
+        },
+        {
+          "id": "ghost-rebirth",
+          "name": "六道轮回",
+          "path": "ghost",
+          "motif": "six-gates",
+          "power": 2,
+          "waves": 6,
+          "ripple": 0.04,
+          "skew": 0,
+          "control": "rings",
+          "theme": "六道轮回",
+          "note": "道途专属 · 六道轮回",
+          "owner": "official.ghost-reincarnation",
+          "scene": {
+            "file": "/extension-assets/official.ghost-reincarnation/visual/domains/ghost-rebirth-outline.png",
+            "size": [
+              640,
+              320
+            ],
+            "sha256": "caefd8e23f7b25151d574956a60a6cc4e96a5a80de7eace4da48584adf6bc5d3",
+            "ink": true,
+            "motion": "wheel"
+          }
+        }
+      ]
+    },
+    "ghost-reincarnation.domain_controls": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/domain-controls.json",
+      "requires": [
+        "official.ghost-reincarnation"
+      ],
+      "sha256": "5fa1b171b7457e6d069609e46b5f647f98771109186230969f1f95949eaa69d3",
+      "domain_controls": [
+        {
+          "id": "ghost-ferry",
+          "name": "黄泉引渡",
+          "path": "ghost",
+          "motif": "ferry",
+          "owner": "official.ghost-reincarnation"
+        }
+      ]
+    },
+    "domain.ink.ghost-shore": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/domains/ghost-shore-outline.png",
+      "size": [
+        320,
+        512
+      ],
+      "sha256": "fd16c3c15a7435a7578b970f6f437a571dfc1eef6c46e9065cc40558218637be",
+      "requires": [
+        "official.ghost-reincarnation"
+      ],
+      "domain_art": true
+    },
+    "domain.ink.ghost-procession": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/domains/ghost-procession-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "4cafdfd54ad603ee2c319d08225cefda6672ccc9cdac8ea8c221704954cbcd3e",
+      "requires": [
+        "official.ghost-reincarnation"
+      ],
+      "domain_art": true
+    },
+    "domain.ink.ghost-rebirth": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/domains/ghost-rebirth-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "caefd8e23f7b25151d574956a60a6cc4e96a5a80de7eace4da48584adf6bc5d3",
+      "requires": [
+        "official.ghost-reincarnation"
+      ],
+      "domain_art": true
     }
   }
 }

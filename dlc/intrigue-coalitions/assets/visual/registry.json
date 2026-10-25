@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "assets": {
+    "intrigue-coalitions.domain_controls": {
+      "file": "/extension-assets/official.intrigue-coalitions/visual/domain-controls.json",
+      "requires": [
+        "official.intrigue-coalitions"
+      ],
+      "sha256": "3a7bb2d5f81e87aa4de758102fe7a058dfe25fa8cce748bd2a391fe5ac44a522",
+      "domain_controls": [
+        {
+          "id": "intrigue-board",
+          "name": "纵横棋局",
+          "path": null,
+          "motif": "chess",
+          "owner": "official.intrigue-coalitions"
+        }
+      ]
+    }
+  }
+}

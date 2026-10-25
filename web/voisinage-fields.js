@@ -17,6 +17,21 @@
     {id:'void',name:'太虚折境',theme:'虚空',power:1.45,waves:4,ripple:.035,skew:.16,control:'crystal',note:'菱形折缘 · 悬浮折面 · 错层虚线'},
     {id:'time',name:'烛时之轮',theme:'岁序',power:2,waves:12,ripple:.012,skew:0,control:'rings',note:'晷轮刻缘 · 烛龙盘轮 · 内外时环缓转'}
   ];
+  let loadPromise;
+  function register(rows){
+    for(const row of rows||[]){
+      const index=catalog.findIndex(r=>r.id===row.id);
+      if(index>=0)catalog[index]=Object.freeze({...catalog[index],...row});
+      else if(row.motif)catalog.push(Object.freeze({...row}));
+    }
+  }
+  async function refresh(identity=''){
+    const response=await fetch('/api/domain-styles'+(identity?'?id='+encodeURIComponent(identity):''));
+    if(!response.ok)throw Error('邻域样式读取失败');
+    const data=await response.json();register(data.catalog);DomainControlEffects.register(data.controls);
+    await DomainMotifs.prepare(data.catalog);return data;
+  }
+  function ensure(){return loadPromise??=(refresh().catch(e=>{loadPromise=null;throw e;}));}
   function hash(text){let h=2166136261;for(const ch of String(text)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
   function rgb(h,s,l){const a=s*Math.min(l,1-l),f=n=>{const k=(n+h/30)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))));};return [f(0),f(8),f(4)];}
   const css=v=>'rgb('+v.join(',')+')';
@@ -34,6 +49,8 @@
       controlColor:color?css(rgb(hue,.7,.67)):tint(.30),controlCore:color?css(rgb(hue,.66,.91)):tint(.85),speed:.82+((h>>>14)%37)/100};
   }
   function compose(settings,identity='player'){
+    // A historical DLC style may be absent after disabling its package.
+    settings={...settings};for(const key of ['outline','pattern'])if(!catalog.some(r=>r.id===settings[key]))settings[key]='mist';
     const style=build(settings.pattern,identity,settings.palette),outline=catalog.find(r=>r.id===settings.outline);
     if(!outline)throw Error('Unknown outline');
     for(const k of ['power','waves','ripple','skew'])style[k]=outline[k];
@@ -56,6 +73,7 @@
   function point(g,style,a,t,scale=1){const r=radius(style,a,t)*scale,nx=Math.cos(a)*r,ny=Math.sin(a)*r;
     return [g.cx+(nx+style.skew*ny)*g.rx,g.cy+ny*g.ry];}
   function pattern(style,x,y,t,n){const z=t*style.speed;
+    if(style.motif)return DomainMotifs.pattern(style,x,y,t,n);
     if(style.id==='mist')return (.5+.5*Math.sin(y*.055+x*.008+n*8-z*.45))**3;
     if(style.id==='star')return (.5+.5*Math.sin(Math.hypot(x-440,(y-260)*1.6)*.045+n*4-z*.14))**6;
     if(style.id==='frost')return (.5+.5*Math.sin(x*.035+y*.048+n*2-z*.08))**10;
@@ -80,7 +98,11 @@
     const factor=front?.16:1;
     const world=(nx,ny)=>[g.cx+(nx+style.skew*ny)*g.rx,g.cy+ny*g.ry];
     const line=(points,w=1,a=.4)=>path(points,w,a*factor);
-    if(style.id==='mist'){
+    if(style.scene?.ink&&style.id!=='asura-prison'&&window.DomainInk?.draw({c,style,g,time:t,world,line,front,opacity})){
+      // Authored transparent contours replace the legacy internal decoration.
+    }else if(style.motif){
+      DomainMotifs.draw({c,style,g,time:t,world,line,front,opacity});
+    }else if(style.id==='mist'){
       for(let i=0;i<11;i++){
         const pts=[],base=-.77+i*.15;
         for(let j=0;j<=60;j++){const nx=-1.08+j/60*2.16,ny=base+Math.sin(nx*5+t*.20+i*.71)*.065+Math.sin(nx*11-i)*.025;pts.push(world(nx,ny));}
@@ -257,5 +279,5 @@
       }
     }
   }
-  window.DomainFields=Object.freeze({catalog:Object.freeze(catalog.map(Object.freeze)),palettes:Object.freeze(palettes),colorHex,build,compose,distance,pattern,decorations});
+  window.DomainFields=Object.freeze({get catalog(){return Object.freeze([...catalog]);},ensure,refresh,register,palettes:Object.freeze(palettes),colorHex,build,compose,distance,pattern,decorations});
 })();

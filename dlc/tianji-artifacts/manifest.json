@@ -8,5 +8,6 @@
   "enabled": true,
   "load_order": 45,
   "requires": [],
-  "description": "神机与材料散布十一界；自炼法宝动态入榜，神机保留原始榜值，本命分列原始战力和培养加成。"
+  "description": "神机与材料散布十一界；自炼法宝动态入榜，神机保留原始榜值，本命分列原始战力和培养加成。",
+  "visual_registry": "visual/registry.json"
 }

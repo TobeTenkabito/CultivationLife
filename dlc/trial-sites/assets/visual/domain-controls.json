@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "trial-gates",
+      "name": "九关封门",
+      "path": null,
+      "motif": "gates",
+      "owner": "official.trial-sites"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "assets": {
+    "trial-sites.domain_controls": {
+      "file": "/extension-assets/official.trial-sites/visual/domain-controls.json",
+      "requires": [
+        "official.trial-sites"
+      ],
+      "sha256": "115872cb67ba5d956266b6c2938a4c6ffd7ab0b850536a236c7ba80747e7ccaa",
+      "domain_controls": [
+        {
+          "id": "trial-gates",
+          "name": "九关封门",
+          "path": null,
+          "motif": "gates",
+          "owner": "official.trial-sites"
+        }
+      ]
+    }
+  }
+}

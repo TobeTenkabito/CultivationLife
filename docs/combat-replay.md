@@ -22,6 +22,8 @@ alpha.3 正式接入邻域回放。`voisinage.animation` 记录真实建立的�
 
 ## 事实与时序
 
+2026-10-25：普通施法已替换为多层光流与爆散，邻域增至13款通用与17款道途／DLC限定外观。既有单符号投射不再参与渲染；完整范围、权威道途校验与验证见[施法、道途邻域与渡劫演绎](spell-domain-effects.md)。下文早期素材描述保留历史背景。
+
 `PlayerCombatSystem.resolve` 在实际普通路径记录每轮 `ordinary_exchange.opening/before/after`：普通阶段起点、实际普通扣减前、扣减后双方态势；`actors.player/enemy` 标记该阶段双方的普通行动权。混合路径从既有权威能力账本读取普通损耗，不把邻域伤害混入攻击。劫关 `system/combat/trials.run_batch` 同样只记录真正发生的普通阶段。轮末原有 `player_combat_state/enemy_combat_state` 是恢复、邻域尾部效果及快速判定后的权威值，作为检查点直接同步，不虚构攻击。仅增加只读采样，不改变公式、分配、资源、时间或随机调用。
 
 `engine_combat_runtime._record_player_combat` 将 `combat_visuals.report_visuals` 的有限视觉描述放入原 `last_combat_report.visual`：主角、对手模板、真实本命物品 ID／炼器形制。它不是新人物记录。字段仍属于原 session 战报，保持结构10，无 Player／GameState 新字段。失效的旧报告不猜测初值或伪造回合。

@@ -81,6 +81,8 @@ def main():
                                    actions=dict(asura_spell=dict(name='修罗煞印', duration=4, contacts=[2.1]))))
     assets['asura.character_manifest'] = dict(file=url+'manifest.json', sha256=sha(out/'manifest.json'), requires=[OWNER],
                                              combat_actors=list(actors), character_forms=forms)
+    previous = read(out.parent/'registry.json').get('assets', {}) if (out.parent/'registry.json').exists() else {}
+    assets.update({key: row for key, row in previous.items() if row.get('domain_styles') or row.get('domain_controls') or row.get('domain_art')})
     write(out.parent/'registry.json', dict(assets=assets))
     write(out/'provenance.json', dict(generator='OpenAI built-in image_gen',
           prompts='design/asura-characters-20261025/redesign-prompts.json', static_forms=2, painted_keyposes=18,

@@ -12,7 +12,7 @@ from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT),str(ROOT/'tests')]
 from playwright.sync_api import sync_playwright
-from cultivation_life import server
+from cultivation_life import server, content_registry as registry
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import MONSTER_EVOLUTIONS
 from cultivation_life.monster_visuals import serpent_appearance
@@ -115,7 +115,7 @@ def main():
                     # Installed but disabled: filtered catalog and HTTP route reject all exclusive files.
                     active=[r for r in server.EXTENSION_REPORT if r.get('id')!='official.monster-bloodlines']
                     asset='/extension-assets/official.monster-bloodlines/visual/serpent/serpent-spirit-shared-figure.png'
-                    with patch.object(server,'EXTENSION_REPORT',active):
+                    with patch.object(server,'EXTENSION_REPORT',active), patch.object(registry,'EXTENSION_REPORT',active):
                         assert page.request.get(url+asset).status==404
                         page.reload();page.wait_for_function('!!window.PixelLibrary');page.evaluate('GameThemes.ready')
                         requests.clear();page.evaluate('id=>loadGame(id)',made['id'])

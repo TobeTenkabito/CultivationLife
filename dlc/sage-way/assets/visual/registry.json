@@ -222,6 +222,22 @@
           "combat": "confucian-npc-female"
         }
       ]
+    },
+    "sage-way.domain_controls": {
+      "file": "/extension-assets/official.sage-way/visual/domain-controls.json",
+      "requires": [
+        "official.sage-way"
+      ],
+      "sha256": "e81f2500fdf78d1569bc9c53ba6953c0b1f2809d2e040e34998961100be044fb",
+      "domain_controls": [
+        {
+          "id": "sage-law",
+          "name": "戒尺律令",
+          "path": "confucian",
+          "motif": "edict",
+          "owner": "official.sage-way"
+        }
+      ]
     }
   }
 }

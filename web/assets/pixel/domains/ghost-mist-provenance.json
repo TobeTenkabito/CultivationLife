@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Game VFX contour drawing, transparent background. Draw in crisp BLACK ink strokes ONLY, like an uncolored architectural outline sketch. All enclosed surfaces must be EMPTY transparent; no fills, no grey shading, no hatching, no texture, no atmosphere, no glow, no painted backgrounds. Black structural contours only. Keep strong clean outer silhouettes and sparse inner lines, readable at 700px wide. Chinese xianxia fantasy art, elegant distinctive forms. Wide landscape 2:1 composition fitting an invisible oval, 8 percent clear margin, subject centered in upper-middle, lower center spacious for combatants. No border, no labels, no text, no people, no UI. An underworld river with sinuous outlined currents, a narrow old arch bridge and empty mooring poles fading toward receding gate-like rocks. No filled mist or water surface, use long open current strokes.",
+  "source": "design/domain-outlines-20261025/raw/ghost-mist.png",
+  "source_sha256": "b063a5a7f6c3716f0b1e728eaf9f3ca9ac098320454f360a6b132ecbd38a1b84",
+  "file": "ghost-mist-outline.png",
+  "sha256": "a4b41946ff64c0710db29bc37c8a2dd089fbee38190d042e6578d4520eb65f2d",
+  "coverage": 0.18306640625,
+  "export": "Extract black authored strokes to alpha; discard light surfaces; white RGB; resize with Canvas high smoothing, zero alpha below12."
+}

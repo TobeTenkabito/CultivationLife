@@ -7,12 +7,15 @@
   function noise(x,y){const ix=Math.floor(x),iy=Math.floor(y),fx=smooth(x-ix),fy=smooth(y-iy),at=(a,b)=>grid[(b&127)*128+(a&127)];return (at(ix,iy)*(1-fx)+at(ix+1,iy)*fx)*(1-fy)+(at(ix,iy+1)*(1-fx)+at(ix+1,iy+1)*fx)*fy;}
   const loaded=new Map();
   function load(actor='dao-male'){
-    if(!['dao-male','dao-female','demonic-male','demonic-female'].includes(actor))actor='dao-male';
+    const optional=/^actor\.(path|monster)\.[a-z0-9-]+$/.test(actor);
+    if(!optional&&!['dao-male','dao-female','demonic-male','demonic-female'].includes(actor))actor='dao-male';
     if(loaded.has(actor))return loaded.get(actor);
     const image=src=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('预览素材加载失败'));im.src=src;});
     const promise=Promise.all([fetch('/assets/pixel/combat/manifest.json').then(r=>{if(!r.ok)throw Error('人物清单加载失败');return r.json();}),image('/assets/pixel/combat/terrace.png')]).then(async([manifest,background])=>{
-      const actors=await Promise.all([actor,'dao-female'].map(async id=>{const clip=manifest.actors[id].animations.idle;return {id,clip,image:await image('/'+clip.sheet.replace(/^\//,''))};}));return {manifest,background,actors};
-    }).catch(e=>{loaded.delete(actor);throw e;});loaded.set(actor,promise);return promise;
+      const actors=await Promise.all([actor,'dao-female'].map(async id=>{
+        if(id.startsWith('actor.')){const figure=await VisualAssets.load(id+'.figure');if(!figure)throw Error('主角预览素材加载失败');return {id,figure};}
+        const clip=manifest.actors[id].animations.idle;return {id,clip,image:await image('/'+clip.sheet.replace(/^\//,''))};}));return {manifest,background,actors};
+    }).catch(e=>{loaded.delete(actor);throw e;});loaded.set(actor,promise);while(loaded.size>8)loaded.delete(loaded.keys().next().value);return promise;
   }
   function create(canvas,assets){const c=canvas.getContext('2d'),layer=document.createElement('canvas');layer.width=BW;layer.height=BH;const lc=layer.getContext('2d'),pixels=lc.createImageData(BW,BH);
     function path(points,color,width=1,alpha=1){c.save();c.strokeStyle=color;c.lineWidth=width;c.globalAlpha=alpha;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();c.restore();}
@@ -48,7 +51,9 @@
       }
       if(mode==='control'){binding(fields[1],280,time,false);binding(fields[0],680,time,false);}
       for(let i=0;i<2;i++){
-        const a=assets.actors[i],clip=a.clip,index=Math.min(clip.frames-1,Math.floor((time%clip.duration)*assets.manifest.fps)),r=clip.rects[index],anchor=clip.poses[index].anchor||assets.manifest.anchor;
+        const a=assets.actors[i];
+        if(a.figure){c.drawImage(a.figure,fields[i].x-84.5,243,169,190);continue;}
+        const clip=a.clip,index=Math.min(clip.frames-1,Math.floor((time%clip.duration)*assets.manifest.fps)),r=clip.rects[index],anchor=typeof clip.poses[index]==='object'&&clip.poses[index].anchor||assets.manifest.anchor;
         c.save();c.translate(fields[i].x,433);c.scale((i?-1:1)*(clip.facing||1),1);const scale=.95;
         c.drawImage(a.image,r[0],r[1],r[2],r[3],(r[4]-anchor[0])*scale,(r[5]-anchor[1])*scale,r[2]*scale,r[3]*scale);c.restore();
       }

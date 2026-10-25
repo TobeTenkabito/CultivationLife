@@ -1,0 +1,75 @@
+{
+  "styles": [
+    {
+      "id": "asura-blood",
+      "name": "血海战轮",
+      "path": "demonic",
+      "motif": "war-wheel",
+      "power": 2.2,
+      "waves": 12,
+      "ripple": 0.05,
+      "skew": 0,
+      "control": "rings",
+      "theme": "血海战轮",
+      "note": "道途专属 · 血海战轮",
+      "owner": "official.asura-manifestation",
+      "scene": {
+        "file": "/extension-assets/official.asura-manifestation/visual/domains/asura-blood-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "e4264658cdfe042751cd767fcd82b0668c37f871c9c3946ce605c0e6fe8883cf",
+        "ink": true,
+        "motion": "wheel"
+      }
+    },
+    {
+      "id": "asura-palace",
+      "name": "八部天阙",
+      "path": "demonic",
+      "motif": "palace",
+      "power": 3.7,
+      "waves": 8,
+      "ripple": 0.035,
+      "skew": 0,
+      "control": "rings",
+      "theme": "八部天阙",
+      "note": "道途专属 · 八部天阙",
+      "owner": "official.asura-manifestation",
+      "scene": {
+        "file": "/extension-assets/official.asura-manifestation/visual/domains/asura-palace-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "fb2f39c306a9963ec8d637dcdeb7d95904bd22a1c17f4babf782c28f2bed7dde",
+        "ink": true,
+        "motion": "palace"
+      }
+    },
+    {
+      "id": "asura-prison",
+      "name": "修罗劫狱",
+      "path": "demonic",
+      "motif": "chains",
+      "power": 2.8,
+      "waves": 6,
+      "ripple": 0.08,
+      "skew": 0.08,
+      "control": "rings",
+      "theme": "修罗劫狱",
+      "note": "刑门勾线 · 锁链悬碑 · 透明轮廓",
+      "owner": "official.asura-manifestation",
+      "scene": {
+        "file": "/extension-assets/official.asura-manifestation/visual/domains/asura-prison-outline.png",
+        "size": [
+          1024,
+          466
+        ],
+        "sha256": "b78cfce73c2a28568b02df42fc70ffb91eb26d1b3bfeae77eed04561d6f184f0",
+        "ink": true
+      }
+    }
+  ]
+}

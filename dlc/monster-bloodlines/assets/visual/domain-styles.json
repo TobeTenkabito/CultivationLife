@@ -1,0 +1,76 @@
+{
+  "styles": [
+    {
+      "id": "monster-stars",
+      "name": "万妖星庭",
+      "path": "monster",
+      "motif": "star-beast",
+      "power": 2.5,
+      "waves": 8,
+      "ripple": 0.065,
+      "skew": 0,
+      "control": "lotus",
+      "theme": "万妖星庭",
+      "note": "道途专属 · 万妖星庭",
+      "owner": "official.monster-bloodlines",
+      "scene": {
+        "file": "/extension-assets/official.monster-bloodlines/visual/domains/monster-stars-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "85791b6779f65dfe08e652a305c474044206597e7cc46ac2137d545f9f7942d3",
+        "ink": true,
+        "motion": "orbit"
+      }
+    },
+    {
+      "id": "monster-ancestor",
+      "name": "祖灵天幕",
+      "path": "monster",
+      "motif": "wings",
+      "power": 2.2,
+      "waves": 5,
+      "ripple": 0.08,
+      "skew": 0,
+      "control": "lotus",
+      "theme": "祖灵天幕",
+      "note": "道途专属 · 祖灵天幕",
+      "owner": "official.monster-bloodlines",
+      "scene": {
+        "file": "/extension-assets/official.monster-bloodlines/visual/domains/monster-ancestor-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "d2c85cb743ddcdd20a2f861cec77336657592521b38e6d50342f5becf94c462c",
+        "ink": true,
+        "motion": "wings"
+      }
+    },
+    {
+      "id": "monster-origin",
+      "name": "山海归元",
+      "path": "monster",
+      "motif": "mountain-sea",
+      "power": 3.2,
+      "waves": 7,
+      "ripple": 0.09,
+      "skew": 0,
+      "control": "lotus",
+      "theme": "山海归元",
+      "note": "道途专属 · 山海归元",
+      "owner": "official.monster-bloodlines",
+      "scene": {
+        "file": "/extension-assets/official.monster-bloodlines/visual/domains/monster-origin-outline.png",
+        "size": [
+          640,
+          320
+        ],
+        "sha256": "f24c6097f0cff0d49166fbdc7857ee1f5e3b9807cf229be4f340133ad8360908",
+        "ink": true,
+        "motion": "tide"
+      }
+    }
+  ]
+}

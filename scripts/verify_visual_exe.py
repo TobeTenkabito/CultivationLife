@@ -95,7 +95,7 @@ def run(with_dlc):
                 if not with_dlc:assert not any('/extension-assets/' in p for p in requests)
                 browser.close()
             print(f'Compiled optional UI passed: DLC={with_dlc}',flush=True)
-            return dict(with_dlc=with_dlc,base_version=VERSION,exe_sha256=file_digest(folder/'launcher.exe'),visual_ui_verified=True,dlc_visual_verified=True,visual_additions_verified=True,domain_replay_verified=True,protagonist_static_verified=True,monster_visuals_verified=True,path_characters_verified=True,home_scenes_verified=True)
+            return dict(with_dlc=with_dlc,base_version=VERSION,exe_sha256=file_digest(folder/'launcher.exe'),visual_ui_verified=True,dlc_visual_verified=True,visual_additions_verified=True,domain_replay_verified=True,protagonist_static_verified=True,monster_visuals_verified=True,path_characters_verified=True,home_scenes_verified=True,domain_ink_verified=True)
         finally:
             subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],capture_output=True)
             process.wait(timeout=20)

@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Game VFX contour drawing, transparent background. Draw in crisp BLACK ink strokes ONLY, like an uncolored architectural outline sketch. All enclosed surfaces must be EMPTY transparent; no fills, no grey shading, no hatching, no texture, no atmosphere, no glow, no painted backgrounds. Black structural contours only. Keep strong clean outer silhouettes and sparse inner lines, readable at 700px wide. Chinese xianxia fantasy art, elegant distinctive forms. Wide landscape 2:1 composition fitting an invisible oval, 8 percent clear margin, subject centered in upper-middle, lower center spacious for combatants. No border, no labels, no text, no people, no UI. An ancient living grove with arching tree trunks, leafy boughs, hanging vines and spiral roots; a large seed or bud rests in the center of the root cradle. Distinct from a single sacred tree.",
+  "source": "design/domain-outlines-20261025/raw/beast-grove.png",
+  "source_sha256": "3ecc256cf33e9890e4054d4559e8f78e884bb9580fa0285660319ef1fc12ac12",
+  "file": "beast-grove-outline.png",
+  "sha256": "a53f1011bea0465ce2b349f1e528787e43c1411101e2607e3e3032add38fd93b",
+  "coverage": 0.2861865234375,
+  "export": "Extract black authored strokes to alpha; discard light surfaces; white RGB; resize with Canvas high smoothing, zero alpha below12."
+}

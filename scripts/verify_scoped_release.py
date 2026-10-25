@@ -240,13 +240,15 @@ def main():
         modules=[str(p.relative_to(ROOT)).replace('\\','/') for p in sorted((ROOT/'tests').rglob('test_*.py'))]
         selected=[modules[i::options.shards] for i in range(options.shards)]
         if options.balance_tests:
-            selected=balanced_test_shards(modules,options.shards,[ROOT/f'build/scoped-{tag}-{i}.xml' for i in range(options.shards)])
+            history=[ROOT/f'build/scoped-{tag}-{i}.xml' for i in range(options.shards)]
+            if not any(p.is_file() for p in history):history=[ROOT/'build/scoped-2170.xml']
+            selected=balanced_test_shards(modules,options.shards,history)
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
     if options.focused_visual:
         selected=[(VISUAL_ALPHA6_TESTS if options.home_scenes else VISUAL_ALPHA5_TESTS if options.path_characters else VISUAL_ALPHA4_TESTS if options.monster_visuals else VISUAL_ALPHA3_TESTS)[i::options.shards] for i in range(options.shards)]
     if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
-                                   '--maxfail=0' if profile in {'architecture','buildings'} else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
+                                   '--maxfail=0' if profile in {'architecture','buildings'} or (profile=='visual' and not options.focused_visual) else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
     else:
         jobs=[('related-tests',['-m','pytest',*selected,'-q','--tb=short',f'--junitxml=build/scoped-{tag}.xml'])]
@@ -288,6 +290,12 @@ def main():
     if options.monster_visuals:browsers += ['browser_monster_release','browser_monster_flora_visuals']
     if options.path_characters:browsers += ['browser_path_characters']
     if options.home_scenes:browsers += ['browser_home_scenes']
+    if profile=='visual' and not options.focused_visual:
+        browsers += ['browser_monster_release','browser_monster_flora_visuals','browser_path_characters',
+                     'browser_asura_characters','browser_home_scenes','browser_spell_domains',
+                     'browser_asura_prison','browser_trial_variants','browser_monster_aquatic_visuals',
+                     'browser_monster_fox_visuals','browser_monster_insect_visuals',
+                     'browser_monster_serpent_visuals','browser_monster_turtle_visuals']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     if profile=='common-goods':
         jobs.append(('combat-upstream',['tools/verify_combat_upstream_2151.py']))

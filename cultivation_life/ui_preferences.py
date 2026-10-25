@@ -13,14 +13,20 @@ DEFAULTS = {"theme": "a", "reduced_motion": False, "pixel_art": False}
 _LOCK = RLock()
 
 
-def _voisinage_appearance(value):
+def _voisinage_appearance(value, *, stored=False):
+    from .domain_styles import catalog, controls
     styles = {'mist', 'star', 'frost', 'lotus', 'sword', 'seal', 'water', 'mountain', 'wood', 'thunder', 'moon', 'void', 'time'}
+    styles.update(row['id'] for row in catalog())
     allowed = {'outline': styles, 'pattern': styles,
                'palette': {'rose', 'peach', 'gold', 'lime', 'green', 'jade', 'cyan', 'blue', 'indigo', 'violet', 'lilac', 'pink'},
-               'control': {'rings', 'talismans', 'stars', 'lotus', 'pillars', 'crystal'}}
+               'control': {row['id'] for row in controls(all_paths=True)}}
     if not isinstance(value, dict) or set(value) != set(allowed) | {'density'}:
         raise ValueError('邻域外观须包含轮廓、意象、配色、控制样式与质感')
     for key, choices in allowed.items():
+        # Keep optional saved identities while a package is temporarily off.
+        # Projection and new submissions separately enforce eligibility.
+        if stored and key in {'outline', 'pattern', 'control'} and isinstance(value[key], str) and re.fullmatch(r'[a-z][a-z0-9-]{0,47}', value[key]):
+            continue
         if key == 'palette' and isinstance(value[key], str) and re.fullmatch(r'#[0-9a-fA-F]{6}', value[key]):
             continue
         if not isinstance(value[key], str) or value[key] not in choices:
@@ -63,13 +69,13 @@ def load_ui_preferences(root: Path) -> dict:
                 pass
         if 'voisinage_appearance' in data:
             try:
-                result['voisinage_appearance'] = _voisinage_appearance(data['voisinage_appearance'])
+                result['voisinage_appearance'] = _voisinage_appearance(data['voisinage_appearance'], stored=True)
             except ValueError:
                 pass
         return result
 
 
-def write_ui_preferences(root: Path, payload: dict) -> dict:
+def write_ui_preferences(root: Path, payload: dict, *, character_path=None) -> dict:
     if not isinstance(payload, dict) or not payload or set(payload) - (DEFAULTS.keys() | {'navigation', 'voisinage_appearance'}):
         raise ValueError("界面偏好仅支持 theme、reduced_motion、pixel_art、navigation 与 voisinage_appearance")
     if "theme" in payload and (not isinstance(payload["theme"], str) or payload["theme"] not in THEMES):
@@ -82,6 +88,8 @@ def write_ui_preferences(root: Path, payload: dict) -> dict:
         payload = payload | {'navigation': _navigation(payload['navigation'])}
     if 'voisinage_appearance' in payload:
         payload = payload | {'voisinage_appearance': _voisinage_appearance(payload['voisinage_appearance'])}
+        from .domain_styles import validate
+        validate(payload['voisinage_appearance'], character_path)
     with _LOCK:
         value = load_ui_preferences(root) | payload
         destination = root / "data" / "ui_preferences.json"

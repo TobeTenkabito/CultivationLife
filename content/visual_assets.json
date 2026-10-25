@@ -8012,6 +8012,216 @@
       ],
       "sha256": "f9abe076c6d0de5beeee04f6340f24b25fe0268a0230daaa2c8813a2f2725409",
       "requires": []
+    },
+    "domain.ink.mist": {
+      "file": "/assets/pixel/domains/mist-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "59ded4c2829eec7257f7b30502681e00491b2775076e2479a9bb5ca05e738aae",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.star": {
+      "file": "/assets/pixel/domains/star-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "63febb24c47eb5b1732870b37d9b72fc6d33d239032fc49b997de4aa08de0daa",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.frost": {
+      "file": "/assets/pixel/domains/frost-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "06ffbb7bcd730f1d00eabfd7f62d7e9be94d4bc3a69fdd4a1acee573e390e99c",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.lotus": {
+      "file": "/assets/pixel/domains/lotus-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "42fc5f0670145da4a3ce3c949865cf1decfd317f73f552ca95a9839d35cd7fc3",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.sword": {
+      "file": "/assets/pixel/domains/sword-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "652f854d297656e9b6c80c2119e90dbb83f48b4cf004e8c816295b7115917cd2",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.seal": {
+      "file": "/assets/pixel/domains/seal-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "ee8a98924544259132d4fc3d6ae92673051a40f750be98fb7f5095a8efdfdd7e",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.water": {
+      "file": "/assets/pixel/domains/water-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "70c66dbaca74b3099ed5480973f449d7ede5c12c9789377424f4c4889ef75cec",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.mountain": {
+      "file": "/assets/pixel/domains/mountain-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "5ef97d0cbad5c618cb7c624e37e5a2be2dd26ce7c56e46e8c13f78234e38f911",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.wood": {
+      "file": "/assets/pixel/domains/wood-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "1ff893827dfa8d469624450a1e9377b6151d9a6a2f01a8925781e96b2256f001",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.thunder": {
+      "file": "/assets/pixel/domains/thunder-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "2fd724fcecc1199ca860c27dc4d76fad3139155da9612a8a925d3cdb1ae81936",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.moon": {
+      "file": "/assets/pixel/domains/moon-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "8a2906094173c6ce76e520351648d008d70ae45a0fd1b1d4eb971514e240c90a",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.void": {
+      "file": "/assets/pixel/domains/void-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "77c44309f1a38c4b6c21220c5f1d076cdfc9a7baeb1757a7f5281778190780c7",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.time": {
+      "file": "/assets/pixel/domains/time-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "36c23cb7188011cd3c77ca1518b1a03c7b6f8677c9e669e16102a27a9e2605ec",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.demon-flame": {
+      "file": "/assets/pixel/domains/demon-flame-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "3f74df1308e6cb225d5db869235b10589648af5b7d66a80e0bac771d0d2836cb",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.demon-rift": {
+      "file": "/assets/pixel/domains/demon-rift-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "ff6cf1d32ec680cc38d5da34c6914340b8a0e16c3c038844a15e721566531574",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.beast-grove": {
+      "file": "/assets/pixel/domains/beast-grove-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "a53f1011bea0465ce2b349f1e528787e43c1411101e2607e3e3032add38fd93b",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.beast-wilds": {
+      "file": "/assets/pixel/domains/beast-wilds-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "c292f5bbe7345859d5b23757a3ba5cfe1ee418dd76d44e479cffe0f9459d57bf",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.ghost-lantern": {
+      "file": "/assets/pixel/domains/ghost-lantern-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "bdb41e145bf8304c425d6e187e3916aa666050cc445de728c396ada2560fd512",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.ghost-mist": {
+      "file": "/assets/pixel/domains/ghost-mist-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "a4b41946ff64c0710db29bc37c8a2dd089fbee38190d042e6578d4520eb65f2d",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.sage-scroll": {
+      "file": "/assets/pixel/domains/sage-scroll-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "a5e981caa31ab1a658f686828343f0810bb02b17795a526b4b0f6943ec0d5096",
+      "requires": [],
+      "domain_art": true
+    },
+    "domain.ink.buddha-land": {
+      "file": "/assets/pixel/domains/buddha-land-outline.png",
+      "size": [
+        640,
+        320
+      ],
+      "sha256": "5016ebc26ae8de6a33d4a0c9a1e6ce08fb1f314f829be59420318abcd05b9441",
+      "requires": [],
+      "domain_art": true
     }
   },
   "items": {

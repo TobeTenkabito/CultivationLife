@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "monster-roots",
+      "name": "血脉缚根",
+      "path": "monster",
+      "motif": "vines",
+      "owner": "official.monster-bloodlines"
+    }
+  ]
+}

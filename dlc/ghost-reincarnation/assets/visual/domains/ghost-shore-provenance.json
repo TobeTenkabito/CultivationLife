@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Game VFX contour drawing, transparent background. Draw in crisp BLACK ink strokes ONLY, like an uncolored architectural outline sketch. All enclosed surfaces must be EMPTY transparent; no fills, no grey shading, no hatching, no texture, no atmosphere, no glow, no painted backgrounds. Black structural contours only. Keep strong clean outer silhouettes and sparse inner lines, readable at 700px wide. Chinese xianxia fantasy art, elegant distinctive forms. Wide landscape 2:1 composition fitting an invisible oval, 8 percent clear margin, subject centered in upper-middle, lower center spacious for combatants. No border, no labels, no text, no people, no UI. SPECIAL ASSET: one single red-spider-lily plant drawn only in BLACK outline strokes, centered on transparent background, square canvas. One complete long slender slightly curved stem reaching bottom center, one large airy flower head with many curled narrow petals and long radiating stamens at top center. Full plant, no roots, no leaves, no other flowers, no pot. The blossom and stem must be clearly separated by a visible neck; this single flower will be repeated and animated with anchored roots in the game. No fill or shading.",
+  "source": "design/domain-outlines-20261025/raw/ghost-shore.png",
+  "source_sha256": "7b31154b24ab5d55ce3bb712463188fa4b6af77a2ddfd0fc060462a20f0f9e39",
+  "file": "ghost-shore-outline.png",
+  "sha256": "fd16c3c15a7435a7578b970f6f437a571dfc1eef6c46e9065cc40558218637be",
+  "coverage": 0.096484375,
+  "export": "Extract black authored strokes to alpha; discard light surfaces; white RGB; resize with Canvas high smoothing, zero alpha below12."
+}

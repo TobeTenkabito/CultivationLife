@@ -16,7 +16,8 @@
   document.body.append(dialog);const $=s=>dialog.querySelector(s);
   let draft={...VoisinageAppearance.defaults},npc,renderer,ready=false,busy=false,token=0,raf=0,time=2.8,last=0,lastPaint=0,paused=false,frames=0;
   let scriptsPromise,previewActor='dao-male',actorLabel='主角';
-  function scripts(){if(!scriptsPromise)scriptsPromise=Promise.all(['/voisinage-fields.js?v=alpha3','/voisinage-controls.js','/voisinage-preview.js?v=alpha3'].map(src=>new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=()=>{el.remove();reject(Error('编辑器组件加载失败，请重新打开'));};document.head.append(el);}))).catch(e=>{scriptsPromise=null;throw e;});return scriptsPromise;}
+  let eligible=[],eligibleControls=[],editingGameId='';
+  function scripts(){if(!scriptsPromise)scriptsPromise=new Promise((resolve,reject)=>{const el=document.createElement('script');el.src='/voisinage-preview.js?v=fx2';el.onload=resolve;el.onerror=()=>{el.remove();reject(Error('编辑器组件加载失败，请重新打开'));};document.head.append(el);}).catch(e=>{scriptsPromise=null;throw e;});return scriptsPromise;}
   function stop(){cancelAnimationFrame(raf);raf=0;last=0;}
   function draw(){if(!ready||!dialog.open)return;renderer.paint(draft,npc,time,$('#ve-scene').value);frames++;
     $('#ve-density-label').textContent=draft.density+'%';$('#ve-palette-label').textContent='左侧：'+actorLabel+' · '+draft.palette.toUpperCase()+'　／　右侧：NPC · '+DomainFields.palettes.find(p=>p.id===npc.palette).name;
@@ -26,22 +27,27 @@
   function next(){npc=VoisinageAppearance.createEncounter([{pattern:'star',outline:'star',control:'stars',density:65}])[0];draw();}
   function populate(){
     for(const key of ['outline','pattern','control']){
-      const rows=key==='control'?DomainControlEffects.catalog:DomainFields.catalog;
+      const rows=key==='control'?DomainControlEffects.catalog.filter(row=>eligibleControls.includes(row.id)):DomainFields.catalog.filter(row=>eligible.includes(row.id));
       $('#ve-'+key).replaceChildren(...rows.map(row=>{const option=document.createElement('option');option.value=row.id;option.textContent=row.name;return option;}));
     }
   }
   async function open(){if(dialog.open)return;const own=++token;ready=false;dialog.showModal();$('#ve-status').textContent='正在读取外观设置…';$('#ve-save').disabled=true;$('#ve-fields').disabled=true;
     try{
-      const [saved]=await Promise.all([fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw Error('外观设置读取失败，请关闭后重试');return r.json();}),scripts()]);
+      editingGameId=typeof game==='undefined'?'':game?.id||'';
+      const [saved,choices]=await Promise.all([fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw Error('外观设置读取失败，请关闭后重试');return r.json();}),DomainFields.refresh(editingGameId),scripts()]);
+      eligible=choices.available;
+      eligibleControls=choices.available_controls;
       const actor=window.VisualAssets?.actor(typeof game==='undefined'?null:game?.player);
-      previewActor=actor?actor.replace('actor.human.','').replace('.','-'):'dao-male';actorLabel=actor?'主角':'外观示意人物';
+      previewActor=actor?.startsWith('actor.human.')?actor.replace('actor.human.','').replace('.','-'):actor||'dao-male';actorLabel=actor?'主角':'外观示意人物';
       const assets=await VoisinagePreview.load(previewActor);if(own!==token||!dialog.open)return;
       renderer=VoisinagePreview.create($('#ve-canvas'),assets);populate();draft={...VoisinageAppearance.defaults,...saved.voisinage_appearance};
+      for(const key of ['outline','pattern'])if(!eligible.includes(draft[key]))draft[key]='mist';
+      if(!eligibleControls.includes(draft.control))draft.control='rings';
       draft.palette=DomainFields.colorHex(draft.palette);
       for(const [key,value] of Object.entries(draft))$('#ve-'+key).value=value;
       $('#ve-color-hex').value=draft.palette.toUpperCase();colorValidity(true);
       ready=true;paused=saved.reduced_motion===true||matchMedia('(prefers-reduced-motion: reduce)').matches;time=2.8;next();draw();animate();
-      $('#ve-status').textContent='修改后点击“保存搭配”。';$('#ve-save').disabled=false;$('#ve-fields').disabled=false;
+      $('#ve-status').textContent='仅显示当前道途及已加载扩展可用的样式。';$('#ve-save').disabled=false;$('#ve-fields').disabled=false;
     }catch(e){if(own===token&&dialog.open)$('#ve-status').textContent=e.message;}
   }
   for(const key of ['outline','pattern','palette','control','density'])$('#ve-'+key).addEventListener('input',()=>{
@@ -60,7 +66,7 @@
   $('#ve-close').onclick=$('#ve-cancel').onclick=()=>dialog.close();
   $('#ve-save').onclick=async()=>{
     if(!ready||busy||$('#ve-color-hex').getAttribute('aria-invalid')==='true')return;busy=true;const own=token,snapshot={...draft};$('#ve-save').disabled=true;$('#ve-fields').disabled=true;$('#ve-status').textContent='正在保存…';
-    try{const response=await fetch('/api/ui-preferences',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({voisinage_appearance:snapshot})});
+    try{const response=await fetch('/api/ui-preferences',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({voisinage_appearance:snapshot,...(editingGameId?{game_id:editingGameId}:{})})});
       if(!response.ok)throw Error('保存失败，搭配尚未保存，请重试');await response.json();if(own===token)$('#ve-status').textContent='搭配已保存，下次打开仍会保留。';
     }catch(e){if(own===token)$('#ve-status').textContent=e.message;}
     finally{busy=false;if(own===token){$('#ve-save').disabled=false;$('#ve-fields').disabled=false;}}

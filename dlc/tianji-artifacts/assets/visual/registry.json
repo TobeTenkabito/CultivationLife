@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "assets": {
+    "tianji-artifacts.domain_controls": {
+      "file": "/extension-assets/official.tianji-artifacts/visual/domain-controls.json",
+      "requires": [
+        "official.tianji-artifacts"
+      ],
+      "sha256": "69c589ada0530d6722609e2e6ea59f4b247f12ae3d127c4c73e210ff24c92189",
+      "domain_controls": [
+        {
+          "id": "tianji-lock",
+          "name": "天机悬锁",
+          "path": null,
+          "motif": "gears",
+          "owner": "official.tianji-artifacts"
+        }
+      ]
+    }
+  }
+}

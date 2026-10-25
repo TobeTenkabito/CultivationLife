@@ -527,7 +527,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         check(Boolean.TRUE.equals(js("document.querySelector('.pixel-portrait').src.includes('demonic-female')")),"Native demonic avatar");
         tapSelector("[data-close-dialog=player-details-dialog]");tapSelector("[data-panel-target=settings]");tapSelector("[data-voisinage-editor]");
         waitForJs("VoisinageEditor.status().ready","Native domain editor");
-        check(Boolean.TRUE.equals(js("VoisinageEditor.status().previewActor==='demonic-female'&&document.querySelectorAll('#ve-pattern option').length===13")),"Native preview identity and thirteen styles");
+        check(Boolean.TRUE.equals(js("VoisinageEditor.status().previewActor==='demonic-female'&&document.querySelectorAll('#ve-pattern option').length===18")),"Native preview identity and path-gated styles");
+        check(Boolean.TRUE.equals(js("DomainFields.catalog.length===30&&DomainFields.catalog.every(r=>!!DomainMotifs.bitmap(DomainFields.compose({outline:r.id,pattern:r.id,palette:'#98baca',density:75,control:'rings'},'native-ink')))")),"Native thirty outline assets decoded and tinted");
+        result.putString("domain_ink_scope","Thirty base/DLC outline bitmaps decoded and tinted; eighteen lawful demonic choices; flowing clock saved through native editor and replay");
         js("for(const [key,value] of [['outline','time'],['pattern','time'],['color-hex','#98baca']]){const e=document.querySelector('#ve-'+key);e.value=value;e.dispatchEvent(new Event('input',{bubbles:true}));}true");
         tapSelector("#ve-save");waitForJs("!VoisinageEditor.status().busy&&document.querySelector('#ve-status').textContent.includes('已保存')","Native appearance save");
         check(Boolean.TRUE.equals(js("document.querySelector('#voisinage-editor').scrollWidth<=document.querySelector('#voisinage-editor').clientWidth+1")),"Native editor overflow");

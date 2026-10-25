@@ -108,4 +108,6 @@ alpha.3发行复核：轮廓相位与边缘装饰统一读取所选轮廓，避�
 
 ## alpha.4 妖修可选注册表
 
+2026-10-25新增17款道途／DLC域式、当前可选主角编辑器预览、复合施法与独立劫云素材；归属、导出保留规则与源码验收见[特效更新说明](spell-domain-effects.md)。
+
 妖修八族的576条专属声明已从本体content/visual_assets.json移至DLC。public_catalog从启用包的visual_registry合并清单，extension_asset分别接收本体资源根和外置扩展根；核心身份不可被覆盖。通用resolve_realm_appearance按权威血脉境界提供143套静态与139套战斗形象，渲染器通过combat_actors发现动作包。发行验收与缺省行为见[alpha.4说明](alpha4-release.md)。

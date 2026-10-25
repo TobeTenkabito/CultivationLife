@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Game VFX contour drawing, transparent background. Draw in crisp BLACK ink strokes ONLY, like an uncolored architectural outline sketch. All enclosed surfaces must be EMPTY transparent; no fills, no grey shading, no hatching, no texture, no atmosphere, no glow, no painted backgrounds. Black structural contours only. Keep strong clean outer silhouettes and sparse inner lines, readable at 700px wide. Chinese xianxia fantasy art, elegant distinctive forms. Wide landscape 2:1 composition fitting an invisible oval, 8 percent clear margin, subject centered in upper-middle, lower center spacious for combatants. No border, no labels, no text, no people, no UI. An intricate celestial armillary sphere with crossing orbital arcs suspended among a few smaller constellation figures, star nodes with thin connections and elegant compass-like arcs. Clear large central celestial globe, no letters or numbers.",
+  "source": "design/domain-outlines-20261025/raw/star.png",
+  "source_sha256": "2bb4a180fbc9f12cec635fec82080e558d02dac3476a46ac1172d5b0abc826cc",
+  "file": "star-outline.png",
+  "sha256": "63febb24c47eb5b1732870b37d9b72fc6d33d239032fc49b997de4aa08de0daa",
+  "coverage": 0.1391455078125,
+  "export": "Extract black authored strokes to alpha; discard light surfaces; white RGB; resize with Canvas high smoothing, zero alpha below12."
+}

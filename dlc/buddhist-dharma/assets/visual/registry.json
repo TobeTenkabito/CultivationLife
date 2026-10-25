@@ -222,6 +222,22 @@
           "combat": "buddhist-npc-male"
         }
       ]
+    },
+    "buddhist-dharma.domain_controls": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/domain-controls.json",
+      "requires": [
+        "official.buddhist-dharma"
+      ],
+      "sha256": "9d2f1e4a412c9b926453cf0fe95131844375e936e444086ca188f7b3da982327",
+      "domain_controls": [
+        {
+          "id": "buddha-wheel",
+          "name": "梵轮止念",
+          "path": "buddhist",
+          "motif": "wheel",
+          "owner": "official.buddhist-dharma"
+        }
+      ]
     }
   }
 }

@@ -10,9 +10,12 @@
     {id:'pillars',name:'四柱锁界',note:'四枚法柱落定，脚下连线锁合；柱印向下归位。'},
     {id:'crystal',name:'晶棱凝禁',note:'晶棱由下向上凝成，折线闭合；不表示附加冻结。'}
   ].map(row=>Object.freeze({...row,semantics:['domination','seal'],status:'approved'}));
+  function register(rows){for(const row of rows||[])if(row.motif&&!catalog.some(r=>r.id===row.id))catalog.push(Object.freeze({...row}));}
   function draw(id,ctx,active=false){
     const {c,f,target:x,time:t,front,stroke}=ctx;
     if(!catalog.some(row=>row.id===id)||id==='rings')return false;
+    const custom=catalog.find(row=>row.id===id);
+    if(custom.motif)return DomainControlMotifs.draw(custom.motif,ctx,active);
     const pulse=active?Math.sin(clamp((t-2)/2.4)*Math.PI):0;
     if(active&&(t<=2||t>=4.4))return true;
     const q=ease(t/.95),a=active?pulse:.88;
@@ -99,5 +102,5 @@
     }
     return true;
   }
-  window.DomainControlEffects=Object.freeze({catalog:Object.freeze(catalog),draw});
+  window.DomainControlEffects=Object.freeze({get catalog(){return Object.freeze([...catalog]);},register,draw});
 })();

@@ -76,6 +76,8 @@ def main():
         write(out/'manifest.json',manifest)
         assets[path+'.character_manifest']=dict(file=url+'manifest.json',sha256=sha(out/'manifest.json'),requires=[owner],
                                                combat_actors=list(actors),character_forms=forms)
+        previous=read(out.parent/'registry.json').get('assets',{}) if (out.parent/'registry.json').exists() else {}
+        assets.update({key:row for key,row in previous.items() if row.get('domain_styles') or row.get('domain_controls') or row.get('domain_art')})
         write(out.parent/'registry.json',dict(assets=assets))
         write(out/'provenance.json',dict(generator='OpenAI built-in image_gen',prompts='design/three-paths-alpha5-20261025/prompts.json',
             static_forms=4,painted_keyposes=36,animation_clips=28,export='nearest-neighbour, original soft alpha, common scale and foot anchor',sources=provenance))

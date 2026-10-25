@@ -13,7 +13,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT/'tests')]
 from playwright.sync_api import sync_playwright
-from cultivation_life import server
+from cultivation_life import server, content_registry as registry
 from cultivation_life.content_registry import ACTIONS
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item
@@ -332,12 +332,13 @@ def main():
                     engine._combat(game,dict(target_name='旧宝切磋',target_power=engine._player_battle_power(game)*.95,
                         target_realm_index=game.player.realm_index,combat_type='cultivator',gender='female',path='dao'),False,random.Random(27))
                     engine.store.save(game)
-                    with patch.object(server,'EXTENSION_REPORT',[]):
+                    with patch.object(server,'EXTENSION_REPORT',[]), patch.object(registry,'EXTENSION_REPORT',[]):
                         requests.clear();page.reload();page.wait_for_function('!!configData');page.evaluate('GameThemes.ready')
                         page.evaluate('id=>loadGame(id)',identity);pixel(True)
                         navigation_locator(page,'#battle-report-open').click()
                         page.wait_for_function('CombatReplay.diagnostics().active && !document.querySelector("[data-combat-replay]").disabled')
                         assert not page.evaluate("PixelLibrary.catalog.items.guixu_canghai_equipment_01")
+                        assert page.evaluate('DomainFields.catalog.every(style=>!style.owner)')
                         assert not any('/extension-assets/' in url for _,url in requests)
                         original=engine.store._path(identity).read_bytes()
                         # Aborted loading and rapid report changes must not blank the last scene.

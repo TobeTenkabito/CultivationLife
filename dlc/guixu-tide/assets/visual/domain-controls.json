@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "guixu-erode",
+      "name": "归墟蚀环",
+      "path": null,
+      "motif": "abyss",
+      "owner": "official.guixu-tide"
+    }
+  ]
+}

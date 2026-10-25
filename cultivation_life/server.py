@@ -160,6 +160,13 @@ class Handler(BaseHTTPRequestHandler):
                 })
             elif path == "/api/ui-preferences":
                 self._json(load_ui_preferences(PERSISTENCE_ROOT))
+            elif path == '/api/domain-styles':
+                from .domain_styles import catalog, available, controls
+                from urllib.parse import parse_qs
+                identity = parse_qs(urlparse(self.path).query).get('id', [''])[0]
+                character_path = ENGINE.store.load(identity).player.path if identity else None
+                self._json(dict(catalog=catalog(), available=[r['id'] for r in available(character_path)], path=character_path,
+                                controls=controls(all_paths=True), available_controls=[r['id'] for r in controls(character_path)]))
             elif path == "/api/visual-assets":
                 self._json(public_catalog(ENGINE_ROOT, EXTENSION_REPORT, APP_ROOT))
             elif path == "/api/games":
@@ -211,7 +218,10 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(result)
                 return
             if path == "/api/ui-preferences":
-                self._json(write_ui_preferences(PERSISTENCE_ROOT, payload))
+                payload = dict(payload)
+                identity = payload.pop('game_id', None)
+                character_path = ENGINE.store.load(identity).player.path if identity else None
+                self._json(write_ui_preferences(PERSISTENCE_ROOT, payload, character_path=character_path))
                 return
             if path.startswith("/api/extensions/"):
                 package_id = unquote(path.removeprefix("/api/extensions/").strip("/"))

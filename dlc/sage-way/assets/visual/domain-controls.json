@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "sage-law",
+      "name": "戒尺律令",
+      "path": "confucian",
+      "motif": "edict",
+      "owner": "official.sage-way"
+    }
+  ]
+}

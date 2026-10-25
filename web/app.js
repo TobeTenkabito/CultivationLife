@@ -710,6 +710,8 @@ function render(data) {
   $('#death-reason').textContent = p.death_reason || '';
   bindBuildingControls();
   window.GameThemes?.render(data);
+  // First load enters the game in GameThemes; event art must see that state.
+  window.EventScenes?.render(data);
   renderPostBattlePossession();
   renderButtons();
   window.TutorialGuide?.render(data,payload=>mutate(`/api/games/${data.id}/tutorial`,payload));

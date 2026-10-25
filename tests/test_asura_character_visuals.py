@@ -49,7 +49,7 @@ def test_owned_images_and_all_animation_frames():
     data = json.loads((OUT/'manifest.json').read_text(encoding='utf8'))
     assert data['version'] == '1.3.0' and len(data['actors']) == 2
     rows = json.loads((OUT.parent/'registry.json').read_text(encoding='utf8'))['assets']
-    assert len(rows) == 9
+    assert len([r for r in rows.values() if not r.get('domain_styles') and not r.get('domain_controls') and not r.get('domain_art')]) == 9
     disabled = [r for r in registry.EXTENSION_REPORT if r['id'] != OWNER]
     assert not set(rows) & public_catalog(ROOT, disabled)['assets'].keys()
     for row in rows.values():

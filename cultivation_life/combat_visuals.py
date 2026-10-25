@@ -139,14 +139,22 @@ def report_visuals(game, target, report, *, identity=None):
         from .ui_preferences import load_ui_preferences
         from secrets import choice
         defaults = dict(outline='mist', pattern='mist', palette='jade', control='rings', density=65)
-        settings = load_ui_preferences(persistence_root()).get('voisinage_appearance', defaults)
+        from .domain_styles import project, available, controls
+        settings = project(load_ui_preferences(persistence_root()).get('voisinage_appearance', defaults), game.player.path)
         owners = dict.fromkeys(f['owner'] for row in report['rounds']
             for f in row.get('voisinage', {}).get('animation', {}).get('fields', []))
         existing = report.get('visual', {}).get('domains', {})
-        visual['domains'] = {owner: existing.get(owner) or (dict(settings) if owner == 'player' else
-            dict(defaults, palette=choice(('rose','peach','gold','lime','green','jade','cyan','blue',
-                                         'indigo','violet','lilac','pink')),
-                 outline=choice(('mist','star','frost','lotus','sword','seal','water','mountain','wood','thunder','moon','void','time')),
-                 pattern=choice(('mist','star','frost','lotus','sword','seal','water','mountain','wood','thunder','moon','void','time')),
-                 control=choice(('rings','talismans','stars','lotus','pillars','crystal')))) for owner in list(owners)[:64]}
+        def appearance(owner):
+            if owner in existing:
+                return existing[owner]
+            if owner == 'player':
+                return dict(settings)
+            person = find_person(game, owner, include_inactive=True)
+            member = next((r for r in target.get('members', []) if str(r.get('npc_id') or r.get('id')) == owner), {})
+            path = person.path if person else member.get('path', target.get('path'))
+            styles = [r['id'] for r in available(path)]
+            return dict(defaults, palette=choice(('rose','peach','gold','lime','green','jade','cyan','blue',
+                       'indigo','violet','lilac','pink')), outline=choice(styles), pattern=choice(styles),
+                       control=choice([r['id'] for r in controls(path)]))
+        visual['domains'] = {owner: appearance(owner) for owner in list(owners)[:64]}
     return visual

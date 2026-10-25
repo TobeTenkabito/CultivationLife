@@ -92,6 +92,8 @@ def assemble():
         entry.update(sha256=sha(out/'manifest.json'),combat_actors=list(data['actors']),appearance_key=species)
         write(out/'registry.json',dict(assets=rows))
         assets.update(rows)
+    previous=read(BASE/'registry.json').get('assets',{}) if (BASE/'registry.json').exists() else {}
+    assets.update({key:row for key,row in previous.items() if row.get('domain_styles') or row.get('domain_controls') or row.get('domain_art')})
     write(BASE/'registry.json',dict(schema_version=1,owner=OWNER,assets=assets))
     manifest = read(package)
     manifest['visual_registry'] = 'visual/registry.json'

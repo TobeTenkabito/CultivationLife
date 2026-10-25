@@ -223,7 +223,8 @@
     let renderer=null,scene=null;
     try{
       catalogPromise??=fetch('/assets/pixel/combat/manifest.json').then(r=>{if(!r.ok)throw Error('combat assets');return r.json();}).catch(e=>{catalogPromise=null;throw e;});
-      const [base,items]=await Promise.all([catalogPromise,PixelLibrary.ensure()]);
+      // Optional style vocabulary must not take down ordinary battle playback.
+      const [base,items]=await Promise.all([catalogPromise,PixelLibrary.ensure(),DomainFields.ensure().catch(()=>null)]);
       let A=base;
       const identities=new Set([report.visual.hero,report.visual.enemy,...Object.values(report.visual.teams||{}).flat().map(m=>m.asset)]);
       const extraCatalogs=Object.values(items?.assets || {}).filter(row=>row.combat_actors?.some(id=>identities.has(id)));

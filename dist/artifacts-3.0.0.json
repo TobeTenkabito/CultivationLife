@@ -1,0 +1,45 @@
+{
+  "version": "3.0.0",
+  "status": "passed",
+  "regression": {
+    "collected": 6508,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 6508
+  },
+  "browser_flows": 23,
+  "root_launcher_updated": true,
+  "artifacts": [
+    {
+      "file": "浮生问道-v3.0.0.exe",
+      "bytes": 61921571,
+      "sha256": "5bf45e3c656a30bb331225ee11c9f32de9fd35b35573eef81f3cee3b913780b1"
+    },
+    {
+      "file": "浮生问道-v3.0.0-Windows.zip",
+      "bytes": 147838422,
+      "sha256": "dabf59c55e3106045ae83b83fd0b4f84ae1cbe83a21308e1990a137dea4814b6"
+    },
+    {
+      "file": "浮生问道-v3.0.0-Android12.apk",
+      "bytes": 181541302,
+      "sha256": "2be266f4e998ab7976c8f58e0ef88fe894c4653407372ea586253c0804d81b0d"
+    },
+    {
+      "file": "浮生问道-v3.0.0-Android12.zip",
+      "bytes": 165290857,
+      "sha256": "711a8a93c20707a51596e6d5fc49f7d66f480c0c138b0c12fb02d728f682aebe"
+    },
+    {
+      "file": "release-3.0.0.json",
+      "bytes": 37713,
+      "sha256": "231a4032b6a8168a3382f21a18f2c16cc7840dca042bc7c904d172651ff95b77"
+    },
+    {
+      "file": "release-3.0.0-android.80.json",
+      "bytes": 38681,
+      "sha256": "35e26cb5f65e727e871a0ce0fb00ba678bc9ea4d6f27e7058a6402caf4105384"
+    }
+  ]
+}

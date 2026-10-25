@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Game VFX contour drawing, transparent background. Draw in crisp BLACK ink strokes ONLY, like an uncolored architectural outline sketch. All enclosed surfaces must be EMPTY transparent; no fills, no grey shading, no hatching, no texture, no atmosphere, no glow, no painted backgrounds. Black structural contours only. Keep strong clean outer silhouettes and sparse inner lines, readable at 700px wide. Chinese xianxia fantasy art, elegant distinctive forms. Wide landscape 2:1 composition fitting an invisible oval, 8 percent clear margin, subject centered in upper-middle, lower center spacious for combatants. No border, no labels, no text, no people, no UI. Zhulong, the ancient CHINESE DRAGON OF TIME, coils around a central circular traditional astronomical time dial. Serpentine dragon body with unmistakable dragon head, horns, whiskers and claw, elegant scales indicated sparingly. The central dial is an EMPTY transparent circle with two concentric rim contours; NO baked clock hands or tick marks because these will be animated in game. No candles, no western clock tower.",
+  "source": "design/domain-outlines-20261025/raw/time.png",
+  "source_sha256": "ba8d3a4f3749cb2049024fd27c8ca993fde92b9ca26c4ae8d10fe78d86026ed7",
+  "file": "time-outline.png",
+  "sha256": "36c23cb7188011cd3c77ca1518b1a03c7b6f8677c9e669e16102a27a9e2605ec",
+  "coverage": 0.2230224609375,
+  "export": "Extract black authored strokes to alpha; discard light surfaces; white RGB; resize with Canvas high smoothing, zero alpha below12."
+}

@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Game VFX contour drawing, transparent background. Draw in crisp BLACK ink strokes ONLY, like an uncolored architectural outline sketch. All enclosed surfaces must be EMPTY transparent; no fills, no grey shading, no hatching, no texture, no atmosphere, no glow, no painted backgrounds. Black structural contours only. Keep strong clean outer silhouettes and sparse inner lines, readable at 700px wide. Chinese xianxia fantasy art, elegant distinctive forms. Wide landscape 2:1 composition fitting an invisible oval, 8 percent clear margin, subject centered in upper-middle, lower center spacious for combatants. No border, no labels, no text, no people, no UI. An imposing cloud crown pierced by seven branching lightning channels, zigzag thunder veins converging on a suspended many-sided lightning seal. Clearly angular electric branching shapes.",
+  "source": "design/domain-outlines-20261025/raw/thunder.png",
+  "source_sha256": "4e6451c20b5a10ecd961e6565afe466813045b8a84f16008ba34f74a077d3682",
+  "file": "thunder-outline.png",
+  "sha256": "2fd724fcecc1199ca860c27dc4d76fad3139155da9612a8a925d3cdb1ae81936",
+  "coverage": 0.170517578125,
+  "export": "Extract black authored strokes to alpha; discard light surfaces; white RGB; resize with Canvas high smoothing, zero alpha below12."
+}

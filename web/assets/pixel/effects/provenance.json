@@ -1,0 +1,13 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Use case: stylized-concept. Premium hand-painted PIXEL ART background for a Chinese xianxia cultivation RPG heavenly lightning tribulation cinematic, landscape 16:9. NO people or creatures, NO symbols or writing. Low camera facing a broad ancient circular stone ritual terrace, flat central foreground from x30% to70% clear for character sprite. Terrace occupies bottom 35%, central standing point at 86% height. Epic towering thundercloud vortex fills upper 65%, layered indigo charcoal cobalt clouds with luminous blue silver edges, distant sharp Chinese mountain peaks left and right framed by swirling mist, tiny distant storm veins inside clouds but NO main lightning bolt striking ground (animated separately). A break of muted warm dawn gold behind storm near distant horizon. Sophisticated rich atmospheric detail, readable deliberate pixel clusters, crisp pixel texture, strong depth, restrained contrast behind central character. Dramatic awe and heavenly power, not horror. No blur, no text, no UI, no watermark, no figures. Image will be resized to 768x432 game canvas. Full opaque scenic painting.\n",
+  "source": "design/spell-domains-20261025/storm-source.png",
+  "source_sha256": "b43145a2782188cc368c45a416abe26d696adb099724b2b900a87839bdaa77a8",
+  "file": "tribulation-storm.png",
+  "size": [
+    768,
+    432
+  ],
+  "sha256": "0688aa337a43424848c01c9645781a80c29d9a905684d7373287d01694930c68",
+  "export": "Nearest-neighbor resize only; no generated character or text baked into background."
+}

@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Game VFX contour drawing, transparent background. Draw in crisp BLACK ink strokes ONLY, like an uncolored architectural outline sketch. All enclosed surfaces must be EMPTY transparent; no fills, no grey shading, no hatching, no texture, no atmosphere, no glow, no painted backgrounds. Black structural contours only. Keep strong clean outer silhouettes and sparse inner lines, readable at 700px wide. Chinese xianxia fantasy art, elegant distinctive forms. Wide landscape 2:1 composition fitting an invisible oval, 8 percent clear margin, subject centered in upper-middle, lower center spacious for combatants. No border, no labels, no text, no people, no UI. Large interlocking hollow rhombus portals and nested broken perspective frames, floating fractured polygon planes and spatial rifts bending toward an empty center. Sharp clean impossible geometry.",
+  "source": "design/domain-outlines-20261025/raw/void.png",
+  "source_sha256": "e1b958613c0ac72e496960ac5e07b6a6012443f0904680620dfded860ed267bf",
+  "file": "void-outline.png",
+  "sha256": "77c44309f1a38c4b6c21220c5f1d076cdfc9a7baeb1757a7f5281778190780c7",
+  "coverage": 0.17421875,
+  "export": "Extract black authored strokes to alpha; discard light surfaces; white RGB; resize with Canvas high smoothing, zero alpha below12."
+}

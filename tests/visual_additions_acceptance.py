@@ -21,7 +21,12 @@ def verify(page, identity, output):
     page.locator('[data-voisinage-editor]').click()
     page.wait_for_function('VoisinageEditor.status().ready')
     assert page.evaluate('VoisinageEditor.status().previewActor')=='demonic-female'
-    assert page.locator('#ve-pattern option').count()==13
+    asura=page.evaluate("configData.extensions.some(r=>r.id==='official.asura-manifestation'&&r.status==='loaded')")
+    assert page.locator('#ve-pattern option').count()==(18 if asura else 15)
+    from domain_ink_acceptance import verify_outline
+    catalog=page.evaluate('DomainFields.catalog.map(r=>r.id)')
+    assert len(catalog)==(30 if asura else 21)
+    for style in catalog:verify_outline(page,style)
     page.locator('#ve-outline').select_option('time')
     page.locator('#ve-pattern').select_option('time')
     page.locator('#ve-color-hex').fill('#98baca')

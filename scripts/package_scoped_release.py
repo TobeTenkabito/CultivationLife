@@ -20,13 +20,26 @@ def main():
     scoped=json.loads((ROOT/f'build/scoped-{tag}.json').read_text(encoding='utf-8'))
     require(scoped['version']==VERSION and scoped['inputs_sha256']==inputs_digest(ROOT),'Scoped tests do not match final sources')
     require(all(r['status']=='passed' for r in scoped['runs']),'Scoped checks incomplete')
+    reconciliation = None
+    if scoped.get('reconciliation'):
+        report = ROOT/scoped['reconciliation']
+        require(file_digest(report)==scoped['reconciliation_sha256'],'Regression reconciliation changed')
+        reconciliation=json.loads(report.read_text(encoding='utf-8'))
+        require(reconciliation['inputs_sha256']==scoped['inputs_sha256'],'Retested regression sources mismatch')
+        require(all(file_digest(ROOT/name)==digest for name,digest in reconciliation['final_test_sources'].items()),'Regression test sources changed after acceptance')
+        for attempt in reconciliation['original_runs']:
+            require(all(file_digest(ROOT/attempt[key])==attempt[key+'_sha256'] for key in ('xml','log')),'Original regression evidence changed')
+        require(all(file_digest(ROOT/reconciliation[key])==reconciliation[key+'_sha256'] for key in ('retest_xml','retest_log')),'Corrected module retest evidence changed')
     suites=list(ET.parse(ROOT/f'build/scoped-{tag}.xml').getroot().iter('testsuite'))
     require(suites and all(int(s.get('failures',0))==0 and int(s.get('errors',0))==0 for s in suites),'Related regressions failed')
     tests=sum(int(s.get('tests',0)) for s in suites)
+    regression=dict(collected=tests,skipped=sum(int(s.get('skipped',0)) for s in suites),failures=0,errors=0)
+    regression['passed']=regression['collected']-regression['skipped']
     transfer=(ROOT/f'build/save-transfer-{tag}.log').read_text(encoding='utf-8-sig')
     extra=re.search(r'(\d+) passed',transfer)
     require(extra is not None and 'failed' not in transfer.lower() and 'ERROR' not in transfer,'Save transfer smoke tests failed')
-    tests+=int(extra[1])
+    transfer_in_regression = bool(reconciliation and reconciliation.get('replaced_module')=='tests/test_save_transfer.py')
+    if not transfer_in_regression:tests+=int(extra[1])
     evidence=json.loads((ROOT/f'build/exe-{tag}-verification.json').read_text(encoding='utf-8'))
     validate_evidence(ROOT,VERSION,evidence)
     native=json.loads((ROOT/f'build/android-{tag}-scoped.json').read_text(encoding='utf-8'))
@@ -192,6 +205,11 @@ def main():
             require('not full repository regression' in scoped.get('scope',''), 'Focused scope must be declared')
         else:
             require(selected=={p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').rglob('test_*.py')},'Visual release requires full regression selection')
+            if VERSION=='3.0.0':
+                require({'browser_monster_aquatic_visuals','browser_monster_fox_visuals','browser_monster_insect_visuals','browser_monster_serpent_visuals','browser_monster_turtle_visuals'}<={r['name'] for r in scoped['runs']},'Stable monster DLC-disable browser coverage incomplete')
+                require({'browser_monster_release','browser_monster_flora_visuals','browser_path_characters','browser_asura_characters','browser_home_scenes','browser_spell_domains','browser_asura_prison','browser_trial_variants'}<={r['name'] for r in scoped['runs']},'Stable visual browser coverage incomplete')
+                require(all(all(c.get(k) for k in ('monster_visuals_verified','path_characters_verified','home_scenes_verified','domain_ink_verified')) for c in evidence['cases']),'Stable compiled visual coverage incomplete')
+                require(all(all(marker in (ROOT/n).read_text(encoding='utf-8-sig') for marker in ('monster_visual_scope','path_character_scope','home_scenes_scope','domain_ink_scope')) for n in native['logs']),'Stable native visual coverage incomplete')
         require({'browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits'}<={r['name'] for r in scoped['runs']},'Visual/legacy browsers incomplete')
         require(all(c.get('visual_ui_verified') for c in evidence['cases']),'Actual compiled optional UI required with and without DLC')
         require(all(c.get('dlc_visual_verified') for c in evidence['cases']),'Compiled DLC image ownership and disabled fallback required')
@@ -227,7 +245,10 @@ def main():
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],
               incompatible_save_schemas='1–9; no migration',dlc_versions=dlcs,
               validation_scope=scoped['scope'],tests=tests,runs=scoped['runs'],
+              regression=regression,save_transfer_smoke_tests=int(extra[1]),
+              save_transfer_smoke_in_regression=transfer_in_regression,
               save_transfer_log=f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
+    if reconciliation is not None:base['regression_reconciliation']=reconciliation
     if scoped.get('profile') == 'architecture':
         base['architecture']=architecture
     if scoped.get('profile') == 'regional':

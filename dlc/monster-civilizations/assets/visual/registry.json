@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "assets": {
+    "monster-civilizations.domain_controls": {
+      "file": "/extension-assets/official.monster-civilizations/visual/domain-controls.json",
+      "requires": [
+        "official.monster-civilizations"
+      ],
+      "sha256": "110b56a7bf037ff0f56146a3c8686e7ab2e7c30634cdd2e99f9d6e218d447f36",
+      "domain_controls": [
+        {
+          "id": "monster-totems",
+          "name": "图腾围猎",
+          "path": "monster",
+          "motif": "totems",
+          "owner": "official.monster-civilizations"
+        }
+      ]
+    }
+  }
+}

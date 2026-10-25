@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "asura-judgment",
+      "name": "罪秤刑枷",
+      "path": "demonic",
+      "motif": "judgment",
+      "owner": "official.asura-manifestation"
+    }
+  ]
+}

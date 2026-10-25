@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "tianji-lock",
+      "name": "天机悬锁",
+      "path": null,
+      "motif": "gears",
+      "owner": "official.tianji-artifacts"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "controls": [
+    {
+      "id": "buddha-wheel",
+      "name": "梵轮止念",
+      "path": "buddhist",
+      "motif": "wheel",
+      "owner": "official.buddhist-dharma"
+    }
+  ]
+}

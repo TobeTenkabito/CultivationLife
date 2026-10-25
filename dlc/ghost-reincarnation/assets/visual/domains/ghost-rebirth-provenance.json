@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Game VFX contour drawing, transparent background. Draw in crisp BLACK ink strokes ONLY, like an uncolored architectural outline sketch. All enclosed surfaces must be EMPTY transparent; no fills, no grey shading, no hatching, no texture, no atmosphere, no glow, no painted backgrounds. Black structural contours only. Keep strong clean outer silhouettes and sparse inner lines, readable at 700px wide. Chinese xianxia fantasy art, elegant distinctive forms. Wide landscape 2:1 composition fitting an invisible oval, 8 percent clear margin, subject centered in upper-middle, lower center spacious for combatants. No border, no labels, no text, no people, no UI. Six ancient Chinese stone archway portals arranged symmetrically around a hollow central wheel, each portal distinct through roofs and carved edge patterns, delicate radial links and an outer cycle ring. No words or people.",
+  "source": "design/domain-outlines-20261025/raw/ghost-rebirth.png",
+  "source_sha256": "935487a3852dc00853cac9140c6b00b92e3760021f396265221099026a525aee",
+  "file": "ghost-rebirth-outline.png",
+  "sha256": "caefd8e23f7b25151d574956a60a6cc4e96a5a80de7eace4da48584adf6bc5d3",
+  "coverage": 0.292373046875,
+  "export": "Extract black authored strokes to alpha; discard light surfaces; white RGB; resize with Canvas high smoothing, zero alpha below12."
+}

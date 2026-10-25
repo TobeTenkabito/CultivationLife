@@ -34,7 +34,7 @@ def test_shipped_assets_and_action_endpoints(path,package):
     out=ROOT/'dlc'/package/'assets/visual/characters'
     data=json.loads((out/'manifest.json').read_text(encoding='utf8'))
     entries=json.loads((out.parent/'registry.json').read_text(encoding='utf8'))['assets']
-    assert len(data['actors'])==4 and len(entries)==17
+    assert len(data['actors'])==4 and len([r for r in entries.values() if not r.get('domain_styles') and not r.get('domain_controls') and not r.get('domain_art')])==17
     for row in entries.values():
         target=extension_asset(ROOT,ROOT,registry.EXTENSION_REPORT,row['file'])
         import hashlib
