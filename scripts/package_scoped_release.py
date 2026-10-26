@@ -38,7 +38,7 @@ def main():
     transfer=(ROOT/f'build/save-transfer-{tag}.log').read_text(encoding='utf-8-sig')
     extra=re.search(r'(\d+) passed',transfer)
     require(extra is not None and 'failed' not in transfer.lower() and 'ERROR' not in transfer,'Save transfer smoke tests failed')
-    transfer_in_regression = bool(reconciliation and reconciliation.get('replaced_module')=='tests/test_save_transfer.py')
+    transfer_in_regression = bool(reconciliation and reconciliation.get('replaced_module')=='tests/test_save_transfer.py') or any('tests/test_save_transfer.py' in shard for shard in scoped['tests'])
     if not transfer_in_regression:tests+=int(extra[1])
     evidence=json.loads((ROOT/f'build/exe-{tag}-verification.json').read_text(encoding='utf-8'))
     validate_evidence(ROOT,VERSION,evidence)
@@ -176,6 +176,20 @@ def main():
         performance=json.loads((ROOT/'build/building-performance.json').read_text(encoding='utf-8'))
         if visits:require(all(r.get('visit_claims')==r['buildings'] and r.get('landscape_claims')==r['buildings'] and r.get('city_books')==r['buildings'] for r in performance['rows']),'Building visits performance must include persistent claim and finance records')
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
+    if scoped.get('profile')=='update301':
+        from scripts.verify_scoped_release import UPDATE301_TESTS, UPDATE301_BROWSERS
+        require(all(c.get('update301_verified') for c in evidence['cases']),'3.0.1 compiled acceptance required with and without DLC')
+        require({name for shard in scoped['tests'] for name in shard}==set(UPDATE301_TESTS),'3.0.1 related selection incomplete')
+        require(set(UPDATE301_BROWSERS)<={r['name'] for r in scoped['runs']},'3.0.1 real browser acceptance incomplete')
+        required={f'build/android-update301-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','3.0.1 native scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'3.0.1 native test APK changed')
+        require(all('update301_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'3.0.1 native marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='visual':
         selected={name for shard in scoped['tests'] for name in shard}
         if scoped.get('regression_scope') == 'alpha6-focused':
@@ -319,8 +333,9 @@ def main():
             z.write(ROOT/'build/common-goods-performance/report.md',f'performance-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.md',f'combat-calibration-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.json',f'combat-calibration-{VERSION}.json')
-    if scoped.get('profile') in {'teachings','visual','combat-alpha'}:
+    if scoped.get('profile') in {'teachings','visual','combat-alpha','update301'}:
         updates=[('guixu-tide','归墟之潮'),('tianji-artifacts','巧夺天工')] if scoped['profile']=='combat-alpha' else [('guixu-tide','归墟之潮')] if scoped['profile']=='visual' else [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]
+        if scoped['profile']=='update301':updates=[('monster-civilizations','万灵争衡')]
         if scoped.get('regression_scope')=='alpha4-focused':updates.append(('monster-bloodlines','万妖归宗'))
         if scoped.get('regression_scope')=='alpha5-focused':updates=[('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')]
         if scoped.get('regression_scope')=='alpha6-focused':updates=[]
@@ -332,6 +347,7 @@ def main():
                     if p.is_file() and '__pycache__' not in p.parts:
                         z.write(p,p.relative_to(ROOT).as_posix())
                 note='docs/alpha2-release.md' if scoped['profile']=='combat-alpha' else 'docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
+                if scoped['profile']=='update301':note='docs/release-301.md'
                 if package=='monster-bloodlines':note='docs/alpha4-release.md'
                 if scoped.get('regression_scope')=='alpha5-focused':note='docs/alpha5-release.md'
                 z.write(ROOT/note,note)

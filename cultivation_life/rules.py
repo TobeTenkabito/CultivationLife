@@ -571,6 +571,20 @@ def max_mp(player: Player) -> int:
     return max(1, round(mana * spirit_root_mana_multiplier(player)))
 
 
+def body_combat_power(player: Player) -> float:
+    """Ordinary body cultivation contributes 80% of its matching realm standard."""
+    from .cultivation_coordinates import STARTS, describe
+    rank = max(0, min(100, int(player.body_training)))
+    coordinate = describe(rank)
+    index = coordinate['realm_index']
+    if index == 0:
+        return rank * 8.0
+    width = STARTS[index + 1] - STARTS[index]
+    layers = 13 if index == 1 else 9
+    layer = min(layers, 1 + (rank - STARTS[index]) * layers // width)
+    return round(expected_combat_power(index, layer) * 0.8, 1)
+
+
 def combat_power(player: Player) -> float:
     from .system.crafted_artifact_rules import effective_artifact_combat_bonus
     current = realm(player)
@@ -590,7 +604,7 @@ def combat_power(player: Player) -> float:
         and entry.active_in(player.world)
         and (not entry.requires_immortal_power or player.immortal_power_converted)
     )
-    comprehensive = current.base_power * layer_factor * status + current.base_power * progress * 0.15 + item_power + player.body_training * 8
+    comprehensive = current.base_power * layer_factor * status + current.base_power * progress * 0.15 + item_power + body_combat_power(player) * (0.35 + 0.65 * hp_ratio)
     total = (
         comprehensive + technique_power + player.faction_combat_bonus
         + player.outer_king_fixed_combat_power
@@ -930,10 +944,10 @@ def intrinsic_resource_breakdown(player: Player) -> dict[str, Any]:
 def public_player(player: Player) -> dict[str, Any]:
     ensure_technique_set(player)
     data = player.to_dict()
-    from .monster_visuals import monster_appearance
-    from .character_visuals import character_appearance
-    appearance = monster_appearance(player) or character_appearance(player)
+    from .character_skins import appearance as skin_appearance, public as public_skins
+    appearance = skin_appearance(player)
     data['visual_actor'] = appearance['static'] if appearance else None
+    data['character_skins'] = public_skins(player)
     data["world_age"] = player.age
     data["age"] = current_body_age(player)
     data.pop("ghost_core_state", None)

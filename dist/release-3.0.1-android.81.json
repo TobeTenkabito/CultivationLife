@@ -1,0 +1,119 @@
+{
+  "base_version": "3.0.1",
+  "save_schema": 10,
+  "compatible_save_schemas": [
+    10
+  ],
+  "incompatible_save_schemas": "1–9; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.3.0",
+    "buddhist-dharma": "1.2.0",
+    "ghost-reincarnation": "3.10.0",
+    "guixu-tide": "2.7.2",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.19.0",
+    "monster-civilizations": "1.0.1",
+    "sage-way": "1.6.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 664,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_release_301",
+      "log": "build\\browser_release_301-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_npc_art",
+      "log": "build\\browser_npc_art-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_monster_civilizations",
+      "log": "build\\browser_monster_civilizations-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_common_elemental_techniques",
+      "log": "build\\browser_common_elemental_techniques-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_replay",
+      "log": "build\\browser_combat_replay-301.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-301.log",
+      "status": "passed"
+    }
+  ],
+  "regression": {
+    "collected": 664,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 664
+  },
+  "save_transfer_smoke_tests": 21,
+  "save_transfer_smoke_in_regression": true,
+  "save_transfer_log": "build/save-transfer-301.log",
+  "inputs_sha256": "8f110e447ecbf12de75d25a99481f9295eb04c6fa20f795de0733d43529ec17d",
+  "platform": "Android 12",
+  "android_version": "3.0.1-android.81",
+  "version_code": 81,
+  "apk_sha256": "11d9e3f6519aa34af02c8e1294f55dceb770ca2739646cdc8828906232cd50ce",
+  "native": {
+    "version": "3.0.1",
+    "apk_sha256": "11d9e3f6519aa34af02c8e1294f55dceb770ca2739646cdc8828906232cd50ce",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-update301-portrait-301.log",
+      "build/android-update301-landscape-301.log"
+    ],
+    "test_apk_sha256": "c1ef3d3e43615f9f6777890098b0fd2c0c18e863085562a050fbcea546d24bb9",
+    "log_hashes": {
+      "build/android-update301-portrait-301.log": "270828b23fc0f9dc9c5b19200d68782ad87e17f7fcc5dc70f346784012127204",
+      "build/android-update301-landscape-301.log": "270828b23fc0f9dc9c5b19200d68782ad87e17f7fcc5dc70f346784012127204"
+    },
+    "scope": "3.0.1 focused four-theme skin selection, actual earlier-form figure, unchanged gameplay and ecology observation; portrait/landscape, not full repository"
+  },
+  "physical_device_tested": false
+}

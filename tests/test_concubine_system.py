@@ -100,7 +100,7 @@ def test_captive_cauldron_hehuan_cap_cooldown_and_next_attempt_consumption(
     assert engine._load(game_id).player.concubine_breakthrough_bonus == 0
 
 
-def test_being_concubine_reduces_efficiency_drains_opportunity_and_adds_base_chance(
+def test_being_concubine_preserves_opportunity_and_adds_base_chance(
     concubine_game: tuple[GameEngine, str],
 ) -> None:
     engine, game_id = concubine_game
@@ -118,8 +118,8 @@ def test_being_concubine_reduces_efficiency_drains_opportunity_and_adds_base_cha
     chance = engine._breakthrough_chance(game.player, False)
     assert chance["concubine_base_bonus"] == pytest.approx(0.02)
     drained = engine._advance_concubine_status(game, 1)
-    assert drained > 0
-    assert game.player.opportunity == pytest.approx(100 - drained)
+    assert drained == 0
+    assert game.player.opportunity == 100
 
 
 class _AlwaysTrigger(random.Random):

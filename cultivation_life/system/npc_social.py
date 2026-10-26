@@ -7,6 +7,7 @@ from functools import lru_cache
 
 from ..models import GameState, SectNpc
 from ..content_registry import WORLD_SYSTEMS
+from ..npc_names import person_name
 from .combat.npc_lifecycle import initialize_native
 
 FIXED_COUPLE = {
@@ -19,7 +20,7 @@ FIXED_COUPLE = {
 def _hint(seed: int, npc_id: str) -> tuple[str, int]:
     value = int.from_bytes(hashlib.sha256(f"social:{seed}:{npc_id}".encode()).digest()[:8], "big")
     rng = random.Random(value)
-    name = rng.choice("沈柳顾陆温谢宁苏") + rng.choice(("知微", "清辞", "云舒", "照水", "望舒", "听澜", "长宁", "怀真")) if rng.random() < .32 else ""
+    name = person_name(rng) if rng.random() < .32 else ""
     count = rng.randint(1, 3) if rng.random() < .18 else 0
     return name, count
 

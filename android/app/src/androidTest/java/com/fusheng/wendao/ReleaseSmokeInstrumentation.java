@@ -452,6 +452,36 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("buildings_scope","22 city stories, four themes, real city construction and original inventory, stale material recovery, yearly government cap, named ruins, identity-preserving rebuild, bounded rewards and earned event followup; zero menu years");
     }
 
+    private void runUpdate301(Bundle result) throws Exception {
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'换装原生验收',spirit_root:'supreme_metal',path:'dao',gender:'female',seed:301,custom_start:{world:'spirit',realm_index:7}})}).then(g=>g.id)");
+        python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ne.store.save(g)");
+        async("loadGame("+JSONObject.quote(id)+")");
+        python("from cultivation_life import server\nserver._skin301_before=server.ENGINE.store.load("+JSONObject.quote(id)+").to_dict()");
+        tapSelector("#theme-open");
+        if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        for(String theme:new String[]{"a","b","d","f"}) {
+            tapSelector("#theme-open");tapSelector("[data-theme-picker=dialog] [data-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector(".hud-identity");tapSelector("#character-skins summary");
+            tapSelector("[data-skin-id='actor.path.dao-nascent-hero-female']");
+            waitForJs("!busy&&game.player.character_skins.selected==='actor.path.dao-nascent-hero-female'&&document.querySelector('.pixel-details-art canvas').dataset.actor==='actor.path.dao-nascent-hero-female'","Native earlier unlocked skin and rendered figure");
+            check(Boolean.TRUE.equals(js("document.querySelector('#player-details-dialog').scrollWidth<=document.querySelector('#player-details-dialog').clientWidth+2")),"Native skin gallery fits screen");
+            capture("skins-301-"+theme+"-"+arguments.getString("orientation"));
+            tapSelector("[data-skin-id='']");waitForJs("!busy&&!game.player.character_skins.selected","Native automatic skin restored");
+            tapSelector("#character-skins summary");tapSelector("[data-close-dialog=player-details-dialog]");
+        }
+        python("from cultivation_life import server\na=server._skin301_before\nb=server.ENGINE.store.load("+JSONObject.quote(id)+").to_dict()\nfor row in (a,b):\n row.pop('updated_at',None)\n row['player'].pop('character_skins',None)\nassert a==b");
+        check(Boolean.TRUE.equals(async("api('/api/visual-assets').then(c=>c.assets['base.character_manifest'].character_forms.length===8)")),"Native eight base forms registered");
+        String monster=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'万灵原生验收',spirit_root:'supreme_earth',path:'monster',seed:301,monster_species_id:'fox',custom_start:{world:'monster_realm',realm_index:7}})}).then(g=>g.id)");
+        python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(monster)+")\ng.pending_event=None\ng.player.opportunity=999999\ne.store.save(g)");
+        async("loadGame("+JSONObject.quote(monster)+")");tapSelector("[data-panel-target=civilizations]");
+        waitForJs("!!document.querySelector('.mc-region')","Native redesigned atlas loaded");
+        tapSelector("[data-civilization-action=observe]");waitForJs("!busy&&!!document.querySelector('.mc-species')","Native actual ecology observation");
+        check(Boolean.TRUE.equals(js("document.querySelector('#civilizations-card').scrollWidth<=document.querySelector('#civilizations-card').clientWidth+2")),"Native ecology panel fits screen");
+        capture("ecology-301-"+arguments.getString("orientation"));
+        result.putString("update301_scope","Four-theme actual skin selection, earlier form, rendered figure, unchanged gameplay, eight base forms and real ecology observation; native portrait/landscape");
+    }
+
     private void runVisualUi(Bundle result) throws Exception {
         String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'新版原生验收',spirit_root:'heavenly',path:'dao',seed:322,preset_id:'core'})}).then(g=>g.id)");
         python(assetText("visual_release.py")+"\nfrom cultivation_life import server\nprepare_visual_release(server.ENGINE,"+JSONObject.quote(id)+")");
@@ -770,7 +800,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("combat-alpha")) {
+            if(phase.equals("update301")) {
+                runUpdate301(result);
+            } else if(phase.equals("combat-alpha")) {
                 runCombatAlpha(result);
             } else if(phase.equals("visual-ui")) {
                 runVisualUi(result);

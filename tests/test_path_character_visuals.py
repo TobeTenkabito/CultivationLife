@@ -48,7 +48,7 @@ def test_shipped_assets_and_action_endpoints(path,package):
         assert groups['defeat']['poses'][-1]=='down'
         assert len(set(sum([a['poses'] for a in groups.values()],[])))==9
         assert actor['energy_effect'] and actor['sex'] in ['male','female']
-    assert not any('actor.path.' in key for key in json.loads((ROOT/'content/visual_assets.json').read_text(encoding='utf8'))['assets'])
+    assert not any(key.startswith('actor.path.'+path+'-') for key in json.loads((ROOT/'content/visual_assets.json').read_text(encoding='utf8'))['assets'])
 
 def test_real_combat_new_npc_with_core_hero(tmp_path):
     from cultivation_life.engine import GameEngine

@@ -575,6 +575,7 @@ class Player:
     # Optional Confucian-teaching DLC bonuses.  The authoritative doctrine
     # simulation lives on GameState; this compact cache lets base combat and
     # breakthrough rules consume the currently active effects.
+    character_skins: dict[str, Any] = field(default_factory=dict)
     sage_effects: dict[str, float] = field(default_factory=dict)
     # 《圣人之道》内圣外王。等级实时由 haoran_exp 推导，不重复持久化。
     haoran_exp: float = 0.0
@@ -593,6 +594,8 @@ class Player:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Player:
         data = dict(normalize_content_references(value))
+        from .character_skin_schema import validate as validate_skins
+        data['character_skins'] = validate_skins(data.get('character_skins', {}))
         data['immortal_traces'] = max(0, int(data.get('immortal_traces', 0))) + sum(
             max(0, int(i.get('quantity', 0))) for i in data.get('inventory', []) if i.get('id') == 'immortal_trace')
         data['inventory'] = [i for i in data.get('inventory', []) if i.get('id') != 'immortal_trace']

@@ -622,6 +622,14 @@ class GameEngine:
         self.store.save(game)
         return self.present(game)
 
+    def select_character_skin(self, game_id: str, skin_id: str = '') -> dict[str, Any]:
+        from ..character_skins import choose
+        game = self._load(game_id)
+        choose(game.player, skin_id)
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
     def update_setting(self, game_id: str, setting: str, enabled: bool) -> dict[str, Any]:
         game = self._load(game_id)
         if setting == 'manual_combat_plan':

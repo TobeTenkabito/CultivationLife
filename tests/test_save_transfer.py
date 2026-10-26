@@ -13,6 +13,7 @@ from cultivation_life.storage import SaveStore
 from cultivation_life.version import BASE_GAME_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
+NEXT_RELEASE = BASE_GAME_VERSION.rsplit('.', 1)[0] + '.' + str(int(BASE_GAME_VERSION.rsplit('.', 1)[1]) + 1)
 
 
 @pytest.fixture
@@ -71,7 +72,7 @@ def test_struct10_previous_and_current_release_codes(snapshot, version):
     assert json.loads(target._path(game_id).read_bytes()) == doc['save']
 
 
-@pytest.mark.parametrize('version', ['3.0.1', '3.0.1-beta.1', '3.0.1-rc.1', '4.0.0-alpha.1', '3.-alpha-1'])
+@pytest.mark.parametrize('version', [NEXT_RELEASE, NEXT_RELEASE+'-beta.1', NEXT_RELEASE+'-rc.1', '4.0.0-alpha.1', '3.-alpha-1'])
 def test_future_or_nonstandard_prerelease_code_rejected(snapshot, version):
     source, game_id, target = snapshot
     doc, _ = decode_snapshot(export_snapshot(source, game_id)['payload'])

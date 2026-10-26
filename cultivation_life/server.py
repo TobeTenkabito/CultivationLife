@@ -383,6 +383,8 @@ class Handler(BaseHTTPRequestHandler):
                     game_id, payload.get("item_id", ""), payload.get("mode", "direct"),
                     payload.get("stat_id", ""),
                 )
+            elif operation == 'character-skin':
+                result = ENGINE.select_character_skin(game_id, payload.get('skin_id', ''))
             elif operation == "settings":
                 result = ENGINE.update_setting(
                     game_id, payload.get("setting", ""), bool(payload.get("enabled", False))

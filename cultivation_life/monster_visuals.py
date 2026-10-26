@@ -16,7 +16,7 @@ def _read(path):
     return json.loads(path.read_text(encoding='utf-8'))
 
 
-def _appearance(player, species):
+def _appearance(player, species, *, node_id=None):
     """Return an ephemeral identity; no save migration or inferred branch mutation.
 
     A bloodline's own realm survives sealed descent. Ambiguous merged nodes use
@@ -28,7 +28,7 @@ def _appearance(player, species):
         return None
     if not any(r.get('id') == OWNER and r.get('status') == 'loaded' for r in registry.EXTENSION_REPORT):
         return None
-    node_id = player.monster_evolution_id
+    node_id = node_id or player.monster_evolution_id
     node = registry.MONSTER_EVOLUTIONS.get(node_id)
     if not node or node.get('species') != species:
         return None

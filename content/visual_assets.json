@@ -8222,6 +8222,537 @@
       "sha256": "5016ebc26ae8de6a33d4a0c9a1e6ce08fb1f314f829be59420318abcd05b9441",
       "requires": [],
       "domain_art": true
+    },
+    "actor.path.dao-nascent-hero-male.figure": {
+      "file": "/assets/pixel/characters-301/dao-nascent-hero-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "d193362fb55e3ae09016e6006b6aabc55ffed5bb8d5cfba67ce302498d07b286",
+      "requires": []
+    },
+    "actor.path.dao-nascent-hero-male.portrait": {
+      "file": "/assets/pixel/characters-301/dao-nascent-hero-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "72f447d3869361ed2964c3288a9efdc50f9f0b97bd5f80efa7efc25fddb38a40",
+      "requires": []
+    },
+    "actor.path.dao-nascent-hero-male.thumbnail": {
+      "file": "/assets/pixel/characters-301/dao-nascent-hero-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "5117f1114d04b4c7d55db7c28ac948f1d43114b410379fed25578972989f0526",
+      "requires": []
+    },
+    "dao-nascent-hero-male.actions": {
+      "file": "/assets/pixel/characters-301/dao-nascent-hero-male-actions.png",
+      "size": [
+        1890,
+        180
+      ],
+      "sha256": "c8b4766b1d80f3f46fbac4c8b4cdba6802eb6a40c383391f44de1db75635e5fc",
+      "requires": []
+    },
+    "actor.path.dao-nascent-hero-female.figure": {
+      "file": "/assets/pixel/characters-301/dao-nascent-hero-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "42658d72ab6e8ae2a9c4c96df8b87e4e97bf35276ce638724045e6dc09e684be",
+      "requires": []
+    },
+    "actor.path.dao-nascent-hero-female.portrait": {
+      "file": "/assets/pixel/characters-301/dao-nascent-hero-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "d8b8648fbc7e233a4c2105f07fa81fc30695fba5a1592eb8def3ace24abd7325",
+      "requires": []
+    },
+    "actor.path.dao-nascent-hero-female.thumbnail": {
+      "file": "/assets/pixel/characters-301/dao-nascent-hero-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "321977fbf10b293f5b11ad3d9ea19a11025fb7c0b7607eec920672d37b29e2a2",
+      "requires": []
+    },
+    "dao-nascent-hero-female.actions": {
+      "file": "/assets/pixel/characters-301/dao-nascent-hero-female-actions.png",
+      "size": [
+        1750,
+        180
+      ],
+      "sha256": "316811364b769d1e6c651c8c53ca2862c62766c0f85746e4b3cd95a300079484",
+      "requires": []
+    },
+    "actor.path.dao-integration-hero-male.figure": {
+      "file": "/assets/pixel/characters-301/dao-integration-hero-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "473146819d026d0db51833e5cbf478dd449f1e27a88c393f2f031eef25e292fa",
+      "requires": []
+    },
+    "actor.path.dao-integration-hero-male.portrait": {
+      "file": "/assets/pixel/characters-301/dao-integration-hero-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "f94bfe2756c936cc1284cf76e4aa0ad13ec6f1bd0c8f30e0ca8903d4a81e7cd7",
+      "requires": []
+    },
+    "actor.path.dao-integration-hero-male.thumbnail": {
+      "file": "/assets/pixel/characters-301/dao-integration-hero-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "531c7a175da929cc6efa08deaf97f45ddfcfbf013bca9b1d1e4d365f7ada3b97",
+      "requires": []
+    },
+    "dao-integration-hero-male.actions": {
+      "file": "/assets/pixel/characters-301/dao-integration-hero-male-actions.png",
+      "size": [
+        1710,
+        179
+      ],
+      "sha256": "bea28376cd77745cf7dba0680b9c66b10da1bf310f950865c893270dda5f3b64",
+      "requires": []
+    },
+    "actor.path.dao-integration-hero-female.figure": {
+      "file": "/assets/pixel/characters-301/dao-integration-hero-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "6956a9c5288c88a5deda935f69918b317ba46718d9a2ea5717f25dce73d2e406",
+      "requires": []
+    },
+    "actor.path.dao-integration-hero-female.portrait": {
+      "file": "/assets/pixel/characters-301/dao-integration-hero-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "bcb6082141bca81c0707de4934c426e4aa955faf7c67ac5c77aad5dc9f7ecdf4",
+      "requires": []
+    },
+    "actor.path.dao-integration-hero-female.thumbnail": {
+      "file": "/assets/pixel/characters-301/dao-integration-hero-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "75a1f83af71766eee97feae6a2a1167d6297851d57a3da95c612a78f5b15f66b",
+      "requires": []
+    },
+    "dao-integration-hero-female.actions": {
+      "file": "/assets/pixel/characters-301/dao-integration-hero-female-actions.png",
+      "size": [
+        1670,
+        180
+      ],
+      "sha256": "a259ed3a0b366df26f1b00f9fd8fc5f8ee4570cadc93fe59c531b328d9cfe2c6",
+      "requires": []
+    },
+    "actor.path.demonic-nascent-hero-male.figure": {
+      "file": "/assets/pixel/characters-301/demonic-nascent-hero-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "737777ed4973d0218ccb829385e5f5141922c75fa1cef7b2fd64f654f81408af",
+      "requires": []
+    },
+    "actor.path.demonic-nascent-hero-male.portrait": {
+      "file": "/assets/pixel/characters-301/demonic-nascent-hero-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ab52be489d2f51c9dbbd97eaf39e1bf2ca9487ef66ac721304abf643d16f01f4",
+      "requires": []
+    },
+    "actor.path.demonic-nascent-hero-male.thumbnail": {
+      "file": "/assets/pixel/characters-301/demonic-nascent-hero-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "2fee9f993a5b0a93400ce62db0f4eb3ad798e2a5ee69b58bd7dcb9d7e1049e65",
+      "requires": []
+    },
+    "demonic-nascent-hero-male.actions": {
+      "file": "/assets/pixel/characters-301/demonic-nascent-hero-male-actions.png",
+      "size": [
+        1720,
+        179
+      ],
+      "sha256": "494a534d06678d62e436f34328ea72e5b8ff670d6dc354bc3e21f0687456d9b8",
+      "requires": []
+    },
+    "actor.path.demonic-nascent-hero-female.figure": {
+      "file": "/assets/pixel/characters-301/demonic-nascent-hero-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "bad69e9773b66d6cd037af4958147b37f884291cb42c4273d7cba05359227120",
+      "requires": []
+    },
+    "actor.path.demonic-nascent-hero-female.portrait": {
+      "file": "/assets/pixel/characters-301/demonic-nascent-hero-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "9bfe23c96cb246bc960013a4d1c55f09616ea2b6db58c21b80a73484c3e777fb",
+      "requires": []
+    },
+    "actor.path.demonic-nascent-hero-female.thumbnail": {
+      "file": "/assets/pixel/characters-301/demonic-nascent-hero-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "3c34b326bae985d209c6c7947b9ba9d326d6e7155a6b45922906d9f64ff0da53",
+      "requires": []
+    },
+    "demonic-nascent-hero-female.actions": {
+      "file": "/assets/pixel/characters-301/demonic-nascent-hero-female-actions.png",
+      "size": [
+        1570,
+        180
+      ],
+      "sha256": "65a39416532b64e615ab20ec3faa5fd00f66b844b5723f9f0cf3bb36eee0ad6c",
+      "requires": []
+    },
+    "actor.path.demonic-integration-hero-male.figure": {
+      "file": "/assets/pixel/characters-301/demonic-integration-hero-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "01b6eae18bebd8783ceb1818ff93eec330affd320a37857ec47355cfb2b07c7f",
+      "requires": []
+    },
+    "actor.path.demonic-integration-hero-male.portrait": {
+      "file": "/assets/pixel/characters-301/demonic-integration-hero-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "5ab446eafa94db51f4ef2025ecb51604d325b4bb98db141fafac7933664b3666",
+      "requires": []
+    },
+    "actor.path.demonic-integration-hero-male.thumbnail": {
+      "file": "/assets/pixel/characters-301/demonic-integration-hero-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "25a5380a5f36c492866d6183e0111c2cf010ee6e82b0f75dddaae1d78aa3bff7",
+      "requires": []
+    },
+    "demonic-integration-hero-male.actions": {
+      "file": "/assets/pixel/characters-301/demonic-integration-hero-male-actions.png",
+      "size": [
+        1700,
+        179
+      ],
+      "sha256": "97fc7ea9a02c9dd697d23dc5795ef528115a1260ef730fc47350518504925a21",
+      "requires": []
+    },
+    "actor.path.demonic-integration-hero-female.figure": {
+      "file": "/assets/pixel/characters-301/demonic-integration-hero-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a563a6c9caa6c2a3f0c311ccb66f244ed9f4b21feb83abd557d16905b79a6df1",
+      "requires": []
+    },
+    "actor.path.demonic-integration-hero-female.portrait": {
+      "file": "/assets/pixel/characters-301/demonic-integration-hero-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "7f535dc9bb50cb8b697d16ce5f3cb207a99967b9c6f7777f91dacaad45f13456",
+      "requires": []
+    },
+    "actor.path.demonic-integration-hero-female.thumbnail": {
+      "file": "/assets/pixel/characters-301/demonic-integration-hero-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "5b5d59b5df650f7edb43c17992b3308adace89e6091d35d4422e6c0f721616d9",
+      "requires": []
+    },
+    "demonic-integration-hero-female.actions": {
+      "file": "/assets/pixel/characters-301/demonic-integration-hero-female-actions.png",
+      "size": [
+        1710,
+        180
+      ],
+      "sha256": "09183835ebeb32b231b0420621641f84636f1fa21b7363c0e2fc2cfac235525a",
+      "requires": []
+    },
+    "base.character_manifest": {
+      "file": "/assets/pixel/characters-301/manifest.json",
+      "sha256": "3b950cdbf03a9856dab225ba13e12dd2d25929b560151bd4ccfe6a8a377e0e35",
+      "requires": [],
+      "combat_actors": [
+        "dao-nascent-hero-male",
+        "dao-nascent-hero-female",
+        "dao-integration-hero-male",
+        "dao-integration-hero-female",
+        "demonic-nascent-hero-male",
+        "demonic-nascent-hero-female",
+        "demonic-integration-hero-male",
+        "demonic-integration-hero-female"
+      ],
+      "character_forms": [
+        {
+          "name": "元婴道修·男",
+          "path": "dao",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "min_realm_index": 4,
+          "static": "actor.path.dao-nascent-hero-male",
+          "combat": "dao-nascent-hero-male"
+        },
+        {
+          "name": "元婴道修·女",
+          "path": "dao",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "min_realm_index": 4,
+          "static": "actor.path.dao-nascent-hero-female",
+          "combat": "dao-nascent-hero-female"
+        },
+        {
+          "name": "合体道修·男",
+          "path": "dao",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "min_realm_index": 7,
+          "static": "actor.path.dao-integration-hero-male",
+          "combat": "dao-integration-hero-male"
+        },
+        {
+          "name": "合体道修·女",
+          "path": "dao",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "min_realm_index": 7,
+          "static": "actor.path.dao-integration-hero-female",
+          "combat": "dao-integration-hero-female"
+        },
+        {
+          "name": "元婴魔修·男",
+          "path": "demonic",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "min_realm_index": 4,
+          "static": "actor.path.demonic-nascent-hero-male",
+          "combat": "demonic-nascent-hero-male"
+        },
+        {
+          "name": "元婴魔修·女",
+          "path": "demonic",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "min_realm_index": 4,
+          "static": "actor.path.demonic-nascent-hero-female",
+          "combat": "demonic-nascent-hero-female"
+        },
+        {
+          "name": "合体魔修·男",
+          "path": "demonic",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "min_realm_index": 7,
+          "static": "actor.path.demonic-integration-hero-male",
+          "combat": "demonic-integration-hero-male"
+        },
+        {
+          "name": "合体魔修·女",
+          "path": "demonic",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "min_realm_index": 7,
+          "static": "actor.path.demonic-integration-hero-female",
+          "combat": "demonic-integration-hero-female"
+        }
+      ],
+      "skin_forms": [
+        {
+          "name": "道修·初行·男",
+          "path": "dao",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "static": "actor.path.dao-base-hero-male",
+          "combat": "dao-male"
+        },
+        {
+          "name": "道修·初行·女",
+          "path": "dao",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "static": "actor.path.dao-base-hero-female",
+          "combat": "dao-female"
+        },
+        {
+          "name": "魔修·初行·男",
+          "path": "demonic",
+          "race": "human",
+          "gender": "male",
+          "role": "hero",
+          "static": "actor.path.demonic-base-hero-male",
+          "combat": "demonic-male"
+        },
+        {
+          "name": "魔修·初行·女",
+          "path": "demonic",
+          "race": "human",
+          "gender": "female",
+          "role": "hero",
+          "static": "actor.path.demonic-base-hero-female",
+          "combat": "demonic-female"
+        }
+      ]
+    },
+    "actor.path.dao-base-hero-male.figure": {
+      "file": "/assets/pixel/characters-301/dao-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "998a5f1398dbc58951ce6e080bc533b1cd33c502c9ba2b1423503287015cf58b",
+      "requires": []
+    },
+    "actor.path.dao-base-hero-male.portrait": {
+      "file": "/assets/pixel/characters-301/dao-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "d2fff01e03db386608616d664c0ab33993e6ec889cc3043ff21ae2be6b37282a",
+      "requires": []
+    },
+    "actor.path.dao-base-hero-male.thumbnail": {
+      "file": "/assets/pixel/characters-301/dao-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "8090f8f7fb4a33dbff0e177b88e2b873feb8b2cc2caaf824b56d1b1f1a834f2e",
+      "requires": []
+    },
+    "actor.path.dao-base-hero-female.figure": {
+      "file": "/assets/pixel/characters-301/dao-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "ecff917772738c3ead6f587082a4c939852d482602eea5afdd8523a7e0996bf4",
+      "requires": []
+    },
+    "actor.path.dao-base-hero-female.portrait": {
+      "file": "/assets/pixel/characters-301/dao-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "8f9bbd700f20280dee30bcb1f03716e7d286a68bbfae3637c013c1a620fa9de3",
+      "requires": []
+    },
+    "actor.path.dao-base-hero-female.thumbnail": {
+      "file": "/assets/pixel/characters-301/dao-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "f3393c6e76d11861d117238f5f2dcf6072e960a8f96fe5618b60b0bb895f79e1",
+      "requires": []
+    },
+    "actor.path.demonic-base-hero-male.figure": {
+      "file": "/assets/pixel/characters-301/demonic-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "31397b527b03d35acc53ce2c7b89a5f3b4b56284dedd3b46ae29bfe11082cb6d",
+      "requires": []
+    },
+    "actor.path.demonic-base-hero-male.portrait": {
+      "file": "/assets/pixel/characters-301/demonic-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "619b0c96302121f79b7a443e2c117e1f124bb7a6e1285e691078e14701df814c",
+      "requires": []
+    },
+    "actor.path.demonic-base-hero-male.thumbnail": {
+      "file": "/assets/pixel/characters-301/demonic-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "a827fb3a79ad33799300b2e58e46024286bb0b0935b76701e1f39c8e8a995149",
+      "requires": []
+    },
+    "actor.path.demonic-base-hero-female.figure": {
+      "file": "/assets/pixel/characters-301/demonic-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "59d11ba2b14b386d8d397403226883ca51cf61aed9f62dc2b600555494772679",
+      "requires": []
+    },
+    "actor.path.demonic-base-hero-female.portrait": {
+      "file": "/assets/pixel/characters-301/demonic-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "e6ab7c801c4622b41facef412f08b3e7d262c9a3448c193255552c9995285325",
+      "requires": []
+    },
+    "actor.path.demonic-base-hero-female.thumbnail": {
+      "file": "/assets/pixel/characters-301/demonic-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "e03ab85a2521395a1ed8a38a3f2e7834342a44d0a4f577436f1aff4e581d6f44",
+      "requires": []
     }
   },
   "items": {

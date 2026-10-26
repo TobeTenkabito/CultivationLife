@@ -42,6 +42,10 @@ def verify(with_dlc):
             else:
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
+            if '--update301' in sys.argv:
+                from scripts.verify_update301_exe import verify_update301
+                verify_update301(base, with_dlc)
+                return dict(with_dlc=with_dlc, exe_sha256=verified_digest, base_version=VERSION, update301_verified=True)
             world_doc = json.loads((ROOT / 'content/world.json').read_text(encoding='utf-8'))
             assert config["worlds"] == world_doc['systems']['world_names']
             assert all(x["status"] == "loaded" for x in config["extensions"])
@@ -73,7 +77,7 @@ def verify(with_dlc):
             request = urllib.request.Request(base + '/api/ui-preferences', method='POST',
                 data=b'{"theme":"f","reduced_motion":true}', headers={'Content-Type':'application/json'})
             with urllib.request.urlopen(request, timeout=5) as response:
-                assert json.load(response) == {'theme':'f','reduced_motion':True}
+                assert json.load(response) == {'theme':'f','reduced_motion':True,'pixel_art':False}
             assert json.loads((folder / 'data/ui_preferences.json').read_text())['theme'] == 'f'
             with urllib.request.urlopen(base + '/api/ui-preferences', timeout=5) as response:
                 assert json.load(response)['reduced_motion'] is True

@@ -4,8 +4,8 @@
   let manifest=null, pending=null;
   const bound=new Map();
   const active=()=>document.documentElement.dataset.visual==='pixel';
-  function ensure(){
-    if(!active())return Promise.resolve(null);
+  function ensure(explicit=false){
+    if(!active()&&!explicit)return Promise.resolve(null);
     if(!pending)pending=fetch('/api/visual-assets').then(r=>{if(!r.ok)throw new Error('assets');return r.json();}).then(value=>{
       manifest=value;refresh();window.dispatchEvent(new Event('game:visual-ready'));return value;
     }).catch(()=>null);

@@ -182,9 +182,11 @@ def test_preparation_runs_every_stage_and_commits_at_most_once(saved, monkeypatc
             return changed and index == 0
         monkeypatch.setattr(getattr(engine_persistence, name), 'prepare_' + name, stage)
     commit = Mock(wraps=store.save)
+    monkeypatch.setattr(engine_persistence.reconciliation, 'prepare_reconciliation',
+                        lambda state: calls.append('reconciliation') or False)
     monkeypatch.setattr(store, 'save', commit)
     engine_persistence._load(PersistenceDependencies(**values), game.id)
-    assert calls == ['foundations', 'vitality', 'character', 'world', 'services', 'events']
+    assert calls == ['foundations', 'vitality', 'character', 'world', 'services', 'events', 'reconciliation']
     assert commit.call_count == int(changed)
 
 

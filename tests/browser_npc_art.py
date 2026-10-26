@@ -52,7 +52,7 @@ def main():
                     page.wait_for_function('configData && window.GameThemes && window.NpcArt')
                     page.evaluate('GameThemes.ready')
                     page.evaluate('async id => loadGame(id)', identity)
-                    assert not any('/assets/pixel/social/' in r and r.endswith('.png') for r in requests)
+                    assert page.locator('.roster-identity .npc-art-avatar').count() > 0
 
                     def toggle(value):
                         # Close utility panels through their real navigation before opening appearance.
@@ -136,7 +136,9 @@ def main():
                     assert engine.store._path(identity).read_bytes() == saved
 
                     toggle(False)
-                    assert page.locator('.npc-art-avatar,.npc-art-contact-figure,.npc-art-portrait,.npc-art-figure').count() == 0
+                    # Sect portraits are available in the original interface too.
+                    assert page.locator('.roster-identity .npc-art-avatar').count() > 0
+                    assert page.locator('.npc-art-contact-figure').count() == 0
                     assert page.locator('#npc-event-art').is_hidden()
                     toggle(True)
                     page.locator('#npc-event-art .npc-art-figure').wait_for(state='visible')
@@ -200,7 +202,7 @@ def main():
                     assert page.evaluate('JSON.stringify(game)') == before
                     assert engine.store._path(identity).read_bytes() == saved
                     toggle(False)
-                    assert roster.locator('.npc-art-avatar').count() == 0
+                    assert roster.locator('.npc-art-avatar').count() > 0
                     toggle(True)
                     navigation_locator(page, '[data-panel-target=relationship]').click()
                     reveal_subpage(page, search)

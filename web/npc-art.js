@@ -30,8 +30,8 @@ window.NpcArt = (() => {
     return pool[hash%pool.length];
   }
   function resolve(n){return n&&people.get(n.id)||n;}
-  function image(n,kind,onFailure){
-    const key=active()?select(n):null;if(!key)return null;
+  function image(n,kind,onFailure,roster=false){
+    const key=active()||roster?select(n):null;if(!key)return null;
     const img=el('img',undefined,`npc-art-${kind}`);img.alt=`${n.name}${kind==='portrait'?'头像':'立绘'}`;
     const extension=key.startsWith('actor.path.');
     const asset=extension?window.PixelLibrary?.catalog?.assets[key+'.'+kind]:pack.actors[key][kind];
@@ -50,8 +50,8 @@ window.NpcArt = (() => {
       ...(value.faction?.roster||[]).filter(n=>!n.is_player),...(value.world_npcs||[])];
     for(const row of rows)if(row?.id&&row.name)people.set(row.id,row);
   }
-  function open(person){
-    const n=resolve(person);if(!active()||!select(n))return;
+  function open(person,roster=false){
+    const n=roster?person:resolve(person);if((!active()&&!roster)||!select(n))return;
     if(!dialog){
       dialog=el('dialog',undefined,'npc-art-dialog');dialog.id='npc-art-dialog';dialog.setAttribute('aria-labelledby','npc-art-title');
       dialog.addEventListener('keydown',event=>{if(event.key==='Escape')event.stopPropagation();});
@@ -60,7 +60,7 @@ window.NpcArt = (() => {
     dialog.replaceChildren();
     const head=el('header',undefined,'npc-art-heading'),title=el('h2',n.name);title.id='npc-art-title';
     const close=el('button','关闭');close.type='button';close.onclick=()=>dialog.close();head.append(title,close);
-    const body=el('div',undefined,'npc-art-profile'),figure=image(n,'figure'),facts=el('div');
+    const body=el('div',undefined,'npc-art-profile'),figure=image(n,'figure',null,roster),facts=el('div');
     if(figure)body.append(figure);
     for(const text of [n.title,[n.realm_name,n.path_name,n.race_name,n.gender_name].filter(Boolean).join(' · '),
       n.status,n.relationship,n.affinity==null?'':`好感 ${Number(n.affinity).toFixed(0)}`])if(text)facts.append(el('p',text));
@@ -68,10 +68,16 @@ window.NpcArt = (() => {
     if(n.world===null||n.perceived_alive===false)facts.append(el('p','依已有记录展示；当前去向与可交往状态以名册为准。','muted'));
     body.append(facts);dialog.append(head,body);dialog.showModal();
   }
-  function avatar(row,person){
-    const n=resolve(person);if(!active()||!select(n))return;
+  function avatar(row,person,roster=false){
+    const n=roster?person:resolve(person);if(!active()&&!roster)return;
+    if(roster&&!window.PixelLibrary?.catalog){
+      window.PixelLibrary?.ensure(true).then(catalog=>{if(catalog&&row.isConnected&&!row.querySelector('.npc-art-avatar'))avatar(row,person,true);});
+      return;
+    }
+    if(!select(n))return;
     const b=el('button',undefined,'npc-art-avatar');b.type='button';b.setAttribute('aria-label',`查看${n.name}的人物卡`);
-    const img=image(n,'portrait',()=>b.remove());b.append(img);b.onclick=()=>open(n);row.prepend(b);
+    const img=image(n,'portrait',()=>b.remove(),roster);if(!img)return;
+    b.append(img);b.onclick=()=>open(n,roster);row.prepend(b);
   }
   function selfAvatar(row,player,openDetails){
     const key=active()?window.VisualAssets?.actor(player):null;if(!key)return;

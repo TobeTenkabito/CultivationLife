@@ -477,6 +477,7 @@ function render(data) {
   $('#start-screen').classList.add('hidden'); $('#achievement-screen').classList.add('hidden'); $('#game-screen').classList.remove('hidden'); $('#new-game-button').classList.remove('hidden');
   queueAchievementToasts(data.new_achievements || []);
   const p = data.player;
+  window.CharacterSkins?.render(data, skin_id => mutate(`/api/games/${data.id}/character-skin`, {skin_id}));
   renderSecretArts(data.secret_arts || {});
   const transformationAvailable = data.transformation_system?.available !== false;
   const transformationDock = document.querySelector('[data-panel-target="transformation"]');
@@ -1880,7 +1881,7 @@ function renderFaction(faction) {
     if (npc.combat_artifact_name) addStatus('主战法宝', npc.combat_artifact_name);
     identity.appendChild(status);
     if (npc.is_player) window.NpcArt?.selfAvatar(identity,game.player,()=>$('#player-details-dialog').showModal());
-    else window.NpcArt?.avatar(identity,npc);
+    else window.NpcArt?.avatar(identity,npc,true);
     const controls = document.createElement('div'); controls.className = 'relationship-actions';
     if (npc.can_request_master) controls.appendChild(relationshipButton(npc, 'master', '拜师'));
     if (npc.can_accept_disciple) controls.appendChild(relationshipButton(npc, 'disciple', '收徒'));
@@ -3905,8 +3906,8 @@ function renderConcubines(system) {
     const status = document.createElement('div'); status.className = 'concubine-status active';
     const bonus = system.status.breakthrough_bonus_active ? ' · 低于对方境界时基础突破 +2%' : '';
     const relation = system.status.dependent ? ' · 已主动依附' : '';
-    const anger = system.status.angered ? ' · 正主震怒：本期机缘抽取提高至 3%' : '';
-    status.innerHTML = htmlText`<b>你是${system.status.owner_name}的侍妾</b><small>${system.status.owner_realm_name} · 机缘获取效率 ×0.8 · 每回合被抽取机缘${bonus}${relation}${anger}</small>`;
+    const anger = system.status.angered ? ' · 正主震怒' : '';
+    status.innerHTML = htmlText`<b>你是${system.status.owner_name}的侍妾</b><small>${system.status.owner_realm_name} · 机缘获取效率 ×0.8${bonus}${relation}${anger}</small>`;
     const tools = document.createElement('div'); tools.className = 'relationship-tools';
     const statusAction = (label, action, available = true, danger = false) => {
       const button = document.createElement('button'); button.className = `concubine-owner-action${danger ? ' danger' : ''}`;

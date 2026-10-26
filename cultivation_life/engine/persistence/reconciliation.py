@@ -10,4 +10,6 @@ def prepare_reconciliation(game: GameState) -> bool:
     changed = adopt(game)
     changed = release_dead_captor(game) or changed
     changed = adopt_field(game) or changed
+    from ...character_skins import remember
+    changed = remember(game.player) or changed
     return changed

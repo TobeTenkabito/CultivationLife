@@ -75,6 +75,11 @@ def _proposal_related(player, identity):
                for row in rows)
 
 
+def proposal_species_allowed(player, owner):
+    """Untransformed young monsters only receive proposals from monster cultivators."""
+    return player.path != 'monster' or player.realm_index >= 4 or owner.path == 'monster'
+
+
 def _maybe_concubine_proposal(deps: DependentLifecycleDependencies, game: GameState, rng: random.Random) -> bool:
     if game.settings.get("silent_events", False):
         return False
@@ -90,6 +95,7 @@ def _maybe_concubine_proposal(deps: DependentLifecycleDependencies, game: GameSt
         if npc.alive and npc.world == player.world and npc.gender == "male"
         and deps._rank(npc) > deps._rank(player)
         and not _proposal_related(player, npc.id)
+        and proposal_species_allowed(player, npc)
     ]
     if not candidates:
         return False
@@ -121,6 +127,8 @@ def _resolve_concubine_proposal(
     name = str(runtime.get("owner_name", "一位高阶修士"))
     if not owner or not owner.alive or owner.world != game.player.world:
         return "owner_absent", "提议者已经离开当前界面，这桩拉拢自然作罢。"
+    if not proposal_species_allowed(game.player, owner):
+        return "form_ineligible", "你尚未化形，对方不再提出纳妾请求。"
     if _proposal_related(game.player, owner.id):
         return "relationship_changed", "你们已有特殊关系，这桩纳妾提议作罢。"
     if not accept:
@@ -141,7 +149,7 @@ def _resolve_concubine_proposal(
         )
     deps._set_concubine_status(game, runtime)
     return "accepted", (
-        f"你接受{name}的拉拢，成为其侍妾。此后每回合会被抽取机缘，机缘获取效率降至 80%；"
+        f"你接受{name}的拉拢，成为其侍妾。机缘获取效率降至 80%，已有机缘不再逐回合扣除；"
         "修为仍低于对方时，基础突破概率 +2%。"
     )
 
@@ -239,7 +247,7 @@ def _resolve_concubine_revenge(
     game.player.hp = max(1.0, game.player.hp - max_hp(game.player) * 0.22)
     deps._set_concubine_status(game, runtime, forced=True)
     game.player.concubine_status["angered_until_unit"] = game.diplomacy_unit + 2
-    return "captured", f"反抗失败，你负伤后被{name}强行带走；冲突令双方好感缓和 {relief:g} 点，但两个行动单位内机缘抽取仍会更重。"
+    return "captured", f"反抗失败，你负伤后被{name}强行带走；冲突令双方好感缓和 {relief:g} 点。"
 
 
 def _resolve_concubine_escape(
@@ -269,7 +277,7 @@ def _resolve_concubine_escape(
     status["failed_escape_count"] = int(status.get("failed_escape_count", 0)) + 1
     status["angered_until_unit"] = game.diplomacy_unit + 2
     return "escape_failed", (
-        f"脱身失败（成功率 {chance:.0%}），{owner.name}被彻底激怒；两个行动单位内每期机缘抽取由 2% 提高至 3%。"
+        f"脱身失败（成功率 {chance:.0%}），{owner.name}被彻底激怒，双方关系恶化。"
     )
 
 
@@ -359,13 +367,7 @@ def _advance_concubine_status(deps: DependentLifecycleDependencies, game: GameSt
     if not owner and str(status.get("owner_world", game.player.world)) != game.player.world:
         game.player.concubine_status = None
         return 0.0
-    angered = int(status.get("angered_until_unit", -1)) >= game.diplomacy_unit
-    drain = min(
-        game.player.opportunity,
-        opportunity_required(game.player) * (0.03 if angered else 0.02) * units,
-    )
-    game.player.opportunity = max(0.0, game.player.opportunity - drain)
-    status["last_drain"] = round(drain, 1)
+    status["last_drain"] = 0.0
     status["turns"] = int(status.get("turns", 0)) + units
-    return drain
+    return 0.0
 

@@ -512,7 +512,8 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         amount = int(value)
         body_age = current_body_age(player)
         old = int(player.lifespan or body_age)
-        player.lifespan = min(300, max(old, body_age + 1) + amount)
+        limit = 900 if player.path == "monster" else 300
+        player.lifespan = max(old, min(limit, max(old, body_age + 1) + amount))
         return None, f"炼体延寿，寿元上限由 {old} 提升至 {player.lifespan} 岁。"
     if kind == "acquire_root":
         if player.spirit_root != "none":

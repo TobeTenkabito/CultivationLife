@@ -37,7 +37,7 @@
     return b;
   }
   function map(){
-    const compact=innerWidth<620;
+    const compact=true;
     const graph=svg('svg',{viewBox:compact?'0 0 360 275':'0 0 660 210',role:'group','aria-label':'选择栖地，查阅原地图道路与考察记录'});
     const positions=new Map(view.regions.map((r,i)=>[r.id,compact?[75+i%2*210,35+Math.floor(i/2)*85]:[75+i%3*250,45+Math.floor(i/3)*110]]));
     view.edges.forEach(e=>{const a=positions.get(e.source),b=positions.get(e.target);if(a&&b)graph.append(svg('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],class:'mc-road'}));});
@@ -58,8 +58,10 @@
   function ecology(container){
     const selected=view.regions.find(r=>r.id===selectedRegion)||view.regions.find(r=>r.current)||view.regions.find(r=>r.known)||view.regions[0];
     selectedRegion=selected?.id||'';
-    container.append(note('点选栖地查阅考察记录。连线沿用已有道路；图志不会代你移动。旧图请以新考察核实，护育不向行囊赠送材料。'),map());
-    if(selected){const form=el('div',null,'mc-form'),picker=el('select');picker.setAttribute('aria-label','栖地记录');view.regions.forEach(r=>{const option=el('option',`${r.name} · ${r.current?'所在栖地':r.known?'已考察':'未考察'}`);option.value=r.id;picker.append(option);});picker.value=selectedRegion;picker.onchange=()=>{selectedRegion=picker.value;draw();};form.append(picker);container.append(form);}
+    const layout=el('div',null,'mc-ecology-layout'),atlas=el('section',null,'mc-atlas-map');
+    atlas.append(el('small','山川与栖地','mc-eyebrow'),el('h3','生息舆图'),map(),note('点选栖地查阅记录。前往当地考察，才能更新生灵数量。'));
+    layout.append(atlas);container.append(layout);
+    if(selected){const form=el('div',null,'mc-form'),picker=el('select');picker.setAttribute('aria-label','栖地记录');view.regions.forEach(r=>{const option=el('option',`${r.name} · ${r.current?'所在栖地':r.known?'已考察':'未考察'}`);option.value=r.id;picker.append(option);});picker.value=selectedRegion;picker.onchange=()=>{selectedRegion=picker.value;draw();};form.append(picker);atlas.append(form);}
     const grid=el('div',null,'mc-grid');
     (selected?[selected]:[]).forEach(r=>{
       const card=el('article',null,`mc-region${r.current?' current':''}`);card.dataset.region=r.id;
@@ -75,7 +77,7 @@
       if(r.current){const actions=el('div',null,'mc-actions');const observe=button('observe');observe.disabled ||= r.year===view.year;actions.append(observe);
         if(r.known){actions.append(button('protect'),button('guide'));if(view.effect_years>0)card.append(note(`现有护育安排尚余 ${view.effect_years}年。`));}card.append(actions);}
       grid.append(card);
-    });container.append(grid);
+    });layout.append(grid);
   }
   function clans(container){
     container.append(note('氏族承载祖源与族约；族籍可与现有宗门、家族身份并存。立分支与并族转移原有族众，不能重复认领。'));
@@ -120,8 +122,9 @@
     const r=root();r.replaceChildren();
     const heading=document.querySelector('#civilizations-card > .section-title');
     r.style.setProperty('--mc-tabs-top',`${Math.max(0,heading.offsetHeight+(parseFloat(getComputedStyle(heading).top)||0))}px`);
-    const head=el('div',null,'mc-atlas-head');head.append(el('p','观山川生息，续诸族传承。'));
+    const head=el('div',null,'mc-atlas-head'),title=el('div');title.append(el('small','万灵图志','mc-eyebrow'),el('h3',worlds[view.world]||'异域记录'),el('p','山川生息 · 氏族传承 · 王庭史事'));head.append(title);
     const select=el('select');select.setAttribute('aria-label','已知界面');view.worlds.forEach(id=>{const o=el('option',worlds[id]);o.value=id;select.append(o);});select.value=view.world;select.onchange=()=>{world=select.value;selectedRegion='';page=0;view=null;load();};head.append(select);r.append(head);
+    const stats=el('div',null,'mc-summary');[[view.regions.filter(x=>x.known).length+' / '+view.regions.length,'已考察栖地'],[view.clans.length,'已知氏族'],[view.year,'当前纪年']].forEach(([value,label])=>{const item=el('div');item.append(el('strong',value),el('span',label));stats.append(item);});r.append(stats);
     const tabs=el('div',null,'mc-tabs');tabs.setAttribute('role','tablist');[['ecology','生息图'],['clans','氏族谱'],['court','王庭'],['journal','万灵志']].forEach(([id,text])=>{const b=el('button',text);b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-selected',String(tab===id));b.dataset.civilizationTab=id;b.onclick=()=>{tab=id;draw();};tabs.append(b);});r.append(tabs);
     if(!view.supported){r.append(note('此万灵记录版本暂不支持。原记录已保留，请启用对应版本后继续。'));return;}
     const content=el('div',null,'mc-tab-content');content.setAttribute('role','tabpanel');({ecology,clans,court,journal})[tab](content);r.append(content);

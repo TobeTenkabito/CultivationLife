@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.monster-civilizations",
   "name": "万灵争衡：百族兴衰",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "kind": "dlc",
   "enabled": true,
   "load_order": 120,
