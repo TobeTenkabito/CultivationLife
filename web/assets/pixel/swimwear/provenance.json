@@ -1,0 +1,713 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "export": "Original painted RGBA, nearest-neighbour packing; no anatomy reconstruction",
+  "forms": 4,
+  "static_images": 12,
+  "painted_keyposes": 40,
+  "animation_clips": 28,
+  "sources": [
+    {
+      "id": "swim-sunny-female",
+      "source": "sunny-female.png",
+      "sha256": "7b330db4cc0fb66ddb8af52327a6b34a85479050c753dc371c17f413046ef3ff",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            93,
+            1011,
+            293,
+            1428
+          ],
+          "scale": 0.6522781774580336
+        },
+        "portrait": {
+          "source_rect": [
+            354,
+            1028,
+            732,
+            1418
+          ],
+          "scale": 0.28717948717948716
+        },
+        "thumbnail": {
+          "source_rect": [
+            93,
+            1011,
+            293,
+            1428
+          ],
+          "scale": 0.3069544364508393
+        },
+        "idle": {
+          "source_rect": [
+            97,
+            0,
+            291,
+            387
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            151,
+            91
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            414,
+            9,
+            642,
+            388
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            144,
+            94
+          ]
+        },
+        "release": {
+          "source_rect": [
+            739,
+            7,
+            1047,
+            387
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            126,
+            94
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            63,
+            383,
+            335,
+            750
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            134,
+            99
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            426,
+            383,
+            691,
+            747
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            136,
+            100
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            757,
+            388,
+            1016,
+            752
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            137,
+            100
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            69,
+            744,
+            342,
+            1041
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            134,
+            129
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            397,
+            751,
+            663,
+            1037
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            135,
+            134
+          ]
+        },
+        "down": {
+          "source_rect": [
+            678,
+            817,
+            1086,
+            968
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            105,
+            191
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            767,
+            1002,
+            1008,
+            1423
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            141,
+            76
+          ]
+        }
+      }
+    },
+    {
+      "id": "swim-sunny-male",
+      "source": "sunny-male.png",
+      "sha256": "78b4bd29f55b24a4f883fc6c20d04be923346c8f63c0d5d8d7df3e00a81956ec",
+      "rows": 3,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            317,
+            939,
+            504,
+            1404
+          ],
+          "scale": 0.5849462365591398
+        },
+        "portrait": {
+          "source_rect": [
+            511,
+            994,
+            829,
+            1404
+          ],
+          "scale": 0.2731707317073171
+        },
+        "thumbnail": {
+          "source_rect": [
+            317,
+            939,
+            504,
+            1404
+          ],
+          "scale": 0.2752688172043011
+        },
+        "idle": {
+          "source_rect": [
+            36,
+            31,
+            259,
+            487
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            149,
+            81
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            284,
+            44,
+            533,
+            489
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            144,
+            85
+          ]
+        },
+        "release": {
+          "source_rect": [
+            542,
+            71,
+            846,
+            492
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            134,
+            94
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            843,
+            60,
+            1077,
+            486
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            147,
+            93
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            9,
+            545,
+            294,
+            921
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            138,
+            112
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            262,
+            545,
+            551,
+            919
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            137,
+            112
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            573,
+            548,
+            816,
+            924
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            146,
+            112
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            831,
+            644,
+            1072,
+            934
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            146,
+            145
+          ]
+        },
+        "down": {
+          "source_rect": [
+            4,
+            1216,
+            342,
+            1356
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            127,
+            202
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            808,
+            944,
+            1074,
+            1413
+          ],
+          "scale": 0.3837953091684435,
+          "offset": [
+            141,
+            76
+          ]
+        }
+      }
+    },
+    {
+      "id": "swim-moon-female",
+      "source": "moon-female.png",
+      "sha256": "8501f412bf028d0e95b440cfe623dba6a9e7af4264ee85cfca65aaa3e0d6a6d3",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            69,
+            1077,
+            310,
+            1448
+          ],
+          "scale": 0.7331536388140162
+        },
+        "portrait": {
+          "source_rect": [
+            355,
+            1069,
+            713,
+            1448
+          ],
+          "scale": 0.2955145118733509
+        },
+        "thumbnail": {
+          "source_rect": [
+            69,
+            1077,
+            310,
+            1448
+          ],
+          "scale": 0.3450134770889488
+        },
+        "idle": {
+          "source_rect": [
+            46,
+            6,
+            293,
+            418
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            139,
+            80
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            379,
+            15,
+            671,
+            422
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            130,
+            82
+          ]
+        },
+        "release": {
+          "source_rect": [
+            727,
+            13,
+            1072,
+            424
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            119,
+            80
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            36,
+            424,
+            343,
+            791
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            127,
+            99
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            393,
+            424,
+            681,
+            790
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            131,
+            100
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            743,
+            431,
+            1044,
+            790
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            128,
+            103
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            42,
+            771,
+            325,
+            1095
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            132,
+            118
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            352,
+            796,
+            652,
+            1076
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            128,
+            136
+          ]
+        },
+        "down": {
+          "source_rect": [
+            667,
+            894,
+            1079,
+            1068
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            104,
+            182
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            736,
+            1059,
+            1019,
+            1448
+          ],
+          "scale": 0.42718446601941745,
+          "offset": [
+            132,
+            90
+          ]
+        }
+      }
+    },
+    {
+      "id": "swim-moon-male",
+      "source": "moon-male.png",
+      "sha256": "bac05c533fd427c03d2c6245751af19b68418843b22177b664d983c56e7d371f",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            35,
+            1035,
+            334,
+            1434
+          ],
+          "scale": 0.681704260651629
+        },
+        "portrait": {
+          "source_rect": [
+            353,
+            1043,
+            734,
+            1435
+          ],
+          "scale": 0.2857142857142857
+        },
+        "thumbnail": {
+          "source_rect": [
+            35,
+            1035,
+            334,
+            1434
+          ],
+          "scale": 0.3208020050125313
+        },
+        "idle": {
+          "source_rect": [
+            32,
+            1,
+            277,
+            382
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            136,
+            81
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            388,
+            6,
+            665,
+            373
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            129,
+            88
+          ]
+        },
+        "release": {
+          "source_rect": [
+            743,
+            15,
+            1079,
+            374
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            115,
+            92
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            15,
+            377,
+            355,
+            731
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            114,
+            94
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            398,
+            379,
+            702,
+            728
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            123,
+            96
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            743,
+            402,
+            1065,
+            726
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            119,
+            108
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            35,
+            733,
+            326,
+            1047
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            126,
+            112
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            370,
+            739,
+            680,
+            1038
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            121,
+            119
+          ]
+        },
+        "down": {
+          "source_rect": [
+            691,
+            894,
+            1078,
+            1034
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            104,
+            192
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            744,
+            1049,
+            1050,
+            1442
+          ],
+          "scale": 0.4580152671755725,
+          "offset": [
+            122,
+            76
+          ]
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "id": "swim-sunny-female",
+      "file": "sunny-female.png",
+      "name": "晴海轻游",
+      "gender": "female",
+      "min_realm_index": 0,
+      "rows": 4,
+      "prompt": "Use case: stylized-concept. Production transparent sprite sheet for Chinese xianxia RPG 浮生问道. The supplied female image is STYLE AND ADULT FACE reference only, NOT an edit target. New optional universal summer skin '晴海轻游', one clearly adult Chinese woman about 25, long dark hair in elegant high ponytail, small jade hairpin, tasteful opaque turquoise and ivory sporty ONE-PIECE SWIMSUIT with delicate wave embroidery and a short tied hip sash, bare arms and bare legs, matching low flat turquoise sandals. Refined, relaxed, athletic elegance, neutral practical battle stances, not pinup. Detailed crisp 32-bit painterly pixel illustration matching reference. Genuine transparent background. EXACTLY 3 equal columns x 4 equal rows, 12 separate images with generous transparent gaps. Same face, hair, outfit and scale throughout. Row-major cells: 1 full-body three-quarter facing right idle; 2 full-body right-facing gathering spell palms raised; 3 full-body right-facing releasing spell one palm extended; 4 full-body protective ward; 5 full-body bracing impact arms crossed; 6 full-body recoiling hit; 7 full-body staggering; 8 full-body kneeling on one knee with one foot planted and one hand supported; 9 full-body lying defeated sideways with legs naturally offset; 10 full-body FRONT VIEW standing detail illustration; 11 large FRONT bust PORTRAIT cropped at chest; 12 full-body right-facing domain invocation hands raised. All full-body cells MUST include two anatomically connected complete legs, two distinct visible feet and sandals, correct perspective, no duplicates, no extra limbs, no amputations. Feet can overlap naturally but both tips identifiable. Keep entire body within its cell, no accessories floating outside. NO backgrounds, labels, grid lines, text, shadows, big magic effects, weapons, robes, stockings or tights. High resolution 1536x2048 preferred. All cells same character, all art isolated.",
+      "reference": "web/assets/pixel/characters-301/dao-nascent-hero-female-figure.png",
+      "source_sha256": "7b330db4cc0fb66ddb8af52327a6b34a85479050c753dc371c17f413046ef3ff"
+    },
+    {
+      "id": "swim-sunny-male",
+      "file": "sunny-male.png",
+      "name": "晴海轻游",
+      "gender": "male",
+      "min_realm_index": 0,
+      "rows": 3,
+      "reference": "web/assets/pixel/characters-301/dao-nascent-hero-male-figure.png",
+      "source_sha256": "78b4bd29f55b24a4f883fc6c20d04be923346c8f63c0d5d8d7df3e00a81956ec"
+    },
+    {
+      "id": "swim-moon-female",
+      "file": "moon-female.png",
+      "name": "沧月流光",
+      "gender": "female",
+      "min_realm_index": 5,
+      "rows": 4,
+      "reference": "web/assets/pixel/characters-301/dao-nascent-hero-female-figure.png",
+      "source_sha256": "8501f412bf028d0e95b440cfe623dba6a9e7af4264ee85cfca65aaa3e0d6a6d3"
+    },
+    {
+      "id": "swim-moon-male",
+      "file": "moon-male.png",
+      "name": "沧月流光",
+      "gender": "male",
+      "min_realm_index": 5,
+      "rows": 4,
+      "reference": "web/assets/pixel/characters-301/dao-nascent-hero-male-figure.png",
+      "source_sha256": "bac05c533fd427c03d2c6245751af19b68418843b22177b664d983c56e7d371f"
+    }
+  ]
+}

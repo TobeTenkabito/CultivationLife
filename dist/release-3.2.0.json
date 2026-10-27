@@ -1,12 +1,13 @@
 {
-  "base_version": "3.0.1",
-  "save_schema": 10,
+  "base_version": "3.2.0",
+  "save_schema": 11,
   "compatible_save_schemas": [
-    10
+    11
   ],
-  "incompatible_save_schemas": "1–9; no migration",
+  "incompatible_save_schemas": "1–10; no migration",
   "dlc_versions": {
     "asura-manifestation": "1.3.0",
+    "authored-techniques": "1.0.0",
     "buddhist-dharma": "1.2.0",
     "ghost-reincarnation": "3.10.0",
     "guixu-tide": "2.7.2",
@@ -18,82 +19,72 @@
     "trial-sites": "1.1.0"
   },
   "validation_scope": "User-requested related and upstream tests only; not full repository regression",
-  "tests": 664,
+  "tests": 974,
   "runs": [
     {
       "name": "related-tests-0",
-      "log": "build\\related-tests-0-301.log",
+      "log": "build\\related-tests-0-320.log",
       "status": "passed"
     },
     {
       "name": "related-tests-1",
-      "log": "build\\related-tests-1-301.log",
+      "log": "build\\related-tests-1-320.log",
       "status": "passed"
     },
     {
       "name": "related-tests-2",
-      "log": "build\\related-tests-2-301.log",
+      "log": "build\\related-tests-2-320.log",
       "status": "passed"
     },
     {
       "name": "check_world_transition_contract",
-      "log": "build\\check_world_transition_contract-301.log",
+      "log": "build\\check_world_transition_contract-320.log",
       "status": "passed"
     },
     {
       "name": "check_module_dependencies",
-      "log": "build\\check_module_dependencies-301.log",
+      "log": "build\\check_module_dependencies-320.log",
       "status": "passed"
     },
     {
       "name": "check_documentation",
-      "log": "build\\check_documentation-301.log",
+      "log": "build\\check_documentation-320.log",
       "status": "passed"
     },
     {
-      "name": "browser_release_301",
-      "log": "build\\browser_release_301-301.log",
+      "name": "browser_soul_lifecycle",
+      "log": "build\\browser_soul_lifecycle-320.log",
       "status": "passed"
     },
     {
-      "name": "browser_npc_art",
-      "log": "build\\browser_npc_art-301.log",
+      "name": "browser_swimwear_skins",
+      "log": "build\\browser_swimwear_skins-320.log",
       "status": "passed"
     },
     {
-      "name": "browser_monster_civilizations",
-      "log": "build\\browser_monster_civilizations-301.log",
-      "status": "passed"
-    },
-    {
-      "name": "browser_common_elemental_techniques",
-      "log": "build\\browser_common_elemental_techniques-301.log",
-      "status": "passed"
-    },
-    {
-      "name": "browser_combat_replay",
-      "log": "build\\browser_combat_replay-301.log",
+      "name": "browser_authored_techniques",
+      "log": "build\\browser_authored_techniques-320.log",
       "status": "passed"
     },
     {
       "name": "browser_events_212",
-      "log": "build\\browser_events_212-301.log",
+      "log": "build\\browser_events_212-320.log",
       "status": "passed"
     }
   ],
   "regression": {
-    "collected": 664,
+    "collected": 974,
     "skipped": 0,
     "failures": 0,
     "errors": 0,
-    "passed": 664
+    "passed": 974
   },
   "save_transfer_smoke_tests": 21,
   "save_transfer_smoke_in_regression": true,
-  "save_transfer_log": "build/save-transfer-301.log",
-  "inputs_sha256": "8f110e447ecbf12de75d25a99481f9295eb04c6fa20f795de0733d43529ec17d",
+  "save_transfer_log": "build/save-transfer-320.log",
+  "inputs_sha256": "2f9739db067ff7ab8e1fb50d18d0822ee27b8e5bdbbd96404c06d27caf4abaa1",
   "platform": "Windows",
-  "exe_sha256": "a206fdea870d69fb037b374854cb3fe4eb3c35e81cd0c275282b890708a6592a",
+  "exe_sha256": "7b9bfa8c29634ccf100fb0f0bcce4169d47b593fe15dc462e32ea4bdfe271ec9",
   "with_and_without_dlc_verified": true,
   "root_launcher_updated": true
 }

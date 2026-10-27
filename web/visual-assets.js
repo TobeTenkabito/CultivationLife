@@ -3,7 +3,7 @@
   'use strict';
   const catalog = window.PixelAssetCatalog || {assets:{}, frames:[], base:'/assets/pixel/v1/'}, cache = new Map();
   async function load(id) {
-    const extension = id.startsWith('actor.monster.') || id.startsWith('actor.path.');
+    const extension = id.startsWith('actor.monster.') || id.startsWith('actor.path.') || id.startsWith('actor.cosmetic.');
     const source = extension ? (await window.PixelLibrary?.ensure())?.assets : catalog.assets;
     const entry = source && Object.prototype.hasOwnProperty.call(source, id) ? source[id] : null;
     if (!entry) return Promise.resolve(null);
@@ -17,6 +17,12 @@
     return cache.get(id);
   }
   function actor(player) {
+    // Universal outfits are explicitly selected by the server, across all paths/races.
+    if (player && /^actor\.cosmetic\.[a-z0-9][a-z0-9-]*-(male|female)$/.test(player.visual_actor || '') &&
+        player.visual_actor.endsWith(`-${player.gender}`) && ['male','female'].includes(player.gender) &&
+        player.character_skins?.selected === player.visual_actor && !player.ghost_host_body &&
+        !player.ghost_attachment && !player.transformation_loadouts?.[player.transformation_technique?.id]?.active?.length)
+      return player.visual_actor;
     // The server selects optional forms from the loaded package's declarations.
     // A realm form may have an identity distinct from the cultivation path.
     if (player && /^actor\.path\.[a-z0-9][a-z0-9-]*-hero-(male|female)$/.test(player.visual_actor || '') &&

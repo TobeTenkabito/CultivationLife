@@ -42,7 +42,9 @@ def availability(game, npc):
     elif (npc.realm_index, npc.layer) > (p.realm_index, p.layer): actions['concubine'] = '对方修为须不高于你'
     if float(npc.affinity or 0) < rules['friend_affinity_required']: actions['friend'] = '尚需增进好感'
     if not any(row.get('id') == npc.id for row in p.party) and len(p.party) >= WORLD_SYSTEMS['party']['max_companions']: actions['party'] = '同行队伍已满'
-    if p.path != 'demonic': actions['capture'] = '魔修方可施展生擒魔禁'
+    from ..soul_rules import can_capture
+    if not can_capture(p): actions['capture'] = '需魔修、神游或掌握第二元婴秘法'
+    elif p.path != 'demonic' and kind != 'npc': actions['capture'] = '请先解除关系再生擒'
     elif kind in {'disciple','concubine','party'}: actions['capture'] = '请先解除此段名分或同行，再行生擒'
     if game.governance_actions.get(f'party_interaction:{npc.id}') == p.age:
         actions['improve'] = actions['worsen'] = '本行动单位已与此人交流'

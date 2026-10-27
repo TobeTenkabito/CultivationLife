@@ -35,7 +35,8 @@ def buy_black_market_item(deps: BlackMarketDependencies, game_id: str, result_id
             raise ValueError('这件符箓不属于当前界面的流通范围')
     limited = any(row['world'] == game.player.world and row['content_id'] == result.get('content_id')
                     for row in LIMITED_TRADE_GOODS) and result.get('kind') == 'item'
-    if not spirit and not talisman and not limited and not deps._is_world_market_good(
+    from ..authored_markets import permitted
+    if not spirit and not talisman and not limited and not permitted(game,result) and not deps._is_world_market_good(
         game.player.world, str(result.get("kind", "")), str(result.get("content_id", "")),
     ):
         raise ValueError("这件货物不属于当前世界的流通范围")
@@ -46,7 +47,11 @@ def buy_black_market_item(deps: BlackMarketDependencies, game_id: str, result_id
         raise ValueError("这份黑市材料已经失去灵性")
     if not remove_item(game.player, "spirit_stone", total_price):
         raise ValueError(f"需要 {total_price} 枚下品灵石")
-    if spirit:
+    if kind == 'authored_technique':
+        from ..authored_techniques import grant_market
+        for _ in range(quantity):
+            grant_market(game, result['content_id'])
+    elif spirit:
         for _ in range(quantity):
             grant(game, result['content_id'])
     elif talisman:
@@ -261,7 +266,9 @@ def search_black_market(deps: BlackMarketDependencies, game_id: str, pattern: st
             results.append(dict(id='black-' + book.id, kind='spirit_manual', content_id=book.id,
                 name=book.name, description=description, tier=book.grade,
                 tier_name=REALMS[book.grade].name, price=45000))
-    results.sort(key=lambda row: (row['kind'] != 'spirit_manual', row["tier"], row["name"]))
+    from ..authored_techniques import market_offers
+    results.extend(dict(row,price=max(1,round(row['price']*multiplier))) for row in market_offers(game, 'black-') if matcher.search(row['name']+' '+row['description']))
+    results.sort(key=lambda row: (row['kind'] not in {'spirit_manual','authored_technique'}, row["tier"], row["name"]))
     state["black_market_results"] = results[:int(deps._auction_rules()["black_market_result_limit"])]
     game.updated_at = now_iso()
     deps.store.save(game)

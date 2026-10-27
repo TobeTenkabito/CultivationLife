@@ -58,6 +58,8 @@ def verify_ghost_controls(page, engine):
     game = engine.store.load(game.id)
     host = dict(id='host-a', name='沈青', race='human', path='dao', spirit_root='supreme_metal',
                 realm_index=3, layer=2, age=214, lifespan=730, combat_power=2000)
+    from cultivation_life.system.soul_lifecycle import leave_body
+    leave_body(game)
     enter_host_body(game.player, host)
     engine.store.save(game)
     page.evaluate('async id => loadGame(id)', game.id)

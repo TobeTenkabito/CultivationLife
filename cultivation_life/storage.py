@@ -100,6 +100,7 @@ class SaveStore:
                     "path": data['player'].get('path', 'dao'),
                     "alive": data['player'].get('alive', True),
                     "bytes": path.stat().st_size,
+                    "authored_count": len(data.get("authored_techniques", {}).get("own", {})),
                     "realm_name": REALMS[int(data['player'].get('realm_index', 0))].name,
                     "world_name": WORLD_SYSTEMS['world_names'].get(data['player'].get('world', 'human'), '未知界面'),
                     "path_name": PATH_NAMES.get(data['player'].get('path', 'dao'), '修行者'),

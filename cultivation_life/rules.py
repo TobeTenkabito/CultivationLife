@@ -615,7 +615,8 @@ def combat_power(player: Player) -> float:
         total *= 1.01
     total *= 1.0 + max(0.0, float(player.sage_effects.get("combat_multiplier", 0.0)))
     from .system.asura import inherited_power
-    return round(total + inherited_power(player), 1)
+    from .soul_rules import wandering
+    return round((total + inherited_power(player)) * (.35 if wandering(player) else 1.), 1)
 
 
 def recommended_combat_power(realm_index: int, layer: int) -> float:
@@ -815,6 +816,9 @@ def opportunity_multiplier(
     *, allow_untrained: bool = False,
 ) -> float:
     """原有效率保持独立，最后仅为当前主修乘上所在界面的气环境倍率。"""
+    from .soul_rules import wandering
+    if player.nascent_state.get('stagnant'):
+        return 0.
     root_efficiency = root_definition(player.spirit_root)["efficiency"]
     if (player.technique is None and not allow_untrained
             or player.technique is not None and not can_player_practice_technique(player, player.technique)):
@@ -837,6 +841,7 @@ def opportunity_multiplier(
         * modifier(player, "opportunity_efficiency", 1.0)
         * (1 + max(0.0, float(player.sage_effects.get("opportunity_multiplier", 0.0))))
         * (0.8 if player.concubine_status else 1.0)
+        * (1.25 if wandering(player) else 1.0)
     )
 
 

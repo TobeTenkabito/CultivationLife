@@ -151,8 +151,10 @@ class GhostPhaseTwoTests(unittest.TestCase):
         rate = player.ghost_soul_erosion_rate_pp = 0.25
         target = {"id": "host-a", "name": "沈青", "race": "human", "path": "dao", "spirit_root": "supreme_metal", "realm_index": 3, "layer": 2, "age": 214, "lifespan": 730, "combat_power": 2000}
         original_age = player.age
+        player.spirit_state = dict(mode='wandering',body_intact=False,entered=player.age,deadline=player.age+1,address={})
         allowed, _ = can_possess(player, target)
         self.assertTrue(allowed)
+        player.spirit_state = dict(mode='wandering',body_intact=False,entered=player.age,deadline=player.age+1,address={})
         enter_host_body(player, target)
         self.assertTrue(is_possessed(player))
         self.assertEqual(player.name, "沈青（无常）")
@@ -173,6 +175,8 @@ class GhostPhaseTwoTests(unittest.TestCase):
         game = self._game()
         target = {"id": "host-b", "name": "陆归尘", "race": "human", "path": "dao", "spirit_root": "supreme_wood", "realm_index": 0, "layer": 1, "combat_power": 1}
         self.assertEqual(possession_limit(game.player), 1)
+        from cultivation_life.system.soul_lifecycle import leave_body
+        leave_body(game, destroyed=True)
         enter_host_body(game.player, target)
         self.engine._die(game, "宿主寿尽", "SYS_LIFESPAN")
         self.assertTrue(game.player.alive)
@@ -300,6 +304,7 @@ class GhostPhaseTwoTests(unittest.TestCase):
             "spirit_root": "supreme_water", "realm_index": 3, "layer": 2,
             "age": 40, "lifespan": 500,
         }
+        player.spirit_state = dict(mode='wandering',body_intact=False,entered=player.age,deadline=player.age+1,address={})
         enter_host_body(player, target)
         self.assertEqual((player.age, current_body_age(player)), (800, 40))
         advance_player_age(player, 100)

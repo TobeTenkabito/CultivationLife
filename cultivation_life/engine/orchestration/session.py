@@ -35,7 +35,7 @@ def create_game(
     deps: SessionDependencies, name: str, spirit_root: str, path: str, seed: int | None = None,
     technique_element: str | None = None, preset_id: str | None = None,
     start_world: str | None = None, monster_species_id: str | None = None,
-    gender: str = "male", custom_start: dict | None = None, *, sync_natal=None,
+    gender: str = "male", custom_start: dict | None = None, *, sync_natal=None, authored_inheritance=None,
 ) -> dict[str, Any]:
     preset = next(
         (entry for entry in WORLD_SYSTEMS.get("quick_start_presets", []) if entry["id"] == preset_id),
@@ -217,6 +217,8 @@ def create_game(
         player.tribulation_power = float(thunder["base_power"])
     created = now_iso()
     game = GameState(str(uuid.uuid4()), actual_seed, player, created, created)
+    if authored_inheritance:
+        game.authored_techniques = copy.deepcopy(authored_inheritance)
     if WORLD_SYSTEMS['heavens_framework']['enabled']:
         from ...system.heavens.state import initialize
         initialize(game)
@@ -262,6 +264,8 @@ def create_game(
         from .dlc_birth import upper_path
         upper_path(game, custom)
         player.hp, player.mp = max_hp(player), max_mp(player)
+    from ...soul_rules import body_cap, soul_cap
+    player.body_energy, player.soul_energy = body_cap(player), soul_cap(player)
     game.history.append(HistoryRecord(
         "SYS_BIRTH", 1, player.age, "问道之始", None, "created",
         (

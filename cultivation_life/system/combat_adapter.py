@@ -40,7 +40,7 @@ def persistent_owners(game: GameState, keys: set[str]) -> dict[str, Any]:
     if game.family and pending:
         for npc in game.family.npcs:
             collect(npc.id, npc)
-    for group in (game.world_npcs, game.notable_npcs):
+    for group in (game.world_npcs, game.notable_npcs, game.inactive_npcs):
         for key in tuple(pending):
             if key in group:
                 collect(key, group[key])
@@ -69,6 +69,7 @@ class CapabilityBinding:
     battle: VoisinageBattle
     owners: dict[str, Any]
     resources: dict[str, NpcResourceBinding | ApertureResourceBinding]
+    now: float | None = None
 
     def commit(self, updates: list[dict[str, Any]], *, lethal: bool = False) -> None:
         for update in updates:
@@ -87,7 +88,8 @@ class CapabilityBinding:
                 state["current"] = update["current"]
             if update["id"] == "player":
                 continue
-            commit_condition(owner, update, lethal=lethal)
+            if commit_condition(owner, update, lethal=lethal, now=self.now):
+                update['body_escaped'] = True
 
 
 def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: dict[str, Any],
@@ -178,4 +180,4 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
     supplies = tuple(ResourceSupply(**row) for row in target.get("resource_supplies", []))
     seals = tuple(VoisinageSeal(**row) for row in target.get("voisinage_seals", []))
     return CapabilityBinding(VoisinageBattle(combatants, contest_ratio=float(config.get("contest_ratio", 1.25)),
-                                         supplies=supplies, seals=seals), owners, resources)
+                                         supplies=supplies, seals=seals), owners, resources, game.player.age)

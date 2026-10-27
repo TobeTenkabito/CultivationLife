@@ -16,8 +16,11 @@ def relationship_violence(deps: RelationshipViolenceDependencies, game_id, kind,
     if not player.alive or game.pending_event or game.active_trial or player.imprisonment:
         raise ValueError("请先结束当前事件或战斗")
     deps.assert_buddhist_operation_allowed(game_id, "relationship-violence")
-    if capture and (kind != 'npc' or player.path != 'demonic'):
-        raise ValueError("生擒修士须修习魔道；亲近之人须走关系生擒流程")
+    from ...soul_rules import can_capture
+    if capture and (kind != 'npc' or not can_capture(player)):
+        raise ValueError("生擒需魔修、神游或掌握第二元婴；亲近之人须先解除关系")
+    if player.nascent_state.get('refining', {}).get('id') == target_id:
+        raise ValueError('请先取消对此人的元婴炼化')
     stranger = None
     if kind == 'npc':
         stranger = deps._find_npc(game, target_id) or deps._promote_cached_npc(game, target_id, '交锋')

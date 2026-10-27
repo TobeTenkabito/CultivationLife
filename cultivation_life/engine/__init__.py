@@ -622,6 +622,37 @@ class GameEngine:
         self.store.save(game)
         return self.present(game)
 
+    def soul_action(self, game_id: str, action: str, payload: dict) -> dict[str, Any]:
+        import copy
+        from ..system.soul_actions import execute, SoulDependencies
+        from .transactions import accept_committed_game
+        game = copy.deepcopy(self._load(game_id))
+        rng = decode_rng(game.seed, game.rng_state)
+        deps = SoulDependencies(self._dependencies.advancement.year,
+                                self._dependencies.advancement.settlement, self._die)
+        execute(deps, game, action, payload, rng)
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        self.store.save(game)
+        accept_committed_game(self, game)
+        return self.present(game)
+
+    def authored_technique_action(self, game_id: str, action: str, payload: dict) -> dict[str, Any]:
+        from ..system import authored_techniques as authored
+        game = self._load(game_id)
+        if action == 'preview':
+            authored.require(game)
+            return authored.quote(game.player, payload.get('design', {}))
+        if action == 'create':
+            authored.create(game, payload.get('design', {}), payload.get('revision'))
+        elif action == 'manual':
+            authored.buy_manual(game, payload.get('id'), payload.get('level'), payload.get('revision'))
+        else:
+            raise ValueError('未知著经操作')
+        game.updated_at = now_iso()
+        self.store.save(game)
+        return self.present(game)
+
     def select_character_skin(self, game_id: str, skin_id: str = '') -> dict[str, Any]:
         from ..character_skins import choose
         game = self._load(game_id)
@@ -791,8 +822,8 @@ class GameEngine:
     def _race_alliance(game: GameState, world: str, first: str, second: str) -> dict[str, Any] | None:
         return combat_runtime._race_alliance(game, world, first, second)
 
-    def _die(self, game: GameState, reason: str, event_id: str, *, offer_captive_possession: bool=False) -> None:
-        return combat_runtime._die(self._dependencies.combat_runtime, game, reason, event_id, offer_captive_possession=offer_captive_possession)
+    def _die(self, game: GameState, reason: str, event_id: str, *, offer_captive_possession: bool=False, death_cause: str | None=None) -> None:
+        return combat_runtime._die(self._dependencies.combat_runtime, game, reason, event_id, offer_captive_possession=offer_captive_possession, death_cause=death_cause)
 
     @staticmethod
     def _snapshot(player: Player) -> dict[str, Any]:
@@ -918,8 +949,10 @@ class GameEngine:
         return heavens_operations.command(self._dependencies.heavens, game_id, command_seq,
                                            expected_revision, action, target_id, options)
 
-    def create_game(self, name: str, spirit_root: str, path: str, seed: int | None=None, technique_element: str | None=None, preset_id: str | None=None, start_world: str | None=None, monster_species_id: str | None=None, gender: str='male', custom_start: dict | None=None) -> dict[str, Any]:
-        return session.create_game(self._dependencies.session, name, spirit_root, path, seed, technique_element, preset_id, start_world, monster_species_id, gender, custom_start, sync_natal=self._sync_natal_artifact_bonuses)
+    def create_game(self, name: str, spirit_root: str, path: str, seed: int | None=None, technique_element: str | None=None, preset_id: str | None=None, start_world: str | None=None, monster_species_id: str | None=None, gender: str='male', custom_start: dict | None=None, inherit_from: str | None=None) -> dict[str, Any]:
+        from ..system.authored_techniques import inherit
+        inherited = inherit(self.store.load(inherit_from)) if inherit_from else None
+        return session.create_game(self._dependencies.session, name, spirit_root, path, seed, technique_element, preset_id, start_world, monster_species_id, gender, custom_start, sync_natal=self._sync_natal_artifact_bonuses, authored_inheritance=inherited)
 
     def advance(self, game_id: str, action: str, years: int=1) -> dict[str, Any]:
         return advancement.advance(self._dependencies.advancement, game_id, action, years)

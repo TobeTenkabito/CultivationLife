@@ -5,6 +5,8 @@ from .immortal_cultivation import grant_trace_chance
 
 
 def grant(player, amount, efficiencies, *, apply_efficiency=True):
+    if amount > 0 and player.nascent_state.get('stagnant'):
+        return 0.
     if amount > 0 and apply_efficiency:
         amount *= opportunity_multiplier(player, allow_untrained=True)
     before = player.opportunity

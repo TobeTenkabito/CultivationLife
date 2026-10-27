@@ -106,6 +106,7 @@ async function boot() {
 }
 
 function renderSaveList(saves) {
+  window.AuthoredTechniques?.lineages();
   const list = $('#save-list');
   list.replaceChildren();
   $('#save-count').textContent = saves.length ? `共 ${saves.length} 卷 · 最近落笔的旅程在前` : '尚无修行卷';
@@ -353,7 +354,7 @@ function renderQuickStarts(presets) {
 
 async function startQuickGame(presetId, monsterSpeciesId = null, path = null) {
   const form = new FormData($('#new-game-form'));
-  const payload = {name: form.get('name') || '', gender:form.get('gender') || 'male', preset_id: presetId, monster_species_id:monsterSpeciesId};
+  const payload = {inherit_from:form.get('inherit_from')||null, name: form.get('name') || '', gender:form.get('gender') || 'male', preset_id: presetId, monster_species_id:monsterSpeciesId};
   if (path) payload.path = path;
   if (form.get('seed')) payload.seed = Number(form.get('seed'));
   await mutate('/api/games', payload);
@@ -445,6 +446,8 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  window.AuthoredTechniques?.lineages();
+  window.UtilityPanels?.close('authored');
   window.EventScenes?.dispose();
   window.UtilityPanels?.close('trial-site');
   window.GameNavigation?.close({restoreFocus:false});
@@ -699,6 +702,8 @@ function render(data) {
   window.BuddhistWish?.render(data.buddhist_system || {}, data, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload));
   window.ImmortalAperturePanel?.render(data.aperture || {}, payload=>mutate(`/api/games/${data.id}/aperture-action`,payload),{pending:!!data.pending_event,alive:data.player.alive});
   window.UpperInstitutionPanel?.render(data,payload=>mutate(`/api/games/${data.id}/upper-institution`,payload));
+  window.SoulPanel?.render(data,payload=>mutate(`/api/games/${data.id}/soul`,payload));
+  window.AuthoredTechniques?.render(data,payload=>api(`/api/games/${data.id}/authored-technique`,{method:'POST',body:JSON.stringify(payload)}),payload=>payload.action==='upgrade'?mutate(`/api/games/${data.id}/technique-upgrade`,{technique_id:payload.id}):mutate(`/api/games/${data.id}/authored-technique`,payload));
   window.MonsterCivilizationsPanel?.render(data,payload=>api(`/api/games/${data.id}/civilizations-view`,{method:'POST',body:JSON.stringify(payload)}),payload=>mutate(`/api/games/${data.id}/civilizations-action`,payload));
   window.UpperVoisinagePanel?.render(data,payload=>mutate(`/api/games/${data.id}/upper-voisinage`,payload));
   window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
@@ -1877,6 +1882,7 @@ function renderFaction(faction) {
     if (npc.social_hint?.companion_name) addStatus('道侣', npc.social_hint.companion_name);
     if (npc.social_hint?.concubine_count) addStatus('侍妾', `${npc.social_hint.concubine_count} 人`);
     if (npc.treasure_name) addStatus('重宝', npc.treasure_name);
+    if (npc.learned_techniques?.length) addStatus('所学功法',npc.learned_techniques.map(t=>`${t.name} Lv.${t.level}`).join('、'));
     if (npc.main_technique_name) addStatus('主修功法', `${npc.main_technique_name} Lv.${npc.main_technique_level || 1}`);
     if (npc.combat_artifact_name) addStatus('主战法宝', npc.combat_artifact_name);
     identity.appendChild(status);
@@ -3330,7 +3336,7 @@ function renderDemonicSystem(system) {
     row.innerHTML = htmlText`<b>${person.name}</b><small>${person.gender_name || '性别未明'} · ${person.realm_name || `境界 ${person.realm_index}`} · ${person.path_name || person.path} · 战力 ${number(person.combat_power)} · 好感 ${number(person.affinity || 0)}</small>`;
     const tools = document.createElement('div'); tools.className = 'captive-tools';
     const actions = [['release','释放'],['torture','拷打']];
-    if (game?.ghost_system?.available && !game?.ghost_system?.suspended) actions.push(['possess','夺舍']);
+    if (game?.soul?.mode === '神游') actions.push(['possess','夺舍']);
     if (system.is_demonic) actions.push(['corpse','直接炼化'],['living','种下标记']);
     if (person.can_recruit_concubine) actions.push(['concubine','纳为侍妾']);
     actions.forEach(([action,label]) => {

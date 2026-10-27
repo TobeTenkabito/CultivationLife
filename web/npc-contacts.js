@@ -22,6 +22,7 @@ window.NpcContacts = (() => {
     header.append(el('span',n.name.slice(0,1),'contact-seal'));
     const title = el('div'); title.append(el('small',n.contact_source==='institution'?`机构往来 · ${n.institution_name||'机构'}`:n.contact_source==='fixed'?'世间留名 · 重要人物':n.contact_source==='sect'?'同门问道 · 宗门同道':n.contact_source==='important'?'故人留名 · 重要人物':'萍水相逢 · 一面之缘'),el('h3',n.name),el('p',`${n.realm_name} · ${n.path_name} · ${n.gender_name}`));header.append(title);target.append(header);
     target.append(el('p',`${relation(n) || '相识'} · 好感 ${Number(n.affinity || 0).toFixed(0)} · ${n.status}`,'contact-standing'));
+    target.append(el('p',`身魂状态：${n.spirit_state?.mode==='wandering'?'神游':'普通'}`,'muted'));
     if(n.cultivation_ranks) target.append(el('p',`炼体 ${n.cultivation_ranks.body.name} · 神识 ${n.cultivation_ranks.sense.name}`,'muted'));
     const tools = el('div',undefined,'contact-actions');
     for (const [action,label] of Object.entries(labels)) {

@@ -160,6 +160,14 @@ class Handler(BaseHTTPRequestHandler):
                 })
             elif path == "/api/ui-preferences":
                 self._json(load_ui_preferences(PERSISTENCE_ROOT))
+            elif path == '/api/authored-lineages':
+                from .system.authored_techniques import enabled
+                rows = []
+                if enabled():
+                    for entry in ENGINE.store.list_games():
+                        if entry.get('compatible') and entry.get('authored_count'):
+                            rows.append(dict(id=entry['id'],name=entry['name'],books=entry['authored_count'],updated_at=entry['updated_at']))
+                self._json(dict(available=enabled(), lineages=rows))
             elif path == '/api/domain-styles':
                 from .domain_styles import catalog, available, controls
                 from urllib.parse import parse_qs
@@ -239,7 +247,7 @@ class Handler(BaseHTTPRequestHandler):
                     payload.get("path", "dao"), payload.get("seed"), payload.get("technique_element", "neutral"),
                     payload.get("preset_id"), payload.get("start_world"),
                     payload.get("monster_species_id"),
-                    payload.get("gender", "male"), payload.get("custom_start"),
+                    payload.get("gender", "male"), payload.get("custom_start"), payload.get("inherit_from"),
                 )
                 if payload.get('tutorial_enabled') is True:
                     result = ENGINE.tutorial_action(result['id'], 'enable')
@@ -383,6 +391,10 @@ class Handler(BaseHTTPRequestHandler):
                     game_id, payload.get("item_id", ""), payload.get("mode", "direct"),
                     payload.get("stat_id", ""),
                 )
+            elif operation == 'soul':
+                result = ENGINE.soul_action(game_id, payload.get('action'), payload)
+            elif operation == 'authored-technique':
+                result = ENGINE.authored_technique_action(game_id, payload.get('action'), payload)
             elif operation == 'character-skin':
                 result = ENGINE.select_character_skin(game_id, payload.get('skin_id', ''))
             elif operation == "settings":

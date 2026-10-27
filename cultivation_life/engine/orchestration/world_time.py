@@ -14,6 +14,9 @@ from ...time_flow import TRAVEL_TIME, completed_action_units, settle_elapsed_tim
 def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     """Isolated year: same personal breakthrough, thunder and lifespan order."""
     p = game.player
+    from ...system.soul_lifecycle import tick
+    if not tick(game, rng, deps._die):
+        return False
     from ...system.economy.state import advance_economy
     if deps.advance_regions:
         deps.advance_regions(game, [])
@@ -57,6 +60,9 @@ def _advance_world_year(
     deps: WorldYearDependencies, game: GameState, rng: random.Random, era_news: list[str], *, encounters: bool = True,
 ) -> bool:
     player = game.player
+    from ...system.soul_lifecycle import tick
+    if not tick(game, rng, deps._die):
+        return False
     from ...system.economy.state import advance_economy
     if deps.advance_regions:
         deps.advance_regions(game, era_news)

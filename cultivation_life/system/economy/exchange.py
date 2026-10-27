@@ -69,6 +69,13 @@ def _open_exchange(deps: ExchangeDependencies, game, rng):
             demands=[dict(definition_id=wanted['id'], name=wanted['name'], quantity=quantity,
                           unit_value=int(wanted['base_material_value']))],
             demand_value=quantity * int(wanted['base_material_value']), completed=False, substitution_attempted=False))
+    from ..authored_techniques import market_offers
+    for book in market_offers(game,'exchange-')[:2]:
+        wanted=eligible[0]; unit=int(wanted['base_material_value']); quantity=max(1,math.ceil(book['price']/unit))
+        offers.append(dict(id=state['id']+book['id'],npc_alias='著经旧客',
+            reward={'name':book['name']},reward_kind='authored_technique',manual_id=book['content_id'],reward_value=book['price'],
+            demands=[dict(definition_id=wanted['id'],name=wanted['name'],quantity=quantity,unit_value=unit)],
+            demand_value=quantity*unit,completed=False,substitution_attempted=False))
     state.update(status="open", remaining=2, offers=offers)
     from ...content_registry import ROOT_BOOK_GOODS, ITEM_CATALOG
     books = [r for r in ROOT_BOOK_GOODS if r['world'] == state['world'] and r['tier'] <= max(4, tier + 1)]
@@ -165,6 +172,9 @@ def exchange_action(deps: ExchangeDependencies, game_id: str, action: str, paylo
             goods = ROOT_BOOK_GOODS if offer['reward_kind'] == 'root_book' else SECRET_MATERIAL_GOODS
             if not any(r['world'] == game.player.world and r['content_id'] == offer.get('item_id') for r in goods):
                 raise ValueError('交换书卷不属于当前会场')
+        if offer.get('reward_kind')=='authored_technique':
+            from ..authored_techniques import local_books
+            if offer.get('manual_id') not in local_books(game): raise ValueError('传承不属于当前会场')
         materials = {x["id"]: x for x in deps._exchange_materials(game)}
         selected = payload.get("materials", [])
         if not isinstance(selected, list) or not selected or len(selected) > 999:
@@ -205,6 +215,9 @@ def exchange_action(deps: ExchangeDependencies, game_id: str, action: str, paylo
             if offer.get('reward_kind') in {'root_book', 'secret_material'}:
                 from ...rules import add_item
                 add_item(game.player, offer['item_id'])
+            elif offer.get('reward_kind') == 'authored_technique':
+                from ..authored_techniques import grant_market
+                grant_market(game,offer['manual_id'])
             elif offer.get('reward_kind') == 'spirit_manual':
                 from ..spirit_voisinage import grant
                 grant(game, offer['manual_id'])

@@ -217,6 +217,9 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
         if not annual_person(game, npc):
             continue
         npc.age += 1
+        from ...system.npc_soul import settle as settle_soul
+        if not settle_soul(npc, game.player.age):
+            continue
         if deps._intrigue_is_imprisoned(game, npc.id):
             if npc.lifespan is not None and npc.age >= npc.lifespan:
                 npc.alive = False
@@ -480,6 +483,9 @@ def _resolve_npc_periodic_tribulation(
     world_cap = deps._tribulation_base_power_cap(npc.world)
     pressure = min(uncapped_pressure, world_cap) if world_cap is not None else uncapped_pressure
     preparedness = own_power / max(1.0, expected * 0.72 + pressure * 16)
+    from ...soul_rules import wandering
+    if wandering(npc):
+        preparedness /= 1.75
     success_chance = max(0.48, min(0.985, 0.62 + preparedness * 0.24))
     old_count = npc.tribulation_count
     npc.tribulation_count += 1

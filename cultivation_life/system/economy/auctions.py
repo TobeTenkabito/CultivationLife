@@ -185,6 +185,8 @@ def _open_auction(deps: AuctionsDependencies, game: GameState, rng: Any) -> None
             "sell_bargains":{},
         } for npc in candidates[:4]],
     })
+    from ..authored_markets import append_fair
+    append_fair(game, candidates)
     game.history.append(HistoryRecord(
         "SYS_AUCTION_OPEN", 1, game.player.age, "拍卖会开幕", state["location_id"], "open",
         f"{state['location_name']}拍卖会正式开幕，共有 {len(lots)} 件拍品登台。会内竞价与交涉不消耗时间。",
@@ -237,6 +239,8 @@ def consign_auction_item(deps: AuctionsDependencies, game_id: str, item_id: str,
     item = next((entry for entry in game.player.inventory if entry.id == item_id and entry.quantity > 0), None)
     if not item or item_id == "spirit_stone" or limited_trade_item(item_id):
         raise ValueError("该物品无法送拍")
+    if (item.technique_id or '').startswith('TECH_AUTHORED_'):
+        raise ValueError('自创传承玉简不可转售或寄拍')
     if item.crafted_artifact_id:
         raise ValueError("组合炼器法宝请使用包裹内该物品自己的寄拍按钮")
     tier = max((int(row['tier']) for row in MARKET_GOODS if row['kind'] == 'item' and row['content_id'] == item_id), default=1)
@@ -287,7 +291,8 @@ def place_auction_bid(deps: AuctionsDependencies, game_id: str, lot_id: str) -> 
         raise ValueError("该拍品已经结拍或不存在")
     if lot.get("seller") == "player":
         raise ValueError("不能竞拍自己送拍的物品")
-    if not deps._is_world_market_good(
+    from ..authored_markets import permitted
+    if not permitted(game,lot) and not deps._is_world_market_good(
         game.player.world, str(lot.get("kind", "")), str(lot.get("content_id", "")),
     ):
         raise ValueError("该拍品不属于当前世界，已被交易会撤下")
@@ -362,8 +367,9 @@ def _finish_auction(deps: AuctionsDependencies, game: GameState, rng: Any, reaso
     sold: list[str] = []
     unsold: list[str] = []
     commission = float(deps._auction_rules()["commission_rate"])
+    from ..authored_markets import permitted
     for lot in state.get("lots", []):
-        if lot.get("seller") != "player" and not deps._is_world_market_good(
+        if lot.get("seller") != "player" and not permitted(game,lot) and not deps._is_world_market_good(
             game.player.world, str(lot.get("kind", "")), str(lot.get("content_id", "")),
         ):
             if lot.get("current_bidder") == "player":
@@ -376,7 +382,11 @@ def _finish_auction(deps: AuctionsDependencies, game: GameState, rng: Any, reaso
             add_item(game.player, "spirit_stone", old_bid - int(lot["current_bid"]))
         lot["closed"] = True
         if lot.get("current_bidder") == "player":
-            deps._grant_auction_content(game.player, str(lot["kind"]), str(lot["content_id"]))
+            if lot['kind']=='authored_technique':
+                from ..authored_techniques import grant_market
+                grant_market(game,lot['content_id'])
+            else:
+                deps._grant_auction_content(game.player, str(lot["kind"]), str(lot["content_id"]))
             record_external(game, 'auction_escrow', f'background:{game.player.world}',
                             int(lot['current_bid']), '拍卖货款交割')
             purchased.append(f"{lot['name']}（{lot['current_bid']}灵石）")

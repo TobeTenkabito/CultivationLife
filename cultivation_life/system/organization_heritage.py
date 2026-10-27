@@ -157,7 +157,10 @@ def advance_member(game,entity,npc):
     if facts.get('at')==marker: return
     facts['at']=marker
     digest=hashlib.sha256(f'{game.seed}:{marker}:{npc.id}'.encode()).digest()
-    levels=facts.setdefault('levels',{})
+    from .npc_techniques import levels as learned_levels
+    levels=learned_levels(npc)
+    npc.technique_levels=levels
+    facts['levels']=levels
     actual=npc.main_technique_id
     if actual and actual not in levels: levels[actual]=npc.main_technique_level
     pool=research_pool(entity.world,npc.path,npc.realm_index)
@@ -195,7 +198,8 @@ def advance_member(game,entity,npc):
     body=npc.body_training or 0
     native_power=bool(npc.transcendence and npc.transcendence.get('conversion',0)>0)
     if t.category=='spiritual' and body>=t.required_body_training and (not t.requires_immortal_power or native_power) and (not current or t.combat_bonus>=current.combat_bonus):
-        npc.main_technique_id=identity;npc.main_technique_level=level+1
+        from .npc_techniques import learn
+        learn(npc,t,level+1,'main')
     if body>=t.required_body_training and (not t.requires_immortal_power or native_power):
         learned=copy.copy(t);learned.level=level+1
         bonus=max(0.,learned.combat_bonus*technique_scale(learned))

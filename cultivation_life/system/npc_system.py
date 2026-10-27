@@ -23,7 +23,8 @@ def npc_combat_power(
     root_factor = 0.82 + min(2.0, max(0.0, root_efficiency)) * 0.16
     progress_factor = 1.0 + min(0.12, max(0.0, npc.cultivation_progress) / 1000.0)
     treasure_power = float(treasure.combat_bonus) if treasure else 0.0
-    return round(expected_power(npc.realm_index, npc.layer) * root_factor * progress_factor + treasure_power, 1)
+    from ..soul_rules import wandering
+    return round((expected_power(npc.realm_index, npc.layer) * root_factor * progress_factor + treasure_power) * (.35 if wandering(npc) else 1.), 1)
 def party_combat_power(leader_power: float, companion_powers: Iterable[float]) -> float:
     companions = [max(0.0, float(value)) for value in companion_powers][:2]
     coefficient = 0.5 if len(companions) == 1 else 0.25 if len(companions) >= 2 else 0.0

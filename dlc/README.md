@@ -69,4 +69,7 @@ dlc/
 | [万灵争衡：百族兴衰](monster-civilizations/README.md) | 1.0.1 | `official.monster-civilizations` |
 | [圣人之道：内圣外王](sage-way/README.md) | 1.6.0 | `official.sage-way` |
 | [神机百变：巧夺天工](tianji-artifacts/README.md) | 2.2.1 | `official.tianji-artifacts` |
+| [著经立道](authored-techniques/README.md) | 1.0.0 | 自创功法、点数玉简、简单效果和一代传承 |
 | [万象试境：问道无涯](trial-sites/README.md) | 1.1.0 | `official.trial-sites` |
+
+《著经立道》1.0.0（official.authored-techniques）配套本体3.1.0，见[玩法](../docs/authored-techniques.md)。

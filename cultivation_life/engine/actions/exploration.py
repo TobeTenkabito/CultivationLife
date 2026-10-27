@@ -327,6 +327,8 @@ def train(deps: ExplorationDependencies, game, action, units):
         elif action == "sense_train":
             p.divine_sense_experience += deps.sense_step(p)
         elif action == 'rest':
+            from ...system.soul_lifecycle import restore
+            restore(p)
             p.hp = min(max_hp(p), p.hp + max_hp(p) * 0.05)
             p.mp = min(max_mp(p), p.mp + max_mp(p) * 0.05)
         if (

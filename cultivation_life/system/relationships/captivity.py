@@ -208,6 +208,8 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
     player = game.player
     if not player.alive or game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法处置俘虏")
+    if player.nascent_state.get('refining', {}).get('id') == target_id:
+        raise ValueError('请先在元婴界面取消炼化，再处置此俘虏')
     prisoner = next((entry for entry in player.prisoners if str(entry.get("id")) == target_id), None)
     disciple = None if prisoner else next(
         (entry for entry in player.disciples if str(entry.get("id")) == target_id and is_free(entry)), None,

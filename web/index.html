@@ -10,6 +10,8 @@
   <link rel="stylesheet" href="/panels.css?v=1.45.0">
   <link rel="stylesheet" href="/monster-civilizations.css?v=2100">
   <link rel="stylesheet" href="/character-skins.css?v=301">
+  <link rel="stylesheet" href="/authored-techniques.css?v=310">
+  <link rel="stylesheet" href="/soul.css?v=320">
   <link rel="stylesheet" href="/themes/common.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/composition.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/a.css?v=1.45.0">
@@ -61,6 +63,7 @@
         <label id="monster-species-field" class="hidden">妖修本源种<select name="monster_species_id" id="monster-species-select"></select><span>政治身份仍为妖族；本源种只决定生命谱系。</span></label>
         <label>出生界面<select name="start_world" id="start-world-select"></select></label>
         <label>天机数 <span>可留空</span><input name="seed" type="number" min="1" placeholder="随机"></label>
+        <label id="authored-lineage-field" class="hidden">前世著作<select name="inherit_from" id="authored-lineage"><option value="">不继承 · 从此世开始</option></select><span>只继承所选存档亲自创作的功法；须在黑市或交易会重新获得。</span></label>
         <button class="primary" type="submit">叩问长生</button>
       </form>
       <section class="save-library" aria-labelledby="save-library-title"><div class="save-library-heading"><div><p class="eyebrow">前尘有迹 · 道途可续</p><h3 id="save-library-title">我的修行卷</h3><p id="save-count" class="muted"></p></div><button type="button" data-save-import>导入存档</button></div><p class="save-library-note">行止皆自动落笔。续接旧旅程，或将存档码带往另一台设备。</p><div id="save-list" class="save-list"></div></section>
@@ -389,6 +392,8 @@
 <article id="immortal-aperture-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙窍"><div class="section-title"><h2>仙窍</h2><button id="immortal-aperture-toggle" type="button">关闭</button></div><div id="immortal-aperture-content" class="immortal-content"></div></article>
 <article id="spirit-voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="灵域"><div class="section-title"><h2>灵域</h2><button id="spirit-voisinage-toggle" type="button">关闭</button></div><div id="spirit-voisinage-content" class="immortal-content"></div></article>
 <article id="upper-institution-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="本界机构"><div class="section-title"><h2>本界机构</h2><button id="upper-institution-toggle" type="button">关闭</button></div><div id="upper-institution-content" class="immortal-content"></div></article>
+<article id="authored-card" class="paper utility-panel hidden" role="dialog" aria-label="著经立道"><div class="section-title"><h2>著经立道</h2><button id="authored-toggle" type="button">关闭</button></div><div id="authored-content"></div></article>
+<article id="nascent-card" class="paper utility-panel hidden" role="dialog" aria-label="第二元婴"><div class="section-title"><h2>第二元婴</h2><button id="nascent-toggle" type="button">关闭</button></div><div id="nascent-content"></div></article>
 <article id="civilizations-card" class="paper utility-panel hidden" role="dialog" aria-label="万灵图志"><div class="section-title"><h2>万灵图志</h2><button id="civilizations-toggle" type="button">关闭</button></div><div id="civilizations-content"></div></article>
 <article id="asura-conversion-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="煞元转化"><div class="section-title"><h2>煞元转化</h2><button id="asura-conversion-toggle" type="button">关闭</button></div><div id="asura-conversion-content" class="immortal-content"></div></article>
 <article id="asura-body-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="修罗之躯"><div class="section-title"><h2>修罗之躯</h2><button id="asura-body-toggle" type="button">关闭</button></div><div id="asura-body-content" class="immortal-content"></div></article>
@@ -526,6 +531,8 @@
         <button type="button" data-panel-target="secret-art" title="秘法"><span>秘</span><small>秘法</small></button>
         <button type="button" data-panel-target="transformation" title="变身管理"><span>变</span><small>变身</small></button>
         <button type="button" data-panel-target="bloodline" data-dlc="monster" title="妖修血脉" class="hidden bloodline-dock-button"><span>脉</span><small>血脉</small></button>
+        <button type="button" data-panel-target="authored" title="著经立道" class="hidden"><span>著</span><small>创法</small></button>
+        <button type="button" data-panel-target="nascent" title="第二元婴" class="hidden"><span>婴</span><small>元婴</small></button>
         <button type="button" data-panel-target="civilizations" title="万灵图志" class="hidden"><span>灵</span><small>万灵</small></button>
         <button type="button" data-panel-target="ghost-soul" data-dlc="ghost" title="三魂七魄" class="hidden ghost-dock-button"><span>魂</span><small>十魂</small></button>
         <button type="button" data-panel-target="ghost-attachment" data-dlc="ghost" title="附灵" class="hidden ghost-dock-button"><span>附</span><small>附灵</small></button>
@@ -643,6 +650,8 @@
   <script src="/asura-panel.js?v=1.56.2"></script>
   <script src="/upper-institution-panel.js?v=1.55.0"></script>
   <script src="/monster-civilizations.js?v=2100"></script>
+  <script src="/authored-techniques.js?v=310"></script>
+  <script src="/soul.js?v=320"></script>
   <script src="/character-skins.js?v=301"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>

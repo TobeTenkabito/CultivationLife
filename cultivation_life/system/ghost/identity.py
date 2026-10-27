@@ -38,6 +38,11 @@ def _post_battle_possession_candidates(game: GameState) -> list[dict[str, Any]]:
 
 
 def _prepare_post_battle_possession(deps: GhostIdentityDependencies, game: GameState, source_event: str) -> bool:
+    from ...soul_rules import wandering
+    if game.player.path == 'ghost' and not wandering(game.player):
+        from ..soul_lifecycle import leave_body
+        leave_body(game, destroyed=True)
+        game.player.hp = 0.
     candidates = deps._post_battle_possession_candidates(game)
     if not candidates:
         return False
@@ -178,6 +183,8 @@ def _capture_defeated_ghost(game: GameState, target: dict[str, Any], rng: random
     capture_chance = max(0.05, min(0.90, base))
     if rng.random() >= capture_chance:
         return False
+    from ..soul_lifecycle import leave_body
+    leave_body(game, destroyed=True)
     player.hp = 1.0
     player.mp = max(0.0, player.mp)
     player.ghost_attachment = None
@@ -212,6 +219,8 @@ def leave_possessed_body(deps: GhostIdentityDependencies, game_id: str) -> dict[
     if not player.alive:
         raise ValueError("此生已经结束")
     host = leave_host_body(player)
+    from ..soul_lifecycle import leave_body
+    leave_body(game, destroyed=True)
     player.hp = min(max(1.0, player.hp), max_hp(player)); player.mp = min(player.mp, max_mp(player))
     game.history.append(HistoryRecord(
         "SYS_POSSESSION_LEFT", 1, player.age, "离舍归魂", None, "left",

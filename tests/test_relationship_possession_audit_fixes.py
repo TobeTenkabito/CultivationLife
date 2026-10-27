@@ -14,6 +14,8 @@ from cultivation_life.system.possession_system import can_possess, enter_host_bo
 
 def captive_game(engine):
     game = new_game(engine, 'ghost', 4, 5)
+    from cultivation_life.system.soul_lifecycle import leave_body
+    leave_body(game)
     game.player.opportunity = 321
     npc = SectNpc('host-' + game.id, '宿身', '', 3, 1, 20, 900, path='dao', race='human', spirit_root='supreme_metal')
     game.notable_npcs[npc.id] = npc

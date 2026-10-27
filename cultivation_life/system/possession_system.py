@@ -37,6 +37,8 @@ def current_body_age(player: Player) -> int:
 
 def advance_player_age(player: Player, years: int = 1) -> None:
     """Advance world time and, while possessed, the host body in parallel."""
+    if player.nascent_state.get('crisis'):
+        raise ValueError('请先在人物详情处理神魂夺舍危机')
     elapsed = max(0, int(years))
     player.age += elapsed
     if is_possessed(player):
@@ -105,8 +107,11 @@ def possession_limit(player: Player) -> int | None:
 def can_possess(player: Player, target: dict[str, Any]) -> tuple[bool, str]:
     if not target.get("alive", True):
         return False, "目标已经陨落，无法夺舍"
-    if not has_ghost_core(player) or is_possessed(player):
-        return False, "只有未寄身的鬼修可以夺舍"
+    if target.get('spirit_state', {}).get('mode') == 'wandering' and not target['spirit_state'].get('body_intact'):
+        return False, '目标肉身已毁，无法夺舍无身元婴'
+    from ..soul_rules import wandering
+    if not wandering(player) or is_possessed(player):
+        return False, "只有神游且未寄身时可以夺舍"
     if player.cultivation_suppression:
         return False, "请先解除压制修为，再进行夺舍"
     if player.sealed_cultivation:
@@ -192,6 +197,9 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
     player.ghost_attachment = None
     player.ghost_captor = None
     player.possession_count += 1
+    player.spirit_state = {}
+    from ..soul_rules import body_cap
+    player.body_energy = body_cap(player) * .7
     player.milestones["ghost_possessions"] = int(player.milestones.get("ghost_possessions", 0)) + 1
     # The host starts wounded after the soul struggle, but alive.
     expected = max(30.0, REALMS[realm_index].base_power ** 0.5 * 16 + layer * 8)

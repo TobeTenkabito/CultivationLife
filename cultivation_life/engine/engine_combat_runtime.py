@@ -44,6 +44,10 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
         "player", player.name, "player", max(1.0, combat_power(player)),
         player.realm_index, player.path,
     )]
+    from ..system.second_nascent import unit
+    second = unit(game)
+    if second:
+        units.append(second)
     for puppet in player.puppets:
         kind = str(puppet.get("type", "mechanical"))
         if not usable_puppet(puppet, game) or kind not in {"mechanical", "corpse"}:
@@ -321,6 +325,16 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     if lethal and resolution.voisinage_lethal:
         player.hp = 0.0
     deps._apply_support_damage(player, resolution.support_updates)
+    from ..system.second_nascent import damage as damage_second
+    damage_second(game, resolution.support_updates)
+    from ..soul_rules import body_cap, soul_cap, wandering
+    if wandering(player):
+        player.soul_energy = max(0. if lethal else min(1., player.soul_energy), player.soul_energy - soul_cap(player) * min(1., hp_loss / max(1., hp_max)) * .5)
+    else:
+        player.body_energy = max(0. if lethal else min(1., player.body_energy), player.body_energy - body_cap(player) * min(1., hp_loss / max(1., hp_max)))
+    from ..system.soul_lifecycle import resolve_energy
+    resolve_energy(game, rng, lambda g, reason, event: deps._die(g, reason, event,
+        death_cause='combat' if target.get('non_story_combat') else 'story'))
     for puppet in player.puppets:
         if not puppet.get("alive", True):
             settle_puppet_person(game, puppet, outcome="dead", reason="活傀在战斗中被摧毁")
@@ -330,6 +344,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     resolved_captures = []
     if resolution.capability_updates:
         enemy_updates = {row["id"]: row for row in resolution.capability_updates if row["side"] == "enemy"}
+        target['body_escaped_ids'] = [key for key, row in enemy_updates.items() if row.get('body_escaped')]
         members = target.get("members") or [{
             "name": target["target_name"], "power": target_power,
             "realm_index": target["target_realm_index"], "npc_id": target.get("npc_id"),
@@ -345,7 +360,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
                 continue
             if update.get("suppressed"):
                 resolved_captures.append(key)
-            elif update.get("vitality", 1) <= 0 and lethal:
+            elif update.get("vitality", 1) <= 0 and lethal and not update.get('body_escaped'):
                 resolved_kills.append(member)
         if resolved_kills and target.get("combat_type") != "beast":
             summaries = []
@@ -404,10 +419,11 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             deps._die(
                 game, f"猎妖时不敌{target['target_name']}，身死道消", "SYS_BEAST_HUNT",
                 offer_captive_possession=bool(target.get("non_story_combat")),
+                death_cause='combat' if target.get('non_story_combat') else 'story',
             )
-            result = "dead"
+            result = "defeat_survived" if player.alive else "dead"
             deps._record_player_combat(game, target, resolution, result)
-            return result, lead + f"你未能完成对妖兽的压制，反被{target['target_name']}所杀。"
+            return result, lead + ('肉身毁去，元婴保住了一命；请尽快处理神游状态。' if player.alive else f"你未能完成对妖兽的压制，反被{target['target_name']}所杀。")
         result = "defeat"
         deps._record_player_combat(game, target, resolution, result)
         return result, lead + f"你未达到狩猎所需的 {threshold:.1f} 倍准备优势，预案自动护送你负伤退走。"
@@ -434,9 +450,12 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
                 deps._die(
                     game, f"不敌{target['target_name']}，身死道消", "SYS_COMBAT",
                     offer_captive_possession=can_take_captive,
+                    death_cause='combat' if target.get('non_story_combat') else 'story',
                 )
-            result = "controlled" if captured else "dead"
+            result = "controlled" if captured else "defeat_survived" if player.alive else "dead"
             deps._record_player_combat(game, target, resolution, result)
+            if result == 'defeat_survived':
+                return result, lead + '肉身毁去，元婴保住了一命；请尽快处理神游状态。'
             return result, lead + (
                 f"你败给{target['target_name']}，魂体被拘入禁制。"
                 if captured else (
@@ -496,6 +515,8 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
 def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[str, Any],
                         resolution: Any, victim: dict[str, Any], rng: random.Random, lead: str) -> tuple[str, str]:
     """Shared rewards and consequences for an actually resolved kill."""
+    if victim.get('npc_id') in target.get('body_escaped_ids', []):
+        return 'victory_escape', lead + f"{victim['name']}肉身已毁，元婴离体逃出，未结算击杀奖励。"
     player = game.player
     target["killed_member"] = victim
     fame_before = player.fame
@@ -731,13 +752,24 @@ def _race_alliance(game: GameState, world: str, first: str, second: str) -> dict
 def _die(
     deps: CombatDependencies, game: GameState, reason: str, event_id: str, *,
     offer_captive_possession: bool = False,
+    death_cause: str | None = None,
 ) -> None:
     if not game.player.alive:
         return
+    from ..system.soul_lifecycle import rescue, death_excluded, leave_body
+    if rescue(game, reason, event_id, death_cause):
+        return
+    from ..soul_rules import wandering
     from ..system.possession_system import is_possessed, leave_host_body
-    if is_possessed(game.player):
+    if (death_cause == 'combat' and not death_excluded(game, event_id, death_cause)
+            and game.player.realm_index >= 4 and not wandering(game.player) and not is_possessed(game.player)):
+        leave_body(game, destroyed=True)
+        game.pending_event = None
+        return
+    if is_possessed(game.player) and not death_excluded(game, event_id, death_cause):
         from ..rules import max_hp, max_mp
         host = leave_host_body(game.player)
+        leave_body(game, destroyed=True)
         game.player.hp = max(1.0, min(game.player.hp, max_hp(game.player)))
         game.player.mp = max(0.0, min(game.player.mp, max_mp(game.player)))
         game.pending_event = None

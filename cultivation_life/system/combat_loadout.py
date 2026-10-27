@@ -31,13 +31,15 @@ def _responses(entry, source):
 
 
 def public_loadout(game, npc):
+    from .npc_techniques import public, resolve
     key = read(npc, 'main_technique_id')
-    technique = TECHNIQUE_CATALOG.get(key)
+    technique = resolve(game, key)
     if technique is None and key:
         definition = game.doctrine_state.get('definitions', {}).get(key.split(':manual:')[0], {})
         technique = next((t for t in definition.get('manuals', ()) if t['id'] == key), None)
     artifact = ITEM_CATALOG.get(read(npc, 'combat_artifact_id'))
     return dict(main_technique_name=read(technique, 'name') if technique else None,
+                learned_techniques=public(game,npc),
                 combat_artifact_name=artifact.name if artifact else None)
 
 
@@ -56,7 +58,8 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
         artifacts.extend(active_crafted_artifacts(owner))
     else:
         key = read(owner, 'main_technique_id')
-        technique = TECHNIQUE_CATALOG.get(key)
+        from .npc_techniques import resolve
+        technique = resolve(game,key)
         if technique is None and key:
             # Generated ids include the parent doctrine; direct lookup avoids
             # traversing the 25-doctrine catalog for every combatant.
@@ -69,12 +72,19 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
         ward = 2 if npc_golden_light(owner) else 1
         resistance = .01 if ward == 2 else 0.0
         artifacts.extend(tianji_artifacts)
+        second = getattr(getattr(game, 'player', None), 'nascent_state', {}).get('second', {})
+        if second and second.get('id') == read(owner, 'id'):
+            from .npc_techniques import equipped
+            techniques = [book for _, book in equipped(game, owner) if book.active_in(read(owner, 'world'))]
+            artifacts = list(second['equipment'])
     if player:
         from .tianji_system import tianji_content_available
         if not tianji_content_available():
             artifacts = [a for a in artifacts if not read(a, 'tianji')]
     responses = tuple(r for t in techniques for r in _responses(t, 'technique')) + tuple(r for i in artifacts for r in _responses(i, 'artifact'))
-    return replace(source, technique_tier=max((_tier(t) for t in techniques), default=1),
+    from .authored_techniques import combat_rules
+    return replace(source, semantic_rules=source.semantic_rules + combat_rules(game, owner, player=player),
+                   technique_tier=max((_tier(t) for t in techniques), default=1),
                    artifact_tier=max((_tier(i) for i in artifacts), default=1), passive_ward_tier=ward,
                    body_voisinage_resistance=resistance,
                    interventions=responses[:8])

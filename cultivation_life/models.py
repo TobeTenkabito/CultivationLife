@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from .authored_technique_schema import validate_library as validate_authored_library
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -114,12 +115,15 @@ class Technique:
     effective_worlds: list[str] = field(default_factory=list)
     force_tier: int = 1
     combat_interventions: list[dict[str, Any]] = field(default_factory=list)
+    authored_buffs: list[dict[str, Any]] = field(default_factory=list)
     required_affinities: list[str] = field(default_factory=list)
 
     def active_in(self, world: str) -> bool:
         return not self.effective_worlds or world in self.effective_worlds
 
     def __post_init__(self) -> None:
+        from .authored_technique_schema import validate_buffs
+        validate_buffs(self.authored_buffs)
         self.level = max(1, min(9, int(self.level)))
         # 旧存档与未显式标注的内容按道统补齐先天“源”；一旦写入存档，
         # sources 就成为功法自身的固定数据，不随角色所在界面改变。
@@ -218,6 +222,8 @@ class SectNpc:
     # Combat loadout is distinct from the valuable treasure/drop slot.
     main_technique_id: str | None = None
     main_technique_level: int = 1
+    technique_levels: dict[str, int] = field(default_factory=dict)
+    technique_slots: dict[str, str] = field(default_factory=dict)
     combat_artifact_id: str | None = None
     combat_factor: float = 1.0
     faction_id: str | None = None
@@ -256,9 +262,16 @@ class SectNpc:
     # personal tolerance, not an economic wallet or a copied supply inventory.
     economic_lifespan_bonus: float = 0.0
     economic_provision_year: int | None = None
+    spirit_state: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         import math
+        from .soul_rules import validate_spirit
+        self.spirit_state = validate_spirit(self.spirit_state)
+        from .npc_technique_schema import normalize
+        self.technique_levels = normalize(self.technique_levels, self.main_technique_id, self.main_technique_level, self.family_traits)
+        if not isinstance(self.technique_slots, dict) or set(self.technique_slots) - {'support','combat','body','sense','transformation'} or any(k not in self.technique_levels for k in self.technique_slots.values()):
+            raise ValueError('人物功法配置无效')
         if (type(self.economic_lifespan_bonus) not in (int, float)
                 or not math.isfinite(self.economic_lifespan_bonus)
                 or not 0 <= self.economic_lifespan_bonus <= 320
@@ -276,6 +289,8 @@ class SectNpc:
 
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
+        from .npc_technique_schema import normalize
+        result['technique_levels'] = normalize(self.technique_levels,self.main_technique_id,self.main_technique_level,self.family_traits)
         if self.location_id is None:
             result.pop('location_id')
         return result
@@ -576,6 +591,11 @@ class Player:
     # simulation lives on GameState; this compact cache lets base combat and
     # breakthrough rules consume the currently active effects.
     character_skins: dict[str, Any] = field(default_factory=dict)
+    creation_insights: dict[str, Any] = field(default_factory=dict)
+    body_energy: float = 100.0
+    soul_energy: float = 100.0
+    spirit_state: dict[str, Any] = field(default_factory=dict)
+    nascent_state: dict[str, Any] = field(default_factory=dict)
     sage_effects: dict[str, float] = field(default_factory=dict)
     # 《圣人之道》内圣外王。等级实时由 haoran_exp 推导，不重复持久化。
     haoran_exp: float = 0.0
@@ -596,6 +616,16 @@ class Player:
         data = dict(normalize_content_references(value))
         from .character_skin_schema import validate as validate_skins
         data['character_skins'] = validate_skins(data.get('character_skins', {}))
+        from .authored_technique_schema import validate_insights
+        data['creation_insights'] = validate_insights(data.get('creation_insights', {}))
+        from .soul_rules import validate_spirit, validate_energy
+        from .soul_schema import validate_nascent
+        data['body_energy'] = validate_energy(data.get('body_energy', 100.0))
+        data['soul_energy'] = validate_energy(data.get('soul_energy', 100.0))
+        data['spirit_state'] = validate_spirit(data.get('spirit_state', {}))
+        data['nascent_state'] = validate_nascent(data.get('nascent_state', {}))
+        for equipment in (data['nascent_state'].get('second') or {}).get('equipment', []):
+            Item.from_dict(equipment)
         data['immortal_traces'] = max(0, int(data.get('immortal_traces', 0))) + sum(
             max(0, int(i.get('quantity', 0))) for i in data.get('inventory', []) if i.get('id') == 'immortal_trace')
         data['inventory'] = [i for i in data.get('inventory', []) if i.get('id') != 'immortal_trace']
@@ -971,6 +1001,7 @@ class GameState:
     # unique-body ownership and sparse NPC holders are frozen together here.
     tianji_state: dict[str, Any] = field(default_factory=dict)
     doctrine_state: dict[str, Any] = field(default_factory=dict)
+    authored_techniques: dict[str, Any] = field(default_factory=dict)
     yaochi_state: dict[str, Any] = field(default_factory=dict)
     monster_civilization_state: dict[str, Any] = field(default_factory=dict)
     settings: dict[str, bool] = field(default_factory=lambda: {
@@ -1077,6 +1108,7 @@ class GameState:
             "yaochi_state": self.yaochi_state,
             "monster_civilization_state": copy.deepcopy(self.monster_civilization_state),
             "doctrine_state": self.doctrine_state,
+            "authored_techniques": self.authored_techniques,
             "settings": self.settings,
             "map_war_last_encounter_unit": self.map_war_last_encounter_unit,
             "world_rules_version": self.world_rules_version,
@@ -1152,6 +1184,7 @@ class GameState:
             strategic_war_state=copy.deepcopy(value.get("strategic_war_state", {})),
             upper_institutions=copy.deepcopy(value.get("upper_institutions", {})),
             spatial_state=copy.deepcopy(value.get("spatial_state", {})),
+            authored_techniques=validate_authored_library(copy.deepcopy(value.get('authored_techniques', {}))),
             heavenly_court=dict(value.get("heavenly_court", {})),
             natal_artifact=dict(value.get("natal_artifact", {})),
             last_combat_report=value.get("last_combat_report"),

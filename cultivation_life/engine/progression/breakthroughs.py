@@ -42,6 +42,9 @@ from ..dependencies import BreakthroughDependencies
 
 def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng: random.Random) -> None:
     player = game.player
+    if player.nascent_state.get('stagnant'):
+        player.awaiting_major_breakthrough = player.awaiting_minor_breakthrough = False
+        return
     if player.cultivation_suppression:
         return
     if opportunity_unbounded(player):
@@ -196,6 +199,8 @@ def _manual_minor_layers(player: Player) -> set[int]:
 
 
 def _manual_breakthrough_kind(deps: BreakthroughDependencies, player: Player) -> str | None:
+    if player.nascent_state.get('stagnant'):
+        return None
     if player.world in {'rift', 'lost'}:
         return 'minor' if player.layer < realm(player).layers else 'major' if player.realm_index < len(REALMS)-1 else None
     from ...system.asura import active as asura_active, vein_ready as asura_vein_ready
@@ -602,6 +607,8 @@ def _resolve_heavenly_demon_battle(
 
 def _complete_major_breakthrough(deps: BreakthroughDependencies, game: GameState, rng: random.Random, old_label: str) -> None:
     player = game.player
+    if player.nascent_state.get('stagnant'):
+        return
     player.awaiting_major_breakthrough = False
     player.awaiting_minor_breakthrough = False
     player.heart_demon = max(0.0, player.heart_demon - 5)
@@ -652,6 +659,8 @@ def _complete_major_breakthrough(deps: BreakthroughDependencies, game: GameState
 
 def _complete_minor_breakthrough(deps: BreakthroughDependencies, game: GameState, rng: random.Random, old_label: str) -> None:
     player = game.player
+    if player.nascent_state.get('stagnant'):
+        return
     player.awaiting_minor_breakthrough = False
     player.heart_demon = max(0.0, player.heart_demon - 1)
     old_realm = realm(player)

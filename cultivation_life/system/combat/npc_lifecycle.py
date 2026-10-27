@@ -21,7 +21,7 @@ from .lifecycle_schema import (
 )
 
 
-def commit_condition(owner: Any, update: Mapping[str, Any], *, lethal: bool) -> None:
+def commit_condition(owner: Any, update: Mapping[str, Any], *, lethal: bool, now=None) -> bool | None:
     """Physical restoration and control have identical meaning in both callers."""
     if 'body' in update:
         wounds = min(4, max(0, int((1 - update['body']) / .15 + 1e-8)))
@@ -29,6 +29,9 @@ def commit_condition(owner: Any, update: Mapping[str, Any], *, lethal: bool) -> 
         wounds = max(read(owner, 'wounds', 0), min(4, int((1 - update['vitality']) * 4)))
     _write(owner, 'wounds', wounds)
     if lethal and update['vitality'] <= 0 and not update['suppressed'] and not update.get('escaped'):
+        from ..npc_soul import escape_body
+        if update.get('body', 1) <= 0 and escape_body(owner, now):
+            return True
         _write(owner, 'alive', False)
         _write(owner, 'death_reason', '仙域斗法中陨落')
 
@@ -61,6 +64,8 @@ def settle(owner: Any, now: float, config: Mapping[str, Any]) -> dict | None:
     changes discard the unknown interval; known movements must use move_world.
     Saved rates apply to the elapsed interval, new rules to subsequent time.
     """
+    from ..npc_soul import settle as settle_soul
+    settle_soul(owner, now)
     state = read(owner, "transcendence")
     if state is None:
         return None

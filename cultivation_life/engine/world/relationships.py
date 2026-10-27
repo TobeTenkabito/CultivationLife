@@ -93,6 +93,8 @@ def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, r
         treasure_item_id=next(iter(relation.get("items", {})), None),
         main_technique_id=relation.get('main_technique_id'),
         main_technique_level=int(relation.get('main_technique_level', 1)),
+        technique_levels=copy.deepcopy(relation.get('technique_levels', {})),
+        technique_slots=copy.deepcopy(relation.get('technique_slots', {})),
         combat_artifact_id=relation.get('combat_artifact_id'),
         next_tribulation_age=relation.get("next_tribulation_age"),
         tribulation_count=int(relation.get("tribulation_count", 0)),
@@ -443,6 +445,9 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
             continue
         child = next((row for row in player.offspring if row.get("id") == npc.id), None)
         npc.age += 1
+        from ...system.npc_soul import settle as settle_soul
+        if not settle_soul(npc, game.player.age):
+            continue
         tribulation = deps._resolve_npc_periodic_tribulation(game, npc, rng, family.name)
         if tribulation and family.world == player.world:
             news.append(f"{player.age}岁：{tribulation}")

@@ -176,6 +176,31 @@ def main():
         performance=json.loads((ROOT/'build/building-performance.json').read_text(encoding='utf-8'))
         if visits:require(all(r.get('visit_claims')==r['buildings'] and r.get('landscape_claims')==r['buildings'] and r.get('city_books')==r['buildings'] for r in performance['rows']),'Building visits performance must include persistent claim and finance records')
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
+    if scoped.get('profile')=='soul-lifecycle':
+        from scripts.verify_scoped_release import SOUL_TESTS
+        require(all(c.get('soul_verified') for c in evidence['cases']),'Soul compiled acceptance required with and without DLC')
+        require({name for shard in scoped['tests'] for name in shard}==set(SOUL_TESTS),'Soul related selection incomplete')
+        require({'browser_soul_lifecycle','browser_swimwear_skins','browser_authored_techniques','browser_events_212'}<={r['name'] for r in scoped['runs']},'Soul browser acceptance incomplete')
+        required={f'build/android-soul-lifecycle-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Soul Android 12 native scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Soul native test APK changed')
+        require(all('soul_lifecycle_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Soul native marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+    if scoped.get('profile')=='authored':
+        from scripts.verify_scoped_release import AUTHORED_TESTS, AUTHORED_BROWSERS
+        require(all(c.get('authored_verified') for c in evidence['cases']),'3.1.0 compiled acceptance required with and without DLC')
+        require({name for shard in scoped['tests'] for name in shard}==set(AUTHORED_TESTS),'3.1.0 related selection incomplete')
+        require(set(AUTHORED_BROWSERS)<={r['name'] for r in scoped['runs']},'3.1.0 real browser acceptance incomplete')
+        required={f'build/android-authored-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','3.1.0 native scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'3.1.0 native test APK changed')
+        require(all('authored_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'3.1.0 native marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='update301':
         from scripts.verify_scoped_release import UPDATE301_TESTS, UPDATE301_BROWSERS
         require(all(c.get('update301_verified') for c in evidence['cases']),'3.0.1 compiled acceptance required with and without DLC')
@@ -256,8 +281,8 @@ def main():
         code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     dlcs={p.parent.name:json.loads(p.read_text(encoding='utf-8'))['version'] for p in (ROOT/'dlc').glob('*/manifest.json')}
-    base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[10],
-              incompatible_save_schemas='1–9; no migration',dlc_versions=dlcs,
+    base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[SAVE_SCHEMA_VERSION],
+              incompatible_save_schemas=f'1–{SAVE_SCHEMA_VERSION-1}; no migration',dlc_versions=dlcs,
               validation_scope=scoped['scope'],tests=tests,runs=scoped['runs'],
               regression=regression,save_transfer_smoke_tests=int(extra[1]),
               save_transfer_smoke_in_regression=transfer_in_regression,
@@ -333,8 +358,9 @@ def main():
             z.write(ROOT/'build/common-goods-performance/report.md',f'performance-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.md',f'combat-calibration-{VERSION}.md')
             z.write(ROOT/'build/combat-calibration-2151/report.json',f'combat-calibration-{VERSION}.json')
-    if scoped.get('profile') in {'teachings','visual','combat-alpha','update301'}:
+    if scoped.get('profile') in {'teachings','visual','combat-alpha','update301','authored'}:
         updates=[('guixu-tide','归墟之潮'),('tianji-artifacts','巧夺天工')] if scoped['profile']=='combat-alpha' else [('guixu-tide','归墟之潮')] if scoped['profile']=='visual' else [('buddhist-dharma','诸法无我'),('sage-way','圣人之道')]
+        if scoped['profile']=='authored':updates=[('authored-techniques','著经立道')]
         if scoped['profile']=='update301':updates=[('monster-civilizations','万灵争衡')]
         if scoped.get('regression_scope')=='alpha4-focused':updates.append(('monster-bloodlines','万妖归宗'))
         if scoped.get('regression_scope')=='alpha5-focused':updates=[('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')]
@@ -347,11 +373,12 @@ def main():
                     if p.is_file() and '__pycache__' not in p.parts:
                         z.write(p,p.relative_to(ROOT).as_posix())
                 note='docs/alpha2-release.md' if scoped['profile']=='combat-alpha' else 'docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
+                if scoped['profile']=='authored':note='docs/authored-techniques.md'
                 if scoped['profile']=='update301':note='docs/release-301.md'
                 if package=='monster-bloodlines':note='docs/alpha4-release.md'
                 if scoped.get('regression_scope')=='alpha5-focused':note='docs/alpha5-release.md'
                 z.write(ROOT/note,note)
-                z.writestr('安装说明.txt',f'配套本体 v{VERSION}，仅支持结构 10。解压至游戏根目录，覆盖对应 dlc/{package} 文件夹；重启生效。旧本体需先升级；Android 请安装同版签名 APK。用户开关与存档不会被本包覆盖。\n')
+                z.writestr('安装说明.txt',f'配套本体 v{VERSION}，仅支持结构 {SAVE_SCHEMA_VERSION}。解压至游戏根目录，覆盖对应 dlc/{package} 文件夹；重启生效。旧本体需先升级；Android 请安装同版签名 APK。用户开关与存档不会被本包覆盖。\n')
                 z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc=package,version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
             with zipfile.ZipFile(destination) as z:
                 require(z.testzip() is None,'DLC archive damaged')

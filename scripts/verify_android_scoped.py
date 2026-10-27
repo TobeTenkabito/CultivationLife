@@ -27,6 +27,8 @@ def main():
     visual = '--visual' in sys.argv[2:]
     combat = '--combat-alpha' in sys.argv[2:]
     update301 = '--update301' in sys.argv[2:]
+    soul = '--soul-lifecycle' in sys.argv[2:]
+    authored = '--authored' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
     logs=([f'build/android-{phase}-{orientation}-{tag}.log' for phase in phases for orientation in ('portrait','landscape')]
@@ -58,11 +60,16 @@ def main():
         logs=[f'build/android-visual-ui-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if combat:
         logs=[f'build/android-combat-alpha-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
+    if authored:
+        logs=[f'build/android-authored-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if update301:
         logs=[f'build/android-update301-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
+    if soul:logs=[f'build/android-soul-lifecycle-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
+        if soul:require('soul_lifecycle_scope' in text,f'Missing soul native acceptance: {name}')
+        if authored:require('authored_scope' in text,f'Missing authoring native acceptance: {name}')
         if update301:require('update301_scope' in text,f'Missing 3.0.1 native skin and ecology acceptance: {name}')
         if visual and BASE_GAME_VERSION=='3.0.0-alpha.4':require('monster_visual_scope' in text,f'Missing alpha.4 native monster scope: {name}')
         if visual and BASE_GAME_VERSION=='3.0.0-alpha.5':require('path_character_scope' in text,f'Missing alpha.5 native path scope: {name}')
@@ -130,6 +137,8 @@ def main():
     if visits:receipt['scope']='Four-theme text gazetteer and expanded illustrations, real scenery/industry/temple visits, bounded insight, earned followup and original estate production; portrait/landscape'
     if visual:receipt['scope']='Optional pixel UI, original inventory commands, true natal sockets, eleven world maps, social portraits, domain editor and real domain battle replay; four themes, native portrait/landscape'
     if combat:receipt['scope']='User-requested focused combat CG, single/group defeat, Guixu factual use, true/replica intelligence, read-only replay and disposal; four themes, native portrait/landscape, not full repository'
+    if soul:receipt['scope']='Base soul energy, leave/return, study, real captive refinement, equipment and four-theme mobile layout; signed Android 12 portrait/landscape'
+    if authored:receipt['scope']='Authored DLC create, paid manual and upgrade, one-generation inheritance, four themes and contact art text containment; native portrait/landscape, focused scope'
     if update301:receipt['scope']='3.0.1 focused four-theme skin selection, actual earlier-form figure, unchanged gameplay and ecology observation; portrait/landscape, not full repository'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')

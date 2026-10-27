@@ -8753,6 +8753,203 @@
       ],
       "sha256": "e03ab85a2521395a1ed8a38a3f2e7834342a44d0a4f577436f1aff4e581d6f44",
       "requires": []
+    },
+    "actor.cosmetic.swim-sunny-female.figure": {
+      "file": "/assets/pixel/swimwear/swim-sunny-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f91593e4c6074f251c0afcb3ea721e934686a1c3867b8d0d808b8c26914cbe65",
+      "requires": []
+    },
+    "actor.cosmetic.swim-sunny-female.portrait": {
+      "file": "/assets/pixel/swimwear/swim-sunny-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "487825d6a00a18a643a6d7a659e29dd581ab194365a3b9191291a27d4946123b",
+      "requires": []
+    },
+    "actor.cosmetic.swim-sunny-female.thumbnail": {
+      "file": "/assets/pixel/swimwear/swim-sunny-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "fe4b2196a8d3a6d72ab4c9bf713e96ff0defac49ea25095d380f45203f0f7f91",
+      "requires": []
+    },
+    "swim-sunny-female.actions": {
+      "file": "/assets/pixel/swimwear/swim-sunny-female-actions.png",
+      "size": [
+        1740,
+        180
+      ],
+      "sha256": "a197c86dadc9180e13caeb18d66612299ad30949f93e4e8c3179ff1a6c6085c1",
+      "requires": []
+    },
+    "actor.cosmetic.swim-sunny-male.figure": {
+      "file": "/assets/pixel/swimwear/swim-sunny-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "b24331177cb268178b988760fd725d25d561ba0a26b943520f7b3ba1d8c7cc79",
+      "requires": []
+    },
+    "actor.cosmetic.swim-sunny-male.portrait": {
+      "file": "/assets/pixel/swimwear/swim-sunny-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "f10821b2304d67b451a842510618d374945c8926ad933a254b294b407f24ebac",
+      "requires": []
+    },
+    "actor.cosmetic.swim-sunny-male.thumbnail": {
+      "file": "/assets/pixel/swimwear/swim-sunny-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "343a00366731b768fb581165ea17c7696dc15c0174942bed99c1518177216d14",
+      "requires": []
+    },
+    "swim-sunny-male.actions": {
+      "file": "/assets/pixel/swimwear/swim-sunny-male-actions.png",
+      "size": [
+        1300,
+        180
+      ],
+      "sha256": "febe9b9e503b31d9f1e4b256f9c01eb442e817a8468d8cd82e8998bcf3449ccd",
+      "requires": []
+    },
+    "actor.cosmetic.swim-moon-female.figure": {
+      "file": "/assets/pixel/swimwear/swim-moon-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f64b491ebef8106eed9d9e9717b0376a4a004b0fb6ad9fa4ef4f9e981d1f9091",
+      "requires": []
+    },
+    "actor.cosmetic.swim-moon-female.portrait": {
+      "file": "/assets/pixel/swimwear/swim-moon-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "8f4e73776c1097f606942753957afa69d0384d867fba9e7903bb4eb97271e1a8",
+      "requires": []
+    },
+    "actor.cosmetic.swim-moon-female.thumbnail": {
+      "file": "/assets/pixel/swimwear/swim-moon-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "fcfa05a2b6f7840279638ddd0beb474681d709dcf15c8fadeeea27e5e86c672a",
+      "requires": []
+    },
+    "swim-moon-female.actions": {
+      "file": "/assets/pixel/swimwear/swim-moon-female-actions.png",
+      "size": [
+        1760,
+        176
+      ],
+      "sha256": "b820ad01c3f9f6616bf0cee79d4635565bf6598553f13888103cd6ca5e5fc35d",
+      "requires": []
+    },
+    "actor.cosmetic.swim-moon-male.figure": {
+      "file": "/assets/pixel/swimwear/swim-moon-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "3fabefd7d212e2cb04dc3121175444491a7f26681a0500ede01f27ee79d8295d",
+      "requires": []
+    },
+    "actor.cosmetic.swim-moon-male.portrait": {
+      "file": "/assets/pixel/swimwear/swim-moon-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "28a4b7cd68b059357b90e5b68ac574b51b2de1f84006d704d285dba2f077dbf2",
+      "requires": []
+    },
+    "actor.cosmetic.swim-moon-male.thumbnail": {
+      "file": "/assets/pixel/swimwear/swim-moon-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "cb4375e268e97d8a97288d5d990daabcd6eb6815963ecc4e3f0035c6a0de78c3",
+      "requires": []
+    },
+    "swim-moon-male.actions": {
+      "file": "/assets/pixel/swimwear/swim-moon-male-actions.png",
+      "size": [
+        1770,
+        180
+      ],
+      "sha256": "5f1e43c78cc5eba508d4dfe978467355be49c31022d2793835526d6f928e3505",
+      "requires": []
+    },
+    "base.swimwear_manifest": {
+      "file": "/assets/pixel/swimwear/manifest.json",
+      "sha256": "490d97b0f20d63caa8d206f0458ba83168d83646a448c7093e0458cf10dad2ee",
+      "requires": [],
+      "combat_actors": [
+        "swim-sunny-female",
+        "swim-sunny-male",
+        "swim-moon-female",
+        "swim-moon-male"
+      ],
+      "skin_forms": [
+        {
+          "name": "晴海轻游·女",
+          "gender": "female",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.swim-sunny-female",
+          "combat": "swim-sunny-female",
+          "unlock_label": "全道途通用 · 默认解锁"
+        },
+        {
+          "name": "晴海轻游·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.swim-sunny-male",
+          "combat": "swim-sunny-male",
+          "unlock_label": "全道途通用 · 默认解锁"
+        },
+        {
+          "name": "沧月流光·女",
+          "gender": "female",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 5,
+          "static": "actor.cosmetic.swim-moon-female",
+          "combat": "swim-moon-female",
+          "unlock_label": "全道途通用 · 化神期解锁"
+        },
+        {
+          "name": "沧月流光·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 5,
+          "static": "actor.cosmetic.swim-moon-male",
+          "combat": "swim-moon-male",
+          "unlock_label": "全道途通用 · 化神期解锁"
+        }
+      ]
     }
   },
   "items": {

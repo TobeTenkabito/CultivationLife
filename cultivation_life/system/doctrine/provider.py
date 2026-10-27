@@ -89,6 +89,8 @@ def _npc_record(game, npc):
         _write(npc, 'main_technique_id', record['manuals'][0])
     if read(npc, 'main_technique_id') in record.get('manuals', ()):
         _write(npc, 'main_technique_level', record.get('manual_level', 1))
+        from ..npc_techniques import levels
+        _write(npc, 'technique_levels', levels(npc))
     return record
 
 

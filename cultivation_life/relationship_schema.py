@@ -6,12 +6,12 @@ import copy
 SINGLE_RELATIONS = ('master', 'dao_companion')
 LIST_RELATIONS = ('disciples', 'dao_friends', 'disciple_requests', 'concubines', 'prisoners')
 PERSON_FIELDS = frozenset('''name realm_index layer age lifespan spirit_root cultivation_progress
-path race world alive death_reason affinity gender main_technique_id main_technique_level
+path race world alive death_reason affinity gender main_technique_id main_technique_level technique_levels technique_slots
 combat_artifact_id combat_factor next_tribulation_age tribulation_count tribulation_power
 concealed_realm_index concealed_layer transcendence body_training immortal_body_level
 divine_sense_rank monster_species_id asura_route faction_id departed_age departure_reason
 wounds treasure_item_id treasure_looted family_traits family_combat_bonus notorious notoriety
-encountered_player social_profile roster_state custody roster_origin'''.split())
+encountered_player social_profile roster_state custody roster_origin spirit_state'''.split())
 LABEL_FIELDS = frozenset(('realm_name', 'spirit_root_name', 'path_name', 'race_name', 'gender_name'))
 
 
@@ -80,6 +80,9 @@ def normalize_relationship_document(document, *, legacy=False):
         for key in ('affinity', 'main_technique_id'):
             if persons[identity].get(key) is None and row.get(key) is not None:
                 persons[identity][key] = copy.deepcopy(row[key])
+        learned=persons[identity].setdefault('technique_levels',{})
+        for book in row.get('techniques',[]):
+            if isinstance(book,str): learned.setdefault(book,1)
         for key in PERSON_FIELDS | LABEL_FIELDS:
             row.pop(key, None)
         row['id'] = identity

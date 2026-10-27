@@ -107,6 +107,9 @@ def _resolve_trial_step(deps: TrialDependencies, game: GameState, step: str, rng
         float(WORLD_SYSTEMS["demonic_cultivation"].get("periodic_thunder_damage_multiplier", 1.0))
         if kind == "periodic_thunder" and player.path == "demonic" else 1.0
     )
+    from ...soul_rules import wandering
+    if wandering(player) and kind in {'heavenly', 'periodic_thunder'}:
+        damage_multiplier *= 1.75
     hp_loss = max_hp(player) * rng.uniform(*drain_hp) * (1 - reduction) * damage_multiplier
     mp_loss = max_mp(player) * rng.uniform(*drain_mp) * (1 - reduction) * damage_multiplier
     player.hp = max(1.0, player.hp - hp_loss)
@@ -117,8 +120,10 @@ def _resolve_trial_step(deps: TrialDependencies, game: GameState, step: str, rng
         next_event = deps.events_by_id[event_ids[trial["step_index"]]]
         game.pending_event = deps._instantiate_event(next_event, game, rng)
         reduction_text = f"（法宝减伤 {reduction:.0%}）" if reduction else ""
-        if damage_multiplier > 1:
+        if kind == 'periodic_thunder' and player.path == 'demonic':
             reduction_text += "（魔修承受雷劫伤害 +20%）"
+        if wandering(player) and kind in {'heavenly', 'periodic_thunder'}:
+            reduction_text += '（神游承受天雷伤害 +75%）'
         return "trial_step_success", f"判定通过（{detail}）；劫力消耗 HP {hp_loss:.0f}、MP {mp_loss:.0f}{reduction_text}。"
 
     old_label = str(trial.get("old_label", public_player(player)["realm_name"]))

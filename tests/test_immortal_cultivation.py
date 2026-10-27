@@ -196,6 +196,9 @@ def test_insufficient_resources_cannot_partially_pay(prepared):
     engine, game, _ = prepared
     game.player.immortal_traces = 0
     engine.store.save(game)
+    # The fixture manually raises realm; establish its newly unlocked skins
+    # before taking the atomic-command snapshot.
+    engine.get_game(game.id)
     before = engine.store.load(game.id).player.to_dict()
     with pytest.raises(ValueError, match='不足'):
         engine.immortal_action(game.id, 'open_vein')

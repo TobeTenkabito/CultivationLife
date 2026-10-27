@@ -327,6 +327,8 @@ def gift_disciple(deps: RelationshipActionDependencies, game_id: str, disciple_i
         if content_id in taught:
             raise ValueError("这名弟子已经受过此法")
         taught.append(content_id)
+        from ...system.npc_techniques import learn
+        learn(disciple,technique)
         result = "disciple_taught_technique"
         summary = f"你为弟子{disciple['name']}拓印并讲授《{technique.name}》；你自身的功法不会失去。"
     else:
@@ -458,7 +460,9 @@ def manage_dao_companion(
                 raise ValueError("你尚未掌握这部功法")
             if not can_practice_technique(str(companion.get("spirit_root", "none")), technique):
                 raise ValueError("道侣的灵根无法修习这部功法")
-            companion["main_technique_id"] = technique.id
+            from ...system.npc_techniques import learn
+            slot='main' if technique.category=='spiritual' else {'body':'body','divine_sense':'sense','transformation':'transformation'}.get(technique.category)
+            learn(companion,technique,slot=slot)
             taught = companion.setdefault("techniques", [])
             if technique.id not in taught:
                 taught.append(technique.id)

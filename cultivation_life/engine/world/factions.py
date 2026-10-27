@@ -215,6 +215,9 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
             if not annual_person(game, npc):
                 continue
             npc.age += 1
+            from ...system.npc_soul import settle as settle_soul
+            if not settle_soul(npc, game.player.age):
+                continue
             if deps._intrigue_is_imprisoned(game, npc.id):
                 if npc.lifespan is not None and npc.age >= npc.lifespan:
                     npc.alive = False

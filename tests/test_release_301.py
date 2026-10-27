@@ -106,7 +106,7 @@ def test_monster_history_unlocks_only_attained_branches_and_disabled_dlc_hides_t
     saved = copy.deepcopy(p.to_dict())
     assert character_skins.appearance(p)['static'] == old
     with patch.object(registry, 'EXTENSION_REPORT', []):
-        assert character_skins.eligible_skins(p) == []
+        assert not any(s['id'].startswith('actor.monster.') for s in character_skins.eligible_skins(p))
         assert character_skins.appearance(p) is None
     assert p.to_dict() == saved
     assert character_skins.appearance(Player.from_dict(saved))['static'] == old

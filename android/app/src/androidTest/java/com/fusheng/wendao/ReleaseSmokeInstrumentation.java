@@ -452,6 +452,68 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("buildings_scope","22 city stories, four themes, real city construction and original inventory, stale material recovery, yearly government cap, named ruins, identity-preserving rebuild, bounded rewards and earned event followup; zero menu years");
     }
 
+    private void runSoulLifecycle(Bundle result) throws Exception {
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'身魂原生验收',spirit_root:'supreme_metal',path:'dao',seed:320,preset_id:'core'})}).then(g=>g.id)");
+        python(assetText("soul_release.py")+"\nfrom cultivation_life import server\nprepare_soul(server.ENGINE,"+JSONObject.quote(id)+")");
+        async("loadGame("+JSONObject.quote(id)+")");
+        tapSelector(".hud-identity");
+        tapSelector("[data-soul-action=leave]");waitForJs("!busy&&game.soul.mode==='神游'","Soul leave");
+        tapSelector("[data-soul-action=return]");waitForJs("!busy&&game.soul.mode==='普通'","Soul return");
+        check(Boolean.TRUE.equals(js("document.querySelectorAll('#soul-details progress').length===2")),"Two personal energy bars");
+        tapSelector("[data-close-dialog=player-details-dialog]");tapSelector("[data-panel-target=secret-art]");
+        tapSelector("#soul-secrets [data-soul-action=study]");waitForJs("!busy&&game.soul.secrets[0].known","Second soul secret");
+        tapSelector("#secret-art-toggle");tapSelector("[data-panel-target=nascent]");waitForPanelReady("#nascent-card");
+        for(int count=1;count<=3;count++) {
+            tapSelector("#nascent-content [data-soul-action=refine]");
+            waitForJs("!busy&&(!!game.soul.second||game.soul.refining?.years==="+count+")","Real captive refinement");
+        }
+        check(Boolean.TRUE.equals(js("game.soul.second.id==='release-nascent'")),"Original captive identity");
+        js("(()=>{const b=document.querySelector('[data-soul-action=equip]');b.parentElement.querySelector('select').value='release-soul-sword';return true;})()");
+        tapSelector("[data-soul-action=equip]");waitForJs("!busy&&game.soul.second.equipment.length===1","Actual equipment transfer");
+        for(String theme:new String[]{"a","b","d","f"}) {
+            tapSelector("#nascent-toggle");tapSelector("#theme-open");tapSelector("[data-theme-picker=dialog] [data-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector("[data-panel-target=nascent]");waitForPanelReady("#nascent-card");
+            check(Boolean.TRUE.equals(js("document.querySelector('#nascent-card').scrollWidth<=document.querySelector('#nascent-card').clientWidth+2")),"Soul panel fits native screen");
+            capture("soul-lifecycle-"+theme+"-"+arguments.getString("orientation"));
+        }
+        tapSelector("[data-soul-action=unequip]");waitForJs("!busy&&game.soul.second.equipment.length===0","Equipment returned once");
+        result.putString("soul_lifecycle_scope","Real personal energy bars, leave/return, secret study, original captive three-year refinement, equipment delivery/return and four themes; signed native portrait/landscape");
+    }
+
+    private void runAuthored(Bundle result) throws Exception {
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'创法原生验收',spirit_root:'supreme_metal',path:'dao',seed:310,preset_id:'core'})}).then(g=>g.id)");
+        python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\nfor t in g.player.known_techniques:t.level=9\ne.store.save(g)");
+        async("loadGame("+JSONObject.quote(id)+")");
+        tapSelector("[data-panel-target=authored]");waitForPanelReady("#authored-card");
+        js("(()=>{const n=document.querySelector('[data-authored-input=name]');n.value='原生回澜经';n.dispatchEvent(new Event('input',{bubbles:true}));const c=document.querySelector('[data-authored-input=category]');c.value='support';c.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
+        tapSelector("[data-author-add-buff]");
+        js("(()=>{let s=document.querySelectorAll('.at-buff select')[1];s.value='from_round';s.dispatchEvent(new Event('change'));s=document.querySelectorAll('.at-buff select')[2];s.value='restore';s.dispatchEvent(new Event('change'));let n=document.querySelectorAll('.at-buff input')[2];n.value='3';n.dispatchEvent(new Event('input'));return true;})()");
+        waitForJs("!document.querySelector('[data-author-create]').disabled","Authoring quote");
+        tapSelector("[data-author-create]");waitForJs("!busy&&AuthoredTechniques.ready()&&game.authored_techniques.books.length===1","Authoring committed");
+        tapSelector("[data-author-manual]");waitForJs("!busy&&AuthoredTechniques.ready()&&game.authored_techniques.revision===2","Paid manual committed");
+        tapSelector("[data-author-upgrade]");waitForJs("!busy&&AuthoredTechniques.ready()&&game.authored_techniques.books[0].level===2","Manual upgrade committed");
+        check(Boolean.TRUE.equals(js("document.querySelector('.at-book').textContent.includes('第3轮起')")),"Simple delayed effect is readable");
+        for(String theme:new String[]{"a","b","d","f"}) {
+            tapSelector("#authored-toggle");tapSelector("#theme-open");tapSelector("[data-theme-picker=dialog] [data-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector("[data-panel-target=authored]");waitForPanelReady("#authored-card");
+            check(Boolean.TRUE.equals(js("document.querySelector('#authored-card').scrollWidth<=document.querySelector('#authored-card').clientWidth+2")),"Authoring panel fits native screen");
+            capture("authored-"+theme+"-"+arguments.getString("orientation"));
+        }
+        tapSelector("#authored-toggle");tapSelector("#theme-open");
+        if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        tapSelector("[data-panel-target=relationship]");waitForPanelReady("#relationship-card");
+        js("(()=>{const n=document.querySelector('#npc-contacts input[type=search]');n.value='顾长庚';n.dispatchEvent(new Event('input',{bubbles:true}));return true;})()");
+        tapSelector(".contact-person");waitForJs("!!document.querySelector('.contact-detail .npc-art-figure')","Native NPC figure");
+        check(Boolean.TRUE.equals(js("['.contact-detail','.contact-hero'].every(s=>{const n=document.querySelector(s);return n.scrollWidth<=n.clientWidth+1})")),"Contact figure and text stay in frame");
+        capture("authored-contact-"+arguments.getString("orientation"));tapSelector("#relationship-toggle");
+        js("showStart();true");waitForJs("[...document.querySelector('#authored-lineage').options].some(o=>o.value==="+JSONObject.quote(id)+")","Current lineage selector");
+        js("document.querySelector('#authored-lineage').value="+JSONObject.quote(id)+";document.querySelector('#new-game-form input[name=name]').value='原生继承验收';true");
+        tapSelector("#new-game-form button[type=submit]");waitForJs("!busy&&game?.player.name==='原生继承验收'","New native playthrough",60000);
+        check(Boolean.TRUE.equals(js("game.authored_techniques.books.length===1&&!game.authored_techniques.books[0].own&&game.authored_techniques.books[0].level===0")),"Inherited definition does not grant learned book");
+        result.putString("authored_scope","Real create, simple round-three effect, paid manual, upgrade, one-generation new game; four themes and NPC art/text containment in native portrait/landscape");
+    }
+
     private void runUpdate301(Bundle result) throws Exception {
         String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'换装原生验收',spirit_root:'supreme_metal',path:'dao',gender:'female',seed:301,custom_start:{world:'spirit',realm_index:7}})}).then(g=>g.id)");
         python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\ne.store.save(g)");
@@ -800,7 +862,11 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("update301")) {
+            if(phase.equals("soul-lifecycle")) {
+                runSoulLifecycle(result);
+            } else if(phase.equals("authored")) {
+                runAuthored(result);
+            } else if(phase.equals("update301")) {
                 runUpdate301(result);
             } else if(phase.equals("combat-alpha")) {
                 runCombatAlpha(result);

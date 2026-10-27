@@ -7,3 +7,6 @@
 .skin-gallery img{max-width:100%;height:144px;object-fit:contain;image-rendering:pixelated}
 .skin-auto{display:grid;place-items:center;height:144px;font-size:1.5rem;letter-spacing:.3em;color:var(--muted)}
 .skin-gallery button:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
+.skin-unlock{font-size:.7rem;line-height:1.5;margin-top:5px;color:var(--muted);overflow-wrap:anywhere}
+.skin-gallery .skin-locked{opacity:.7;cursor:not-allowed}
+.skin-gallery .skin-locked img{filter:saturate(.3)}

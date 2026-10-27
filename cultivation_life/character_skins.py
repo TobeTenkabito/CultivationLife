@@ -19,6 +19,24 @@ def natural_appearance(player):
     return monster_appearance(player) or character_appearance(player)
 
 
+def _attained_realm(player):
+    return max(player.realm_index, (player.sealed_cultivation or {}).get('realm_index', 0),
+               (player.cultivation_suppression or {}).get('realm_index', 0))
+
+
+def _matches(player, form):
+    # Explicit cosmetic scope, never a wildcard for natural/bloodline forms.
+    if form.get('scope') == 'all_paths':
+        return form.get('gender') == player.gender
+    return all(form.get(k) == getattr(player, k) for k in ('path', 'race', 'gender'))
+
+
+def _skin_entry(key, form, assets):
+    return dict(id=key, static=key, combat=form.get('combat'), name=form.get('name', key),
+                thumbnail=assets.get(key+'.thumbnail', assets[key+'.figure'])['file'],
+                unlock_label=form.get('unlock_label', ''))
+
+
 def _catalog_forms(assets):
     forms = {}
     for entry in assets.values():
@@ -50,15 +68,14 @@ def _catalog_forms(assets):
 
 
 def eligible_skins(player):
-    """Only existing attained forms and recorded bloodline branches unlock art."""
+    """Attained forms, bloodline history and explicit universal cosmetic unlocks."""
     assets = _assets()
     forms = _catalog_forms(assets)
     unlocked = set(player.character_skins.get('unlocked', []))
     if not _blocked(player):
-        realm = max(player.realm_index, (player.sealed_cultivation or {}).get('realm_index', 0),
-                    (player.cultivation_suppression or {}).get('realm_index', 0))
+        realm = _attained_realm(player)
         for key, form in forms.items():
-            if (all(form.get(k) == getattr(player, k) for k in ('path', 'race', 'gender'))
+            if (_matches(player, form)
                     and form.get('min_realm_index', 0) <= realm and not form.get('monster_node')):
                 unlocked.add(key)
         if player.path == 'monster':
@@ -78,9 +95,10 @@ def eligible_skins(player):
     result = []
     for key in sorted(unlocked):
         form = forms.get(key)
+        if form and form.get('scope') == 'all_paths' and not _matches(player, form):
+            continue
         if form and key+'.portrait' in assets and key+'.figure' in assets:
-            result.append(dict(id=key, static=key, combat=form.get('combat'),
-                               name=form.get('name', key), thumbnail=assets.get(key+'.thumbnail', assets[key+'.figure'])['file']))
+            result.append(_skin_entry(key, form, assets))
     return result
 
 
@@ -105,7 +123,16 @@ def appearance(player):
 
 
 def public(player):
-    return dict(selected=player.character_skins.get('selected'), available=eligible_skins(player), blocked=_blocked(player))
+    available = eligible_skins(player)
+    known = {skin['id'] for skin in available}
+    assets = _assets()
+    locked = [_skin_entry(form['static'], form, assets) for entry in assets.values()
+              for form in entry.get('skin_forms', [])
+              if form.get('scope') == 'all_paths' and _matches(player, form) and form['static'] not in known
+              and form.get('min_realm_index', 0) > _attained_realm(player)
+              and form['static']+'.portrait' in assets and form['static']+'.figure' in assets]
+    return dict(selected=player.character_skins.get('selected'), available=available,
+                locked=locked, blocked=_blocked(player))
 
 
 def choose(player, identity):

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "api_version": 1,
+  "id": "official.authored-techniques",
+  "name": "著经立道",
+  "version": "1.0.0",
+  "kind": "dlc",
+  "enabled": true,
+  "load_order": 130,
+  "requires": [],
+  "description": "以所学化为创法点，编撰功法、刻录玉简，只传上一世之书。"
+}

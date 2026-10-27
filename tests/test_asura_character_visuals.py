@@ -23,7 +23,8 @@ OUT = ROOT/'dlc/asura-manifestation/assets/visual/characters'
 @pytest.mark.parametrize('gender', ['male', 'female'])
 def test_attained_rank_boundary_read_only_and_disabled(gender):
     p = Player(name='修罗外观', spirit_root='heavenly', path='demonic', gender=gender, realm_index=8, world='asura')
-    assert character_appearance(p) is None  # Visiting Asura does not grant the form.
+    base = dict(static=f'actor.path.demonic-integration-hero-{gender}', combat=f'demonic-integration-hero-{gender}')
+    assert character_appearance(p) == base  # Visiting Asura retains base art, never grants Asura art.
     p.realm_index = 9
     before = copy.deepcopy(p.to_dict()); rng = random.getstate()
     expected = dict(static=f'actor.path.asura-hero-{gender}', combat=f'asura-hero-{gender}')
@@ -38,8 +39,10 @@ def test_attained_rank_boundary_read_only_and_disabled(gender):
     assert character_appearance(p) == expected
     assert character_appearance(p, role='npc') is None
     with patch.object(registry, 'EXTENSION_REPORT', [r for r in registry.EXTENSION_REPORT if r['id'] != OWNER]):
-        assert character_appearance(p) is None
-    for key, value in [('race','monster'), ('path','dao'), ('gender','unknown'), ('transformed',True),
+        assert character_appearance(p) == base
+    assert character_appearance({**p.to_dict(), 'path': 'dao'}) == dict(
+        static=f'actor.path.dao-integration-hero-{gender}', combat=f'dao-integration-hero-{gender}')
+    for key, value in [('race','monster'), ('gender','unknown'), ('transformed',True),
                        ('ghost_host_body', {'id':'host'}), ('ghost_attachment', {'id':'host'}), ('identity_known',False)]:
         changed = {**p.to_dict(), key: value}
         assert character_appearance(changed) is None

@@ -211,6 +211,15 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
             player.next_tribulation_age = player.age + int(remaining) if remaining is not None else None
         player.sealed_cultivation = None
     player.world = plan.destination
+    from .soul_lifecycle import second_person
+    second = second_person(game)
+    if second and plan.mode == TransitionMode.PROGRESSION:
+        from .combat.npc_lifecycle import move_world
+        from ..content_registry import WORLD_SYSTEMS
+        move_world(second, plan.destination, player.age, WORLD_SYSTEMS.get('transcendent_combat', {}))
+    if second:
+        second.location_id = None
+    player.nascent_state.pop('refining', None)
     game.spatial_state['current'] = plan.destination_instance
     player.fame = player.fame_by_world.get(destination_scope, 0.0)
     player.location_id = plan.arrival_location

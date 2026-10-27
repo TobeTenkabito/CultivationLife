@@ -31,6 +31,8 @@ from ..dependencies import AdvancementDependencies
 def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int = 1) -> dict[str, Any]:
     game = deps._load(game_id)
     player = game.player
+    if player.nascent_state.get('crisis'):
+        raise ValueError('请先在人物详情处理神魂夺舍危机')
     if player.world in {'rift', 'lost'}:
         return deps._spatial_training(game, action, years)
     if not player.alive:
@@ -354,6 +356,14 @@ def _body_training_step(
 
 def _apply_action_resources(player: Player, action: str, pay_cost: bool) -> None:
     """Apply annual gains but charge negative HP/MP modifiers once per action unit."""
+    from ...system.soul_lifecycle import restore
+    from ...soul_rules import body_cap, soul_cap
+    if action == 'rest':
+        restore(player)
+    elif pay_cost and action == 'body_train':
+        player.body_energy = max(0., player.body_energy - body_cap(player) * .1)
+    elif pay_cost and action == 'sense_train':
+        player.soul_energy = max(0., player.soul_energy - soul_cap(player) * .1)
     for resource, maximum in (("hp", max_hp(player)), ("mp", max_mp(player))):
         if resource == "mp" and player.world == "celestial" and not player.immortal_power_converted:
             maximum *= max(0, min(5, player.immortal_conversion_stage)) / 5

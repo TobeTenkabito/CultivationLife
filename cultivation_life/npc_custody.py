@@ -103,7 +103,7 @@ def transfer_free_person(game, npc, faction=None):
 
 
 def detain_person(game, seed, npc_type, *, kind='prisoner'):
-    if kind not in {'prisoner', 'concubine', 'living_puppet'}:
+    if kind not in {'prisoner', 'concubine', 'living_puppet', 'second_nascent'}:
         raise ValueError('未知人物拘禁状态')
     identity = str(seed.get('npc_id') or seed.get('id') or '')
     npc = find_person(game, identity, include_inactive=True)
@@ -235,6 +235,8 @@ def settle_puppet_person(game, puppet, *, outcome, reason=''):
 def retire_owned_people(game):
     """Permanent departure ends ownership without fabricating deaths/rewards."""
     for npc in game.inactive_npcs.values():
+        if (npc.custody or {}).get('kind') == 'second_nascent':
+            continue
         if npc.roster_state == 'held' and (npc.custody or {}).get('holder_id') == game.id:
             npc.roster_state, npc.custody = 'retired', None
             sync_offspring(game, npc)

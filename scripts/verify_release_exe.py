@@ -42,6 +42,14 @@ def verify(with_dlc):
             else:
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
+            if '--soul-lifecycle' in sys.argv:
+                from scripts.verify_soul_exe import verify_soul
+                verify_soul(base, with_dlc, folder)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,soul_verified=True)
+            if '--authored' in sys.argv:
+                from scripts.verify_authored_exe import verify_authored
+                verify_authored(base, with_dlc)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,authored_verified=True)
             if '--update301' in sys.argv:
                 from scripts.verify_update301_exe import verify_update301
                 verify_update301(base, with_dlc)

@@ -22,7 +22,8 @@ def buy_private_trade_item(deps: PrivateTradeDependencies, game_id: str, npc_id:
     offer = next((row for row in attendee.get("trade_offers", []) if row["id"] == offer_id and not row.get("sold")), None)
     if not offer:
         raise ValueError("这件私人物品已经易主")
-    if not deps._is_world_market_good(
+    from ..authored_markets import permitted
+    if not permitted(game,offer) and not deps._is_world_market_good(
         game.player.world, str(offer.get("kind", "")), str(offer.get("content_id", "")),
     ):
         raise ValueError("这件货物不属于当前世界的流通范围")
@@ -30,7 +31,11 @@ def buy_private_trade_item(deps: PrivateTradeDependencies, game_id: str, npc_id:
     if balance(game,'player') < int(offer['price']):
         raise ValueError(f"私下交易需要 {offer['price']} 枚下品灵石")
     transfer_value(game,'player',f'background:{game.player.world}',int(offer['price']),'拍卖场私下购买（背景持有者收款）')
-    deps._grant_auction_content(game.player, str(offer["kind"]), str(offer["content_id"]))
+    if offer['kind']=='authored_technique':
+        from ..authored_techniques import grant_market
+        grant_market(game,offer['content_id'])
+    else:
+        deps._grant_auction_content(game.player, str(offer["kind"]), str(offer["content_id"]))
     offer["sold"] = True
     npc = deps._find_npc(game, npc_id)
     affinity_range = deps._auction_rules()["private_trade_buy_affinity_gain"]
@@ -59,6 +64,8 @@ def sell_private_trade_item(deps: PrivateTradeDependencies, game_id: str, npc_id
     item = next((row for row in game.player.inventory if row.id == item_id and row.quantity > 0), None)
     if not item or item_id == "spirit_stone":
         raise ValueError("这件物品无法私下出售")
+    if (item.technique_id or '').startswith('TECH_AUTHORED_'):
+        raise ValueError('自创传承玉简不可转售或寄拍')
     if item.crafted_artifact_id:
         raise ValueError("组合炼器法宝须按其唯一实例价值出售或寄拍")
     base = deps._plant_item_value(item) or deps._catalog_price("item", item_id)

@@ -34,7 +34,7 @@ def saved(tmp_path):
     return store, game
 
 
-@pytest.mark.parametrize('version', [None, True, '6', 6.0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, SAVE_SCHEMA_VERSION + 1, 999])
+@pytest.mark.parametrize('version', [None, True, '6', 6.0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, SAVE_SCHEMA_VERSION + 1, 999])
 def test_unsupported_versions_never_decode_or_rewrite(saved, monkeypatch, version):
     store, game = saved
     path = store._path(game.id)
@@ -68,29 +68,29 @@ def test_current_schema_read_is_pure_and_no_copy_migration_is_needed(saved, monk
 
 
 def test_future_migration_runner_orders_registered_steps_on_a_copy_once():
-    document = {'id': 'game', 'version': 10, 'nested': {'values': []}}
+    document = {'id': 'game', 'version': SAVE_SCHEMA_VERSION, 'nested': {'values': []}}
     calls = []
     def step(data):
         calls.append(data['version'])
         data['nested']['values'].append(data['version'])
-    converted = migrate_document(document, target=12, steps={10: step, 11: step})
-    assert calls == [10, 11]
-    assert converted == {'id': 'game', 'version': 12, 'nested': {'values': [10, 11]}}
-    assert document == {'id': 'game', 'version': 10, 'nested': {'values': []}}
-    assert migrate_document(converted, target=12, steps={10: step, 11: step}) is converted
-    assert calls == [10, 11]
+    converted = migrate_document(document, target=SAVE_SCHEMA_VERSION+2, steps={SAVE_SCHEMA_VERSION: step, SAVE_SCHEMA_VERSION+1: step})
+    assert calls == [SAVE_SCHEMA_VERSION, SAVE_SCHEMA_VERSION+1]
+    assert converted == {'id': 'game', 'version': SAVE_SCHEMA_VERSION+2, 'nested': {'values': [SAVE_SCHEMA_VERSION, SAVE_SCHEMA_VERSION+1]}}
+    assert document == {'id': 'game', 'version': SAVE_SCHEMA_VERSION, 'nested': {'values': []}}
+    assert migrate_document(converted, target=SAVE_SCHEMA_VERSION+2, steps={SAVE_SCHEMA_VERSION: step, SAVE_SCHEMA_VERSION+1: step}) is converted
+    assert calls == [SAVE_SCHEMA_VERSION, SAVE_SCHEMA_VERSION+1]
 
 
 def test_missing_migration_is_rejected_before_any_step_runs():
     step = Mock()
     with pytest.raises(ValueError, match='缺少'):
-        migrate_document({'version': 10}, target=12, steps={10: step})
+        migrate_document({'version': SAVE_SCHEMA_VERSION}, target=SAVE_SCHEMA_VERSION+2, steps={SAVE_SCHEMA_VERSION: step})
     step.assert_not_called()
 
 
 @pytest.mark.parametrize('corruption', ['raises', 'identity', 'version'])
 def test_failed_migrations_preserve_the_original_document(corruption):
-    document = {'id': 'game', 'version': 10, 'nested': []}
+    document = {'id': 'game', 'version': SAVE_SCHEMA_VERSION, 'nested': []}
     original = copy.deepcopy(document)
     def step(data):
         data['nested'].append('changed')
@@ -98,7 +98,7 @@ def test_failed_migrations_preserve_the_original_document(corruption):
             raise RuntimeError('Interrupted')
         data['id' if corruption == 'identity' else 'version'] = 'changed'
     with pytest.raises(RuntimeError):
-        migrate_document(document, target=11, steps={10: step})
+        migrate_document(document, target=SAVE_SCHEMA_VERSION+1, steps={SAVE_SCHEMA_VERSION: step})
     assert document == original
 
 

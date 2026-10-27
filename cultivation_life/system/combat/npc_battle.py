@@ -124,10 +124,10 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
     for update in battle.updates():
         npc = owners[update["id"]]
         resources[npc.id].commit(update["current"])
-        commit_condition(npc, update, lethal=True)
+        commit_condition(npc, update, lethal=True, now=now)
         if update["suppressed"]:
             suppressed.append(npc.id)
-        elif update["vitality"] <= 0:
+        elif update["vitality"] <= 0 and not npc.alive:
             killed.append(npc.id)
             npc.alive, npc.death_reason = False, "仙域斗法中陨落"
     return NpcEngagement(battle.verdict() or "stalemate", tuple(killed), tuple(suppressed), tuple(reports))
