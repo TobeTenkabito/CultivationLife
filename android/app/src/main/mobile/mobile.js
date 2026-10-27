@@ -25,7 +25,8 @@
     if (window.GameNavigation?.close()) return true;
     const confirm = document.querySelector('#game-confirm-backdrop:not(.hidden)');
     if (confirm) { closeGameConfirm(); return true; }
-    const dialog = document.querySelector('dialog[open]');
+    const dialogs = [...document.querySelectorAll('dialog[open]')];
+    const dialog = document.activeElement?.closest('dialog[open]') || dialogs[dialogs.length - 1];
     if (dialog) { dialog.close(); return true; }
     const panel = document.querySelector('.panel-open');
     if (panel) { window.UtilityPanels.close(panel.id.replace(/-card$/, '')); return true; }

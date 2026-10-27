@@ -481,6 +481,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("soul_lifecycle_scope","Real personal energy bars, leave/return, secret study, original captive three-year refinement, equipment delivery/return and four themes; signed native portrait/landscape");
         tapSelector("#nascent-toggle");
         runHolidaySkins(result);
+        runFrontierSkins(result);
     }
 
     private void runHolidaySkins(Bundle result) throws Exception {
@@ -513,6 +514,46 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             }
         }
         result.putString("holiday_skin_scope","Four unrestricted holiday skins selected via native taps, portraits, reload, real battle and costume attack renderer, portrait/landscape");
+    }
+
+    private void runFrontierSkins(Bundle result) throws Exception {
+        tapSelector("#theme-open");
+        if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        for(String gender:new String[]{"male","female"}) {
+            for(String style:new String[]{"frontier","swim-integration"}) {
+                int rank=style.equals("frontier")?1:7;
+                String world=rank==7?"spirit":"human";
+                String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'荒原原生',spirit_root:'supreme_metal',path:'dao',gender:"+JSONObject.quote(gender)+",seed:322,custom_start:{world:"+JSONObject.quote(world)+",realm_index:"+rank+"}})}).then(g=>g.id)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                String key="actor.cosmetic."+style+"-"+gender;
+                String effect="revolver";
+                tapSelector(".hud-identity");
+                capture("frontier-entry-"+style+"-"+gender+"-"+arguments.getString("orientation"));
+                tapSelector("#character-skins-open");
+                runOnMainSync(()->activity.onBackPressed());
+                waitForJs("!document.querySelector('#character-skins').open&&document.querySelector('#player-details-dialog').open","Back returns from wardrobe to details");
+                tapSelector("#character-skins-open");
+                if(rank<7)check(Boolean.TRUE.equals(js("document.querySelector("+JSONObject.quote("[data-skin-id=\"actor.cosmetic.swim-integration-"+gender+"\"]")+").disabled")),"Native rank-seven gate");
+                tapSelector("[data-skin-id='"+key+"']");
+                waitForJs("!busy&&game.player.character_skins.selected==="+JSONObject.quote(key),"Native unrestricted skin selection");
+                waitForJs("document.querySelector('.pixel-portrait').complete&&document.querySelector('.pixel-portrait').naturalWidth===128","Native frontier portrait decoded");
+                check(Boolean.TRUE.equals(js("document.querySelector('#character-skins').scrollWidth<=document.querySelector('#character-skins').clientWidth+2")),"Frontier wardrobe fits");
+                capture("frontier-"+style+"-"+gender+"-"+arguments.getString("orientation"));
+                tapSelector("#character-skins-close");tapSelector("[data-close-dialog=player-details-dialog]");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.player.character_skins.selected==="+JSONObject.quote(key))),"Native skin reload");
+                python(assetText("frontier_release.py")+"\nfrom cultivation_life import server\nfrontier_battle(server.ENGINE,"+JSONObject.quote(id)+")");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("#battle-report-open");
+                waitForJs("window.CombatReplay&&CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native frontier replay");
+                if(style.equals("frontier"))check(Boolean.TRUE.equals(js("(()=>{const original=SpellEffects;let found=false;window.SpellEffects={...original,draw(s,m,state,h){if(m.attacker?.actor.cast_effect==="+JSONObject.quote(effect)+"&&state.round&&state.time-state.round.contacts[0]>-.1&&state.time-state.round.contacts[0]<0)found=true;return original.draw(s,m,state,h);}};try{for(let t=0;t<CombatReplay.diagnostics().duration&&!found;t+=.025)CombatReplay.seek(t);return found;}finally{window.SpellEffects=original;}})()")),"Native costume attack effects");
+                else js("CombatReplay.seek(2.05);true");
+                capture("frontier-attack-"+style+"-"+gender+"-"+arguments.getString("orientation"));
+                tapSelector("#battle-report-toggle");
+            }
+        }
+        result.putString("frontier_skin_scope","Four frontier/swimwear skins, rank-seven gate, wardrobe beside art, portraits, reload, actual revolver renderer, signed portrait/landscape");
     }
 
     private void runAuthored(Bundle result) throws Exception {

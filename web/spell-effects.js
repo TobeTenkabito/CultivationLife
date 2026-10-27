@@ -34,6 +34,7 @@
   }
   function draw(s,m,state,{context,projectClip,natal}){
     const r=state.round;if(!r||!m.attacker)return;
+    if(window.FrontierEffects?.draw(s,m,state,{context,projectClip}))return;
     if(window.HolidayEffects?.draw(s,m,state,{context,projectClip}))return;
     const a=m.attacker,k=s.scale,dir=a.dir,p=palette(a.actor),local=state.time-r.start;
     const front=context(s.front),rear=context(s.rear),c=context(s.projectile),origin=a.hand,x=m.contact,y=m.hitY;

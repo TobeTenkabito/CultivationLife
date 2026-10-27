@@ -41,7 +41,7 @@ def test_all_paths_both_genders_real_rank_and_no_dlc_dependency(path, gender):
     with patch.object(registry, 'EXTENSION_REPORT', []):
         skins.choose(p, key('moon', gender))
         assert skins.appearance(p)['static'] == key('moon', gender)
-        assert not skins.public(p)['locked']
+        assert key('moon', gender) not in {s['id'] for s in skins.public(p)['locked']}
         with pytest.raises(ValueError):
             skins.choose(p, key('moon', 'male' if gender == 'female' else 'female'))
     saved = p.to_dict()

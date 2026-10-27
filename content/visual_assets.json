@@ -9147,6 +9147,203 @@
           "unlock_label": "全道途通用 · 默认解锁"
         }
       ]
+    },
+    "actor.cosmetic.frontier-male.figure": {
+      "file": "/assets/pixel/frontier/frontier-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "73c4506859224b20c66b210a7bf97e71b42b6dddf18e14351d9406a61539230e",
+      "requires": []
+    },
+    "actor.cosmetic.frontier-male.portrait": {
+      "file": "/assets/pixel/frontier/frontier-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "70e011a10401df89984dbf07c2708945b1b5ba0a591444e0f18701824dce47fd",
+      "requires": []
+    },
+    "actor.cosmetic.frontier-male.thumbnail": {
+      "file": "/assets/pixel/frontier/frontier-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "1a13715c0d446e28dad2bd12538e57ba8d33a3f21dfd793c3037cceb21ddefc0",
+      "requires": []
+    },
+    "frontier-male.actions": {
+      "file": "/assets/pixel/frontier/frontier-male-actions.png",
+      "size": [
+        1881,
+        360
+      ],
+      "sha256": "d6d693b95e781d9aa86684274094b8a0d5355fa5b74f0a52f35ab7d7ab54a1bf",
+      "requires": []
+    },
+    "actor.cosmetic.frontier-female.figure": {
+      "file": "/assets/pixel/frontier/frontier-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "a03d02cd6b4a6566b40782faf5e3637d6511a059c412c970aa0c659d9a699990",
+      "requires": []
+    },
+    "actor.cosmetic.frontier-female.portrait": {
+      "file": "/assets/pixel/frontier/frontier-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "037e6facf87b1fc6617d91cce531830b75cb2ecceda286f19ac868623fc6aa51",
+      "requires": []
+    },
+    "actor.cosmetic.frontier-female.thumbnail": {
+      "file": "/assets/pixel/frontier/frontier-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "1031f8ef58536bfc2bd30fdce7a0e730e4de1f8b278de81ab4c2fe4d0241ecd9",
+      "requires": []
+    },
+    "frontier-female.actions": {
+      "file": "/assets/pixel/frontier/frontier-female-actions.png",
+      "size": [
+        1936,
+        360
+      ],
+      "sha256": "4506920eef2f8b70e9e8ce3a355a03aeacadf185dbfa20ad730421f5caad4370",
+      "requires": []
+    },
+    "actor.cosmetic.swim-integration-male.figure": {
+      "file": "/assets/pixel/frontier/swim-integration-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "11db2c95bb3c1ec04c0da35101c7bdf7f1cf9f1a64ca03668e2b8db57beb7985",
+      "requires": []
+    },
+    "actor.cosmetic.swim-integration-male.portrait": {
+      "file": "/assets/pixel/frontier/swim-integration-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "fec9a8ec8abfaa2fd09c01e66cfafb7a6ca4d7dc05ba84c2870174745c33b905",
+      "requires": []
+    },
+    "actor.cosmetic.swim-integration-male.thumbnail": {
+      "file": "/assets/pixel/frontier/swim-integration-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "1b477fb9ce62ee69fd10400a90de5355aa6155e15ec3ea94899a91e66404aaf3",
+      "requires": []
+    },
+    "swim-integration-male.actions": {
+      "file": "/assets/pixel/frontier/swim-integration-male-actions.png",
+      "size": [
+        1560,
+        180
+      ],
+      "sha256": "213e790001a967087305a14e0fd3398140798aee236121498bb323b338158cd7",
+      "requires": []
+    },
+    "actor.cosmetic.swim-integration-female.figure": {
+      "file": "/assets/pixel/frontier/swim-integration-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "9b12a276db3676a36905152759ea39d36ea91661ee222ce431cea70a94635ccb",
+      "requires": []
+    },
+    "actor.cosmetic.swim-integration-female.portrait": {
+      "file": "/assets/pixel/frontier/swim-integration-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b543cc6397d24c2601cd587ca1fd80d41783cd308442cb3f73f4ac30fc99c09c",
+      "requires": []
+    },
+    "actor.cosmetic.swim-integration-female.thumbnail": {
+      "file": "/assets/pixel/frontier/swim-integration-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "b191912ff830caefb3d38847d481fbb59bf796f11e8fd9c6c53299ef0501ac20",
+      "requires": []
+    },
+    "swim-integration-female.actions": {
+      "file": "/assets/pixel/frontier/swim-integration-female-actions.png",
+      "size": [
+        1540,
+        180
+      ],
+      "sha256": "fa690b932883aa0fde73addbf46658d493c7da06be781c8107439aeb73b8a51a",
+      "requires": []
+    },
+    "base.frontier_manifest": {
+      "file": "/assets/pixel/frontier/manifest.json",
+      "sha256": "58f7d48b50d4bf7a97de9455c81dc80a8ccc9b93610545376d3cdbb1bcb7351e",
+      "requires": [],
+      "combat_actors": [
+        "frontier-male",
+        "frontier-female",
+        "swim-integration-male",
+        "swim-integration-female"
+      ],
+      "skin_forms": [
+        {
+          "name": "荒原逐日·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.frontier-male",
+          "combat": "frontier-male",
+          "unlock_label": "全道途通用 · 默认解锁"
+        },
+        {
+          "name": "荒原逐日·女",
+          "gender": "female",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.frontier-female",
+          "combat": "frontier-female",
+          "unlock_label": "全道途通用 · 默认解锁"
+        },
+        {
+          "name": "沧溟曜金·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 7,
+          "static": "actor.cosmetic.swim-integration-male",
+          "combat": "swim-integration-male",
+          "unlock_label": "全道途通用 · 合体期解锁"
+        },
+        {
+          "name": "沧溟曜金·女",
+          "gender": "female",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 7,
+          "static": "actor.cosmetic.swim-integration-female",
+          "combat": "swim-integration-female",
+          "unlock_label": "全道途通用 · 合体期解锁"
+        }
+      ]
     }
   },
   "items": {

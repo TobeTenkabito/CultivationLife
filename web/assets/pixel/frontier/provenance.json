@@ -1,0 +1,826 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "export": "Original painted RGBA, nearest-neighbour packing; no anatomy reconstruction",
+  "forms": 4,
+  "static_images": 12,
+  "painted_keyposes": 48,
+  "animation_clips": 28,
+  "sources": [
+    {
+      "id": "frontier-male",
+      "source": "frontier-male.png",
+      "sha256": "c644cfe8ba7345b8b13840b828608c6da3f30ebd617b8994e8f6172031045712",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            78,
+            932,
+            234,
+            1234
+          ],
+          "scale": 0.9006622516556292
+        },
+        "portrait": {
+          "source_rect": [
+            319,
+            929,
+            626,
+            1239
+          ],
+          "scale": 0.36129032258064514
+        },
+        "thumbnail": {
+          "source_rect": [
+            78,
+            932,
+            234,
+            1234
+          ],
+          "scale": 0.423841059602649
+        },
+        "idle": {
+          "source_rect": [
+            76,
+            7,
+            233,
+            309
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            151,
+            97
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            348,
+            11,
+            553,
+            309
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            138,
+            99
+          ]
+        },
+        "aim": {
+          "source_rect": [
+            660,
+            12,
+            938,
+            309
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            119,
+            99
+          ]
+        },
+        "release": {
+          "source_rect": [
+            979,
+            13,
+            1240,
+            309
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            123,
+            100
+          ]
+        },
+        "recoil": {
+          "source_rect": [
+            60,
+            316,
+            263,
+            619
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            139,
+            96
+          ]
+        },
+        "recover": {
+          "source_rect": [
+            363,
+            321,
+            612,
+            619
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            127,
+            99
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            685,
+            341,
+            927,
+            612
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            128,
+            113
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            999,
+            318,
+            1203,
+            616
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            138,
+            99
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            71,
+            635,
+            294,
+            917
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            133,
+            107
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            370,
+            683,
+            614,
+            899
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            128,
+            142
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            666,
+            710,
+            925,
+            898
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            124,
+            157
+          ]
+        },
+        "down": {
+          "source_rect": [
+            926,
+            788,
+            1251,
+            887
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            106,
+            204
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            702,
+            897,
+            890,
+            1238
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            143,
+            76
+          ]
+        },
+        "holster": {
+          "source_rect": [
+            1004,
+            940,
+            1193,
+            1237
+          ],
+          "scale": 0.5278592375366569,
+          "offset": [
+            142,
+            99
+          ]
+        }
+      }
+    },
+    {
+      "id": "frontier-female",
+      "source": "frontier-female.png",
+      "sha256": "a911f87f983c87d56930a43e9e72b9ac5133087865aa0a7f33252f08a6772d4b",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            87,
+            910,
+            220,
+            1244
+          ],
+          "scale": 0.8143712574850299
+        },
+        "portrait": {
+          "source_rect": [
+            309,
+            922,
+            637,
+            1245
+          ],
+          "scale": 0.34674922600619196
+        },
+        "thumbnail": {
+          "source_rect": [
+            87,
+            910,
+            220,
+            1244
+          ],
+          "scale": 0.38323353293413176
+        },
+        "idle": {
+          "source_rect": [
+            80,
+            4,
+            225,
+            330
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            154,
+            85
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            366,
+            5,
+            537,
+            330
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            148,
+            86
+          ]
+        },
+        "aim": {
+          "source_rect": [
+            681,
+            5,
+            949,
+            331
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            122,
+            85
+          ]
+        },
+        "release": {
+          "source_rect": [
+            988,
+            6,
+            1244,
+            331
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            125,
+            86
+          ]
+        },
+        "recoil": {
+          "source_rect": [
+            51,
+            328,
+            270,
+            652
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            135,
+            86
+          ]
+        },
+        "recover": {
+          "source_rect": [
+            361,
+            345,
+            633,
+            653
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            121,
+            95
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            674,
+            353,
+            878,
+            653
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            139,
+            99
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            1050,
+            329,
+            1198,
+            649
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            154,
+            89
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            41,
+            653,
+            289,
+            915
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            127,
+            119
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            401,
+            675,
+            576,
+            920
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            146,
+            128
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            676,
+            712,
+            881,
+            900
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            139,
+            158
+          ]
+        },
+        "down": {
+          "source_rect": [
+            918,
+            789,
+            1254,
+            894
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            104,
+            201
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            714,
+            903,
+            884,
+            1247
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            148,
+            76
+          ]
+        },
+        "holster": {
+          "source_rect": [
+            1021,
+            919,
+            1176,
+            1245
+          ],
+          "scale": 0.5232558139534884,
+          "offset": [
+            152,
+            85
+          ]
+        }
+      }
+    },
+    {
+      "id": "swim-integration-male",
+      "source": "swim-integration-male.png",
+      "sha256": "1fbe1f74fc2bc307c84e9075a1b6a000b4dac9dd72649d178ec75552d3deb53a",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            92,
+            1094,
+            248,
+            1508
+          ],
+          "scale": 0.6570048309178744
+        },
+        "portrait": {
+          "source_rect": [
+            302,
+            1093,
+            724,
+            1519
+          ],
+          "scale": 0.26291079812206575
+        },
+        "thumbnail": {
+          "source_rect": [
+            92,
+            1094,
+            248,
+            1508
+          ],
+          "scale": 0.30917874396135264
+        },
+        "idle": {
+          "source_rect": [
+            109,
+            2,
+            257,
+            383
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            161,
+            93
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            432,
+            9,
+            590,
+            382
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            158,
+            97
+          ]
+        },
+        "release": {
+          "source_rect": [
+            725,
+            17,
+            991,
+            382
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            135,
+            100
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            57,
+            401,
+            329,
+            756
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            134,
+            104
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            417,
+            410,
+            610,
+            754
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            151,
+            109
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            731,
+            415,
+            983,
+            755
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            138,
+            111
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            94,
+            767,
+            260,
+            1087
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            157,
+            119
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            374,
+            843,
+            640,
+            1076
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            135,
+            156
+          ]
+        },
+        "down": {
+          "source_rect": [
+            654,
+            943,
+            1019,
+            1049
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            114,
+            211
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            764,
+            1094,
+            988,
+            1515
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            144,
+            76
+          ]
+        }
+      }
+    },
+    {
+      "id": "swim-integration-female",
+      "source": "swim-integration-female.png",
+      "sha256": "9777ef14085ee9b14a99dc9776a3fe7cea5bb30db66136450e41810e284fc545",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            95,
+            1098,
+            255,
+            1505
+          ],
+          "scale": 0.6683046683046683
+        },
+        "portrait": {
+          "source_rect": [
+            321,
+            1094,
+            703,
+            1518
+          ],
+          "scale": 0.2641509433962264
+        },
+        "thumbnail": {
+          "source_rect": [
+            95,
+            1098,
+            255,
+            1505
+          ],
+          "scale": 0.3144963144963145
+        },
+        "idle": {
+          "source_rect": [
+            106,
+            3,
+            266,
+            393
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            158,
+            87
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            432,
+            3,
+            584,
+            395
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            159,
+            86
+          ]
+        },
+        "release": {
+          "source_rect": [
+            706,
+            12,
+            1008,
+            395
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            127,
+            90
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            69,
+            390,
+            353,
+            774
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            131,
+            89
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            401,
+            401,
+            624,
+            774
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            144,
+            94
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            712,
+            424,
+            977,
+            765
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            135,
+            108
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            80,
+            766,
+            256,
+            1103
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            154,
+            110
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            374,
+            816,
+            642,
+            1088
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            134,
+            138
+          ]
+        },
+        "down": {
+          "source_rect": [
+            670,
+            930,
+            1024,
+            1041
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            115,
+            208
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            752,
+            1092,
+            944,
+            1507
+          ],
+          "scale": 0.43373493975903615,
+          "offset": [
+            151,
+            76
+          ]
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "id": "frontier-male",
+      "name": "荒原逐日",
+      "gender": "male",
+      "min_realm_index": 0,
+      "rows": 4,
+      "layout": "gunslinger",
+      "file": "frontier-male.png",
+      "prompt": "Use case: stylized-concept. Asset type: production transparent game character sprite sheet for a Chinese cultivation RPG. Refined hand-painted 2D semi-realistic fantasy RPG illustration with clean sharp edges and detailed clothing, NOT chibi, NOT photographic, NOT a 3D render. Adult East Asian protagonist age 25-30. Consistent face, costume, hair, height and proportions across every cell. Actual transparent alpha background, no scenery, no ground shadows, no lines, no labels, no letters, no numbers, no watermark. Each cell contains exactly ONE isolated connected character silhouette and generous transparent margins on all four sides. Nothing crosses the cell boundaries. All standing poses show BOTH anatomically correct legs and BOTH complete shoes, separated visibly; do not lose the rear leg. Both arms, hands and fingers anatomically natural. No floating accessories, detached sparkles, effects or extra weapons. In action poses character faces screen RIGHT in three-quarter view. Never crop feet, hat, hands or hair. Square high-resolution sheet with EXACTLY 4 columns and 4 rows, exactly 16 evenly spaced cells. READ ORDER left-to-right then top-to-bottom: Row 1: (1) full-body idle, gun holstered, one hand near holster; (2) full-body drawing revolver upward from holster; (3) full-body aiming revolver horizontally RIGHT at shoulder height, straight arm; (4) full-body firing revolver RIGHT, straight arm, gun barrel horizontal, NO baked muzzle flash. Row 2: (5) full-body recoil, gun and forearm kicked slightly upward; (6) full-body recovering gun back to horizontal aim; (7) full-body defensive side step with free forearm guarding torso and revolver pointed down; (8) full-body bracing with both forearms across head, pistol held safely pointing upward. Row 3: (9) full-body struck, torso leaning back; (10) full-body staggering, knees buckling; (11) kneeling on BOTH knees, hand on ground and pistol lowered; (12) lying defeated on side horizontally, BOTH legs and boots clear, non-graphic. Row 4: (13) beautiful FRONT FACING full-body neutral character illustration with both boots visible, gun holstered; (14) large FRONT FACING head-and-shoulders portrait with hat, same face, isolated; (15) full-body victory pose lifting pistol skyward, other hand on hip; (16) full-body holstering revolver. Maintain horizontal pistol orientation in cells 3,4,6 so animated bullets originate at the barrel. Subject: handsome adult East Asian male 1890s classic American Western gunslinger. Broad worn brown cowboy hat, short black hair, burgundy neckerchief, cream shirt, dark waistcoat, tobacco-brown leather duster hanging open, fitted dark trousers, TWO brown leather cowboy boots with understated spurs, leather cartridge belt and revolver holster. One silver and dark steel period six-shot revolver, no modern firearm. Charming confident clean-shaven face. Tasteful ornate turquoise buckle. Costume remains identical in all cells.",
+      "muzzle_uv": [
+        0.99,
+        0.1182
+      ],
+      "source_sha256": "c644cfe8ba7345b8b13840b828608c6da3f30ebd617b8994e8f6172031045712"
+    },
+    {
+      "id": "frontier-female",
+      "name": "荒原逐日",
+      "gender": "female",
+      "min_realm_index": 0,
+      "rows": 4,
+      "layout": "gunslinger",
+      "file": "frontier-female.png",
+      "prompt": "Use case: stylized-concept. Asset type: production transparent game character sprite sheet for a Chinese cultivation RPG. Refined hand-painted 2D semi-realistic fantasy RPG illustration with clean sharp edges and detailed clothing, NOT chibi, NOT photographic, NOT a 3D render. Adult East Asian protagonist age 25-30. Consistent face, costume, hair, height and proportions across every cell. Actual transparent alpha background, no scenery, no ground shadows, no lines, no labels, no letters, no numbers, no watermark. Each cell contains exactly ONE isolated connected character silhouette and generous transparent margins on all four sides. Nothing crosses the cell boundaries. All standing poses show BOTH anatomically correct legs and BOTH complete shoes, separated visibly; do not lose the rear leg. Both arms, hands and fingers anatomically natural. No floating accessories, detached sparkles, effects or extra weapons. In action poses character faces screen RIGHT in three-quarter view. Never crop feet, hat, hands or hair. Square high-resolution sheet with EXACTLY 4 columns and 4 rows, exactly 16 evenly spaced cells. READ ORDER left-to-right then top-to-bottom: Row 1: (1) full-body idle, gun holstered, one hand near holster; (2) full-body drawing revolver upward from holster; (3) full-body aiming revolver horizontally RIGHT at shoulder height, straight arm; (4) full-body firing revolver RIGHT, straight arm, gun barrel horizontal, NO baked muzzle flash. Row 2: (5) full-body recoil, gun and forearm kicked slightly upward; (6) full-body recovering gun back to horizontal aim; (7) full-body defensive side step with free forearm guarding torso and revolver pointed down; (8) full-body bracing with both forearms across head, pistol held safely pointing upward. Row 3: (9) full-body struck, torso leaning back; (10) full-body staggering, knees buckling; (11) kneeling on BOTH knees, hand on ground and pistol lowered; (12) lying defeated on side horizontally, BOTH legs and boots clear, non-graphic. Row 4: (13) beautiful FRONT FACING full-body neutral character illustration with both boots visible, gun holstered; (14) large FRONT FACING head-and-shoulders portrait with hat, same face, isolated; (15) full-body victory pose lifting pistol skyward, other hand on hip; (16) full-body holstering revolver. Maintain horizontal pistol orientation in cells 3,4,6 so animated bullets originate at the barrel. Subject: beautiful adult East Asian female 1890s classic Western gunslinger, elegant and athletic. Cream cowboy hat with dark leather band, long black hair tied into a practical flowing ponytail, red neckerchief, ivory blouse, fitted dark brown leather waistcoat, cropped sand-colored jacket, high-waisted fitted dark denim trousers, TWO complete knee-high brown leather cowboy boots, cartridge belt and leather revolver holster. One silver and dark steel period six-shot revolver, no modern firearm. Turquoise earrings and buckle. Confident graceful expression. Fully clothed, no lingerie. Costume remains identical in all cells.",
+      "muzzle_uv": [
+        0.99,
+        0.1554
+      ],
+      "source_sha256": "a911f87f983c87d56930a43e9e72b9ac5133087865aa0a7f33252f08a6772d4b"
+    },
+    {
+      "id": "swim-integration-male",
+      "name": "沧溟曜金",
+      "gender": "male",
+      "min_realm_index": 7,
+      "rows": 4,
+      "file": "swim-integration-male.png",
+      "prompt": "Use case: stylized-concept. Asset type: production transparent game character sprite sheet for a Chinese cultivation RPG. Refined hand-painted 2D semi-realistic fantasy RPG illustration with clean sharp edges and detailed clothing, NOT chibi, NOT photographic, NOT a 3D render. Adult East Asian protagonist age 25-30. Consistent face, costume, hair, height and proportions across every cell. Actual transparent alpha background, no scenery, no ground shadows, no lines, no labels, no letters, no numbers, no watermark. Each cell contains exactly ONE isolated connected character silhouette and generous transparent margins on all four sides. Nothing crosses the cell boundaries. All standing poses show BOTH anatomically correct legs and BOTH complete shoes, separated visibly; do not lose the rear leg. Both arms, hands and fingers anatomically natural. No floating accessories, detached sparkles, effects or extra weapons. In action poses character faces screen RIGHT in three-quarter view. Never crop feet, hat, hands or hair. Portrait high-resolution sheet with EXACTLY 3 columns and 4 rows, exactly 12 evenly spaced cells. Read order left-to-right top-to-bottom: Row 1: full-body idle standing; full-body gathering energy with hands near chest; full-body spell release extending arm to RIGHT. Row 2: full-body ward stance with palm outward; full-body bracing forearms over head; full-body hit recoil leaning backward. Row 3: full-body stagger with knees bending; kneeling with both knees and hands visible; lying defeated on side with BOTH legs and feet visible, non-graphic. Row 4: FRONT FACING full-body neutral fashion illustration; large FRONT FACING head-and-shoulders portrait; full-body victory lifting arms. No drawn energy effects. Subject: handsome adult East Asian male immortal in a luxurious modern beach swimwear outfit, visibly distinct from navy moon and teal beach skins: deep emerald green tailored mid-thigh swim trunks with fine gold piping and discreet wave embroidery, open sleeveless white lightweight beach vest with gold edging, jade pendant, black hair in a high half ponytail, athletic natural adult build, TWO gold-trimmed flat leather sandals with complete visible feet. Refined emerald white gold palette. No long robes, no trousers, no weapons, no transparent shorts. Fashion game character, nonsexual neutral action and portrait poses.",
+      "source_sha256": "1fbe1f74fc2bc307c84e9075a1b6a000b4dac9dd72649d178ec75552d3deb53a"
+    },
+    {
+      "id": "swim-integration-female",
+      "name": "沧溟曜金",
+      "gender": "female",
+      "min_realm_index": 7,
+      "rows": 4,
+      "file": "swim-integration-female.png",
+      "prompt": "Use case: stylized-concept. Asset type: production transparent game character sprite sheet for a Chinese cultivation RPG. Refined hand-painted 2D semi-realistic fantasy RPG illustration with clean sharp edges and detailed clothing, NOT chibi, NOT photographic, NOT a 3D render. Adult East Asian protagonist age 25-30. Consistent face, costume, hair, height and proportions across every cell. Actual transparent alpha background, no scenery, no ground shadows, no lines, no labels, no letters, no numbers, no watermark. Each cell contains exactly ONE isolated connected character silhouette and generous transparent margins on all four sides. Nothing crosses the cell boundaries. All standing poses show BOTH anatomically correct legs and BOTH complete shoes, separated visibly; do not lose the rear leg. Both arms, hands and fingers anatomically natural. No floating accessories, detached sparkles, effects or extra weapons. In action poses character faces screen RIGHT in three-quarter view. Never crop feet, hat, hands or hair. Portrait high-resolution sheet with EXACTLY 3 columns and 4 rows, exactly 12 evenly spaced cells. Read order left-to-right top-to-bottom: Row 1: full-body idle standing; full-body gathering energy with hands near chest; full-body spell release extending arm to RIGHT. Row 2: full-body ward stance with palm outward; full-body bracing forearms over head; full-body hit recoil leaning backward. Row 3: full-body stagger with knees bending; kneeling with both knees and hands visible; lying defeated on side with BOTH legs and feet visible, non-graphic. Row 4: FRONT FACING full-body neutral fashion illustration; large FRONT FACING head-and-shoulders portrait; full-body victory lifting arms. No drawn energy effects. Subject: beautiful adult East Asian female immortal in a luxurious modern beach swimwear outfit, visibly distinct from navy moon and teal beach skins: opaque deep emerald green elegant one-piece swimsuit with gold geometric trim, modest asymmetrical shoulder detail, small jade waist ornament, light short white wrap sarong tied at one hip ending at upper thighs, long black hair half tied with a gold-and-jade clip, TWO flat gold-strapped sandals. Refined emerald white gold palette. Fully opaque swimsuit front and back; no lingerie or sheer swimsuit, no erotic pose or exaggerated anatomy. Both bare legs and complete sandals clear. No weapons, no magical floating jewelry, no long robes. Fashion game character, nonsexual neutral action and portrait poses.",
+      "source_sha256": "9777ef14085ee9b14a99dc9776a3fe7cea5bb30db66136450e41810e284fc545"
+    }
+  ]
+}
