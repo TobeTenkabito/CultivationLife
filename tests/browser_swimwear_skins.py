@@ -56,8 +56,7 @@ def main():
                         actor = f'swim-{style}-{gender}'
                         key = 'actor.cosmetic.' + actor
                         page.locator('.hud-identity').click()
-                        page.locator('#character-skins').evaluate('node=>node.open=false')
-                        page.locator('#character-skins summary').click()
+                        page.locator('#character-skins-open').click()
                         if style == 'sunny':
                             moon = f'actor.cosmetic.swim-moon-{gender}'
                             locked = page.locator(f'[data-skin-id="{moon}"]')
@@ -73,9 +72,10 @@ def main():
                         for width in (1440, 390, 320, 844):
                             page.set_viewport_size(dict(width=width, height=960 if width == 1440 else 844 if width < 400 else 390))
                             page.locator(f'[data-skin-id="{key}"]').scroll_into_view_if_needed()
-                            assert page.locator('#player-details-dialog').evaluate('d=>d.scrollWidth<=d.clientWidth+1')
+                            assert page.locator('#character-skins').evaluate('d=>d.scrollWidth<=d.clientWidth+1')
                             page.wait_for_function('Array.from(document.querySelectorAll(".skin-gallery img")).every(im=>im.complete&&im.naturalWidth>0)')
                             page.screenshot(path=str(out / f'{actor}-{width}.png'))
+                        page.locator('#character-skins-close').click()
                         page.locator('[data-close-dialog=player-details-dialog]').click()
                         page.reload()
                         page.wait_for_function('!!configData&&!busy')

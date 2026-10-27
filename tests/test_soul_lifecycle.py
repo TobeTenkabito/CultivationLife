@@ -31,6 +31,33 @@ def ready(tmp_path):
 def act(e,g,action,**kw):
     return e.soul_action(g.id,action,dict(revision=e.store.load(g.id).player.nascent_state.get('revision',0),**kw))
 
+
+@pytest.mark.parametrize('path',['dao','demonic','ghost','monster','confucian','buddhist'])
+@pytest.mark.parametrize('rank',[3,4])
+def test_leave_secret_auto_unlock_and_authoritative_rank(ready,path,rank):
+    from cultivation_life.system.soul_presentation import public
+    e,g=ready;p=g.player;p.path=path;p.realm_index=rank
+    e.store.save(g)
+    # Normalize the deliberately edited fixture before checking command atomicity.
+    e.get_game(g.id);g=e.store.load(g.id);p=g.player
+    assert public(g)['leave_unlocked'] is (rank>=4)
+    assert public(g)['can_leave'] is (rank>=4)
+    before=e.store._path(g.id).read_bytes()
+    if rank<4:
+        with pytest.raises(ValueError,match='元婴期'):
+            act(e,g,'leave')
+        assert e.store._path(g.id).read_bytes()==before
+    else:
+        act(e,g,'leave');after=e.store.load(g.id)
+        assert wandering(after.player)
+        assert after.player.soul_energy==p.soul_energy-10
+        assert after.player.age==p.age
+        assert after.player.inventory==p.inventory
+        assert not public(after)['can_leave']
+        act(e,after,'return');after=e.store.load(g.id)
+        assert not wandering(after.player)
+        assert after.player.soul_energy==p.soul_energy-10
+
 def prisoner(g):
     n=SectNpc('second-test','清澜','散修',4,2,50,10000,spirit_root='supreme_metal')
     g.world_npcs[n.id]=n

@@ -38,9 +38,11 @@
   figure.append(figureCanvas);
   const natalFigure=document.createElement('img');natalFigure.className='pixel-natal-on-actor pixel-item-icon';natalFigure.alt='本命法宝';natalFigure.hidden=true;figure.append(natalFigure);
   const summary = document.createElement('div'); summary.className = 'pixel-character-summary';
+  const visual = document.createElement('div'); visual.className = 'pixel-character-visual';
+  visual.append(figure);
   const characterHead = detailsContent.querySelector('.character-head');
   const characterRealm = detailsContent.querySelector('.realm');
-  characterHead.before(summary); summary.append(characterHead,characterRealm,figure);
+  characterHead.before(summary); summary.append(characterHead,characterRealm,visual);
   const figureContext = figureCanvas.getContext('2d');
   let figureIdentity = null, figureRevision = 0;
   let current = null, revision = 0, drawerMode = false, layoutFrame = null;

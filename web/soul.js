@@ -18,11 +18,16 @@ window.SoulPanel=(()=>{
     if(s.stagnant)personal.append(el('p','道基永久受损：本世修为无法再精进。','soul-warning'));
     const a=el('div',undefined,'soul-actions');
     if(s.crisis)a.append(button(`抵御夺舍 · 成功率 ${Math.round(s.resistance_chance*100)}%`,'resist'));
-    else{if(s.can_leave)a.append(button('元婴离体 · 神魂−10','leave'));if(s.possessed)a.append(button('离舍归魂 · 宿身将毁去','leave_host'));if(s.spirit.body_intact)a.append(button('归还原肉身','return'));}personal.append(a);
+    else{if(s.possessed)a.append(button('离舍归魂 · 宿身将毁去','leave_host'));if(s.spirit.body_intact)a.append(button('归还原肉身','return'));}personal.append(a);
     if(s.mode==='神游')personal.append(el('p','夺舍：进入「俘虏」选择不高于自身境界的活俘虏。失败可能陨落；可提前研习阴魂续命诀并掌握鬼道功法，以转修鬼道续存。','soul-note'));
     const c=el('details');c.append(el('summary','道途转换'));
     for(const r of s.conversions){const card=el('div',undefined,'soul-card');card.append(el('strong',r.name),el('p',`消耗${r.cost}级对应气（现有${r.available}级）。不足时按比例折损修为，转换后：${r.realm_name}，第${r.layer}层。`),button('转修'+r.name,'convert',{id:r.id},!r.learned||!r.has_book||!!s.crisis));if(!r.learned||!r.has_book)card.append(el('p','需对应转换秘法及至少一门该道途功法。','soul-note'));c.append(card);}personal.append(c);
     library.replaceChildren(el('h3','身魂秘法'));const books=el('div',undefined,'soul-grid');
+    const leave=el('div',undefined,'soul-card');
+    leave.append(el('strong','元婴离体'),el('p',s.leave_unlocked?'已自动解锁 · 消耗10点神魂，肉身留在原地。':'元婴期自动解锁，无须研习。'));
+    leave.append(el('p','离体后战力降至35%、机缘效率+25%，天劫与雷劫伤害+75%。非鬼修最多离体一个时间单位，须回到肉身原处，在人物详情中归体。','soul-note'));
+    const leaveReason=!s.leave_unlocked?'元婴期解锁':s.possessed?'请先离舍归魂':s.mode==='神游'?'已处于神游':s.soul.current<10?'神魂能量不足':null;
+    leave.append(button(leaveReason||'元婴离体 · 神魂−10','leave',{},!s.can_leave||!!s.crisis||s.soul.current<10));books.append(leave);
     for(const r of s.secrets){const card=el('div',undefined,'soul-card');card.append(el('strong',r.name),el('p',r.known?'已掌握':`研习消耗 ${r.price} 灵石 · ${r.realm_name}起`),button(r.known?'已掌握':'研习','study',{id:r.id},r.known||!r.eligible||!!s.crisis));books.append(card);}library.append(books);
     const known=s.secrets.find(r=>r.id==='second_nascent')?.known;
     document.querySelector('[data-panel-target="nascent"]').classList.toggle('hidden',!known);

@@ -35,8 +35,21 @@ def main():
                     base=f'http://127.0.0.1:{http.server_port}'
                     page.goto(base);page.wait_for_function('!!configData&&!busy');page.evaluate('id=>loadGame(id)',g.id)
                     page.wait_for_function('!!game?.soul&&!busy')
+                    navigation_locator(page,'[data-panel-target=secret-art]').click()
+                    assert page.locator('#soul-details [data-soul-action=leave]').count()==0
+                    # A stale leave click refreshes once without spending soul energy.
+                    revision=page.evaluate('game.soul.revision')
+                    energy=page.evaluate('game.soul.soul.current')
+                    response=page.request.post(base+f'/api/games/{g.id}/soul',data=dict(action='study',id='path_ghost',revision=revision))
+                    assert response.ok
+                    page.locator('#soul-secrets [data-soul-action=leave]').click()
+                    page.wait_for_function('r=>!busy&&game.soul.revision===r',arg=revision+1)
+                    assert page.evaluate('game.soul.mode')=='普通'
+                    assert page.evaluate('game.soul.soul.current')==energy
+                    page.locator('#soul-secrets [data-soul-action=leave]').click();page.wait_for_function('!busy&&game.soul.mode==="神游"')
+                    assert page.locator('[data-soul-action=leave]').is_disabled()
+                    page.locator('#secret-art-toggle').click()
                     page.locator('.hud-identity').click()
-                    page.locator('[data-soul-action=leave]').click();page.wait_for_function('!busy&&game.soul.mode==="神游"')
                     page.locator('[data-soul-action=return]').click();page.wait_for_function('!busy&&game.soul.mode==="普通"')
                     page.locator('[data-close-dialog=player-details-dialog]').click()
                     navigation_locator(page,'[data-panel-target=secret-art]').click()

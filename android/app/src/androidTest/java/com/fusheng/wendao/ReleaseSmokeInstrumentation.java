@@ -456,8 +456,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'身魂原生验收',spirit_root:'supreme_metal',path:'dao',seed:320,preset_id:'core'})}).then(g=>g.id)");
         python(assetText("soul_release.py")+"\nfrom cultivation_life import server\nprepare_soul(server.ENGINE,"+JSONObject.quote(id)+")");
         async("loadGame("+JSONObject.quote(id)+")");
-        tapSelector(".hud-identity");
+        tapSelector("[data-panel-target=secret-art]");
         tapSelector("[data-soul-action=leave]");waitForJs("!busy&&game.soul.mode==='神游'","Soul leave");
+        tapSelector("#secret-art-toggle");tapSelector(".hud-identity");
         tapSelector("[data-soul-action=return]");waitForJs("!busy&&game.soul.mode==='普通'","Soul return");
         check(Boolean.TRUE.equals(js("document.querySelectorAll('#soul-details progress').length===2")),"Two personal energy bars");
         tapSelector("[data-close-dialog=player-details-dialog]");tapSelector("[data-panel-target=secret-art]");
@@ -493,14 +494,13 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 String key="actor.cosmetic."+style+"-"+gender;
                 String effect=style.equals("halloween")&&gender.equals("male")?"halloween-bats":style;
                 tapSelector(".hud-identity");
-                js("document.querySelector('#character-skins').open=false");
-                tapSelector("#character-skins summary");
+                tapSelector("#character-skins-open");
                 tapSelector("[data-skin-id='"+key+"']");
                 waitForJs("!busy&&game.player.character_skins.selected==="+JSONObject.quote(key),"Native unrestricted skin selection");
                 waitForJs("document.querySelector('.pixel-portrait').complete&&document.querySelector('.pixel-portrait').naturalWidth===128","Native holiday portrait decoded");
-                check(Boolean.TRUE.equals(js("document.querySelector('#player-details-dialog').scrollWidth<=document.querySelector('#player-details-dialog').clientWidth+2")),"Holiday wardrobe fits");
+                check(Boolean.TRUE.equals(js("document.querySelector('#character-skins').scrollWidth<=document.querySelector('#character-skins').clientWidth+2")),"Holiday wardrobe fits");
                 capture("holiday-"+style+"-"+gender+"-"+arguments.getString("orientation"));
-                tapSelector("[data-close-dialog=player-details-dialog]");
+                tapSelector("#character-skins-close");tapSelector("[data-close-dialog=player-details-dialog]");
                 async("loadGame("+JSONObject.quote(id)+")");
                 check(Boolean.TRUE.equals(js("game.player.character_skins.selected==="+JSONObject.quote(key))),"Native skin reload");
                 python(assetText("holiday_release.py")+"\nfrom cultivation_life import server\nholiday_battle(server.ENGINE,"+JSONObject.quote(id)+")");
@@ -559,13 +559,13 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
         for(String theme:new String[]{"a","b","d","f"}) {
             tapSelector("#theme-open");tapSelector("[data-theme-picker=dialog] [data-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
-            tapSelector(".hud-identity");tapSelector("#character-skins summary");
+            tapSelector(".hud-identity");tapSelector("#character-skins-open");
             tapSelector("[data-skin-id='actor.path.dao-nascent-hero-female']");
             waitForJs("!busy&&game.player.character_skins.selected==='actor.path.dao-nascent-hero-female'&&document.querySelector('.pixel-details-art canvas').dataset.actor==='actor.path.dao-nascent-hero-female'","Native earlier unlocked skin and rendered figure");
-            check(Boolean.TRUE.equals(js("document.querySelector('#player-details-dialog').scrollWidth<=document.querySelector('#player-details-dialog').clientWidth+2")),"Native skin gallery fits screen");
+            check(Boolean.TRUE.equals(js("document.querySelector('#character-skins').scrollWidth<=document.querySelector('#character-skins').clientWidth+2")),"Native skin gallery fits screen");
             capture("skins-301-"+theme+"-"+arguments.getString("orientation"));
             tapSelector("[data-skin-id='']");waitForJs("!busy&&!game.player.character_skins.selected","Native automatic skin restored");
-            tapSelector("#character-skins summary");tapSelector("[data-close-dialog=player-details-dialog]");
+            tapSelector("#character-skins-close");tapSelector("[data-close-dialog=player-details-dialog]");
         }
         python("from cultivation_life import server\na=server._skin301_before\nb=server.ENGINE.store.load("+JSONObject.quote(id)+").to_dict()\nfor row in (a,b):\n row.pop('updated_at',None)\n row['player'].pop('character_skins',None)\nassert a==b");
         check(Boolean.TRUE.equals(async("api('/api/visual-assets').then(c=>c.assets['base.character_manifest'].character_forms.length===8)")),"Native eight base forms registered");

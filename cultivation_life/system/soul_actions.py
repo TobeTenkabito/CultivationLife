@@ -78,7 +78,7 @@ def execute(deps, game, action, payload, rng):
         state.setdefault('known', []).append(identity)
         life.record(game, f'耗费{price}灵石研习{name}。')
     elif action == 'leave':
-        if (p.realm_index < 4 and p.path != 'ghost') or is_possessed(p):
+        if p.realm_index < 4 or is_possessed(p):
             raise ValueError('元婴期起可离体；寄身者请先使用原离舍入口')
         if p.soul_energy < 10:
             raise ValueError('元婴离体需要10点神魂能量')
