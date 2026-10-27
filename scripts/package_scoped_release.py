@@ -179,12 +179,14 @@ def main():
     if scoped.get('profile')=='soul-lifecycle':
         from scripts.verify_scoped_release import SOUL_TESTS
         require(all(c.get('soul_verified') for c in evidence['cases']),'Soul compiled acceptance required with and without DLC')
+        require(all(c.get('holiday_verified') for c in evidence['cases']),'Holiday compiled acceptance required with and without DLC')
         require({name for shard in scoped['tests'] for name in shard}==set(SOUL_TESTS),'Soul related selection incomplete')
-        require({'browser_soul_lifecycle','browser_swimwear_skins','browser_authored_techniques','browser_events_212'}<={r['name'] for r in scoped['runs']},'Soul browser acceptance incomplete')
+        require({'browser_soul_lifecycle','browser_swimwear_skins','browser_holiday_skins','browser_sect_tasks','browser_authored_techniques','browser_events_212'}<={r['name'] for r in scoped['runs']},'Soul/holiday/sect browser acceptance incomplete')
         required={f'build/android-soul-lifecycle-{o}-{tag}.log' for o in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Soul Android 12 native scope incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Soul native test APK changed')
         require(all('soul_lifecycle_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Soul native marker missing')
+        require(all('holiday_skin_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Holiday native marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
     if scoped.get('profile')=='authored':

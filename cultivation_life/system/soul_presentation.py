@@ -1,8 +1,8 @@
 """Read-only personal soul view; never charges, rolls or advances clocks."""
 import copy
 from ..content_registry import PATH_NAMES, REALMS
-from ..soul_rules import SECRETS, PATH_QI, wandering, body_cap, soul_cap, assimilation_cost
-from .soul_lifecycle import second_person
+from ..soul_rules import SECRETS, PATH_QI, wandering, body_cap, soul_cap, assimilation_cost, rebellion_chance
+from .soul_lifecycle import second_person, second_age, second_lifespan
 from .soul_actions import blocked, conversion_quote
 from .npc_techniques import public as public_books
 from .second_nascent import power
@@ -27,6 +27,8 @@ def public(game):
         refining=copy.deepcopy(state.get('refining')),
         captives=[dict(id=r['id'],name=r.get('name'),realm=r.get('realm_index')) for r in p.prisoners if r.get('alive',True) and r.get('realm_index',0)>=4],
         second=(dict(**copy.deepcopy(state['second']),name=npc.name,realm=REALMS[npc.realm_index].name,
+            age=second_age(game,npc),lifespan=second_lifespan(npc),
+            next_rebellion_chance=rebellion_chance(max(0.,state['second'].get('control',100.)-2)),
             layer=npc.layer,power=power(game),cost=assimilation_cost(npc.realm_index),
             books=public_books(game,npc),slots={'main':npc.main_technique_id,**npc.technique_slots}) if npc else None),
         equipment=[dict(id=i.id,name=i.name) for i in p.inventory if i.combat_bonus>0 and not i.crafted_artifact_id],

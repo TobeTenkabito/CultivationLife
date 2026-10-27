@@ -658,6 +658,9 @@ def _annual_relationship_update(deps: RelationshipDependencies, game: GameState,
     ]
     seen = set()
     for relation in event_relations:
+        if (relation.get('custody') or {}).get('kind') == 'second_nascent':
+            # This same actor is aged by the personal second-soul clock.
+            continue
         from ...regional_context import task_active
         if not task_active(game, relation.get('world', player.world)):
             continue

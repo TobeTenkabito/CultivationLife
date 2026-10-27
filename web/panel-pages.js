@@ -20,7 +20,7 @@
   function auto(id,host,nodes,names={}){const grouped=new Map();for(const n of nodes){const name=names[n.id]||title(n)||'概览';if(!grouped.has(name))grouped.set(name,[]);grouped.get(name).push(n);}mount(id,host,[...grouped]);}
   function refresh(saveId){
     if(saveId&&identity!==saveId){identity=saveId;selected.clear();mounted=new WeakMap();}
-    const faction=q('#faction-content');if(faction){const summary=q('#faction-summary');auto('faction',faction,[...children(summary),...children(faction).filter(n=>n!==summary)],{'faction-description':'概览','faction-dispatch':'差遣','faction-rewards':'岁禄','faction-roster':'门人','faction-diplomacy-detail':'外交'});}
+    const faction=q('#faction-content');if(faction){const summary=q('#faction-summary');auto('faction',faction,[...children(summary),...children(faction).filter(n=>n!==summary)],{'faction-description':'概览','sect-task-board':'任务','faction-dispatch':'差遣','faction-rewards':'岁禄','faction-roster':'门人','faction-diplomacy-detail':'外交'});}
     const family=q('#family-content');if(family)auto('family',family,children(family).flatMap(n=>n.matches('.family-management')?children(n):[n]));
     const rel=q('#relationship-card');if(rel)auto('relationship',rel,children(rel).filter(n=>!n.matches('.section-title')),{'npc-contacts':'故人笺'});
     for(const id of ['transformation','captive']){const host=q('#'+id+'-card');if(host)auto(id,host,children(host).filter(n=>!n.matches('.section-title')),{'transformation-note':'本相','transformation-combined':'本相'});}

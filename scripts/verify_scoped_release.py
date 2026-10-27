@@ -28,6 +28,9 @@ SOUL_TESTS = list(dict.fromkeys(AUTHORED_TESTS + [
     'tests/test_ghost_phase_two.py','tests/test_ghost_reincarnation_dlc.py','tests/test_demonic_system.py',
     'tests/test_relationship_possession_audit_fixes.py','tests/test_immortal_cultivation.py',
     'tests/test_body_bounty_update.py','tests/test_combat_replay.py','tests/test_npc_social_update.py',
+    'tests/test_holiday_skins.py','tests/test_sect_tasks.py','tests/test_survival_settlement.py',
+    'tests/test_intrigue_system.py','tests/test_organization_economy.py','tests/test_war_logistics.py',
+    'tests/test_domain_styles.py','tests/test_visual_release.py','tests/test_pixel_assets.py',
 ]))
 AUTHORED_BROWSERS = ['browser_authored_techniques','browser_npc_art','browser_common_elemental_techniques','browser_events_212']
 
@@ -325,7 +328,7 @@ def main():
         browsers=['browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits','browser_npc_art','browser_voisinage_editor','browser_domain_replay','browser_combat_replay','browser_combat_groups']
     if profile=='combat-alpha':
         browsers=['browser_alpha2_dlc_fixes','browser_combat_replay','browser_combat_groups','browser_events_212']
-    if profile=='soul-lifecycle':browsers=['browser_soul_lifecycle','browser_swimwear_skins','browser_authored_techniques','browser_events_212']
+    if profile=='soul-lifecycle':browsers=['browser_soul_lifecycle','browser_swimwear_skins','browser_holiday_skins','browser_sect_tasks','browser_authored_techniques','browser_events_212']
     if profile=='authored':browsers=AUTHORED_BROWSERS
     if profile=='update301':browsers=UPDATE301_BROWSERS
     if options.monster_visuals:browsers += ['browser_monster_release','browser_monster_flora_visuals']

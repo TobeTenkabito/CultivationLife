@@ -360,6 +360,8 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
     result['authored_techniques'] = authored_public(game)
     from ..system.soul_presentation import public as soul_public
     result['soul'] = soul_public(game)
+    from ..system.sect_tasks.presentation import public as sect_tasks_public
+    result['faction']['task_board'] = sect_tasks_public(game)
     result['player']['spirit_mode'] = result['soul']['mode']
     spatial_limit = spatial.cultivation_block_reason(game)
     if spatial_limit:

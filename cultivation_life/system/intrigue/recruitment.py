@@ -74,6 +74,8 @@ def _generate_intrigue_recruitment_session(
     sect = game.sects.get(faction_id)
     if not sect or sect.extinct:
         raise ValueError("当前宗门已经不存在")
+    from ..sect_membership import recruiting
+    if not recruiting(game,sect.id):raise ValueError('宗门已暂停招收新弟子')
     config = deps._intrigue_recruitment_config()
     maximum = max(1, min(5, int(config.get("max_candidates", 5))))
     pool_low, pool_high = config.get("applicant_pool", [6, 12])

@@ -196,6 +196,7 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
                 game,
                 f"空间裂缝撕裂护持：防护判定 {score['score']:.1f} / {requirement}，身死道消。",
                 "SYS_RIFT_DEATH",
+                survival_stage='special',
             )
             return commit(deps, game, rng)
         weights = spatial.outcome_weights(rift)
@@ -262,6 +263,9 @@ def spatial_action(deps: ExplorationDependencies, game_id, action, payload):
 
 
 def train(deps: ExplorationDependencies, game, action, units):
+    if action == 'body_train':
+        from ...soul_rules import require_body_training
+        require_body_training(game.player)
     require_free(game)
     local_actions = {"cultivate", "rest", "body_train", "sense_train"}
     if game.player.world == 'lost':

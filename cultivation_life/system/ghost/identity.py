@@ -38,74 +38,12 @@ def _post_battle_possession_candidates(game: GameState) -> list[dict[str, Any]]:
 
 
 def _prepare_post_battle_possession(deps: GhostIdentityDependencies, game: GameState, source_event: str) -> bool:
-    from ...soul_rules import wandering
-    if game.player.path == 'ghost' and not wandering(game.player):
-        from ..soul_lifecycle import leave_body
-        leave_body(game, destroyed=True)
-        game.player.hp = 0.
-    candidates = deps._post_battle_possession_candidates(game)
-    if not candidates:
-        return False
-    choices = [{
-        "id": str(row.get("id")),
-        "text": (
-            f"夺舍 {row.get('name', '无名俘虏')} · "
-            f"{REALMS[int(row.get('realm_index', 0))].name}{int(row.get('layer', 1))}层 · "
-            f"{int(row.get('age', game.player.age))}岁"
-        ),
-        "enabled": True,
-    } for row in candidates]
-    game.pending_event = {
-        "id": "SYS_POST_BATTLE_POSSESSION",
-        "version": 1,
-        "title": "战陨夺舍",
-        "body": "肉身已在非剧情战中陨灭，但本魂尚有一线余地。你可以消耗一次夺舍次数，占据一名不高于自身境界的俘虏；也可以放弃并结束此生。",
-        "choices": choices,
-        "runtime": {
-            "source_event": source_event,
-            "source_realm": game.player.realm_index,
-            "prisoner_ids": [choice["id"] for choice in choices],
-        },
-    }
-    return True
+    # Terminal death has no pending resurrection branch.
+    return False
 
 
 def post_battle_possess(deps: GhostIdentityDependencies, game_id: str, target_id: str) -> dict[str, Any]:
-    game = deps._load(game_id)
-    player = game.player
-    pending = game.pending_event or {}
-    if player.alive or pending.get("id") != "SYS_POST_BATTLE_POSSESSION":
-        raise ValueError("当前没有可结算的战陨夺舍")
-    permitted = {str(value) for value in pending.get("runtime", {}).get("prisoner_ids", [])}
-    if target_id not in permitted:
-        raise ValueError("该俘虏不在本次战陨夺舍候选中")
-    target = next((row for row in player.prisoners if str(row.get("id")) == target_id), None)
-    if target is None:
-        raise ValueError("目标俘虏已经不存在")
-    allowed, reason = can_possess(player, target)
-    if not allowed:
-        raise ValueError(reason)
-    source_event = str(pending.get("runtime", {}).get("source_event", "SYS_COMBAT"))
-    player.alive = True
-    player.death_reason = None
-    player.prisoners.remove(target)
-    host = enter_host_body(player, target)
-    kill_person(game, target.get("npc_id") or target["id"], "被夺舍，原神魂不复存在")
-    game.pending_event = None
-    game.history.append(HistoryRecord(
-        "SYS_POST_BATTLE_POSSESSION", 1, player.age, "借尸还魂", target_id, "possessed",
-        f"战陨之际，你舍弃旧躯并夺取{host['name']}的肉身；年龄与寿元均以这具肉身为准。",
-        {
-            "host_id": host.get("id"), "source_event": source_event,
-            "body_age": current_body_age(player), "world_age": player.age,
-            "lifespan": player.lifespan,
-            "possession_count": player.possession_count,
-        },
-        ["system", "ghost", "possession", "combat", "resurrection"],
-    ))
-    game.updated_at = now_iso()
-    deps.store.save(game)
-    return deps.present(game)
+    raise ValueError("战陨夺舍入口已停用；存活结算后仍在神游时，请使用俘虏夺舍")
 
 
 def ghost_constraint_action(deps: GhostIdentityDependencies, game_id: str, action: str) -> dict[str, Any]:
@@ -143,23 +81,29 @@ def ghost_constraint_action(deps: GhostIdentityDependencies, game_id: str, actio
             player.ghost_captor = None
             result, summary = "escaped", f"你击破拘魂禁制，重获自由（胜算 {chance:.0%}）；双方好感重置为中立。"
         else:
-            deps._die(game, "反抗拘魂者失败，魂印崩碎，魂飞魄散", "SYS_GHOST_RESIST_FAILED")
-            result, summary = "dead", f"反抗失败，魂体被禁制磨灭（胜算 {chance:.0%}）。"
+            deps._die(game, "反抗拘魂者失败，魂印崩碎，魂飞魄散", "SYS_GHOST_RESIST_FAILED", survival_stage="spirit_failed")
+            result = "survived" if player.alive else "dead"
+            outcome = "第二元婴承接本魂，仍处于神游" if player.alive else "魂体被禁制磨灭"
+            summary = f"反抗失败，{outcome}（胜算 {chance:.0%}）。"
     elif action == "possess":
         allowed, reason = can_possess(player, captor)
         if not allowed:
             raise ValueError(reason)
         if rng.random() < chance:
             captor_npc = deps._find_npc(game, str(captor.get("npc_id") or captor.get("id", "")))
-            host = enter_host_body(player, captor)
+            from ..npc_techniques import resolve
+            host_target = captor_npc.to_dict() if captor_npc else captor
+            host = enter_host_body(player, host_target, technique=resolve(game, host_target.get('main_technique_id')))
             if captor_npc:
                 captor_npc.alive = False
                 captor_npc.death_reason = f"被{player.name}反夺肉身，原神魂不复存在"
             player.hp = min(player.hp, max_hp(player)); player.mp = min(player.mp, max_mp(player))
             result, summary = "possessed", f"你反夺魂印，成功占据{host['name']}的肉身（胜算 {chance:.0%}）。"
         else:
-            deps._die(game, "夺舍拘魂者失败，神魂遭反噬而灭", "SYS_GHOST_POSSESSION_FAILED")
-            result, summary = "dead", f"夺舍失败，神魂遭反噬而灭（胜算 {chance:.0%}）。"
+            deps._die(game, "夺舍拘魂者失败，神魂遭反噬而灭", "SYS_GHOST_POSSESSION_FAILED", survival_stage="spirit_failed")
+            result = "survived" if player.alive else "dead"
+            outcome = "第二元婴承接本魂，仍处于神游" if player.alive else "神魂遭反噬而灭"
+            summary = f"夺舍失败，{outcome}（胜算 {chance:.0%}）。"
     else:
         raise ValueError("未知受制行动")
     game.history.append(HistoryRecord(
@@ -172,6 +116,9 @@ def ghost_constraint_action(deps: GhostIdentityDependencies, game_id: str, actio
 
 def _capture_defeated_ghost(game: GameState, target: dict[str, Any], rng: random.Random) -> bool:
     player = game.player
+    from ...soul_rules import wandering
+    if not player.alive or player.realm_index < 4 or not wandering(player):
+        return False
     if not ghost_cultivation_active(player) or player.ghost_captor or is_possessed(player):
         return False
     if target.get("combat_type") not in {None, "cultivator"} or str(target.get("race", "human")) not in {"human", "demon", "immortal"}:
@@ -183,8 +130,6 @@ def _capture_defeated_ghost(game: GameState, target: dict[str, Any], rng: random
     capture_chance = max(0.05, min(0.90, base))
     if rng.random() >= capture_chance:
         return False
-    from ..soul_lifecycle import leave_body
-    leave_body(game, destroyed=True)
     player.hp = 1.0
     player.mp = max(0.0, player.mp)
     player.ghost_attachment = None

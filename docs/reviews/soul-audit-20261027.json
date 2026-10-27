@@ -1,0 +1,452 @@
+{
+  "title": "v3.2.0 新增系统边界审查 · 待用户裁定",
+  "date": "2026-10-27",
+  "scope": "身魂能量、第二元婴、神游、夺舍、转道，以及NPC功法等级、自创功法、佛儒旧入口的交互。泳装仅做已有专项回归。",
+  "status": "仅审查，未修复任何游戏逻辑、未修改用户存档、未升版打包。",
+  "evidence_note": "B01–B06和D01–D02为隔离档复现；D03–D06为源码确认的设计边界，不能等同完整场景回归。B02的鬼修例外和B03的完整继承范围待定。",
+  "issues": [
+    {
+      "id": "B01",
+      "kind": "bug",
+      "priority": "P1",
+      "title": "第二元婴完整度被重复折算",
+      "trigger": "第二元婴完整度从100%降到50%后参战。",
+      "observed": "满值战力36608；面板显示18304，但战斗汇总再乘0.5，实际只计9152，即满值25%。",
+      "impact": "面板高估实际支援战力，也改变胜负与生擒率预估。",
+      "proposal": "只在一个权威入口折算完整度；面板与参战汇总读取同一有效战力。",
+      "decision": "是否保持线性折损；若有意采用平方衰减，也必须将面板同步显示为9152。",
+      "refs": [
+        [
+          "cultivation_life/system/second_nascent.py",
+          "def power"
+        ],
+        [
+          "cultivation_life/engine/engine_combat_runtime.py",
+          "own_power = max"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/system/second_nascent.py",
+          "line": 9,
+          "anchor": "def power"
+        },
+        {
+          "file": "cultivation_life/engine/engine_combat_runtime.py",
+          "line": 240,
+          "anchor": "own_power = max"
+        }
+      ]
+    },
+    {
+      "id": "B02",
+      "kind": "bug",
+      "priority": "P1",
+      "title": "肉身已毁、体魄为零仍能积累炼体进度",
+      "trigger": "鬼修处于无肉身神游，配置炼体功法，执行一个炼体时间单位。",
+      "observed": "真实advance入口经过5年，body_intact仍为false、体魄仍为0，炼体进度却由0增加至46。",
+      "impact": "毁体清零后仍能在零体魄下继续练“肉身”；鬼修没有离体超时限制，可持续积累。",
+      "proposal": "无肉身时禁止普通炼体；若希望鬼修能炼魂，应单独定义对应资源、收益和身体归属。",
+      "decision": "鬼修神游能否炼体需要你定性；当前行为已复现，未擅自删除旧鬼修玩法。",
+      "refs": [
+        [
+          "cultivation_life/engine/orchestration/advancement.py",
+          "if action == \"body_train\" and not trapped_in_guixu"
+        ],
+        [
+          "cultivation_life/engine/actions/cultivation.py",
+          "def body_breakthrough"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/engine/orchestration/advancement.py",
+          "line": 61,
+          "anchor": "if action == \"body_train\" and not trapped_in_guixu"
+        },
+        {
+          "file": "cultivation_life/engine/actions/cultivation.py",
+          "line": 385,
+          "anchor": "def body_breakthrough"
+        }
+      ]
+    },
+    {
+      "id": "B03",
+      "kind": "bug",
+      "priority": "P1",
+      "title": "夺舍继承主修时丢失NPC功法等级",
+      "trigger": "NPC主修已达Lv.7，玩家成功夺舍该俘虏。",
+      "observed": "真实captive_action入口成功寄身后，主修与已学列表中的该书变成Lv.1。",
+      "impact": "新增加的NPC等级记录没有接入旧夺舍复制入口；已经达到的等级效果也会失效。",
+      "proposal": "从原NPC权威学习记录继承等级，并明确其他已学功法是否继承；本体公共模板不能覆盖人物事实。",
+      "decision": "推荐主修继承原等级；辅修、杀伐和其他已学书是否继承，由你决定。",
+      "refs": [
+        [
+          "cultivation_life/system/possession_system.py",
+          "def enter_host_body"
+        ],
+        [
+          "cultivation_life/system/possession_system.py",
+          "target_technique = copy.deepcopy"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/system/possession_system.py",
+          "line": 129,
+          "anchor": "def enter_host_body"
+        },
+        {
+          "file": "cultivation_life/system/possession_system.py",
+          "line": 142,
+          "anchor": "target_technique = copy.deepcopy"
+        }
+      ]
+    },
+    {
+      "id": "B04",
+      "kind": "bug",
+      "priority": "P1",
+      "title": "永久停滞后涅槃白扣愿力并误报突破",
+      "trigger": "佛修魂伤永久停滞，愿力100，点击涅槃。",
+      "observed": "真实buddhist_action入口愿力100→0，筑基1层保持不变，日志却写“涅槃突破一个小境界”。",
+      "impact": "付费成功提示与实际状态矛盾；还发放了涅槃后的限时效率效果。",
+      "proposal": "在报价、按钮及正式扣费前统一检查永久停滞；不能等到突破完成函数静默return。",
+      "decision": "若涅槃可治魂伤，需要明确治疗价格和是否同时升境；否则应原子拒绝且不扣资源。",
+      "refs": [
+        [
+          "cultivation_life/system/buddhist_wish.py",
+          "def nirvana_target"
+        ],
+        [
+          "cultivation_life/system/buddhist_wish.py",
+          "def nirvana("
+        ],
+        [
+          "cultivation_life/engine/progression/breakthroughs.py",
+          "def _complete_minor_breakthrough"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/system/buddhist_wish.py",
+          "line": 99,
+          "anchor": "def nirvana_target"
+        },
+        {
+          "file": "cultivation_life/system/buddhist_wish.py",
+          "line": 116,
+          "anchor": "def nirvana("
+        },
+        {
+          "file": "cultivation_life/engine/progression/breakthroughs.py",
+          "line": 660,
+          "anchor": "def _complete_minor_breakthrough"
+        }
+      ]
+    },
+    {
+      "id": "B05",
+      "kind": "bug",
+      "priority": "P1",
+      "title": "永久停滞后外王升境扣费并增加涨价次数",
+      "trigger": "儒修魂伤永久停滞，拥有足够浩然经验，执行外王升境。",
+      "observed": "真实sage_outer_king入口扣600浩然经验，使用次数+1，筑基1层仍未改变。",
+      "impact": "玩家没有升境，还承担后续外王次数递增的价格；高境界分支可能先进入无收益劫关，后者尚未实测。",
+      "proposal": "把停滞检查前置到外王目标预览和命令入口，失败不扣费、不计次数、不启动劫关。",
+      "decision": "推荐与普通突破同样拒绝；是否存在外王特许修复魂伤由你另定。",
+      "refs": [
+        [
+          "cultivation_life/system/sage_system.py",
+          "def _outer_advance_block_reason"
+        ],
+        [
+          "cultivation_life/system/sage_system.py",
+          "def sage_outer_king"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/system/sage_system.py",
+          "line": 755,
+          "anchor": "def _outer_advance_block_reason"
+        },
+        {
+          "file": "cultivation_life/system/sage_system.py",
+          "line": 798,
+          "anchor": "def sage_outer_king"
+        }
+      ]
+    },
+    {
+      "id": "B06",
+      "kind": "bug",
+      "priority": "P2",
+      "title": "夺舍失败被第二元婴救活后仍记录魂飞魄散",
+      "trigger": "处于神游、有第二元婴，夺舍另一俘虏判定失败。",
+      "observed": "真实captive_action入口中第二元婴已消耗、玩家alive=true，但最后日志仍显示“夺舍失败，魂飞魄散”。",
+      "impact": "玩家难以判断此次是否真的死亡、替死是否已触发；旧处置入口仍将调用死亡结算等同于最终死亡。",
+      "proposal": "死亡结算返回后读取最终存活状态，统一产出dead或survived结果与文案，并排查其他旧死亡调用者。",
+      "decision": "推荐更正结果和提示，不改变这次替死的规则。",
+      "refs": [
+        [
+          "cultivation_life/system/relationships/captivity.py",
+          "if action == \"possess\""
+        ],
+        [
+          "cultivation_life/system/relationships/captivity.py",
+          "result, summary = \"dead\""
+        ],
+        [
+          "cultivation_life/engine/engine_combat_runtime.py",
+          "def _die("
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/system/relationships/captivity.py",
+          "line": 229,
+          "anchor": "if action == \"possess\""
+        },
+        {
+          "file": "cultivation_life/system/relationships/captivity.py",
+          "line": 251,
+          "anchor": "result, summary = \"dead\""
+        },
+        {
+          "file": "cultivation_life/engine/engine_combat_runtime.py",
+          "line": 752,
+          "anchor": "def _die("
+        }
+      ]
+    },
+    {
+      "id": "D01",
+      "kind": "decision",
+      "priority": "优先定规则",
+      "title": "应急神魂抗争是否允许在封印、拘禁和事件期间处理",
+      "trigger": "神魂危机与修为压制、封印、拘禁或待处理事件叠加。",
+      "observed": "已复现：压制状态下抗争被soul_actions.require拒绝，而advance_player_age又因危机拒绝耗时。尚未证明所有解除压制／返界／脱困路径均被堵死，不能直接断言永久软锁。",
+      "impact": "可能形成操作顺序互锁，尤其原事件或脱困需要推进时间时。",
+      "proposal": "将抗争列为只处理当前危机的紧急入口；继续保留封印、拘禁、待处理事件及其奖励，不将应急处理变成逃脱权限。",
+      "decision": "推荐允许就地抗争；或明确哪些状态必须先解除，并保证至少一条不耗时出口。",
+      "refs": [
+        [
+          "cultivation_life/system/soul_actions.py",
+          "def blocked"
+        ],
+        [
+          "cultivation_life/system/soul_actions.py",
+          "def require"
+        ],
+        [
+          "cultivation_life/system/possession_system.py",
+          "def advance_player_age"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/system/soul_actions.py",
+          "line": 23,
+          "anchor": "def blocked"
+        },
+        {
+          "file": "cultivation_life/system/soul_actions.py",
+          "line": 29,
+          "anchor": "def require"
+        },
+        {
+          "file": "cultivation_life/system/possession_system.py",
+          "line": 38,
+          "anchor": "def advance_player_age"
+        }
+      ]
+    },
+    {
+      "id": "D02",
+      "kind": "decision",
+      "priority": "平衡边界",
+      "title": "凡人已无修为可跌时，神魂枯竭是否允许空结果",
+      "trigger": "凡人神魂归零，随机选中“降低一个小境界”。",
+      "observed": "lower_minor(0,1)仍返回(0,1)，这次枯竭被标记已处理。其余三分之二结果仍有效；不能说凡人免疫魂伤。",
+      "impact": "三选一中存在不产生额外惩罚的分支。",
+      "proposal": "可以保留底境保护，或重新抽取其余两项；不要暗中将无可降低变成直接死亡。",
+      "decision": "你选择保底无事、重抽惩罚，还是另设短期虚弱。",
+      "refs": [
+        [
+          "cultivation_life/soul_rules.py",
+          "def lower_minor"
+        ],
+        [
+          "cultivation_life/system/soul_lifecycle.py",
+          "def resolve_energy"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/soul_rules.py",
+          "line": 37,
+          "anchor": "def lower_minor"
+        },
+        {
+          "file": "cultivation_life/system/soul_lifecycle.py",
+          "line": 117,
+          "anchor": "def resolve_energy"
+        }
+      ]
+    },
+    {
+      "id": "D03",
+      "kind": "decision",
+      "priority": "优先定规则",
+      "title": "普通元婴脱体与第二元婴替死的优先级",
+      "trigger": "元婴以上普通战斗致命，玩家同时持有第二元婴。",
+      "observed": "统一_die先调用rescue消耗第二元婴，之后才检查普通元婴脱体。另有体魄归零提前脱体的分支，因此不同致命路径的保护顺序不同。此项为源码确认，未穷举所有战斗组合。",
+      "impact": "有的情况下本可毁体脱出，却先消耗备用元婴；同一“肉身被毁”概念可能得到不同资源损失。",
+      "proposal": "先区分毁体与灭魂：肉身毁坏先处理本魂脱体；本魂真正死亡再消耗第二元婴。",
+      "decision": "推荐采用毁体→本魂脱体→灭魂时替死；也可明确第二元婴永远优先，但需统一所有入口。",
+      "refs": [
+        [
+          "cultivation_life/engine/engine_combat_runtime.py",
+          "def _die("
+        ],
+        [
+          "cultivation_life/system/soul_lifecycle.py",
+          "def resolve_energy"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/engine/engine_combat_runtime.py",
+          "line": 752,
+          "anchor": "def _die("
+        },
+        {
+          "file": "cultivation_life/system/soul_lifecycle.py",
+          "line": 117,
+          "anchor": "def resolve_energy"
+        }
+      ]
+    },
+    {
+      "id": "D04",
+      "kind": "decision",
+      "priority": "优先定规则",
+      "title": "替死是否包括寿尽、神游超时，以及新寿元怎么算",
+      "trigger": "第二元婴存在时发生SYS_LIFESPAN或SYS_SPIRIT_TIMEOUT。",
+      "observed": "当前排除的是剧情和渡劫，其余统一死亡可触发替死；寿尽且世界年龄达到寿元时，会给予一个时间单位加1年的续命窗口。继承第二元婴修为，但未按其原主剩余寿命统一重算新寿元。",
+      "impact": "影响长生路线和连续炼化替死的收益；这是用户原规则尚未细定的边界。",
+      "proposal": "用明确死亡原因表登记是否可替死，并单独定义继承后的寿元和天劫时钟，避免靠事件ID前缀长期判定。",
+      "decision": "是否允许寿终替死；允许时用原剩余寿命、目标境界寿命，还是固定找肉身窗口。",
+      "refs": [
+        [
+          "cultivation_life/system/soul_lifecycle.py",
+          "def death_excluded"
+        ],
+        [
+          "cultivation_life/system/soul_lifecycle.py",
+          "def rescue"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/system/soul_lifecycle.py",
+          "line": 75,
+          "anchor": "def death_excluded"
+        },
+        {
+          "file": "cultivation_life/system/soul_lifecycle.py",
+          "line": 85,
+          "anchor": "def rescue"
+        }
+      ]
+    },
+    {
+      "id": "D05",
+      "kind": "decision",
+      "priority": "转道规则",
+      "title": "转道目标和对应气的含义尚需统一",
+      "trigger": "转儒、转佛、转鬼，或尝试将修罗作为转换目标。",
+      "observed": "当前目标只有道／魔／鬼／佛／儒；道佛儒都扣灵气等级，魔扣魔气，鬼扣阴气；没有修罗转换秘法。完全没有目标气时也允许转换，修为按比例降至凡人。",
+      "impact": "“对应气”对儒修可能应指浩然之气；转鬼零气保命是否应付出凡人修为，也是需要明确的玩法选择。",
+      "proposal": "给每条转换路线列出秘法、前置书籍、资源、最低保留境界和身体要求，报价与执行共用同一表。",
+      "decision": "儒修用灵气还是浩然；佛修用灵气还是佛门资源；修罗是否仅沿原飞升路线；零气转鬼是否允许。",
+      "refs": [
+        [
+          "cultivation_life/soul_rules.py",
+          "PATH_QI ="
+        ],
+        [
+          "cultivation_life/system/soul_actions.py",
+          "def conversion_quote"
+        ],
+        [
+          "cultivation_life/system/soul_actions.py",
+          "elif action == 'convert'"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/soul_rules.py",
+          "line": 12,
+          "anchor": "PATH_QI ="
+        },
+        {
+          "file": "cultivation_life/system/soul_actions.py",
+          "line": 49,
+          "anchor": "def conversion_quote"
+        },
+        {
+          "file": "cultivation_life/system/soul_actions.py",
+          "line": 98,
+          "anchor": "elif action == 'convert'"
+        }
+      ]
+    },
+    {
+      "id": "D06",
+      "kind": "decision",
+      "priority": "跨系统规则",
+      "title": "第二元婴学习功法的成本与同化间隔",
+      "trigger": "把本尊高等级普通／自创功法配置给第二元婴，或本尊随后突破境界。",
+      "observed": "配置时直接按本尊书籍等级写入第二元婴所学记录，无玉简或时间成本；同化费用取第二元婴境界，而间隔固定为提取时本尊的行动时间单位，之后不随突破更新。",
+      "impact": "同一本高等级自创书可以同时服务本尊和第二元婴；低境界提前提取会长期保留更短的缴费周期。两者都是当前明确实现，是否符合预期需你定。",
+      "proposal": "学习可以免费共享，也可以付一次教学成本；同化间隔建议以固定世界年或第二元婴境界决定，并持久记录到期时间。",
+      "decision": "第二元婴共享功法等级是否免费；同化周期以本尊、第二元婴还是固定年份为准。",
+      "refs": [
+        [
+          "cultivation_life/system/soul_actions.py",
+          "elif action == 'technique'"
+        ],
+        [
+          "cultivation_life/system/soul_actions.py",
+          "state['second'] = dict"
+        ],
+        [
+          "cultivation_life/system/soul_lifecycle.py",
+          "elif npc and p.age >= row['due']"
+        ]
+      ],
+      "source_locations": [
+        {
+          "file": "cultivation_life/system/soul_actions.py",
+          "line": 183,
+          "anchor": "elif action == 'technique'"
+        },
+        {
+          "file": "cultivation_life/system/soul_actions.py",
+          "line": 154,
+          "anchor": "state['second'] = dict"
+        },
+        {
+          "file": "cultivation_life/system/soul_lifecycle.py",
+          "line": 172,
+          "anchor": "elif npc and p.age >= row['due']"
+        }
+      ]
+    }
+  ],
+  "validation": "68 passed in 136.22s (0:02:16)",
+  "runtime_inputs_sha256": "2f9739db067ff7ab8e1fb50d18d0822ee27b8e5bdbbd96404c06d27caf4abaa1"
+}

@@ -105,8 +105,12 @@ def possession_limit(player: Player) -> int | None:
 
 
 def can_possess(player: Player, target: dict[str, Any]) -> tuple[bool, str]:
+    if not player.alive:
+        return False, '此生已经结束，无法夺舍'
     if not target.get("alive", True):
         return False, "目标已经陨落，无法夺舍"
+    if target.get('lifespan') is not None and int(target.get('age', 0)) >= target['lifespan']:
+        return False, '目标寿元已尽，无法夺舍'
     if target.get('spirit_state', {}).get('mode') == 'wandering' and not target['spirit_state'].get('body_intact'):
         return False, '目标肉身已毁，无法夺舍无身元婴'
     from ..soul_rules import wandering
@@ -126,7 +130,7 @@ def can_possess(player: Player, target: dict[str, Any]) -> tuple[bool, str]:
     return True, ""
 
 
-def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
+def enter_host_body(player: Player, target: dict[str, Any], *, technique=None) -> dict[str, Any]:
     allowed, reason = can_possess(player, target)
     if not allowed:
         raise ValueError(reason)
@@ -140,6 +144,21 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
     technique_id = target.get("main_technique_id")
     if technique_id in TECHNIQUE_CATALOG:
         target_technique = copy.deepcopy(TECHNIQUE_CATALOG[str(technique_id)])
+    elif technique is not None and technique.id == technique_id:
+        target_technique = copy.deepcopy(technique)
+    if target_technique:
+        from ..npc_technique_schema import normalize
+        facts = normalize(target.get('technique_levels', {}), technique_id,
+                          target.get('main_technique_level', 1), target.get('family_traits', {}))
+        target_technique.level = facts.get(technique_id, 1)
+    # Resolve missing legacy NPC coordinates with the same deterministic authority.
+    from .npc_cultivation import ensure_npc
+    coordinates = dict(target)
+    if coordinates.get('body_training') is None or coordinates.get('divine_sense_rank') is None:
+        ensure_npc(coordinates)
+        for field in ('body_training', 'divine_sense_rank'):
+            if target.get(field) is not None:
+                coordinates[field] = target[field]
     player.ghost_core_state = core
     world_age = player.age
     target_age = max(0, int(target.get("age", world_age)))
@@ -153,7 +172,7 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
         "path": target_path, "path_name": PATH_NAMES.get(target_path, target_path),
         "realm_index": realm_index, "layer": layer,
         "immortal_body_level": max(0, int(target.get('immortal_body_level', 0))),
-        "body_training": max(0, int(target.get('body_training') if target.get('body_training') is not None else realm_index * 2)),
+        "body_training": max(0, int(coordinates['body_training'])),
         "golden_light_rank": max(1, min(5, int(target.get('golden_light_rank', 1)))),
     }
     player.name = f"{target_name}（{original_name}）"
@@ -175,8 +194,9 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
         )
     player.opportunity = float(target.get("opportunity", 0.0))
     player.qi_experience = {"spirit": 0.0, "demon": 0.0, "monster": 0.0, "yin": 0.0}
-    body_training = target.get("body_training")
-    player.body_training = max(0, int(realm_index * 2 if body_training is None else body_training))
+    player.body_training = max(0, int(coordinates['body_training']))
+    player.divine_sense_rank = max(0, int(coordinates['divine_sense_rank']))
+    player.divine_sense_experience = 0.
     player.body_progress = 0.0
     player.technique = target_technique
     player.support_technique = None
@@ -198,8 +218,9 @@ def enter_host_body(player: Player, target: dict[str, Any]) -> dict[str, Any]:
     player.ghost_captor = None
     player.possession_count += 1
     player.spirit_state = {}
-    from ..soul_rules import body_cap
+    from ..soul_rules import body_cap, soul_cap
     player.body_energy = body_cap(player) * .7
+    player.soul_energy = min(player.soul_energy, soul_cap(player))
     player.milestones["ghost_possessions"] = int(player.milestones.get("ghost_possessions", 0)) + 1
     # The host starts wounded after the soul struggle, but alive.
     expected = max(30.0, REALMS[realm_index].base_power ** 0.5 * 16 + layer * 8)

@@ -622,6 +622,22 @@ class GameEngine:
         self.store.save(game)
         return self.present(game)
 
+    def sect_task_action(self, game_id: str, payload: dict) -> dict[str, Any]:
+        import copy
+        from ..system.sect_tasks.actions import execute
+        from .transactions import accept_committed_game
+        self.assert_ghost_operation_allowed(game_id,'sect-task')
+        self.assert_guixu_operation_allowed(game_id,'sect-task')
+        self.assert_buddhist_operation_allowed(game_id,'sect-task')
+        game=copy.deepcopy(self._load(game_id))
+        rng=decode_rng(game.seed,game.rng_state)
+        execute(game,self.maps,payload,rng,self._combat,self._npc_power)
+        game.rng_state=encode_rng(rng)
+        game.updated_at=now_iso()
+        self.store.save(game)
+        accept_committed_game(self,game)
+        return self.present(game)
+
     def soul_action(self, game_id: str, action: str, payload: dict) -> dict[str, Any]:
         import copy
         from ..system.soul_actions import execute, SoulDependencies
@@ -822,8 +838,8 @@ class GameEngine:
     def _race_alliance(game: GameState, world: str, first: str, second: str) -> dict[str, Any] | None:
         return combat_runtime._race_alliance(game, world, first, second)
 
-    def _die(self, game: GameState, reason: str, event_id: str, *, offer_captive_possession: bool=False, death_cause: str | None=None) -> None:
-        return combat_runtime._die(self._dependencies.combat_runtime, game, reason, event_id, offer_captive_possession=offer_captive_possession, death_cause=death_cause)
+    def _die(self, game: GameState, reason: str, event_id: str, *, offer_captive_possession: bool=False, death_cause: str | None=None, survival_stage: str='body') -> None:
+        return combat_runtime._die(self._dependencies.combat_runtime, game, reason, event_id, offer_captive_possession=offer_captive_possession, death_cause=death_cause, survival_stage=survival_stage)
 
     @staticmethod
     def _snapshot(player: Player) -> dict[str, Any]:

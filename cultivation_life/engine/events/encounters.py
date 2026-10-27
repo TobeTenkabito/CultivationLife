@@ -301,6 +301,8 @@ def _maybe_faction_event(deps: EncounterDependencies, game: GameState, rng: rand
             continue
         if "faction" not in tags or "faction_join" in tags:
             continue
+        if 'duty' in tags or 'manual_only' in tags:
+            continue
         if "revenge" in tags and not deps._revenge_ready(game, "faction", str(event["id"])):
             continue
         if deps._intrigue_enabled() and any(

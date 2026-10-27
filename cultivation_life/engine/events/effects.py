@@ -233,7 +233,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         amount = max_hp(player) * float(value)
         player.hp = max(0, player.hp - amount)
         if player.hp <= 0:
-            deps._die(game, effect.get("reason", "伤势过重"), pending["id"])
+            deps._die(game, effect.get("reason", "伤势过重"), pending["id"], death_cause='story')
         return "dead" if not player.alive else "injured", f"受到 {amount:.0f} 点伤害。"
     if kind == "add_item":
         if effect['item_id'] == 'spirit_stone':
@@ -329,7 +329,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         detail = "，".join(displays)
         if failures:
             reason = effect.get("failure_reason", "未能通过生死判定，身死道消")
-            deps._die(game, reason, pending["id"])
+            deps._die(game, reason, pending["id"], death_cause='story')
             return "dead", f"判定失败（{detail}）。{reason}。"
         return "check_success", f"判定通过（{detail}）。{effect.get('success_text', '')}".strip()
     if kind == "trial_step":
@@ -542,6 +542,8 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         return None, "你与良人结为夫妻。"
     if kind == "join_faction":
         faction_id = str(effect["faction_id"])
+        from ...system.sect_membership import recruiting
+        if not recruiting(game,faction_id):return 'recruitment_closed','该宗门已经暂停招收新弟子。'
         if faction_id not in FACTION_DEFINITIONS:
             raise ValueError("未知宗门")
         if FACTION_DEFINITIONS[faction_id].get('kind', 'sect') != 'sect':

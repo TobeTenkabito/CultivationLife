@@ -385,6 +385,8 @@ def _body_breakthrough_chance(deps: CultivationActionDependencies, player: Playe
 def body_breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str, Any]:
     game = deps._load(game_id)
     player = game.player
+    from ...soul_rules import require_body_training
+    require_body_training(player)
     if not player.alive or game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法冲击炼体境界")
     if player.body_technique is None:

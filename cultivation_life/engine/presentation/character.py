@@ -181,6 +181,8 @@ def _public_dao_friends(deps: CharacterViewDependencies, game: GameState) -> lis
 
 
 def _relationship_can_join_faction(deps: CharacterViewDependencies, game: GameState, relation: dict[str, Any]) -> bool:
+    from ...system.sect_membership import recruiting
+    if not recruiting(game,game.player.faction_id):return False
     sect = game.sects.get(game.player.faction_id or "")
     return bool(
         sect and not sect.extinct and sect.world == game.player.world

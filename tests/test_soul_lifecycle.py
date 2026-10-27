@@ -104,6 +104,9 @@ def test_refine_original_npc_equipment_and_rescue(ready):
     assert g.player.nascent_state['second']['equipment'][0]['id']=='soul-sword'
     e._die(g,'普通斗法死亡','SYS_COMBAT')
     assert g.player.alive and wandering(g.player) and g.player.realm_index==4
+    assert g.player.nascent_state.get('second') and g.inactive_npcs[npc.id].alive
+    e._die(g,'神游中再次遭遇致命攻击','SYS_COMBAT')
+    assert g.player.alive and wandering(g.player)
     assert not g.player.nascent_state.get('second') and not g.inactive_npcs[npc.id].alive
     assert sum(i.quantity for i in g.player.inventory if i.id=='soul-sword')==1
 
@@ -179,6 +182,7 @@ def test_npc_body_escape_penalty_and_deadline(ready):
 def test_unpaid_second_rebels_and_cannot_save_own_killer(ready):
     e,g=ready;g=ready_second(e,g)
     g.player.nascent_state['second']['auto']=False
+    g.player.nascent_state['second']['control']=40
     g.player.age=g.player.nascent_state['second']['due']
     rng=random.Random(1)
     with patch.object(rng,'random',return_value=0.):

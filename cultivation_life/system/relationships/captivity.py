@@ -238,7 +238,8 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
         chance = max(0.10, min(0.95, 0.55 + (own_power - target_power) / (own_power + target_power) * 0.35))
         if rng.random() < chance:
             player.prisoners.remove(target)
-            host = enter_host_body(player, target)
+            from ..npc_techniques import resolve
+            host = enter_host_body(player, target, technique=resolve(game, target.get('main_technique_id')))
             kill_person(game, target.get("npc_id") or target["id"],
                         f"被{player.name}夺舍，原神魂不复存在")
             game.encounter_npc_cache = [
@@ -247,8 +248,10 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
             ]
             result, summary = "possessed", f"你以本魂压过{name}，成功夺取肉身（成功率 {chance:.0%}）；原 NPC 永久退场。"
         else:
-            deps._die(game, f"夺舍{name}失败，神魂遭宿主反噬而灭", "SYS_POSSESSION_FAILED")
-            result, summary = "dead", f"夺舍{name}失败，魂飞魄散（成功率 {chance:.0%}）。"
+            deps._die(game, f"夺舍{name}失败，神魂遭宿主反噬而灭", "SYS_POSSESSION_FAILED", survival_stage='spirit_failed')
+            result = 'survived' if player.alive else 'dead'
+            outcome = '第二元婴承接本魂，仍处于神游' if player.alive else '魂飞魄散'
+            summary = f"夺舍{name}失败，{outcome}（成功率 {chance:.0%}）。"
     elif action == "release":
         if disciple:
             raise ValueError("弟子不能通过俘虏释放")

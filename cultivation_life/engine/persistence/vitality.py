@@ -40,6 +40,6 @@ def prepare_vitality(deps: VitalityPreparationDependencies, game: GameState) -> 
             or float(game.player.ghost_intrinsic_mp_current or 0.0) < ghost_floor
         )
     ):
-        deps._die(game, "本体魂基已经低于存在界限，魂魄彻底消散", "SYS_GHOST_SOUL_DISPERSAL")
+        deps._die(game, "本体魂基已经低于存在界限，魂魄彻底消散", "SYS_GHOST_SOUL_DISPERSAL", survival_stage="spirit_failed")
         ghost_migrated = True
     return bool(possession_timeline_migrated or ghost_migrated)

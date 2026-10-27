@@ -33,7 +33,10 @@
           d.seniors.forEach(s=>{const o=node('option',s.name);o.value=s.id;select.append(o);});
           const b=button('请高层审批','depot_review',{},!ready);b.onclick=()=>send('depot_review',{...p,approver_id:select.value});card.append(select,b);}
       }
-      if(r.status==='approved')card.append(button('领取物资','depot_collect',p));
+      if(r.status==='approved'){
+        card.append(button('领取物资','depot_collect',p,r.can_collect===false));
+        if(r.can_collect===false)card.append(node('small','本行动单位领取额度不足；高价物资请单件申领，下个未使用额度的单位领取。'));
+      }
       if(['approved','pending'].includes(r.status))card.append(button('撤销申请','depot_cancel',p));
       requests.append(card);
     }

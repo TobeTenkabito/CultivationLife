@@ -563,6 +563,8 @@ def invite_relationship_to_faction(deps: RelationshipActionDependencies, game_id
         raise ValueError("当前状态无法引荐入宗")
     if not sect or sect.extinct or sect.world != player.world:
         raise ValueError("你当前没有可以引荐他人的宗门")
+    from ...system.sect_membership import recruiting
+    if not recruiting(game,sect.id):raise ValueError('宗门已暂停招收新弟子')
     relations = [entry for entry in [player.master, player.dao_companion, *player.dao_friends] if entry]
     relation = next((entry for entry in relations if str(entry.get("id")) == npc_id), None)
     if not relation or not is_free(relation) or relation.get("world") != player.world:

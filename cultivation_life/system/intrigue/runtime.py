@@ -120,6 +120,9 @@ def advance_npc_faction(
     if controller and eligible_voters and rng.random() < .16:
         style = deps._intrigue_governance_style(game, controller)
         resolution_type = {"internal": "mass_recruitment", "balance": "investment", "diplomacy": "form_alliance", "military": "declare_war"}[style]
+        from ..sect_membership import recruiting
+        if resolution_type=='mass_recruitment' and not recruiting(game,sect.id):
+            resolution_type='investment'
         from ..economy.estate_management import recruitment_ready
         if resolution_type=='declare_war' and not recruitment_ready(game,sect):
             resolution_type='investment'

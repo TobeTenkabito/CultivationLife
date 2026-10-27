@@ -341,6 +341,9 @@ def _guixu_trapped_training(
 ) -> dict[str, Any]:
     """Run only inward-facing training while the player is trapped."""
     game = deps._load(game_id)
+    if action == 'body_train':
+        from ...soul_rules import require_body_training
+        require_body_training(game.player)
     session = (
         game.guixu_state.get("player_session")
         if isinstance(game.guixu_state, dict) else None

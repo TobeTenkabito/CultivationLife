@@ -31,6 +31,9 @@ from ..dependencies import AdvancementDependencies
 def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int = 1) -> dict[str, Any]:
     game = deps._load(game_id)
     player = game.player
+    if action == 'body_train':
+        from ...soul_rules import require_body_training
+        require_body_training(player)
     if player.nascent_state.get('crisis'):
         raise ValueError('请先在人物详情处理神魂夺舍危机')
     if player.world in {'rift', 'lost'}:
@@ -338,6 +341,8 @@ def _body_training_step(
     concentrations: dict[str, float] | None = None,
 ) -> float:
     """Calculate one year of body training for every training context."""
+    from ...soul_rules import require_body_training
+    require_body_training(player)
     if player.body_technique is None:
         return 0.0
     body_rules = WORLD_SYSTEMS["body_cultivation"]

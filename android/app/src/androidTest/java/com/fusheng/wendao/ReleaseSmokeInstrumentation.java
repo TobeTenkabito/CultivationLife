@@ -478,6 +478,41 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         }
         tapSelector("[data-soul-action=unequip]");waitForJs("!busy&&game.soul.second.equipment.length===0","Equipment returned once");
         result.putString("soul_lifecycle_scope","Real personal energy bars, leave/return, secret study, original captive three-year refinement, equipment delivery/return and four themes; signed native portrait/landscape");
+        tapSelector("#nascent-toggle");
+        runHolidaySkins(result);
+    }
+
+    private void runHolidaySkins(Bundle result) throws Exception {
+        tapSelector("#theme-open");
+        if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        for(String gender:new String[]{"male","female"}) {
+            for(String style:new String[]{"christmas","halloween"}) {
+                String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'节日原生',spirit_root:'supreme_metal',path:'dao',gender:"+JSONObject.quote(gender)+",seed:321,preset_id:'core'})}).then(g=>g.id)");
+                async("loadGame("+JSONObject.quote(id)+")");
+                String key="actor.cosmetic."+style+"-"+gender;
+                String effect=style.equals("halloween")&&gender.equals("male")?"halloween-bats":style;
+                tapSelector(".hud-identity");
+                js("document.querySelector('#character-skins').open=false");
+                tapSelector("#character-skins summary");
+                tapSelector("[data-skin-id='"+key+"']");
+                waitForJs("!busy&&game.player.character_skins.selected==="+JSONObject.quote(key),"Native unrestricted skin selection");
+                waitForJs("document.querySelector('.pixel-portrait').complete&&document.querySelector('.pixel-portrait').naturalWidth===128","Native holiday portrait decoded");
+                check(Boolean.TRUE.equals(js("document.querySelector('#player-details-dialog').scrollWidth<=document.querySelector('#player-details-dialog').clientWidth+2")),"Holiday wardrobe fits");
+                capture("holiday-"+style+"-"+gender+"-"+arguments.getString("orientation"));
+                tapSelector("[data-close-dialog=player-details-dialog]");
+                async("loadGame("+JSONObject.quote(id)+")");
+                check(Boolean.TRUE.equals(js("game.player.character_skins.selected==="+JSONObject.quote(key))),"Native skin reload");
+                python(assetText("holiday_release.py")+"\nfrom cultivation_life import server\nholiday_battle(server.ENGINE,"+JSONObject.quote(id)+")");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("#battle-report-open");
+                waitForJs("window.CombatReplay&&CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native holiday replay");
+                check(Boolean.TRUE.equals(js("(()=>{const original=SpellEffects;let found=false;window.SpellEffects={...original,draw(s,m,state,h){if(m.attacker?.actor.holiday_effect==="+JSONObject.quote(effect)+"&&state.round&&state.time-state.round.contacts[0]>-.5&&state.time-state.round.contacts[0]<-.15)found=true;return original.draw(s,m,state,h);}};try{for(let t=0;t<CombatReplay.diagnostics().duration&&!found;t+=.1)CombatReplay.seek(t);return found;}finally{window.SpellEffects=original;}})()")),"Native costume attack effects");
+                capture("holiday-attack-"+style+"-"+gender+"-"+arguments.getString("orientation"));
+                tapSelector("#battle-report-toggle");
+            }
+        }
+        result.putString("holiday_skin_scope","Four unrestricted holiday skins selected via native taps, portraits, reload, real battle and costume attack renderer, portrait/landscape");
     }
 
     private void runAuthored(Bundle result) throws Exception {

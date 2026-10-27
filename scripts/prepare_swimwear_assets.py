@@ -39,7 +39,9 @@ def separate(source, rows):
     return parts
 
 
-def main():
+def main(source_dir=SOURCE, output_dir=OUT, manifest_key='base.swimwear_manifest'):
+    SOURCE, OUT = source_dir, output_dir
+    URL = '/assets/pixel/' + OUT.name + '/'
     OUT.mkdir(parents=True, exist_ok=True)
     template = read(ROOT / 'web/assets/pixel/characters-301/manifest.json')['actors']['dao-nascent-hero-female']
     assets, actors, forms, sources = {}, {}, [], []
@@ -77,6 +79,8 @@ def main():
         for mode, clip in actor['animations'].items():
             clip.update(packed, rects=[packed['rects'][POSES.index(pose)] for pose in clip['poses']])
         actor.update(name=name, faction='cosmetic', sex=row['gender'], energy_color='#8adbd0' if row['min_realm_index'] == 0 else '#c5d4ff')
+        if row.get('holiday_effect'):
+            actor['holiday_effect'] = row['holiday_effect']
         actors[ident] = actor
         forms.append(dict(name=name, gender=row['gender'], role='hero', scope='all_paths',
                           min_realm_index=row['min_realm_index'], static=static, combat=ident,
@@ -86,7 +90,7 @@ def main():
     manifest = OUT / 'manifest.json'
     write(manifest, dict(schema_version=1, fps=20, actors=actors,
                          actions=dict(attack=dict(name='结印施法', duration=4.0, contacts=[2.1]))))
-    assets['base.swimwear_manifest'] = dict(file=URL+manifest.name, sha256=sha(manifest), requires=[],
+    assets[manifest_key] = dict(file=URL+manifest.name, sha256=sha(manifest), requires=[],
                                            combat_actors=list(actors), skin_forms=forms)
     catalog = read(ROOT / 'content/visual_assets.json')
     catalog['assets'].update(assets)
@@ -95,7 +99,7 @@ def main():
           export='Original painted RGBA, nearest-neighbour packing; no anatomy reconstruction',
           forms=4, static_images=12, painted_keyposes=40, animation_clips=28, sources=sources,
           prompts=[dict(row, source_sha256=sha(SOURCE / row['file'])) for row in prompts]))
-    print('Exported 2 universal swimwear designs: 4 forms, 12 static images, 40 keyposes, 28 clips')
+    print(f'Exported {manifest_key}: 4 forms, 12 static images, 40 keyposes, 28 clips')
 
 
 if __name__ == '__main__':

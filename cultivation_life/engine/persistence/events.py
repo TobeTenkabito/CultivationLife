@@ -36,8 +36,19 @@ def prepare_events(deps: EventsPreparationDependencies, game: GameState) -> bool
         generated = generated_events.is_generated(head)
         definition = (generated_events.definition_for(game, head) if generated
                       else deps.events_by_id.get(head.get('id')))
-        if head.get('id') == 'SYS_POST_BATTLE_POSSESSION':
-            retained.append(head)
+        if definition and {'faction','duty'} <= set(definition.get('tags',[])):
+            changed = True
+            game.history.append(HistoryRecord(
+                'SYS_CONTENT_MIGRATION',1,game.player.age,'宗门任务更新',None,'unavailable',
+                '旧宗门差事已停用，请前往宗门任务栏；后续已得奖励保留。',
+                {'event_id':head['id']},['system','migration']))
+        elif head.get('id') == 'SYS_POST_BATTLE_POSSESSION':
+            changed = True
+            game.history.append(HistoryRecord(
+                'SYS_CONTENT_MIGRATION', 1, game.player.age, '事件校正', None, 'unavailable',
+                '旧战陨夺舍入口已停用；保留后续事件，已死亡人物不会复活。',
+                {'event_id': head['id']}, ['system', 'migration'],
+            ))
         elif definition is None:
             # A removed content pack must not take a queued earned reward with it.
             game.history.append(HistoryRecord(

@@ -100,7 +100,10 @@
     "sage_state.worlds.*.settled_year / buddhist_state.worlds.*.settled_year（历法复核）": "scope：原学说社会或原佛门网络已经结算的日历年份，不含资源或人物副本。新网络从建立年起采用；旧结构10无标记的既有网络按当前已观察年份采用一次，避免在落后的地区时钟中重放旧版已推进的竞争或信众衰减。不唤醒异界、不追发个人收益；地区补算只处理晚于本网络标记的年份，空间网络仍仅随本实例推进。",
     "GameState.last_combat_report.visual.domains / rounds.*.voisinage.animation": "session：alpha.3新增有界邻域表现快照。核心仅采样真实展开字段、覆盖判定、施权与介入结果、阶段前后合计态势比例；不新增结算或随机调用。visual.domains保存至多64名实际施域者的机器外观偏好／独立系统熵抽取淡色，玩家身份固定为player；重播与读档不重抽。画面每方最多3人，不复制NPC、账本、移动状态或逐帧数据，跨界沿原战报清理。旧缺失事实不补造。",
     "Player.character_skins": "personal：仅保存已解锁素材ID和手选皮肤；跨界、封印、修为降低保留，关闭DLC保留记录但不加载其素材。读档准备登记当前合法境界与明确血脉历史，未走过分支不解锁；切换不改人物、资源、时间、RNG或历史战报。结构10缺失为空。",
-    "Player.creation_insights / GameState.authored_techniques": "创法点数认领与支出归同一玩家个人；本世作品及仅上一周目作品的冻结定义归本档全局，通行不复制、不刷新点数或市场。NPC technique_levels 与 technique_slots 归原人物，升级持久保存，同一功法不因展示或跨界重置。"
+    "Player.creation_insights / GameState.authored_techniques": "创法点数认领与支出归同一玩家个人；本世作品及仅上一周目作品的冻结定义归本档全局，通行不复制、不刷新点数或市场。NPC technique_levels 与 technique_slots 归原人物，升级持久保存，同一功法不因展示或跨界重置。",
+    "intrigue_state.factions.sect:ID.task_board": "scope：原宗门任务、发布境界、招新政策、影响力、逐人薪俸与不满危机记录、行动单位配额及修订号。仅玩家在籍、同界且当前实际年份结算；退宗或任何离界停止，返回不补算。物资和现金不存任务副本；任务绑定原世界、地点、发布人及宗籍时间，完成者只结算一次。",
+    "economy_v2.accounts.person:ID": "personal：原NPC的唯一实付薪俸现金，初值0，府库实转发放，购买任务材料与捐献真实扣款；转籍、离宗保留原ID账户，不复制到新宗门。",
+    "wars.*.sect_mobilization / sect_mobilization_round / sect_mobilization_owner": "scope：原活动同界战役的有限一次动员加成，每项2%、累计最多10%；原会战开场领取并绑定原battle编号，下一场失效，不授予移动或远程战斗权限。玩家离界或离宗不启用留存收益；只读查询不消费。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",
@@ -427,6 +430,9 @@
     "Player.body_energy/soul_energy": "随原玩家保留的唯一个人能量；统一行动、战斗、世界年和空间年结算，读投影不扣费。",
     "Player.spirit_state": "元婴离体状态与固定期限；address为原肉身固定地址，归体须同界同地点同实例，不移动人物。肉身被毁不恢复炼体。",
     "Player.nascent_state": "秘法、魂伤、修炼停滞和同化时钟属于原玩家。second.id只引用inactive_npcs中的原俘虏；equipment为从原背包移出的唯一装备。个人第二元婴随玩家沿权威跨界入口移动，明确例外于普通俘虏永久离界退出规则；其他俘虏仍退出。转界取消未完成炼化。",
-    "SectNpc.spirit_state": "原NPC的个人身魂状态，不复制名册；第二元婴同化约束替代普通离体期限。"
+    "Player.nascent_state.second.control": "独立个人控制力0–100，初值100；同化恢复20，未同化每期下降2。低于50不能承接本魂，不与战斗完整度混用；跨界与读档不重置。",
+    "Player.nascent_state.second.age_year": "原第二元婴生理年龄已结算到的玩家世界年锚点；每段真实时间只回写原NPC.age一次，普通世界、独立空间与跨界共用。结构11旧第二元婴缺少该字段时以载入世界年明确采用，不追造年龄；控制力缺失明确采用100，随后随原账本保存。",
+    "SectNpc.age/lifespan (second_nascent)": "沿原俘虏生理年龄与寿命；炼虚以下寿尽消散，炼虚起无寿限。不复制人物、不按玩家生理年龄或同化due重建时钟。承接本魂时剩余寿命换算至玩家世界年，不为寿尽本尊补寿。",
+    "SectNpc.spirit_state": "原NPC的个人身魂状态，不复制名册；第二元婴同化约束替代普通离体期限，不豁免炼虚以下寿元。"
   }
 }

@@ -112,7 +112,7 @@ class GhostReincarnationDlcTests(unittest.TestCase):
         game.player.ghost_soul_erosion_rate_pp = 100.0
         self.assertFalse(self.engine._apply_soul_erosion_units(game, 1))
         self.assertFalse(game.player.alive)
-        self.assertIn("魂飞魄散", game.player.death_reason)
+        self.assertIn("本魂消散", game.player.death_reason)
 
     def test_batch_erosion_matches_unit_by_unit_and_first_unit_is_harmless(self):
         player = Player("长夜", "mutated_yin", path="ghost", realm_index=1, layer=1)

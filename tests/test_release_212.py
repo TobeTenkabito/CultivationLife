@@ -59,6 +59,9 @@ def test_all_registered_event_definitions_survive_pending_reconciliation(local, 
     for definition in engine.events:
         game.pending_event = {key: copy.deepcopy(definition[key]) for key in ('id', 'title', 'body', 'choices')}
         prepare_events(deps, game)
+        if {'faction','duty'} <= set(definition.get('tags',[])):
+            assert game.pending_event is None  # Retired in favour of the task board.
+            continue
         assert game.pending_event['id'] == definition['id']
         assert set(row['id'] for row in definition['choices']) <= set(row['id'] for row in game.pending_event['choices'])
         assert all('effects' not in row and 'conditions' not in row for row in game.pending_event['choices'])

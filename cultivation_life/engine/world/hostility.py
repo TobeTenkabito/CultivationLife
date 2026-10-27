@@ -388,7 +388,8 @@ def _imprison_or_execute(
         execution_chance = min(0.95, execution_chance + 0.12)
     if rng.random() < execution_chance:
         deps._die(game, f"落入{deps._hostility_name(key, game)}之手，被当场处决", "SYS_WANTED_EXECUTION")
-        return f"敌对值 {hostility:.0f}，对方拒绝收押，将你当场处决。"
+        outcome = '肉身被毁，存活结算后进入神游' if player.alive else '将你当场处决，此生结束'
+        return f"敌对值 {hostility:.0f}，对方拒绝收押；{outcome}。"
     low, high = config["prison_years"]
     years = rng.randint(int(low), int(high)) + min(8, int(hostility // 35))
     player.imprisonment = {

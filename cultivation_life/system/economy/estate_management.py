@@ -23,6 +23,8 @@ def settlement_interval(game, row):
 
 
 def recruitment_ready(game, entity):
+    from ..sect_membership import recruiting
+    if entity.kind=='sect' and not recruiting(game,entity.id):return False
     kind = 'family' if entity is game.family else 'sect'
     address = f'organization:{kind}:{entity.id}'
     row = game.economy_v2.get('organizations', {}).get(address, {})

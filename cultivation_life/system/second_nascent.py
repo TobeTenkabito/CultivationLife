@@ -6,14 +6,18 @@ from .npc_techniques import equipped
 from .soul_lifecycle import second_person, consume_second
 
 
-def power(game):
+def full_power(game):
     npc = second_person(game)
     if not npc:
         return 0.
     row = game.player.nascent_state['second']
     bonus = sum(t.combat_bonus * technique_scale(t) for _, t in equipped(game, npc))
     bonus += sum(item.get('combat_bonus', 0) for item in row['equipment'])
-    return round((expected_combat_power(npc.realm_index, npc.layer) * .8 + bonus) * row['integrity'] / 100, 1)
+    return expected_combat_power(npc.realm_index, npc.layer) * .8 + bonus
+
+
+def power(game):
+    return round(full_power(game) * game.player.nascent_state.get('second', {}).get('integrity', 0) / 100, 1)
 
 
 def unit(game):
@@ -21,7 +25,7 @@ def unit(game):
     npc = second_person(game)
     if npc:
         row = game.player.nascent_state['second']
-        return BattleUnit(npc.id, f'第二元婴·{npc.name}', 'second_nascent', power(game),
+        return BattleUnit(npc.id, f'第二元婴·{npc.name}', 'second_nascent', full_power(game),
                          npc.realm_index, npc.path, row['integrity'] / 100, 'integrity')
 
 

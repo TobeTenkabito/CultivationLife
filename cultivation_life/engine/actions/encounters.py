@@ -140,7 +140,8 @@ def prison_action(deps: EncounterActionDependencies, game_id: str, action: str) 
             player.hp = max(0.0, player.hp - damage)
             if player.hp <= 0:
                 deps._die(game, "越狱失败，被狱卒当场格杀", "SYS_PRISON_ESCAPE")
-                result, summary = "dead", "越狱失败，你被当场格杀。"
+                result = 'survived' if player.alive else 'dead'
+                summary = '越狱失败，肉身被毁，存活结算后进入神游。' if player.alive else '越狱失败，你被当场格杀。'
             else:
                 result, summary = "failed", f"越狱失败，HP -{damage:.0f}，敌对值继续上升。"
     else:
@@ -149,8 +150,9 @@ def prison_action(deps: EncounterActionDependencies, game_id: str, action: str) 
         from ...system.intrigue.custody import advance_prison_year
         advance_prison_year(game)
     if action in {"endure", "wait", "cultivate"} and player.alive and not deps._advance_soul_erosion_time(game, 1):
-        result = "dead"
-        summary = "刑狱岁月令魂蚀越过最后界限，你在出狱前魂飞魄散。"
+        result = 'survived' if player.alive else 'dead'
+        summary = ('刑狱岁月令本魂消散，第二元婴承接本魂，进入神游。' if player.alive
+                   else '刑狱岁月令魂蚀越过最后界限，你在出狱前魂飞魄散。')
     if action in {"endure", "wait", "cultivate"} and player.alive:
         drained = deps._advance_concubine_status(game, 1)
         if drained:

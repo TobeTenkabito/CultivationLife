@@ -75,6 +75,9 @@ def _intrigue_resolve(
 ) -> dict[str, Any]:
     if resolution_type not in deps.RESOLUTION_LABELS:
         raise ValueError("未知重大决议")
+    if kind=='sect' and resolution_type in {'mass_recruitment','disciple_recruitment'}:
+        from ..sect_membership import recruiting
+        if not recruiting(game,faction_id):raise ValueError('宗门已暂停招收新弟子')
     from ..territory.actions import ACTIONS, validate
     if resolution_type in ACTIONS:
         if kind!='sect':raise ValueError('地方影响力决议仅适用于宗门')
@@ -158,6 +161,9 @@ def _intrigue_apply_resolution(
     target_id: str, rng: random.Random, *, context: dict[str, Any] | None = None,
 ) -> None:
     kind, faction_id = str(record["kind"]), str(record["id"])
+    if kind=='sect' and resolution_type in {'mass_recruitment','disciple_recruitment'}:
+        from ..sect_membership import recruiting
+        if not recruiting(game,faction_id):return
     if resolution_type == 'imprison_member':
         from .custody import imprison
         imprison(game, record, deps._intrigue_members(game, kind, faction_id), target_id,

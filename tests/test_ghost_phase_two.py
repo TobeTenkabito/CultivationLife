@@ -171,21 +171,20 @@ class GhostPhaseTwoTests(unittest.TestCase):
         self.assertEqual(player.possession_count, 1)
         self.assertEqual(player.ghost_reincarnation_imprints, {"3": 7})
 
-    def test_default_possession_limit_and_body_death_returns_to_core(self):
+    def test_host_lifespan_death_is_terminal(self):
         game = self._game()
-        target = {"id": "host-b", "name": "陆归尘", "race": "human", "path": "dao", "spirit_root": "supreme_wood", "realm_index": 0, "layer": 1, "combat_power": 1}
+        game.player.realm_index = 4
+        target = {"id":"host-b", "name":"陆归尘", "race":"human", "path":"dao",
+                  "spirit_root":"supreme_wood", "realm_index":4, "layer":1,
+                  "age":40, "lifespan":900, "combat_power":1}
         self.assertEqual(possession_limit(game.player), 1)
         from cultivation_life.system.soul_lifecycle import leave_body
         leave_body(game, destroyed=True)
         enter_host_body(game.player, target)
         self.engine._die(game, "宿主寿尽", "SYS_LIFESPAN")
-        self.assertTrue(game.player.alive)
-        self.assertEqual(game.player.path, "ghost")
-        self.assertFalse(is_possessed(game.player))
+        self.assertFalse(game.player.alive)
         self.assertEqual(game.player.possession_count, 1)
-        allowed, reason = can_possess(game.player, target)
-        self.assertFalse(allowed)
-        self.assertIn("最多", reason)
+        self.assertFalse(can_possess(game.player, target)[0])
 
     def test_advanced_techniques_extend_or_remove_possession_limit(self):
         player = Player("夺形", "mutated_yin", path="ghost", possession_count=1)
@@ -334,41 +333,22 @@ class GhostPhaseTwoTests(unittest.TestCase):
         self.assertEqual(loaded.player.ghost_attachment["name"], "魂灯")
         self.assertTrue(loaded.ghost_parade)
 
-    def test_routine_battle_death_offers_eligible_captive_and_uses_npc_life(self):
+    def test_below_nascent_death_does_not_offer_captive_revival(self):
         game = self._game()
         game.player.realm_index = 3
         game.player.layer = 7
-        game.player.age = 480
-        game.player.prisoners = [
-            {
-                "id": "eligible", "name": "陆还真", "race": "human", "path": "dao",
-                "spirit_root": "supreme_water", "realm_index": 3, "layer": 2,
-                "age": 196, "lifespan": 812, "combat_power": 2800,
-            },
-            {
-                "id": "too-high", "name": "越境者", "race": "human", "path": "dao",
-                "spirit_root": "supreme_fire", "realm_index": 4, "layer": 1,
-                "age": 620, "lifespan": 1350, "combat_power": 20000,
-            },
-        ]
-        self.engine._die(
-            game, "非剧情战陨落", "SYS_COMBAT", offer_captive_possession=True,
-        )
+        game.player.prisoners = [{
+            "id":"eligible", "name":"陆还真", "race":"human", "path":"dao",
+            "spirit_root":"supreme_water", "realm_index":3, "layer":2,
+            "age":196, "lifespan":812, "combat_power":2800,
+        }]
+        self.engine._die(game, "非剧情战陨落", "SYS_COMBAT", offer_captive_possession=True)
         self.assertFalse(game.player.alive)
-        self.assertEqual(game.pending_event["id"], "SYS_POST_BATTLE_POSSESSION")
-        self.assertEqual([row["id"] for row in game.pending_event["choices"]], ["eligible"])
-
+        self.assertIsNone(game.pending_event)
         self.engine.store.save(game)
-        reloaded = self.engine._load(game.id)
-        self.assertEqual(reloaded.pending_event["id"], "SYS_POST_BATTLE_POSSESSION")
-        result = self.engine.post_battle_possess(game.id, "eligible")
-        self.assertTrue(result["player"]["alive"])
-        self.assertEqual((result["player"]["age"], result["player"]["lifespan"]), (196, 812))
-        self.assertEqual(result["ghost_system"]["phase_two"]["possession_count"], 1)
-        self.assertIsNone(result["pending_event"])
-
-        restored = self.engine.leave_possessed_body(game.id)
-        self.assertEqual(restored["player"]["age"], 480)
+        with self.assertRaisesRegex(ValueError, "停用"):
+            self.engine.post_battle_possess(game.id, "eligible")
+        self.assertFalse(self.engine.store.load(game.id).player.alive)
 
     def test_story_or_noncombat_death_does_not_offer_captive_possession(self):
         game = self._game()
@@ -382,6 +362,9 @@ class GhostPhaseTwoTests(unittest.TestCase):
 
     def test_becoming_an_npc_artifact_spirit_records_humiliation_milestone(self):
         game = self._game()
+        game.player.realm_index = 4
+        from cultivation_life.system.soul_lifecycle import leave_body
+        leave_body(game, destroyed=True)
 
         class CapturingRng:
             @staticmethod

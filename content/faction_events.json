@@ -163,6 +163,63 @@
       "tags": ["faction", "faction_unique", "faction:puti", "technique", "rare"], "weight": 2, "repeat": "once",
       "conditions": {"all": [{"path": "player.faction_id", "op": "eq", "value": "puti"}, {"path": "player.faction_contribution", "op": "gte", "value": 20}]},
       "choices": [{"id": "main", "text": "将佛经立为主修", "effects": [{"type": "equip_technique", "technique_id": "TECH_PUTI", "slot": "main"}]}, {"id": "support", "text": "将佛经立为辅修", "effects": [{"type": "equip_technique", "technique_id": "TECH_PUTI", "slot": "support"}]}]
+    },
+    {
+      "id": "EVT_SECT_FINANCE_CONFLICT",
+      "version": 1,
+      "title": "门内争薪",
+      "body": "府库欠薪引起门内冲突。",
+      "tags": [
+        "faction",
+        "finance",
+        "manual_only"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "acknowledge",
+          "text": "知晓此事",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_SECT_FINANCE_DEPARTURE",
+      "version": 1,
+      "title": "长老离宗",
+      "body": "高阶修士因财政危机离开宗门。",
+      "tags": [
+        "faction",
+        "finance",
+        "manual_only"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "acknowledge",
+          "text": "知晓此事",
+          "effects": []
+        }
+      ]
+    },
+    {
+      "id": "EVT_SECT_FINANCE_DISSOLUTION",
+      "version": 1,
+      "title": "山门解散",
+      "body": "长期欠薪导致宗门解散。",
+      "tags": [
+        "faction",
+        "finance",
+        "manual_only"
+      ],
+      "weight": 0,
+      "choices": [
+        {
+          "id": "acknowledge",
+          "text": "知晓此事",
+          "effects": []
+        }
+      ]
     }
   ]
 }

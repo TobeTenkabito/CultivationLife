@@ -67,4 +67,4 @@ def _annual_demonic_update(deps: DemonicAnnualDependencies, game: GameState, rng
             {"souls": len(unrefined), "burden": burden, **risk}, ["system", "demonic", "soul", "negative"],
         ))
         if player.hp <= 0:
-            deps._die(game, "吞噬的外来元神反客为主，撕碎识海", "SYS_SOUL_BACKLASH_DEATH")
+            deps._die(game, "吞噬的外来元神反客为主，撕碎识海", "SYS_SOUL_BACKLASH_DEATH", survival_stage="spirit_failed")

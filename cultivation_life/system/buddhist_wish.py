@@ -97,6 +97,8 @@ def wish_modifier(subject, key, **context):
 
 
 def nirvana_target(engine, game):
+    if game.player.nascent_state.get('stagnant'):
+        return None, '神魂受损，修为永久停滞，无法涅槃升境'
     from .spatial import cultivation_block_reason
     if cultivation_block_reason(game):
         return None, cultivation_block_reason(game)

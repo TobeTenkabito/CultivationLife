@@ -28,9 +28,10 @@ window.SoulPanel=(()=>{
     document.querySelector('[data-panel-target="nascent"]').classList.toggle('hidden',!known);
     document.querySelector('#nascent-card').classList.toggle('hidden',!known);
     const host=document.querySelector('#nascent-content');host.replaceChildren();host.className='soul-panel';
-    const h=el('div',undefined,'soul-hero');h.append(el('h3',s.second?`第二元婴 · ${s.second.name}`:'一身双魂'),el('p','以三年持续炼化提取元婴，每年消耗15神魂。第二元婴保留原主修为，独立参战。可抵挡一次非剧情、非渡劫死亡，随后以其修为进入神游。'));host.append(h);
+    const h=el('div',undefined,'soul-hero');h.append(el('h3',s.second?`第二元婴 · ${s.second.name}`:'一身双魂'),el('p','以三年持续炼化提取元婴，每年消耗15神魂。第二元婴保留原主修为，独立参战。本尊须达到元婴且寿元未尽；神游失败后，仍存活且控制力≥50的第二元婴才可承接本魂。剧情、天劫与雷劫等特殊死亡不能承接。'));host.append(h);
     if(!s.second){if(s.refining){h.append(el('p',`炼化进度 ${s.refining.years} / 3 年`));host.append(button('继续炼化一年','refine',{id:s.refining.id}),button('取消炼化','cancel_refine'));}else choose(host,s.captives,'炼化一年','refine');return;}
-    const n=s.second;h.append(el('p',`${n.realm} · 第${n.layer}层 ｜ 战力 ${Math.round(n.power)} ｜ 完整度 ${Math.round(n.integrity)}%`),el('p',`每${n.interval}年同化消耗${n.cost}神魂；下次：${n.due}岁。欠费每期35%概率遭夺舍。`,'soul-warning'));
+    const n=s.second;h.append(el('p',`${n.realm} · 第${n.layer}层 ｜ 战力 ${Math.round(n.power)} ｜ 完整度 ${Math.round(n.integrity)}% ｜ 控制力 ${Math.round(n.control)} / 100`),el('p',`每${n.interval}年同化消耗${n.cost}神魂；下次：${n.due}岁。每次同化恢复20控制力；未同化每期降低2；下期未同化的反噬概率 ${(n.next_rebellion_chance*100).toFixed(1)}%。控制力不低于50时无反噬，降至0时为35%。`,'soul-warning'));
+    h.append(el('p',`元婴年龄 ${n.age}岁 ｜ ${n.lifespan===null?'炼虚以上，不受寿元限制':`寿元 ${n.lifespan}岁 · 剩余 ${Math.max(0,n.lifespan-n.age)}年`}`));
     const upkeep=el('div',undefined,'soul-actions');upkeep.append(button(`立即同化 · −${n.cost}`,'assimilate'),button(n.auto?'自动同化：开':'自动同化：关','auto'));host.append(upkeep,el('h3','功法配置'));
     const learned=[...new Map([...s.techniques,...n.books].map(t=>[t.id,{...t,name:`${t.name} Lv.${t.level}`}])).values()];
     for(const [slot,label]of Object.entries({main:'主修',support:'辅修',combat:'杀伐',body:'炼体',sense:'神识',transformation:'变化'})){host.append(el('p',`${label}：${learned.find(t=>t.id===n.slots[slot])?.name||'未配置'}`));choose(host,learned,`配置${label}`,'technique',{slot});}

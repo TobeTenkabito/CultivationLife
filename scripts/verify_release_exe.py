@@ -45,7 +45,9 @@ def verify(with_dlc):
             if '--soul-lifecycle' in sys.argv:
                 from scripts.verify_soul_exe import verify_soul
                 verify_soul(base, with_dlc, folder)
-                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,soul_verified=True)
+                from scripts.verify_holiday_exe import verify_holiday
+                verify_holiday(base)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,soul_verified=True,holiday_verified=True)
             if '--authored' in sys.argv:
                 from scripts.verify_authored_exe import verify_authored
                 verify_authored(base, with_dlc)

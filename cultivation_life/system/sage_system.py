@@ -754,6 +754,8 @@ def _outer_target(player) -> tuple[int, int] | None:
 
 def _outer_advance_block_reason(deps: SageActionsDependencies, game: GameState) -> str:
     player = game.player
+    if player.nascent_state.get('stagnant'):
+        return '神魂受损，修为永久停滞，无法外王升境'
     from .spatial import cultivation_block_reason
     if cultivation_block_reason(game):
         return cultivation_block_reason(game)

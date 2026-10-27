@@ -1,0 +1,202 @@
+{
+  "base_version": "3.2.1",
+  "save_schema": 11,
+  "compatible_save_schemas": [
+    11
+  ],
+  "incompatible_save_schemas": "1–10; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.3.0",
+    "authored-techniques": "1.0.0",
+    "buddhist-dharma": "1.2.0",
+    "ghost-reincarnation": "3.10.0",
+    "guixu-tide": "2.7.2",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.19.0",
+    "monster-civilizations": "1.0.1",
+    "sage-way": "1.6.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "Holiday skins/effects, soul survival, current-player sect finance/tasks and related combat/persistence/release upstreams; not full repository regression",
+  "tests": 1156,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build/related-tests-0-321.log",
+      "status": "passed",
+      "reconciliation": "scoped-321-reconciliation.json"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build/related-tests-1-321.log",
+      "status": "passed",
+      "reconciliation": "scoped-321-reconciliation.json"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build/related-tests-2-321.log",
+      "status": "passed",
+      "reconciliation": "scoped-321-reconciliation.json"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build/check_world_transition_contract-321.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build/check_module_dependencies-321.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build/check_documentation-321.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_soul_lifecycle",
+      "log": "build/browser_soul_lifecycle-321.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_swimwear_skins",
+      "log": "build/browser_swimwear_skins-321.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_holiday_skins",
+      "log": "build/browser_holiday_skins-321.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_sect_tasks",
+      "log": "build/browser_sect_tasks-321.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_authored_techniques",
+      "log": "build/browser_authored_techniques-321.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build/browser_events_212-321.log",
+      "status": "passed"
+    }
+  ],
+  "regression": {
+    "collected": 1156,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 1156
+  },
+  "save_transfer_smoke_tests": 21,
+  "save_transfer_smoke_in_regression": true,
+  "save_transfer_log": "build/save-transfer-321.log",
+  "inputs_sha256": "ac465129bc06194c2f7aafa9621af733608a1bcf723e6101f2a8434c2b39555c",
+  "regression_reconciliation": {
+    "inputs_sha256": "ac465129bc06194c2f7aafa9621af733608a1bcf723e6101f2a8434c2b39555c",
+    "reason": "Updated expectations for existing main-soul dispersal wording and 17 new holiday assets/manifest/format declarations. Production sources unchanged; both original failures retained and both complete modules retested.",
+    "replaced_module": "tests/test_ghost_reincarnation_dlc.py",
+    "replaced_modules": [
+      "tests/test_ghost_reincarnation_dlc.py",
+      "tests/test_visual_release.py"
+    ],
+    "final_test_sources": {
+      "tests/test_authored_techniques.py": "9e92b5af57b3b6663a6ff9618e641014083e372cc3d10a287e31415732283cc2",
+      "tests/test_technique_leveling.py": "96dfe4c17871556663f82b216b5b538568cb3d5a18b6d64a88b85e987630e7a4",
+      "tests/test_common_elemental_techniques.py": "0de3f5cadd7f0edf5b6d5ea43b6656a677fa9d0af28c164cb56668ee5d6c89e9",
+      "tests/test_economy_v2.py": "6c82fa531c2bf3b71f39362c4f47dfba1258b03c7ec8cbe10e5d8857fa657896",
+      "tests/test_auction_update.py": "53d4d75caae10e937f2494b1b0754c1f2d14a0096e4a0878a607b9047fbc709f",
+      "tests/test_relationship_records.py": "09b673bc42149edd8042bb1e42c00378e4cf26abaa6c0f7d1df6c7fbe93e4358",
+      "tests/test_relationship_story_update.py": "6b2ae3390c371c369696351ddd7f4fb77cdc39bafdf96b72a15d9d26dac6ab88",
+      "tests/test_npc_custody.py": "ac348d806d76919b56b42d640a87272fd57b9cb839d48a70df1941e96b58344e",
+      "tests/test_doctrines.py": "32fa38e4fae5040d75ab32e7dc3d11358fc6fb45696cf2d06cc546e743e108c4",
+      "tests/test_voisinage_effects.py": "bf456de44dcb5a8ed1678d66ce03704a17dc9d617c2e2835f882561101b8c7a9",
+      "tests/test_combat_semantics.py": "07a72847106c0cc8967e68ed67333fb487583fb6470832562122ccc6c00f6034",
+      "tests/test_player_combat_system.py": "88bac1bc76579583834462f27767a59943e0351129c66fa2bb577ba7a6b5bcfc",
+      "tests/test_persistence_pipeline.py": "a9d878da3e5a3decd9e8947ad5ee24b357ed11e162355dd63abd69bc68a112fc",
+      "tests/test_save_transfer.py": "62e00e4a042aac0f406e02d7b065430db79b0e48986a88cb57309de56be1ce6f",
+      "tests/test_extension_system.py": "ff62a16745c17c7f8be18e0c77ba56facbcfd7a4ae6fb2f9a2c22c8b3f18a04d",
+      "tests/test_world_transition_system.py": "d57af0550c439ebc5cac50b6020a28c208ebc44bf6a3d7be3c7d237e51304934",
+      "tests/test_spatial_talismans.py": "070567dbf73aec91f7ed10fa28247165d3f892d2eadbc870ad0330f6c10e42b2",
+      "tests/test_release_211.py": "9986dd4ce009c47b8d4ad26c127ba51e748b05cd1db6fa3de2f8457e2efd5155",
+      "tests/test_release_212.py": "884815acf1fed798ac1c85d16aa4f2795714f0e0300c846c8f7438ce9680b895",
+      "tests/test_base_game_version.py": "c1d6b33d980a23dcac829fe026ee31efd5cdde394292db51541842f6905374ce",
+      "tests/test_module_dependencies.py": "58357c4f916bb7dceefd18084d96405bf10a413093c8116210ae5d631d432b39",
+      "tests/test_android_packaging.py": "67f3c3dc465b70d31ecda20351971016cf86e9c8372cc2ebe3924ae2e9fa50c9",
+      "tests/test_windows_release_evidence.py": "46cc18051c0ae21c9a7a19778eea99cf6c27a0b7140b327f2720a6771007c982",
+      "tests/test_android_release_checks.py": "de2eef0e9c129f499fdc332a526e59a69185cbd169c79deba4b549a6033e15c6",
+      "tests/test_soul_lifecycle.py": "de37e67d2237c34c932b3cc5c05b07db89a9a04d7138ab3c6a143911ff9c0e0c",
+      "tests/test_swimwear_skins.py": "19dd3701593b71eb63cd67c047cb285ad35e32e8cbdb24e8194cb5cbcd4197cd",
+      "tests/test_ghost_system.py": "3a236a01558b1bc5e04b8b2e897ea6742a7f3df504813c0274364692ffa08647",
+      "tests/test_ghost_phase_two.py": "89f5f60b994500fc1bc9cbf35a9269979979c60c68f1b8a39fd45d2058ef25b1",
+      "tests/test_ghost_reincarnation_dlc.py": "f5f8e97fe3010456f9d7f6d1cfa09e169e264f581d8ffc516203c81058d49f62",
+      "tests/test_demonic_system.py": "5a37d9f14e49b8de64c4dd11ea93a1b8c9cab5dee147b61d5e105e45421c3b38",
+      "tests/test_relationship_possession_audit_fixes.py": "682fc5f5ea4c730fb9162a36e45a5fc1b28df3558e5a3322f9d04125f882c169",
+      "tests/test_immortal_cultivation.py": "7b46046a81188a423906689a1d912a851ab0b8c7b51eaa31f1d9188b3edc4268",
+      "tests/test_body_bounty_update.py": "c1380ce83fae1d9ab28d29bf0ae6f7948b30011a5a60906bdcccf6495e5b1e8e",
+      "tests/test_combat_replay.py": "09fdbfee85eef0e6cdcbaea26c3ea75c7d567c8d78f3ed0b117f8817086dab37",
+      "tests/test_npc_social_update.py": "1000110f396897db88f6ac598a47c901e910a45d70d44c7c5d8f3a828dea6991",
+      "tests/test_holiday_skins.py": "9e068dd3097fb12362ed2a52b9d167992b9b4ad198b5a21e4bc9ba0cfd0a5368",
+      "tests/test_sect_tasks.py": "2d32f12d4c8fc94faf2ea6504fc0b17ede8afc8936bf86422d81631c81ee727a",
+      "tests/test_survival_settlement.py": "aee4c319ed419251f6f0b9906570d8951a17a797f18f5cbd196db653a5199756",
+      "tests/test_intrigue_system.py": "cb07577c0a8c71a9ef550e77bf26d5ee59780666b2ad9a900fa7de3e1e362105",
+      "tests/test_organization_economy.py": "c7081ca72d46ae25c85146576de5f6eb13ed6a52b889465731361f9aad832658",
+      "tests/test_war_logistics.py": "ef99910273a7b63bae4d8dfbf293258f03c39cc9fe8b1935474bb77fe76b4a13",
+      "tests/test_domain_styles.py": "7d3f8059c850b19f39227f72458368ad8492d8c2b390b9a3f63ecece6bcecd2b",
+      "tests/test_visual_release.py": "5aee01c4214b546952171394a805f706e6ff2ee5360f826c69f392d8bbf43f8c",
+      "tests/test_pixel_assets.py": "a4875deff4451ba9f3ae98fb10b4fe861daa97d574e94f25a7b6383c9290cdee"
+    },
+    "original_runs": [
+      {
+        "xml": "build/scoped-321-0.xml",
+        "xml_sha256": "93cc790bee7cd21ec894fd589b340df2a02c189093e83e64976e45a849652248",
+        "log": "build/related-tests-0-321.log",
+        "log_sha256": "48c58ed442761c31214eb910e854339a8cd20019899b4700cd0811d476ed5f30"
+      },
+      {
+        "xml": "build/scoped-321-1.xml",
+        "xml_sha256": "efac9f9cdaca21654def0f97f78d292e35b05dfb4a260795d0049eb40bb85dcb",
+        "log": "build/related-tests-1-321.log",
+        "log_sha256": "f091be3b9f283148413211ee0cf55174fe10b73fbb4b5fce2c6df06abc35e19d"
+      },
+      {
+        "xml": "build/scoped-321-2.xml",
+        "xml_sha256": "2e0ff0ff98045ac8ebe6899ce32860589782bac9a5464f130056a37c9f0a6007",
+        "log": "build/related-tests-2-321.log",
+        "log_sha256": "f289f13ab426cd0d9dfcd737b349fd014ef101c31447f890ee4883da7fcefa00"
+      }
+    ],
+    "retest_xml": "build/scoped-321-retest.xml",
+    "retest_xml_sha256": "46dcc20af0376a2ddc1414c9c4d8c058a72b267dd61c836eb9628521b4886812",
+    "retest_log": "build/scoped-321-retest.log",
+    "retest_log_sha256": "0a78e3e666c2b8995555c07f5bed5c066e3f18f93af62d2ee6553094e3838104"
+  },
+  "platform": "Android 12",
+  "android_version": "3.2.1-android.84",
+  "version_code": 84,
+  "apk_sha256": "ce1f8b398d9d87a54bae95e6c252eacae9d5299301eb0f5c9fc3fa40e492f3d5",
+  "native": {
+    "version": "3.2.1",
+    "apk_sha256": "ce1f8b398d9d87a54bae95e6c252eacae9d5299301eb0f5c9fc3fa40e492f3d5",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-soul-lifecycle-portrait-321.log",
+      "build/android-soul-lifecycle-landscape-321.log"
+    ],
+    "test_apk_sha256": "9658765be86d73e36818299ea01c279b25f47bfcc13b23c0d766bda8533deeae",
+    "log_hashes": {
+      "build/android-soul-lifecycle-portrait-321.log": "815743a1dc98c9f83820a3cf415f22f7694d1a89abfc2f32b7bdd034af41cfaf",
+      "build/android-soul-lifecycle-landscape-321.log": "815743a1dc98c9f83820a3cf415f22f7694d1a89abfc2f32b7bdd034af41cfaf"
+    },
+    "scope": "Base soul energy, leave/return, study, real captive refinement, equipment and four-theme mobile layout; signed Android 12 portrait/landscape"
+  },
+  "physical_device_tested": false
+}

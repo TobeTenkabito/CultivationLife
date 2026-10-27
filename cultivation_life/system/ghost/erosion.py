@@ -35,7 +35,7 @@ def _apply_soul_erosion_units(deps: GhostErosionDependencies, game: GameState, u
             ["system", "ghost", "soul_erosion", "negative", "milestone"],
         ))
     if result["dead"]:
-        deps._die(game, "魂蚀已将本体魂基磨灭，纵有外物亦无法阻止魂飞魄散", "SYS_GHOST_SOUL_DISPERSAL")
+        deps._die(game, "魂蚀已将本体魂基磨灭，本魂消散", "SYS_GHOST_SOUL_DISPERSAL", survival_stage="spirit_failed")
         return False
     return True
 

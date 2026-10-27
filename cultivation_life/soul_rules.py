@@ -26,12 +26,22 @@ def body_cap(player):
     return 100. + 20 * player.body_training
 
 
+def require_body_training(player):
+    if wandering(player) and not player.spirit_state.get('body_intact'):
+        raise ValueError('肉身已毁，须先取得肉身才能炼体')
+
+
 def soul_cap(player):
     return 100. + 25 * player.divine_sense_rank
 
 
 def assimilation_cost(rank):
     return 10 + 5 * max(0, rank - 3)
+
+
+def rebellion_chance(control):
+    """No rebellion above the rescue threshold; grows linearly to 35% at zero."""
+    return max(0., min(.35, (50. - control) * .007))
 
 
 def lower_minor(rank, layer, realms):

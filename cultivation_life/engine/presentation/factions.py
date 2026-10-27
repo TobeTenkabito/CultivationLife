@@ -147,6 +147,7 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         public_npc.pop("concealed_layer", None)
         roster.append({
             **public_npc,
+            'contribution': game.intrigue_state.get('factions', {}).get(f'sect:{sect.id}', {}).get('member_contribution', {}).get(npc.id, 0),
             "title": deps._dynamic_sect_title(npc, sect),
             "realm_index": perception["realm_index"],
             "layer": perception["layer"],

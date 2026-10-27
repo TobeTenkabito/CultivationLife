@@ -74,6 +74,10 @@ def settle_faction(game, maps, row, years):
     if freight in game.economy_v2['accounts']:
         row['income'] += pay(game, freight, source, balance(game, freight), '传送阵货运收入归属府库')
     due = row.get('expected_upkeep', 0) * years
+    salary_paid=0
+    if row['kind']=='sect':
+        from ..sect_tasks.finance import salaries
+        salary_paid=salaries(game,entity,row,years)
     carried_debt = 0
     child_care = 0
     if row['kind'] == 'family':
@@ -82,15 +86,19 @@ def settle_faction(game, maps, row, years):
     # Services keep the old authoritative treasury; supplies are goods, not a
     # second service debit. Optional supplies may use only this interval's
     # welfare envelope, leaving three years of basic maintenance intact.
-    service_due = int(due*.65)+carried_debt+child_care
+    base_service_due = int(due*.65)+carried_debt+child_care
+    # New personal wages replace the old aggregate daily labour envelope.
+    # Preserve the study allowance; never charge the same labour twice.
+    study_budget=int(base_service_due*.15)
+    service_due=base_service_due-min(salary_paid,base_service_due-study_budget)
     from ..organization_heritage import allowance_account
     allowance_account(game,entity)
     paid=min(service_due,balance(game,source))
-    study_paid=int(paid*.15)
+    study_paid=min(paid,study_budget) if salary_paid else int(paid*.15)
     pay(game,source,f'study:{row["kind"]}:{entity.id}',study_paid,'门人日常劳务所得留作研习津贴')
     procure(game,source,world,paid-study_paid,'组织基本养护与日常劳务',partial=True)
     row['expense'] += paid
-    row['shortfall'] = service_due - paid
+    row['shortfall'] = row.get('shortfall',0) + service_due - paid
     if row['kind'] == 'family':
         game.family_state['debt'] = service_due - paid
         from ..family_membership import player_kin,wage
@@ -124,6 +132,9 @@ def settle_faction(game, maps, row, years):
     # Depot purchases and investments spend the same treasury after welfare.
     # Keep the saved allowance bounded by the final available cash as well.
     row['supply_budget_credit']=min(row['supply_budget_credit'],max(0,balance(game,source)-reserve))
+    if row['kind']=='sect':
+        from ..sect_tasks.tasks import advance
+        advance(game,maps,entity)
 
 
 def settle_institution(game, row, years):

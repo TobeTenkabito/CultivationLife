@@ -47,7 +47,10 @@ def test_every_possession_entry_rejects_rank_restore_states_atomically(api, rest
     frozen = snapshot(engine, game.id)
     payload = dict(action='possess') if entry == 'ghost-constraint' else dict(target_id=target, action='possess')
     result = act(game.id, entry, status=400, **payload)
-    assert '压制' in result['error'] if restriction == 'suppressed' else '封印' in result['error']
+    if entry == 'post-battle-possession':
+        assert '停用' in result['error']
+    else:
+        assert '压制' in result['error'] if restriction == 'suppressed' else '封印' in result['error']
     assert engine.store._path(game.id).read_bytes() == frozen
     restored = engine._load(game.id)
     before = copy.deepcopy(restored.player.to_dict())

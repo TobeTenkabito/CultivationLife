@@ -158,7 +158,9 @@ def burn(game,war,side,amount,reason):
 
 def factor(war,side):
     ratio=war.get('logistics',{}).get('sides',{}).get(side,{}).get('coverage',1.)
-    return 1. if ratio>=1 else .95 if ratio>=.75 else .8 if ratio>=.5 else .55 if ratio>=.25 else .25
+    base=1. if ratio>=1 else .95 if ratio>=.75 else .8 if ratio>=.5 else .55 if ratio>=.25 else .25
+    bonus=war.get('sect_mobilization_round',{})
+    return base*(1+bonus.get(side,0)) if bonus.get('battle')==war.get('battles',0) else base
 
 
 def strategy(game,maps,war,side,action,rng,*,participating_player_side=None):
@@ -195,6 +197,12 @@ def strategy(game,maps,war,side,action,rng,*,participating_player_side=None):
 
 def begin_round(game,maps,war,rng,player_side=None,*,participating_player_side=None):
     initialize(game,maps,war)
+    if 'sect_mobilization' in war or 'sect_mobilization_round' in war:
+        current=war.get('sect_mobilization_round',{})
+        if current.get('battle')!=war.get('battles',0):
+            active=game.player.alive and game.player.world==war['world'] and game.player.faction_id==war.get('sect_mobilization_owner')
+            pending=war.pop('sect_mobilization',{})
+            war['sect_mobilization_round']={**(pending if active else {}),'battle':war.get('battles',0)}
     book=war['logistics']
     if player_side is not None:war['player_side']=player_side
     for side in SIDES:

@@ -36,7 +36,7 @@ def bind_world_year(host) -> WorldYearDependencies:
         _annual_world_npc_update=lambda game, rng: host._annual_world_npc_update(game, rng),
         advance_researchers=lambda game: host._dependencies.heavens.advance_researchers(game),
         _check_tribulation=lambda game, rng: host._check_tribulation(game, rng),
-        _die=lambda game, reason, event_id: host._die(game, reason, event_id),
+        _die=lambda *args, **kwargs: host._die(*args, **kwargs),
         _maybe_artifact_synthesis=lambda game, rng: host._maybe_artifact_synthesis(game, rng),
         _maybe_mortal_root_completion=lambda game, rng: host._maybe_mortal_root_completion(game, rng),
         _maybe_race_war_ambush=lambda game, rng: host._maybe_race_war_ambush(game, rng),
@@ -50,7 +50,7 @@ def bind_map_travel(host) -> MapTravelDependencies:
         year=bind_elapsed_year(host),
         _clear_market=lambda game: host._clear_market(game),
         _compact_world_history=lambda game: host._compact_world_history(game),
-        _die=lambda game, reason, event_id: host._die(game, reason, event_id),
+        _die=lambda *args, **kwargs: host._die(*args, **kwargs),
         _ensure_market=lambda game, rng: host._ensure_market(game, rng),
         _finish_travel_time=lambda game, start_age, institution_world, institution_unit, news, rng, *, action_units=None: (
             host._finish_travel_time(game, start_age, institution_world, institution_unit, news, rng)

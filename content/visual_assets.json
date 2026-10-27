@@ -8950,6 +8950,203 @@
           "unlock_label": "全道途通用 · 化神期解锁"
         }
       ]
+    },
+    "actor.cosmetic.christmas-male.figure": {
+      "file": "/assets/pixel/holiday/christmas-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "32518e11e4356e67982b97b45fa8fd4a78041ba20b75592bd6de003d0f284e3b",
+      "requires": []
+    },
+    "actor.cosmetic.christmas-male.portrait": {
+      "file": "/assets/pixel/holiday/christmas-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "1af1d19fd62e1b13cf2986161fc021d5c06c0c827fde24752a0bc94515ec305b",
+      "requires": []
+    },
+    "actor.cosmetic.christmas-male.thumbnail": {
+      "file": "/assets/pixel/holiday/christmas-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "fc3a61da1f994a34a41fbc6aa9691c2481d98082616f4ba519045a652ed713f6",
+      "requires": []
+    },
+    "christmas-male.actions": {
+      "file": "/assets/pixel/holiday/christmas-male-actions.png",
+      "size": [
+        1881,
+        356
+      ],
+      "sha256": "85a54ba0c126237ebf590d08a444d5327e04400997714dad74cbf0a118147301",
+      "requires": []
+    },
+    "actor.cosmetic.christmas-female.figure": {
+      "file": "/assets/pixel/holiday/christmas-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "e24e4d21c7720938c556972bb572935f9b2104f0620a688d865e3178190609ba",
+      "requires": []
+    },
+    "actor.cosmetic.christmas-female.portrait": {
+      "file": "/assets/pixel/holiday/christmas-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "4361661d12cee421d66b577b3344ef6d2af4f18ce3e2de0a55bdaa7d402e45f4",
+      "requires": []
+    },
+    "actor.cosmetic.christmas-female.thumbnail": {
+      "file": "/assets/pixel/holiday/christmas-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "3a3df73c8e24acacdc940db268c952a59bc344d231dc9d92ec70efe66a317813",
+      "requires": []
+    },
+    "christmas-female.actions": {
+      "file": "/assets/pixel/holiday/christmas-female-actions.png",
+      "size": [
+        1760,
+        177
+      ],
+      "sha256": "3b81a233f63646da78a48f4f98c09ef3b8214b264a12e842ccf0f7efb23fe99c",
+      "requires": []
+    },
+    "actor.cosmetic.halloween-male.figure": {
+      "file": "/assets/pixel/holiday/halloween-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "921bbf160100676ce6753650c9c5f1f23778d1bb32453779988e545461f5932b",
+      "requires": []
+    },
+    "actor.cosmetic.halloween-male.portrait": {
+      "file": "/assets/pixel/holiday/halloween-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "056744057a414726ec5c071139f36d90b31732c7c9702f105b92c06103256044",
+      "requires": []
+    },
+    "actor.cosmetic.halloween-male.thumbnail": {
+      "file": "/assets/pixel/holiday/halloween-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "f7225e39ba2898ecfdd2193d771e5c065d74bff235b8b94691a5a3dc1be4ff4d",
+      "requires": []
+    },
+    "halloween-male.actions": {
+      "file": "/assets/pixel/holiday/halloween-male-actions.png",
+      "size": [
+        1700,
+        180
+      ],
+      "sha256": "479a09a1be75d355e289b097d98eaed2d7a0c4ca2d872a88be35aa1632b3a4e6",
+      "requires": []
+    },
+    "actor.cosmetic.halloween-female.figure": {
+      "file": "/assets/pixel/holiday/halloween-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "5421094f59fd0963516d6a15524a5fec1d79523c9fe085040c47d5f66ba1a2fa",
+      "requires": []
+    },
+    "actor.cosmetic.halloween-female.portrait": {
+      "file": "/assets/pixel/holiday/halloween-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b4a38ba6e97951d1dc28552494ffc39f1df91cc46dfc6ba5f372059c7edeb6dc",
+      "requires": []
+    },
+    "actor.cosmetic.halloween-female.thumbnail": {
+      "file": "/assets/pixel/holiday/halloween-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "17e5e6f9b1010b2c35d78814e6351118c9fab5cbd2225833f0596e21f2a824ba",
+      "requires": []
+    },
+    "halloween-female.actions": {
+      "file": "/assets/pixel/holiday/halloween-female-actions.png",
+      "size": [
+        1620,
+        177
+      ],
+      "sha256": "4cb73d66af7a407d055926040429505316322b43a81339153951f76a4bbb4d49",
+      "requires": []
+    },
+    "base.holiday_manifest": {
+      "file": "/assets/pixel/holiday/manifest.json",
+      "sha256": "dae66c1f33d3f32c171b2233cb2a35abc551b239fd4164070a87551628f8accd",
+      "requires": [],
+      "combat_actors": [
+        "christmas-male",
+        "christmas-female",
+        "halloween-male",
+        "halloween-female"
+      ],
+      "skin_forms": [
+        {
+          "name": "霜夜礼赞·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.christmas-male",
+          "combat": "christmas-male",
+          "unlock_label": "全道途通用 · 默认解锁"
+        },
+        {
+          "name": "霜夜礼赞·女",
+          "gender": "female",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.christmas-female",
+          "combat": "christmas-female",
+          "unlock_label": "全道途通用 · 默认解锁"
+        },
+        {
+          "name": "幽夜绮宴·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.halloween-male",
+          "combat": "halloween-male",
+          "unlock_label": "全道途通用 · 默认解锁"
+        },
+        {
+          "name": "幽夜绮宴·女",
+          "gender": "female",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.halloween-female",
+          "combat": "halloween-female",
+          "unlock_label": "全道途通用 · 默认解锁"
+        }
+      ]
     }
   },
   "items": {

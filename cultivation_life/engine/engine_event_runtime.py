@@ -19,7 +19,6 @@ from ..rules import (
     negative_event_multiplier,
     root_elements,
 )
-from ..system.transformation_system import active_transformation_profile
 from .engine_constants import OPS
 from .dependencies import EventDependencies
 
@@ -302,16 +301,8 @@ def _resolve_story_combat_check(
         return "check_success", f"{combat_summary}{effect.get('success_text', '')}"
     if result in {"stalemate", "controlled", "victory_controlled", "defeat_trapped"}:
         return "check_failed", combat_summary
-    transformation_revives = "prevent_defeat_once" in active_transformation_profile(game.player)["traits"]
     reason = str(effect.get("failure_reason", "未能战胜剧情强敌"))
-    if transformation_revives:
-        game.player.hp = max(1.0, game.player.hp)
-        if game.last_combat_report:
-            game.last_combat_report["death_prevented"] = True
-            game.last_combat_report["result"] = "defeat_survived"
-            game.last_combat_report.setdefault("key_events", []).append("凤凰变涅槃替你承受了剧情中本应发生的一次陨落。")
-        return "check_failed", f"{combat_summary}{reason}；凤凰变涅槃保住了性命，但本次剧情目标失败。"
-    deps._die(game, reason, event_id)
+    deps._die(game, reason, event_id, death_cause='story')
     if game.last_combat_report:
         game.last_combat_report["result"] = "dead"
         game.last_combat_report["result_grade"] = "溃败"

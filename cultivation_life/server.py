@@ -391,6 +391,8 @@ class Handler(BaseHTTPRequestHandler):
                     game_id, payload.get("item_id", ""), payload.get("mode", "direct"),
                     payload.get("stat_id", ""),
                 )
+            elif operation == 'sect-task':
+                result = ENGINE.sect_task_action(game_id, payload)
             elif operation == 'soul':
                 result = ENGINE.soul_action(game_id, payload.get('action'), payload)
             elif operation == 'authored-technique':

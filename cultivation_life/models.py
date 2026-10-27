@@ -623,7 +623,7 @@ class Player:
         data['body_energy'] = validate_energy(data.get('body_energy', 100.0))
         data['soul_energy'] = validate_energy(data.get('soul_energy', 100.0))
         data['spirit_state'] = validate_spirit(data.get('spirit_state', {}))
-        data['nascent_state'] = validate_nascent(data.get('nascent_state', {}))
+        data['nascent_state'] = validate_nascent(data.get('nascent_state', {}), age=data.get('age', cls.age))
         for equipment in (data['nascent_state'].get('second') or {}).get('equipment', []):
             Item.from_dict(equipment)
         data['immortal_traces'] = max(0, int(data.get('immortal_traces', 0))) + sum(

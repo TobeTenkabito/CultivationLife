@@ -260,6 +260,8 @@ def command(game, maps, payload):
             good = catalog(entity.world).get(request['item'])
             if not good:
                 raise ValueError('此物资内容当前未启用；可取消申请归还原府库')
+            from ...sect_board_rules import claim
+            claim(game,entity,unit_value(game,row,request['item'])*request['reserved'],request['reserved'])
             if good['kind'] == 'item':
                 add_item(p, good['id'], request['reserved'])
             else:
@@ -284,6 +286,13 @@ def public(game, entity):
     row = find(game, entity)
     offers = catalog(entity.world)
     stock = row['stock'] if row else {}
+    requests=copy.deepcopy(row['requests']) if row else []
+    if entity.kind=='sect' and game.player.faction_id==entity.id:
+        from ...sect_board_rules import defaults, quota, can_withdraw
+        board=game.intrigue_state.get('factions',{}).get(f'sect:{entity.id}',{}).get('task_board',defaults())
+        used=quota(game,board)['value']
+        for request in requests:
+            request['can_collect']=can_withdraw(game,used,unit_value(game,row,request['item'])*request['reserved'],request['reserved'],item=True)
     return dict(owner_id=entity.id, name=entity.name, revision=row['revision'] if row else 0,
         location=entity.location_id, local=game.player.location_id == entity.location_id,
         can_manage=can_manage(game, entity), balance=int(game.intrigue_state.get('factions', {}).get(f'{owner_kind(game,entity)}:{entity.id}', {}).get('resources', 0)),
@@ -293,4 +302,4 @@ def public(game, entity):
             requestable=offers[k]['tier']<=game.player.realm_index+1 and (entity.kind!='sect' or game.player.faction_contribution>=contribution_cost(offers[k])), **offers[k]) for k,n in stock.items() if n and k in offers],
         offers=[dict(key=k, **v) for k,v in offers.items()][:128],
         seniors=[dict(id=n.id, name=n.name) for n in seniors(game, entity)],
-        requests=copy.deepcopy(row['requests']) if row else [], history=list(row['history']) if row else [])
+        requests=requests, history=list(row['history']) if row else [])

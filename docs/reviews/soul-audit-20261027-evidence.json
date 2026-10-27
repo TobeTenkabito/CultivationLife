@@ -1,0 +1,90 @@
+{
+  "version": "3.2.0",
+  "runtime_unchanged": true,
+  "inputs_sha256": "2f9739db067ff7ab8e1fb50d18d0822ee27b8e5bdbbd96404c06d27caf4abaa1",
+  "probes": [
+    {
+      "id": "B01",
+      "status": "reproduced",
+      "evidence": {
+        "full": 36608.0,
+        "display_at_50": 18304.0,
+        "actual_contribution_at_50": 9152.0
+      }
+    },
+    {
+      "id": "B02",
+      "status": "reproduced",
+      "evidence": {
+        "body_intact": false,
+        "body_energy": 0.0,
+        "body_progress": 46.0,
+        "age_advanced": 5
+      }
+    },
+    {
+      "id": "B03",
+      "status": "reproduced",
+      "evidence": {
+        "book": "TECH_BASIC_QI",
+        "npc_level": 7,
+        "host_player_level": 1,
+        "entry": "GameEngine.captive_action"
+      }
+    },
+    {
+      "id": "D01",
+      "status": "reproduced",
+      "evidence": {
+        "resist_rejected": "请先处理事件、试炼、拘禁或修为封印",
+        "time_rejected": "请先在人物详情处理神魂夺舍危机",
+        "scope": "guard reproduction; not a claim all escape routes are blocked"
+      }
+    },
+    {
+      "id": "B04",
+      "status": "reproduced",
+      "evidence": {
+        "before_layer": 1,
+        "after_layer": 1,
+        "wish_before": 100,
+        "wish_after": 0,
+        "history": "涅槃突破一个小境界，免除此关天劫；三个时间单位内机缘获取效率额外 +100%。"
+      }
+    },
+    {
+      "id": "B05",
+      "status": "reproduced",
+      "evidence": {
+        "before_layer": 1,
+        "after_layer": 1,
+        "haoran_spent": 600.0,
+        "uses": 1
+      }
+    },
+    {
+      "id": "B06",
+      "status": "reproduced",
+      "evidence": {
+        "alive": true,
+        "second_consumed": true,
+        "last_history": "夺舍隔离宿身失败，魂飞魄散（成功率 90%）。"
+      }
+    },
+    {
+      "id": "D02",
+      "status": "reproduced",
+      "evidence": {
+        "before": [
+          0,
+          1
+        ],
+        "after": [
+          0,
+          1
+        ],
+        "mortal_layers": 1
+      }
+    }
+  ]
+}

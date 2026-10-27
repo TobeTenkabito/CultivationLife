@@ -1774,6 +1774,7 @@ function renderFaction(faction) {
   const details = document.createElement('p'); details.className = 'faction-meta';
   details.textContent = `${timelineText(faction.join_age)}入门 · 宗门贡献 ${faction.contribution} · 宗门总战力 ${number(faction.total_power || 0)}`; summary.appendChild(details);
   window.renderOrganizationFinance?.(summary, faction.finance);
+  window.SectTasks?.render(summary,faction.task_board,payload=>mutate(`/api/games/${game.id}/sect-task`,payload));
   window.renderOrganizationBusiness?.(summary, 'sect', faction, game, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   window.OrganizationDepot?.render(summary, faction.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   window.OrganizationHeritage?.render(summary, faction.heritage, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
@@ -1876,6 +1877,7 @@ function renderFaction(faction) {
     addStatus('年龄', `${npc.age} 岁`);
     addStatus('寿元', npc.lifespan == null ? '无尽' : `${npc.lifespan} 岁`);
     addStatus('战力', number(npc.combat_power || 0));
+    addStatus('宗门贡献', number(npc.is_player ? faction.contribution : npc.contribution || 0));
     addStatus('突破', npc.breakthrough_chance == null ? '当前无瓶颈' : percent(npc.breakthrough_chance));
     if (npc.affinity != null) addStatus('好感', `${number(npc.affinity)}${npc.attitude ? ` · ${npc.attitude}` : ''}`);
     if (npc.wounds) addStatus('伤势', `负伤 ${npc.wounds} 级`, true);

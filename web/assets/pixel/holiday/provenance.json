@@ -1,0 +1,724 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "export": "Original painted RGBA, nearest-neighbour packing; no anatomy reconstruction",
+  "forms": 4,
+  "static_images": 12,
+  "painted_keyposes": 40,
+  "animation_clips": 28,
+  "sources": [
+    {
+      "id": "christmas-male",
+      "source": "christmas-male-v3.png",
+      "sha256": "baa518d43c1d0ea95786b5c07f4ad0ee9793e81573e6be1c01ecce4a7a27eeec",
+      "rows": 3,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            444,
+            735,
+            707,
+            1037
+          ],
+          "scale": 0.9006622516556292
+        },
+        "portrait": {
+          "source_rect": [
+            748,
+            756,
+            1075,
+            1038
+          ],
+          "scale": 0.3547400611620795
+        },
+        "thumbnail": {
+          "source_rect": [
+            444,
+            735,
+            707,
+            1037
+          ],
+          "scale": 0.423841059602649
+        },
+        "idle": {
+          "source_rect": [
+            47,
+            69,
+            310,
+            366
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            114,
+            80
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            410,
+            72,
+            681,
+            366
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            112,
+            82
+          ]
+        },
+        "release": {
+          "source_rect": [
+            775,
+            78,
+            1062,
+            375
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            107,
+            80
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            1129,
+            95,
+            1401,
+            373
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            112,
+            91
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            47,
+            405,
+            315,
+            705
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            113,
+            78
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            421,
+            443,
+            711,
+            699
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            106,
+            104
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            791,
+            483,
+            1064,
+            705
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            111,
+            124
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            1147,
+            492,
+            1425,
+            695
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            110,
+            136
+          ]
+        },
+        "down": {
+          "source_rect": [
+            45,
+            924,
+            397,
+            1027
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            88,
+            195
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            1143,
+            745,
+            1410,
+            1040
+          ],
+          "scale": 0.5925925925925926,
+          "offset": [
+            113,
+            81
+          ]
+        }
+      }
+    },
+    {
+      "id": "christmas-female",
+      "source": "christmas-female.png",
+      "sha256": "7d4557f03cd730ecee9d77c5aecc7bbbb785475ac3b03c9b930ac213bc1ea2f9",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            52,
+            1063,
+            317,
+            1444
+          ],
+          "scale": 0.7139107611548556
+        },
+        "portrait": {
+          "source_rect": [
+            360,
+            1063,
+            735,
+            1448
+          ],
+          "scale": 0.2909090909090909
+        },
+        "thumbnail": {
+          "source_rect": [
+            52,
+            1063,
+            317,
+            1444
+          ],
+          "scale": 0.3359580052493438
+        },
+        "idle": {
+          "source_rect": [
+            38,
+            0,
+            314,
+            388
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            130,
+            80
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            404,
+            0,
+            688,
+            390
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            128,
+            79
+          ]
+        },
+        "release": {
+          "source_rect": [
+            754,
+            12,
+            1062,
+            390
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            122,
+            85
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            31,
+            387,
+            360,
+            750
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            118,
+            91
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            396,
+            400,
+            696,
+            749
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            124,
+            98
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            769,
+            401,
+            1064,
+            745
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            125,
+            100
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            74,
+            753,
+            316,
+            1066
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            137,
+            114
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            408,
+            757,
+            683,
+            1070
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            130,
+            114
+          ]
+        },
+        "down": {
+          "source_rect": [
+            699,
+            869,
+            1086,
+            1047
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            104,
+            175
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            754,
+            1076,
+            1059,
+            1447
+          ],
+          "scale": 0.4536082474226804,
+          "offset": [
+            123,
+            88
+          ]
+        }
+      }
+    },
+    {
+      "id": "halloween-male",
+      "source": "halloween-male.png",
+      "sha256": "9c6761feb310c5499d8180146c5a89407bddb3182422ffa4ef53d391e54aaef9",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            3,
+            1012,
+            323,
+            1422
+          ],
+          "scale": 0.6634146341463415
+        },
+        "portrait": {
+          "source_rect": [
+            315,
+            1017,
+            725,
+            1421
+          ],
+          "scale": 0.27722772277227725
+        },
+        "thumbnail": {
+          "source_rect": [
+            3,
+            1012,
+            323,
+            1422
+          ],
+          "scale": 0.3121951219512195
+        },
+        "idle": {
+          "source_rect": [
+            33,
+            4,
+            326,
+            365
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            128,
+            98
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            360,
+            18,
+            719,
+            359
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            114,
+            107
+          ]
+        },
+        "release": {
+          "source_rect": [
+            730,
+            8,
+            1080,
+            366
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            116,
+            99
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            6,
+            369,
+            374,
+            708
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            112,
+            108
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            380,
+            366,
+            728,
+            710
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            116,
+            105
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            752,
+            380,
+            1082,
+            708
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            120,
+            112
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            18,
+            713,
+            338,
+            1021
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            122,
+            121
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            336,
+            745,
+            711,
+            1010
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            110,
+            140
+          ]
+        },
+        "down": {
+          "source_rect": [
+            695,
+            868,
+            1084,
+            1020
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            107,
+            189
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            703,
+            1022,
+            1086,
+            1433
+          ],
+          "scale": 0.43795620437956206,
+          "offset": [
+            108,
+            76
+          ]
+        }
+      }
+    },
+    {
+      "id": "halloween-female",
+      "source": "halloween-female-v2.png",
+      "sha256": "e4d43da5f0a24d576b33d3b6ed52355452b93e027dce6c6f51abac5e2f6b2a86",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            60,
+            1060,
+            325,
+            1438
+          ],
+          "scale": 0.7195767195767195
+        },
+        "portrait": {
+          "source_rect": [
+            345,
+            1060,
+            752,
+            1430
+          ],
+          "scale": 0.28501228501228504
+        },
+        "thumbnail": {
+          "source_rect": [
+            60,
+            1060,
+            325,
+            1438
+          ],
+          "scale": 0.3386243386243386
+        },
+        "idle": {
+          "source_rect": [
+            51,
+            2,
+            316,
+            409
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            135,
+            80
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            398,
+            4,
+            707,
+            413
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            125,
+            79
+          ]
+        },
+        "release": {
+          "source_rect": [
+            741,
+            2,
+            1040,
+            409
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            128,
+            80
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            47,
+            399,
+            350,
+            756
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            127,
+            102
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            428,
+            400,
+            665,
+            764
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            141,
+            99
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            751,
+            399,
+            1054,
+            765
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            127,
+            98
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            41,
+            734,
+            337,
+            1072
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            128,
+            110
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            393,
+            762,
+            714,
+            1070
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            123,
+            123
+          ]
+        },
+        "down": {
+          "source_rect": [
+            696,
+            853,
+            1071,
+            1042
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            111,
+            174
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            774,
+            1048,
+            1055,
+            1440
+          ],
+          "scale": 0.43243243243243246,
+          "offset": [
+            131,
+            86
+          ]
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "id": "christmas-male",
+      "file": "christmas-male-v3.png",
+      "name": "霜夜礼赞",
+      "gender": "male",
+      "min_realm_index": 0,
+      "rows": 3,
+      "prompt": "Use case: stylized-concept. Asset: transparent production sprite sheet for Chinese xianxia RPG. Reference image is STYLE and adult face reference only. Create NEW Christmas holiday costume for handsome stylish adult Chinese male protagonist, age 25. Fashion-forward crimson tailored jacket, elegant fitted black trousers, polished black ankle boots, silver snowflake clasps and a magnificent flowing crimson cape with restrained white fur collar, black long hair tied back, handsome youthful face. NOT old Santa Claus. Detailed crisp painterly pixel illustration matching reference. Exactly THREE columns FOUR rows, twelve completely separate images, generous transparent gutters, no borders/text. Row-major: 1 three-quarter right-facing idle full body; 2 gathering spell; 3 releasing spell palm forward; 4 protective ward; 5 bracing arms crossed; 6 recoiling hit; 7 staggering; 8 kneeling one knee foot planted; 9 lying defeated horizontally; 10 FRONT full-body standing detail; 11 large FRONT bust portrait; 12 domain invocation both hands raised. Same character/outfit throughout. Each full body has TWO anatomically connected legs and TWO distinct correctly-perspectived boots, both visible even behind cape. Entire body fits cell, no cutoffs, no duplicate limbs, no detached effects, no ground shadows, no background. Cape attached shoulders, trousers remain distinct from cape. Genuine alpha transparency. High resolution 1536x2048 preferred.",
+      "correction_prompt": "Re-layout this SAME Christmas male character sprite sheet into EXACTLY FOUR COLUMNS and THREE ROWS, twelve images on a wide transparent canvas. Preserve red and white fur cape costume, stylish handsome face, black trousers, all twelve poses. Each figure must be only 70% of its cell height and width; leave HUGE blank transparent gaps between figures. No touching silhouettes. Row-major order:1 idle,2 gather spell,3 release spell,4 guard,5 brace arms crossed,6 hit recoil,7 stagger,8 kneeling with TWO visible boot tips,9 lying defeated two offset feet,10 front full-body standing,11 front chest bust portrait,12 both arms raised domain invocation. TWO complete legs TWO boots in every fullbody pose. Full head and boots within canvas. No text/grid/effect circles/background. DO NOT fill entire canvas with figures; wide margins are mandatory, each separated by 80 empty pixels. Genuine alpha transparency.",
+      "holiday_effect": "christmas",
+      "reference": "web/assets/pixel/characters-301/dao-nascent-hero-male-figure.png",
+      "source_sha256": "baa518d43c1d0ea95786b5c07f4ad0ee9793e81573e6be1c01ecce4a7a27eeec"
+    },
+    {
+      "id": "christmas-female",
+      "file": "christmas-female.png",
+      "name": "霜夜礼赞",
+      "gender": "female",
+      "min_realm_index": 0,
+      "rows": 4,
+      "prompt": "Use case: stylized-concept. Transparent production sprite sheet for Chinese xianxia RPG. Reference is painting style and adult face reference only. NEW Christmas female protagonist costume, beautiful clearly adult Chinese woman age 25. Stylish festive crimson velvet SHORT SKIRT, hem mid-thigh and opaque safety shorts beneath, fitted elegant red winter jacket with white fur trim, silver snowflake clasp, short shoulder capelet, matching red ankle boots, bare legs, long flowing black hair with holly hair ornament. Cheerful sophisticated festive outfit, neutral practical combat stances. Detailed crisp painterly pixel art matching reference. EXACTLY 3 equal columns x 4 equal rows, twelve isolated images, wide transparent gutters. Row-major: 1 full-body three-quarter facing right idle; 2 gathering spell; 3 releasing spell; 4 protective ward; 5 bracing impact arms crossed; 6 recoiling hit; 7 staggering; 8 kneeling one knee with other foot planted; 9 lying sideways defeated, both legs offset; 10 FRONT standing full-body detail; 11 large FRONT bust portrait; 12 domain invocation hands raised. Same adult face and outfit throughout. Every full body includes TWO anatomically connected complete legs and TWO clearly visible boots in correct perspective; no amputations, no extra legs, no crossed-up anatomy. Entire figures stay inside own cells. No text, grid, backgrounds, shadows, weapons or detached spell effects. Genuine transparent alpha. Prefer 1536x2048.",
+      "correction_prompt": null,
+      "holiday_effect": "christmas",
+      "reference": "web/assets/pixel/characters-301/dao-nascent-hero-female-figure.png",
+      "source_sha256": "7d4557f03cd730ecee9d77c5aecc7bbbb785475ac3b03c9b930ac213bc1ea2f9"
+    },
+    {
+      "id": "halloween-male",
+      "file": "halloween-male.png",
+      "name": "幽夜绮宴",
+      "gender": "male",
+      "min_realm_index": 0,
+      "rows": 4,
+      "prompt": "Use case: stylized-concept. Transparent production sprite sheet Chinese xianxia RPG. Reference image only for detailed crisp painterly pixel style and adult Chinese face. NEW Halloween male costume, elegant handsome adult age25, long black hair, stylish midnight violet and charcoal vampire-inspired tailored jacket, burnt orange satin lining, silver bat clasp, small pumpkin belt ornament, fitted dark trousers and two black leather boots. Refined Halloween fantasy costume, no gore. Exactly THREE columns FOUR rows twelve separate images, generous TRANSPARENT gutters. Same face outfit scale throughout. Row-major cells:1 right-facing three-quarter idle full-body;2 gathering spell;3 releasing spell one palm forward;4 protective ward;5 bracing arms crossed;6 recoiling hit;7 staggering;8 kneeling on one knee one foot planted, show second boot behind grounded knee;9 lying defeated horizontally both legs offset and both boots visible;10 FRONT standing full body;11 large FRONT bust portrait;12 domain invocation hands up. Every full body has TWO anatomically connected legs and TWO distinct visible correctly-perspectived boots. Clothing must not conceal both feet. No extra limbs, no amputations, no cutoffs, no floating effects, no ground shadows, no labels/text/grid/background. Genuine alpha transparency. 1536x2048 preferred.",
+      "correction_prompt": null,
+      "holiday_effect": "halloween-bats",
+      "reference": "web/assets/pixel/characters-301/dao-nascent-hero-male-figure.png",
+      "source_sha256": "9c6761feb310c5499d8180146c5a89407bddb3182422ffa4ef53d391e54aaef9"
+    },
+    {
+      "id": "halloween-female",
+      "file": "halloween-female-v2.png",
+      "name": "幽夜绮宴",
+      "gender": "female",
+      "min_realm_index": 0,
+      "rows": 4,
+      "prompt": "Use case: stylized-concept. New transparent Halloween female costume production sprite sheet Chinese xianxia RPG. Reference only adult Chinese face and detailed painterly pixel style. One clearly adult woman age25, long black hair, elegant violet witch hat with orange ribbon and small pumpkin brooch, fashionable dark plum short layered dress with orange satin lining, decorative silver bat buttons, opaque safety shorts under skirt, fitted sleeves and elegant black lace-up boots. Playful refined seasonal fantasy attire, practical neutral poses not pinup. EXACTLY 3 equal columns x4 equal rows,12 separate isolated figures, generous transparent gutters. Row-major:1 three-quarter right idle full body;2 gather spell;3 release spell one hand forward;4 protective ward;5 brace arms crossed;6 recoil hit;7 stagger;8 kneel on one knee with other foot planted, second boot visible beside grounded knee;9 lie sideways defeated, two legs offset with TWO visible boots;10 FRONT full-body stand;11 large FRONT bust portrait;12 domain invocation arms raised. Consistent face outfit hair and hat across sheet. Every full body includes two naturally connected complete legs and two visible correctly-perspectived boots. Entire hat, hands, feet fit each cell. No amputations/extra limbs, no text/grid/background/shadows/weapons or detached spell effects. Genuine alpha transparency. Prefer1536x2048.",
+      "correction_prompt": "Precise production correction of supplied Halloween female sprite sheet. Preserve exactly existing character, face, outfit, palette, witch hat and all 12 poses. Keep 3 columns x4 rows. Enlarge TRANSPARENT canvas margins and gently fit each complete painted figure within its cell with generous blank gutters. Bottom-right arms-raised pose currently has cropped shoes: paint the TWO complete matching black boots with correct anatomy and perspective. Full top hats and full feet of ALL poses must be inside canvas, leave 25 pixels empty all around each figure, and no figures touching each other. Do not change other costume or composition. Genuine transparent background. No text or lines.",
+      "holiday_effect": "halloween",
+      "reference": "web/assets/pixel/characters-301/dao-nascent-hero-female-figure.png",
+      "source_sha256": "e4d43da5f0a24d576b33d3b6ed52355452b93e027dce6c6f51abac5e2f6b2a86"
+    }
+  ]
+}

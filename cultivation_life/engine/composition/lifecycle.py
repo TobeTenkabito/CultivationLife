@@ -43,7 +43,7 @@ def bind_persistence_runtime(engine: GameEngine, *, bloodline_content_available:
             _ensure_merchant=lambda game: engine._ensure_merchant(game),
         ),
         vitality=VitalityPreparationDependencies(
-            _die=lambda game, reason, event_id: engine._die(game, reason, event_id),
+            _die=lambda *args, **kwargs: engine._die(*args, **kwargs),
         ),
         character=CharacterPreparationDependencies(
             _body_progress_required=lambda player: engine._body_progress_required(player),

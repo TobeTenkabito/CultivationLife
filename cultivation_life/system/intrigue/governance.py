@@ -115,7 +115,8 @@ def intrigue_personnel_action(
     if not deps._intrigue_enabled():
         raise ValueError("《明争暗斗：合纵连横》DLC 尚未启用")
     faction_id = deps._intrigue_player_faction_id(game, kind)
-    if not faction_id or not deps._intrigue_has_control(game, kind, faction_id):
+    leader_expel=bool(kind=='sect' and action=='expel' and game.intrigue_state.get('factions',{}).get(f'sect:{faction_id}',{}).get('positions',{}).get('leader')=='player')
+    if not faction_id or not (deps._intrigue_has_control(game, kind, faction_id) or leader_expel):
         raise ValueError("你没有该势力的控制权")
     if game.pending_event or game.player.imprisonment:
         raise ValueError("当前状态无法处理势力人事")
@@ -170,15 +171,11 @@ def intrigue_personnel_action(
     elif action == "expel":
         if deps._intrigue_is_imprisoned(game, npc.id):
             raise ValueError('请先释放囚犯，再办理逐出')
-        for pid, holder in list(record["positions"].items()):
-            if holder == npc.id:
-                record["positions"][pid] = None
         entity = deps._intrigue_entity(game, kind, faction_id)
         if entity:
-            entity.npcs = [row for row in entity.npcs if row.id != npc.id]
-        npc.faction_id = None
+            from ..sect_membership import release as release_member
+            release_member(game,entity,record,npc)
         npc.affinity = float(npc.affinity or 0) - 30
-        game.world_npcs.setdefault(npc.id, npc)
         record["unrest"] = min(100.0, float(record.get("unrest", 0)) + 12)
         summary = f"你将{npc.name}逐出{deps._intrigue_faction_name(game, kind, faction_id)}；对方已心生怨恨。"
     elif action == "imprison":

@@ -55,6 +55,14 @@ def main():
                     page.locator('[data-soul-action=auto]').click();page.wait_for_function('r=>!busy&&game.soul.revision===r',arg=revision+1)
                     assert page.evaluate('game.soul.second.auto') is False
                     page.locator('[data-soul-action=auto]').click();page.wait_for_function('!busy&&game.soul.second.auto')
+                    # Control is independent and the real button restores it once.
+                    current=e.store.load(g.id);current.player.nascent_state['second']['control']=49
+                    e.store.save(current);page.evaluate('async id=>loadGame(id)',g.id)
+                    page.wait_for_function('!busy&&game.soul.second.control===49')
+                    assert '控制力 49 / 100' in page.locator('#nascent-content').inner_text()
+                    assert '剩余' in page.locator('#nascent-content').inner_text()
+                    page.locator('[data-soul-action=assimilate]').click()
+                    page.wait_for_function('!busy&&game.soul.second.control===69')
                     for theme in ['a','b','d','f']:
                         set_theme(page,theme)
                         for width,height in [(1440,960),(390,844),(844,390),(320,740)]:
@@ -68,6 +76,27 @@ def main():
                     assert page.locator('#soul-details progress').count()==2
                     assert page.locator('#player-details-dialog').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
                     page.screenshot(path=str(output/'details-320.png'))
+                    page.locator('[data-close-dialog=player-details-dialog]').click()
+                    # Real load drops a retired event but retains its earned follow-up.
+                    import random
+                    current=e.store.load(g.id)
+                    reward=e._prepare_treasure_reward_event(current,random.Random(2))
+                    legacy=dict(id='SYS_POST_BATTLE_POSSESSION',version=1,title='旧战陨夺舍',
+                        choices=[dict(id=n.id,text='旧夺舍按钮',enabled=True)],runtime={})
+                    current.pending_event=dict(legacy,_followup_event=reward)
+                    e.store.save(current);page.evaluate('async id=>loadGame(id)',g.id)
+                    page.wait_for_function('(id)=>!busy&&game.pending_event?.id===id',arg=reward['id'])
+                    assert page.locator('#post-battle-possession').is_hidden()
+                    page.locator('#event-choices button').first.click()
+                    page.wait_for_function('!busy&&!game.pending_event')
+                    # Emulate a browser still showing the retired button from before this fix.
+                    current=e.store.load(g.id);current.player.alive=False;current.player.hp=0
+                    current.player.death_reason='特殊死亡';current.pending_event=legacy;e.store.save(current)
+                    page.evaluate('(old)=>{game.player.alive=false;game.pending_event=old;render(game);}',legacy)
+                    page.locator('#post-battle-possession-choices button').click()
+                    page.wait_for_function('!busy&&!game.player.alive&&!game.pending_event')
+                    assert page.locator('#post-battle-possession').is_hidden()
+                    assert not e.store.load(g.id).player.alive
                     assert not errors,errors
                     browser.close()
             finally:http.shutdown();http.server_close()

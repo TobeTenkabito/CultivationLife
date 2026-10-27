@@ -333,8 +333,12 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     else:
         player.body_energy = max(0. if lethal else min(1., player.body_energy), player.body_energy - body_cap(player) * min(1., hp_loss / max(1., hp_max)))
     from ..system.soul_lifecycle import resolve_energy
-    resolve_energy(game, rng, lambda g, reason, event: deps._die(g, reason, event,
-        death_cause='combat' if target.get('non_story_combat') else 'story'))
+    fatal_settled = []
+    def settle_energy_collapse(g, reason, event):
+        deps._die(g, reason, event,
+            death_cause='combat' if target.get('non_story_combat') else 'story')
+        fatal_settled.append(reason)
+    resolve_energy(game, rng, settle_energy_collapse)
     for puppet in player.puppets:
         if not puppet.get("alive", True):
             settle_puppet_person(game, puppet, outcome="dead", reason="活傀在战斗中被摧毁")
@@ -370,6 +374,10 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             lead += " ".join(summaries)
         target["resolved_capture_ids"] = resolved_captures
 
+    if fatal_settled:
+        result = 'defeat_survived' if player.alive else 'dead'
+        deps._record_player_combat(game, target, resolution, result)
+        return result, lead + ('肉身崩毁，存活结算后进入神游。' if player.alive else '肉身崩毁，未能存续，此生结束。')
     if resolution.outcome == "stalemate":
         deps._record_player_combat(game, target, resolution, "stalemate")
         return "stalemate", lead + "交锋尚未分出全局胜负；已记录各单位后果，不额外判定击杀、擒获或撤离成功。"
@@ -441,17 +449,12 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
                 "涅槃类能力替你承受了必死一击，才没有当场陨落。"
             )
         if player.hp <= 0:
-            can_take_captive = bool(
-                target.get("non_story_combat")
-                and deps._post_battle_possession_candidates(game)
+            deps._die(
+                game, f"不敌{target['target_name']}，身死道消", "SYS_COMBAT",
+                death_cause='combat' if target.get('non_story_combat') else 'story',
             )
-            captured = False if can_take_captive else deps._capture_defeated_ghost(game, target, rng)
-            if not captured:
-                deps._die(
-                    game, f"不敌{target['target_name']}，身死道消", "SYS_COMBAT",
-                    offer_captive_possession=can_take_captive,
-                    death_cause='combat' if target.get('non_story_combat') else 'story',
-                )
+            captured = bool(player.alive and target.get('non_story_combat')
+                            and deps._capture_defeated_ghost(game, target, rng))
             result = "controlled" if captured else "defeat_survived" if player.alive else "dead"
             deps._record_player_combat(game, target, resolution, result)
             if result == 'defeat_survived':
@@ -753,32 +756,24 @@ def _die(
     deps: CombatDependencies, game: GameState, reason: str, event_id: str, *,
     offer_captive_possession: bool = False,
     death_cause: str | None = None,
+    survival_stage: str = 'body',
 ) -> None:
+    if survival_stage not in {'body', 'spirit_failed', 'special'}:
+        raise ValueError('未知存活结算入口')
     if not game.player.alive:
         return
-    from ..system.soul_lifecycle import rescue, death_excluded, leave_body
-    if rescue(game, reason, event_id, death_cause):
-        return
-    from ..soul_rules import wandering
-    from ..system.possession_system import is_possessed, leave_host_body
-    if (death_cause == 'combat' and not death_excluded(game, event_id, death_cause)
-            and game.player.realm_index >= 4 and not wandering(game.player) and not is_possessed(game.player)):
-        leave_body(game, destroyed=True)
-        game.pending_event = None
-        return
-    if is_possessed(game.player) and not death_excluded(game, event_id, death_cause):
-        from ..rules import max_hp, max_mp
-        host = leave_host_body(game.player)
-        leave_body(game, destroyed=True)
-        game.player.hp = max(1.0, min(game.player.hp, max_hp(game.player)))
-        game.player.mp = max(0.0, min(game.player.mp, max_mp(game.player)))
-        game.pending_event = None
-        game.history.append(HistoryRecord(
-            "SYS_POSSESSED_BODY_DESTROYED", 1, game.player.age, "宿身崩毁", None, "returned_to_ghost",
-            f"{host.get('name', '宿主')}的肉身因“{reason}”毁灭；你的本魂脱出，夺舍次数不返还。",
-            {"host_id": host.get("id"), "source_event": event_id}, ["system", "ghost", "possession"],
-        ))
-        return
+    from ..system.soul_lifecycle import (
+        rescue, death_excluded, lifespan_exhausted, survival_rank, try_wandering, settle_second,
+    )
+    # Each gate authorizes only the next check. No fallback may bypass an earlier gate.
+    terminal = (survival_stage == 'special' or death_excluded(game, event_id, death_cause)
+                or lifespan_exhausted(game.player))
+    if not terminal and survival_rank(game.player) >= 4:
+        if survival_stage == 'body' and try_wandering(game):
+            return
+        settle_second(game)
+        if rescue(game, reason, event_id, death_cause):
+            return
     game.player.alive = False
     game.player.hp = 0
     game.player.death_reason = reason
@@ -787,8 +782,7 @@ def _die(
         event_id, 1, game.player.age, "此生落幕", None, "dead", reason,
         {"alive": [True, False]}, ["system", "death"],
     ))
-    if offer_captive_possession:
-        deps._prepare_post_battle_possession(game, event_id)
+    # Legacy offer_captive_possession is accepted for callers, never a post-death revival.
 
 
 def _snapshot(player: Player) -> dict[str, Any]:

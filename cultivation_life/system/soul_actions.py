@@ -115,7 +115,7 @@ def execute(deps, game, action, payload, rng):
         state.pop('crisis')
         chance = min(.9, .35 + p.divine_sense_rank * .025)
         if rng.random() >= chance:
-            deps.die(game, '神魂枯竭后未能抵御邪魂夺舍', 'SYS_SOUL_POSSESSION')
+            deps.die(game, '神魂枯竭后未能抵御邪魂夺舍', 'SYS_SOUL_POSSESSION', survival_stage='spirit_failed')
         else:
             life.record(game, '成功击退夺舍邪魂；神魂仍需调息恢复。')
     elif action == 'refine':
@@ -152,7 +152,7 @@ def execute(deps, game, action, payload, rng):
                 npc.spirit_state = dict(mode='wandering', body_intact=False, entered=p.age,
                     deadline=p.age + life.unit_years(p), address=life.address(game))
                 state['second'] = dict(id=npc.id, due=p.age+life.unit_years(p), interval=life.unit_years(p),
-                                       integrity=100., auto=True, equipment=[])
+                                       integrity=100., control=100., age_year=p.age, auto=True, equipment=[])
                 state.pop('refining')
                 life.record(game, f'炼化完成，{npc.name}成为第二元婴，继承其原修为。')
         settle_elapsed_time(deps.settlement, game, rng, [], action='rest',
@@ -171,6 +171,7 @@ def execute(deps, game, action, payload, rng):
             p.soul_energy -= cost
             row['due'] = p.age + row['interval']
             row['integrity'] = min(100., row['integrity']+20)
+            row['control'] = min(100., row.get('control', 100.)+20)
         elif action == 'auto':
             row['auto'] = not row['auto']
         elif action == 'equip':

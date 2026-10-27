@@ -209,6 +209,8 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
             continue
         if sect.extinct:
             continue
+        if _sect_finance_notices(deps,game,sect,rng):
+            continue
         for npc in sect.npcs:
             if not npc.alive or npc.world != sect.world:
                 continue
@@ -324,6 +326,65 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
     if personal:
         news.extend(annual_player_faction(deps, game, rng))
     return news
+
+
+def _sect_finance_notices(deps, game, sect, rng):
+    from ...system.sect_tasks.state import active, snapshot, record
+    if not active(game,sect):return False
+    board=snapshot(game,sect)
+    notices=board.get('notices',[])
+    if not notices:return False
+    # Append after any earned event; acknowledgment never replays the penalty.
+    for notice in notices:
+        identity='EVT_SECT_FINANCE_'+notice['kind'].upper()
+        event=deps._instantiate_event(deps.events_by_id[identity],game,rng)
+        event['body']=notice['text']+' 可在宗门任务栏查看薪俸、捐献及治理措施。'
+        event['_history_tags']=['system','faction','finance',f'world:{sect.world}']
+        if not game.pending_event:game.pending_event=event
+        else:
+            tail=game.pending_event
+            while tail.get('_followup_event'):tail=tail['_followup_event']
+            tail['_followup_event']=event
+    board['notices']=[]
+    if board.pop('dissolve_pending',False):
+        from ...system.sect_membership import release
+        from ...npc_custody import is_free
+        from ...system.territory.state import clear_faction
+        row=record(game,sect)
+        from ...system.intrigue.custody import release as release_prisoner
+        for entry in list(row.get('prison',[])):
+            identity=str(entry.get('prisoner_id',''))
+            if identity!='player' and game.intrigue_state.get('npc_prisons',{}).get(identity) in {None,f'sect:{sect.id}'}:
+                release_prisoner(game,row,identity)
+        prison=game.player.imprisonment
+        if prison and prison.get('faction_id')==sect.id:
+            from ..actions.encounters import _remember_faction_prison_release
+            _remember_faction_prison_release(game.player,prison)
+            game.player.imprisonment=None
+            row['prison']=[r for r in row.get('prison',[]) if r.get('prisoner_id')!='player']
+        # Disbanding the organization does not teleport deployed soldiers home.
+        from ...system.war.occupancy import participant_ids
+        from ...system.strategic_war.dispatch import recall
+        for war in game.wars:
+            if war.get('status') not in {'active','peace_ready'} or sect.id not in participant_ids(war):continue
+            if war.get('strategic_war_id'):
+                if sect.id not in war.get('withdrawn_orgs',[]):recall(game,war,sect)
+            else:
+                for side in ('attacker','defender'):
+                    ids=[identity for identity in war.get('roster',{}).get(side,[]) if war.get('roster_owner',{}).get(identity)==sect.id]
+                    escaped=war.setdefault('escaped',{}).setdefault(side,[])
+                    escaped[:]=list(dict.fromkeys([*escaped,*ids]))
+        for npc in list(sect.npcs):
+            if is_free(npc):release(game,sect,row,npc)
+        row['positions']={k:None for k in row.get('positions',{})}
+        row['controller_id']=None
+        row['pending_recruitment']=None
+        for task in board['tasks']:
+            if task['status']=='open':task['status']='cancelled'
+        clear_faction(game,sect.id)
+        _dissolve_player_sect(deps,game,sect,'长期欠薪与财政危机')
+        return True
+    return False
 
 
 def annual_player_faction(deps: FactionDependencies, game: GameState, rng: random.Random) -> list[str]:
