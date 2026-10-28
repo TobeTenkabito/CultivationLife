@@ -101,10 +101,14 @@ def main(source_dir=SOURCE, output_dir=OUT, manifest_key='base.swimwear_manifest
         actor.update(name=name, faction='cosmetic', sex=row['gender'], energy_color='#8adbd0' if row['min_realm_index'] == 0 else '#c5d4ff')
         if row.get('holiday_effect'):
             actor['holiday_effect'] = row['holiday_effect']
+        if row.get('cast_effect'):
+            actor['cast_effect'] = row['cast_effect']
         actors[ident] = actor
         forms.append(dict(name=name, gender=row['gender'], role='hero', scope='all_paths',
                           min_realm_index=row['min_realm_index'], static=static, combat=ident,
                           unlock_label={0:'全道途通用 · 默认解锁',5:'全道途通用 · 化神期解锁',7:'全道途通用 · 合体期解锁'}[row['min_realm_index']]))
+        if row.get('achievement'):
+            forms[-1].update(achievement=row['achievement'], unlock_label='全道途通用 · 完成成就「传奇故事」解锁 · 无境界限制')
         assets[ident+'.actions'] = dict(file=packed['sheet'], size=packed['size'], sha256=packed['sha256'], requires=[])
         sources.append(dict(id=ident, source=row['file'], sha256=sha(source), rows=row['rows'], exports=records))
     manifest = OUT / 'manifest.json'

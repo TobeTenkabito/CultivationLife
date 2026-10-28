@@ -11,7 +11,7 @@
   ];
   const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
   const narrowQuery = matchMedia('(max-width: 1000px)');
-  let preferences = {theme:root.dataset.theme || 'a', reduced_motion:root.dataset.motion === 'reduced', pixel_art:root.dataset.visual === 'pixel'};
+  let preferences = {theme:root.dataset.theme || 'a', reduced_motion:root.dataset.motion === 'reduced', pixel_art:root.dataset.visual === 'pixel', pixel_theme:root.dataset.pixelTheme || 'light', compact_docks:root.dataset.compactDocks!=='false'};
   let revision = 0, saveQueue = Promise.resolve(), current = null, feedbackTimer = null;
   const stage = document.createElement('section'); stage.className = 'theme-play-area';
   stage.setAttribute('aria-label','修行与生平纪事');
@@ -50,7 +50,7 @@
   }
   const closeDialogs=()=>document.querySelectorAll('.appearance-dialog[open]').forEach(d=>d.close());
   function reflow() {
-    const theme=preferences.theme;
+    const theme=preferences.pixel_art?'a':preferences.theme;
     const focus=document.activeElement;
     const restore=focus&&hud.contains(focus);
     if(theme==='b') core.insertBefore(opportunity,$('#cultivate-action'));
@@ -64,12 +64,17 @@
   function cache() { try{localStorage.setItem('cultivation-appearance',JSON.stringify(preferences));}catch(_){} }
   function apply() {
     root.classList.add('theme-switching');
-    root.dataset.theme=preferences.theme;
+    root.dataset.theme=preferences.pixel_art?'a':preferences.theme;
+    root.dataset.pixelTheme=preferences.pixel_theme;
+    root.dataset.compactDocks=String(preferences.compact_docks);
     root.dataset.motion=preferences.reduced_motion?'reduced':'full';
     root.dataset.visual=preferences.pixel_art?'pixel':'text';
     const theme=themes.find(t=>t.id===preferences.theme);
-    $('#theme-open').textContent=preferences.pixel_art?'绘景 · 山海图志':`主题 · ${theme.name}`;
+    $('#theme-open').textContent=preferences.pixel_art?`绘景 · ${preferences.pixel_theme==='dark'?'沧海夜色':'山海图志'}`:`主题 · ${theme.name}`;
     document.querySelectorAll('[data-theme-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.themeChoice===preferences.theme)));
+    document.querySelectorAll('[data-theme-choice]').forEach(b=>b.hidden=preferences.pixel_art);
+    document.querySelectorAll('[data-pixel-theme-choice]').forEach(b=>{b.hidden=!preferences.pixel_art;b.setAttribute('aria-pressed',String(b.dataset.pixelThemeChoice===preferences.pixel_theme));});
+    document.querySelectorAll('[data-dock-label-setting]').forEach(i=>i.checked=preferences.compact_docks);
     document.querySelectorAll('[data-motion-setting]').forEach(i=>i.checked=preferences.reduced_motion);
     document.querySelectorAll('[data-pixel-setting]').forEach(i=>i.checked=preferences.pixel_art);
     $('.theme-motto').textContent=theme.motto;
@@ -85,7 +90,7 @@
     saveQueue=saveQueue.catch(()=>{}).then(async()=>{
       const response=await fetch('/api/ui-preferences',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)});
       if(!response.ok)throw new Error('外观已切换，但偏好保存失败，请稍后重试。');
-      if(state.theme===preferences.theme&&state.reduced_motion===preferences.reduced_motion&&state.pixel_art===preferences.pixel_art)status.textContent='外观偏好已保存，下次启动仍会保留。';
+      if(Object.keys(state).every(k=>state[k]===preferences[k]))status.textContent='外观偏好已保存，下次启动仍会保留。';
     }).catch(error=>{status.textContent=error.message;const t=$('#toast');t.textContent=error.message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);});
     return saveQueue;
   }
@@ -93,9 +98,15 @@
     for(const t of themes){const b=document.createElement('button');b.type='button';b.dataset.themeChoice=t.id;b.className='theme-choice';b.setAttribute('aria-pressed','false');b.style.setProperty('--choice-bg',t.bg);b.style.setProperty('--choice-ink',t.ink);
       b.innerHTML=`<span class="theme-choice-art" aria-hidden="true"><i>${t.symbol}</i></span><span><b>${t.name}</b><small>${t.caption}</small></span><span class="theme-chosen" aria-hidden="true">✓</span>`;
       b.addEventListener('click',()=>save({theme:t.id}));container.append(b);}
+    for(const [id,name,caption,bg,ink,symbol]of [['light','山海图志','浅色 · 松绿温纸','#f6f8ef','#237c76','山'],['dark','沧海夜色','暗色 · 深海月青','#17282d','#7dd9ce','月']]){
+      const b=document.createElement('button');b.type='button';b.dataset.pixelThemeChoice=id;b.className='theme-choice';b.style.setProperty('--choice-bg',bg);b.style.setProperty('--choice-ink',ink);
+      b.innerHTML=`<span class="theme-choice-art" aria-hidden="true"><i>${symbol}</i></span><span><b>${name}</b><small>${caption}</small></span><span class="theme-chosen" aria-hidden="true">✓</span>`;
+      b.onclick=()=>save({pixel_theme:id});container.append(b);
+    }
   });
   document.querySelectorAll('[data-motion-setting]').forEach(i=>i.addEventListener('change',()=>save({reduced_motion:i.checked})));
   document.querySelectorAll('[data-pixel-setting]').forEach(i=>i.addEventListener('change',()=>save({pixel_art:i.checked})));
+  document.querySelectorAll('[data-dock-label-setting]').forEach(i=>i.addEventListener('change',()=>save({compact_docks:i.checked})));
   const dlc={guixu:'guixu','ghost-soul':'ghost','ghost-attachment':'ghost','ghost-parade':'ghost',sage:'sage','sage-inner-outer':'sage',bloodline:'bloodline',intrigue:'intrigue',tianji:'tianji'};
   for(const [name,family] of Object.entries(dlc)){const b=$(`[data-panel-target="${name}"]`);if(b){b.dataset.dlc=family;b.title=`${b.title} · DLC`;}}
   const precise=value=>Number.isFinite(Number(value))?Number(value).toLocaleString('zh-CN',{maximumFractionDigits:2}):'—';
@@ -168,6 +179,6 @@
   window.addEventListener('game:panel-open',e=>{if(preferences.theme==='f')feedback(e.detail.target);});
   apply();
   const initialRevision=revision;
-  const ready=fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(saved=>{if(revision===initialRevision){preferences={theme:themes.some(t=>t.id===saved.theme)?saved.theme:'a',reduced_motion:saved.reduced_motion===true,pixel_art:saved.pixel_art===true};apply();}}).catch(()=>{});
+  const ready=fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(saved=>{if(revision===initialRevision){preferences={theme:themes.some(t=>t.id===saved.theme)?saved.theme:'a',reduced_motion:saved.reduced_motion===true,pixel_art:saved.pixel_art===true,pixel_theme:saved.pixel_theme==='dark'?'dark':'light',compact_docks:saved.compact_docks!==false};apply();}}).catch(()=>{});
   window.GameThemes={render,showStart,ready,get preferences(){return {...preferences};},get saved(){return saveQueue;}};
 })();

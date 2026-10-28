@@ -32,8 +32,9 @@
       glow(c,[[x+Math.cos(a)*r,y+Math.sin(a)*r*.8],[x+Math.cos(a)*(r+len),y+Math.sin(a)*(r+len)*.8+q*q*7*k]],p,j%4? k:2*k,fade*.7);}
     if(!guard)for(let j=0;j<6;j++)petal(c,x,y,(8+q*24)*k,j*TAU/6+q,p,fade*.5);
   }
-  function draw(s,m,state,{context,projectClip,natal}){
+  function draw(s,m,state,{context,projectClip,natal,image}){
     const r=state.round;if(!r||!m.attacker)return;
+    if(window.TideEffects?.draw(s,m,state,{context,projectClip,image}))return;
     if(window.FrontierEffects?.draw(s,m,state,{context,projectClip}))return;
     if(window.HolidayEffects?.draw(s,m,state,{context,projectClip}))return;
     const a=m.attacker,k=s.scale,dir=a.dir,p=palette(a.actor),local=state.time-r.start;

@@ -14,7 +14,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_shipped_reviewed_assets_are_self_contained():
     from cultivation_life.content_registry import EXTENSION_REPORT
     source=dict(catalog(ROOT), assets=public_catalog(ROOT,EXTENSION_REPORT)['assets'])
-    assert len(source['assets'])==1593 and len(source['maps'])==11
+    assert len(source['assets'])==1603 and len(source['maps'])==11
     assert len(source['items'])==1165
     packages={json.loads(p.read_text(encoding='utf-8'))['id']:p.parent for p in (ROOT/'dlc').glob('*/manifest.json')}
     for identity,row in source['assets'].items():
@@ -37,7 +37,7 @@ def test_shipped_reviewed_assets_are_self_contained():
                 if row['file'].startswith('/extension-assets/'):
                     assert data['owner']==owner
                 else:
-                    assert identity in {'base.character_manifest', 'base.swimwear_manifest', 'base.holiday_manifest', 'base.frontier_manifest'} and not row['requires']
+                    assert identity in {'base.character_manifest', 'base.swimwear_manifest', 'base.holiday_manifest', 'base.frontier_manifest', 'base.tide_manifest'} and not row['requires']
             continue
         with Image.open(path) as image:
             assert list(image.size)==row['size']
@@ -47,11 +47,11 @@ def test_shipped_reviewed_assets_are_self_contained():
                 assert image.mode=='RGBA'
                 assert identity.startswith(('actor.monster.fox-','fox-','actor.monster.serpent-','serpent-',
                                             'actor.monster.avian-','avian-','actor.monster.ape-','ape-','actor.monster.turtle-','turtle-','actor.monster.insect-','insect-','actor.monster.aquatic-','aquatic-','actor.monster.flora-','flora-'))
-            elif row['file'].startswith(('/assets/pixel/characters-301/', '/assets/pixel/swimwear/', '/assets/pixel/holiday/', '/assets/pixel/frontier/')) or any(p in row.get('requires',[]) for p in ['official.ghost-reincarnation','official.sage-way','official.buddhist-dharma','official.asura-manifestation']):
+            elif row['file'].startswith(('/assets/pixel/characters-301/', '/assets/pixel/swimwear/', '/assets/pixel/holiday/', '/assets/pixel/frontier/', '/assets/pixel/tide/')) or any(p in row.get('requires',[]) for p in ['official.ghost-reincarnation','official.sage-way','official.buddhist-dharma','official.asura-manifestation']):
                 assert image.mode=='RGBA' and image.getextrema()[-1][0]==0
                 if identity.startswith(('actor.path.', 'actor.cosmetic.')):
                     assert image.size=={'portrait':(128,128),'figure':(256,288),'thumbnail':(128,144)}[identity.rsplit('.',1)[1]]
-                else:assert identity.endswith('.actions') and max(image.size)<=2048
+                else:assert (identity.endswith('.actions') or identity=='effect.tidal_wave.keyframes') and max(image.size)<=2048
             elif identity.startswith('map.'):assert image.size==(768,576)
             else:
                 assert image.mode=='RGBA' and image.size==(32,32)

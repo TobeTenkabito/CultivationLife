@@ -4,10 +4,28 @@ window.SoulPanel=(()=>{
   const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
   const personal=el('section',undefined,'soul-panel');personal.id='soul-details';
   document.querySelector('#player-details-content').append(personal);
-  const library=el('section',undefined,'soul-panel');library.id='soul-secrets';
-  document.querySelector('#secret-art-card').append(library);
   async function run(action,extra){if(pending)return;const revision=game.soul.revision;pending=true;draw();try{await send({action,revision,...extra});}finally{pending=false;draw();}}
-  function button(text,action,extra={},disabled=false){const b=el('button',text);b.type='button';b.dataset.soulAction=action;b.disabled=pending||game.soul.blocked||disabled;b.onclick=()=>run(action,extra);return b;}
+  function button(text,action,extra={},disabled=false){const b=el('button',text);b.type='button';b.dataset.soulAction=action;b.dataset.available=pending||game.soul.blocked||disabled?'0':'1';b.disabled=b.dataset.available==='0';b.onclick=()=>run(action,extra);return b;}
+  function secretArts(s){
+    return [{id:'soul_leave',soul:true,name:'元婴离体',acquired:s.leave_unlocked,category:'离体',seal:'魂',
+      status:s.leave_unlocked?(s.mode==='神游'?'神游中':'已解锁'):'未解锁',hint:'元婴期自动解锁',
+      description:'元婴离开肉身，进入神游状态。原肉身留在原处，返回后可在人物详情中归体。'},
+      ...s.secrets.map(r=>({id:'soul_'+r.id,soul:true,secret:r,acquired:r.known,name:r.name,
+        category:r.id==='second_nascent'?'双魂':'转修',seal:r.id==='second_nascent'?'婴':'转',
+        status:r.known?'已掌握':r.eligible?'可研习':'境界不足',hint:`${r.realm_name}起 · ${r.price}灵石`,
+        description:r.id==='second_nascent'?'炼化俘虏中的元婴及以上修士，提取第二元婴。可独立参战、配置功法与装备，须定期消耗神魂同化。':'掌握此秘法与对应道途的功法后，可在人物详情的「道途转换」中预览代价并转修。'}))];
+  }
+  function secretDetail(host,row){
+    const s=game.soul,r=row.secret,leave=row.id==='soul_leave';
+    const facts=el('dl',undefined,'secret-art-facts');
+    const entries=leave?[['解锁境界','元婴期 · 自动解锁'],['施术消耗','10 点神魂能量'],['神游效果','战力降至35% · 机缘效率+25%'],['离体风险','天劫与雷劫伤害+75%'],['离体期限','非鬼修最多一个时间单位，逾期本魂消散；鬼修不限']]:[['修习境界',r.realm_name+'起'],['首次研习',`${r.price} 灵石`],['掌握状态',r.known?'已掌握':'尚未研习']];
+    for(const [label,value]of entries)facts.append(el('dt',label),el('dd',value));host.append(facts);
+    if(!leave&&r.known){host.append(el('p',r.id==='second_nascent'?'已掌握，可从「婴」入口管理第二元婴。':'已掌握，可在人物详情中查看转修条件。','secret-art-complete'));return;}
+    const reason=s.blocked?'当前状态无法施展或研习秘法':s.crisis?'请先抵御夺舍':leave?(!s.leave_unlocked?'元婴期自动解锁':s.possessed?'请先离舍归魂':s.mode==='神游'?'已处于神游':s.soul.current<10?'神魂能量不足':!s.can_leave?'当前无法离体':null):(!r.eligible?`${r.realm_name}起可研习`:null);
+    const b=button(leave?'元婴离体 · 神魂−10':'研习秘法',leave?'leave':'study',leave?{}:{id:r.id},!!reason);
+    b.className='secret-art-command';b.title=reason||'';b.disabled=b.disabled||(typeof busy!=='undefined'&&busy);host.append(b);
+    if(reason)host.append(el('p',reason,'secret-art-reason'));
+  }
   function choose(host,rows,text,action,extra={}){const w=el('div',undefined,'soul-actions'),s=el('select');for(const r of rows){const o=el('option',r.name);o.value=r.id;s.append(o);}const b=button(text,action,{},!rows.length);b.onclick=()=>run(action,{id:s.value,...extra});w.append(s,b);host.append(w);}
   function draw(){
     if(!game?.soul)return;const s=game.soul;
@@ -22,13 +40,7 @@ window.SoulPanel=(()=>{
     if(s.mode==='神游')personal.append(el('p','夺舍：进入「俘虏」选择不高于自身境界的活俘虏。失败可能陨落；可提前研习阴魂续命诀并掌握鬼道功法，以转修鬼道续存。','soul-note'));
     const c=el('details');c.append(el('summary','道途转换'));
     for(const r of s.conversions){const card=el('div',undefined,'soul-card');card.append(el('strong',r.name),el('p',`消耗${r.cost}级对应气（现有${r.available}级）。不足时按比例折损修为，转换后：${r.realm_name}，第${r.layer}层。`),button('转修'+r.name,'convert',{id:r.id},!r.learned||!r.has_book||!!s.crisis));if(!r.learned||!r.has_book)card.append(el('p','需对应转换秘法及至少一门该道途功法。','soul-note'));c.append(card);}personal.append(c);
-    library.replaceChildren(el('h3','身魂秘法'));const books=el('div',undefined,'soul-grid');
-    const leave=el('div',undefined,'soul-card');
-    leave.append(el('strong','元婴离体'),el('p',s.leave_unlocked?'已自动解锁 · 消耗10点神魂，肉身留在原地。':'元婴期自动解锁，无须研习。'));
-    leave.append(el('p','离体后战力降至35%、机缘效率+25%，天劫与雷劫伤害+75%。非鬼修最多离体一个时间单位，须回到肉身原处，在人物详情中归体。','soul-note'));
-    const leaveReason=!s.leave_unlocked?'元婴期解锁':s.possessed?'请先离舍归魂':s.mode==='神游'?'已处于神游':s.soul.current<10?'神魂能量不足':null;
-    leave.append(button(leaveReason||'元婴离体 · 神魂−10','leave',{},!s.can_leave||!!s.crisis||s.soul.current<10));books.append(leave);
-    for(const r of s.secrets){const card=el('div',undefined,'soul-card');card.append(el('strong',r.name),el('p',r.known?'已掌握':`研习消耗 ${r.price} 灵石 · ${r.realm_name}起`),button(r.known?'已掌握':'研习','study',{id:r.id},r.known||!r.eligible||!!s.crisis));books.append(card);}library.append(books);
+    window.SecretArtPanel?.setSoulArts(secretArts(s),secretDetail);
     const known=s.secrets.find(r=>r.id==='second_nascent')?.known;
     document.querySelector('[data-panel-target="nascent"]').classList.toggle('hidden',!known);
     document.querySelector('#nascent-card').classList.toggle('hidden',!known);

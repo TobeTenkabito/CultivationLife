@@ -457,12 +457,17 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         python(assetText("soul_release.py")+"\nfrom cultivation_life import server\nprepare_soul(server.ENGINE,"+JSONObject.quote(id)+")");
         async("loadGame("+JSONObject.quote(id)+")");
         tapSelector("[data-panel-target=secret-art]");
+        tapSelector("#secret-tab-known");
+        tapSelector("[data-secret-art=soul_leave]");
         tapSelector("[data-soul-action=leave]");waitForJs("!busy&&game.soul.mode==='神游'","Soul leave");
         tapSelector("#secret-art-toggle");tapSelector(".hud-identity");
         tapSelector("[data-soul-action=return]");waitForJs("!busy&&game.soul.mode==='普通'","Soul return");
         check(Boolean.TRUE.equals(js("document.querySelectorAll('#soul-details progress').length===2")),"Two personal energy bars");
         tapSelector("[data-close-dialog=player-details-dialog]");tapSelector("[data-panel-target=secret-art]");
-        tapSelector("#soul-secrets [data-soul-action=study]");waitForJs("!busy&&game.soul.secrets[0].known","Second soul secret");
+        tapSelector("#secret-tab-potential");
+        js("document.querySelector('#secret-art-search').value='第二元婴';document.querySelector('#secret-art-search').dispatchEvent(new Event('input',{bubbles:true}));true");
+        tapSelector("[data-secret-art=soul_second_nascent]");
+        tapSelector("#secret-root-detail [data-soul-action=study]");waitForJs("!busy&&game.soul.secrets[0].known","Second soul secret");
         tapSelector("#secret-art-toggle");tapSelector("[data-panel-target=nascent]");waitForPanelReady("#nascent-card");
         for(int count=1;count<=3;count++) {
             tapSelector("#nascent-content [data-soul-action=refine]");
@@ -471,6 +476,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         check(Boolean.TRUE.equals(js("game.soul.second.id==='release-nascent'")),"Original captive identity");
         js("(()=>{const b=document.querySelector('[data-soul-action=equip]');b.parentElement.querySelector('select').value='release-soul-sword';return true;})()");
         tapSelector("[data-soul-action=equip]");waitForJs("!busy&&game.soul.second.equipment.length===1","Actual equipment transfer");
+        tapSelector("#nascent-toggle");tapSelector("#theme-open");
+        if(Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        tapSelector("[data-panel-target=nascent]");waitForPanelReady("#nascent-card");
         for(String theme:new String[]{"a","b","d","f"}) {
             tapSelector("#nascent-toggle");tapSelector("#theme-open");tapSelector("[data-theme-picker=dialog] [data-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
             tapSelector("[data-panel-target=nascent]");waitForPanelReady("#nascent-card");
@@ -478,10 +487,52 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             capture("soul-lifecycle-"+theme+"-"+arguments.getString("orientation"));
         }
         tapSelector("[data-soul-action=unequip]");waitForJs("!busy&&game.soul.second.equipment.length===0","Equipment returned once");
-        result.putString("soul_lifecycle_scope","Real personal energy bars, leave/return, secret study, original captive three-year refinement, equipment delivery/return and four themes; signed native portrait/landscape");
+        result.putString("soul_lifecycle_scope","Real personal energy bars, leave/return, secret study, original captive three-year refinement, equipment delivery/return and four legacy themes; signed native portrait/landscape");
         tapSelector("#nascent-toggle");
         runHolidaySkins(result);
         runFrontierSkins(result);
+        runTideTheme(result);
+    }
+
+    private void runTideTheme(Bundle result) throws Exception {
+        tapSelector("#theme-open");
+        if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        for(String palette:new String[]{"light","dark"}) {
+            tapSelector("#theme-dialog [data-pixel-theme-choice="+palette+"]");async("GameThemes.saved");
+            check(Boolean.TRUE.equals(js("document.documentElement.dataset.pixelTheme==="+JSONObject.quote(palette)+"&&[...document.querySelectorAll('#theme-dialog [data-theme-choice]')].every(n=>n.hidden)")),"Exactly two new UI palettes");
+            capture("tide-theme-"+palette+"-"+arguments.getString("orientation"));
+        }
+        tapSelector("#theme-dialog [data-dock-label-setting]");async("GameThemes.saved");
+        check(Boolean.TRUE.equals(async("api('/api/ui-preferences').then(p=>p.pixel_theme==='dark'&&p.compact_docks===GameThemes.preferences.compact_docks)")),"Native appearance preferences persisted");
+        tapSelector("[data-close-dialog=theme-dialog]");
+        for(String gender:new String[]{"female","male"}) {
+            String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'潮汐原生',spirit_root:'supreme_metal',path:'dao',gender:"+JSONObject.quote(gender)+",seed:323,custom_start:{world:'human',realm_index:1}})}).then(g=>g.id)");
+            async("loadGame("+JSONObject.quote(id)+")");
+            String key="actor.cosmetic.swim-tide-"+gender;
+            if(gender.equals("female")) {
+                boolean earned=Boolean.TRUE.equals(async("api('/api/achievements').then(v=>v.achievements.some(r=>r.id==='cultivation_rootless_legend'&&r.unlocked))"));
+                if(!earned) {
+                    tapSelector(".hud-identity");tapSelector("#character-skins-open");
+                    check(Boolean.TRUE.equals(js("document.querySelector("+JSONObject.quote("[data-skin-id='"+key+"']")+").disabled")),"Native achievement gate");
+                    tapSelector("#character-skins-close");tapSelector("[data-close-dialog=player-details-dialog]");
+                }
+                python(assetText("tide_release.py")+"\nfrom cultivation_life import server\nearn_legend(server.ENGINE,"+JSONObject.quote(id)+")");
+                async("loadGame("+JSONObject.quote(id)+")");
+            }
+            tapSelector(".hud-identity");tapSelector("#character-skins-open");tapSelector("[data-skin-id='"+key+"']");
+            waitForJs("!busy&&game.player.visual_actor==="+JSONObject.quote(key),"Native achievement skin selected");
+            check(Boolean.TRUE.equals(js("game.player.realm_index===1&&document.querySelector('#character-skins').scrollWidth<=document.querySelector('#character-skins').clientWidth+2")),"No realm gate and wardrobe fits");
+            capture("tide-"+gender+"-"+arguments.getString("orientation"));
+            tapSelector("#character-skins-close");tapSelector("[data-close-dialog=player-details-dialog]");
+            async("loadGame("+JSONObject.quote(id)+")");
+            check(Boolean.TRUE.equals(js("game.player.visual_actor==="+JSONObject.quote(key))),"Native tide reload");
+            python(assetText("frontier_release.py")+"\nfrom cultivation_life import server\nfrontier_battle(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");tapSelector("#battle-report-open");
+            waitForJs("window.CombatReplay&&CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native tide replay");
+            check(Boolean.TRUE.equals(js("(()=>{const original=SpellEffects;let found=false;window.SpellEffects={...original,draw(s,m,state,h){if(m.attacker?.actor.cast_effect==='tidal_wave'&&state.round&&state.time-state.round.contacts[0]>=.12&&state.time-state.round.contacts[0]<.2){const im=h.image(TideEffects.sheet);if(!im||im.width!==1536)throw Error('Native painted water atlas missing');found=true;}return original.draw(s,m,state,h);}};try{for(let t=0;t<CombatReplay.diagnostics().duration&&!found;t+=.025)CombatReplay.seek(t);return found;}finally{window.SpellEffects=original;}})()")),"Native water-wave attack renderer");
+            capture("tide-attack-"+gender+"-"+arguments.getString("orientation"));tapSelector("#battle-report-toggle");
+        }
+        result.putString("tide_theme_scope","Two palettes, native persisted preferences, achievement unlock, low-realm male/female outfits, reload and actual decoded painted-keyframe water attack, portrait/landscape");
     }
 
     private void runHolidaySkins(Bundle result) throws Exception {
@@ -2027,6 +2078,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                     tapSelector("#secret-tab-known");
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('#secret-art-library .secret-art-entry').length===4")),"Only acquired native secret arts appear");
                     tapSelector("#secret-tab-potential");
+                    js("document.querySelector('#secret-art-filter').value='root';document.querySelector('#secret-art-filter').dispatchEvent(new Event('change',{bubbles:true}));true");
                     check(Boolean.TRUE.equals(js("document.querySelectorAll('#secret-art-library .secret-art-entry').length===6 && !document.querySelector('.secret-art-command')")),"Potential arts guide without unowned action buttons");
                     tapSelector("#secret-tab-known");
                     capture("secret-arts-catalog-"+theme+"-"+arguments.getString("orientation","portrait"));

@@ -15,6 +15,13 @@ if TYPE_CHECKING:
 
 
 def bind_view_preparation(engine: GameEngine) -> ViewPreparationDependencies:
+    def evaluate_achievements(game, player_rank):
+        from ...character_skins import unlock_achievement_rewards
+        fresh = engine.achievements.evaluate(game, player_rank=player_rank)
+        if unlock_achievement_rewards(game.player, engine.achievements.metadata.read()['achievements']):
+            engine.store.save(game)
+        return fresh
+
     return ViewPreparationDependencies(
         _ensure_natal_artifact=lambda game: engine._ensure_natal_artifact(game),
         _guixu_definitions=lambda: engine._guixu_definitions(),
@@ -65,7 +72,7 @@ def bind_view_preparation(engine: GameEngine) -> ViewPreparationDependencies:
         _relationship_can_join_faction=lambda game, person: engine._relationship_can_join_faction(game, person),
         _stable_gender=lambda npc_id: engine._stable_gender(npc_id),
         _tribulation_base_power_cap=lambda world: engine._tribulation_base_power_cap(world),
-        _evaluate_achievements=lambda game, player_rank: engine.achievements.evaluate(game, player_rank=player_rank),
+        _evaluate_achievements=evaluate_achievements,
         _public_buddhist=lambda game: engine._public_buddhist(game),
         _public_heavens=lambda game: engine._public_heavens(game),
         _get_maps=lambda: engine.maps,

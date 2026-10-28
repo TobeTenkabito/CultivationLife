@@ -670,8 +670,9 @@ class GameEngine:
         return self.present(game)
 
     def select_character_skin(self, game_id: str, skin_id: str = '') -> dict[str, Any]:
-        from ..character_skins import choose
+        from ..character_skins import choose, unlock_achievement_rewards
         game = self._load(game_id)
+        unlock_achievement_rewards(game.player, self.achievements.metadata.read()['achievements'])
         choose(game.player, skin_id)
         game.updated_at = now_iso()
         self.store.save(game)

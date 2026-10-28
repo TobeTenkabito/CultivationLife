@@ -124,10 +124,11 @@ def main():
 
 def verify_effects(page, style):
     # Actual renderer dispatch and deterministic no-RNG effects, both travel directions.
-    result = page.evaluate("""style=>{
+    result = page.evaluate("""async style=>{
+      const bitmap=style==='tidal_wave'?await createImageBitmap(await (await fetch(TideEffects.sheet)).blob()):null;
       const canvas=()=>Object.assign(document.createElement('canvas'),{width:600,height:360});
       const s={scale:1,width:600,height:360,rear:canvas(),front:canvas(),projectile:canvas()};
-      const ctx=c=>c.getContext('2d'), helper={context:ctx,projectClip:(c,m,s,draw)=>draw()};
+      const ctx=c=>c.getContext('2d'), helper={context:ctx,projectClip:(c,m,s,draw)=>draw(),image:()=>bitmap};
       const hash=()=>[s.rear,s.front,s.projectile].map(c=>c.toDataURL()).join('|');
       const clear=()=>[s.rear,s.front,s.projectile].forEach(c=>ctx(c).clearRect(0,0,600,360));
       const r={start:0,contacts:[2.1]}, actor={cast_effect:style};
@@ -140,14 +141,14 @@ def verify_effects(page, style):
             clear();const blank=hash();SpellEffects.draw(s,m,{round:r,time},helper);const first=hash();
             clear();SpellEffects.draw(s,m,{round:r,time},helper);
             if(hash()!==first)throw Error('Nondeterministic effect');
-            if(time<3&&first===blank)throw Error('Missing revolver effect');
+            if(time<3&&first===blank)throw Error('Missing costume effect');
             if(time===4&&first!==blank)throw Error('Expired particles');
             samples.push(first);
           }
         }
         if(FrontierEffects.draw(s,{attacker:{actor:{faction:'dao'}}},{round:r,time:2.05},helper))throw Error('Default actor overridden');
         return samples.length===10;
-      } finally {Math.random=original;}
+      } finally {Math.random=original;bitmap?.close();}
     }""", style)
     assert result
 

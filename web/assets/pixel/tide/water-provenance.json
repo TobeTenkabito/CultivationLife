@@ -1,0 +1,44 @@
+{
+  "source": "design/tide-water-20261028/water-keyframes.png",
+  "prompt": {
+    "generator": "OpenAI built-in image_gen",
+    "prompt": "Use case: stylized-concept. Asset type: production 2D game VFX sprite sheet, painted water attack animation. Create a transparent 4-column by 4-row atlas with EXACTLY 16 equal rectangular cells, overall landscape 2048x1536. All cells same camera, same baseline at 75% cell height, ample transparent gutters inside every cell. Read order left to right top to bottom. No characters, text, labels, grid lines, scenery or opaque backdrop. A spectacular azure/turquoise water spell with luminous white froth, translucent blue volumes, fine painted splashes and crisp silhouettes. Motion direction LEFT TO RIGHT throughout. This is an actual evolving animation, NOT sixteen copies or recolors. Row 1 four sequential charging frames: tiny rising water ribbon, growing spiral, gathering curved surge, rising crest. Row 2 four sequential advancing frames: tall crest leans right, crest curls forward, hollow barrel wave extends right, curling wave tip breaks down and forward. Row 3 four consecutive impact frames: crest strikes at right, explosive foamy crash with thick central body, widest erupting spray crown, falling fan of foamy water. Row 4 four consecutive dissipating frames: collapsing water mass, low splashing foam, scattered small droplets and foam streaks, very sparse lingering droplets. Keep full wave and all droplets strictly within each cell with at least 8% transparent padding; no contact with adjacent frames. Consistent painterly fantasy game art, powerful sculpted water, precise changing fluid forms, no ground shadow. True transparent alpha background.",
+    "source": "water-keyframes-source.png",
+    "frames": 16,
+    "grid": [
+      4,
+      4
+    ],
+    "stages": [
+      "charge",
+      "travel",
+      "impact",
+      "dissipate"
+    ],
+    "padding_edit": {
+      "generator": "OpenAI built-in image_gen",
+      "reference": "water-keyframes-source.png",
+      "output": "water-keyframes.png",
+      "prompt": "Use case: precise-object-edit. Edit this water animation sprite atlas. Preserve all sixteen distinct painted water shapes, their colors and row-major chronological order. Essential production correction: each frame needs MUCH MORE transparent padding on ALL FOUR SIDES. Lay out EXACTLY 4 columns x 4 rows of identical rectangular cells in a 4:3 landscape canvas. Within each cell scale the complete water shape down uniformly to fit ONLY the central 60% width and central 60% height. Each cell must have completely EMPTY TRANSPARENT 20% margins on left, right, top and bottom. Keep each water base at 78% cell height. Remove the broad haze/glow outside the water; retain only clean isolated water and nearby droplets. No overlapping cells, NO artwork touching any cell boundary, no grid lines or text, no background. This must be a clean export-ready sprite sheet whose 16 cells can be sliced mechanically without cutting off foam, droplets or water. True transparent alpha."
+    }
+  },
+  "stages": [
+    "charge",
+    "travel",
+    "impact",
+    "dissipate"
+  ],
+  "frames": 16,
+  "cell": [
+    384,
+    288
+  ],
+  "generator": "OpenAI built-in image_gen",
+  "source_sha256": "20de8ca839cbeef931018fcdc70565c77dfed15ee720e8851fbd139253a5afc9",
+  "sha256": "7c4a5dfcb3d947b66c83922205742520d72bf6b6d1741960bd579b17c21df1a7",
+  "grid": [
+    4,
+    4
+  ],
+  "export": "Fixed grid crop and nearest-neighbour packing with two-pixel transparent gutters; no procedural water painting"
+}

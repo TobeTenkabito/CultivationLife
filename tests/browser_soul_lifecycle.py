@@ -15,6 +15,12 @@ from scripts.browser_navigation import navigation_locator, set_theme
 from playwright.sync_api import sync_playwright
 
 
+def select_secret(page, identity, name, known=True):
+    page.locator('#secret-tab-'+('known' if known else 'potential')).click()
+    page.locator('#secret-art-search').fill(name)
+    page.locator(f'[data-secret-art={identity}]').click()
+
+
 def main():
     output=ROOT/'build/soul-ui';output.mkdir(parents=True,exist_ok=True)
     with tempfile.TemporaryDirectory() as folder:
@@ -37,23 +43,48 @@ def main():
                     page.wait_for_function('!!game?.soul&&!busy')
                     navigation_locator(page,'[data-panel-target=secret-art]').click()
                     assert page.locator('#soul-details [data-soul-action=leave]').count()==0
+                    assert page.locator('#soul-secrets').count()==0
+                    for theme in ['a','b','d','f']:
+                        set_theme(page,theme)
+                        for width,height in [(1440,960),(390,844),(844,390),(320,740)]:
+                            page.set_viewport_size(dict(width=width,height=height))
+                            select_secret(page,'soul_leave','元婴离体')
+                            page.wait_for_timeout(700)
+                            assert page.locator('#secret-root-detail [data-soul-action=leave]').is_enabled()
+                            assert page.locator('#secret-art-detail-heading h3').inner_text()=='元婴离体'
+                            assert 'undefined' not in page.locator('#secret-art-card').inner_text()
+                            assert page.locator('#secret-art-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2'),(theme,width)
+                            if width<=760:
+                                assert page.locator('#secret-art-library').is_hidden()
+                                page.locator('#secret-art-back').click()
+                                assert page.locator('[data-secret-art=soul_leave]').is_visible()
+                                page.locator('[data-secret-art=soul_leave]').click()
+                            if theme=='a':page.screenshot(path=str(output/f'secret-detail-{width}.png'))
+                    page.set_viewport_size(dict(width=1440,height=960));set_theme(page,'a')
+                    page.locator('#secret-tab-known').click()
+                    page.screenshot(path=str(output/'secret-catalog-1440.png'))
+                    select_secret(page,'soul_leave','元婴离体')
                     # A stale leave click refreshes once without spending soul energy.
                     revision=page.evaluate('game.soul.revision')
                     energy=page.evaluate('game.soul.soul.current')
                     response=page.request.post(base+f'/api/games/{g.id}/soul',data=dict(action='study',id='path_ghost',revision=revision))
                     assert response.ok
-                    page.locator('#soul-secrets [data-soul-action=leave]').click()
+                    page.locator('#secret-root-detail [data-soul-action=leave]').click()
                     page.wait_for_function('r=>!busy&&game.soul.revision===r',arg=revision+1)
                     assert page.evaluate('game.soul.mode')=='普通'
                     assert page.evaluate('game.soul.soul.current')==energy
-                    page.locator('#soul-secrets [data-soul-action=leave]').click();page.wait_for_function('!busy&&game.soul.mode==="神游"')
+                    page.locator('#secret-root-detail [data-soul-action=leave]').click();page.wait_for_function('!busy&&game.soul.mode==="神游"')
                     assert page.locator('[data-soul-action=leave]').is_disabled()
                     page.locator('#secret-art-toggle').click()
                     page.locator('.hud-identity').click()
                     page.locator('[data-soul-action=return]').click();page.wait_for_function('!busy&&game.soul.mode==="普通"')
                     page.locator('[data-close-dialog=player-details-dialog]').click()
                     navigation_locator(page,'[data-panel-target=secret-art]').click()
-                    page.locator('#soul-secrets [data-soul-action=study]').first.click();page.wait_for_function('!busy&&game.soul.secrets[0].known')
+                    select_secret(page,'soul_second_nascent','第二元婴',known=False)
+                    page.locator('#secret-root-detail [data-soul-action=study]').click();page.wait_for_function('!busy&&game.soul.secrets[0].known')
+                    assert page.locator('#secret-tab-known').get_attribute('aria-selected')=='true'
+                    assert page.locator('#secret-art-detail-heading h3').inner_text()=='第二元婴'
+                    assert page.locator('#secret-root-detail [data-soul-action=study]').count()==0
                     page.locator('#secret-art-toggle').click()
                     navigation_locator(page,'[data-panel-target=nascent]').click()
                     for count in range(3):
@@ -110,6 +141,17 @@ def main():
                     page.wait_for_function('!busy&&!game.player.alive&&!game.pending_event')
                     assert page.locator('#post-battle-possession').is_hidden()
                     assert not e.store.load(g.id).player.alive
+                    # Below Nascent Soul, both secrets are discoverable but cannot be used.
+                    low=e.create_game('未解锁秘法','supreme_metal','dao',322,preset_id='core')['id']
+                    current=e._load(low);current.pending_event=None;e.store.save(current)
+                    page.evaluate('async id=>loadGame(id)',low)
+                    page.wait_for_function('!busy&&!!game.soul')
+                    navigation_locator(page,'[data-panel-target=secret-art]').click()
+                    for art,name,action in [('soul_leave','元婴离体','leave'),('soul_second_nascent','第二元婴','study')]:
+                        select_secret(page,art,name,known=False)
+                        assert page.locator(f'#secret-root-detail [data-soul-action={action}]').is_disabled()
+                        page.evaluate('renderButtons()')
+                        assert page.locator(f'#secret-root-detail [data-soul-action={action}]').is_disabled()
                     assert not errors,errors
                     browser.close()
             finally:http.shutdown();http.server_close()

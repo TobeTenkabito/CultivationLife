@@ -222,6 +222,9 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
         )
     ranking_data = deps._public_spirit_ranking(game)
     new_achievements = deps._evaluate_achievements(game, ranking_data.get("player_rank"))
+    # Cosmetic achievement grants are committed above, then exposed in this same response.
+    from ..character_skins import public as public_skins
+    player_data['character_skins'] = public_skins(game.player)
     from .actions.world_travel import plan_public_crossing
     travel_routes = []
     for destination in WORLD_SYSTEMS["world_profiles"]:

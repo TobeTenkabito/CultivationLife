@@ -70,6 +70,7 @@ def main():
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if soul:require('soul_lifecycle_scope' in text,f'Missing soul native acceptance: {name}')
         if soul:require('frontier_skin_scope' in text,f'Missing frontier/swimwear native acceptance: {name}')
+        if soul:require('tide_theme_scope' in text,f'Missing tide/theme native acceptance: {name}')
         if authored:require('authored_scope' in text,f'Missing authoring native acceptance: {name}')
         if update301:require('update301_scope' in text,f'Missing 3.0.1 native skin and ecology acceptance: {name}')
         if visual and BASE_GAME_VERSION=='3.0.0-alpha.4':require('monster_visual_scope' in text,f'Missing alpha.4 native monster scope: {name}')

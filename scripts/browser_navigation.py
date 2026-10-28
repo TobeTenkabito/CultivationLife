@@ -40,7 +40,11 @@ def set_theme(page, theme):
             opened.append(name)
             page.locator(f'#{name}-toggle').click()
     page.locator('#theme-open').click()
-    page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
+    if page.evaluate('GameThemes.preferences.pixel_art'):
+        palette = 'dark' if theme in ('b', 'd', 'dark') else 'light'
+        page.locator(f'[data-theme-picker=dialog] [data-pixel-theme-choice={palette}]').click()
+    else:
+        page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
     page.evaluate('GameThemes.saved')
     page.locator('[data-close-dialog=theme-dialog]').click()
     for name in opened:

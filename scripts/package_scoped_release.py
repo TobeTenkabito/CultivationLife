@@ -181,6 +181,8 @@ def main():
         require(all(c.get('soul_verified') for c in evidence['cases']),'Soul compiled acceptance required with and without DLC')
         require(all(c.get('holiday_verified') for c in evidence['cases']),'Holiday compiled acceptance required with and without DLC')
         require(all(c.get('frontier_verified') for c in evidence['cases']),'Frontier compiled acceptance required with and without DLC')
+        require(all(c.get('tide_verified') for c in evidence['cases']),'Tide achievement and two-theme compiled acceptance required')
+        require({'browser_tide_theme','browser_themes_139','browser_desktop_navigation','browser_secret_art_training'}<={r['name'] for r in scoped['runs']},'Theme/navigation/secret browser acceptance required')
         require({'browser_frontier_skins','browser_release_301'}<={r['name'] for r in scoped['runs']},'Gun/swimwear and wardrobe entry browser acceptance required')
         require({name for shard in scoped['tests'] for name in shard}==set(SOUL_TESTS),'Soul related selection incomplete')
         require({'browser_soul_lifecycle','browser_swimwear_skins','browser_holiday_skins','browser_sect_tasks','browser_authored_techniques','browser_events_212'}<={r['name'] for r in scoped['runs']},'Soul/holiday/sect browser acceptance incomplete')
@@ -190,6 +192,7 @@ def main():
         require(all('soul_lifecycle_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Soul native marker missing')
         require(all('holiday_skin_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Holiday native marker missing')
         require(all('frontier_skin_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Gun/swimwear native marker missing')
+        require(all('tide_theme_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Tide/two-theme native marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
     if scoped.get('profile')=='authored':

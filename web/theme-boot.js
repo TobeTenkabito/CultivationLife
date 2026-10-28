@@ -3,7 +3,9 @@
   let value = {};
   try { value = JSON.parse(localStorage.getItem('cultivation-appearance') || '{}') || {}; } catch (_) {}
   value.theme = ({c:'a',e:'f'})[value.theme] || value.theme;
-  document.documentElement.dataset.theme = /^[abdf]$/.test(value.theme || '') ? value.theme : 'a';
+  document.documentElement.dataset.theme = value.pixel_art === true ? 'a' : /^[abdf]$/.test(value.theme || '') ? value.theme : 'a';
+  document.documentElement.dataset.pixelTheme = value.pixel_theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.compactDocks = String(value.compact_docks !== false);
   document.documentElement.dataset.motion = value.reduced_motion === true ? 'reduced' : 'full';
   document.documentElement.dataset.visual = value.pixel_art === true ? 'pixel' : 'text';
 })();

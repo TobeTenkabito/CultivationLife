@@ -49,7 +49,9 @@ def verify(with_dlc):
                 verify_holiday(base)
                 from scripts.verify_frontier_exe import verify_frontier
                 verify_frontier(base)
-                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,soul_verified=True,holiday_verified=True,frontier_verified=True)
+                from scripts.verify_tide_exe import verify_tide
+                verify_tide(base,folder)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,soul_verified=True,holiday_verified=True,frontier_verified=True,tide_verified=True)
             if '--authored' in sys.argv:
                 from scripts.verify_authored_exe import verify_authored
                 verify_authored(base, with_dlc)

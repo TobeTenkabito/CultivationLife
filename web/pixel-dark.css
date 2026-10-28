@@ -1,0 +1,33 @@
+/* The new UI has one layout and two palettes; classic themes stay independent. */
+.theme-choice[hidden]{display:none!important}
+:root[data-visual=pixel][data-pixel-theme=dark]{
+  color-scheme:dark;
+  --background:#0e1c22;--surface:#17282d;--paper:#17282d;
+  --ink:#e2ede7;--muted:#a1b7b5;--line:#3a555b;
+  --pine:#7dd9ce;--pine-dark:#a5e5dc;--cinnabar:#f59b87;
+  --gold:#e5c482;--tint:#21393f;--track:#324b52;
+  --on-accent:#102b2d;--info:#91cfe9;--violet:#c2b5eb;--rose:#e9adc5;
+}
+:root[data-visual=pixel][data-pixel-theme=dark] .pixel-drawer::backdrop,
+:root[data-visual=pixel][data-pixel-theme=dark] dialog::backdrop{background:#020b12bb}
+:root[data-visual=pixel][data-pixel-theme=dark] .pixel-background{filter:brightness(.7) saturate(.82)}
+:root[data-visual=pixel][data-pixel-theme=dark] input,
+:root[data-visual=pixel][data-pixel-theme=dark] select,
+:root[data-visual=pixel][data-pixel-theme=dark] textarea{color:var(--ink);background-color:var(--surface);border-color:var(--line)}
+:root[data-visual=pixel][data-pixel-theme=dark] :focus-visible{outline-color:var(--pine)}
+:root[data-visual=pixel][data-pixel-theme=dark] .battle-animation{background:var(--paper);color:var(--ink)}
+:root[data-visual=pixel][data-pixel-theme=dark] .combat-playback-controls{background:var(--tint)}
+:root[data-visual=pixel][data-pixel-theme=dark] .combat-playback-controls button,
+:root[data-visual=pixel][data-pixel-theme=dark] .combat-playback-controls select{background:var(--paper);color:var(--ink);border-color:var(--line)}
+:root[data-visual=pixel][data-pixel-theme=dark] .combat-lineup{border-color:var(--line)}
+:root[data-visual=pixel][data-pixel-theme=dark] .combat-lineup small{color:var(--muted)}
+:root[data-visual=pixel][data-pixel-theme=dark] .combat-lineup [data-combat-lineup=npc]{color:var(--rose)}
+:root[data-visual=pixel][data-pixel-theme=dark] .combat-stance progress,
+:root[data-visual=pixel][data-pixel-theme=dark] .combat-stance progress::-webkit-progress-bar{background:var(--track)}
+:root[data-visual=pixel][data-pixel-theme=dark] .pixel-world-view{background:var(--background)}
+/* Full labels remain in the mobile directory and accessible button names. */
+:root[data-compact-docks=true] .in-game:not(.navigation-compact) .strategy-dock[data-desktop-dock]{width:64px;grid-template-columns:1fr;padding:6px}
+:root[data-compact-docks=true] .in-game:not(.navigation-compact) .strategy-dock[data-desktop-dock] button{width:50px;height:42px;min-height:42px;display:grid;grid-template-columns:1fr;place-items:center;padding:4px;gap:0;text-align:center}
+:root[data-compact-docks=true] .in-game:not(.navigation-compact) .strategy-dock[data-desktop-dock] button small{display:none}
+.desktop-dock-tooltip{position:fixed;z-index:10000;max-width:180px;padding:8px 13px;border:1px solid var(--line);border-radius:4px;color:var(--ink);background:var(--surface);box-shadow:0 4px 16px #0004;pointer-events:none;font:13px/1.5 var(--sans)}
+.desktop-dock-tooltip[hidden]{display:none}

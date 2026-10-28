@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <script src="/theme-boot.js?v=2.1.0"></script>
+  <script src="/theme-boot.js?v=323-2.1.0"></script>
   <link rel="stylesheet" href="/style.css?v=2.0.1">
   <link rel="stylesheet" href="/buddhist-panel.css?v=1.45.0">
   <link rel="stylesheet" href="/panels.css?v=1.45.0">
@@ -45,7 +45,7 @@
     </header>
 
     <section id="theme-entry" class="theme-entry" aria-label="选择界面主题">
-      <div class="theme-entry-heading"><div><p class="eyebrow">四境随心</p><h2>择一方天地，开启此生。</h2></div><span>随时可在右上角或设置中更换</span></div>
+      <div class="theme-entry-heading"><div><p class="eyebrow">随心设色</p><h2>择一方天地，开启此生。</h2></div><span>随时可在右上角或设置中更换</span></div>
       <div class="theme-choices" data-theme-picker="start"></div>
     </section>
     <section id="start-screen" class="paper start-card">
@@ -487,7 +487,7 @@
         </article>
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
-          <section class="settings-appearance"><h3>界面主题</h3><div class="theme-choices" data-theme-picker="settings"></div><label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label><label class="settings-row"><span><b>减弱动态效果</b><small>减少星月、山水字幕和翻页动效，不影响游戏进度。</small></span><input type="checkbox" data-motion-setting></label></section>
+          <section class="settings-appearance"><h3>界面主题</h3><div class="theme-choices" data-theme-picker="settings"></div><label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label><label class="settings-row"><span><b>侧栏悬停显示名称</b><small>电脑侧栏平时仅显示单字，悬停或键盘聚焦时显示全名；关闭后始终显示全名。</small></span><input type="checkbox" data-dock-label-setting></label><label class="settings-row"><span><b>减弱动态效果</b><small>减少星月、山水字幕和翻页动效，不影响游戏进度。</small></span><input type="checkbox" data-motion-setting></label></section>
           <section class="settings-appearance"><h3>邻域外观</h3><p class="muted">搭配自己的邻域轮廓、意象、配色与控制样式。</p><button type="button" data-voisinage-editor>邻域编辑器</button></section>
           <section class="settings-save-transfer"><h3>存档传承</h3><p class="muted">进度已自动保存。导出当前修行卷，或用存档码恢复另一段旅程。</p><div class="transfer-actions"><button type="button" data-save-export-current>导出当前存档</button><button type="button" data-save-import>导入存档</button></div></section>
           <div class="settings-list">
@@ -587,11 +587,11 @@
     </section>
   </div>
   <dialog id="theme-dialog" class="appearance-dialog" aria-labelledby="theme-dialog-title">
-    <div class="dialog-heading"><div><p class="eyebrow">四境随心</p><h2 id="theme-dialog-title">界面主题</h2></div><button type="button" data-close-dialog="theme-dialog">完成</button></div>
-    <p class="muted">主题会立即应用并记住选择。「松烟书院」是默认主题。</p>
+    <div class="dialog-heading"><div><p class="eyebrow">随心设色</p><h2 id="theme-dialog-title">界面主题</h2></div><button type="button" data-close-dialog="theme-dialog">完成</button></div>
+    <p class="muted">主题会立即应用并记住选择，可随时切换。</p>
     <div class="theme-choices" data-theme-picker="dialog"></div>
     <label class="settings-row"><span><b>减弱动态效果</b><small>保留静态主题与全部操作，系统的减弱动态设置也会生效。</small></span><input type="checkbox" data-motion-setting></label>
-    <label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label>
+    <label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label><label class="settings-row"><span><b>侧栏悬停显示名称</b><small>电脑侧栏平时仅显示单字，悬停或键盘聚焦时显示全名；关闭后始终显示全名。</small></span><input type="checkbox" data-dock-label-setting></label>
     <p class="theme-save-status" role="status" aria-live="polite"></p>
   </dialog>
   <dialog id="player-details-dialog" class="appearance-dialog player-details-dialog" aria-labelledby="player-details-title">
@@ -620,7 +620,8 @@
   <script src="/local-economy.js?v=3"></script>
   <script src="/map-directory.js?v=territory-ui2"></script>
   <script src="/upper-energy.js?v=1.55.0"></script>
-  <script src="/theme-manager.js?v=2.1.0"></script>
+  <script src="/theme-manager.js?v=323"></script>
+  <script src="/desktop-labels.js?v=323"></script>
   <link rel="stylesheet" href="/voisinage-editor.css?v=2">
   <script src="/voisinage-appearance.js?v=1"></script>
   <script src="/voisinage-editor.js?v=fx3"></script>
@@ -653,7 +654,7 @@
   <script src="/upper-institution-panel.js?v=1.55.0"></script>
   <script src="/monster-civilizations.js?v=2100"></script>
   <script src="/authored-techniques.js?v=310"></script>
-  <script src="/soul.js?v=321a"></script>
+  <script src="/soul.js?v=322b"></script>
   <script src="/character-skins.js?v=321a"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>
@@ -694,7 +695,7 @@
   <script src="/panel-pages.js?v=3000"></script>
   <script src="/strategic-war-panel.js?v=1"></script>
   <link rel="stylesheet" href="/secret-art-panel.css?v=1">
-  <script src="/secret-art-panel.js?v=1"></script>
+  <script src="/secret-art-panel.js?v=322b"></script>
   <script src="/domain-motifs.js?v=fx8"></script>
   <script src="/domain-ink.js?v=fx9"></script>
   <script src="/voisinage-fields.js?v=fx7"></script>
@@ -702,8 +703,10 @@
   <script src="/voisinage-controls.js?v=fx3"></script>
   <script src="/combat-domains.js?v=fx2"></script>
   <script src="/frontier-effects.js?v=322"></script>
+  <script src="/tide-effects.js?v=323"></script>
+  <link rel="stylesheet" href="/pixel-dark.css?v=323">
   <script src="/holiday-effects.js?v=321"></script>
-  <script src="/spell-effects.js?v=322"></script>
+  <script src="/spell-effects.js?v=323"></script>
   <script src="/combat-renderer.js?v=fx2"></script>
   <script src="/actor-variants.js?v=alpha6"></script>
   <script src="/tribulation-effects.js?v=fx3"></script>

@@ -9,7 +9,8 @@ from pathlib import Path
 from threading import RLock
 
 THEMES = frozenset("abdf")
-DEFAULTS = {"theme": "a", "reduced_motion": False, "pixel_art": False}
+DEFAULTS = {"theme": "a", "reduced_motion": False, "pixel_art": False,
+            "pixel_theme": "light", "compact_docks": True}
 _LOCK = RLock()
 
 
@@ -61,6 +62,8 @@ def load_ui_preferences(root: Path) -> dict:
             "theme": ({"c": "a", "e": "f"}.get(data["theme"], data["theme"])) if isinstance(data.get("theme"), str) and data["theme"] in THEMES | {"c", "e"} else "a",
             "reduced_motion": data.get("reduced_motion") if isinstance(data.get("reduced_motion"), bool) else False,
             "pixel_art": data.get("pixel_art") is True,
+            "pixel_theme": 'dark' if data.get('pixel_theme') == 'dark' else 'light',
+            "compact_docks": data.get('compact_docks') is not False,
         }
         if 'navigation' in data:
             try:
@@ -77,13 +80,17 @@ def load_ui_preferences(root: Path) -> dict:
 
 def write_ui_preferences(root: Path, payload: dict, *, character_path=None) -> dict:
     if not isinstance(payload, dict) or not payload or set(payload) - (DEFAULTS.keys() | {'navigation', 'voisinage_appearance'}):
-        raise ValueError("界面偏好仅支持 theme、reduced_motion、pixel_art、navigation 与 voisinage_appearance")
+        raise ValueError("界面偏好字段无效")
     if "theme" in payload and (not isinstance(payload["theme"], str) or payload["theme"] not in THEMES):
         raise ValueError("请选择松烟书院、月下观星、丹砂金阙或竹简纪年")
     if "reduced_motion" in payload and not isinstance(payload["reduced_motion"], bool):
         raise ValueError("减弱动态效果必须为布尔值")
     if "pixel_art" in payload and not isinstance(payload["pixel_art"], bool):
         raise ValueError("像素绘景必须为布尔值")
+    if 'pixel_theme' in payload and payload['pixel_theme'] not in ('light', 'dark'):
+        raise ValueError('新版界面仅支持浅色和暗色主题')
+    if 'compact_docks' in payload and not isinstance(payload['compact_docks'], bool):
+        raise ValueError('侧栏悬停名称必须为布尔值')
     if 'navigation' in payload:
         payload = payload | {'navigation': _navigation(payload['navigation'])}
     if 'voisinage_appearance' in payload:

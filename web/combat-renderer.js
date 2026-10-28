@@ -188,13 +188,14 @@
   }
   let planSeal;
   function effects(s,m,state){
-    SpellEffects.draw(s,m,state,{context,projectClip,natal:planSeal?cache.get(planSeal):null});
+    SpellEffects.draw(s,m,state,{context,projectClip,image:path=>cache.get(path),natal:planSeal?cache.get(planSeal):null});
   }
   async function prepare(plan){
     planSeal=plan.natalIcon;
     const needed=[plan.battlefield?.file??A.terrace];if(planSeal)needed.push(planSeal);
     for(const side of ['hero','npc'])for(const [slot,member] of plan.teams[side].entries()){
       const id=member.asset,actor=A.actors[id];
+      if(actor.cast_effect==='tidal_wave'&&window.TideEffects)needed.push(TideEffects.sheet);
       const moves=actor.role==='hero'?[...new Set(plan.rounds.filter(r=>r.side===side&&r.actorIndex===slot).map(r=>r.action))]:['attack'];
       if(plan.domains?.length)moves.push(actor.role==='hero'?(actor.domain_action??(id.startsWith('demonic')?'blast':'dragon')):'attack');
       for(const mode of ['idle','hit','brace',...moves])needed.push(actor.animations[mode].sheet);

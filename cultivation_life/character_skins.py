@@ -76,7 +76,8 @@ def eligible_skins(player):
         realm = _attained_realm(player)
         for key, form in forms.items():
             if (_matches(player, form)
-                    and form.get('min_realm_index', 0) <= realm and not form.get('monster_node')):
+                    and form.get('min_realm_index', 0) <= realm and not form.get('monster_node')
+                    and not form.get('achievement')):
                 unlocked.add(key)
         if player.path == 'monster':
             for node in dict.fromkeys([*player.monster_evolution_history, player.monster_evolution_id]):
@@ -100,6 +101,17 @@ def eligible_skins(player):
         if form and key+'.portrait' in assets and key+'.figure' in assets:
             result.append(_skin_entry(key, form, assets))
     return result
+
+
+def unlock_achievement_rewards(player, achievements):
+    """Grant only cosmetic identities authorized by the existing global ledger."""
+    earned = {key for key, form in _catalog_forms(_assets()).items()
+              if form.get('achievement') in achievements and _matches(player, form)}
+    unlocked = sorted(set(player.character_skins.get('unlocked', [])) | earned)
+    if unlocked == player.character_skins.get('unlocked', []):
+        return False
+    player.character_skins = {**player.character_skins, 'unlocked': unlocked}
+    return True
 
 
 def remember(player):
@@ -129,7 +141,7 @@ def public(player):
     locked = [_skin_entry(form['static'], form, assets) for entry in assets.values()
               for form in entry.get('skin_forms', [])
               if form.get('scope') == 'all_paths' and _matches(player, form) and form['static'] not in known
-              and form.get('min_realm_index', 0) > _attained_realm(player)
+              and (form.get('achievement') or form.get('min_realm_index', 0) > _attained_realm(player))
               and form['static']+'.portrait' in assets and form['static']+'.figure' in assets]
     return dict(selected=player.character_skins.get('selected'), available=available,
                 locked=locked, blocked=_blocked(player))

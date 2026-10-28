@@ -53,6 +53,7 @@ def main():
                                 assert page.locator('#secret-art-library .secret-art-entry').count() == 4
                                 page.screenshot(path=str(output / f'catalog-{theme}-{width}.png'))
                                 click_control(page.locator('#secret-tab-potential'))
+                                page.locator('#secret-art-filter').select_option('root')
                                 assert page.locator('#secret-art-library .secret-art-entry').count() == 6
                                 click_control(page.locator('#secret-art-library .secret-art-entry').first)
                                 assert page.locator('#secret-root-detail .secret-art-command').count() == 0

@@ -1,0 +1,439 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "export": "Original painted RGBA, nearest-neighbour packing; no anatomy reconstruction",
+  "forms": 2,
+  "static_images": 6,
+  "painted_keyposes": 20,
+  "animation_clips": 14,
+  "sources": [
+    {
+      "id": "swim-tide-female",
+      "source": "swim-tide-female.png",
+      "sha256": "f34c13292a603f09452f9eed8f09f218590bd335676710602f9ac05180b3969e",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            94,
+            1096,
+            254,
+            1506
+          ],
+          "scale": 0.6634146341463415
+        },
+        "portrait": {
+          "source_rect": [
+            321,
+            1092,
+            703,
+            1515
+          ],
+          "scale": 0.2647754137115839
+        },
+        "thumbnail": {
+          "source_rect": [
+            94,
+            1096,
+            254,
+            1506
+          ],
+          "scale": 0.3121951219512195
+        },
+        "idle": {
+          "source_rect": [
+            107,
+            3,
+            267,
+            394
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            158,
+            89
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            430,
+            3,
+            587,
+            396
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            159,
+            88
+          ]
+        },
+        "release": {
+          "source_rect": [
+            719,
+            8,
+            1009,
+            397
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            130,
+            90
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            73,
+            389,
+            355,
+            774
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            132,
+            91
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            402,
+            399,
+            624,
+            776
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            145,
+            95
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            713,
+            424,
+            976,
+            767
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            136,
+            109
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            79,
+            765,
+            255,
+            1102
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            155,
+            112
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            374,
+            814,
+            643,
+            1087
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            135,
+            139
+          ]
+        },
+        "down": {
+          "source_rect": [
+            672,
+            931,
+            1024,
+            1040
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            117,
+            209
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            757,
+            1092,
+            946,
+            1513
+          ],
+          "scale": 0.42755344418052255,
+          "offset": [
+            152,
+            76
+          ]
+        }
+      }
+    },
+    {
+      "id": "swim-tide-male",
+      "source": "swim-tide-male.png",
+      "sha256": "15f8d03fee93fba89bb4b1bd80c4fe13bf3ef647b45871d6c9e84c7d5ca42761",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            111,
+            1015,
+            271,
+            1418
+          ],
+          "scale": 0.674937965260546
+        },
+        "portrait": {
+          "source_rect": [
+            335,
+            1016,
+            745,
+            1415
+          ],
+          "scale": 0.2807017543859649
+        },
+        "thumbnail": {
+          "source_rect": [
+            111,
+            1015,
+            271,
+            1418
+          ],
+          "scale": 0.3176178660049628
+        },
+        "idle": {
+          "source_rect": [
+            106,
+            4,
+            265,
+            381
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            157,
+            90
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            427,
+            4,
+            641,
+            381
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            145,
+            90
+          ]
+        },
+        "release": {
+          "source_rect": [
+            750,
+            32,
+            1064,
+            371
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            123,
+            106
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            70,
+            377,
+            337,
+            730
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            133,
+            100
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            404,
+            387,
+            706,
+            721
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            126,
+            109
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            762,
+            388,
+            1016,
+            721
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            136,
+            109
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            56,
+            726,
+            343,
+            1025
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            129,
+            124
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            409,
+            759,
+            652,
+            1004
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            139,
+            148
+          ]
+        },
+        "down": {
+          "source_rect": [
+            705,
+            901,
+            1082,
+            999
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            109,
+            213
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            782,
+            1005,
+            1024,
+            1413
+          ],
+          "scale": 0.4411764705882353,
+          "offset": [
+            139,
+            76
+          ]
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "id": "swim-tide-female",
+      "name": "沧海传奇",
+      "gender": "female",
+      "min_realm_index": 0,
+      "rows": 4,
+      "file": "swim-tide-female.png",
+      "achievement": "cultivation_rootless_legend",
+      "cast_effect": "tidal_wave",
+      "prompt": "Use case: stylized-concept. Production asset for a Chinese xianxia RPG. Create a polished hand-painted character sprite sheet with EXACTLY twelve separate depictions in a regular THREE COLUMN by FOUR ROW grid on a truly transparent RGBA background. Each cell must have generous transparent gaps and never touch another cell. No labels, borders, text, scenery, cast shadows or detached particles. Consistent adult character, costume and proportions across every cell. Face and painting style inspired by the provided reference, but a NEW swimwear design. In row-major order: 1 full-body idle three-quarter facing right; 2 full-body gathering water magic with hands near chest; 3 full-body strong palm cast toward right; 4 full-body defensive raised arms; 5 full-body braced blocking stance; 6 full-body recoil from hit; 7 full-body stagger leaning back; 8 kneeling weakened with both legs anatomically clear; 9 lying defeated side-on with both legs and feet clearly accounted for; 10 front-facing full-body wardrobe figure; 11 large head-and-shoulders portrait; 12 full-body both hands raised invoking a tide. All standing figures show two complete distinct legs and both feet with natural perspective; use slight offset feet instead of merging legs. Keep hands anatomical with five fingers. No actual water effects in this sheet: those will be drawn by the game. Detailed clean silhouette, elegant flowing black hair, finely rendered face, controlled highlights, readable at small sprite size. All swimsuit fabric fully opaque, all intimate areas securely covered. Confident heroic, not erotic posing. Aim for 1536x2048 or larger portrait sheet. FEMALE VERSION: clearly adult Chinese woman around 28, attractive athletic curvy build, same face and long dark hair family as reference. More daring than the former green one-piece: a shimmering deep-aqua two-piece bikini, secure triangular bra cups with fine gold edging and small central pearl, high-cut bikini bottoms with elegant thin side straps, bare midriff and full legs, delicate gold ankle bracelets and minimal flat gold sandals. No skirt or cloth covering the legs. Hair pinned partly up with turquoise ornament, remaining long hair flowing. Luxurious aquatic heroine costume.",
+      "repair_prompt": "Precise local anatomical repair of this existing transparent 3-column by 4-row adult female RPG sprite sheet. Preserve the same image dimensions, all twelve cells, original face, hairstyle, blue bikini costume, colors, rendering, full-body poses, all legs and feet and all other cells. ONLY correct the missing second arm in the TOP RIGHT cell (row 1 column 3, forward palm casting pose). Keep the existing arm extending to the right with its raised palm exactly as is. Draw the OTHER shoulder and complete upper arm naturally angled backward/down, a visibly bent elbow and a forearm folding forward to a clearly visible relaxed hand held beside the waist/low ribs, in front of the dark hair, separate from the extended arm. Correct shoulder attachment, upper-arm and forearm lengths, one wrist and five fingers, no disconnected hand, no third arm. Preserve the torso and both legs. No red markings. Keep background truly transparent and keep all other eleven cell drawings unchanged. This is a small repair, not a redesign.",
+      "down_repair_prompt": "Make ONE small anatomical clarification in this transparent 3 by 4 sprite sheet. Preserve the repaired two-arm casting pose in row 1 column 3 and ALL other cells exactly. Edit ONLY the lying-down female pose in row 3 column 3: make the farther arm and its hand visibly readable as a second arm. Keep the existing near arm bent on the ground beneath her head. Add a naturally bent far arm resting above her head on the ground: show a connected upper arm passing behind the near shoulder, a bent elbow and forearm above the head, with the second hand relaxed near the forehead, five natural fingers. Avoid any third arm, merged hands or disconnected limbs. Keep her face, head size, hair, opaque blue bikini, torso, natural reclining posture, both legs and both sandal feet. Do not modify the kneeling pose, portrait, standing poses, or layout. Exactly twelve cells, same dimensions and transparent background, no labels or markings.",
+      "discarded_full_sheet_repairs": [
+        "repair_prompt",
+        "down_repair_prompt"
+      ],
+      "final_repair": {
+        "hair_reference": "../frontier-swim-20261027/swim-integration-female-v1.png",
+        "costume_source": "swim-tide-female-sleek-background.png",
+        "costume_prompt": "Precise costume replacement / identity preservation. IMAGE 1 (green-and-white swimsuit sprite sheet on brown background) is the AUTHORITATIVE EDIT TARGET. Preserve its exact woman's face, natural slim straight black hair, hairstyles, hair silhouettes, fine tapered wispy ends, narrow flowing locks, realistic smooth hair texture, anatomy, original poses, proportions, and 3-column 4-row layout. This original HAIR is the user's chosen version: do not enlarge or inflate it at all. IMAGE 2 is ONLY a clothing design reference (aqua/gold bikini); DO NOT copy its fluffy voluminous hair or its face or body or poses. On the original target image 1 replace ONLY the green one-piece and white sarong with an opaque deep-aqua gold-edged two-piece bikini matching image 2: secure triangular cups, thin gold-trimmed straps, opaque high-cut bikini bottoms, bare midriff and legs, original gold sandals. Keep all original limbs and hands from image 1 exactly, especially original top-right single forward casting arm plus other arm naturally bent with hand at chest, NOT two arms emerging from one shoulder. All full body cells show anatomically accounted-for paired arms and legs, correct elbows/knees/wrists, coherent perspective. Change the brown background to true RGBA transparency with no shadows, glow, residue, scenery, labels, particles, outlines or panels. All twelve sprites isolated by clear transparent gaps. Do NOT beautify, restyle, resculpt, thicken, curl, crimp or fluff the hair. The original narrow smooth silky straight hair of image 1 is more important than any other styling. Keep the original eye/face identity. Same 1024x1536 layout as image 1; no cropping. Adult woman, nonsexual athletic game poses, opaque swimsuit. This is a clothing swap on image 1, not a redesign based on image 2.",
+        "hands_source": "down-hands-repaired.png",
+        "hands_prompt": "Anatomical repair of this cropped game artwork showing a forearm and a hand resting near a face. Preserve the existing arm, hand, partial face and straight hair exactly. Add the missing second FOREARM AND HAND lying alongside and slightly BELOW the existing forearm. New forearm begins naturally from behind the existing elbow near the left side, its upper arm is outside/occluded in this crop. Its relaxed hand ends a little to the LEFT and BELOW the existing hand so two wrists and two five-fingered hands remain distinct. Natural paired arms resting together, not an extra hand attached to the first wrist. Do not add anything above the face. Keep same wide 159:75 composition, original scale and alignment. Transparent background. Only add this second forearm/hand in the lower empty area.",
+        "feet_source": "down-feet-repaired.png",
+        "feet_prompt": "Precise anatomical correction of these TWO FEET IN GOLD SANDALS in a game sprite crop. Each foot must have EXACTLY FIVE anatomically natural toes: one big toe and four smaller toes, decreasing in size, NO six/seven-toed foot and NO duplicate small toes. There are two feet and ten toes total. Preserve the two feet's pose, overlapping perspective, ankles, shins, golden sandal shape, thin straps, skin tone and soft painted rendering. The nearer upper foot currently has too many little toes: replace its toe row with a clearly readable five-toe row. Correct the lower farther foot too. Do not change any other anatomy or composition. Same wide 165:75 crop and original placement. Transparent background, no annotations.",
+        "assembly": {
+          "hands_rect": [
+            865,
+            975,
+            159,
+            75
+          ],
+          "hands_polygon": [
+            [
+              7,
+              34
+            ],
+            [
+              66,
+              34
+            ],
+            [
+              91,
+              38
+            ],
+            [
+              111,
+              42
+            ],
+            [
+              123,
+              53
+            ],
+            [
+              117,
+              64
+            ],
+            [
+              98,
+              65
+            ],
+            [
+              74,
+              56
+            ],
+            [
+              14,
+              49
+            ],
+            [
+              5,
+              44
+            ]
+          ],
+          "feet_rect": [
+            660,
+            980,
+            165,
+            75
+          ],
+          "method": "Resize generated local patches to source crop dimensions; copy hands only through the declared polygon; replace footwear crop; preserve all other source pixels.",
+          "review": "Two naturally folded forearms and distinct hands beside face; five toes per foot; no overhead arm; original chosen sleek hair retained."
+        }
+      },
+      "source_sha256": "f34c13292a603f09452f9eed8f09f218590bd335676710602f9ac05180b3969e"
+    },
+    {
+      "id": "swim-tide-male",
+      "name": "沧海传奇",
+      "gender": "male",
+      "min_realm_index": 0,
+      "rows": 4,
+      "file": "swim-tide-male.png",
+      "achievement": "cultivation_rootless_legend",
+      "cast_effect": "tidal_wave",
+      "prompt": "Use case: stylized-concept. Production asset for a Chinese xianxia RPG. Create a polished hand-painted character sprite sheet with EXACTLY twelve separate depictions in a regular THREE COLUMN by FOUR ROW grid on a truly transparent RGBA background. Each cell must have generous transparent gaps and never touch another cell. No labels, borders, text, scenery, cast shadows or detached particles. Consistent adult character, costume and proportions across every cell. Face and painting style inspired by the provided reference, but a NEW swimwear design. In row-major order: 1 full-body idle three-quarter facing right; 2 full-body gathering water magic with hands near chest; 3 full-body strong palm cast toward right; 4 full-body defensive raised arms; 5 full-body braced blocking stance; 6 full-body recoil from hit; 7 full-body stagger leaning back; 8 kneeling weakened with both legs anatomically clear; 9 lying defeated side-on with both legs and feet clearly accounted for; 10 front-facing full-body wardrobe figure; 11 large head-and-shoulders portrait; 12 full-body both hands raised invoking a tide. All standing figures show two complete distinct legs and both feet with natural perspective; use slight offset feet instead of merging legs. Keep hands anatomical with five fingers. No actual water effects in this sheet: those will be drawn by the game. Detailed clean silhouette, elegant flowing black hair, finely rendered face, controlled highlights, readable at small sprite size. All swimsuit fabric fully opaque, all intimate areas securely covered. Confident heroic, not erotic posing. Aim for 1536x2048 or larger portrait sheet. MALE VERSION: clearly adult Chinese man around 28, handsome sharp face, muscular athletic physique, long black hair half tied up. More revealing than old vest and shorts: shirtless torso, fitted deep-aqua and midnight-blue swimming briefs with elegant gold side clasp and subtle wave pattern, opaque fabric and secure full coverage, bare muscular legs, minimal flat black-and-gold sandals, single turquoise pendant and wrist cuff. No coat, shirt, cape, skirt or shorts. Confident aquatic hero, not exaggerated bodybuilding.",
+      "source_sha256": "15f8d03fee93fba89bb4b1bd80c4fe13bf3ef647b45871d6c9e84c7d5ca42761"
+    }
+  ]
+}

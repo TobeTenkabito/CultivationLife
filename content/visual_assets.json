@@ -9344,6 +9344,120 @@
           "unlock_label": "全道途通用 · 合体期解锁"
         }
       ]
+    },
+    "actor.cosmetic.swim-tide-female.figure": {
+      "file": "/assets/pixel/tide/swim-tide-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "5f4ca5bb6c022888ca0d740842e38701c2cce71dc56a28a1ee55837a43cdaf6c",
+      "requires": []
+    },
+    "actor.cosmetic.swim-tide-female.portrait": {
+      "file": "/assets/pixel/tide/swim-tide-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "d4ccc1692a09311356a4bbffac4c2327e088f25e932de4b48d313b0ab90b20bc",
+      "requires": []
+    },
+    "actor.cosmetic.swim-tide-female.thumbnail": {
+      "file": "/assets/pixel/tide/swim-tide-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "17c1cfcb70e556c2b21d47060f803615e9b3ca1a24bf85c349897e8702a857bb",
+      "requires": []
+    },
+    "swim-tide-female.actions": {
+      "file": "/assets/pixel/tide/swim-tide-female-actions.png",
+      "size": [
+        1500,
+        180
+      ],
+      "sha256": "30a75cab72962f21f9b2edcbeadfe97b8056db3916c1e53bd407d61fd8f6a109",
+      "requires": []
+    },
+    "actor.cosmetic.swim-tide-male.figure": {
+      "file": "/assets/pixel/tide/swim-tide-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "49d7a46262f8f804f865ac0e936932b7b0d1713b20e367997a93b9c2e1eb3466",
+      "requires": []
+    },
+    "actor.cosmetic.swim-tide-male.portrait": {
+      "file": "/assets/pixel/tide/swim-tide-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b46e776da70bfe326dcd22c51fde4de98d62055cb8b02a38c97b0a1b4a90ddfd",
+      "requires": []
+    },
+    "actor.cosmetic.swim-tide-male.thumbnail": {
+      "file": "/assets/pixel/tide/swim-tide-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "49fdfb6171340ce3196211fe23de05755d1d8d1a4a6823eb81174fbff12305dc",
+      "requires": []
+    },
+    "swim-tide-male.actions": {
+      "file": "/assets/pixel/tide/swim-tide-male-actions.png",
+      "size": [
+        1660,
+        180
+      ],
+      "sha256": "6e4de6c40ebf4c68105c7b9030adcae277b25f1a057aa9bac593b7e1bad1a375",
+      "requires": []
+    },
+    "base.tide_manifest": {
+      "file": "/assets/pixel/tide/manifest.json",
+      "sha256": "4e4cc260f41d8519e4275b83fb5b89f2b3c5a2b8cfbb7929d3503e070436f936",
+      "requires": [],
+      "combat_actors": [
+        "swim-tide-female",
+        "swim-tide-male"
+      ],
+      "skin_forms": [
+        {
+          "name": "沧海传奇·女",
+          "gender": "female",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.swim-tide-female",
+          "combat": "swim-tide-female",
+          "unlock_label": "全道途通用 · 完成成就「传奇故事」解锁 · 无境界限制",
+          "achievement": "cultivation_rootless_legend"
+        },
+        {
+          "name": "沧海传奇·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.swim-tide-male",
+          "combat": "swim-tide-male",
+          "unlock_label": "全道途通用 · 完成成就「传奇故事」解锁 · 无境界限制",
+          "achievement": "cultivation_rootless_legend"
+        }
+      ]
+    },
+    "effect.tidal_wave.keyframes": {
+      "size": [
+        1536,
+        1152
+      ],
+      "requires": [],
+      "file": "/assets/pixel/tide/water-keyframes.png",
+      "sha256": "7c4a5dfcb3d947b66c83922205742520d72bf6b6d1741960bd579b17c21df1a7"
     }
   },
   "items": {

@@ -1,5 +1,5 @@
 {
-  "base_version": "3.2.2",
+  "base_version": "3.2.3",
   "save_schema": 11,
   "compatible_save_schemas": [
     11
@@ -19,110 +19,130 @@
     "trial-sites": "1.1.0"
   },
   "validation_scope": "User-requested related and upstream tests only; not full repository regression",
-  "tests": 1194,
+  "tests": 1266,
   "runs": [
     {
       "name": "related-tests-0",
-      "log": "build\\related-tests-0-322.log",
+      "log": "build\\related-tests-0-323.log",
       "status": "passed"
     },
     {
       "name": "related-tests-1",
-      "log": "build\\related-tests-1-322.log",
+      "log": "build\\related-tests-1-323.log",
       "status": "passed"
     },
     {
       "name": "related-tests-2",
-      "log": "build\\related-tests-2-322.log",
+      "log": "build\\related-tests-2-323.log",
       "status": "passed"
     },
     {
       "name": "check_world_transition_contract",
-      "log": "build\\check_world_transition_contract-322.log",
+      "log": "build\\check_world_transition_contract-323.log",
       "status": "passed"
     },
     {
       "name": "check_module_dependencies",
-      "log": "build\\check_module_dependencies-322.log",
+      "log": "build\\check_module_dependencies-323.log",
       "status": "passed"
     },
     {
       "name": "check_documentation",
-      "log": "build\\check_documentation-322.log",
+      "log": "build\\check_documentation-323.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_tide_theme",
+      "log": "build\\browser_tide_theme-323.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_themes_139",
+      "log": "build\\browser_themes_139-323.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_desktop_navigation",
+      "log": "build\\browser_desktop_navigation-323.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_secret_art_training",
+      "log": "build\\browser_secret_art_training-323.log",
       "status": "passed"
     },
     {
       "name": "browser_frontier_skins",
-      "log": "build\\browser_frontier_skins-322.log",
+      "log": "build\\browser_frontier_skins-323.log",
       "status": "passed"
     },
     {
       "name": "browser_release_301",
-      "log": "build\\browser_release_301-322.log",
+      "log": "build\\browser_release_301-323.log",
       "status": "passed"
     },
     {
       "name": "browser_soul_lifecycle",
-      "log": "build\\browser_soul_lifecycle-322.log",
+      "log": "build\\browser_soul_lifecycle-323.log",
       "status": "passed"
     },
     {
       "name": "browser_swimwear_skins",
-      "log": "build\\browser_swimwear_skins-322.log",
+      "log": "build\\browser_swimwear_skins-323.log",
       "status": "passed"
     },
     {
       "name": "browser_holiday_skins",
-      "log": "build\\browser_holiday_skins-322.log",
+      "log": "build\\browser_holiday_skins-323.log",
       "status": "passed"
     },
     {
       "name": "browser_sect_tasks",
-      "log": "build\\browser_sect_tasks-322.log",
+      "log": "build\\browser_sect_tasks-323.log",
       "status": "passed"
     },
     {
       "name": "browser_authored_techniques",
-      "log": "build\\browser_authored_techniques-322.log",
+      "log": "build\\browser_authored_techniques-323.log",
       "status": "passed"
     },
     {
       "name": "browser_events_212",
-      "log": "build\\browser_events_212-322.log",
+      "log": "build\\browser_events_212-323.log",
       "status": "passed"
     }
   ],
   "regression": {
-    "collected": 1194,
+    "collected": 1266,
     "skipped": 0,
     "failures": 0,
     "errors": 0,
-    "passed": 1194
+    "passed": 1266
   },
   "save_transfer_smoke_tests": 21,
   "save_transfer_smoke_in_regression": true,
-  "save_transfer_log": "build/save-transfer-322.log",
-  "inputs_sha256": "e16d06484bfaf9656c9ebf98eddf6db52cf5d03bde465cad68c8fca37241feac",
+  "save_transfer_log": "build/save-transfer-323.log",
+  "inputs_sha256": "650675fa2590cec4aa27aa8473d6ea96498cc4d45a5cc81a81b6415bb79a8426",
   "platform": "Android 12",
-  "android_version": "3.2.2-android.85",
-  "version_code": 85,
-  "apk_sha256": "cc91891f67af05556abba2fdbeae285797d2b51c54f8f7a864b232d38d0b7c07",
+  "android_version": "3.2.3-android.86",
+  "version_code": 86,
+  "apk_sha256": "e0522e5bb911fb673535e114315d530ce8f9e6ae59e77e2b718b0ac00d10e9cb",
   "native": {
-    "version": "3.2.2",
-    "apk_sha256": "cc91891f67af05556abba2fdbeae285797d2b51c54f8f7a864b232d38d0b7c07",
+    "version": "3.2.3",
+    "apk_sha256": "e0522e5bb911fb673535e114315d530ce8f9e6ae59e77e2b718b0ac00d10e9cb",
     "status": "passed",
     "signed": true,
     "device": "emulator-5580",
     "android": "12",
     "sdk": "31",
     "logs": [
-      "build/android-soul-lifecycle-portrait-322.log",
-      "build/android-soul-lifecycle-landscape-322.log"
+      "build/android-soul-lifecycle-portrait-323.log",
+      "build/android-soul-lifecycle-landscape-323.log"
     ],
-    "test_apk_sha256": "174f55cc86874e5ce41350cbe5d45ebfe5fa8fde5499d393e0d8491d737fa8ab",
+    "test_apk_sha256": "dc8b0aca6c604ac2766e0eafa2930ad4108bc0b4b92f8281d331457def2cc5d5",
     "log_hashes": {
-      "build/android-soul-lifecycle-portrait-322.log": "c75dca6b0f7e851670d57d8c709468a68ee1833679164e03de4ab47d83d480d1",
-      "build/android-soul-lifecycle-landscape-322.log": "c75dca6b0f7e851670d57d8c709468a68ee1833679164e03de4ab47d83d480d1"
+      "build/android-soul-lifecycle-portrait-323.log": "08b89d9e9a6b1b8fd4ef2146f4d6c6e66780e51144f5bcd6fac79c57659374b3",
+      "build/android-soul-lifecycle-landscape-323.log": "08b89d9e9a6b1b8fd4ef2146f4d6c6e66780e51144f5bcd6fac79c57659374b3"
     },
     "scope": "Soul secrets, energy, captive refinement and equipment; holiday and 1890s frontier skins, actual gun FX, Integration swimwear gate, wardrobe nested back, four themes; signed Android 12 portrait/landscape"
   },
