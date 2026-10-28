@@ -16,12 +16,12 @@ URL = '/assets/pixel/swimwear/'
 POSES = ['idle', 'gather', 'release', 'guard', 'brace', 'hit', 'stagger', 'kneel', 'down', 'domain']
 
 
-def separate(source, rows, count=12):
+def separate(source, rows, count=12, *, min_pixels=1000):
     pixels = np.array(Image.open(source).convert('RGBA'))
     for threshold in (8, 64, 128, 192):
         labels, _ = ndimage.label(pixels[:, :, 3] >= threshold, np.ones((3, 3)))
         sizes = np.bincount(labels.ravel())
-        ids = [i for i in range(1, len(sizes)) if sizes[i] > 1000]
+        ids = [i for i in range(1, len(sizes)) if sizes[i] > min_pixels]
         if len(ids) == count:
             break
     assert len(ids) == count, (source, len(ids), count)
@@ -98,7 +98,9 @@ def main(source_dir=SOURCE, output_dir=OUT, manifest_key='base.swimwear_manifest
         if gun:
             actor['attack_action'] = 'revolver'
             actor['animations']['revolver'] = actor['animations'].pop('attack')
-        actor.update(name=name, faction='cosmetic', sex=row['gender'], energy_color='#8adbd0' if row['min_realm_index'] == 0 else '#c5d4ff')
+        actor.update(name=name, faction='cosmetic', sex=row['gender'], energy_color=row.get('energy_color', '#8adbd0' if row['min_realm_index'] == 0 else '#c5d4ff'))
+        if row.get('spell_palette'):
+            actor['spell_palette'] = row['spell_palette']
         if row.get('holiday_effect'):
             actor['holiday_effect'] = row['holiday_effect']
         if row.get('cast_effect'):
@@ -108,7 +110,8 @@ def main(source_dir=SOURCE, output_dir=OUT, manifest_key='base.swimwear_manifest
                           min_realm_index=row['min_realm_index'], static=static, combat=ident,
                           unlock_label={0:'全道途通用 · 默认解锁',5:'全道途通用 · 化神期解锁',7:'全道途通用 · 合体期解锁'}[row['min_realm_index']]))
         if row.get('achievement'):
-            forms[-1].update(achievement=row['achievement'], unlock_label='全道途通用 · 完成成就「传奇故事」解锁 · 无境界限制')
+            label = row.get('achievement_name', '传奇故事')
+            forms[-1].update(achievement=row['achievement'], unlock_label=f'全道途通用 · 完成成就「{label}」解锁 · 无境界限制')
         assets[ident+'.actions'] = dict(file=packed['sheet'], size=packed['size'], sha256=packed['sha256'], requires=[])
         sources.append(dict(id=ident, source=row['file'], sha256=sha(source), rows=row['rows'], exports=records))
     manifest = OUT / 'manifest.json'

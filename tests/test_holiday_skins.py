@@ -78,3 +78,16 @@ def test_shipped_static_and_all_battle_frames_are_complete_and_self_contained():
                     assert 0 < dx < dx+w < 384 and 0 < dy < dy+h < 288
                     assert sheet.crop((x, y, x+w, y+h)).getbbox()
         assert poses == {'idle', 'gather', 'release', 'guard', 'brace', 'hit', 'stagger', 'kneel', 'down', 'domain'}
+
+
+def test_christmas_painted_frames_are_unique_padded_and_dissipate():
+    path = ROOT/'web/assets/pixel/holiday/christmas-keyframes.png'
+    atlas = Image.open(path)
+    assert atlas.size == (1536,1152) and atlas.mode == 'RGBA'
+    frames = [atlas.crop((i%4*384,i//4*288,i%4*384+384,i//4*288+288)) for i in range(16)]
+    assert len({hashlib.sha256(im.tobytes()).digest() for im in frames}) == 16
+    for frame in frames:
+        left,top,right,bottom = frame.getbbox()
+        assert 0 < left < right < 384 and 0 < top < bottom < 288
+    coverage = lambda im: sum(im.getchannel('A').histogram()[128:])
+    assert coverage(frames[-1]) < coverage(frames[10])*.2

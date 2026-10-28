@@ -2,6 +2,92 @@
   "schema_version": 1,
   "achievements": [
     {
+      "id": "ghost_hundred_non_ghost_kills",
+      "name": "百鬼夜行",
+      "description": "在同一存档内，以鬼修身份累计击杀100名非鬼修修士，解锁男性安倍晴明皮肤。",
+      "category": "cultivation",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "ghost_non_ghost_kills", "value": 100}}
+    },
+    {
+      "id": "soul_body_destroyed_survival", "name": "死了，但没完全死", "category": "cultivation",
+      "description": "肉身被毁后，成功以元婴神游状态存续。死讯属实，本人存疑。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"soul_story": "body_destroyed"}
+    },
+    {
+      "id": "soul_second_life", "name": "这不是我最后一条命", "category": "cultivation",
+      "description": "第二元婴实际替本尊承接一次致命结局。你以为我为什么练小号？",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"soul_story": "second_rescued"}
+    },
+    {
+      "id": "soul_account_recovered", "name": "账号找回成功", "category": "cultivation",
+      "description": "肉身被毁后成功夺舍，并在该宿身重新达到毁身前的境界。装备没了，号还在。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"soul_story": "account_recovered"}
+    },
+    {
+      "id": "travel_homecoming", "name": "衣锦还乡", "category": "cultivation",
+      "description": "真正飞升离开某界后，经正常压制下界通行重返该界。当年你叫我小友，现在请注意称呼。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"homecoming": true}
+    },
+    {
+      "id": "family_tian_replaces_qi", "name": "田氏代齐", "category": "cultivation",
+      "description": "以外姓身份加入家族，在原本家绝嗣后继承该家族，并保留原族名、不使用更名资格。国号照旧，当家换人。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"family_line_preserved": true}
+    },
+    {
+      "id": "sect_payroll_rescue", "name": "我养你啊", "category": "cultivation",
+      "description": "本宗欠薪时亲自捐资，保持宗籍与同界，在后续年度恢复全员足额发薪。别人修仙靠宗门，我的宗门靠我。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "rescued_sect_payroll", "value": 1}}
+    },
+    {
+      "id": "sect_three_dismissals", "name": "铁打的弟子，流水的掌门", "category": "cultivation",
+      "description": "保持同一段宗籍，经历三次因财政危机发生的掌门罢免换任。掌门换了三届，我的工资还是没涨。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"three_sect_leaders": true}
+    },
+    {
+      "id": "war_reparations_profit", "name": "谢谢老板", "category": "cultivation",
+      "description": "所属宗门或家族实际参战获胜，实收战争赔款超过己方全案实际战争损耗。你负责宣战，我负责盈利。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "profitable_war_reparations", "value": 1}}
+    },
+    {
+      "id": "politics_world_unification", "name": "天下布武", "category": "cultivation",
+      "description": "使当前界面所有其他存续宗门直接依附于自己所属的同一个宗门或家族，且至少有一个附庸宗门。宗门名字可以不同，老板必须是同一个。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"world_sects_submit": true}
+    },
+    {
+      "id": "cultivation_rank_one", "name": "一个能打的都没有", "category": "cultivation",
+      "description": "登上当前界面的天榜第一。别误会，我是说在座的各位。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"ranking": 1}
+    },
+    {
+      "id": "wealth_million_stones", "name": "钞能力", "category": "cultivation",
+      "description": "行囊中同时持有至少一百万灵石。我的灵根是付款码。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"item": "spirit_stone", "minimum_quantity": 1000000}
+    },
+    {
+      "id": "cultivation_mahayana_disciple", "name": "我徒弟有大帝之姿", "category": "cultivation",
+      "description": "拥有一名仍在世的大乘或更高境界弟子。这次真没吹，境界摆在这儿。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"relationship": {"kind": "disciple", "minimum_realm": 8}}
+    },
+    {
+      "id": "crafting_three_mechanical_puppets", "name": "替身使者", "category": "cultivation",
+      "description": "同时拥有至少三具未被毁灭的机关傀儡。修仙太危险，先让替身上。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"puppet_count": {"type": "mechanical", "minimum": 3, "usable_only": true}}
+    },
+    {
       "id": "demonic_former_leader_campaign", "name": "先帝还在创业", "category": "cultivation",
       "description": "将某位掌门炼成炼尸，并使其实际参加一场其原宗门参与的战役；原宗门可为任意一方或其盟友。",
       "source": {"kind": "base", "id": "base", "name": "游戏本体"},

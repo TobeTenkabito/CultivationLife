@@ -178,6 +178,7 @@ def main():
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
     if scoped.get('profile')=='soul-lifecycle':
         from scripts.verify_scoped_release import SOUL_TESTS
+        require(all(c.get('hunt_verified') for c in evidence['cases']),'Hunt compiled assets required')
         require(all(c.get('soul_verified') for c in evidence['cases']),'Soul compiled acceptance required with and without DLC')
         require(all(c.get('holiday_verified') for c in evidence['cases']),'Holiday compiled acceptance required with and without DLC')
         require(all(c.get('frontier_verified') for c in evidence['cases']),'Frontier compiled acceptance required with and without DLC')
@@ -189,6 +190,7 @@ def main():
         required={f'build/android-soul-lifecycle-{o}-{tag}.log' for o in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Soul Android 12 native scope incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Soul native test APK changed')
+        require(all('hunt_beasts_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Hunt native marker missing')
         require(all('soul_lifecycle_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Soul native marker missing')
         require(all('holiday_skin_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Holiday native marker missing')
         require(all('frontier_skin_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Gun/swimwear native marker missing')

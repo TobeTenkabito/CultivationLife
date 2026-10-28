@@ -3,14 +3,15 @@
   window.createCombatBeasts=function(A,T){
   const {between,mix,clamp}=T;
   const colors={avian:'#91cbd5',quadruped:'#c5b88c',insect:'#9abc70'};
+  const style=v=>v.actor.beast_style??v.id;
   const launches={avian:[1.15,1.85],insect:[1.15,2.15]};
   for(const kind of Object.keys(colors))A.actors[kind].energy_color=colors[kind];
   function geometry(s,m,state){
     const r=state.round;if(!r||!m.attacker.actor.creature)return;
     const v=m.attacker,t=state.time-r.start,dir=v.dir;
-    if(v.id==='avian'){
+    if(style(v)==='avian'){
       v.y-=Math.round(62*s.scale*between(t,.7,1.15)*(1-between(t,2.55,3.5)));
-    }else if(v.id==='quadruped'){
+    }else if(style(v)==='quadruped'){
       const g=v.actor.animations.attack,i=Math.round(A.actions.quadruped.contacts[0]*A.fps);
       const point=g.poses[i].point,anchor=g.poses[i].anchor;
       const reach=(point[0]-anchor[0])*s.scale,goal=m.contact-dir*reach;
@@ -24,16 +25,16 @@
     }
   }
   function guard(s,v,t,{context,line,ring}){
-    if(!v.actor.creature||!colors[v.id])return false;
+    if(!v.actor.creature||!colors[style(v)])return false;
     const b=v.barrier,c=context(s.front),rear=context(s.rear),k=s.scale,dir=v.dir;
-    const color=colors[v.id];c.save();rear.save();c.globalAlpha=b.opacity*.58;rear.globalAlpha=b.opacity*.3;
+    const color=colors[style(v)];c.save();rear.save();c.globalAlpha=b.opacity*.58;rear.globalAlpha=b.opacity*.3;
     const edge=(a)=>[b.cx+dir*(b.rx*Math.cos(a)-b.shield*1.7*k*Math.exp(-a*a/.24)),b.cy+b.ry*Math.sin(a)];
-    if(v.id==='avian'){
+    if(style(v)==='avian'){
       for(let j=0;j<5;j++){
         const a=-1.1+j*.5,p=edge(a),q=edge(a+.22);
         line(c,p,q,color,1);line(c,q,[q[0]-dir*8*k,q[1]+3*k],'#c3dce0');
       }
-    }else if(v.id==='quadruped'){
+    }else if(style(v)==='quadruped'){
       let prev=null;for(let j=0;j<=45;j++){
         const a=mix(-1.2,1.2,j/45),p=edge(a);if(prev)line(c,prev,p,'#b6c5bf');prev=p;
       }
@@ -50,18 +51,18 @@
     c.restore();rear.restore();return true;
   }
   function effects(s,m,state,{context,line,ring,projectClip}){
-    const a=m.attacker;if(!a?.actor.creature||!colors[a.id])return false;
+    const a=m.attacker;if(!a?.actor.creature||!colors[style(a)])return false;
     const r=state.round,t=state.time-r.start,k=s.scale,dir=a.dir,c=context(s.projectile),x=m.contact,cy=m.hitY;
     projectClip(c,m,s,()=>{
-      if(a.id==='quadruped'){
+      if(style(a)==='quadruped'){
         const age=state.time-r.contacts[0];if(age<0||age>.2)return;
         c.save();c.globalAlpha=.64*(1-between(age,0,.2));
         for(let j=0;j<3;j++)line(c,[x-dir*(13+j*3)*k,cy-14*k+j*6*k],[x,cy+8*k+j*6*k],j===1?'#e0d9b5':'#b9c6c3',1);
         c.restore();return;
       }
-      const duration=a.id==='avian'?.3:.26,length=(a.id==='avian'?40:30)*k;
+      const duration=style(a)==='avian'?.3:.26,length=(style(a)==='avian'?40:30)*k;
       for(let j=0;j<r.contacts.length;j++){
-        const hit=r.contacts[j]-r.start,launch=launches[a.id][j];
+        const hit=r.contacts[j]-r.start,launch=launches[style(a)][j];
         if(t<launch||t>hit+duration)continue;
         const origin=a.hand,travel=between(t,launch,hit);
         const head=t<=hit?mix(origin[0],x,travel):x+dir*length*clamp((t-hit)/duration);
@@ -71,9 +72,9 @@
         for(let band=0;band<3;band++){
           let prev=null;
           for(let i=0;i<=38;i++){
-            const u=i/38,arc=Math.sin(u*Math.PI)*(a.id==='avian'?18:25)*k*(j%2?-1:1);
+            const u=i/38,arc=Math.sin(u*Math.PI)*(style(a)==='avian'?18:25)*k*(j%2?-1:1);
             const p=[mix(tail,head,u),centerY+arc+(band-1)*2*k];
-            if(prev)line(c,prev,p,band===1?colors[a.id]:a.id==='avian'?'#b8e0df':'#b6bd83',1);prev=p;
+            if(prev)line(c,prev,p,band===1?colors[style(a)]:style(a)==='avian'?'#b8e0df':'#b6bd83',1);prev=p;
           }
         }c.restore();
       }

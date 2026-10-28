@@ -35,7 +35,7 @@ def fight(engine, *, ratio=.9, seed=42):
 def test_reports_capture_real_initial_loss_and_end(engine, ratio):
     game, target, rng = fight(engine, ratio=ratio)
     report = game.last_combat_report
-    assert report['visual']['enemy'] == 'avian'
+    assert report['visual']['enemy'] == 'hunt-jade-eagle'
     before = copy.deepcopy(game.to_dict())
     state = rng.getstate()
     assert report_visuals(game, target, report) == report['visual']
@@ -71,7 +71,7 @@ def test_only_field_stages_are_excluded_not_mixed_battles(engine):
     game, target, _ = fight(engine)
     report = copy.deepcopy(game.last_combat_report)
     report['rounds'][0]['voisinage'] = {}
-    assert report_visuals(game, target, report)['enemy'] == 'avian'
+    assert report_visuals(game, target, report)['enemy'] == 'hunt-jade-eagle'
     for row in report['rounds']:
         row.pop('ordinary_exchange', None)
         row['initiative'] = 'voisinage'
@@ -141,7 +141,7 @@ def test_field_only_opening_then_ordinary_stages_remain_replayable(engine):
     assert following['ordinary_exchange']['opening'][1] == first['enemy_combat_state']
     assert following['ordinary_exchange']['opening'][1] < first['enemy_combat_state_max']
     game, target, _ = fight(engine)
-    assert report_visuals(game,target,resolution.to_dict())['enemy'] == 'avian'
+    assert report_visuals(game,target,resolution.to_dict())['enemy'] == 'hunt-jade-eagle'
 
 
 def test_trial_rows_capture_ordinary_and_domain_stages():
@@ -263,7 +263,7 @@ def test_mechanical_and_beasts_never_borrow_human_portraits_to_avoid_duplicates(
                dict(name='碧甲刀螳', kind='beast', power=10)]
     result = combat_identity(game, dict(members=members), player_units=units)
     assert [row['asset'] for row in result['teams']['hero']] == ['mechanical-puppet'] * 3
-    assert {row['asset'] for row in result['teams']['npc']} == {'quadruped', 'avian', 'insect'}
+    assert {row['asset'] for row in result['teams']['npc']} == {'hunt-rock-wolf', 'hunt-jade-eagle', 'hunt-jade-mantis'}
     assert all(row['gender'] is None for team in result['teams'].values() for row in team)
 
 

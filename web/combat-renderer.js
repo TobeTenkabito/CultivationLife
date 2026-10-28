@@ -100,7 +100,7 @@
       const edges=[rect[4]-v.anchor[0],rect[4]+rect[2]-v.anchor[0]].map(x=>x*dir*s.scale);
       v.x=clamp(v.x,4-Math.min(...edges),s.width-4-Math.max(...edges));
       v.y=clamp(v.y,4-(rect[5]-v.anchor[1])*s.scale,s.height-4-(rect[5]+rect[3]-v.anchor[1])*s.scale);
-      const p=v.actor.release_point;
+      const p=v.actor.release_points?.[typeof v.frame==='string'?v.frame:'']??v.actor.release_point;
       v.hand=[v.x+v.dir*(p[0]-v.anchor[0])*s.scale,v.y+(p[1]-v.anchor[1])*s.scale];
     }
     return motion;
@@ -192,9 +192,14 @@
   }
   async function prepare(plan){
     planSeal=plan.natalIcon;
+    const optional=new Set();
     const needed=[plan.battlefield?.file??A.terrace];if(planSeal)needed.push(planSeal);
     for(const side of ['hero','npc'])for(const [slot,member] of plan.teams[side].entries()){
       const id=member.asset,actor=A.actors[id];
+      const historical=window.HistoricalEffects?.sheetFor(actor);
+      if(historical){needed.push(historical);optional.add(historical);}
+      const christmas=window.ChristmasEffects?.sheetFor(actor);
+      if(christmas){needed.push(christmas);optional.add(christmas);}
       if(actor.cast_effect==='tidal_wave'&&window.TideEffects)needed.push(TideEffects.sheet);
       const moves=actor.role==='hero'?[...new Set(plan.rounds.filter(r=>r.side===side&&r.actorIndex===slot).map(r=>r.action))]:['attack'];
       if(plan.domains?.length)moves.push(actor.role==='hero'?(actor.domain_action??(id.startsWith('demonic')?'blast':'dragon')):'attack');
@@ -204,7 +209,10 @@
     // Keep only the current duel's resources; do not decode the whole roster.
     for(const key of [...cache.keys()])if(!needed.includes(key)){cache.get(key).close();cache.delete(key);}
     if(new Set(needed).size>maxCache)throw Error('Combat resource count exceeds bound');
-    for(const path of new Set(needed)){if(disposed)return;await load(path);}
+    for(const path of new Set(needed)){
+      if(disposed)return;
+      try{await load(path);}catch(error){if(!optional.has(path))throw error;}
+    }
     if([...cache.values()].reduce((n,im)=>n+im.width*im.height*4,0)>96*1024*1024)throw Error('Combat decode budget exceeded');
     return needed;
   }

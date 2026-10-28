@@ -14,6 +14,7 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from playwright.sync_api import sync_playwright
 from scripts.browser_navigation import navigation_locator
+from browser_historical_skins import capture_preview
 
 
 def main():
@@ -32,7 +33,8 @@ def main():
                     browser = pw.chromium.launch()
                     page = browser.new_page(viewport=dict(width=1440, height=960), reduced_motion='reduce')
                     errors = []
-                    page.on('pageerror', lambda e: errors.append(str(e)))
+                    page.on('pageerror', lambda e: errors.append(e.stack or str(e)))
+                    page.on('requestfailed', lambda request: print('Request failed:', request.url, request.failure, flush=True))
                     page.goto(base)
                     page.wait_for_function('!!configData&&!busy')
                     page.locator('#theme-open').click()
@@ -86,6 +88,7 @@ def main():
                         page.evaluate('id=>loadGame(id)', game.id)
                         navigation_locator(page, '#battle-report-open').click()
                         page.wait_for_function('CombatReplay.diagnostics().active&&!document.querySelector("[data-combat-replay]").disabled')
+                        saved_before = engine.store._path(game.id).read_bytes()
                         for at in (0, 1.5, 2.1):
                             page.evaluate('at=>CombatReplay.seek(at)', at)
                             info = page.evaluate('CombatReplay.diagnostics()')
@@ -95,7 +98,14 @@ def main():
                           const original=SpellEffects;let found=false;
                           window.SpellEffects={...original,draw(s,m,state,helpers){
                             if(m.attacker?.actor.holiday_effect===style&&state.round&&
-                               state.time-state.round.contacts[0]>-.5&&state.time-state.round.contacts[0]<-.15)found=true;
+                               state.time-state.round.contacts[0]>-.5&&state.time-state.round.contacts[0]<-.15){
+                              if(style==='christmas'){
+                                const image=helpers.image(ChristmasEffects.sheet);
+                                if(!image||image.width!==1536||image.height!==1152)throw Error('Painted snow not decoded in real replay');
+                                window.historicalPreviewStart=state.round.start;
+                              }
+                              found=true;
+                            }
                             return original.draw(s,m,state,helpers);
                           }};
                           try {
@@ -105,25 +115,47 @@ def main():
                         }""", effect)
                         page.screenshot(path=str(out / f'{actor}-combat.png'))
                         verify_effects(page, effect)
+                        if style=='christmas':
+                            verify_snow_frames(page)
+                            capture_preview(page, out/f'{actor}.webm')
+                            for width,height in [(1440,960),(390,844),(844,390)]:
+                                page.set_viewport_size(dict(width=width,height=height))
+                                page.evaluate('()=>CombatReplay.seek(historicalPreviewStart+2.25)')
+                                info=page.evaluate('CombatReplay.diagnostics()')
+                                assert all(0<=p['bounds'][0]<p['bounds'][2]<=info['viewport'][0]+1 for p in info['participants'])
+                                page.screenshot(path=str(out/f'{actor}-impact-{width}.png'))
+                            page.set_viewport_size(dict(width=1440,height=960))
                         page.evaluate('at=>CombatReplay.seek(at)', 10000)
                         page.locator('#battle-report-toggle').click()
+                        assert page.evaluate('CombatReplay.diagnostics().cache')==0
+                        if style=='christmas':
+                            pattern='**/assets/pixel/holiday/christmas-keyframes.png'
+                            page.route(pattern,lambda route:route.abort())
+                            navigation_locator(page,'#battle-report-open').click()
+                            page.wait_for_function('CombatReplay.diagnostics().active&&!document.querySelector("[data-combat-replay]").disabled')
+                            page.evaluate('()=>CombatReplay.seek(historicalPreviewStart+2.1)')
+                            page.locator('#battle-report-toggle').click()
+                            page.unroute(pattern)
+                        assert engine.store._path(game.id).read_bytes()==saved_before
                     assert not errors, errors
                     browser.close()
             finally:
                 http.shutdown()
                 http.server_close()
     result = dict(status='passed', forms=4, real_skin_commands=True, reload=True, no_rank_gate=True,
-                  widths=[1440, 390, 320, 844], real_battle_replays=4)
+                  widths=[1440, 390, 320, 844], real_battle_replays=4,
+                  painted_snow_frames=16, missing_snow_fallback=True, readonly_replay=True)
     (out / 'validation.json').write_text(json.dumps(result, indent=2), encoding='utf8')
     print(json.dumps(result))
 
 
 def verify_effects(page, style):
     # Actual renderer dispatch and deterministic no-RNG effects, both travel directions.
-    result = page.evaluate("""style=>{
+    result = page.evaluate("""async style=>{
+      const bitmap=style==='christmas'?await createImageBitmap(await (await fetch(ChristmasEffects.sheet)).blob()):null;
       const canvas=()=>Object.assign(document.createElement('canvas'),{width:600,height:360});
       const s={scale:1,width:600,height:360,rear:canvas(),front:canvas(),projectile:canvas()};
-      const ctx=c=>c.getContext('2d'), helper={context:ctx,projectClip:(c,m,s,draw)=>draw()};
+      const ctx=c=>c.getContext('2d'), helper={context:ctx,projectClip:(c,m,s,draw)=>draw(),image:()=>bitmap};
       const hash=()=>[s.rear,s.front,s.projectile].map(c=>c.toDataURL()).join('|');
       const clear=()=>[s.rear,s.front,s.projectile].forEach(c=>ctx(c).clearRect(0,0,600,360));
       const r={start:0,contacts:[2.1]}, actor={holiday_effect:style};
@@ -143,9 +175,38 @@ def verify_effects(page, style):
         }
         if(HolidayEffects.theme({faction:'dao'})!==null)throw Error('Default actor overridden');
         return samples.length===10;
-      } finally {Math.random=original;}
+      } finally {Math.random=original;bitmap?.close();}
     }""", style)
     assert result
+
+
+def verify_snow_frames(page):
+    page.evaluate('''async()=>{
+      const im=await createImageBitmap(await (await fetch(ChristmasEffects.sheet)).blob());
+      const canvas=()=>Object.assign(document.createElement('canvas'),{width:700,height:450});
+      const s={scale:1,width:700,height:450,ground:430,rear:canvas(),front:canvas(),projectile:canvas()};
+      const context=c=>c.getContext('2d');let clips=0;
+      const helpers={context,image:()=>im,projectClip:(c,m,s,draw)=>{clips++;draw();}};
+      const clear=()=>[s.rear,s.front,s.projectile].forEach(c=>context(c).clearRect(0,0,700,450));
+      const hash=()=>[s.rear,s.front,s.projectile].map(c=>c.toDataURL()).join('|');
+      const phases=[[-1.9,-.7],[-.7,0],[0,.45],[.45,1.2]];
+      const ages=phases.flatMap(([a,b])=>[0,1,2,3].map(i=>a+(b-a)*(i+.3)/4));
+      const random=Math.random;Math.random=()=>{throw Error('Snow consumed RNG');};
+      try{
+        for(const dir of [1,-1]){
+          const m={attacker:{actor:{holiday_effect:'christmas'},hand:[dir===1?160:540,220],dir},contact:dir===1?520:180,hitY:220};
+          const draw=age=>{clear();ChristmasEffects.draw(s,m,{round:{contacts:[2.1]},time:2.1+age},helpers);return hash();};
+          const first=ages.map(draw);
+          if(new Set(first).size!==16||new Set(ages.map(a=>ChristmasEffects.sample(a).index)).size!==16)throw Error('Missing snow keyframes');
+          for(let i=15;i>=0;i--)if(draw(ages[i])!==first[i])throw Error('Snow reverse seek differs');
+          clear();const blank=hash();
+          for(const age of [-2,1.21,4])if(draw(age)!==blank)throw Error('Snow escaped lifetime');
+          if(ChristmasEffects.draw(s,m,{round:{contacts:[2.1]},time:2.1},{...helpers,image:()=>null}))throw Error('Snow blocked missing-image fallback');
+        }
+        if(clips!==16)throw Error('Snow bypasses travel clipping');
+        if(ChristmasEffects.sheetFor({holiday_effect:'halloween'})!==undefined)throw Error('Snow applied to Halloween');
+      }finally{Math.random=random;im.close();}
+    }''')
 
 
 if __name__ == '__main__':

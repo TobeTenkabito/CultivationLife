@@ -147,6 +147,23 @@ def test_extinct_bloodline_player_succeeds_and_renames_once(engine):
     game=engine._load(game.id);assert game.family.id==identity and game.family.name=='新传承仙族'
     with pytest.raises(ValueError,match='一次'):engine.family_action(game.id,'rename',dict(name='重复更名'))
 
+
+def test_tian_succession_unlocks_while_original_name_is_preserved(engine):
+    game,family=clan_game(engine)
+    original_name=family.name
+    engine.family_action(game.id,'join',dict(target_id=family.id))
+    game=engine._load(game.id)
+    assert not engine.achievements._matches({'family_line_preserved':True},game,player_rank=None)
+    for npc in game.family.npcs:npc.alive=False
+    resolve_line(game,game.family)
+    engine.store.save(game)
+    shown=engine.get_game(game.id)
+    assert '田氏代齐' in {r['name'] for r in shown['new_achievements']}
+    actual=engine.store.load(game.id)
+    assert actual.family.name==original_name and actual.family.id==family.id
+    assert actual.family.heritage['rename_available']
+    assert '田氏代齐' not in {r['name'] for r in engine.get_game(game.id)['new_achievements']}
+
 def test_living_player_founder_and_absent_living_kin_block_extinction(engine):
     game,family=clan_game(engine)
     # Born into the original clan: the player belongs to its bloodline.

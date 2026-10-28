@@ -1,0 +1,379 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "export": "Original painted RGBA, nearest-neighbour packing; no anatomy reconstruction",
+  "forms": 2,
+  "static_images": 6,
+  "painted_keyposes": 20,
+  "animation_clips": 14,
+  "sources": [
+    {
+      "id": "nobunaga-male",
+      "source": "nobunaga-male.png",
+      "sha256": "46edb0fd1d985e7ea09942b6cc288e467b772b4ceb44eae793ad7b8db8e7fae4",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            15,
+            1053,
+            335,
+            1481
+          ],
+          "scale": 0.6355140186915887
+        },
+        "portrait": {
+          "source_rect": [
+            344,
+            1049,
+            680,
+            1486
+          ],
+          "scale": 0.2562929061784897
+        },
+        "thumbnail": {
+          "source_rect": [
+            15,
+            1053,
+            335,
+            1481
+          ],
+          "scale": 0.29906542056074764
+        },
+        "idle": {
+          "source_rect": [
+            33,
+            0,
+            258,
+            370
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            148,
+            110
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            356,
+            12,
+            667,
+            367
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            131,
+            116
+          ]
+        },
+        "release": {
+          "source_rect": [
+            689,
+            17,
+            1016,
+            366
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            128,
+            119
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            9,
+            367,
+            345,
+            719
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            126,
+            117
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            351,
+            376,
+            692,
+            721
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            125,
+            120
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            698,
+            378,
+            1024,
+            720
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            128,
+            121
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            21,
+            703,
+            338,
+            1059
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            130,
+            116
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            348,
+            789,
+            675,
+            1038
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            128,
+            158
+          ]
+        },
+        "down": {
+          "source_rect": [
+            648,
+            862,
+            1019,
+            1024
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            119,
+            192
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            676,
+            1029,
+            1017,
+            1486
+          ],
+          "scale": 0.3938730853391685,
+          "offset": [
+            125,
+            76
+          ]
+        }
+      }
+    },
+    {
+      "id": "seimei-male",
+      "source": "seimei-male.png",
+      "sha256": "8e1b1a1ea4c06f9b5637a7f604220a1b1acec6656c44fe6c8fc9a4fceae78125",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            10,
+            1026,
+            336,
+            1464
+          ],
+          "scale": 0.6210045662100456
+        },
+        "portrait": {
+          "source_rect": [
+            326,
+            1026,
+            673,
+            1470
+          ],
+          "scale": 0.25225225225225223
+        },
+        "thumbnail": {
+          "source_rect": [
+            10,
+            1026,
+            336,
+            1464
+          ],
+          "scale": 0.2922374429223744
+        },
+        "idle": {
+          "source_rect": [
+            8,
+            2,
+            310,
+            393
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            131,
+            97
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            347,
+            2,
+            702,
+            393
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            120,
+            97
+          ]
+        },
+        "release": {
+          "source_rect": [
+            708,
+            2,
+            1018,
+            391
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            129,
+            98
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            6,
+            385,
+            326,
+            753
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            127,
+            106
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            354,
+            385,
+            700,
+            750
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            122,
+            107
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            710,
+            418,
+            1024,
+            747
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            128,
+            122
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            11,
+            751,
+            302,
+            1035
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            133,
+            140
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            338,
+            792,
+            685,
+            1009
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            122,
+            168
+          ]
+        },
+        "down": {
+          "source_rect": [
+            662,
+            880,
+            1020,
+            1008
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            119,
+            204
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            667,
+            1018,
+            1023,
+            1460
+          ],
+          "scale": 0.4072398190045249,
+          "offset": [
+            120,
+            76
+          ]
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "id": "nobunaga-male",
+      "name": "织田信长",
+      "achievement": "politics_world_unification",
+      "achievement_name": "天下布武",
+      "energy_color": "#df884f",
+      "file": "nobunaga-male.png",
+      "gender": "male",
+      "rows": 4,
+      "min_realm_index": 0,
+      "prompt": "Production 2D fantasy RPG character sprite sheet, transparent alpha. Exactly twelve isolated panels in a precise 3 columns x 4 rows grid, tall 1024x1536 or larger same ratio canvas. Same SINGLE adult male in every panel, consistent face, outfit and proportions. Row-major panels: 1 standing idle three-quarter facing right, 2 gathering power with both hands visibly separated near chest, 3 decisive commanding forward attack with one hand extended and the OTHER hand clearly visible near waist, 4 defensive ready pose both arms visible, 5 bracing pose both forearms separate, 6 recoiling from a hit both arms visible, 7 staggering on two legs, 8 kneeling with two arms and two hands visibly resting separately, 9 lying sideways defeated with two visible hands folded naturally in front of chest and two separately visible booted feet, 10 independent full-body frontal standing portrait, 11 large bust portrait, 12 full-body casting ultimate with both arms raised and visible hands. All full-body poses fully contained in their individual cells including feet and headgear; only panel11 is bust. Adequate transparent gutters, no overlapping cells. Correct human anatomy: exactly two arms, two hands, two legs, two feet, five digits per visible hand. Do not hide a missing limb behind the cape or robe. No text, labels, grid, backdrop, symbols floating separately, or detached items. Rich detailed painterly semi-realistic game illustration, sharp face, tasteful ornate materials, clean silhouette; not chibi, not pixel art. Original interpretation of historical Oda Nobunaga, charismatic imposing Japanese warlord about 38, angular handsome face, finely groomed small mustache and pointed short goatee, slick black hair tied in high compact warrior knot. Distinct original costume: graphite-black lacquer lamellar armor with finely engraved bronze angular rising-sun motifs, deep oxblood silk underlayers, asymmetrical restrained gold shoulder plates, short ivory-lined dark crimson commander's cape clasped with a round bronze medallion, dark fitted trousers visible below segmented armor skirts, TWO fully visible armored black boots. A single sheathed katana remains attached to belt. Closed narrow black-and-bronze command fan in right hand for attack and ceremonial pose, no long drawn blade, fan remains clearly gripped and connected. Original grounded human facial identity and independently designed patterns/silhouette. Do not reproduce any existing game's specific character face, armor silhouette, ornaments, insignia, or composition. Emphasize regal military tailoring, purposeful dynamic poses, and legs/feet that remain easy to read.",
+      "spell_palette": [
+        "#9b3530",
+        "#efac62",
+        "#fff0c8"
+      ],
+      "source_sha256": "46edb0fd1d985e7ea09942b6cc288e467b772b4ceb44eae793ad7b8db8e7fae4"
+    },
+    {
+      "id": "seimei-male",
+      "name": "安倍晴明",
+      "achievement": "ghost_hundred_non_ghost_kills",
+      "achievement_name": "百鬼夜行",
+      "energy_color": "#8bcbd2",
+      "file": "seimei-male.png",
+      "gender": "male",
+      "rows": 4,
+      "min_realm_index": 0,
+      "prompt": "Production 2D fantasy RPG character sprite sheet, transparent alpha. Exactly twelve isolated panels in a precise 3 columns x 4 rows grid, tall 1024x1536 or larger same ratio canvas. Same SINGLE adult male in every panel, consistent face, outfit and proportions. Row-major panels: 1 standing idle three-quarter facing right, 2 gathering power with both hands visibly separated near chest, 3 decisive commanding forward attack with one hand extended and the OTHER hand clearly visible near waist, 4 defensive ready pose both arms visible, 5 bracing pose both forearms separate, 6 recoiling from a hit both arms visible, 7 staggering on two legs, 8 kneeling with two arms and two hands visibly resting separately, 9 lying sideways defeated with two visible hands folded naturally in front of chest and two separately visible booted feet, 10 independent full-body frontal standing portrait, 11 large bust portrait, 12 full-body casting ultimate with both arms raised and visible hands. All full-body poses fully contained in their individual cells including feet and headgear; only panel11 is bust. Adequate transparent gutters, no overlapping cells. Correct human anatomy: exactly two arms, two hands, two legs, two feet, five digits per visible hand. Do not hide a missing limb behind the cape or robe. No text, labels, grid, backdrop, symbols floating separately, or detached items. Rich detailed painterly semi-realistic game illustration, sharp face, tasteful ornate materials, clean silhouette; not chibi, not pixel art. Original interpretation of historical Abe no Seimei as a beautiful elegant adult Japanese onmyoji about 30. Refined composed face, dark straight hair neatly tied at nape with two narrow side locks, NO long white hair. Tall slim black lacquer eboshi cap with a subtle bronze star-map pin, not a crown. Elaborate original layered kariginu-inspired robes: pearl-ivory inner robe, midnight-indigo outer robe with muted jade lining, fine bronze celestial-chart embroidery, tiny cloud and flowing-water woven patterns, dark plum braided waist cord, layered structured shoulder seams, decorative scroll-case and two attached paper talisman strips on belt. Clothing must be visually rich and carefully tailored rather than plain colored robes. Split side panels reveal dark indigo hakama and TWO ivory tabi-clad feet in dark lacquer sandals; in every full-body panel show two feet naturally, no bare toes. An ivory ribbed folding fan with ORIGINAL fine dark-gold astronomy diagram, securely held in right hand during casting, left hand clearly separately visible making a simple seal. Sleeves gracefully drape BELOW forearms so wrists and hands can be traced anatomically. Original face, costume and embroidery; do not reproduce an existing game's white-haired/blue-and-white Seimei likeness, exact outfit cuts, ornament shapes, pose compositions or trademark symbols. Restrained majestic silhouette and richly detailed materials.",
+      "spell_palette": [
+        "#426c91",
+        "#92d8cd",
+        "#fff0c8"
+      ],
+      "revision_prompt": "Edit the provided 12-panel Abe no Seimei sheet. Keep exactly the same 3 by 4 panel layout and all pose roles and character identity. Redesign his costume for much greater FENGYA: elegant graceful poetic Japanese court gentleman, airy flowing SILVERY IVORY and pale mist-jade kariginu with a restrained smoky violet inner layer, long graceful asymmetrical sleeve hems, refined fine silver/gold willow and lunar embroidery concentrated along edges, large restful silk surfaces with subtle woven texture rather than dense dark gold decoration. Slim lower black eboshi cap, graceful long black hair tied neatly with fine flowing ribbons. Handsome ethereal refined face, calm intelligent slight smile. Original richly layered fashionable fantasy game design, not a copy of any existing game character. Avoid massive heavy layers, overdecorated dark robes, armor, and stock plain colored robes. Refine every pose into composed elegant movement: delicate fan grip, wrist turns, flowing sleeves that reveal both hands clearly. Keep EACH FULL BODY anatomically correct, two arms traceable shoulder elbow wrist, two distinct hands, two tabi-clad feet; down pose two hands visible naturally separated in front of chest. All 12 panels isolated. Crucial: remove the entire grey studio background and ground shadows. Output a REAL TRANSPARENT ALPHA sprite sheet, no backdrop, no gradients, no checkered background, generous transparent gutters around each sprite. Preserve detailed painterly illustration quality.",
+      "source_sha256": "8e1b1a1ea4c06f9b5637a7f604220a1b1acec6656c44fe6c8fc9a4fceae78125"
+    }
+  ]
+}

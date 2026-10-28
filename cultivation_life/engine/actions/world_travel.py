@@ -429,7 +429,8 @@ def cross_world(deps: WorldTravelDependencies, game_id: str, destination: str) -
     result = f"returned_{destination}"
     game.history.append(HistoryRecord(
         "SYS_CROSS_WORLD", 1, player.age, "跨界往返", destination, result, summary,
-        {"world": player.world, "cultivation_suppressed": bool(player.sealed_cultivation), "direction": plan.direction.value},
+        {"world": player.world, "cultivation_suppressed": bool(player.sealed_cultivation), "direction": plan.direction.value,
+         "mode": plan.mode.value},
         ["system", "world_crossing", "world:global"],
     ))
     rng = decode_rng(game.seed, game.rng_state)

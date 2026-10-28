@@ -1,0 +1,256 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "painted_keyposes": 32,
+  "sources": [
+    {
+      "id": "hunt-rock-wolf",
+      "source": "design/hunt-beasts-20261029/hunt-rock-wolf.png",
+      "sha256": "9b97a8d68bcccf960eb887a2622ec6b53d60e70d7a3939ca782e27d7f3bb103c",
+      "scale": 0.45454545454545453,
+      "source_rects": [
+        [
+          0,
+          63,
+          425,
+          415
+        ],
+        [
+          434,
+          110,
+          866,
+          401
+        ],
+        [
+          870,
+          70,
+          1370,
+          394
+        ],
+        [
+          1326,
+          107,
+          1764,
+          412
+        ],
+        [
+          3,
+          485,
+          444,
+          832
+        ],
+        [
+          449,
+          461,
+          846,
+          821
+        ],
+        [
+          880,
+          547,
+          1304,
+          818
+        ],
+        [
+          1314,
+          621,
+          1769,
+          810
+        ]
+      ]
+    },
+    {
+      "id": "hunt-jade-eagle",
+      "source": "design/hunt-beasts-20261029/hunt-jade-eagle.png",
+      "sha256": "fa73721b3a2e065b092ae0ad79233dc381479795d545299ad623fcf40ee5da03",
+      "scale": 0.40302267002518893,
+      "source_rects": [
+        [
+          8,
+          39,
+          372,
+          436
+        ],
+        [
+          398,
+          138,
+          847,
+          421
+        ],
+        [
+          853,
+          5,
+          1356,
+          437
+        ],
+        [
+          1354,
+          64,
+          1768,
+          443
+        ],
+        [
+          14,
+          461,
+          443,
+          828
+        ],
+        [
+          470,
+          477,
+          928,
+          832
+        ],
+        [
+          883,
+          522,
+          1327,
+          808
+        ],
+        [
+          1293,
+          654,
+          1758,
+          831
+        ]
+      ]
+    },
+    {
+      "id": "hunt-gold-ape",
+      "source": "design/hunt-beasts-20261029/hunt-gold-ape.png",
+      "sha256": "9b2e7829b75fa0acb867825774645942f9b591e3e5ce71bbeee0d3b118a8c529",
+      "scale": 0.3333333333333333,
+      "source_rects": [
+        [
+          17,
+          12,
+          329,
+          492
+        ],
+        [
+          358,
+          113,
+          719,
+          489
+        ],
+        [
+          746,
+          69,
+          1264,
+          489
+        ],
+        [
+          1176,
+          39,
+          1530,
+          496
+        ],
+        [
+          15,
+          515,
+          324,
+          981
+        ],
+        [
+          387,
+          535,
+          750,
+          974
+        ],
+        [
+          763,
+          564,
+          1089,
+          968
+        ],
+        [
+          1096,
+          736,
+          1532,
+          982
+        ]
+      ]
+    },
+    {
+      "id": "hunt-jade-mantis",
+      "source": "design/hunt-beasts-20261029/hunt-jade-mantis.png",
+      "sha256": "0588baf5d7d010650ef41ba06aadc07033a936b69106203bab5914a0697e24ba",
+      "scale": 0.3883495145631068,
+      "source_rects": [
+        [
+          7,
+          82,
+          373,
+          494
+        ],
+        [
+          385,
+          210,
+          761,
+          494
+        ],
+        [
+          729,
+          118,
+          1321,
+          496
+        ],
+        [
+          1160,
+          135,
+          1512,
+          496
+        ],
+        [
+          8,
+          535,
+          353,
+          959
+        ],
+        [
+          383,
+          584,
+          770,
+          958
+        ],
+        [
+          746,
+          626,
+          1129,
+          961
+        ],
+        [
+          1088,
+          794,
+          1530,
+          963
+        ]
+      ]
+    }
+  ],
+  "prompts": [
+    {
+      "id": "hunt-rock-wolf",
+      "name": "裂岩妖狼",
+      "kind": "quadruped",
+      "prompt": "Use case: stylized-concept. Original Chinese cultivation RPG enemy sprite sheet, refined painterly game illustration, detailed realistic animal anatomy, no text, no borders, no ground, transparent alpha background. Exactly EIGHT fully separated full-body depictions of the SAME creature, arranged in 4 columns by 2 rows, each within its own equal cell with ample transparent padding. All face RIGHT in clear three-quarter side view. Row1: idle stance; attack anticipation crouch; lunging strike; attack follow-through. Row2: guarding stance; recoiling from hit; stumbling withdrawal; defeated lying on side (non-gory). Consistent size, colors, identity, lighting. Every limb remains anatomically attached and accounted for, no duplicate limbs. Show complete extremities within frame. Creature: powerful slate-grey wolf, coarse silver fur, angular natural dark stone plates across shoulders and back with restrained amber cracks, amber eyes, one bushy tail, exactly four legs with four canine paws, two ears. Lean wild wolf muzzle, not tiger or dog armor."
+    },
+    {
+      "id": "hunt-jade-eagle",
+      "name": "青翎灵鹫",
+      "kind": "avian",
+      "prompt": "Use case: stylized-concept. Original Chinese cultivation RPG enemy sprite sheet, refined painterly game illustration, detailed realistic animal anatomy, no text, no borders, no ground, transparent alpha background. Exactly EIGHT fully separated full-body depictions of the SAME creature, arranged in 4 columns by 2 rows, each within its own equal cell with ample transparent padding. All face RIGHT in clear three-quarter side view. Row1: idle stance; attack anticipation crouch; lunging strike; attack follow-through. Row2: guarding stance; recoiling from hit; stumbling withdrawal; defeated lying on side (non-gory). Consistent size, colors, identity, lighting. Every limb remains anatomically attached and accounted for, no duplicate limbs. Show complete extremities within frame. Creature: majestic jade-green and teal eagle-vulture with ivory breast, layered blade-like feathers, gold eyes and hooked dark beak. Exactly two feathered wings and two scaled legs with correctly arranged raptor talons. Both wings clearly legible in attack poses, natural folded wings in resting poses. No extra arms or human anatomy."
+    },
+    {
+      "id": "hunt-gold-ape",
+      "name": "噬金妖猿",
+      "kind": "quadruped",
+      "prompt": "Use case: stylized-concept. Original Chinese cultivation RPG enemy sprite sheet, refined painterly game illustration, detailed realistic animal anatomy, no text, no borders, no ground, transparent alpha background. Exactly EIGHT fully separated full-body depictions of the SAME creature, arranged in 4 columns by 2 rows, each within its own equal cell with ample transparent padding. All face RIGHT in clear three-quarter side view. Row1: idle stance; attack anticipation crouch; lunging strike; attack follow-through. Row2: guarding stance; recoiling from hit; stumbling withdrawal; defeated lying on side (non-gory). Consistent size, colors, identity, lighting. Every limb remains anatomically attached and accounted for, no duplicate limbs. Show complete extremities within frame. Creature: imposing upright silver-black gorilla ape with naturally metallic golden forearm ridges and shoulder fur, powerful dark face, amber eyes, heavy hands. Exactly two long arms each with one five-digit hand and two shorter hind legs each with one ape foot, no tail. Strike is a heavy forward punch; guard crossed forearms; defeat lies sideways with both arms and both legs distinguishable. Must look like a bipedal ape, not a four-legged wolf."
+    },
+    {
+      "id": "hunt-jade-mantis",
+      "name": "碧甲刀螳",
+      "kind": "insect",
+      "prompt": "Use case: stylized-concept. Original Chinese cultivation RPG enemy sprite sheet, refined painterly game illustration, detailed realistic animal anatomy, no text, no borders, no ground, transparent alpha background. Exactly EIGHT fully separated full-body depictions of the SAME creature, arranged in 4 columns by 2 rows, each within its own equal cell with ample transparent padding. All face RIGHT in clear three-quarter side view. Row1: idle stance; attack anticipation crouch; lunging strike; attack follow-through. Row2: guarding stance; recoiling from hit; stumbling withdrawal; defeated lying on side (non-gory). Consistent size, colors, identity, lighting. Every limb remains anatomically attached and accounted for, no duplicate limbs. Show complete extremities within frame. Creature: emerald jade armored praying mantis with long segmented abdomen and triangular insect head, exactly SIX legs total: TWO serrated scythe forelegs and FOUR thin jointed walking legs. Two fine antennae, no human hands, no extra legs, no dragon wings. Clearly separated walking feet and visible scythe forelegs in each pose, strike cuts forward with one scythe."
+    }
+  ]
+}

@@ -48,6 +48,20 @@ def attach_second(g, control=100, *, remaining=1000, rank=4):
     return n
 
 
+def test_achievements_distinguish_body_survival_and_actual_second_rescue(ready):
+    e,g=ready
+    e._die(g,'普通肉身致命伤','SYS_TEST_FATAL')
+    first=e.achievements.evaluate(g)
+    assert '死了，但没完全死' in {r['name'] for r in first}
+    assert '这不是我最后一条命' not in {r['name'] for r in first}
+    attach_second(g)
+    e._die(g,'本魂消散','SYS_SPIRIT_TIMEOUT',survival_stage='spirit_failed')
+    e.store.save(g)
+    shown=e.get_game(g.id)
+    assert '这不是我最后一条命' in {r['name'] for r in shown['new_achievements']}
+    assert not g.player.nascent_state.get('second')
+
+
 @pytest.mark.parametrize('rank', [3, 4])
 @pytest.mark.parametrize('stage', ['body', 'spirit_failed', 'special'])
 @pytest.mark.parametrize('control', [None, 49, 50])
@@ -208,6 +222,20 @@ def test_actual_possession_inherits_host_coordinates_life_and_book_level(ready):
     assert (p.age,current_body_age(p),p.lifespan) == (world_age,196,812)
     assert p.technique.level == 7 and p.known_techniques[0].level == 7
     assert not after.inactive_npcs[n.id].alive and not p.prisoners
+    assert not e.achievements._matches({'soul_story':'account_recovered'},after,player_rank=None)
+
+
+def test_real_possession_after_destroyed_body_recovers_account(ready):
+    e,g=ready
+    e._die(g,'肉身致命伤','SYS_TEST_FATAL')
+    npc=SectNpc('recovery-host','新宿身','散修',4,1,50,10000,spirit_root='supreme_metal')
+    g.world_npcs[npc.id]=npc
+    g.player.prisoners.append(g.detain_person(npc.to_dict()))
+    e.store.save(g)
+    with patch.object(random.Random,'random',return_value=0.):
+        result=e.captive_action(g.id,npc.id,'possess')
+    assert '账号找回成功' in {r['name'] for r in result['new_achievements']}
+    assert '账号找回成功' not in {r['name'] for r in e.get_game(g.id)['new_achievements']}
 
 
 def test_failed_possession_reports_survival_and_preserves_target(ready):

@@ -7,7 +7,11 @@
     buddhist:['#cb8a42','#f8cf8a','#fff6d5'],mechanical:['#367b97','#74d9ec','#fff1b5'],
     corpse:['#594777','#bb8abe','#dbebd4'],monster:['#41956d','#a4e7ab','#f2f6d5']};
   const family=actor=>actor.faction==='companion'?'dao':actor.faction==='asura'?'demonic':actor.faction;
-  function palette(actor){return colors[family(actor)]||colors.monster;}
+  function palette(actor){
+    const custom=actor.spell_palette;
+    if(Array.isArray(custom)&&custom.length===3&&custom.every(c=>/^#[0-9a-f]{6}$/i.test(c)))return custom;
+    return colors[family(actor)]||colors.monster;
+  }
   function path(c,pts,color,width=1,alpha=1){
     if(alpha<=0)return;c.save();c.globalAlpha=clamp(alpha);c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.lineJoin='round';c.beginPath();
     pts.forEach(([x,y],i)=>i?c.lineTo(Math.round(x),Math.round(y)):c.moveTo(Math.round(x),Math.round(y)));c.stroke();c.restore();
@@ -34,6 +38,8 @@
   }
   function draw(s,m,state,{context,projectClip,natal,image}){
     const r=state.round;if(!r||!m.attacker)return;
+    if(window.HistoricalEffects?.draw(s,m,state,{context,projectClip,image}))return;
+    if(window.ChristmasEffects?.draw(s,m,state,{context,projectClip,image}))return;
     if(window.TideEffects?.draw(s,m,state,{context,projectClip,image}))return;
     if(window.FrontierEffects?.draw(s,m,state,{context,projectClip}))return;
     if(window.HolidayEffects?.draw(s,m,state,{context,projectClip}))return;

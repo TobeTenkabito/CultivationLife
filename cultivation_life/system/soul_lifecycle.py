@@ -23,9 +23,9 @@ def replace_rank(player, rank, layer):
         player.sealed_cultivation.update(realm_index=player.realm_index,layer=player.layer)
 
 
-def record(game, text):
+def record(game, text, changes=None):
     game.history.append(HistoryRecord('SYS_SOUL', 1, game.player.age, '神魂与元婴', None,
-                                      'settled', text, {}, ['system', 'soul']))
+                                      'settled', text, changes or {}, ['system', 'soul']))
 
 
 def unit_years(player):
@@ -51,7 +51,8 @@ def leave_body(game, *, destroyed=False):
         p.body_energy = 0.
         from ..rules import max_hp
         p.hp = max(1., min(max_hp(p), max(p.hp, max_hp(p) * .25)))
-    record(game, '肉身已毁，炼体归零。' if destroyed else '元婴离体，肉身留在原处。')
+    record(game, '肉身已毁，炼体归零。' if destroyed else '元婴离体，肉身留在原处。',
+           dict(body_destroyed=True, lost_realm=survival_rank(p)) if destroyed else None)
 
 
 def second_person(game):
@@ -179,7 +180,8 @@ def rescue(game, reason, event_id, cause=None):
         p.hp, p.mp = max_hp(p) * .5, max_mp(p) * .5
         p.alive, p.death_reason = True, None
         game.pending_event = None
-        record(game, f'第二元婴抵挡了“{reason}”，修为变为{REALMS[rank].name}第{layer}层，进入神游。')
+        record(game, f'第二元婴抵挡了“{reason}”，修为变为{REALMS[rank].name}第{layer}层，进入神游。',
+               dict(second_rescued=True))
         return True
     return False
 

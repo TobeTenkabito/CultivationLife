@@ -492,6 +492,27 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         runHolidaySkins(result);
         runFrontierSkins(result);
         runTideTheme(result);
+        runHuntBeasts(result);
+    }
+
+    private void runHuntBeasts(Bundle result) throws Exception {
+        String[] names={"裂岩妖狼","青翎灵鹫","噬金妖猿","碧甲刀螳"};
+        String[] actors={"hunt-rock-wolf","hunt-jade-eagle","hunt-gold-ape","hunt-jade-mantis"};
+        python("import cultivation_life.content_registry as registry\nregistry._native_hunt_names=list(registry.ACTIONS['hunt_beast']['combat']['target_names'])");
+        try {
+            for(int i=0;i<names.length;i++) {
+                String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'猎妖原生',spirit_root:'heavenly',path:'dao',gender:'male',seed:941,preset_id:'core'})}).then(g=>g.id)");
+                python("from cultivation_life import server\nfrom cultivation_life.content_registry import ACTIONS\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\ng.pending_event=None\ng.settings.update(silent_events=True,combat_popup=True)\nserver.ENGINE.store.save(g)\nACTIONS['hunt_beast']['combat']['target_names']=["+JSONObject.quote(names[i])+"]");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("[data-action-tab=combat]");tapSelector("[data-action=hunt_beast]");
+                waitForJs("!busy&&!!game.last_combat_report&&CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native hunt action replay");
+                check(Boolean.TRUE.equals(js("game.last_combat_report.visual.enemy==="+JSONObject.quote(actors[i]))),"Native hunt identity "+names[i]);
+                js("CombatReplay.seek(2.6)");
+                check(Boolean.TRUE.equals(js("document.querySelector('#battle-animation').scrollWidth<=document.querySelector('#battle-animation').clientWidth+1&&CombatReplay.diagnostics().decodedBytes>0")),"Native beast decoded and fits");
+                capture("hunt-"+actors[i]+"-"+arguments.getString("orientation"));tapSelector("#battle-report-toggle");
+            }
+        } finally { python("import cultivation_life.content_registry as registry\nregistry.ACTIONS['hunt_beast']['combat']['target_names']=registry._native_hunt_names\ndel registry._native_hunt_names"); }
+        result.putString("hunt_beasts_scope","Four real hunt button actions, exact species, decoded offline art and portrait/landscape layout");
     }
 
     private void runTideTheme(Bundle result) throws Exception {

@@ -63,7 +63,7 @@ def main():
                         info=page.evaluate('CombatReplay.diagnostics()')
                         assert info['defeat'] and info['defeat']['side']==side, info
                         assert page.evaluate('''async()=>{
-                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();
+                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);
                           const p=CombatReplay.build(game.last_combat_report,A),r=p.finisher??p.rounds.at(-1);
                           if(r.side===p.defeat.side||Math.abs(p.defeat.start-r.contacts.at(-1)-.2)>.0001)return false;
                           if(p.finisher){
@@ -92,8 +92,8 @@ def main():
                     identity = make()
                     assert not any('/pixel/combat/' in url for _,url in requests)
                     pixel(True)
-                    for kind, name in [('avian','青翎灵鹫'), ('quadruped','裂岩妖狼'), ('insect','碧甲刀螳')]:
-                        if kind != 'avian': identity = make('demonic','female')
+                    for kind, name in [('hunt-jade-eagle','青翎灵鹫'), ('hunt-rock-wolf','裂岩妖狼'), ('hunt-gold-ape','噬金妖猿'), ('hunt-jade-mantis','碧甲刀螳')]:
+                        if kind != 'hunt-jade-eagle': identity = make('demonic','female')
                         page.locator('[data-action-tab=combat]').click()
                         with patch.dict(ACTIONS['hunt_beast']['combat'], target_names=[name]):
                             page.locator('[data-action=hunt_beast]').click()
@@ -103,7 +103,7 @@ def main():
                         assert report['visual']['enemy'] == kind
                         assert page.evaluate('CombatReplay.diagnostics().rounds') == len(report['rounds'])*2
                         assert page.evaluate('''async()=>{
-                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json(),r=game.last_combat_report;
+                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);const r=game.last_combat_report;
                           const p=CombatReplay.build(r,A),s=CombatReplay.sample;
                           if(p.rounds[0].side!==(r.rounds[0].initiative==='player'?'hero':'npc'))return false;
                           for(const turn of p.rounds){
@@ -240,7 +240,7 @@ def main():
                     # Successful endurance trials do not imply that the enemy
                     # was defeated. Pending and field-final results also stay up.
                     page.evaluate('''async()=>{
-                      const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();
+                      const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);
                       const base=structuredClone(game.last_combat_report);
                       const row={round:1,initiative:'player',ordinary_exchange:{opening:[100,100],before:[100,100],after:[80,80]},player_combat_state:80,enemy_combat_state:80};
                       Object.assign(base,{visual:{schema_version:1,hero:'dao-male',enemy:'dao-1-f'},rounds:[row],player_combat_state_max:100,enemy_combat_state_max:100,player_combat_state:80,enemy_combat_state:80});

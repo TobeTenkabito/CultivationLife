@@ -222,12 +222,16 @@ def settle(deps, game, row, proposal):
         raise ValueError('和约已执行或原付款条件已变化，请重新议和')
     from ..economy.war_finance import reparations
     from .settlement import armistice
+    actual_losses = war_losses(game, row, proposal['side'])
+    received = {}
     for d in proposal['demands']:
         for allocation in d.get('allocations',[d]):
             paid = reparations(game, dict(kind='sect', world=row['world']),
                                allocation['receiver']['id'], d['payer']['id'], allocation['amount'])
             if paid != allocation['amount']:
                 raise ValueError('原府库不足，不能静默改写已批准的赔款')
+            identity = allocation['receiver']['id']
+            received[identity] = received.get(identity, 0) + paid
     results = []
     for change in proposal.get('effects',[]):
         if change['term'] in {'destroy_outpost','remove_influence'}:
@@ -242,6 +246,15 @@ def settle(deps, game, row, proposal):
                          war_losses=proposal.get('war_losses',0),claimed=proposal.get('claimed',0),shortfall=proposal.get('shortfall',0),
                          truce_years=proposal.get('truce_years',1000), total=sum(d['amount'] for d in proposal['demands']))
     proposal['status'] = 'accepted'
+    owners = {game.player.faction_id, game.family.id if game.family else None}
+    winners = {p['id'] for child in game.wars
+               if child.get('strategic_war_id') == row['id']
+               and child.get('winner') == proposal['side'] and child.get('battles', 0) > 0
+               for p in child.get('coalitions', {}).get(proposal['side'], [])}
+    if (game.player.alive and game.player.world == row['world'] and proposal['term'] in {'reparations', 'heavy_reparations'}
+            and any(identity in winners and received.get(identity, 0) > actual_losses
+                    for identity in owners if identity)):
+        game.player.milestones['profitable_war_reparations'] = 1
     armistice(game, row, f"双方签订{TERMS[proposal['term']]}，实际赔付 {row['treaty']['total']} 灵石；{'；'.join(results)}；原军需另行归返结清。")
 
 

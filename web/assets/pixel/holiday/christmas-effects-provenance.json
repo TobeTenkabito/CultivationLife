@@ -1,0 +1,119 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "source": "design/christmas-effects-20261029/snow-keyframes.png",
+  "source_sha256": "2f7339f85f39f291cbf1a538393e1bb0c010a905ddcf623b3f7332e8c9b94cd7",
+  "sha256": "968b080b8a6f0c7771ae658b3f84f5326b7c8208b815f6cc72ff6feb13a8d3c3",
+  "frames": 16,
+  "grid": [
+    4,
+    4
+  ],
+  "cell": [
+    384,
+    288
+  ],
+  "source_rects": [
+    [
+      45,
+      71,
+      288,
+      289
+    ],
+    [
+      357,
+      57,
+      597,
+      292
+    ],
+    [
+      660,
+      38,
+      937,
+      310
+    ],
+    [
+      980,
+      18,
+      1222,
+      324
+    ],
+    [
+      29,
+      387,
+      281,
+      584
+    ],
+    [
+      321,
+      387,
+      617,
+      575
+    ],
+    [
+      644,
+      385,
+      935,
+      582
+    ],
+    [
+      962,
+      386,
+      1234,
+      585
+    ],
+    [
+      33,
+      656,
+      288,
+      926
+    ],
+    [
+      326,
+      642,
+      620,
+      926
+    ],
+    [
+      641,
+      632,
+      938,
+      938
+    ],
+    [
+      959,
+      638,
+      1232,
+      936
+    ],
+    [
+      35,
+      975,
+      296,
+      1230
+    ],
+    [
+      372,
+      993,
+      598,
+      1216
+    ],
+    [
+      682,
+      1001,
+      890,
+      1184
+    ],
+    [
+      1028,
+      1049,
+      1079,
+      1092
+    ]
+  ],
+  "scale": 0.8104575163398693,
+  "export": "Original RGBA component crops and proportional atlas packing; no procedural snow painting",
+  "prompt": {
+    "generator": "OpenAI built-in image_gen",
+    "prompt": "Original premium fantasy game Christmas ice/snow spell animation SPRITE ATLAS. Exactly SIXTEEN distinct painted animation keyframes in an evenly spaced 4 columns by 4 rows grid on a square canvas. REAL transparent alpha, no background, no checkerboard, no floor or shadow, no people, no text, no labels. Each effect MUST stay comfortably inside the CENTER 65 PERCENT of its own cell with a wide transparent moat on ALL four sides; do not touch neighboring cells or canvas edges. Same detailed painterly semi-realistic VFX style across all frames. Rich layered cyan, deep sapphire blue edges, silver-white luminous ice cores, subtle golden Christmas-star flecks, festive elegance, striking silhouette. Main motif is a highly detailed genuine SIX-ARMED hexagonal snowflake ice crystal with branching tips, clear faceted ice, surrounding streaming snow ribbons and smaller flakes. Do NOT just repeat or rotate the same sticker: draw deformation, progressive formation, flying splinter trails, explosion, fragmentation and falling snow. Row1 four frames CHARGE: scattered frost motes coalesce, small six-armed snowflake forms, large faceted snowflake grows with spiral snow ribbons, final compressed bright ice sigil ready to launch. Row2 four frames FLIGHT towards RIGHT: the snowflake tilts into a forward-moving ice comet, snow ribbons and two smaller companion flakes trail behind, wings of frost stretch and split across subsequent frames; retain readable crystalline snowflake core. Row3 four frames IMPACT: a sharp icy starburst, rapidly unfurling gigantic layered hexagonal snow crown, peak outward crystalline bloom with dramatic radial shards, then the crystal fractures into many small snowflakes. Row4 four frames DISSIPATION: spreading falling snow and melting fragments, thinner drifting snowflake arcs, a few fading crystals, final only sparse delicate ice glints. Use truly different geometry per frame, restrained translucent haze rather than filled opaque discs. Each individual effect self-contained; NO connecting trails between cells. Original design not copied from any franchise."
+  }
+}

@@ -119,6 +119,21 @@ class AchievementSystem:
 
     def _matches(self, condition: dict[str, Any], game: GameState, *, player_rank: int | None, history_index: dict | None = None) -> bool:
         player = game.player
+        if "soul_story" in condition:
+            from .achievement_stories import soul_story
+            return soul_story(game, condition['soul_story'], history_index)
+        if "family_line_preserved" in condition:
+            from .achievement_stories import family_line_preserved
+            return family_line_preserved(game)
+        if "homecoming" in condition:
+            from .achievement_stories import homecoming
+            return homecoming(game)
+        if "three_sect_leaders" in condition:
+            from .achievement_stories import three_sect_leaders
+            return three_sect_leaders(game)
+        if "inherited_technique_level" in condition:
+            from .achievement_stories import inherited_technique
+            return inherited_technique(game, int(condition['inherited_technique_level']))
         if "upper_realm_at_least" in condition:
             from .content_registry import WORLD_SYSTEMS
             worlds = set(WORLD_SYSTEMS.get('upper_voisinages', {}).get('worlds', {})) | {'celestial'}
@@ -180,7 +195,8 @@ class AchievementSystem:
         if set(condition) == {"any"}:
             return any(self._matches(child, game, player_rank=player_rank, history_index=history_index) for child in condition["any"])
         if "item" in condition:
-            return any(item.id == condition["item"] and item.quantity > 0 for item in player.inventory)
+            quantity = sum(item.quantity for item in player.inventory if item.id == condition["item"])
+            return quantity >= max(1, int(condition.get("minimum_quantity", 1)))
         if "flag" in condition:
             return condition["flag"] in player.story_flags
         if "born_rootless" in condition:
@@ -248,14 +264,19 @@ class AchievementSystem:
                 faction.founded_by_player and faction.founder_player_id == game.id
                 for faction in game.sects.values()
             )
+        if "world_sects_submit" in condition:
+            from .achievement_facts import world_sects_submit
+            return world_sects_submit(game)
         if "ranking" in condition:
             return player_rank == int(condition["ranking"])
         if "puppet_count" in condition:
+            from .puppet_state import usable
             expected = condition["puppet_count"]
             kind = str(expected.get("type", ""))
             count = sum(
                 1 for puppet in player.puppets
                 if puppet.get("alive", True) and (not kind or puppet.get("type") == kind)
+                and (not expected.get("usable_only") or usable(puppet, game))
             )
             return count >= int(expected.get("minimum", 1))
         if "milestone_at_least" in condition:

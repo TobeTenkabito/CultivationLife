@@ -1,6 +1,28 @@
 """Achievement evidence over existing identities; no preparation, RNG or simulation."""
 
 
+def world_sects_submit(game):
+    """All other local sects must directly submit to one current player faction."""
+    from .world_state import race_pair
+
+    player = game.player
+    own_sect = game.sects.get(player.faction_id)
+    for owner in (own_sect, game.family):
+        if (not owner or owner.extinct or owner.kind not in {'sect', 'family'}
+                or owner.world != player.world):
+            continue
+        targets = [sect for sect in game.sects.values()
+                   if sect.kind == 'sect' and not sect.extinct
+                   and sect.world == owner.world and sect.id != owner.id]
+        if targets and all(
+            (relation := game.sect_relations.get(race_pair(owner.id, sect.id), {})).get('status') == 'vassal'
+            and relation.get('overlord') == owner.id and relation.get('subject') == sect.id
+            for sect in targets
+        ):
+            return True
+    return False
+
+
 def _people(game):
     # Match relationship_records.find_person's precedence without N roster scans.
     people = dict(game.relationship_npcs)

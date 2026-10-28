@@ -176,6 +176,53 @@ def test_dismissal_reduces_unrest_escalates_later_crisis(ready):
     with pytest.raises(ValueError):act(e,g,'dismiss',successor='player')
 
 
+def test_actual_donation_then_full_payroll_unlocks_rescue_once(ready):
+    e,g,sect,finance=ready
+    state.record(g,sect)['resources']=0
+    salaries(g,sect,finance)
+    assert state.snapshot(g,sect)['arrears']>0
+    e.store.save(g)
+    result=act(e,g,'donate',amount=50000)
+    assert '我养你啊' not in {r['name'] for r in result['new_achievements']}
+    g=e._load(g.id);sect=g.sects[sect.id];g.player.age+=1
+    salaries(g,sect,register(g,'sect',sect.id,'human'))
+    assert state.snapshot(g,sect)['arrears']==0
+    e.store.save(g)
+    assert '我养你啊' in {r['name'] for r in e.get_game(g.id)['new_achievements']}
+    assert '我养你啊' not in {r['name'] for r in e.get_game(g.id)['new_achievements']}
+
+
+def test_three_real_financial_dismissals_need_same_membership(ready):
+    e,g,sect,finance=ready
+    last=None
+    for index,successor in enumerate(('sect-high','player','sect-high')):
+        g=e._load(g.id);sect=g.sects[sect.id]
+        g.player.age+=1;g.pending_event=None
+        board=state.ensure(g,sect)
+        board['arrears']=100;board['salary_year']=g.player.age
+        state.record(g,sect)['unrest']=40
+        e.store.save(g)
+        last=act(e,g,'dismiss',successor=successor)
+        assert ('铁打的弟子，流水的掌门' in {r['name'] for r in last['new_achievements']}) == (index==2)
+
+
+@pytest.mark.parametrize('interruption',['left','crossed','new_membership'])
+def test_payroll_donation_does_not_award_after_membership_or_world_break(ready,interruption):
+    from cultivation_life.models import HistoryRecord
+    e,g,sect,finance=ready
+    state.record(g,sect)['resources']=0
+    salaries(g,sect,finance);e.store.save(g)
+    act(e,g,'donate',amount=50000)
+    g=e._load(g.id);sect=g.sects[sect.id];g.player.age+=1
+    if interruption=='new_membership':g.player.faction_join_age=g.player.age
+    else:
+        identity='SYS_PLAYER_LEAVE_FACTION' if interruption=='left' else 'SYS_CROSS_WORLD'
+        g.history.append(HistoryRecord(identity,1,g.player.age,'中断',sect.id,'left','中断',{},[]))
+    salaries(g,sect,register(g,'sect',sect.id,'human'))
+    assert state.snapshot(g,sect)['arrears']==0
+    assert not g.player.milestones.get('rescued_sect_payroll')
+
+
 def test_old_task_load_preserves_followup_and_rejects_stale_submission(ready):
     e,g,sect,_=ready
     legacy=e.events_by_id['EVT_FACTION_COMMON_PATROL_001']

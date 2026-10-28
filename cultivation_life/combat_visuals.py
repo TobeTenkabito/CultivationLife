@@ -6,6 +6,12 @@ from .visual_selection import select_assets
 from .character_visuals import character_appearance
 
 MIRROR_VARIANTS = frozenset({'heart_demon', 'heavenly_demon', 'corpse_self', 'corpse_primal', 'corpse_superego'})
+HUNT_BEAST_ASSETS = {'裂岩妖狼': 'hunt-rock-wolf', '青翎灵鹫': 'hunt-jade-eagle',
+                     '噬金妖猿': 'hunt-gold-ape', '碧甲刀螳': 'hunt-jade-mantis'}
+
+
+def beast_asset(name):
+    return HUNT_BEAST_ASSETS.get(name) or beast_kind(name)
 
 
 def beast_kind(name):
@@ -77,7 +83,7 @@ def _team_visuals(game, target, hero, player_units=None):
             elif kind == 'corpse':
                 pool = [f'corpse-{gender}']
             elif kind == 'beast':
-                pool = [beast_kind(str(row.get('name', target.get('target_name', '妖兽'))))]
+                pool = [beast_asset(str(row.get('name', target.get('target_name', '妖兽'))))]
                 gender = None
             else:
                 pool = _human_assets(path, gender, source_id or str(row.get('name', '')), companion=kind in {'companion', 'living'})

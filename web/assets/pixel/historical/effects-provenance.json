@@ -1,0 +1,276 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "painted_cast_keyposes": 12,
+  "painted_effect_keyframes": 24,
+  "export": "RGBA component crops and proportional atlas packing only",
+  "sources": [
+    {
+      "actor": "nobunaga-male",
+      "cast_source": "nobunaga-cast.png",
+      "cast_sha256": "d7173b381e8b474804105da628c1e94f91af470311cafea55e8d7e22c4ca9e47",
+      "cast_rects": [
+        [
+          12,
+          8,
+          460,
+          495
+        ],
+        [
+          529,
+          10,
+          986,
+          496
+        ],
+        [
+          1005,
+          15,
+          1525,
+          496
+        ],
+        [
+          16,
+          527,
+          586,
+          998
+        ],
+        [
+          531,
+          511,
+          1117,
+          999
+        ],
+        [
+          1048,
+          480,
+          1469,
+          1001
+        ]
+      ],
+      "cast_scale": 0.2997946611909651,
+      "effect_source": "nobunaga-fx.png",
+      "effect_sha256": "691f9d330b126558549ede912fb1eff7ebd2d7c73dae459b66582331d7121c8b",
+      "effect_rects": [
+        [
+          33,
+          37,
+          332,
+          294
+        ],
+        [
+          445,
+          39,
+          801,
+          297
+        ],
+        [
+          848,
+          25,
+          1206,
+          302
+        ],
+        [
+          1206,
+          47,
+          1650,
+          293
+        ],
+        [
+          15,
+          357,
+          408,
+          554
+        ],
+        [
+          412,
+          368,
+          887,
+          561
+        ],
+        [
+          867,
+          318,
+          1234,
+          614
+        ],
+        [
+          1215,
+          307,
+          1656,
+          633
+        ],
+        [
+          8,
+          572,
+          482,
+          926
+        ],
+        [
+          460,
+          630,
+          912,
+          900
+        ],
+        [
+          903,
+          644,
+          1270,
+          906
+        ],
+        [
+          1297,
+          697,
+          1624,
+          848
+        ]
+      ],
+      "effect_scale": 0.7005649717514124
+    },
+    {
+      "actor": "seimei-male",
+      "cast_source": "seimei-cast.png",
+      "cast_sha256": "0fb1c2572a28360b1ab50d6b9f31af013bdbce686316b5a1be77034c336797d5",
+      "cast_rects": [
+        [
+          9,
+          3,
+          452,
+          502
+        ],
+        [
+          528,
+          3,
+          989,
+          500
+        ],
+        [
+          1010,
+          4,
+          1529,
+          513
+        ],
+        [
+          1,
+          512,
+          558,
+          1012
+        ],
+        [
+          511,
+          512,
+          1059,
+          1013
+        ],
+        [
+          1095,
+          512,
+          1507,
+          1014
+        ]
+      ],
+      "cast_scale": 0.3166332665330661,
+      "effect_source": "seimei-fx-v2.png",
+      "effect_sha256": "5ea4a137cc269090771ab97a5fbaf4fd1d59282b9a637a912f2b1064f470f4a7",
+      "effect_rects": [
+        [
+          54,
+          51,
+          364,
+          317
+        ],
+        [
+          467,
+          48,
+          789,
+          323
+        ],
+        [
+          833,
+          44,
+          1189,
+          344
+        ],
+        [
+          1225,
+          81,
+          1651,
+          312
+        ],
+        [
+          35,
+          398,
+          421,
+          577
+        ],
+        [
+          454,
+          400,
+          842,
+          585
+        ],
+        [
+          887,
+          377,
+          1218,
+          635
+        ],
+        [
+          1276,
+          353,
+          1647,
+          641
+        ],
+        [
+          45,
+          627,
+          429,
+          917
+        ],
+        [
+          503,
+          660,
+          848,
+          893
+        ],
+        [
+          882,
+          711,
+          1196,
+          879
+        ],
+        [
+          1297,
+          739,
+          1492,
+          838
+        ]
+      ],
+      "effect_scale": 0.8075117370892019
+    }
+  ],
+  "prompts": [
+    {
+      "id": "seimei-fx-padding",
+      "reference": "seimei-fx.png",
+      "output": "seimei-fx-v2.png",
+      "prompt": "Edit this VFX atlas for production: preserve all twelve distinct effect designs and colors in the same row-major 4-column 3-row order. Re-space and reduce the effect in EVERY cell to occupy at most 72 percent of the cell width AND 72 percent of its height, centered, leaving a clearly EMPTY TRANSPARENT moat on all four sides of EVERY cell, including outer canvas border. Do not let neighboring effects touch, merge or spill into other cells. Complete any clipped wisps so all twelve are fully contained and cleanly separable. Keep genuine alpha transparency and original painted style. Final three cells must show shrinking scattered glowing fragments with very little haze, the last cell just a few small remnants. No background, no opaque haze rectangle, no checkerboard, no text or grid. Use exact regular 4 columns x3rows, twelve square-ish panels on wide 16:9 canvas."
+    },
+    {
+      "id": "nobunaga-cast",
+      "reference": "../historical-skins-20261028/nobunaga-male.png",
+      "prompt": "Input is costume/face reference, NOT target sheet layout. Draw a NEW 6-frame FULL BODY CAST animation strip in 3 columns x2rows, square uniform cells. EXACT same adult man Oda Nobunaga, face, black hair, moustache and beard, original black/bronze armor, crimson cape, black armored boots as reference. Each pose faces to the RIGHT and attacks RIGHT. Frames 1 drawing command fan up from hip, 2 raising fan at shoulder with slight torso windup, 3 opening black/gold folding fan in forward right hand at eye level with cape trailing, 4 forceful forward downward fan sweep to RIGHT (release), 5 extended right hand holding fan followthrough and left hand clearly behind near belt, 6 closing fan and returning upright. Detailed semi-realistic painted style identical to reference. Both arms/hands visible and anatomically correct in all six frames. Both legs and two boots fully visible with consistent grounded baseline, no cropped fingers or cape. NO duplicated detached limbs or fingers. No effects, particle lights, background, floor shadows, labels or grid. Output REAL transparent alpha. Full costume and human anatomy stay consistent across frames, elegant forceful commanding movement."
+    },
+    {
+      "id": "seimei-cast",
+      "reference": "../historical-skins-20261028/seimei-male.png",
+      "prompt": "Input is costume/face reference, NOT target sheet layout. Draw a NEW 6-frame FULL BODY CAST animation strip in 3 columns x2rows, square uniform cells. EXACT same elegant adult Abe no Seimei, handsome delicate face, neat long BLACK hair, black eboshi cap, moonwhite palejade smokyviolet original embroidered robes and tabi-clad sandals as reference. Preserve the refined FENGYA court-gentleman design and light fine silk texture. All poses face RIGHT, every spell directed RIGHT. Frames 1 delicately unfolding ivory fan near waist while other hand makes seal, 2 open fan raised in a graceful arc near chest with both hands separately visible, 3 sweeping the fully open fan upward right with flowing sleeves and delicate extended wrist, 4 presenting fully OPEN fan to RIGHT at shoulder height to release spell, other hand makes small seal near torso, 5 gently lowering fan with flowing sleeve recovery, 6 folding fan back near waist standing poised. Composed aristocratic precision, gentle dance-like sequence rather than aggressive fist pose. All six are FULL BODY including cap and TWO distinct tabi feet; exactly two anatomical arms and hands per pose traceable from shoulder to elbow to wrist; sleeve BELOW wrists, no extra hands. No effects, backgrounds, floor shadows, labels or grid. REAL transparent alpha, generous transparent gutters, painterly semi-realistic style identical to reference."
+    },
+    {
+      "id": "nobunaga-fx",
+      "prompt": "Production hand-painted original fantasy RPG VFX animation sprite atlas. REAL transparent alpha, no backdrop or checkerboard. EXACTLY twelve frames in 4 columns by 3 rows, evenly sized cells, ideally 2048x1152 canvas. Each cell contains ONE complete integrated effect painting, with generous transparent gutters, all tendrils and particles contained within that cell. No text, numbers, borders, humans or weapons held by people. These are twelve substantially different sequential animation keyframes, not repeated identical stickers. Read row-major. Consistent center baseline, attack pointing RIGHT. The silhouettes visibly deform, expand, fragment and dissipate. Row1 first3 cells: energy coalesces and charges, then cell4 starts launch. Row2 cells1-2: accelerating projectile middle and late travel, cell3-4: first and middle explosion. Row3 cell1: peak explosion, cells2-4: decreasing fragments and final sparse residual glow. Rich bright edges and translucent secondary strokes, finely painted game VFX, no solid rectangle of fog. Theme: crimson-and-gold military command fan unleashed as a huge blazing arc of black-gold razor feathers, original Nobunaga costume spell. Charge starts as red sparks and a partial GOLD FAN SHAPED radial corona, next unfurling fan ribs flare, then compress into three bright curved ember blades. Travel frames feature forward curved GOLDEN FLAME BLADES with deep-crimson trailing cloth-like ribbons of fire, sharp right-facing tips and expanding ember streaks. Impact frames unfold a dramatic huge RED GOLD FAN-BURST, layered radial golden blades, dark crimson flame tongues and white-gold impact center. Aftermath blades break into irregular glowing shards and smoky ember ribbons, last frame only a few sparks. Not a fireball or regular laser beam. High visual impact, richly textured kinetic calligraphic shapes. No kanji, logos or copied insignia."
+    },
+    {
+      "id": "seimei-fx",
+      "prompt": "Production hand-painted original fantasy RPG VFX animation sprite atlas. REAL transparent alpha, no backdrop or checkerboard. EXACTLY twelve frames in 4 columns by 3 rows, evenly sized cells, ideally 2048x1152 canvas. Each cell contains ONE complete integrated effect painting, with generous transparent gutters, all tendrils and particles contained within that cell. No text, numbers, borders, humans or weapons held by people. These are twelve substantially different sequential animation keyframes, not repeated identical stickers. Read row-major. Consistent center baseline, attack pointing RIGHT. The silhouettes visibly deform, expand, fragment and dissipate. Row1 first3 cells: energy coalesces and charges, then cell4 starts launch. Row2 cells1-2: accelerating projectile middle and late travel, cell3-4: first and middle explosion. Row3 cell1: peak explosion, cells2-4: decreasing fragments and final sparse residual glow. Rich bright edges and translucent secondary strokes, finely painted game VFX, no solid rectangle of fog. Theme: elegant moonlit onmyoji talisman magic, ivory paper shikigami CRANES with pale jade silver and soft lavender luminescence. Charge begins as crescent brush strokes that become an original intricate circular lunar astrology SEAL, then paper folds emerge. Travel frames show two or three recognizable ORIGAMI PAPER CRANES unfolding wings, talisman slips orbit their bodies, graceful pale-jade ribbons form a crescent trail, fly RIGHT; they deform/flap across the three sequential frames. At impact an expanding LUNAR DISC of radial fine occult geometric rings blooms with wings and paper talismans, whitejade starburst center, soft violet outer crescents, paper cranes dissolve into petals and small gold calligraphic flecks. Dissipation frames circle fractures, paper slips flutter down, last sparse silver wisps. Keep the graphic sophisticated and FENGYA, ornate rather than plain, no readable writing, no real religious trademark symbol, no copied game motifs. Dramatic clear silhouette with luminous filigree, not generic blue laser."
+    }
+  ]
+}

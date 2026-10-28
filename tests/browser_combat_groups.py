@@ -95,7 +95,7 @@ def main():
                         assert len(state['participants']) == (4 if case in ('one-three', 'three-one') else 6)
                         assert state['cache'] <= 36 and state['decodedBytes'] < 96*1024*1024
                         assert page.evaluate('''async()=>{
-                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json(),r=game.last_combat_report;
+                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);const r=game.last_combat_report;
                           const p=CombatReplay.build(r,A),sample=CombatReplay.sample;
                           for(const row of r.rounds){
                             const beats=p.rounds.filter(b=>b.number===row.round);
@@ -123,7 +123,7 @@ def main():
                             assert len(set(assets)) == 3 and all(a.startswith('demonic-') and a.endswith('-m') for a in assets)
                         # Seek each actual actor's attack contact and a guard response.
                         beats = page.evaluate('''async()=>{
-                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();
+                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);
                           return CombatReplay.build(game.last_combat_report,A).rounds.slice(0,6).map(b=>b.contacts[0]+.04);
                         }''')
                         requests.clear()
@@ -162,7 +162,7 @@ def main():
                         state=page.evaluate('CombatReplay.diagnostics()')
                         assert state['defeat'] and state['defeat']['side']=='hero', state
                         times=page.evaluate('''async()=>{
-                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json(),p=CombatReplay.build(game.last_combat_report,A);
+                          const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);const p=CombatReplay.build(game.last_combat_report,A);
                           const beat=p.finisher??p.rounds.at(-1);
                           if(beat.side!=='npc')throw Error('Allies fall after their own attack');
                           return [beat.start,beat.contacts.at(-1)+.1,p.defeat.start+.1,p.defeat.start+.6,p.duration];
@@ -208,7 +208,7 @@ def main():
                             page.keyboard.press('Escape')
                             page.set_viewport_size(dict(width=1440,height=1080))
                     assert page.evaluate('''async()=>{
-                      const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();
+                      const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);
                       const report=structuredClone(game.last_combat_report);report.natural_terrain='未登记地形';
                       return CombatReplay.build(report,A).battlefield===null;
                     }''')

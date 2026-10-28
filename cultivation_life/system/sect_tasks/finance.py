@@ -21,6 +21,9 @@ def donate(game,sect,identity,amount):
     points=amount//100*5
     merit(game,sect,identity,points)
     board=ensure(game,sect)
+    if identity=='player' and board['arrears']>0:
+        board['rescue_donation']=dict(player_id=game.id,joined_age=game.player.faction_join_age,
+            history_index=len(game.history),world=game.player.world)
     board['influence'][identity]=min(1000,board['influence'].get(identity,0)+amount//100)
     note(game,sect,f'{members(game,sect)[identity].name}捐献{amount}灵石，贡献+{points}。')
 
@@ -70,7 +73,16 @@ def salaries(game,sect,finance,years=1):
         if gift>=100 and (short or row['unrest']>=30):
             donate(game,sect,identity,gift)
     board['revision']+=1
-    if not short: return paid_total
+    if not short:
+        rescue=board.pop('rescue_donation',None)
+        if rescue and rescue['player_id']==game.id and rescue['world']==game.player.world and rescue['joined_age']==game.player.faction_join_age:
+            intervening=game.history[rescue['history_index']:]
+            interrupted=any(r.event_id in {'SYS_PLAYER_LEAVE_FACTION','SYS_CROSS_WORLD'}
+                or isinstance(r.state_diff.get('world'),list) and len(r.state_diff['world'])==2
+                and r.state_diff['world'][0]!=r.state_diff['world'][1] for r in intervening)
+            if not interrupted:
+                game.player.milestones['rescued_sect_payroll']=1
+        return paid_total
     severity=row['unrest']
     previous=board.get('crisis_stage',0)
     stage=3 if severity>=95 and board['crisis_years']>=3 else 2 if severity>=70 else 1 if severity>=40 else 0

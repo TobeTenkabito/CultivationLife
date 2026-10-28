@@ -9,6 +9,7 @@ from ..economy.ledger import balance, transfer_value
 from ..economy.organization_accounts import register, book_expense
 from ..sect_membership import release
 from ..intrigue.leadership import appoint
+from ...models import HistoryRecord
 
 
 def execute(game,maps,payload,rng,combat,npc_power):
@@ -52,6 +53,10 @@ def execute(game,maps,payload,rng,combat,npc_power):
         board['dismissed_crisis_year']=board['salary_year']
         board['dismissals']+=1
         row['unrest']=max(0.,row.get('unrest',0)-25)
+        game.history.append(HistoryRecord('SYS_SECT_LEADER_DISMISSED',1,game.player.age,
+            '财政危机罢免掌门',sect.id,'dismissed',f'{sect.name}罢免掌门并更换继任者。',
+            dict(sect_id=sect.id,joined_age=game.player.faction_join_age,former=former,successor=successor),
+            ['system','faction','finance',f'world:{sect.world}']))
         text=f'罢免现任掌门并任命继任者，不满降低25；今后每次欠薪额外增加{2*board["dismissals"]}不满。'
     elif action=='expel':
         if not rights['expel']:raise ValueError('只有掌门或控制者可以开除弟子')

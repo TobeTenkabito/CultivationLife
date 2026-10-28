@@ -352,6 +352,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         members = target.get("members") or [{
             "name": target["target_name"], "power": target_power,
             "realm_index": target["target_realm_index"], "npc_id": target.get("npc_id"),
+            "path": target.get("path"),
             "faction_id": target.get("faction_id"), "race": target.get("race", "human"),
             "treasure_item_id": target.get("treasure_item_id"),
         }]
@@ -498,6 +499,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     members = target.get("members") or [{
         "name": target["target_name"], "power": target_power,
         "realm_index": target["target_realm_index"], "npc_id": target.get("npc_id"),
+        "path": target.get("path"),
         "faction_id": target.get("faction_id"), "race": target.get("race", "human"),
         "treasure_item_id": target.get("treasure_item_id"),
     }]
@@ -590,6 +592,8 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
 def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: dict[str, Any], rng: random.Random) -> None:
     player = game.player
     emit(game, "cultivator.killed", **victim)
+    from ..achievement_kills import record as record_ghost_kill
+    record_ghost_kill(game, victim)
     from ..system.spirit_voisinage import secondary, offers, grant
     if secondary(player.world) and int(victim.get('realm_index', 0)) >= 5:
         identity = str(victim.get('npc_id') or victim.get('id') or victim.get('name', ''))

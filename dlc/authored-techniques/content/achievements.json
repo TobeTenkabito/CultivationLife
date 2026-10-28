@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "achievements": [
+    {
+      "id": "authored_learn_previous_life", "name": "我抄我自己", "category": "cultivation",
+      "description": "在新人生中，通过正常交易取得并学会前世自创功法。这位前辈的思路，竟与我如此相似。",
+      "source": {"kind": "dlc", "id": "official.authored-techniques", "name": "著经立道"},
+      "condition": {"inherited_technique_level": 1}
+    },
+    {
+      "id": "authored_master_previous_life", "name": "祖宗之法不可变", "category": "cultivation",
+      "description": "将一部前世自创功法修炼至Lv.9。祖宗是我，意见驳回。",
+      "source": {"kind": "dlc", "id": "official.authored-techniques", "name": "著经立道"},
+      "condition": {"inherited_technique_level": 9}
+    }
+  ]
+}

@@ -95,10 +95,21 @@ def test_black_market_real_buy_only_inherited_with_local_and_duplicate_guards(re
     assert not any(r['content_id']==key for r in e.search_black_market(a.id,'回澜')['auction_system']['black_market_results'])
     b=e._load(e.create_game('后世','supreme_metal','dao',311,preset_id='core',inherit_from=a.id)['id']);black(e,b)
     view=e.search_black_market(b.id,'回澜');row=next(r for r in view['auction_system']['black_market_results'] if r['content_id']==key)
-    e.buy_black_market_item(b.id,row['id'])
+    bought=e.buy_black_market_item(b.id,row['id'])
+    assert '我抄我自己' in {r['name'] for r in bought['new_achievements']}
+    assert '祖宗之法不可变' not in {r['name'] for r in bought['new_achievements']}
     assert next(t for t in e.store.load(b.id).player.known_techniques if t.id==key).level==1
     e.buy_black_market_item(b.id,row['id'])
     assert any(i.id==technique_manual_item_id(key,1) for i in e.store.load(b.id).player.inventory)
+    for level in range(1,9):
+        b=e.store.load(b.id)
+        book=next(t for t in b.player.known_techniques if t.id==key)
+        if not any(i.id==technique_manual_item_id(key,level) and i.quantity>0 for i in b.player.inventory):
+            from cultivation_life.rules import add_technique_copy
+            add_technique_copy(b.player,book,level=level)
+            e.store.save(b)
+        upgraded=e.upgrade_technique(b.id,key)
+    assert '祖宗之法不可变' in {r['name'] for r in upgraded['new_achievements']}
     b=e.store.load(b.id);b.auction_state['location_id']='wrong-place';e.store.save(b)
     with pytest.raises(ValueError,match='抵达'):e.buy_black_market_item(b.id,row['id'])
 

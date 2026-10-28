@@ -88,7 +88,10 @@ def main():
                             assert engine._load(identity).family_state['membership']['kin'] is False
                             reveal_subpage(page, page.locator('#family-card .family-overview'))
                             assert '外姓修士' in page.locator('#family-card').inner_text()
+                            original_name=engine.store.load(identity).family.name
                             fixture.succeed(engine,identity);load()
+                            assert engine.store.load(identity).family.name==original_name
+                            assert engine.achievements.metadata.read()['achievements']['family_tian_replaces_qi']['game_id']
                             reveal_subpage(page, page.locator('[data-family-name]')).fill('新本家仙族');click_control(page.locator('[data-family]').filter(has_text='使用一次更名资格'));settle()
                             assert engine._load(identity).family.name=='新本家仙族'
                             page.reload();page.wait_for_function('!!configData && !busy');load()

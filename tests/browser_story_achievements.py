@@ -69,20 +69,26 @@ def main():
                     assert not page.evaluate('game.new_achievements.some(row=>row.name==="黑钱洗白")')
                     page.evaluate("UtilityPanels.close('merchant');showStart()")
                     page.locator('#achievement-open').click()
-                    names = ('先帝还在创业', '教父', '满门忠烈', '黑钱洗白')
+                    names = ('先帝还在创业', '教父', '满门忠烈', '黑钱洗白',
+                             '天下布武', '一个能打的都没有', '钞能力', '我徒弟有大帝之姿', '替身使者',
+                             '死了，但没完全死', '这不是我最后一条命', '账号找回成功', '衣锦还乡',
+                             '田氏代齐', '我养你啊', '铁打的弟子，流水的掌门', '谢谢老板')
+                    dlc_names=('我抄我自己','祖宗之法不可变')
                     for theme in 'abdf':
                         page.evaluate('t=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice="${t}"]`).click()', theme)
                         page.evaluate('GameThemes.saved')
                         for width, height in ((1440, 1000), (412, 915), (915, 412)):
                             page.set_viewport_size({'width': width, 'height': height})
-                            for name in names:
+                            for name in (*names,*dlc_names):
                                 page.locator('#achievement-groups b').get_by_text(name, exact=True).wait_for()
                             assert page.locator('#achievement-screen').evaluate('e=>e.scrollWidth<=e.clientWidth+2')
-                            page.locator('.achievement-row').filter(has=page.get_by_text('先帝还在创业', exact=True)).scroll_into_view_if_needed()
+                            page.locator('.achievement-row').filter(has=page.get_by_text('田氏代齐', exact=True)).scroll_into_view_if_needed()
                             page.screenshot(path=str(output / f'{theme}-{width}.png'), animations='disabled')
                     catalog = page.evaluate('achievementCatalog.achievements')
                     selected = [row for row in catalog if row['name'] in names]
-                    assert len(selected) == 4 and all(row['source']['kind'] == 'base' for row in selected)
+                    assert len(selected) == len(names) and all(row['source']['kind'] == 'base' for row in selected)
+                    assert all(next(r for r in catalog if r['name']==name)['source']['id']=='official.authored-techniques' for name in dlc_names)
+                    assert '不使用更名资格' in next(r for r in catalog if r['name']=='田氏代齐')['description']
                     assert next(row for row in selected if row['name'] == '黑钱洗白')['unlocked']
                     assert '外姓成员不计' in next(row for row in selected if row['name'] == '满门忠烈')['description']
                     assert not errors, errors

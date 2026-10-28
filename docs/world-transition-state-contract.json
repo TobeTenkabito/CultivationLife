@@ -1,6 +1,10 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "Player.milestones.ghost_non_ghost_kills / GameState.history.SYS_GHOST_CULTIVATOR_KILL": "history：原玩家击杀结算登记击杀时玩家为鬼修、对手为已确认非鬼修修士的同档累计事实；原人物编号去重，计数及明细至多100。跨界、转道、保存保留，新存档从零开始，不按旧死亡文本追认。非击杀、灵兽、凡人、未知道途、鬼修、商盟代杀及NPC后台死亡不记录；不改变击杀奖励、死亡或通行规则。",
+    "GameState.history.*.state_diff.body_destroyed / lost_realm / second_rescued / mode / joined_age / former / successor": "history：原身魂成功结算记录肉身被毁及当时真实境界、第二元婴实际承接；原跨界提交记录已执行方式，原宗门财政罢免记录宗门、宗籍年龄和前后掌门编号。只作为成就行为证据保留，不复制人物、修为、通行凭证或资源；缺少旧证据不按叙事文案追造。",
+    "intrigue_state.factions.sect:ID.task_board.rescue_donation": "scope：当前玩家在原宗门欠薪时实际付款后登记的救薪候选，含玩家ID、宗籍年龄、世界及原历史起点索引，不存现金。仅当前在籍同界原年度真正全员足额发薪时核验并消费；退宗或跨界记录、不同宗籍和不同玩家使候选失效，不补算离界期间。",
+    "Player.milestones.rescued_sect_payroll / profitable_war_reparations": "history：真实捐款后恢复全员最低薪俸，以及玩家所属实际获胜参战组织实收赔款高于己方全案实际损耗的单次事实。只在原工资、实际赔款结算成功后记录；报价、失败、旁观、远界与退款均不授予。跨界保留，不携带原府库或产生资源。",
     "GameState.last_combat_report.visual.teams / team_counts": "session：仅从战前实际参战名单读取两方各至多三条有界视觉描述，保存原ID、名称、性别、单位性质、选定素材ID及有效战力权重，完整人数仍依原战报名单；原人物／炼尸与活傀来源性别优先于临时代理。合法候选由战斗投影提供，统一纯素材选择器跨双方优先未用、耗尽才复用，不为去重改变性别、类型或DLC资格。旧schema1仍仅单人表现，不推造旧参战事实。无新NPC、个人HP、伤害、库存或账本副本；沿原session跨界清理，重播不写档、不消耗RNG、不重新结算。",
     "GameState.last_combat_report.visual / rounds.*.ordinary_exchange": "session：原玩家战报内的有限视觉身份、本命物品ID或形制，以及现有至多72轮报告中实际普通阶段的轮初、扣减前后态势及有普通行动权的双方。纯邻域阶段不记普通采样；混合及劫关战斗只读普通交锋权威状态，普通阶段后的邻域结算只作检查点，不归给攻击动画。非魔修暂用同性道修示意，不复制NPC、装备实例或资源账本，不保存动画帧、随机流或播放器进度；跨界沿原战报session清理，重播不重新结算。旧报告缺失时回退文字，不补造历史。",
     "GameState.building_state.city_business / records.*.facilities": "global：公共设施与原固定地址城市同属，不携带；设施消耗原行囊与原营造账户，完好时生效，重建清空。city_business按稳定城市编号记录上次实际经营年龄、实付成本与实收款，跨界、读档与重建均保留；只在现场每真实年最多结算一笔，既有地方operator账户实款不足即拒绝，不新增城库、不补领历年、不增加年度扫描。",

@@ -9458,6 +9458,311 @@
       "requires": [],
       "file": "/assets/pixel/tide/water-keyframes.png",
       "sha256": "7c4a5dfcb3d947b66c83922205742520d72bf6b6d1741960bd579b17c21df1a7"
+    },
+    "actor.cosmetic.nobunaga-male.figure": {
+      "file": "/assets/pixel/historical/nobunaga-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "60652812bfca18ecacbdef76cfe74e7d551410f39195e04ff5422efd5c0cbfc0",
+      "requires": []
+    },
+    "actor.cosmetic.nobunaga-male.portrait": {
+      "file": "/assets/pixel/historical/nobunaga-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "2ad8acc0738e3e6ffad4ef6918e9ac4012f3552487894aefed3943518f759e2f",
+      "requires": []
+    },
+    "actor.cosmetic.nobunaga-male.thumbnail": {
+      "file": "/assets/pixel/historical/nobunaga-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "ba773b8eb0ac987b5d573a72187dd8e19f59ee3350c3b52e1b88b70353ceec99",
+      "requires": []
+    },
+    "nobunaga-male.actions": {
+      "file": "/assets/pixel/historical/nobunaga-male-actions.png",
+      "size": [
+        1460,
+        180
+      ],
+      "sha256": "b0c1767f1ebf3bf0c6deb6c8051879ed5c231c2c7f565fa2e4870638214d2663",
+      "requires": []
+    },
+    "actor.cosmetic.seimei-male.figure": {
+      "file": "/assets/pixel/historical/seimei-male-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "c7e88eb7eb16afb50b1c8d326ce518054948ad6a3a9534845deccc68238c035a",
+      "requires": []
+    },
+    "actor.cosmetic.seimei-male.portrait": {
+      "file": "/assets/pixel/historical/seimei-male-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ecb409690e9b94792e28e61ea74ccebbc1fd3b0b7ebdf112a3f0167a7ffe6b10",
+      "requires": []
+    },
+    "actor.cosmetic.seimei-male.thumbnail": {
+      "file": "/assets/pixel/historical/seimei-male-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "9a37753822ba160866c3fe65a3e166410bd161d64af7bdd16a7f0eefebf392ac",
+      "requires": []
+    },
+    "seimei-male.actions": {
+      "file": "/assets/pixel/historical/seimei-male-actions.png",
+      "size": [
+        1460,
+        180
+      ],
+      "sha256": "d358da4853345c10d3e68ee8a3b03e97b6e8771e603ef2755178fb03051023d4",
+      "requires": []
+    },
+    "base.historical_manifest": {
+      "file": "/assets/pixel/historical/manifest.json",
+      "sha256": "b34e15fcd49cd3a11d9e5a1343399dfdec334017a795dade55aa7e9f2f400bc1",
+      "requires": [],
+      "combat_actors": [
+        "nobunaga-male",
+        "seimei-male"
+      ],
+      "skin_forms": [
+        {
+          "name": "织田信长·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.nobunaga-male",
+          "combat": "nobunaga-male",
+          "unlock_label": "全道途通用 · 完成成就「天下布武」解锁 · 无境界限制",
+          "achievement": "politics_world_unification"
+        },
+        {
+          "name": "安倍晴明·男",
+          "gender": "male",
+          "role": "hero",
+          "scope": "all_paths",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.seimei-male",
+          "combat": "seimei-male",
+          "unlock_label": "全道途通用 · 完成成就「百鬼夜行」解锁 · 无境界限制",
+          "achievement": "ghost_hundred_non_ghost_kills"
+        }
+      ]
+    },
+    "nobunaga-male.casting": {
+      "file": "/assets/pixel/historical/nobunaga-male-casting.png",
+      "size": [
+        1232,
+        156
+      ],
+      "sha256": "440481e417c14deb7a26178338fdf308f200c1b5a6fdc088271130e351289cb2",
+      "requires": []
+    },
+    "effect.nobunaga_command.keyframes": {
+      "file": "/assets/pixel/historical/nobunaga-fx.png",
+      "size": [
+        1536,
+        864
+      ],
+      "sha256": "4ccbe510fa875cef35c460ca5929595b8fa2bde60cb84317943c220162d60892",
+      "requires": []
+    },
+    "seimei-male.casting": {
+      "file": "/assets/pixel/historical/seimei-male-casting.png",
+      "size": [
+        1232,
+        161
+      ],
+      "sha256": "2bced50a7c0c166518a17a4395d57ba03b49214ec5b6614691ec9b517724fb28",
+      "requires": []
+    },
+    "effect.seimei_lunar.keyframes": {
+      "file": "/assets/pixel/historical/seimei-fx.png",
+      "size": [
+        1536,
+        864
+      ],
+      "sha256": "b0d0852845d7204acc02e3cbb9ac93502b1634b7180f69d78473f85c11fd44e6",
+      "requires": []
+    },
+    "effect.christmas.keyframes": {
+      "file": "/assets/pixel/holiday/christmas-keyframes.png",
+      "size": [
+        1536,
+        1152
+      ],
+      "sha256": "968b080b8a6f0c7771ae658b3f84f5326b7c8208b815f6cc72ff6feb13a8d3c3",
+      "requires": []
+    },
+    "hunt-rock-wolf.actions": {
+      "file": "/assets/pixel/hunt-beasts/hunt-rock-wolf-actions.png",
+      "size": [
+        1816,
+        164
+      ],
+      "sha256": "00d96a338dba0822f19eea12c8da0cabd8ed1f3e3ff8c6cefcc036458fb99b9a",
+      "requires": []
+    },
+    "actor.beast.hunt-rock-wolf.figure": {
+      "file": "/assets/pixel/hunt-beasts/hunt-rock-wolf-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "cdb88a0d90dc595d5f6c3f63a19fa19b8d586fac24eaa02f700e1571cca183a9",
+      "requires": []
+    },
+    "actor.beast.hunt-rock-wolf.thumbnail": {
+      "file": "/assets/pixel/hunt-beasts/hunt-rock-wolf-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "2683a024bf15eff5e621598d8a49f535a8e416a08e1be64f2183e092226e608a",
+      "requires": []
+    },
+    "actor.beast.hunt-rock-wolf.portrait": {
+      "file": "/assets/pixel/hunt-beasts/hunt-rock-wolf-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "4577fe6252f5f4300a48d42cdb02b5a08c0acc71ebdc8bd5ab734a65a6cf3f7f",
+      "requires": []
+    },
+    "hunt-jade-eagle.actions": {
+      "file": "/assets/pixel/hunt-beasts/hunt-jade-eagle-actions.png",
+      "size": [
+        1624,
+        174
+      ],
+      "sha256": "9a163b85e77b362d8ae158205beba781c2a41ba6365ea579480ba69ee582f977",
+      "requires": []
+    },
+    "actor.beast.hunt-jade-eagle.figure": {
+      "file": "/assets/pixel/hunt-beasts/hunt-jade-eagle-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "c57d7654c0b7c847d12a439bdd50856d8162f0ccc5bdc30409546b2444f7ac45",
+      "requires": []
+    },
+    "actor.beast.hunt-jade-eagle.thumbnail": {
+      "file": "/assets/pixel/hunt-beasts/hunt-jade-eagle-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "cbbd1d22928ad8276686ed291d2b52ed86bb976ab18c58abbef22f564b56bafd",
+      "requires": []
+    },
+    "actor.beast.hunt-jade-eagle.portrait": {
+      "file": "/assets/pixel/hunt-beasts/hunt-jade-eagle-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "52eda53cacaf5288cc9e3bd51819346194c352cd1d1e26ffb918a85a8cecdd4d",
+      "requires": []
+    },
+    "hunt-gold-ape.actions": {
+      "file": "/assets/pixel/hunt-beasts/hunt-gold-ape-actions.png",
+      "size": [
+        1384,
+        160
+      ],
+      "sha256": "5d007d94bcd6f2446c94f06aac922406d3ae93de65977c166c525a3415c88696",
+      "requires": []
+    },
+    "actor.beast.hunt-gold-ape.figure": {
+      "file": "/assets/pixel/hunt-beasts/hunt-gold-ape-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "c607e8444cd7d6d303206e3a1b99ea179fdcd247602f2833b0ff608e368f7d63",
+      "requires": []
+    },
+    "actor.beast.hunt-gold-ape.thumbnail": {
+      "file": "/assets/pixel/hunt-beasts/hunt-gold-ape-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "09ff006b92dbd92e739c187bbe6dd403a8dfc444a76762363e8fabd06dc07821",
+      "requires": []
+    },
+    "actor.beast.hunt-gold-ape.portrait": {
+      "file": "/assets/pixel/hunt-beasts/hunt-gold-ape-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "198bcc45f1216741a5b9305e4a17a9838584393375b6ae3ab7e031d1bde590d2",
+      "requires": []
+    },
+    "hunt-jade-mantis.actions": {
+      "file": "/assets/pixel/hunt-beasts/hunt-jade-mantis-actions.png",
+      "size": [
+        1840,
+        165
+      ],
+      "sha256": "629387797dc8fab6dcf295fdc9d7bb428ceadc0dd3e452de878c1321065c17ac",
+      "requires": []
+    },
+    "actor.beast.hunt-jade-mantis.figure": {
+      "file": "/assets/pixel/hunt-beasts/hunt-jade-mantis-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "f08664f82fc1fd8a3ef9c13d9ecd458254f8a436281d7b22834f64136338147b",
+      "requires": []
+    },
+    "actor.beast.hunt-jade-mantis.thumbnail": {
+      "file": "/assets/pixel/hunt-beasts/hunt-jade-mantis-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "195b404a002f0c0c356f6bdf51e13b8c7e6e65cfbc7cca186648bf875b7f65e7",
+      "requires": []
+    },
+    "actor.beast.hunt-jade-mantis.portrait": {
+      "file": "/assets/pixel/hunt-beasts/hunt-jade-mantis-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b7bea153938489c95a1e263f2d5d675fc7f788eb92818020ae64b9ed4d02ec9d",
+      "requires": []
+    },
+    "base.hunt_beasts_manifest": {
+      "file": "/assets/pixel/hunt-beasts/manifest.json",
+      "sha256": "adb2b1a714a753ab7df5428b2d2f0bd3f465d27d3a5a418504d7256fb663c52d",
+      "requires": [],
+      "combat_actors": [
+        "hunt-rock-wolf",
+        "hunt-jade-eagle",
+        "hunt-gold-ape",
+        "hunt-jade-mantis"
+      ]
     }
   },
   "items": {

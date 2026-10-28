@@ -82,9 +82,13 @@ def test_result_reparations_http_real_treasuries_once_and_no_income(api):
     reports={k:(v.get('income'),v.get('turnover')) for k,v in g.economy_v2['organizations'].items()}
     inventory=copy.deepcopy(g.player.inventory)
     with patch.object(e,'_vote_probability',return_value=1.):
-        post(g.id,'strategic-war',**command)
+        result=post(g.id,'strategic-war',**command)
     saved=e._load(g.id);actual=saved.strategic_war_state['wars'][0]
     assert actual['treaty']['total']==command['expected_total'] and actual['status']=='armistice'
+    own_received=sum(a['amount'] for d in demands for a in d['allocations'] if a['receiver']['id']==g.player.faction_id)
+    assert own_received>peace.war_losses(g,row,'attacker')
+    assert '谢谢老板' in {r['name'] for r in result['new_achievements']}
+    assert saved.player.milestones['profitable_war_reparations']==1
     for account,value in original.items():
         change=sum(sum(a['amount'] for a in d['allocations'] if account.endswith(':'+a['receiver']['id']))
                    -(d['amount'] if account.endswith(':'+d['payer']['id']) else 0) for d in demands)
