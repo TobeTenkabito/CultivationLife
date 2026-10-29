@@ -21,6 +21,14 @@ class SectYearPort(Protocol):
     ) -> list[str]: ...
 
 
+class DeathPort(Protocol):
+    def __call__(
+        self, game: GameState, reason: str, event_id: str, *,
+        offer_captive_possession: bool = False, death_cause: str | None = None,
+        survival_stage: str = 'body',
+    ) -> None: ...
+
+
 class TravelSettlementPort(Protocol):
     def __call__(
         self, game: GameState, start_age: int, institution_world: str,
@@ -41,7 +49,7 @@ class WorldYearDependencies:
     _annual_spirit_field_update: Callable[[Player], None]
     _annual_world_npc_update: Callable[[GameState, Random], list[str]]
     _check_tribulation: Callable[[GameState, Random], None]
-    _die: Callable[[GameState, str, str], None]
+    _die: DeathPort
     _maybe_artifact_synthesis: Callable[[GameState, Random], bool]
     _maybe_mortal_root_completion: Callable[[GameState, Random], bool]
     _maybe_race_war_ambush: Callable[[GameState, Random], bool]
@@ -68,7 +76,7 @@ class MapTravelDependencies:
     year: ElapsedYearDependencies
     _clear_market: Callable[[GameState], None]
     _compact_world_history: Callable[[GameState], bool]
-    _die: Callable[[GameState, str, str], None]
+    _die: DeathPort
     _ensure_market: Callable[[GameState, Random], bool]
     _finish_travel_time: TravelSettlementPort
     _load: Callable[[str], GameState]

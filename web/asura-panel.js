@@ -13,8 +13,12 @@
     const card=document.getElementById(`${name}-card`),root=document.getElementById(`${name}-content`);
     card.classList.toggle('hidden',!s.available);
     document.querySelector(`[data-panel-target="${name}"]`).classList.toggle('hidden',!s.available);
-    root.replaceChildren();
-    if(!s.available){window.UtilityPanels?.close(name);return;}
+    if(!s.available){root.replaceChildren();window.UtilityPanels?.close(name);window.UtilityPanels.schedule(name,null);return;}
+    window.UtilityPanels.schedule(name,()=>paintSection(game,act,breakthrough,tab));
+  }
+  function paintSection(game,act,breakthrough,tab){
+    const s=game.asura||{},p=game.player,name=`asura-${tab}`;
+    const root=document.getElementById(`${name}-content`);root.replaceChildren();
     root.classList.add('asura-workbench');
     const blocked=!p.alive||!!game.pending_event||!!game.trial?.active||!!game.imprisonment||!!p.sealed_cultivation||!!p.cultivation_suppression||!s.can_cultivate;
     const converted=(s.conversion||0)>=5;

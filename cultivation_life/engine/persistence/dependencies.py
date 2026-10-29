@@ -4,6 +4,7 @@ from random import Random
 from typing import Any, Callable
 from ...models import GameState, Player
 from ...ports import MapPort
+from ...time_dependencies import DeathPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -14,7 +15,7 @@ class FoundationsPreparationDependencies:
 
 @dataclass(frozen=True, slots=True)
 class VitalityPreparationDependencies:
-    _die: Callable[[GameState, str, str], None]
+    _die: DeathPort
 
 
 

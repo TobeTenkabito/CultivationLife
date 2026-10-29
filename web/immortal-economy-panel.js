@@ -10,76 +10,80 @@
       document.querySelector(`[data-panel-target="${id}"]`).classList.toggle('hidden',!data.available);
       if(!data.available)window.UtilityPanels?.close(id);
     }
-    const light=document.querySelector('#golden-light-content');light.replaceChildren();
-    if(golden.available) {
-      light.append(el('h3',`${golden.stages[golden.rank-1].name} · 肉身邻域抵抗 ${Math.round(golden.resistance*100)}%`),el('p','护体金光随仙躯而生，削弱肉身承受的敌方邻域威能与持续压迫。此功效不增加自身邻域的稳固、侵夺或权能，也不消耗仙灵力。','muted'));
-      const track=el('div',null,'voisinage-stages');
-      golden.stages.forEach((s,i)=>{const n=el('span',s.name,i+1===golden.rank?'current':i+1<golden.rank?'completed':'');n.append(el('small',`${Math.round(s.resistance*100)}%`));track.append(n);});light.append(track);
-      if(golden.next_name)light.append(el('p',`锤炼至${golden.next_name}：${golden.recipe.map(r=>`${r.name} ${fmt(r.owned)} / ${fmt(r.needed)}`).join(' · ')}`),el('p','资材可于瑶池功勋商店求取。备齐后在仙界锤炼，材料消耗后晋阶。','muted'),button('锤炼护体金光',{action:'temper_golden_light'},!golden.can_train,temper));
-      else light.append(el('p','金光大圆满，肉身邻域抵抗已达上限。','doctrine-note'));
-    }
-    const root=document.querySelector('#yaochi-content');root.replaceChildren();if(!pool.available)return;
-    root.append(el('h3',`瑶池功勋 ${fmt(pool.merit)}`),el('p','瑶池是经营功勋往来的机构，天庭是驻于玉京仙都的政务机构；两者均不属于宗门、家族或种族势力。功勋与天庭功德分别记载。','muted'));
-    window.renderOrganizationFinance?.(root, pool.finance);
-    if(pool.experience){const x=pool.experience;const box=el('section',null,'doctrine-entry yaochi-experience');box.append(el('h3',`瑶池等级 Lv${fmt(x.level)}`),el('p',`本级经验 ${fmt(x.progress)} / ${fmt(x.required)} · 委托功勋收益 ×${Number(x.multiplier).toFixed(1)}`),el('p',`每次完成委托获得 ${x.per_job} 经验，等级与收益加成不设上限；已接取委托按约定报酬交付。`,'muted'));root.append(box);}
-    const legacy=game.player.institution_affiliations?.yaochi;
-    if(legacy)root.append(el('p',`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，功勋另行记载，不占用宗门归属。`,'muted'));
-    if(!pool.local)root.append(el('p','须亲临「瑶池」办理委托和交易。可在地图查看路线与传送阵。','doctrine-note'),button('查看地图',{},false,()=>window.UtilityPanels.open('map')));
-    const section=title=>{const s=el('section',null,'doctrine-entry');s.append(el('h3',title));root.append(s);return s;};
-    const transact=(label,payload,disabled=false)=>button(label,payload,!pool.local||disabled);
-    const jobs=section('接取委托');
-    if(pool.job){const j=pool.job;jobs.append(el('p',`${j.name} · 履约 ${fmt(j.progress)} / ${fmt(j.years)} 年 · 报酬 ${fmt(j.reward)} 功勋`));jobs.append(transact(j.progress>=j.years?'交付并领取功勋':'继续履约',{action:j.progress>=j.years?'claim_job':'work'}));}
-    else for(const j of pool.commissions)jobs.append(transact(`${j.name} · ${fmt(j.years)} 年 / ${fmt(j.reward)} 功勋`,{action:'accept',target_id:j.id}));
-    jobs.append(el('p','接取后须实际履约；游历与等待不计入进度，中途遇事可处理后续做。','muted'));
-    const shop=section('功勋商店');
-    shop.append(el('p','道统传承、仙躯功法、淬体仙药、金光资材与本境破境丹均以功勋兑换。三种破境丹搭配可增加 40 个百分点，最终成功率最高 98%；用于本境各层冲关，不代替跨境劫战。','muted'));
-    shop.append(el('p',`已锁货 ${pool.locked_count} / ${pool.lock_limit}：一次付费，保留至购买或解锁；占用当期传承名额，常驻资材无需锁货。`,'muted'));
-    const grid=el('div',null,'doctrine-book-grid');
-    for(const o of pool.shop){
-      const row=el('section',null,'doctrine-book');row.dataset.offerId=o.id;
-      row.append(el('h4',`${o.name}${o.locked?' · 已锁定':''}`),el('p',`每份 ×${fmt(o.quantity)} · ${fmt(o.price)} 功勋`));
-      const purchase=el('div',null,'yaochi-purchase');
-      const label=el('label','兑换份数');
-      const quantity=el('input');quantity.type='number';quantity.min='1';quantity.step='1';quantity.value='1';
-      quantity.max=String(o.kind==='body_manual'?1:Math.min(1000000,Math.max(1,Math.floor(pool.merit/o.price))));
-      quantity.setAttribute('aria-label',`${o.name}兑换份数`);
-      quantity.disabled=blocked||!pool.local||o.owned||!o.eligible||o.kind==='body_manual';
-      label.append(quantity);
-      const total=el('p',null,'yaochi-purchase-total');total.setAttribute('aria-live','polite');
-      const buy=transact(o.owned?'已掌握':'兑换',{action:'buy',target_id:o.id});
-      const valid=()=>quantity.value!==''&&quantity.checkValidity()&&Number.isInteger(quantity.valueAsNumber);
-      const update=()=>{
-        const amount=quantity.valueAsNumber;
-        total.textContent=valid()?`所得 ×${fmt(o.quantity*amount)} · 合计 ${fmt(o.price*amount)} 功勋`:`请输入 1 至 ${fmt(quantity.max)} 的整数份数`;
-        buy.disabled=blocked||!pool.local||o.owned||!o.eligible||!valid()||pool.merit<o.price*amount;
-        if(pool.finance && pool.finance.balance<o.price*amount*pool.exchange.stones_per_merit){buy.disabled=true;total.textContent+=' · 瑶池采购资金不足';}
-      };
-      quantity.addEventListener('input',update);
-      buy.onclick=()=>{update();if(!buy.disabled)trade({action:'buy',target_id:o.id,amount:quantity.valueAsNumber});};
-      purchase.append(label,total,buy);row.append(purchase);update();
-      if(o.kind==='doctrine')row.append(el('p','首次获得时掌握功法，其余份数存为传承玉简。','muted'));
-      if(o.description)row.append(el('p',o.description,'muted'));
-      if(o.can_lock)row.append(transact(o.locked?'解除锁货':`锁货 · ${fmt(o.lock_price)} 功勋`,{action:o.locked?'unlock':'lock',target_id:o.id},!o.locked&&(pool.merit<o.lock_price||pool.locked_count>=pool.lock_limit)));
-      grid.append(row);
-    }shop.append(grid);
-    const orders=section('发布求取委托');
-    orders.append(el('p','可求取本境界全部道统功法与仙家资材，不受商店当期传承名额限制。发布时预付功勋，含两成五撮合费；一个行动单位后交付，未领取物品代为保管。','muted'));
-    if(pool.manual_catalog_counts)orders.append(el('p',`本世道统功法共 ${pool.manual_catalog_counts.total} 部，当前境界可求取 ${pool.manual_catalog_counts.eligible} 部；更高品阶将在达到相应境界后列入。`,'muted'));
-    const select=el('select');select.setAttribute('aria-label','求取资材');select.style.maxWidth='100%';
-    const groups=new Map();
-    for(const o of pool.commission_catalog){
-      const label=o.doctrine||'仙躯功法与资材';
-      if(!groups.has(label)){const group=el('optgroup');group.label=label;groups.set(label,group);select.append(group);}
-      const op=el('option',`${o.name}${o.grade?` · ${['真仙','金仙','太乙','大罗'][o.grade-9]}`:''} · ${fmt(o.price)} 功勋`);op.value=o.id;groups.get(label).append(op);
-    }orders.append(select);
-    const publish=transact('发布委托',{action:'publish'});publish.onclick=()=>trade({action:'publish',target_id:select.value});orders.append(publish);
-    for(const o of pool.orders)orders.append(el('p',`${o.name} · ${o.ready?'已交付':`世界历 ${fmt(o.ready_age)} 年可领`}`),transact('领取委托物品',{action:'claim_order',target_id:o.id},!o.ready));
-    const exchange=section('功勋兑换与天庭往来'), rate=pool.exchange;
-    exchange.append(el('p',`1 功勋可换 ${fmt(rate.stones_per_merit)} 灵石；${fmt(rate.merit_per_court_merit)} 功勋可换 1 天庭功德。灵石不能换取功勋。`));
-    const amount=el('input');amount.type='number';amount.min='1';amount.max='1000000';amount.step='1';amount.value='1';amount.setAttribute('aria-label','兑换份数');exchange.append(amount);
-    for(const [label,action] of [['兑换灵石','exchange_stones'],['兑换天庭功德','exchange_court_merit']]){const b=transact(label,{action});b.onclick=()=>{if(amount.reportValidity())trade({action,amount:Number(amount.value)});};exchange.append(b);}
-    exchange.append(transact(`联络天官 · ${fmt(rate.support_cost)} 功勋 / 支持度 +${rate.support_gain}`,{action:'support'},pool.merit<rate.support_cost));
-    if(pool.votes.length){const votes=el('details');votes.append(el('summary',`本次天庭选举 · 每席 ${fmt(rate.vote_cost)} 功勋`),el('p','仅当已取得候选资格时可以议定支持。至多十二席，本次重投有效，选举结束后失效。','muted'));for(const v of pool.votes)votes.append(transact(`${v.name} · ${v.bought?'已议定':'议定一票'}`,{action:'buy_vote',target_id:v.id},v.bought||pool.merit<rate.vote_cost));exchange.append(votes);}
+    window.UtilityPanels.schedule('golden-light',golden.available?()=>{
+      const light=document.querySelector('#golden-light-content');light.replaceChildren();
+      if(golden.available) {
+        light.append(el('h3',`${golden.stages[golden.rank-1].name} · 肉身邻域抵抗 ${Math.round(golden.resistance*100)}%`),el('p','护体金光随仙躯而生，削弱肉身承受的敌方邻域威能与持续压迫。此功效不增加自身邻域的稳固、侵夺或权能，也不消耗仙灵力。','muted'));
+        const track=el('div',null,'voisinage-stages');
+        golden.stages.forEach((s,i)=>{const n=el('span',s.name,i+1===golden.rank?'current':i+1<golden.rank?'completed':'');n.append(el('small',`${Math.round(s.resistance*100)}%`));track.append(n);});light.append(track);
+        if(golden.next_name)light.append(el('p',`锤炼至${golden.next_name}：${golden.recipe.map(r=>`${r.name} ${fmt(r.owned)} / ${fmt(r.needed)}`).join(' · ')}`),el('p','资材可于瑶池功勋商店求取。备齐后在仙界锤炼，材料消耗后晋阶。','muted'),button('锤炼护体金光',{action:'temper_golden_light'},!golden.can_train,temper));
+        else light.append(el('p','金光大圆满，肉身邻域抵抗已达上限。','doctrine-note'));
+      }
+    }:null);
+    window.UtilityPanels.schedule('yaochi',pool.available?()=>{
+      const root=document.querySelector('#yaochi-content');root.replaceChildren();if(!pool.available)return;
+      root.append(el('h3',`瑶池功勋 ${fmt(pool.merit)}`),el('p','瑶池是经营功勋往来的机构，天庭是驻于玉京仙都的政务机构；两者均不属于宗门、家族或种族势力。功勋与天庭功德分别记载。','muted'));
+      window.renderOrganizationFinance?.(root, pool.finance);
+      if(pool.experience){const x=pool.experience;const box=el('section',null,'doctrine-entry yaochi-experience');box.append(el('h3',`瑶池等级 Lv${fmt(x.level)}`),el('p',`本级经验 ${fmt(x.progress)} / ${fmt(x.required)} · 委托功勋收益 ×${Number(x.multiplier).toFixed(1)}`),el('p',`每次完成委托获得 ${x.per_job} 经验，等级与收益加成不设上限；已接取委托按约定报酬交付。`,'muted'));root.append(box);}
+      const legacy=game.player.institution_affiliations?.yaochi;
+      if(legacy)root.append(el('p',`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，功勋另行记载，不占用宗门归属。`,'muted'));
+      if(!pool.local)root.append(el('p','须亲临「瑶池」办理委托和交易。可在地图查看路线与传送阵。','doctrine-note'),button('查看地图',{},false,()=>window.UtilityPanels.open('map')));
+      const section=title=>{const s=el('section',null,'doctrine-entry');s.append(el('h3',title));root.append(s);return s;};
+      const transact=(label,payload,disabled=false)=>button(label,payload,!pool.local||disabled);
+      const jobs=section('接取委托');
+      if(pool.job){const j=pool.job;jobs.append(el('p',`${j.name} · 履约 ${fmt(j.progress)} / ${fmt(j.years)} 年 · 报酬 ${fmt(j.reward)} 功勋`));jobs.append(transact(j.progress>=j.years?'交付并领取功勋':'继续履约',{action:j.progress>=j.years?'claim_job':'work'}));}
+      else for(const j of pool.commissions)jobs.append(transact(`${j.name} · ${fmt(j.years)} 年 / ${fmt(j.reward)} 功勋`,{action:'accept',target_id:j.id}));
+      jobs.append(el('p','接取后须实际履约；游历与等待不计入进度，中途遇事可处理后续做。','muted'));
+      const shop=section('功勋商店');
+      shop.append(el('p','道统传承、仙躯功法、淬体仙药、金光资材与本境破境丹均以功勋兑换。三种破境丹搭配可增加 40 个百分点，最终成功率最高 98%；用于本境各层冲关，不代替跨境劫战。','muted'));
+      shop.append(el('p',`已锁货 ${pool.locked_count} / ${pool.lock_limit}：一次付费，保留至购买或解锁；占用当期传承名额，常驻资材无需锁货。`,'muted'));
+      const grid=el('div',null,'doctrine-book-grid');
+      for(const o of pool.shop){
+        const row=el('section',null,'doctrine-book');row.dataset.offerId=o.id;
+        row.append(el('h4',`${o.name}${o.locked?' · 已锁定':''}`),el('p',`每份 ×${fmt(o.quantity)} · ${fmt(o.price)} 功勋`));
+        const purchase=el('div',null,'yaochi-purchase');
+        const label=el('label','兑换份数');
+        const quantity=el('input');quantity.type='number';quantity.min='1';quantity.step='1';quantity.value='1';
+        quantity.max=String(o.kind==='body_manual'?1:Math.min(1000000,Math.max(1,Math.floor(pool.merit/o.price))));
+        quantity.setAttribute('aria-label',`${o.name}兑换份数`);
+        quantity.disabled=blocked||!pool.local||o.owned||!o.eligible||o.kind==='body_manual';
+        label.append(quantity);
+        const total=el('p',null,'yaochi-purchase-total');total.setAttribute('aria-live','polite');
+        const buy=transact(o.owned?'已掌握':'兑换',{action:'buy',target_id:o.id});
+        const valid=()=>quantity.value!==''&&quantity.checkValidity()&&Number.isInteger(quantity.valueAsNumber);
+        const update=()=>{
+          const amount=quantity.valueAsNumber;
+          total.textContent=valid()?`所得 ×${fmt(o.quantity*amount)} · 合计 ${fmt(o.price*amount)} 功勋`:`请输入 1 至 ${fmt(quantity.max)} 的整数份数`;
+          buy.disabled=blocked||!pool.local||o.owned||!o.eligible||!valid()||pool.merit<o.price*amount;
+          if(pool.finance && pool.finance.balance<o.price*amount*pool.exchange.stones_per_merit){buy.disabled=true;total.textContent+=' · 瑶池采购资金不足';}
+        };
+        quantity.addEventListener('input',update);
+        buy.onclick=()=>{update();if(!buy.disabled)trade({action:'buy',target_id:o.id,amount:quantity.valueAsNumber});};
+        purchase.append(label,total,buy);row.append(purchase);update();
+        if(o.kind==='doctrine')row.append(el('p','首次获得时掌握功法，其余份数存为传承玉简。','muted'));
+        if(o.description)row.append(el('p',o.description,'muted'));
+        if(o.can_lock)row.append(transact(o.locked?'解除锁货':`锁货 · ${fmt(o.lock_price)} 功勋`,{action:o.locked?'unlock':'lock',target_id:o.id},!o.locked&&(pool.merit<o.lock_price||pool.locked_count>=pool.lock_limit)));
+        grid.append(row);
+      }shop.append(grid);
+      const orders=section('发布求取委托');
+      orders.append(el('p','可求取本境界全部道统功法与仙家资材，不受商店当期传承名额限制。发布时预付功勋，含两成五撮合费；一个行动单位后交付，未领取物品代为保管。','muted'));
+      if(pool.manual_catalog_counts)orders.append(el('p',`本世道统功法共 ${pool.manual_catalog_counts.total} 部，当前境界可求取 ${pool.manual_catalog_counts.eligible} 部；更高品阶将在达到相应境界后列入。`,'muted'));
+      const select=el('select');select.setAttribute('aria-label','求取资材');select.style.maxWidth='100%';
+      const groups=new Map();
+      for(const o of pool.commission_catalog){
+        const label=o.doctrine||'仙躯功法与资材';
+        if(!groups.has(label)){const group=el('optgroup');group.label=label;groups.set(label,group);select.append(group);}
+        const op=el('option',`${o.name}${o.grade?` · ${['真仙','金仙','太乙','大罗'][o.grade-9]}`:''} · ${fmt(o.price)} 功勋`);op.value=o.id;groups.get(label).append(op);
+      }orders.append(select);
+      const publish=transact('发布委托',{action:'publish'});publish.onclick=()=>trade({action:'publish',target_id:select.value});orders.append(publish);
+      for(const o of pool.orders)orders.append(el('p',`${o.name} · ${o.ready?'已交付':`世界历 ${fmt(o.ready_age)} 年可领`}`),transact('领取委托物品',{action:'claim_order',target_id:o.id},!o.ready));
+      const exchange=section('功勋兑换与天庭往来'), rate=pool.exchange;
+      exchange.append(el('p',`1 功勋可换 ${fmt(rate.stones_per_merit)} 灵石；${fmt(rate.merit_per_court_merit)} 功勋可换 1 天庭功德。灵石不能换取功勋。`));
+      const amount=el('input');amount.type='number';amount.min='1';amount.max='1000000';amount.step='1';amount.value='1';amount.setAttribute('aria-label','兑换份数');exchange.append(amount);
+      for(const [label,action] of [['兑换灵石','exchange_stones'],['兑换天庭功德','exchange_court_merit']]){const b=transact(label,{action});b.onclick=()=>{if(amount.reportValidity())trade({action,amount:Number(amount.value)});};exchange.append(b);}
+      exchange.append(transact(`联络天官 · ${fmt(rate.support_cost)} 功勋 / 支持度 +${rate.support_gain}`,{action:'support'},pool.merit<rate.support_cost));
+      if(pool.votes.length){const votes=el('details');votes.append(el('summary',`本次天庭选举 · 每席 ${fmt(rate.vote_cost)} 功勋`),el('p','仅当已取得候选资格时可以议定支持。至多十二席，本次重投有效，选举结束后失效。','muted'));for(const v of pool.votes)votes.append(transact(`${v.name} · ${v.bought?'已议定':'议定一票'}`,{action:'buy_vote',target_id:v.id},v.bought||pool.merit<rate.vote_cost));exchange.append(votes);}
+    }:null);
   }
   window.ImmortalEconomyPanel={render};
 })();

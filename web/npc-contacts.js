@@ -56,12 +56,15 @@ window.NpcContacts = (() => {
     form.onsubmit=event=>{event.preventDefault();const chosen=targets.find(row=>row.id===select.value);if(!chosen||!confirm(`要求${n.name}与${chosen.name}交战？双方均可能陨落。`))return;send({npc_id:n.id,action:'promise',target_id:chosen.id,expected_unit:n.contact_promise_unit});};
     target.append(form);form.scrollIntoView({block:'nearest'});
   }
-  function render(value, callback) {
+  function update(value, callback) {
     if(saveId!==value.id){saveId=value.id;selected='';query='';filter='all';page=0;}
     data=value;send=callback;
     const roster=(data.faction?.roster||[]).filter(n=>!n.is_player);
     const sectIds=new Set(roster.map(n=>n.id));
     people=[...new Map([...roster,...(data.world_npcs||[])].map(n=>[n.id,n])).values()].map(n=>({...n,contact_sect:sectIds.has(n.id)}));
+  }
+  function render(value, callback) {
+    update(value, callback);
     const root=document.getElementById('npc-contacts'); if(!root)return;
     const focused=root.contains(document.activeElement)&&document.activeElement.type==='search';
     root.replaceChildren();
@@ -102,5 +105,5 @@ window.NpcContacts = (() => {
     selected=identity;query=person.name;filter=person.perceived_alive?'all':'absent';page=0;
     render(data,send);return true;
   }
-  return {render,open};
+  return {render,open,update};
 })();

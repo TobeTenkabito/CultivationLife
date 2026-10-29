@@ -1,9 +1,39 @@
 """Read-only asset ownership, independent of simulation and player save state."""
 import json
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 
 from .errors import NotFoundError
+
+
+@dataclass
+class _CatalogContext:
+    # Static declarations only. Never retain a player, eligibility or game state.
+    catalogs: dict = field(default_factory=dict)
+    skin_forms: dict = field(default_factory=dict)
+
+
+_catalog_context = ContextVar('visual_catalog_context', default=None)
+
+
+def catalog_context():
+    return _catalog_context.get()
+
+
+@contextmanager
+def catalog_scope():
+    """Reuse static declarations within one request/command, including nested calls."""
+    if catalog_context() is not None:
+        yield
+        return
+    token = _catalog_context.set(_CatalogContext())
+    try:
+        yield
+    finally:
+        _catalog_context.reset(token)
 
 
 @lru_cache(maxsize=8)
@@ -20,7 +50,30 @@ def _extension_registry(path, modified, size):
 
 
 def public_catalog(root: Path, extensions, extension_root=None):
-    loaded = {row['id'] for row in extensions if row.get('status') == 'loaded'}
+    prepared = _prepared_catalog(root, extensions, extension_root)
+    # Preserve independently editable public tables; asset declarations retain
+    # their existing ownership in the core/DLC registry caches.
+    return {key: dict(value) if isinstance(value, dict) else value
+            for key, value in prepared.items()}
+
+
+def catalog_assets(root: Path, extensions, extension_root=None):
+    """Internal read-only use of the prepared asset table, without player state."""
+    return _prepared_catalog(root, extensions, extension_root)['assets']
+
+
+def _prepared_catalog(root, extensions, extension_root):
+    loaded = frozenset(row['id'] for row in extensions if row.get('status') == 'loaded')
+    context = catalog_context()
+    key = (root, extension_root or root, loaded)
+    if context is None:
+        return _build_public_catalog(root, loaded, extension_root)
+    if key not in context.catalogs:
+        context.catalogs[key] = _build_public_catalog(root, loaded, extension_root)
+    return context.catalogs[key]
+
+
+def _build_public_catalog(root, loaded, extension_root):
     source = catalog(root)
     def allowed(row):
         url = row.get('file','')
@@ -56,7 +109,7 @@ def public_catalog(root: Path, extensions, extension_root=None):
 
 
 def extension_asset(root: Path, extension_root: Path, extensions, url: str):
-    entry = next((row for row in public_catalog(root,extensions,extension_root)['assets'].values() if row['file'] == url),None)
+    entry = next((row for row in catalog_assets(root,extensions,extension_root).values() if row['file'] == url),None)
     if not entry or not entry.get('requires'):
         raise NotFoundError('素材未安装或未启用')
     _,_,package_id,relative = url.split('/',3)

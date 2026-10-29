@@ -12,7 +12,7 @@ from ..persistence.dependencies import (
     EventsPreparationDependencies,
 )
 
-from .travel import bind_elapsed_year, bind_settlement
+from .travel import bind_death, bind_elapsed_year, bind_settlement
 
 from ..dependencies import (
     WorldRuntimeDependencies,
@@ -43,7 +43,7 @@ def bind_persistence_runtime(engine: GameEngine, *, bloodline_content_available:
             _ensure_merchant=lambda game: engine._ensure_merchant(game),
         ),
         vitality=VitalityPreparationDependencies(
-            _die=lambda *args, **kwargs: engine._die(*args, **kwargs),
+            _die=bind_death(engine),
         ),
         character=CharacterPreparationDependencies(
             _body_progress_required=lambda player: engine._body_progress_required(player),

@@ -446,6 +446,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  window.UtilityPanels?.reset();
   window.AuthoredTechniques?.lineages();
   window.UtilityPanels?.close('authored');
   window.EventScenes?.dispose();
@@ -467,6 +468,7 @@ function showStart() {
 }
 
 function render(data) {
+  window.UtilityPanels?.begin(data.id);
   game = data;
   window.NpcArt?.context(data);
   window.TrialSitePanel?.update(data, mutate, () => busy);
@@ -600,12 +602,7 @@ function render(data) {
   renderKnownTechniques(p.known_techniques || []);
   renderTransformationSystem(data.transformation_system || {});
   renderMonsterBloodline(data.monster_bloodline || {});
-  renderRelationships(p.master, p.disciples || [], p.disciple_requests || [], p.inventory || [], p.known_techniques || []);
-  renderDaoCompanion(data.dao_companion, p.inventory || [], p.known_techniques || [], Number(p.next_companion_conception_bonus || 0));
-  renderDaoFriends(data.dao_friends || []);
-  renderPersonalRelations(data.personal_relations || {high:[], low:[]});
-  renderConcubines(data.concubine_system || {});
-  renderParty(data.party || []);
+  renderSocialPanels(data);
   renderWanted(data.wanted || []);
   renderPrison(data.imprisonment);
   $('#root-efficiency').textContent = `×${Number(p.cultivation_efficiency || 0).toFixed(2)}`;
@@ -762,6 +759,10 @@ function renderTianji(system) {
   panel?.classList.toggle('hidden', !system.available); dock?.classList.toggle('hidden', !system.available);
   $('#tianji-debug-lv5')?.classList.toggle('hidden', !configData?.console_available || !window.DebugConsole?.active() || !system.available);
   if (!system.available) { window.UtilityPanels?.close('tianji'); return; }
+  UtilityPanels.schedule('tianji', () => paintTianji(system));
+}
+
+function paintTianji(system) {
   $('#tianji-heading').textContent = `已识 ${system.known_count || 0} / 100 · 生成代 ${system.generation_version} · ${system.world_name || '当前界面'}单件战力${system.world_combat_power_cap == null ? '完全解放' : `上限 ${number(system.world_combat_power_cap)}`}`;
   const root = $('#tianji-ranking'); root.innerHTML = '';
   (system.artifacts || []).forEach(artifact => {
@@ -809,6 +810,10 @@ function renderCrafting(system) {
   const panel = $('#crafting-card'), dock = document.querySelector('[data-panel-target="crafting"]');
   panel.classList.toggle('hidden', !system.visible); dock?.classList.toggle('hidden', !system.visible);
   if (!system.visible) { window.UtilityPanels?.close('crafting'); return; }
+  UtilityPanels.schedule('crafting', () => paintCrafting(system));
+}
+
+function paintCrafting(system) {
   const targets = game?.tianji_artifacts?.targets || [];
   $('#crafting-tianji-mode').classList.toggle('hidden', !game?.tianji_artifacts?.available);
   const targetSelect = $('#crafting-target'); targetSelect.innerHTML = '';
@@ -930,6 +935,12 @@ function renderFormation(system) {
   const panel = $('#formation-card'), dock = document.querySelector('[data-panel-target="formation"]');
   panel.classList.toggle('hidden', !system.visible); dock?.classList.toggle('hidden', !system.visible);
   if (!system.visible) { window.UtilityPanels?.close('formation'); return; }
+  // A new response still cancels any outstanding draft, even while closed.
+  invalidateFormationPreview();
+  UtilityPanels.schedule('formation', () => paintFormation(system));
+}
+
+function paintFormation(system) {
   $('#formation-heading').textContent = `V${system.system_version || 1} · 阵法 ${system.level || 0}级 · 传导 ${percent(system.alpha || 0)}`;
   const grid = $('#formation-grid'); grid.innerHTML = '';
   const activeBySlot = new Map((system.active_bindings || []).filter(Boolean).map(row => [Number(row.slot), row.id]));
@@ -967,7 +978,6 @@ function renderFormation(system) {
   $('#formation-name').value = activeLoadout?.name || '';
   $('#formation-name').oninput = scheduleFormationPreview;
   syncFormationSelects();
-  invalidateFormationPreview();
   formationDraftProfile = system.profile || null;
   renderFormationReading(formationDraftProfile);
 
@@ -1217,6 +1227,10 @@ function renderNatalArtifact(system) {
   const panel=$('#natal-artifact-card'), dock=document.querySelector('[data-panel-target="natal-artifact"]');
   panel.classList.toggle('hidden',!system.visible); dock?.classList.toggle('hidden',!system.visible);
   if(!system.visible){window.UtilityPanels?.close('natal-artifact');return;}
+  UtilityPanels.schedule('natal-artifact', () => paintNatalArtifact(system));
+}
+
+function paintNatalArtifact(system) {
   const root=$('#natal-artifact-content');root.innerHTML='';
   root.classList.toggle('pixel-natal-content',!!window.PixelLibrary?.active());
   if(!system.bound){
@@ -1260,6 +1274,10 @@ function renderHeavenlyCourt(court) {
   const visible = !!court.visible;
   panel.classList.toggle('hidden', !visible); dock?.classList.toggle('hidden', !visible);
   if (!visible) { window.UtilityPanels?.close('heavenly-court'); return; }
+  UtilityPanels.schedule('heavenly-court', () => paintHeavenlyCourt(court));
+}
+
+function paintHeavenlyCourt(court) {
   const root = $('#heavenly-court-content'); root.innerHTML = '';
   if (!court.initialized) { root.textContent = '天庭正在汇集仙界势力名册。'; return; }
   $('#court-heading').textContent = `机构 · 玉京仙都 · 第 ${court.unit} 单位 · ${court.seat_count} 席（大${court.seat_sizes?.large||0}·中${court.seat_sizes?.medium||0}·小${court.seat_sizes?.small||0}）`;
@@ -1303,6 +1321,11 @@ function renderIntrigue(system) {
   const enabled = !!system?.enabled;
   panel.classList.toggle('hidden', !enabled); dock?.classList.toggle('hidden', !enabled);
   if (!enabled) { window.UtilityPanels?.close('intrigue'); content.innerHTML = ''; return; }
+  UtilityPanels.schedule('intrigue', () => paintIntrigue(system));
+}
+
+function paintIntrigue(system) {
+  const content = $('#intrigue-content');
   content.innerHTML = '';
   $('#intrigue-heading').textContent = `${(system.sections || []).length} 个相关势力 · 一人一票`;
   if (game?.map?.territory) {
@@ -1583,14 +1606,11 @@ function renderSageSystem(system) {
     return;
   }
   if (!teachingVisible) window.UtilityPanels?.close('sage');
-  const doctrines = system.doctrines || [];
-  const current = doctrines.find(row => row.id === system.membership_id);
-  $('#sage-heading').textContent = current ? current.name : system.teaching_available ? '尚未入说' : '游学诸界';
-  const numeric = system.numeric_rules || {};
-  const controlLead = Number(numeric.control_lead_percent ?? 10).toFixed(1).replace(/\.0$/, '');
-  $('#sage-note').textContent = `本界各家学说共分 ${numeric.world_pool || 100} 点学说声望，单一学说最高 ${numeric.doctrine_cap || 60} 点；门内威望高出现任执掌者 ${controlLead}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`;
-  $('#sage-teaching-sections')?.classList.toggle('hidden', !system.teaching_available);
+  UtilityPanels.schedule('sage', teachingVisible ? () => paintSageTeaching(system) : null);
+  UtilityPanels.schedule('sage-inner-outer', () => paintSageInnerOuter(system));
+}
 
+function paintSageInnerOuter(system) {
   const inner = system.inner_outer || {};
   $('#sage-inner-outer-heading').textContent = `浩然 Lv.${inner.level || 0}`;
   const haoranSummary = $('#sage-haoran-summary'); haoranSummary.innerHTML = '';
@@ -1639,6 +1659,17 @@ function renderSageSystem(system) {
     button.onclick=()=>openGameConfirm({title:`外王 · ${action.name}`,body:`${action.reward}\n浩然经验：${number(action.before_exp)} → ${number(action.after_exp)}\n浩然等级：Lv.${action.before_level} → Lv.${action.after_level}\n${(action.effect_changes||[]).join('\n')||'长期被动数值不跨档'}\n此消费不可逆。`,confirmText:'确认施行',onConfirm:()=>mutate(`/api/games/${game.id}/sage-outer-king`,{action:action.id})});
     card.append(title,reward,cost,changes,button); outerList.appendChild(card);
   });
+
+}
+
+function paintSageTeaching(system) {
+  const doctrines = system.doctrines || [];
+  const current = doctrines.find(row => row.id === system.membership_id);
+  $('#sage-heading').textContent = current ? current.name : system.teaching_available ? '尚未入说' : '游学诸界';
+  const numeric = system.numeric_rules || {};
+  const controlLead = Number(numeric.control_lead_percent ?? 10).toFixed(1).replace(/\.0$/, '');
+  $('#sage-note').textContent = `本界各家学说共分 ${numeric.world_pool || 100} 点学说声望，单一学说最高 ${numeric.doctrine_cap || 60} 点；门内威望高出现任执掌者 ${controlLead}% 方可接掌道统。学说只接纳儒修，跨界期间玩家席位冻结。`;
+  $('#sage-teaching-sections')?.classList.toggle('hidden', !system.teaching_available);
 
   const membership = $('#sage-membership'); membership.innerHTML = '';
   if (current) {
@@ -1745,6 +1776,10 @@ function renderSageSystem(system) {
 }
 
 function renderFaction(faction) {
+  UtilityPanels.schedule('faction', game?.spatial?.scene?.society ? null : () => paintFaction(faction));
+}
+
+function paintFaction(faction) {
   const summary = $('#faction-summary'); summary.innerHTML = '';
   const diplomacyDetail = $('#faction-diplomacy-detail'); diplomacyDetail.innerHTML = '';
   const rewards = $('#faction-rewards'); const roster = $('#faction-roster'); const dispatch = $('#faction-dispatch');
@@ -2131,6 +2166,10 @@ function vassalTransferForm(kind, targetId, targetName, candidates) {
 }
 
 function renderFamily(family, governance) {
+  UtilityPanels.schedule('family', game?.spatial?.scene?.society ? null : () => paintFamily(family, governance));
+}
+
+function paintFamily(family, governance) {
   const content = $('#family-content'); content.innerHTML = '';
   $('#family-status').textContent = family?.exists
     ? (family.extinct ? '传承已绝' : family.same_world ? `${family.living_count} 人在册` : '身处其他界面')
@@ -2176,7 +2215,10 @@ function renderFamily(family, governance) {
 }
 
 function renderWorldNpcs(npcs) {
-  window.NpcContacts?.render(game, payload => mutate(`/api/games/${game.id}/npc-contact`, payload));
+  UtilityPanels.schedule('world-npc', () => paintWorldNpcs(npcs));
+}
+
+function paintWorldNpcs(npcs) {
   const list = $('#world-npc-list'); list.innerHTML = '';
   npcs.forEach(npc => {
     const row = document.createElement('div'); row.className = `world-npc-row${npc.perceived_alive ? '' : ' absent'}`;
@@ -2224,8 +2266,12 @@ function renderWorldNpcs(npcs) {
 function renderSpiritRanking(ranking) {
   const card = $('#ranking-card'); card.classList.toggle('hidden', !ranking?.available);
   document.querySelector("[data-panel-target='ranking']")?.classList.toggle('hidden', !ranking?.available);
+  if (!ranking?.available) { $('#ranking-list').innerHTML = ''; return; }
+  UtilityPanels.schedule('ranking', () => paintSpiritRanking(ranking));
+}
+
+function paintSpiritRanking(ranking) {
   const list = $('#ranking-list'); list.innerHTML = '';
-  if (!ranking?.available) return;
   $('#ranking-title').textContent = ranking.title || '上界天榜前二十';
   $('#ranking-player-status').textContent = ranking.on_board ? `你当前位列第 ${ranking.player_rank}` : `你当前未入前二十（总排名 ${ranking.player_rank}）`;
   ranking.entries.forEach(entry => {
@@ -2293,6 +2339,10 @@ function renderRaceSystem(system) {
   const card = $('#race-card'); card.classList.toggle('hidden', !system?.available);
   document.querySelector("[data-panel-target='race']")?.classList.toggle('hidden', !system?.available);
   if (!system?.available) return;
+  UtilityPanels.schedule('race', () => paintRaceSystem(system));
+}
+
+function paintRaceSystem(system) {
   $('#race-world-label').textContent = `${system.world_name || '上界'}族群`;
   $('#race-description').textContent = system.has_diplomatic_voice
     ? `你当前属于${system.player_race_name}，并已拥有大乘议席；可对任一异族提出宣战、结盟、停战、断盟或依附决议。`
@@ -2355,6 +2405,10 @@ function renderRaceSystem(system) {
 }
 
 function renderWorldRoute(route) {
+  UtilityPanels.schedule('world-route', () => paintWorldRoute(route));
+}
+
+function paintWorldRoute(route) {
   if (!route) return;
   $('#world-route-title').textContent = `${route.name} · ${route.path_name}`;
   $('#world-route-status').textContent = `当前：${route.current_world_name}`;
@@ -2746,6 +2800,10 @@ function renderExchange(system) {
   if(!system.available){window.UtilityPanels?.close('exchange');return;}
   dock.querySelector('small').textContent=system.status==='scheduled'?`${system.actions_until_open}时后`:'交换会';
   dock.title=`${system.location_name} · 匿名交换会`;
+  UtilityPanels.schedule('exchange', () => paintExchange(system));
+}
+
+function paintExchange(system) {
   $('#exchange-title').textContent=`${system.location_name} · 匿名交换会`;
   $('#exchange-description').textContent=system.status==='scheduled'?`还有 ${system.actions_until_open} 个时间单位开幕。固定会址无境界限制。`:`只收材料，不收灵石。需求清单保证成交；替代材料总值须不低于需求总值，成功率65%，多付不找零，被拒绝不扣材料。剩余 ${system.remaining} 个时间单位。`;
   const root=$('#exchange-content');root.innerHTML='';
@@ -2873,6 +2931,10 @@ function renderMap(map, auction) {
 function renderMarket(market) {
   const card = $('#market-card'); card.classList.toggle('hidden', !market?.available);
   if (!market?.available) return;
+  UtilityPanels.schedule('market', () => paintMarket(market));
+}
+
+function paintMarket(market) {
   $('#market-title').textContent = market.name;
   $('#market-wallet').textContent = `灵石 ${market.spirit_stones}`;
   $('#market-description').textContent = `一般坊市与阵材器料坊市各有六个货位，傀儡材料另设核心、外材、能源货架；每个坊市可锁定一项；推进到下个时间单位时，锁定货物保留原价格与品相，其余货位换货。每件一般货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品。`;
@@ -2928,6 +2990,10 @@ function renderAuction(system) {
   dock?.classList.toggle('notice', !!system.available);
   if(dock) dock.dataset.activityState=system.available?(system.status==='scheduled'?`${system.actions_until_open}个时间单位后开幕`:system.status==='open'?'正在举行': '散场黑市 · 推进岁月后关闭'):'';
   if (!system.available) return;
+  UtilityPanels.schedule('auction', () => paintAuction(system));
+}
+
+function paintAuction(system) {
   const statusNames = {scheduled:'拍卖会预告', open:'拍卖会', black_market:'散场黑市'};
   $('#auction-title').textContent = `${system.location_name}·${system.status === 'black_market' ? '' : (system.class_name || '')}${statusNames[system.status] || '交易集会'}`;
   $('#auction-wallet').textContent = `灵石 ${number(system.spirit_stones || 0)}`;
@@ -3547,6 +3613,10 @@ function renderKnownTechniques(techniques) {
 }
 
 function renderTransformationSystem(system) {
+  UtilityPanels.schedule('transformation', () => paintTransformationSystem(system));
+}
+
+function paintTransformationSystem(system) {
   const technique = system.technique;
   $('#transformation-summary').textContent = technique
     ? `${technique.name} · ${system.stored?.length || 0}/${system.capacity} · 启用 ${system.active?.length || 0}/${system.space}`
@@ -3670,6 +3740,21 @@ function relationshipStateLabel(person) {
   if (person.roster_state === 'held') return '（受控）';
   if (person.roster_state === 'retired') return '（已离册）';
   return '';
+}
+
+function renderSocialPanels(data) {
+  // Other panels can link directly to a person before this panel is first opened.
+  window.NpcContacts?.update(data, payload => mutate(`/api/games/${data.id}/npc-contact`, payload));
+  UtilityPanels.schedule('relationship', () => {
+    const p = data.player;
+    renderRelationships(p.master, p.disciples || [], p.disciple_requests || [], p.inventory || [], p.known_techniques || []);
+    renderDaoCompanion(data.dao_companion, p.inventory || [], p.known_techniques || [], Number(p.next_companion_conception_bonus || 0));
+    renderDaoFriends(data.dao_friends || []);
+    renderPersonalRelations(data.personal_relations || {high:[],low:[]});
+    renderConcubines(data.concubine_system || {});
+    renderParty(data.party || []);
+    window.NpcContacts?.render(data, payload => mutate(`/api/games/${data.id}/npc-contact`, payload));
+  });
 }
 
 function renderRelationships(master, disciples, requests, inventory, techniques) {
@@ -4386,18 +4471,19 @@ document.addEventListener('keydown', event => {
   }
 });
 
-function refreshVisualPanels(){
+function refreshVisualPanels(event){
   if(game?.natal_artifact)renderNatalArtifact(game.natal_artifact);
-  if(game?.map)renderMap(game.map,game.auction_system);
+  if(game?.map){
+    const data=game;
+    UtilityPanels.schedule('map',()=>{renderMap(data.map,data.auction_system);window.ExplorationPanel?.renderMap(data,mutate);});
+  }
   if(game){
     window.NpcArt?.close();
-    renderFaction(game.faction);
+    // Roster avatars already finish loading on their original connected rows.
+    // Replacing the roster here can detach a subpage control during a click.
+    if(event?.type!=='game:visual-ready')renderFaction(game.faction);
     renderWorldNpcs(game.world_npcs||[]);
-    renderRelationships(game.player.master,game.player.disciples||[],game.player.disciple_requests||[],game.player.inventory||[],game.player.known_techniques||[]);
-    renderDaoCompanion(game.dao_companion,game.player.inventory||[],game.player.known_techniques||[],Number(game.player.next_companion_conception_bonus||0));
-    renderDaoFriends(game.dao_friends||[]);
-    renderPersonalRelations(game.personal_relations||{high:[],low:[]});
-    renderConcubines(game.concubine_system||{});
+    renderSocialPanels(game);
     renderEvent();
     window.PanelPages?.refresh(game.id);
   }

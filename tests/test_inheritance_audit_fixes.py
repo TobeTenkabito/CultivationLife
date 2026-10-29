@@ -33,6 +33,9 @@ def activated_doctrine(game):
 
 
 def enter_test_host(game):
+    # Structure 11 starts in the body; possession requires the normal soul state first.
+    from cultivation_life.system.soul_lifecycle import leave_body
+    leave_body(game)
     enter_host_body(game.player, dict(id='audit-host', name='借身', race='human', path='dao',
         realm_index=9, layer=1, spirit_root='supreme_metal', alive=True, age=100,
         lifespan=None, opportunity=10**9))

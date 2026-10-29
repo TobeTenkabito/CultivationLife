@@ -2,12 +2,12 @@
 from . import content_registry as registry
 from .character_visuals import character_appearance
 from .monster_visuals import monster_appearance, _appearance
-from .visual_assets import public_catalog
+from .visual_assets import catalog_assets, catalog_context
 
 
 def _assets():
-    return public_catalog(registry.default_content_root().parent, registry.EXTENSION_REPORT,
-                          registry.default_extension_root())['assets']
+    return catalog_assets(registry.default_content_root().parent, registry.EXTENSION_REPORT,
+                          registry.default_extension_root())
 
 
 def _blocked(player):
@@ -40,6 +40,19 @@ def _skin_entry(key, form, assets):
 
 
 def _catalog_forms(assets):
+    context = catalog_context()
+    if context is None:
+        return _build_catalog_forms(assets)
+    key = id(assets)
+    if key not in context.skin_forms:
+        # Keep the asset table alive, so its identity cannot be reused in scope.
+        context.skin_forms[key] = (assets, _build_catalog_forms(assets))
+    # Bloodline history adds player-specific entries to the working form table.
+    # Return fresh form dictionaries just as uncached preparation does.
+    return {key: dict(form) for key, form in context.skin_forms[key][1].items()}
+
+
+def _build_catalog_forms(assets):
     forms = {}
     for entry in assets.values():
         for form in entry.get('character_forms', []):

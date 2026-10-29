@@ -14,7 +14,8 @@ from cultivation_life.system.doctrine.provider import conversion_state
 
 
 def test_trace_probability_stream_is_persisted_and_only_positive_awards_roll():
-    p = Player('测试', 'supreme_metal', immortal_trace_rng=1460)
+    # Use canonical optional fields (including the wardrobe) for the full round trip.
+    p = Player.from_dict(Player('测试', 'supreme_metal', immortal_trace_rng=1460).to_dict())
     for amount in (0, -1, -100):
         assert not grant_trace_chance(p, amount)
     assert p.immortal_trace_rng == 1460

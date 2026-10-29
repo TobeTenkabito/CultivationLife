@@ -103,6 +103,23 @@ def test_critical_composition_callbacks_expose_their_real_arguments(tmp_path):
                     for parameter in inspect.signature(callback).parameters.values()), field.name
 
 
+@pytest.mark.parametrize('bind_name', ['bind_world_year', 'bind_map_travel'])
+def test_time_death_callback_preserves_omitted_options_and_late_binding(bind_name):
+    from types import SimpleNamespace
+    from cultivation_life.engine.composition import travel
+
+    host = SimpleNamespace(_die=Mock())
+    callback = getattr(travel, bind_name)(host)._die
+    game = object()
+    callback(game, '寿元已尽', 'SYS_LIFESPAN')
+    host._die.assert_called_once_with(game, '寿元已尽', 'SYS_LIFESPAN')
+    host._die = Mock()
+    callback(game, '神游失败', 'SYS_SOUL', offer_captive_possession=False,
+             death_cause=None, survival_stage='spirit_failed')
+    host._die.assert_called_once_with(game, '神游失败', 'SYS_SOUL',
+        offer_captive_possession=False, death_cause=None, survival_stage='spirit_failed')
+
+
 @pytest.mark.parametrize('moved', [False, True])
 def test_response_preserves_settlement_commit_and_preparation_order(tmp_path, moved):
     store = SaveStore(tmp_path)

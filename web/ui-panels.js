@@ -1,12 +1,24 @@
 (() => {
   const panelNames = ['immortal-conversion', 'heavens', 'asura-conversion', 'asura-body', 'asura-veins', 'asura-route', 'asura-domain', 'asura-powers', 'talisman', 'puppet-workshop', 'upper-institution', 'golden-light', 'yaochi', 'combat-plan', 'map', 'guixu', 'market', 'auction', 'exchange', 'merchant', 'ghost-parade', 'faction', 'intrigue', 'buddhist', 'buddhist-wish', 'sage', 'sage-inner-outer', 'war', 'world-npc', 'ranking', 'family', 'race', 'world-route', 'extension', 'spirit-field', 'personal-economy', 'inventory', 'secret-art', 'relationship', 'transformation', 'bloodline', 'ghost-soul', 'ghost-attachment', 'captive', 'crafting', 'doctrine', 'immortal-veins', 'immortal-body', 'immortal-aperture', 'spirit-voisinage', 'upper-voisinage', 'voisinage', 'daomen', 'tianji', 'formation', 'natal-artifact', 'heavenly-court', 'settings'];
   const pending = new Map();
+  let saveId = null;
   panelNames.push('civilizations','authored','nascent');
   panelNames.push('trial-site');
+
+  function reset() {
+    pending.clear();
+    panelNames.forEach(close);
+    saveId = null;
+  }
+
+  function begin(id) {
+    if (saveId !== id) { reset(); saveId = id; }
+  }
 
   // The latest authoritative response replaces any unopened presentation work.
   // Only DOM creation is deferred; server preparation and settlement are unchanged.
   function schedule(name, render) {
+    if (!render) { pending.delete(name); return; }
     if (card(name)?.classList.contains('panel-open')) { pending.delete(name); render(); }
     else pending.set(name, render);
   }
@@ -55,5 +67,5 @@
     window.GameNavigation?.init();
   }
 
-  window.UtilityPanels = {init, open, close, toggle, schedule};
+  window.UtilityPanels = {init, open, close, toggle, schedule, begin, reset};
 })();

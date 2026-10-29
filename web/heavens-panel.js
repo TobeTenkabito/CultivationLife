@@ -126,6 +126,12 @@
     const host=document.getElementById('heavens-content'),h=data.heavens;if(!host||!h)return;
     const dock=document.querySelector('[data-panel-target="heavens"]'),notices=(h.notifications||[]).length;
     if(dock){dock.classList.toggle('has-notice',notices>0);dock.title=notices?`诸天 · ${notices} 条新见闻`:'诸天';dock.querySelector('small').textContent=notices?'新见闻':'诸天';}
+    const settings=document.getElementById('settings-heavens');
+    if(settings){settings.replaceChildren();renderSettings(settings,h);}
+    window.UtilityPanels.schedule('heavens',draw);
+  }
+  function draw() {
+    const host=document.getElementById('heavens-content'),h=current.heavens;
     const key=`${ui.page}:${ui.target}:${ui.section}:${ui.chamber}:${ui.historyPage}`,scroll=key===renderedKey?document.getElementById('heavens-body')?.scrollTop||0:0;renderedKey=key;
     host.replaceChildren();
     const navigation=node('div',null,'heavens-navigation');
@@ -146,8 +152,6 @@
       if(!ui.target||h.conflicts?.some(r=>r.id===ui.target))renderRegional(body,h,'conflict');
       else window.HeavensFrontier.render(body,h.frontier,ui,{node,title,tile,back,subview,renderActions,empty,go},h.campaign);
     }
-    const settings=document.getElementById('settings-heavens');
-    if(settings){settings.replaceChildren();renderSettings(settings,h);}
     body.scrollTop=scroll;
   }
   function renderHome(host,h) {

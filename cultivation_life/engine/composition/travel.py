@@ -1,5 +1,6 @@
 """Composition of time operations through explicit, late-bound ports."""
 from ...time_dependencies import (
+    DeathPort,
     ElapsedTravelDependencies,
     ElapsedYearDependencies,
     MapTravelDependencies,
@@ -8,6 +9,24 @@ from ...time_dependencies import (
     TimeSettlementDependencies,
     WorldYearDependencies,
 )
+
+
+_OMITTED = object()
+
+
+def bind_death(host) -> DeathPort:
+    def forward_death(game, reason, event_id, *, offer_captive_possession=_OMITTED,
+                      death_cause=_OMITTED, survival_stage=_OMITTED):
+        # Keep omitted options omitted for late-bound overrides and test hosts.
+        options = {}
+        if offer_captive_possession is not _OMITTED:
+            options['offer_captive_possession'] = offer_captive_possession
+        if death_cause is not _OMITTED:
+            options['death_cause'] = death_cause
+        if survival_stage is not _OMITTED:
+            options['survival_stage'] = survival_stage
+        return host._die(game, reason, event_id, **options)
+    return forward_death
 
 
 def bind_world_year(host) -> WorldYearDependencies:
@@ -36,7 +55,7 @@ def bind_world_year(host) -> WorldYearDependencies:
         _annual_world_npc_update=lambda game, rng: host._annual_world_npc_update(game, rng),
         advance_researchers=lambda game: host._dependencies.heavens.advance_researchers(game),
         _check_tribulation=lambda game, rng: host._check_tribulation(game, rng),
-        _die=lambda *args, **kwargs: host._die(*args, **kwargs),
+        _die=bind_death(host),
         _maybe_artifact_synthesis=lambda game, rng: host._maybe_artifact_synthesis(game, rng),
         _maybe_mortal_root_completion=lambda game, rng: host._maybe_mortal_root_completion(game, rng),
         _maybe_race_war_ambush=lambda game, rng: host._maybe_race_war_ambush(game, rng),
@@ -50,7 +69,7 @@ def bind_map_travel(host) -> MapTravelDependencies:
         year=bind_elapsed_year(host),
         _clear_market=lambda game: host._clear_market(game),
         _compact_world_history=lambda game: host._compact_world_history(game),
-        _die=lambda *args, **kwargs: host._die(*args, **kwargs),
+        _die=bind_death(host),
         _ensure_market=lambda game, rng: host._ensure_market(game, rng),
         _finish_travel_time=lambda game, start_age, institution_world, institution_unit, news, rng, *, action_units=None: (
             host._finish_travel_time(game, start_age, institution_world, institution_unit, news, rng)

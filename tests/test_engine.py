@@ -645,7 +645,7 @@ class EngineTests(unittest.TestCase):
         shown_war = self.engine._instantiate_event(war, game, random.Random(1))
         self.assertNotIn("__decline_faction_task", {choice["id"] for choice in shown_war["choices"]})
 
-    def test_nascent_synthetic_faction_choice_survives_reload_and_resolves(self):
+    def test_retired_nascent_faction_choice_preserves_reward_and_rejects_stale_submit(self):
         created = self.engine.create_game("议事不失", "supreme_metal", "dao", 233)
         game = self.engine.store.load(created["id"])
         game.player.realm_index = 4
@@ -653,13 +653,22 @@ class EngineTests(unittest.TestCase):
         game.player.faction_contribution = 10
         event = self.engine.events_by_id["EVT_FACTION_COMMON_PATROL_001"]
         game.pending_event = self.engine._instantiate_event(event, game, random.Random(1))
+        reward = self.engine._prepare_treasure_reward_event(game, random.Random(2))
+        game.pending_event['_followup_event'] = reward
         self.engine.store.save(game)
 
         reloaded = self.engine.get_game(created["id"])
-        self.assertIsNotNone(reloaded["pending_event"])
-        resolved = self.engine.choose(created["id"], "__decline_faction_task")
+        # The task board retired faction+duty encounters; loading keeps only
+        # their already-earned follow-up, including its original random reward.
+        self.assertEqual(reloaded['pending_event']['id'], reward['id'])
+        self.assertEqual(reloaded['pending_event']['runtime'], reward['runtime'])
+        saved = self.engine.store._path(created['id']).read_bytes()
+        with self.assertRaisesRegex(ValueError, '已经变化'):
+            self.engine.choose(created['id'], '__decline_faction_task', event_id=event['id'])
+        self.assertEqual(self.engine.store._path(created['id']).read_bytes(), saved)
+        resolved = self.engine.choose(created['id'], 'artifact', event_id=reward['id'])
         self.assertIsNone(resolved["pending_event"])
-        self.assertEqual(resolved["history"][0]["choice_id"], "__decline_faction_task")
+        self.assertTrue(any(row['choice_id'] == 'artifact' for row in resolved['history']))
 
     def test_recruitment_distribution_boundaries_are_exact(self):
         self.assertEqual(self.engine._recruit_realm_index(0.0099), 4)

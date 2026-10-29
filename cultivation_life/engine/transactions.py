@@ -3,6 +3,7 @@ from functools import wraps
 import inspect
 from contextlib import contextmanager
 from contextvars import ContextVar
+from ..visual_assets import catalog_scope
 
 
 _request_state = ContextVar('game_request_state', default=None)
@@ -16,7 +17,7 @@ def active_command():
 @contextmanager
 def request_scope(engine):
     """Share hydrated games only within one locked HTTP request, never across requests."""
-    with engine.store.lock:
+    with engine.store.lock, catalog_scope():
         token = _request_state.set((engine, engine.store, {}))
         try:
             yield
@@ -49,7 +50,7 @@ def serialized_commands(cls):
         def wrap(command):
             @wraps(command)
             def run(self, *args, **kwargs):
-                with self.store.lock:
+                with self.store.lock, catalog_scope():
                     token = _active_command.set(command.__name__)
                     try:
                         return command(self, *args, **kwargs)
