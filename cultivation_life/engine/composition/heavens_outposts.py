@@ -10,6 +10,7 @@ from ...system.combat.npc_lifecycle import move_world
 from ...system.world_transition_system import finish_world_transition, cultivation_ceiling
 from ...system.heavens.outpost_definitions import ENDPOINTS, route_id
 from ...system.heavens.outpost_runtime import free
+from ...system.heavens.outpost_routes import profile, peers, paired
 
 
 def bind_outposts(engine, ports):
@@ -39,17 +40,20 @@ def bind_outposts(engine, ports):
         # It never changes the generic cross-world governance check.
         return player_controls(game, entity, engine._sect_members(game, entity), member=member)
 
-    def candidates(game, entity):
+    def candidates(game, entity, destination=None):
         home = faction_site(entity, persist=False)['id']
         relations = [game.player.master, game.player.dao_companion, *game.player.dao_friends,
                      *game.player.disciples, *game.player.concubines, *game.player.party, *game.player.disciple_requests]
         related = {r.get('npc_id') or r.get('id') for r in relations if r}
         war_ids = {i for w in game.wars if w.get('status') in {'active', 'peace_ready', 'withdrawing'}
                    for ids in w.get('roster', {}).values() for i in ids}
+        terms = profile(entity.world)
+        destination = destination or peers(entity.world)[0]
+        ceiling = cultivation_ceiling(WORLD_SYSTEMS, destination)
         return [dict(id=n.id, name=n.name) for n in sorted(engine._sect_members(game, entity), key=lambda n: n.id)
                 if free(game, n) and n.world == entity.world and n.location_id in {None, home}
-                and 1 <= n.realm_index <= 5 and n.id not in related | war_ids
-                and (n.realm_index, n.layer) <= cultivation_ceiling(WORLD_SYSTEMS, 'demon' if entity.world == 'human' else 'human')
+                and terms['npc_minimum'] <= n.realm_index <= terms['maximum'] and n.id not in related | war_ids
+                and (not ceiling or (n.realm_index, n.layer) <= ceiling)
                 and not research_assignment(game, n.id)]
 
     def road(game, world, origin, destination, rank):
@@ -65,7 +69,7 @@ def bind_outposts(engine, ports):
             ceiling = cultivation_ceiling(WORLD_SYSTEMS, destination)
             if not npc or ceiling and (npc.realm_index, npc.layer) > ceiling:
                 return False
-        return bool(WORLD_SYSTEMS['world_profiles'][source]['enabled'] and WORLD_SYSTEMS['world_profiles'][destination]['enabled']
+        return bool(paired(source,destination) and WORLD_SYSTEMS['world_profiles'][source]['enabled'] and WORLD_SYSTEMS['world_profiles'][destination]['enabled']
                     and any(r['id'] == route_id(source, destination) and r['enabled'] and r['mode'] == 'expedition'
                             for r in WORLD_SYSTEMS['world_transition_routes']))
 
@@ -94,11 +98,14 @@ def bind_outposts(engine, ports):
         task = active_task(game.heavens_state.get('runtime'))
         underway = task and task['target_id'] == row['id'] and task['action'] == 'outpost_return'
         if returning:
-            if not visit or visit['status'] != 'visiting' or visit['return_fare'] < 800 and not underway:
+            if not visit or visit['status'] != 'visiting' or visit['return_fare'] < 8*profile(source)['annual'] and not underway:
                 raise ValueError('没有已付费且尚未结束的开拓返程许可')
         else:
             if not control(game, owner(game, row['owner_id']), row) or row['status'] in {'withdrawing', 'closed'}:
                 raise ValueError('原开拓授权已失效或驻地正在撤回')
+            if any(other['id'] != row['id'] and (other.get('visit') or {}).get('status') in {'preparing', 'visiting'}
+                   for other in game.heavens_state.get('runtime', {}).get('outposts', {}).values()):
+                raise ValueError('请先循原许可完成当前开拓返程，再启程另一组双界')
             if visit and visit['status'] in {'preparing', 'visiting'} and not (task and task['action'] == 'outpost_depart'):
                 raise ValueError('已有未结束的开拓个人行程')
         if p.party or any(n.alive and n.roster_state == 'held' and (n.custody or {}).get('holder_id') == game.id for n in game.inactive_npcs.values()):

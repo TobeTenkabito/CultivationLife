@@ -5,12 +5,13 @@ from ..economy.ledger import account, balance, transfer_value
 from ..economy.local_market import require_access
 from .state import active_task, initialize
 from .outpost_definitions import (ACTIONS, LABELS, ENDPOINTS, SITE_NAMES, WORLD_NAMES, OPTIONS,
-    CROSSING_YEARS, BUILD_YEARS, BUILD_COST, WORKING_CASH, ANNUAL_COST, MAX_UNITS, TIMED_ACTIONS, target, is_target)
+    CROSSING_YEARS, BUILD_YEARS, MAX_UNITS, TIMED_ACTIONS, is_target)
 from . import outpost_runtime as runtime
 from . import outpost_development as development
 from .development_definitions import LABELS as DEVELOPMENT_ACTIONS
 from . import outpost_conquest as conquest
 from .conquest_definitions import LABELS as CONQUEST_ACTIONS
+from .outpost_routes import profile, paired, peers, target_for, target_owner, target_destination
 
 
 def handles(state, action, target_id):
@@ -22,7 +23,7 @@ def handles(state, action, target_id):
 def entity_for(deps, game, target_id):
     if not is_target(target_id):
         raise ValueError('未知开拓驻地')
-    entity = deps.outpost_owner(game, target_id.removeprefix('outpost:'))
+    entity = deps.outpost_owner(game, target_owner(target_id))
     if not entity or entity.kind not in {'sect', 'family'}:
         raise ValueError('开拓势力不存在')
     return entity
@@ -54,6 +55,7 @@ def require_control(deps, game, entity, row):
 
 
 def dispatch_plan(deps, game, row, entity, identity, courier):
+    terms = profile(row['source'])
     require_place(game, row['source'], row['home'])
     if faction_site(entity, persist=False)['id'] != row['home'] or entity.world != row['source']:
         raise ValueError('总部已迁址；须先结清原址开拓行程')
@@ -62,7 +64,7 @@ def dispatch_plan(deps, game, row, entity, identity, courier):
         raise ValueError('驻地正在撤回或已经关闭')
     if sum(u['phase'] not in {'home', 'lost'} for u in row['units']) >= MAX_UNITS:
         raise ValueError('同一驻地最多三位原门人在途或驻守')
-    if identity not in {n['id'] for n in deps.outpost_candidates(game, entity)}:
+    if identity not in {n['id'] for n in deps.outpost_candidates(game, entity, row['destination'])}:
         raise ValueError('请选择位于原总部、自由且未被其他职责占用的门人')
     npc = deps.resolve_person(game, identity)
     road = deps.outpost_road(game, row['source'], row['home'], ENDPOINTS[row['source']], npc.realm_index)
@@ -74,9 +76,9 @@ def dispatch_plan(deps, game, row, entity, identity, courier):
     if outstanding + sum(cargo.values()) > 10000:
         raise ValueError('当地及在途仓储容量不足，请先回收原物资')
     if not store or any(store['stock'].get(key, 0) < quantity for key, quantity in cargo.items()):
-        raise ValueError('原总部府库须备齐二阶构材6、导灵矿2、储能矿2；请在府库采购后再派驻')
-    working = 0 if recovery else WORKING_CASH + (0 if courier or row['progress'] else BUILD_COST)
-    total = working + 2 * (road['years'] + CROSSING_YEARS) * ANNUAL_COST
+        raise ValueError(f'原总部府库须备齐{terms["grade"]}阶构材6、导灵矿2、储能矿2；请在府库采购后再派驻')
+    working = 0 if recovery else terms['working_cash'] + (0 if courier or row['progress'] else terms['build_cost'])
+    total = working + 2 * (road['years'] + CROSSING_YEARS) * terms['annual']
     if balance(game, depot.treasury(game, entity)) < total:
         raise ValueError(f'原势力府库不足，本次须预留 {total} 灵石（含往返路费）')
     return dict(road=road, cargo=cargo, total=total)
@@ -114,19 +116,27 @@ def quote(deps, game, action, target_id, options):
         raise ValueError('请先完成或取消当前亲自任务')
     entity = entity_for(deps, game, target_id)
     row = runtime.get(game, target_id)
+    terms = profile(row['source'] if row else entity.world) if (row['source'] if row else entity.world) in ENDPOINTS else None
     years, costs, message = 0, {}, ''
     if action == 'outpost_authorize':
         if row:
             raise ValueError('本势力已有开拓许可，原记录不会刷新或覆盖')
         require_control(deps, game, entity, None)
         if entity.world not in ENDPOINTS:
-            raise ValueError('首期开拓仅开放人界与魔界')
+            raise ValueError('此界面没有已登记的同层开拓路线')
+        destination = target_destination(target_id, entity.world)
+        if not paired(entity.world, destination) or target_for(entity.id,entity.world,destination) != target_id:
+            raise ValueError('须选择已登记的同层双界目的地')
+        if len(state.get('outposts', {}) if state else {}) >= 8:
+            raise ValueError('本档开拓文书已达八份上限，请先管理原有记录')
+        if not deps.outpost_lane(game, dict(source=entity.world,destination=destination)):
+            raise ValueError('本双界路线或所需界面内容未开放')
         require_place(game, entity.world, faction_site(entity, persist=False)['id'])
         if not game.heavens_state.get('generation_enabled') or not deps.get_definitions().generation_available:
             raise ValueError('请先在设置中允许发现新的诸天联系')
-        if not 3 <= game.player.realm_index <= 5 or game.player.sealed_cultivation or game.player.cultivation_suppression:
-            raise ValueError('首期开拓须具备未封限的结丹至炼虚修为')
-        message = '原总部保留原址。批准对界固定落点的民用建设、派驻与补给；此许可不授予宣战或军队征服权。'
+        if not terms['minimum'] <= game.player.realm_index <= terms['maximum'] or game.player.sealed_cultivation or game.player.cultivation_suppression:
+            raise ValueError('开拓须具备本界层要求的未封限修为')
+        message = f'原总部保留原址。批准{WORLD_NAMES[entity.world]}·{SITE_NAMES[entity.world]}至{WORLD_NAMES[destination]}·{SITE_NAMES[destination]}的民用建设、派驻与补给；军事行动须另批军令。'
     else:
         if not row:
             raise ValueError('须先在原总部批准跨界开拓')
@@ -139,14 +149,14 @@ def quote(deps, game, action, target_id, options):
         if action in {'outpost_dispatch', 'outpost_supply'}:
             plan = dispatch_plan(deps, game, row, entity, options['person_id'], action == 'outpost_supply')
             costs = {'organization_stones': plan['total']}
-            message = f'原府库实付托管 {plan["total"]} 灵石；集结 {plan["road"]["years"]} 年、跨界 {CROSSING_YEARS} 年。' + ('使者交付后实际返乡。' if action == 'outpost_supply' else '另装运原府库二阶构材6、导灵矿2、储能矿2；抵达后施工10年。')
+            message = f'原府库实付托管 {plan["total"]} 灵石；集结 {plan["road"]["years"]} 年、跨界 {CROSSING_YEARS} 年。' + ('使者交付后实际返乡。' if action == 'outpost_supply' else f'另装运原府库{terms["grade"]}阶构材6、导灵矿2、储能矿2；抵达后施工10年。')
         elif action in {'outpost_depart', 'outpost_return'}:
             deps.outpost_player_plan(game, row, action == 'outpost_return')
             years = CROSSING_YEARS
-            costs = {'stones': CROSSING_YEARS * ANNUAL_COST * (2 if action == 'outpost_depart' else 0)}
+            costs = {'stones': CROSSING_YEARS * terms['annual'] * (2 if action == 'outpost_depart' else 0)}
             if action == 'outpost_depart' and balance(game, 'player') < costs['stones']:
-                raise ValueError('须从个人行囊预留1600灵石，含去程和返程各800')
-            message = '本人单独循已授权路线通行，原组织职位不因临时通行清除；返程800灵石独立保留，不搬运门人或仓库。'
+                raise ValueError(f'须从个人行囊预留{2*CROSSING_YEARS*terms["annual"]}灵石，含去程和返程')
+            message = f'本人循已授权路线通行，原组织职位不因临时通行清除；返程{CROSSING_YEARS*terms["annual"]}灵石独立保留。'
         elif action == 'outpost_wait':
             years = 1
             if game.player.world not in {row['source'], row['destination']}:
@@ -171,8 +181,8 @@ def quote(deps, game, action, target_id, options):
                 if row['status'] != 'active':
                     raise ValueError('只有已运营驻地可以暂停')
             elif action == 'outpost_activate':
-                if row['status'] != 'suspended' or row['governor_id'] not in {u['person_id'] for u in residents} or balance(game, runtime.wallet(row)) < ANNUAL_COST:
-                    raise ValueError('恢复须已建成、有自由驻守门人且当地经费至少100灵石')
+                if row['status'] != 'suspended' or row['governor_id'] not in {u['person_id'] for u in residents} or balance(game, runtime.wallet(row)) < terms['annual']:
+                    raise ValueError(f'恢复须已建成、有自由驻守门人且当地经费至少{terms["annual"]}灵石')
             elif action == 'outpost_withdraw':
                 if conquest.current(game, row) or any(conquest.stores.pending(w) for w in conquest.wars(game, row)):
                     raise ValueError('须先停战、等待原军队循路归返并结清军需')
@@ -197,7 +207,7 @@ def execute(deps, game, action, target_id, options, proposal, *, run_task, cance
     if action == 'outpost_authorize':
         source = entity.world
         row = dict(id=target_id, owner_id=entity.id, owner_kind=depot.owner_kind(game, entity), issuer_id=game.id,
-            source=source, destination='demon' if source == 'human' else 'human', home=faction_site(entity, persist=False)['id'],
+            source=source, destination=target_destination(target_id,source), home=faction_site(entity, persist=False)['id'],
             status='authorized', progress=0, stock={}, units=[], sequence=0, governor_id=None,
             last_year=game.player.age, visit=None, history=[])
         state.setdefault('outposts', {})[target_id] = row
@@ -206,18 +216,19 @@ def execute(deps, game, action, target_id, options, proposal, *, run_task, cance
         runtime.note(game, row, '总部正式批准跨界开拓，原势力与山门保持唯一。')
         return {'message': '跨界开拓许可已登记'}
     row = runtime.get(game, target_id)
+    fare = CROSSING_YEARS*profile(row['source'])['annual']
     if action in DEVELOPMENT_ACTIONS:
         return development.execute(deps, game, row, action, options)
     if action in CONQUEST_ACTIONS:
         return conquest.execute(deps, game, row, action, options)
     if action in TIMED_ACTIONS:
         if action == 'outpost_depart':
-            escrow = deps.reserve_resources(game, 1600, None, 0)
-            escrow['total'] = 800
-            row['visit'] = dict(status='preparing', return_fare=800)
+            escrow = deps.reserve_resources(game, 2*fare, None, 0)
+            escrow['total'] = fare
+            row['visit'] = dict(status='preparing', return_fare=fare)
         elif action == 'outpost_return':
-            escrow = dict(total=800, spent=0, refunded=0, material=None, mp_paid=0)
-            row['visit']['return_fare'] -= 800
+            escrow = dict(total=fare, spent=0, refunded=0, material=None, mp_paid=0)
+            row['visit']['return_fare'] -= fare
         else:
             escrow = dict(total=0, spent=0, refunded=0, material=None, mp_paid=0)
         task = dict(id=f'heavens-task-{state["next_task_seq"]}', action=action, target_id=target_id,
@@ -300,64 +311,62 @@ def project(deps, game):
     entities = deps.outpost_owners(game)
     result = []
     for entity in entities:
-        key = target(entity.id)
-        row = rows.get(key)
-        source = row['source'] if row else entity.world
-        if source not in ENDPOINTS:
-            continue
-        destination = row['destination'] if row else 'demon' if source == 'human' else 'human'
-        item = dict(id=key, name=entity.name + '·异界分驻地', source=source, destination=destination,
-            source_name=WORLD_NAMES[source], destination_name=WORLD_NAMES[destination],
-            gateway=SITE_NAMES[source], location_name=SITE_NAMES[destination],
-            status=row['status'] if row else 'unregistered', actions=[], candidates=[], residents=[], units=[], history=[])
-        local = game.player.world == destination and game.player.location_id == ENDPOINTS[destination]
-        headquarters = game.player.world == source and game.player.location_id == (row['home'] if row else faction_site(entity, persist=False)['id'])
-        if row:
-            item.update(progress=row['progress'], duration=BUILD_YEARS,
-                return_fare=row['visit']['return_fare'] if row['visit'] else 0,
-                visit_status=row['visit']['status'] if row['visit'] else None,
-                history=list(row['history']), governor_id=row['governor_id'])
-            if local:
-                item.update(stock=dict(row['stock']), balance=balance(game, runtime.wallet(row)))
-                item['stock_rows'] = [dict(name=deps.outpost_item_name(k), quantity=n)
-                                      for k, n in row['stock'].items() if n]
-            else:
-                item['notice'] = '异界详情以最后收到的记录为准；实际抵达当地后核实库存、负责人和建设进度。'
-            for unit in row['units']:
-                npc = deps.resolve_person(game, unit['person_id'])
-                name = npc.name if npc else '原门人'
-                notice = '受控暂停' if npc and npc.alive and not runtime.free(game, npc) else ''
-                if unit['phase'] == 'stationed' and not unit['delivered']:
-                    notice = '已抵达，原钱货待当地接收'
-                if unit['phase'] in {'outbound', 'returning'} and not deps.outpost_lane(game, row, returning=unit['phase'] == 'returning', person_id=unit['person_id']):
-                    notice = '通道关闭或实际修为超出承载，原地等候'
-                elif unit['phase'] == 'homeward' and not unit['duration']:
-                    notice = '已抵原址，等待仓库卸货与账目结清'
-                if headquarters or local:
-                    item['units'].append(dict(id=unit['person_id'], name=name, phase=unit['phase'],
-                        progress=unit['progress'], duration=unit['duration'], alive=bool(npc and npc.alive),
-                        free=runtime.free(game, npc), courier=unit['courier'], notice=notice))
-                if local and not unit['courier'] and runtime.located(deps, game, row, unit):
-                    item['residents'].append(dict(id=npc.id, name=npc.name))
-        if headquarters:
-            item['candidates'] = deps.outpost_candidates(game, entity)
-        for action, label in LABELS.items():
-            if action in DEVELOPMENT_ACTIONS or action in CONQUEST_ACTIONS:
-                continue
-            options = {}
-            if OPTIONS[action]:
-                choices = item['candidates'] if action in {'outpost_dispatch', 'outpost_supply'} else item['residents'] if action == 'outpost_appoint' else [u for u in item['units'] if u['phase'] in {'gathering', 'outbound', 'stationed'} and u['free']]
-                options = {'person_id': choices[0]['id'] if choices else ''}
-            control = dict(action=action, target_id=key, label=label, options=options)
-            try:
-                control.update(quote(deps, game, action, key, options), enabled=True)
-            except ValueError as exc:
-                control.update(enabled=False, reason=str(exc))
-            item['actions'].append(control)
-        state = game.heavens_state.get('runtime')
-        item['development'] = development.project(deps, game, row, key,
-            actor_reason(game) or ('请先完成或取消当前亲自任务' if state and active_task(state) else None))
-        item['conquest'] = conquest.project(deps, game, row, key,
-            actor_reason(game) or ('请先完成或取消当前亲自任务' if state and active_task(state) else None))
-        result.append(item)
+        registered = [(key,row,row['source'],row['destination']) for key,row in rows.items() if row['owner_id']==entity.id]
+        cases = registered + [(target_for(entity.id,entity.world,destination),None,entity.world,destination)
+                              for destination in peers(entity.world) if target_for(entity.id,entity.world,destination) not in rows]
+        for key, row, source, destination in cases:
+            item = dict(id=key, name=entity.name + ('·异界分驻地' if profile(source)['tier']==1 else '·'+WORLD_NAMES[destination]+'分驻地'), source=source, destination=destination,
+                source_name=WORLD_NAMES[source], destination_name=WORLD_NAMES[destination],
+                gateway=SITE_NAMES[source], location_name=SITE_NAMES[destination], terms=profile(source),
+                status=row['status'] if row else 'unregistered', actions=[], candidates=[], residents=[], units=[], history=[])
+            local = game.player.world == destination and game.player.location_id == ENDPOINTS[destination]
+            headquarters = game.player.world == source and game.player.location_id == (row['home'] if row else faction_site(entity, persist=False)['id'])
+            if row:
+                item.update(progress=row['progress'], duration=BUILD_YEARS,
+                    return_fare=row['visit']['return_fare'] if row['visit'] else 0,
+                    visit_status=row['visit']['status'] if row['visit'] else None,
+                    history=list(row['history']), governor_id=row['governor_id'])
+                if local:
+                    item.update(stock=dict(row['stock']), balance=balance(game, runtime.wallet(row)))
+                    item['stock_rows'] = [dict(name=deps.outpost_item_name(k), quantity=n)
+                                          for k, n in row['stock'].items() if n]
+                else:
+                    item['notice'] = '异界详情以最后收到的记录为准；实际抵达当地后核实库存、负责人和建设进度。'
+                for unit in row['units']:
+                    npc = deps.resolve_person(game, unit['person_id'])
+                    name = npc.name if npc else '原门人'
+                    notice = '受控暂停' if npc and npc.alive and not runtime.free(game, npc) else ''
+                    if unit['phase'] == 'stationed' and not unit['delivered']:
+                        notice = '已抵达，原钱货待当地接收'
+                    if unit['phase'] in {'outbound', 'returning'} and not deps.outpost_lane(game, row, returning=unit['phase'] == 'returning', person_id=unit['person_id']):
+                        notice = '通道关闭或实际修为超出承载，原地等候'
+                    elif unit['phase'] == 'homeward' and not unit['duration']:
+                        notice = '已抵原址，等待仓库卸货与账目结清'
+                    if headquarters or local:
+                        item['units'].append(dict(id=unit['person_id'], name=name, phase=unit['phase'],
+                            progress=unit['progress'], duration=unit['duration'], alive=bool(npc and npc.alive),
+                            free=runtime.free(game, npc), courier=unit['courier'], notice=notice))
+                    if local and not unit['courier'] and runtime.located(deps, game, row, unit):
+                        item['residents'].append(dict(id=npc.id, name=npc.name))
+            if headquarters:
+                item['candidates'] = deps.outpost_candidates(game, entity, destination)
+            for action, label in LABELS.items():
+                if action in DEVELOPMENT_ACTIONS or action in CONQUEST_ACTIONS:
+                    continue
+                options = {}
+                if OPTIONS[action]:
+                    choices = item['candidates'] if action in {'outpost_dispatch', 'outpost_supply'} else item['residents'] if action == 'outpost_appoint' else [u for u in item['units'] if u['phase'] in {'gathering', 'outbound', 'stationed'} and u['free']]
+                    options = {'person_id': choices[0]['id'] if choices else ''}
+                control = dict(action=action, target_id=key, label=label, options=options)
+                try:
+                    control.update(quote(deps, game, action, key, options), enabled=True)
+                except ValueError as exc:
+                    control.update(enabled=False, reason=str(exc))
+                item['actions'].append(control)
+            state = game.heavens_state.get('runtime')
+            item['development'] = development.project(deps, game, row, key,
+                actor_reason(game) or ('请先完成或取消当前亲自任务' if state and active_task(state) else None))
+            item['conquest'] = conquest.project(deps, game, row, key,
+                actor_reason(game) or ('请先完成或取消当前亲自任务' if state and active_task(state) else None))
+            result.append(item)
     return result

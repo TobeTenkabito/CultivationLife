@@ -11,7 +11,8 @@ from ..economy.ledger import account, balance, transfer_value
 from ..economy.basket_trade import quote as market_quote, purchase
 from ...regional_context import task_active, historical
 from . import outpost_runtime as base
-from .outpost_definitions import ENDPOINTS, ANNUAL_COST
+from .outpost_definitions import ENDPOINTS
+from .outpost_routes import profile
 from .development_definitions import LABELS, JOBS, LOCAL_PHASES, MAX_CLAIMS
 
 
@@ -51,6 +52,8 @@ def local_quote(deps, game, row):
 
 
 def job_plan(deps, game, row, action, options):
+    terms = profile(row['source'])
+    annual = terms['annual']
     location = options['location_id']
     maps = deps.outpost_maps()
     visible = territory.snapshot(game, maps, row['destination'])
@@ -80,7 +83,7 @@ def job_plan(deps, game, row, action, options):
     if action == 'outpost_build_site':
         for role, quantity in (('ore_structure', 6), ('ore_conduct', 2), ('ore_store', 2)):
             for world in (row['source'], row['destination']):
-                key = f'item:econ_{world}_2_{role}'
+                key = f'item:econ_{world}_{terms["grade"]}_{role}'
                 if row['stock'].get(key, 0) >= quantity:
                     cargo[key] = quantity
                     break
@@ -91,21 +94,23 @@ def job_plan(deps, game, row, action, options):
         if rival == row['owner_id'] or rival not in visible.get(location, {}):
             raise ValueError('须选择当地确有影响力的其他势力')
         opponents = deps.outpost_local_people(game, row, location, rival)
-        if npc.realm_index < 3 or not any(n.realm_index >= 3 for n in opponents):
-            raise ValueError('双方须有实际在场且可应约的结丹以上修士')
-    cost = JOBS[action][2] + (outward['years'] + homeward['years']) * ANNUAL_COST
-    if balance(game, base.wallet(row)) < cost + 3 * ANNUAL_COST:
-        raise ValueError(f'当地经费不足，须预留本次 {cost} 灵石及原驻地三年养护300灵石')
+        if npc.realm_index < terms['minimum'] or not any(n.realm_index >= terms['minimum'] for n in opponents):
+            raise ValueError('双方须有符合本界层修为、实际在场且可应约的修士')
+    cost = JOBS[action][2]*terms['scale'] + (outward['years'] + homeward['years']) * annual
+    if balance(game, base.wallet(row)) < cost + 3 * annual:
+        raise ValueError(f'当地经费不足，须预留本次 {cost} 灵石及原驻地三年养护{3*annual}灵石')
     return dict(outward=outward, homeward=homeward, cargo=cargo, cost=cost)
 
 
 def quote(deps, game, row, action, options):
+    terms = profile(row['source'])
+    annual = terms['annual']
     costs = {}
     ready(deps, game, row, operating=action not in {'outpost_invest', 'outpost_cancel_local', 'outpost_buy_materials'})
     if action == 'outpost_invest':
-        if row['progress'] != 10 or row['status'] not in {'active', 'suspended'} or balance(game, 'player') < 10000:
-            raise ValueError('须有已建成且未撤回的驻地，以及个人实有一万灵石')
-        return dict(years=0, costs={'stones': 10000}, refundable={}, message='本人现场实付一万灵石进入当地原账户，可用于恢复养护与经营。')
+        if row['progress'] != 10 or row['status'] not in {'active', 'suspended'} or balance(game, 'player') < terms['transfer']:
+            raise ValueError(f'须有已建成且未撤回的驻地，以及个人实有{terms["transfer"]}灵石')
+        return dict(years=0, costs={'stones': terms['transfer']}, refundable={}, message=f'本人现场实付{terms["transfer"]}灵石进入当地原账户，可用于恢复养护与经营。')
     if action == 'outpost_develop':
         if row.get('development'):
             raise ValueError('已经开办地方经营，不会重置旧收益和工期')
@@ -123,8 +128,6 @@ def quote(deps, game, row, action, options):
             return dict(years=0, costs={'organization_stones': plan['cost']}, refundable={},
                 message=f'原门人去程{plan["outward"]["years"]}年、办事{JOBS[action][1]}年、返程{plan["homeward"]["years"]}年，原款及所需材料随身托管；负责人留守。',
                 warning='途中受控、离位、失路或原驻地停办会暂停；死亡损失原随身钱货。')
-        if action == 'outpost_invest' and balance(game, 'player') < 10000:
-            raise ValueError('个人行囊不足一万灵石')
         if action == 'outpost_buy_materials':
             market, required, bills, total, fingerprint = local_quote(deps, game, row)
             if options['quote_id'] != fingerprint:
@@ -151,13 +154,14 @@ def quote(deps, game, row, action, options):
             if not any(u['person_id'] == options['person_id'] and u.get('local_job', {}).get('status') == 'active' for u in row['units']):
                 raise ValueError('没有可结束的原地方行程')
         if action == 'outpost_export':
-            if options['person_id'] not in {w['id'] for w in workers(deps, game, row)} or balance(game, base.wallet(row)) < 10300:
-                raise ValueError('须有空闲原门人，并留下三年养护后实有一万灵石可运回')
-            message = '原门人携当地一万灵石循原跨界路线返乡；抵达原仓库后才结入原势力府库，不直接加到玩家行囊。'
+            if options['person_id'] not in {w['id'] for w in workers(deps, game, row)} or balance(game, base.wallet(row)) < terms['transfer'] + 3*annual:
+                raise ValueError(f'须有空闲原门人，并留下三年养护后实有{terms["transfer"]}灵石可运回')
+            message = f'原门人携当地{terms["transfer"]}灵石循原跨界路线返乡；抵达原仓库后才结入原势力府库，不直接加到玩家行囊。'
     return dict(years=0, costs=costs, refundable={}, message=message)
 
 
 def execute(deps, game, row, action, options):
+    terms = profile(row['source'])
     if action == 'outpost_develop':
         main = ENDPOINTS[row['destination']]
         row['development'] = dict(version=1, started_at=game.player.age, claims={main: game.player.age},
@@ -167,7 +171,7 @@ def execute(deps, game, row, action, options):
             if market['world'] == row['destination']:
                 revenue.adopt(game, market)
     elif action == 'outpost_invest':
-        transfer_value(game, 'player', base.wallet(row), 10000, '本人现场向原异界驻地实付注资')
+        transfer_value(game, 'player', base.wallet(row), terms['transfer'], '本人现场向原异界驻地实付注资')
     elif action == 'outpost_buy_materials':
         market, required, bills, total, fingerprint = local_quote(deps, game, row)
         for key, quantity in required.items():
@@ -204,13 +208,15 @@ def execute(deps, game, row, action, options):
         next(u for u in row['units'] if u['person_id'] == options['person_id'])['local_job']['cancel_requested'] = True
     elif action == 'outpost_export':
         unit = next(u for u in row['units'] if u['person_id'] == options['person_id'])
-        transfer_value(game, base.wallet(row), unit['wallet'], 10000, '原门人装运当地一万灵石返乡')
+        transfer_value(game, base.wallet(row), unit['wallet'], terms['transfer'], '原门人装运当地原款返乡')
         base.recall(row, unit)
     base.note(game, row, LABELS[action] + '：沿原人、原款与原地理记录办理。')
     return {'message': LABELS[action] + '已登记'}
 
 
 def settle_claims(deps, game, row):
+    terms = profile(row['source'])
+    annual = terms['annual']
     dev = row.get('development')
     if not dev or not task_active(game, row['destination']):
         return
@@ -229,8 +235,8 @@ def settle_claims(deps, game, row):
         if not policy:
             owned['policy'] = ''
         main = loc == ENDPOINTS[row['destination']]
-        due = 0 if main else math.ceil(10 * (owned['value'] / 100 + (.3 if owned['outpost'] else 0)) * (policy['upkeep'] if policy else 1) * years)
-        available = max(0, balance(game, base.wallet(row)) - 300) if anchors.operational(game, row) else 0
+        due = 0 if main else math.ceil(10*terms['scale'] * (owned['value'] / 100 + (.3 if owned['outpost'] else 0)) * (policy['upkeep'] if policy else 1) * years)
+        available = max(0, balance(game, base.wallet(row)) - 3*annual) if anchors.operational(game, row) else 0
         paid = min(due, available)
         transfer_value(game, base.wallet(row), f'background:{row["destination"]}', paid, '异界外围地方真实巡守与养护')
         dev['expense'] += paid
@@ -247,6 +253,7 @@ def settle_claims(deps, game, row):
 
 
 def reaction(deps, game, row, unit):
+    terms = profile(row['source'])
     dev, job = row['development'], unit['local_job']
     if historical(game) or game.player.age // 10 <= dev['counter_decade']:
         return
@@ -262,10 +269,10 @@ def reaction(deps, game, row, unit):
         people = deps.outpost_local_people(game, row, location, identity)
         treasury = f'organization:{"family" if enemy is game.family else "sect"}:{identity}'
         funds = game.intrigue_state.get('factions', {}).get(f'{"family" if enemy is game.family else "sect"}:{identity}', {}).get('resources', 0)
-        if not people or funds < 1000:
+        if not people or funds < 1000*terms['scale']:
             continue
         dev['counter_decade'] = game.player.age // 10
-        transfer_value(game, treasury, f'background:{row["destination"]}', 1000, '当地原势力实付巡边抵制经费')
+        transfer_value(game, treasury, f'background:{row["destination"]}', 1000*terms['scale'], '当地原势力实付巡边抵制经费')
         own = deps.resolve_person(game, unit['person_id'])
         rank = max((p.realm_index, p.layer) for p in people)
         draw = random.Random(f'{game.seed}:{row["id"]}:counter:{game.player.age // 10}').random()
@@ -310,6 +317,8 @@ def end_job(deps, game, row, unit, *, lost=False):
 
 
 def advance_job(deps, game, row, unit):
+    terms = profile(row['source'])
+    annual = terms['annual']
     job = unit['local_job']
     npc = deps.resolve_person(game, unit['person_id'])
     main, location = ENDPOINTS[row['destination']], job['location_id']
@@ -332,14 +341,14 @@ def advance_job(deps, game, row, unit):
                            existing=job['action'] == 'outpost_build_site')
         except ValueError:
             return
-        opponents = [p for p in deps.outpost_local_people(game, row, location, job['rival_id']) if p.realm_index >= 3] if job['action'] == 'outpost_spar' else []
+        opponents = [p for p in deps.outpost_local_people(game, row, location, job['rival_id']) if p.realm_index >= terms['minimum']] if job['action'] == 'outpost_spar' else []
         if job['action'] == 'outpost_spar' and not opponents:
             return
         if not job['installed']:
             job['stock'] = {}
             job['installed'] = True
         progress = unit['progress'] + 1
-        spent = JOBS[job['action']][2] * progress // unit['duration']
+        spent = JOBS[job['action']][2]*terms['scale'] * progress // unit['duration']
         amount = spent - job['fee_spent']
         if balance(game, job['wallet']) < amount:
             return
@@ -348,10 +357,10 @@ def advance_job(deps, game, row, unit):
         job['fee_spent'] = spent
     elif unit['progress'] < unit['duration']:
         route = deps.outpost_road(game, row['destination'], expected, location if stage == 'local_outbound' else main, npc.realm_index)
-        if not route or route['years'] > unit['duration'] or balance(game, job['wallet']) < ANNUAL_COST:
+        if not route or route['years'] > unit['duration'] or balance(game, job['wallet']) < annual:
             return
-        transfer_value(game, job['wallet'], f'background:{row["destination"]}', ANNUAL_COST, '地方门人沿实际道路行旅')
-        row['development']['expense'] += ANNUAL_COST
+        transfer_value(game, job['wallet'], f'background:{row["destination"]}', annual, '地方门人沿实际道路行旅')
+        row['development']['expense'] += annual
     if unit['progress'] < unit['duration']:
         unit['progress'] += 1
     if unit['progress'] < unit['duration']:
@@ -406,7 +415,7 @@ def project(deps, game, row, target_id, blocked_reason=None):
                 action=job['action'], label=LABELS[job['action']], location_name=deps.outpost_maps().location(row['destination'], job['location_id'])['name'],
                 phase=unit['phase'], progress=unit['progress'], duration=unit['duration'], status=job['status'], result=job['result']))
     def control(action, options=None):
-        item = dict(action=action, target_id=target_id, label=LABELS[action], options=options or {})
+        item = dict(action=action, target_id=target_id, label=(f'现场注资{profile(row["source"])["transfer"]}灵石' if action=='outpost_invest' else f'携{profile(row["source"])["transfer"]}灵石返回总部' if action=='outpost_export' else LABELS[action]), options=options or {})
         try:
             if blocked_reason:
                 raise ValueError(blocked_reason)
@@ -445,7 +454,7 @@ def project(deps, game, row, target_id, blocked_reason=None):
             continue
         own = visible.get(loc, {}).get(row['owner_id'], {})
         rivals = [dict(id=key, name=anchors.organization(game, key).name) for key in visible.get(loc, {}) if key != row['owner_id']
-                  and any(n.realm_index >= 3 for n in deps.outpost_local_people(game, row, loc, key))]
+                  and any(n.realm_index >= profile(row['source'])['minimum'] for n in deps.outpost_local_people(game, row, loc, key))]
         place = dict(id=loc, name=site['name'], value=round(own.get('value', 0), 2), outpost=bool(own.get('outpost')),
                      rivals=rivals, policies=[dict(id=p, name=v['name']) for p, v in POLICIES.items() if permits(p, own.get('value', 0))], actions=[])
         for action in JOBS:

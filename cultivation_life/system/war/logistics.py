@@ -110,7 +110,8 @@ def replenish(game,maps,war,side,amount=None):
     state=war['logistics']['sides'][side]
     if war.get('outpost_id'):
         if war.get('campaign_phase') == 'engaged':
-            reserve = requirements.energy(game, war, side)*4 + 500
+            from ..heavens.outpost_routes import profile
+            reserve = requirements.energy(game, war, side)*4 + 5*profile(war['world'])['annual']
             supply.purchase(game,maps,war,side,war['world'],war['location_id'],max(0, balance(game,wallet(war,side))-reserve))
         return 0
     if war.get('strategic_war_id') and (war.get('campaign_phase') != 'marching' or war.get('logistics_initialized')):

@@ -1,10 +1,10 @@
 """Bounded civilian development commands; no military authorization."""
 LABELS = {
-    'outpost_develop': '开办地方经营', 'outpost_invest': '向当地注资一万灵石',
+    'outpost_develop': '开办地方经营', 'outpost_invest': '向驻地注资',
     'outpost_buy_materials': '采购开拓资材', 'outpost_expand': '派人联络地方',
     'outpost_build_site': '派人建设外驻点', 'outpost_spar': '派人论道争取支持',
     'outpost_policy': '调整地方政策', 'outpost_retract': '撤去当地影响',
-    'outpost_cancel_local': '结束地方行程并返回驻地', 'outpost_export': '携一万灵石返回总部',
+    'outpost_cancel_local': '结束地方行程并返回驻地', 'outpost_export': '运款返回总部',
 }
 OPTIONS = {key: set() for key in LABELS}
 OPTIONS.update(outpost_buy_materials={'quote_id'}, outpost_expand={'person_id', 'location_id'},

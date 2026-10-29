@@ -107,13 +107,14 @@ def plan_world_transition(game, request, systems, maps):
     recovery = bool(route and route.get("seal_recovery"))
     if mode == TransitionMode.EXPEDITION:
         from .heavens.outpost_definitions import ENDPOINTS
+        from .heavens.outpost_routes import paired, profile
         from ..person_assignments import outpost_lane_holder
         def crossing_eligible(row, unit, npc):
             a, b = (row['destination'], row['source']) if unit['phase'] == 'returning' else (row['source'], row['destination'])
             ceiling = cultivation_ceiling(systems, b)
             return (systems['world_profiles'][b]['enabled'] and (not ceiling or (npc.realm_index, npc.layer) <= ceiling)
                     and any(r['id'] == f'expedition:{a}:{b}' and r['enabled'] for r in systems['world_transition_routes']))
-        if outpost_lane_holder(game, eligible=crossing_eligible) not in {None, game.id}:
+        if outpost_lane_holder(game, eligible=crossing_eligible, source=player.world, destination=request.destination) not in {None, game.id}:
             raise ValueError('开拓通道正有原门人通行，请等候通道空出')
         rows = game.heavens_state.get('runtime', {}).get('outposts', {}).values()
         authorized = any(
@@ -124,7 +125,8 @@ def plan_world_transition(game, request, systems, maps):
             for row in rows)
         if (not authorized or player.world not in ENDPOINTS or request.destination not in ENDPOINTS
                 or player.location_id != ENDPOINTS[player.world] or request.arrival_location != ENDPOINTS[request.destination]
-                or seal or player.cultivation_suppression or not 3 <= player.realm_index <= 5):
+                or not paired(player.world, request.destination) or seal or player.cultivation_suppression
+                or not profile(player.world)['minimum'] <= player.realm_index <= profile(player.world)['maximum']):
             raise ValueError('缺少当前落点的开拓往返许可，或修为不符')
         if (player.party or any(n.alive and n.roster_state == 'held' and (n.custody or {}).get('holder_id') == game.id
                                for n in game.inactive_npcs.values())):

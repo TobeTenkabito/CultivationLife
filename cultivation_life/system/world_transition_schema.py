@@ -1,6 +1,7 @@
 """World route classification and content validation without transition side effects."""
 from enum import Enum
 from dataclasses import dataclass
+from .heavens.outpost_routes import ENDPOINTS as OUTPOST_ENDPOINTS, paired
 
 
 class TransitionDirection(str, Enum):
@@ -97,11 +98,11 @@ def validate_transition_content(profiles, routes, realms):
         if mode == TransitionMode.SEALED_RETURN:
             raise ValueError("返界授权仅能来自当前封印")
         if mode == TransitionMode.EXPEDITION and (direction != TransitionDirection.LATERAL
-                or {route['source'], route['destination']} != {'human', 'demon'}
+                or not paired(route['source'], route['destination'])
                 or route.get('purpose') != 'organizational_outpost' or route.get('capacity') != 1
-                or route.get('source_location') != {'human': 'wudi_plain', 'demon': 'red_marrow_city'}[route['source']]
-                or route.get('destination_location') != {'human': 'wudi_plain', 'demon': 'red_marrow_city'}[route['destination']]):
-            raise ValueError('首期开拓路线必须明确人魔两界落点与单人容量')
+                or route.get('source_location') != OUTPOST_ENDPOINTS[route['source']]
+                or route.get('destination_location') != OUTPOST_ENDPOINTS[route['destination']]):
+            raise ValueError('开拓路线须为已登记同层双界、固定落点与单人容量')
         if mode == TransitionMode.STUDY and (direction != TransitionDirection.LATERAL
                 or profiles[route['source']]['tier'] != 3 or route.get('capacity') != 1
                 or route.get('purpose') != 'personal_study'):

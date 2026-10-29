@@ -1,4 +1,5 @@
 """Player-chartered local campaigns over original armies, wars and treaties."""
+from .outpost_routes import profile
 import random
 from ...regional_context import task_active, ordinary_year
 from ...runtime import decode_rng, encode_rng
@@ -11,8 +12,8 @@ from ..war.occupancy import busy
 from ..war.creation import create
 from ..war import logistics, requirements
 from . import outpost_runtime as base, outpost_development as development, conquest_logistics as stores
-from .conquest_definitions import LABELS, WAR_BUDGET, BATTLE_INTERVAL, WAR_LIMIT
-from .outpost_definitions import ENDPOINTS, ANNUAL_COST
+from .conquest_definitions import LABELS, BATTLE_INTERVAL, WAR_LIMIT
+from .outpost_definitions import ENDPOINTS
 
 
 def wars(game, row):
@@ -66,9 +67,9 @@ def plan(deps, game, row, options):
     defenders = defense['people']
     if not defenders:
         raise ValueError('当地没有可实际应战的原守军，不虚构战争或战果')
-    travel = (outward['years'] + homeward['years']) * ANNUAL_COST
-    if balance(game, base.wallet(row)) < WAR_BUDGET + travel + 300:
-        raise ValueError(f'当地须实有军费{WAR_BUDGET}、往返行旅{travel}及驻地养护300灵石')
+    travel = (outward['years'] + homeward['years']) * profile(row['source'])['annual']
+    if balance(game, base.wallet(row)) < profile(row['source'])['war_budget'] + travel + 3*profile(row['source'])['annual']:
+        raise ValueError(f'当地须实有军费{profile(row['source'])['war_budget']}、往返行旅{travel}及驻地养护{3*profile(row['source'])['annual']}灵石')
     history = wars(game, row)
     if len(history) >= WAR_LIMIT and not any(w['campaign_phase'] == 'home' and not stores.pending(w) for w in history):
         raise ValueError('原战役仍有未结清实物，请先结清归返军需')
@@ -85,7 +86,7 @@ def quote(deps, game, row, action, options):
         message = '单独批准已到场门人的当地征战；民用跨界通道仍只运送民用派驻者，不另授军队跨界输送权。'
     elif action == 'outpost_war_start':
         p = plan(deps, game, row, options)
-        return dict(years=0, costs={'organization_stones': WAR_BUDGET+p['travel']}, refundable={}, message=f'原门人循路赴{p["enemy"].name}驻地；去程{p["outward"]["years"]}年，返程{p["homeward"]["years"]}年。军费从当地实付，原总部不出虚兵。')
+        return dict(years=0, costs={'organization_stones': profile(row['source'])['war_budget']+p['travel']}, refundable={}, message=f'原门人循路赴{p["enemy"].name}驻地；去程{p["outward"]["years"]}年，返程{p["homeward"]["years"]}年。军费从当地实付，原总部不出虚兵。')
     else:
         war = current(game, row) or next(iter(reversed(wars(game, row))), None)
         if not war:
@@ -204,9 +205,9 @@ def advance_person(deps, game, row, war, side, j):
         route = deps.outpost_road(game, war['world'], expected, j['destination'] if outward else j['origin'], npc.realm_index)
         if not route or route['years'] > j['duration']: return
         if unit:
-            if j['travel_spent']+ANNUAL_COST > j['travel_paid'] or balance(game, unit['wallet']) < ANNUAL_COST: return
-            transfer_value(game, unit['wallet'], f'background:{war["world"]}', ANNUAL_COST, '原驻地部众实际年度行军')
-            j['travel_spent'] += ANNUAL_COST
+            if j['travel_spent']+profile(row['source'])['annual'] > j['travel_paid'] or balance(game, unit['wallet']) < profile(row['source'])['annual']: return
+            transfer_value(game, unit['wallet'], f'background:{war["world"]}', profile(row['source'])['annual'], '原驻地部众实际年度行军')
+            j['travel_spent'] += profile(row['source'])['annual']
         j['progress'] += 1
     if j['progress'] < j['duration']: return
     deps.outpost_move_npc(game, npc.id, war['world'], j['destination'] if outward else j['origin'])
@@ -254,8 +255,8 @@ def advance(deps, game, row):
     if war['status'] == 'peace_ready' and war.get('winner') == 'attacker' and war['frontier']['victory_battles'] and not requirements.deployed_people(game, war, 'defender', arrived_only=True):
         # Five actual years of uncontested, supplied occupation of the real
         # headquarters earn one 35-point objective, never a replayed click.
-        if not war['frontier']['occupation_awarded'] and balance(game, logistics.wallet(war, 'attacker')) >= ANNUAL_COST:
-            transfer_value(game, logistics.wallet(war, 'attacker'), f'background:{war["world"]}', ANNUAL_COST, '原部众实际控制目标驻地年度开支')
+        if not war['frontier']['occupation_awarded'] and balance(game, logistics.wallet(war, 'attacker')) >= profile(row['source'])['annual']:
+            transfer_value(game, logistics.wallet(war, 'attacker'), f'background:{war["world"]}', profile(row['source'])['annual'], '原部众实际控制目标驻地年度开支')
             war['frontier']['occupation'] += 1
             if war['frontier']['occupation'] == 5:
                 war['frontier']['occupation_awarded'] = True

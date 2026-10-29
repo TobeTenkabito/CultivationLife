@@ -2,11 +2,9 @@
 import re
 from .development_definitions import LABELS as DEVELOPMENT_LABELS, OPTIONS as DEVELOPMENT_OPTIONS, LOCAL_PHASES
 from .conquest_definitions import LABELS as CONQUEST_LABELS, OPTIONS as CONQUEST_OPTIONS
+from .outpost_routes import ENDPOINTS, WORLD_NAMES, SITE_NAMES, target
 
 OUTPOST_ID = 'outpost_network'
-ENDPOINTS = {'human': 'wudi_plain', 'demon': 'red_marrow_city'}
-WORLD_NAMES = {'human': '人界', 'demon': '魔界'}
-SITE_NAMES = {'human': '无棣原', 'demon': '赤髓城'}
 CROSSING_YEARS = 8
 BUILD_YEARS = 10
 BUILD_COST = 10000
@@ -35,12 +33,8 @@ PHASES |= LOCAL_PHASES
 PHASES.add('campaign')
 
 
-def target(owner_id):
-    return 'outpost:' + owner_id
-
-
 def is_target(value):
-    return isinstance(value, str) and re.fullmatch(r'outpost:[\w-]{1,100}', value) is not None
+    return isinstance(value, str) and re.fullmatch(r'outpost:[\w-]{1,100}(?::[a-z_]{1,40})?', value) is not None
 
 
 def route_id(source, destination):

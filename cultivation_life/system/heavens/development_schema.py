@@ -1,6 +1,7 @@
 """Pure optional state contract for regional development and original workers."""
 from .development_definitions import JOBS, LOCAL_PHASES, MAX_CLAIMS
 from .outpost_definitions import ENDPOINTS
+from .outpost_routes import profile
 
 
 def counter(value):
@@ -40,7 +41,7 @@ def validate_job(unit, row, stock_validator):
         raise ValueError('地方行程阶段不一致')
     for key in ('out_years', 'return_years', 'fee_spent', 'started_at'):
         counter(job[key])
-    if job['fee_spent'] > JOBS[job['action']][2] or not isinstance(job['wallet'], str):
+    if job['fee_spent'] > JOBS[job['action']][2]*profile(row['source'])['scale'] or not isinstance(job['wallet'], str):
         raise ValueError('地方行程费用无效')
     if not isinstance(job['location_id'], str) or not isinstance(job['rival_id'], str):
         raise ValueError('地方行程地点或对手无效')
@@ -48,7 +49,7 @@ def validate_job(unit, row, stock_validator):
         route = job[field]
         if type(route) is not list or not route or any(not isinstance(loc, str) or not loc for loc in route):
             raise ValueError('地方行程道路无效')
-    stock_validator(job['stock'], row['source'])
+    stock_validator(job['stock'], row['source'], row['destination'])
     main, location = ENDPOINTS[row['destination']], job['location_id']
     if (job['out_route'][0] != main or job['out_route'][-1] != location
             or job['return_route'][0] != location or job['return_route'][-1] != main):

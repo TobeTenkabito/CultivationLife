@@ -1,4 +1,5 @@
 """Finite original field cash and stock, carried home before any refund."""
+from .outpost_routes import profile
 from ..war import logistics, requirements, supply
 from ..economy import depot
 from ..economy.ledger import account, balance, transfer_value
@@ -6,7 +7,6 @@ from ..economy.state import ensure_regional_market
 from ..economy.basket_trade import sale
 from . import outpost_runtime as base
 from .outpost_definitions import ENDPOINTS
-from .conquest_definitions import WAR_BUDGET
 
 
 def initialize(deps, game, row, war):
@@ -17,13 +17,13 @@ def initialize(deps, game, row, war):
             mobilized=0, spent=0, purchased=0, destroyed=0, transport_loss=0, coverage=1., contributions={}, items={}, consumed_items={}, cross_realm=False,
             stationing_year=game.player.age, stationing_credit=0., stationing_paid=0, stationing_shortfall=0, mobilization_paid=0)
         if side == 'attacker':
-            amount, origin, owner = WAR_BUDGET, base.wallet(row), row['owner_id']
+            amount, origin, owner = profile(row['source'])['war_budget'], base.wallet(row), row['owner_id']
         else:
             entity = deps.outpost_owner(game, war['defender_id'])
             from ..economy.organizations import register
             register(game, depot.owner_kind(game, entity), entity.id, entity.world)
             origin, owner = depot.treasury(game, entity), entity.id
-            amount = min(WAR_BUDGET, balance(game, origin))
+            amount = min(profile(row['source'])['war_budget'], balance(game, origin))
         transfer_value(game, origin, logistics.wallet(war, side), amount, '原地组织实付有限出征军费，未到场不得参战')
         state = war['logistics']['sides'][side]
         state.update(mobilized=amount, contributions={owner: amount})

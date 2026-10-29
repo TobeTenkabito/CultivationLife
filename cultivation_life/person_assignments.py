@@ -88,18 +88,23 @@ def route_occupied(game, source, destination, *, exclude=None):
     return False
 
 
-def outpost_lane_holder(game, *, eligible=None):
+def outpost_lane_holder(game, *, eligible=None, source=None, destination=None):
     """One civilian frontier lane; suspended foreign trips do not block entry."""
     from .regional_context import task_active
     from .system.heavens.outpost_definitions import is_target, ENDPOINTS
     from .npc_custody import is_free
     from .relationship_records import find_person
     runtime = game.heavens_state.get('runtime', {})
+    def matches(row):
+        return not source or {row.get('source'), row.get('destination')} == {source, destination}
     if any(is_target(t.get('target_id')) and t['action'] in {'outpost_depart', 'outpost_return'}
-           and t['status'] in {'reserved', 'running', 'paused'} for t in runtime.get('tasks', [])):
+           and t['status'] in {'reserved', 'running', 'paused'}
+           and matches(runtime.get('outposts', {}).get(t['target_id'], {})) for t in runtime.get('tasks', [])):
         return game.id
     candidates = []
     for row in runtime.get('outposts', {}).values():
+        if not matches(row):
+            continue
         for unit in row['units']:
             world = row['source'] if unit['phase'] == 'outbound' else row['destination']
             npc = find_person(game, unit['person_id'], include_inactive=True)

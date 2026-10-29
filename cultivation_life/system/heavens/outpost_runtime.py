@@ -5,8 +5,9 @@ from ...spatial_people import instance_of
 from ...regional_context import task_active
 from ..economy import depot
 from ..economy.ledger import account, balance, transfer_value
-from .outpost_definitions import ENDPOINTS, CROSSING_YEARS, BUILD_YEARS, BUILD_COST, ANNUAL_COST
+from .outpost_definitions import ENDPOINTS, CROSSING_YEARS, BUILD_YEARS
 from .development_definitions import LOCAL_PHASES
+from .outpost_routes import profile
 
 
 def get(game, target):
@@ -18,7 +19,7 @@ def wallet(row):
 
 
 def materials(world):
-    return {'item:' + material_id(world, 2, role): quantity for role, quantity in
+    return {'item:' + material_id(world, profile(world)['grade'], role): quantity for role, quantity in
             (('ore_structure', 6), ('ore_conduct', 2), ('ore_store', 2))}
 
 
@@ -69,11 +70,12 @@ def deliver_local(game, row, unit):
     the cargo remains in their original purse and inventory, never available
     to pay retrospectively for earlier local construction or upkeep.
     """
+    annual = profile(row['source'])['annual']
     if row['status'] != 'withdrawing':
         for identity, quantity in unit['stock'].items():
             row['stock'][identity] = row['stock'].get(identity, 0) + quantity
         unit['stock'] = {}
-        reserve = (CROSSING_YEARS + unit['road_years']) * ANNUAL_COST
+        reserve = (CROSSING_YEARS + unit['road_years']) * annual
         transfer_value(game, unit['wallet'], wallet(row), max(0, balance(game, unit['wallet']) - reserve), '当地实际接收开拓运输原款')
         if row['status'] == 'authorized':
             row['status'] = 'building'
@@ -113,6 +115,7 @@ def deliver_home(deps, game, row, unit):
 
 
 def advance_unit(deps, game, row, unit, year, lane_holder):
+    annual = profile(row['source'])['annual']
     name = unit['phase']
     if name == 'campaign':
         return  # The original war journey owns movement and military time.
@@ -149,16 +152,16 @@ def advance_unit(deps, game, row, unit, year, lane_holder):
         return
     if name in {'outbound', 'returning'}:
         if (lane_holder != unit['person_id'] or not deps.outpost_lane(game, row, returning=name == 'returning', person_id=unit['person_id'])
-                or not 1 <= npc.realm_index <= 5):
+                or not profile(row['source'])['npc_minimum'] <= npc.realm_index <= profile(row['source'])['maximum']):
             return
     elif unit['duration']:
         plan = deps.outpost_road(game, row['source'], row['home'], ENDPOINTS[row['source']], npc.realm_index)
         if not plan or plan['years'] > unit['road_years']:
             return
     if unit['progress'] < unit['duration']:
-        if balance(game, unit['wallet']) < ANNUAL_COST:
+        if balance(game, unit['wallet']) < annual:
             return
-        transfer_value(game, unit['wallet'], f'background:{owning_world}', ANNUAL_COST, '开拓行程实际年度费用')
+        transfer_value(game, unit['wallet'], f'background:{owning_world}', annual, '开拓行程实际年度费用')
         unit['progress'] += 1
     if unit['progress'] < unit['duration']:
         return
@@ -185,9 +188,16 @@ def year_step(deps, game):
     if not ordinary_year(game) or (region(game) or game.player.world) in {'lost', 'rift'}:
         return
     from ...person_assignments import outpost_lane_holder
-    lane_holder = outpost_lane_holder(game, eligible=lambda row, unit, npc:
-        deps.outpost_lane(game, row, returning=unit['phase'] == 'returning', person_id=npc.id))
-    for row in game.heavens_state.get('runtime', {}).get('outposts', {}).values():
+    rows = game.heavens_state.get('runtime', {}).get('outposts', {}).values()
+    # Reserve each pair for the whole actual year. Completing one charter's
+    # crossing must not let a later charter use that same annual slot again.
+    pairs = {tuple(sorted((row['source'], row['destination']))) for row in rows}
+    lanes = {pair: outpost_lane_holder(game, source=pair[0], destination=pair[1], eligible=lambda r, unit, npc:
+             deps.outpost_lane(game, r, returning=unit['phase'] == 'returning', person_id=npc.id)) for pair in pairs}
+    for row in rows:
+        terms = profile(row['source'])
+        annual = terms['annual']
+        lane_holder = lanes[tuple(sorted((row['source'], row['destination'])))]
         if row.get('military'):
             deps.advance_outpost_war(game, row)
         year = game.player.age
@@ -225,7 +235,7 @@ def year_step(deps, game):
             continue
         if row['status'] == 'building':
             required = materials(row['source'])
-            yearly = BUILD_COST // BUILD_YEARS
+            yearly = terms['build_cost'] // BUILD_YEARS
             if balance(game, wallet(row)) < yearly:
                 continue
             if row['progress'] == 0:
@@ -242,8 +252,8 @@ def year_step(deps, game):
             if row['governor_id'] not in {u['person_id'] for u in residents}:
                 row['status'] = 'suspended'
                 note(game, row, '原负责人已不能在场履职，驻地暂停；可任命原在场门人接任。')
-            elif balance(game, wallet(row)) < ANNUAL_COST:
+            elif balance(game, wallet(row)) < annual:
                 row['status'] = 'suspended'
                 note(game, row, '当地维护经费不足，驻地暂停经营；库存和人员保留。')
             else:
-                transfer_value(game, wallet(row), f'background:{row["destination"]}', ANNUAL_COST, '异界分驻地年度养护')
+                transfer_value(game, wallet(row), f'background:{row["destination"]}', annual, '异界分驻地年度养护')

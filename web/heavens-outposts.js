@@ -10,24 +10,25 @@
       const directory=node('div',null,'heavens-directory');
       for(const row of projects)tile(directory,{name:row.name,description:`${row.source_name} · ${row.gateway} → ${row.destination_name} · ${row.location_name}`,status:status[row.status],glyph:'驻',onClick:()=>go('worlds',row.id)});
       host.append(directory);
-      if(!projects.length)empty(host,'尚无可开拓的势力','首期支持人界或魔界的原宗门、家族。取得实际控制权后，在原总部批准开拓；结丹至炼虚可申请个人往返。');
+      if(!projects.length)empty(host,'尚无可开拓的势力','支持普通三层界面的同层双界开拓。取得原宗门或家族实际控制权后，在原总部为指定目的界批准开拓。');
       return;
     }
     const returnLink=node('button','‹ 返回开拓目录','heavens-back');returnLink.type='button';returnLink.onclick=()=>go('worlds','outpost_network');host.append(returnLink);
     title(host,selected.name,`${selected.source_name} → ${selected.destination_name} · ${selected.location_name} · ${status[selected.status]}`);
     if(selected.notice)host.append(node('p',selected.notice,'muted'));
+    const terms=selected.terms,annual=terms.annual,fare=annual*8;
     subview(host,[['permit','授权与往返'],['staff','派驻与补给'],['local','驻地与仓储'],['development','地方经营'],['conquest','征战与归附'],['records','开拓纪要']],'permit',(body,section)=>{
       let actions=[];
       if(section==='permit'){
-        body.append(node('p',`在原总部批准开拓，到${selected.gateway}申请个人通行。本人去返程各8年，各800灵石；首次启程同时预留返程款。`),node('p','民用开拓许可只用于派驻、施工和补给，不附带征服或宣战权。'));
+        body.append(node('p',`在原总部批准前往${selected.destination_name}的开拓，到${selected.gateway}申请个人通行。去返程各8年，各${fare.toLocaleString()}灵石；首次启程同时预留返程款。`),node('p','每组双界独立使用一条单人通道。民用许可用于派驻、施工和补给；当地征战须另行取得军令。'));
         if(selected.visit_status)body.append(node('p',`个人行程：${({preparing:'启程中',visiting:'异界停留',returned:'已经返乡',cancelled:'启程已取消',failed:'行程结束'})[selected.visit_status]} · 保留返程款 ${selected.return_fare} 灵石`));
         actions=selected.actions.filter(r=>['outpost_authorize','outpost_depart','outpost_return','outpost_wait'].includes(r.action));
       }else if(section==='staff'){
-        body.append(node('p','原门人先沿地图道路集结，再跨界8年。施工另需当地10年；随行预留往返费用。每处最多3人在途或驻守。'),node('p','派驻携带原府库二阶构材6、导灵矿2、储能矿2；补给使者携款抵达后循路返乡。'));
+        body.append(node('p',`原门人沿道路集结，再跨界8年。施工另需当地10年、劳务${terms.build_cost.toLocaleString()}灵石；每处最多3人在途或驻守。`),node('p',`派驻携带原府库${terms.grade}阶构材6、导灵矿2、储能矿2；往返每行旅年${annual.toLocaleString()}灵石，补给使者实付送款${terms.working_cash.toLocaleString()}灵石。`));
         for(const unit of selected.units)body.append(node('p',`${unit.name}${unit.courier?' · 补给使者':''}：${phase[unit.phase]}${unit.duration?` · ${unit.progress}/${unit.duration}年`:''}${unit.notice?' · '+unit.notice:''}`));
         actions=selected.actions.filter(r=>['outpost_dispatch','outpost_supply','outpost_recall'].includes(r.action));
       }else if(section==='local'){
-        body.append(node('p',`施工进度 ${selected.progress||0}/${selected.duration||10} 年；运营养护每当地年100灵石。暂停后保留库存与人员，停止经营养护。`));
+        body.append(node('p',`施工进度 ${selected.progress||0}/${selected.duration||10} 年；运营养护每当地年${annual.toLocaleString()}灵石。暂停后保留库存与人员，停止经营养护。`));
         if(selected.balance!=null){
           body.append(node('p',`当地经费：${selected.balance.toLocaleString()} 灵石`));
           for(const row of selected.stock_rows||[])body.append(node('p',`${row.name} × ${row.quantity}`));
@@ -60,7 +61,7 @@
         };selector.onchange=show;body.append(selector,details);show();return;
       }else if(section==='conquest'){
         const data=selected.conquest||{actions:[],rivals:[]};
-        body.append(node('p',data.authorized?'原总部已签发当地征战军令。':'须先由本人返回原总部，单独批准当地征战。'),node('p','先在目标或相邻地区经营出影响50的驻点，再派原门人循路出征。负责人留守，军费实付三万及往返路费；民用通道不额外输送军队。'));
+        body.append(node('p',data.authorized?'原总部已签发本目的界当地征战军令。':'须先由本人返回原总部，为本目的界单独批准当地征战。'),node('p',`先在目标或相邻地区经营出影响50的驻点，再派原门人循路出征。负责人留守，军费实付${terms.war_budget.toLocaleString()}灵石及往返路费；民用通道不额外输送军队。`));
         const war=data.war;
         if(war){
           body.append(node('p',`${war.enemy_name} · ${war.location_name} · ${({marching:'循路开拔',engaged:'交战与控制总部',returning:'循路撤军',home:'已归返结清'})[war.phase]} · 会战 ${war.battles} 场 · 战争分数 ${war.score}`),node('p',`实际控制总部 ${war.occupation}/5 年；部众每十年会战一次。本人亲征须沿地图到战场，每十年一次。真实胜利且分数达标后，回主驻地签订原依附和约。`));

@@ -35,7 +35,7 @@ CONTENT_VALIDATORS = frozenset(f'cultivation_life.{name}' for name in (
     'system.heavens.incident_schema', 'system.heavens.incident_definitions',
     'system.heavens.outpost_schema', 'system.heavens.outpost_definitions',
     'system.heavens.development_schema', 'system.heavens.development_definitions',
-    'system.heavens.conquest_schema', 'system.heavens.conquest_definitions',
+    'system.heavens.conquest_schema', 'system.heavens.conquest_definitions', 'system.heavens.outpost_routes',
 ))
 CORE_FACADES = frozenset(f'cultivation_life.{name}' for name in (
     'rules', 'achievements', 'event_repository', 'system.map_system',
@@ -56,7 +56,7 @@ MODEL_FOUNDATIONS = frozenset(f'cultivation_life.{name}' for name in (
     'system.heavens.incident_schema', 'system.heavens.incident_definitions',
     'system.heavens.outpost_schema', 'system.heavens.outpost_definitions',
     'system.heavens.development_schema', 'system.heavens.development_definitions',
-    'system.heavens.conquest_schema', 'system.heavens.conquest_definitions',
+    'system.heavens.conquest_schema', 'system.heavens.conquest_definitions', 'system.heavens.outpost_routes',
 ))
 COURT_FACADES = frozenset(f'cultivation_life.system.{name}' for name in (
     'heavenly_court_system', 'court_governance', 'court_lifecycle', 'yaochi_system',
@@ -195,7 +195,7 @@ def violations(edges):
                        'cultivation_life.system.heavens.incident_schema', 'cultivation_life.system.heavens.incident_definitions',
                        'cultivation_life.system.heavens.outpost_schema', 'cultivation_life.system.heavens.outpost_definitions',
                        'cultivation_life.system.heavens.development_schema', 'cultivation_life.system.heavens.development_definitions',
-                       'cultivation_life.system.heavens.conquest_schema', 'cultivation_life.system.heavens.conquest_definitions'}
+                       'cultivation_life.system.heavens.conquest_schema', 'cultivation_life.system.heavens.conquest_definitions', 'cultivation_life.system.heavens.outpost_routes'}
             and target.startswith('cultivation_life.')
             and target not in {'cultivation_life.system.heavens.definitions', 'cultivation_life.system.heavens.frontier_definitions',
                                'cultivation_life.system.heavens.frontier_schema', 'cultivation_life.system.heavens.campaign_schema',
@@ -204,7 +204,7 @@ def violations(edges):
                        'cultivation_life.system.heavens.incident_schema', 'cultivation_life.system.heavens.incident_definitions',
                        'cultivation_life.system.heavens.outpost_schema', 'cultivation_life.system.heavens.outpost_definitions',
                        'cultivation_life.system.heavens.development_schema', 'cultivation_life.system.heavens.development_definitions',
-                       'cultivation_life.system.heavens.conquest_schema', 'cultivation_life.system.heavens.conquest_definitions'}
+                       'cultivation_life.system.heavens.conquest_schema', 'cultivation_life.system.heavens.conquest_definitions', 'cultivation_life.system.heavens.outpost_routes'}
             or source.startswith('cultivation_life.system.heavens.')
             and (target.startswith(('cultivation_life.debug', 'cultivation_life.engine.'))
                  or target in {'cultivation_life.content_registry', 'cultivation_life.server'}))

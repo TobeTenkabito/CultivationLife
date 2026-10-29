@@ -1,5 +1,6 @@
 """Pure validation of original war references and explicit frontier authority."""
-from .conquest_definitions import WAR_BUDGET, WAR_LIMIT
+from .outpost_routes import profile
+from .conquest_definitions import WAR_LIMIT
 
 
 def counter(value):
@@ -37,7 +38,7 @@ def wars(game):
             raise ValueError('实际总部目标战果记录无效')
         if war.get('campaign_phase') not in {'marching', 'engaged', 'returning', 'home'}:
             raise ValueError('驻地战役阶段无效')
-        if not war.get('logistics') or war['logistics']['sides']['attacker']['contributions'] != {row['owner_id']: WAR_BUDGET}:
+        if not war.get('logistics') or war['logistics']['sides']['attacker']['contributions'] != {row['owner_id']: profile(row['source'])['war_budget']}:
             raise ValueError('驻地战役原军费记录无效')
         guests = war.get('defensive_guests')
         if type(guests) is not list or len(guests) != len(set(guests)) or not set(guests) <= set(war['roster']['defender']):
