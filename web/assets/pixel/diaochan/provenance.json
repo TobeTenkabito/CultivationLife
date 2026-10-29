@@ -1,0 +1,195 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "export": "Original painted RGBA, nearest-neighbour packing; no anatomy reconstruction",
+  "forms": 1,
+  "static_images": 3,
+  "painted_keyposes": 10,
+  "animation_clips": 7,
+  "sources": [
+    {
+      "id": "diaochan-female",
+      "source": "diaochan-female.png",
+      "sha256": "303e7ed7cf3e63a2ea653888bdbb948a7982041add4c8f8af2c3990bcf9b8985",
+      "rows": 4,
+      "exports": {
+        "figure": {
+          "source_rect": [
+            7,
+            1105,
+            311,
+            1522
+          ],
+          "scale": 0.6522781774580336
+        },
+        "portrait": {
+          "source_rect": [
+            323,
+            1105,
+            681,
+            1518
+          ],
+          "scale": 0.2711864406779661
+        },
+        "thumbnail": {
+          "source_rect": [
+            7,
+            1105,
+            311,
+            1522
+          ],
+          "scale": 0.3069544364508393
+        },
+        "idle": {
+          "source_rect": [
+            7,
+            2,
+            304,
+            386
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            132,
+            101
+          ]
+        },
+        "gather": {
+          "source_rect": [
+            359,
+            0,
+            667,
+            388
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            130,
+            99
+          ]
+        },
+        "release": {
+          "source_rect": [
+            659,
+            15,
+            1024,
+            382
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            118,
+            108
+          ]
+        },
+        "guard": {
+          "source_rect": [
+            19,
+            383,
+            314,
+            751
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            133,
+            107
+          ]
+        },
+        "brace": {
+          "source_rect": [
+            333,
+            406,
+            721,
+            748
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            114,
+            118
+          ]
+        },
+        "hit": {
+          "source_rect": [
+            719,
+            376,
+            1024,
+            758
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            131,
+            101
+          ]
+        },
+        "stagger": {
+          "source_rect": [
+            2,
+            744,
+            331,
+            1109
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            126,
+            108
+          ]
+        },
+        "kneel": {
+          "source_rect": [
+            338,
+            765,
+            643,
+            1095
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            131,
+            123
+          ]
+        },
+        "down": {
+          "source_rect": [
+            629,
+            911,
+            1024,
+            1081
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            112,
+            187
+          ]
+        },
+        "domain": {
+          "source_rect": [
+            665,
+            1079,
+            1023,
+            1524
+          ],
+          "scale": 0.4044943820224719,
+          "offset": [
+            120,
+            76
+          ]
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "id": "diaochan-female",
+      "name": "貂蝉·凤仪乱红",
+      "gender": "female",
+      "min_realm_index": 0,
+      "achievement": "relationship_fengyi_pavilion",
+      "achievement_name": "凤仪亭",
+      "rows": 4,
+      "file": "diaochan-female.png",
+      "energy_color": "#e57bb3",
+      "spell_palette": [
+        "#ef9bc6",
+        "#f4d494",
+        "#8755bb"
+      ],
+      "prompt": "Use case: stylized-concept. Original premium Chinese xianxia RPG character sprite sheet, painterly refined realistic fantasy illustration, elegant adult woman aged 25 inspired by the literary Diao Chan, NOT any existing game design. Beautiful dignified expressive face, long smooth flowing black hair with a half-up bun, delicate gold phoenix hairpin with plum gemstones, small dangling earrings. Fitted plum-violet and crimson layered silk dance dress with fine gold peony embroidery, a draped off-shoulder shawl, flowing split outer skirt over a short opaque inner skirt, two visible natural legs, matching elegant closed-toe gold-trimmed plum shoes with small heels. Graceful seductive elegance without nudity. She carries TWO small elegant folding fans with crimson silk and gold ribs, one in each hand in attack poses. Natural anatomically correct shoulders, two arms and two hands each five fingers, two legs and two feet in every full-body pose, clear distinct wrists. Hair smooth and fine, not puffy or coarse. Restrained free flowing ribbons do not conceal hands. EXACTLY TWELVE clearly separated panels in a THREE column FOUR row grid, generous transparent gaps, no overlap, no text or panel borders. Consistent woman identity, costume and proportions throughout. Top row left to right: idle full body facing right 3/4; graceful gathering pose with open fans beside chest; forward fan casting with one arm extending toward right and the other clearly bent holding second fan near shoulder. Second row: defensive side pose with two fans shielding upper body; braced low stance both fans distinct; recoiling backwards with both hands visible. Third row: staggering but balanced both feet; kneeling on one knee both arms visible and hands resting near knees; lying defeated on her side non-gory with both forearms clearly separate before chest and face, both legs and shoes identifiable. Fourth row: full-body frontal wardrobe illustration relaxed with two closed fans at sides; close-up head-and-shoulders portrait; radiant raised-fan domain pose both arms visible. Every full body fits completely with padding. Both shoes correct perspective even under skirts. Fully transparent alpha background, no background scenery, no floor, no cast shadow, no effects, no typography.",
+      "source_sha256": "303e7ed7cf3e63a2ea653888bdbb948a7982041add4c8f8af2c3990bcf9b8985"
+    }
+  ]
+}

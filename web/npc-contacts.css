@@ -9,6 +9,7 @@
 @media(max-width:600px){#npc-contacts{padding:10px}.contact-layout{grid-template-columns:1fr}.contact-directory{max-height:225px;grid-template-columns:repeat(2,minmax(0,1fr))}.contact-detail{padding:12px}.contact-heading{flex-wrap:wrap}}
 
 /* Figures and long names must share the available column, including Android landscape. */
+.contact-promise{margin-top:12px;padding:12px;border:1px solid var(--line);max-width:100%;box-sizing:border-box}.contact-promise label{display:block}.contact-promise select{display:block;width:100%;max-width:100%;margin:8px 0;color:var(--ink);background:var(--paper)}.contact-promise button{min-height:40px;margin:4px;max-width:100%;white-space:normal}
 .contact-hero{flex-wrap:wrap;min-width:0}.contact-hero>div:not(.contact-seal){flex:1 1 140px;min-width:0;overflow-wrap:anywhere}
 .contact-detail p,.contact-detail small,.contact-detail h3,.contact-detail li{overflow-wrap:anywhere;max-width:100%}
 .contact-detail .npc-art-contact-figure{flex:0 1 104px;min-width:0;max-width:35%}.contact-detail .npc-art-contact-figure .npc-art-figure{width:100%;max-width:104px}

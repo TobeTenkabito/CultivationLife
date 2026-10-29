@@ -2,7 +2,7 @@
 window.NpcContacts = (() => {
   let data, people = [], send, saveId, selected = '', query = '', filter = 'all', page = 0;
   const el = (tag, text, cls) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (cls) n.className = cls; return n; };
-  const labels = {party:'组队同行',companion:'结为道侣',friend:'结为道友',master:'拜师',disciple:'收徒',concubine:'收为侍妾',improve:'改善关系',worsen:'破坏关系',slay:'截杀',capture:'生擒'};
+  const labels = {party:'组队同行',companion:'结为道侣',friend:'结为道友',master:'拜师',disciple:'收徒',concubine:'收为侍妾',improve:'改善关系',worsen:'破坏关系',promise:'要求承诺',slay:'截杀',capture:'生擒'};
   const relation = n => {
     const name = {master:'师父',companion:'道侣',disciple:'弟子',friend:'道友',concubine:'侍妾',party:'同行'}[n.contact_relation];
     if(name) return name;
@@ -30,16 +30,31 @@ window.NpcContacts = (() => {
       const danger = ['slay','capture','worsen'].includes(action);
       const button = el('button',undefined,`contact-action${danger?' danger':''}`); button.type='button';button.dataset.contactAction=action;
       button.append(el('b',action==='party'&&n.in_party?'离开队伍':label));
-      const hint = reason || (action==='improve'||action==='worsen'?'本行动单位共一次':action==='slay'||action==='capture'?'立即交锋，后果自负':'依双方状况回应');
+      const hint = reason || (action==='promise'?'选择同地点目标，每行动单位一次':action==='improve'||action==='worsen'?'本行动单位共一次':action==='slay'||action==='capture'?'立即交锋，后果自负':'依双方状况回应');
       button.append(el('small',hint));button.title=hint;button.dataset.available=reason?'0':'1';
       button.disabled=!!reason || !!data.pending_event || !data.player.alive;
       button.onclick=()=>{
+        if(action==='promise'){drawPromise(target,n);return;}
         if(danger && !confirm(`对${n.name}执行「${label}」？${action==='worsen'?'这会降低好感。':'将按现有交锋与背叛规则结算，可能危及性命。'}`)) return;
         send({npc_id:n.id,action});
       };tools.append(button);
     }
     window.NpcArt?.contactFigure(header,n);
     target.append(tools);
+  }
+  function drawPromise(target,n){
+    target.querySelector('.contact-promise')?.remove();
+    const form=el('form',undefined,'contact-promise');
+    form.append(el('h4',`${n.name} · 要求承诺`),el('p','双方须在同一地点。交战可能导致负伤、元婴脱出或真正陨落；承诺不保证获胜。','muted'));
+    const label=el('label','指定交战目标'),select=el('select');select.name='target_id';select.setAttribute('aria-label','指定交战目标');
+    const targets=people.filter(row=>row.id!==n.id&&row.perceived_alive&&!row.contact_promise_target_reason&&n.contact_location_id&&row.contact_location_id===n.contact_location_id);
+    for(const row of targets){const option=el('option',`${row.name} · ${row.realm_name}`);option.value=row.id;select.append(option);}
+    label.append(select);form.append(label);
+    if(!targets.length)form.append(el('p','当前名册中没有与此人同地点、且可自由交战的目标。','empty'));
+    const submit=el('button','确认约战');submit.type='submit';submit.disabled=!targets.length;
+    const cancel=el('button','取消');cancel.type='button';cancel.onclick=()=>form.remove();form.append(submit,cancel);
+    form.onsubmit=event=>{event.preventDefault();const chosen=targets.find(row=>row.id===select.value);if(!chosen||!confirm(`要求${n.name}与${chosen.name}交战？双方均可能陨落。`))return;send({npc_id:n.id,action:'promise',target_id:chosen.id,expected_unit:n.contact_promise_unit});};
+    target.append(form);form.scrollIntoView({block:'nearest'});
   }
   function render(value, callback) {
     if(saveId!==value.id){saveId=value.id;selected='';query='';filter='all';page=0;}

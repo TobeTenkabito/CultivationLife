@@ -22,9 +22,11 @@ def availability(game, npc):
     blocked = ('此人不在当前界面或空间，或不在自由名册' if not is_free(npc) or not accessible(game, npc) else
                '请先结束当前事件、战斗或拘禁' if not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
                or (game.guixu_state.get('player_session') or {}).get('trapped') else '')
-    actions = dict.fromkeys(['party','companion','friend','master','disciple','concubine','slay','improve','worsen','capture'], blocked)
+    actions = dict.fromkeys(['party','companion','friend','master','disciple','concubine','slay','improve','worsen','capture','promise'], blocked)
     if blocked:
         return actions
+    from .npc_promises import request_reason
+    actions['promise'] = request_reason(game, npc)
     kind = relation_kind(p, npc.id)
     rules = WORLD_SYSTEMS['relationship']
     if kind not in {'npc','party','friend'}:
@@ -55,10 +57,14 @@ def availability(game, npc):
     return actions
 
 
-def act(deps: NpcContactDependencies, game_id, npc_id, action):
+def act(deps: NpcContactDependencies, game_id, npc_id, action, target_id='', expected_unit=None):
     game = deps._load(game_id)
     # Resolve only existing people. Opening or searching never generates population.
-    npc = deps._find_npc(game, npc_id)
+    if action == 'promise':
+        from ..relationship_records import find_person
+        npc = find_person(game, npc_id, include_inactive=True)
+    else:
+        npc = deps._find_npc(game, npc_id)
     if not npc:
         raw = next((r.get('npc') for r in game.encounter_npc_cache if (r.get('npc') or {}).get('id') == npc_id), None)
         npc = SectNpc.from_dict(raw) if raw else None
@@ -71,6 +77,8 @@ def act(deps: NpcContactDependencies, game_id, npc_id, action):
         raise ValueError(options[action])
     deps.assert_buddhist_operation_allowed(game_id, 'npc-contact')
     p = game.player
+    if action == 'promise':
+        return promise(deps, game, npc, target_id, expected_unit)
     kind = relation_kind(p, npc_id)
     if action == 'party':
         return deps.manage_party(game_id, npc_id, 'leave' if any(r.get('id') == npc_id for r in p.party) else 'invite')
@@ -94,6 +102,36 @@ def act(deps: NpcContactDependencies, game_id, npc_id, action):
     game.governance_actions[f'party_interaction:{npc_id}'] = p.age
     summary = f"你与{npc.name}{'畅谈修行，增进了解' if action == 'improve' else '言语相争，渐生嫌隙'}，好感 {delta:+g}，当前为 {affinity:g}。"
     game.history.append(HistoryRecord('SYS_NPC_CONTACT',1,p.age,'故人交往',npc_id,action,summary,{'affinity':delta},['system','relationship']))
+    game.updated_at = now_iso()
+    game.rng_state = encode_rng(rng)
+    deps.store.save(game)
+    return deps.present(game)
+
+
+def promise(deps, game, actor, target_id, expected_unit):
+    from .npc_promises import validate
+    from ..relationship_records import find_person
+    if not isinstance(target_id, str) or not target_id:
+        raise ValueError('请选择要交战的指定人物')
+    target = find_person(game, target_id, include_inactive=True)
+    if not target:
+        raw = next((r.get('npc') for r in game.encounter_npc_cache
+                    if (r.get('npc') or {}).get('id') == target_id), None)
+        target = SectNpc.from_dict(raw) if raw else None
+    if not target:
+        raise ValueError('交战目标已不在已知人物名册中')
+    validate(game, actor, target, expected_unit)
+    actor = deps._find_npc(game, actor.id) or deps._promote_cached_npc(game, actor.id, '履行交战承诺')
+    target = deps._find_npc(game, target.id) or deps._promote_cached_npc(game, target.id, '承诺交战目标')
+    rng = decode_rng(game.seed, game.rng_state)
+    outcome = deps._promise_battle(game, actor, target, rng)
+    game.governance_actions[f'npc_promise:{actor.id}'] = game.diplomacy_unit
+    fallen = [n.name for n in (actor, target) if n.id in outcome.killed]
+    summary = f'应你的要求，{actor.name}履行承诺，与{target.name}交战。'
+    summary += f'{"、".join(fallen)}当场陨落。' if fallen else '双方交锋后，伤势、消耗与身魂状态已按实际结果保留。'
+    game.history.append(HistoryRecord('SYS_NPC_PROMISE_BATTLE',1,game.player.age,'要求承诺',actor.id,
+        outcome.outcome,summary,dict(actor_id=actor.id,target_id=target.id,killed=list(outcome.killed),
+        suppressed=list(outcome.suppressed),rounds=list(outcome.rounds)),['system','relationship','combat',f'world:{actor.world}']))
     game.updated_at = now_iso()
     game.rng_state = encode_rng(rng)
     deps.store.save(game)

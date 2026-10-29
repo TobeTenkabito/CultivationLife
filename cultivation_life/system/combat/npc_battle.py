@@ -22,14 +22,15 @@ class NpcEngagement:
     rounds: tuple[dict[str, Any], ...]
 
 
-def resolve_local_engagement(attackers, defenders, config, rng, *, now=None, sources=None):
+def resolve_local_engagement(attackers, defenders, config, rng, *, now=None, sources=None,
+                             attacker_objective='repel', defender_objective='repel'):
     """Actual bounded encounters, including mortals, with persistent wounds.
 
     Repelling a combatant does not capture them or transfer a map location.
     Higher capabilities use the existing arbitration and resource settlement.
     """
     special = resolve_npc_engagement(attackers, defenders, config, rng, now=now, sources=sources,
-                                    attacker_objective='repel', defender_objective='repel')
+                                    attacker_objective=attacker_objective, defender_objective=defender_objective)
     if special is not None:
         return special
     if not attackers or not defenders:
@@ -46,14 +47,22 @@ def resolve_local_engagement(attackers, defenders, config, rng, *, now=None, sou
         for side in vitality:
             vitality[side] = max(0.0, vitality[side]-damage[side])
         rounds.append(dict(round=index+1, player_condition=vitality['player'], enemy_condition=vitality['enemy']))
-        if min(vitality.values()) <= .3:
+        if min(vitality.values()) <= (0 if 'kill' in {attacker_objective, defender_objective} else .3):
             break
+    killed = []
     for side, roster in [('player', attackers), ('enemy', defenders)]:
         for npc, _ in roster:
-            npc.wounds = min(4, npc.wounds + max(1, int((1-vitality[side])*3)))
+            lethal = (defender_objective if side == 'player' else attacker_objective) == 'kill'
+            if lethal:
+                commit_condition(npc, dict(vitality=vitality[side], body=vitality[side], suppressed=False),
+                                 lethal=True, now=now)
+                if not npc.alive:
+                    killed.append(npc.id)
+            else:
+                npc.wounds = min(4, npc.wounds + max(1, int((1-vitality[side])*3)))
     difference = vitality['player']-vitality['enemy']
     outcome = 'stalemate' if abs(difference) < .08 else 'victory' if difference > 0 else 'defeat'
-    return NpcEngagement(outcome, (), (), tuple(rounds))
+    return NpcEngagement(outcome, tuple(killed), (), tuple(rounds))
 
 
 def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[tuple[Any, float]],

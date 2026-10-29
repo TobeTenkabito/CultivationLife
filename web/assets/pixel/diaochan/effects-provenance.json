@@ -1,0 +1,132 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "painted_cast_poses": 6,
+  "painted_effect_frames": 12,
+  "cast_sha256": "da7ca45ca7dc39a92f49e207ff009921ff8dd79f2222e0007a64a0983f9b9015",
+  "cast_source_rects": [
+    [
+      15,
+      0,
+      480,
+      505
+    ],
+    [
+      560,
+      1,
+      1010,
+      520
+    ],
+    [
+      1013,
+      30,
+      1529,
+      504
+    ],
+    [
+      16,
+      526,
+      606,
+      998
+    ],
+    [
+      573,
+      511,
+      1066,
+      1005
+    ],
+    [
+      1086,
+      496,
+      1514,
+      1013
+    ]
+  ],
+  "cast_scale": 0.3069306930693069,
+  "effect_sha256": "869535da935853f25393e16eda70078ca4e113455135cbf4c2ab0704b3b52d78",
+  "effect_source_rects": [
+    [
+      0,
+      0,
+      384,
+      341
+    ],
+    [
+      384,
+      0,
+      768,
+      341
+    ],
+    [
+      768,
+      0,
+      1152,
+      341
+    ],
+    [
+      1152,
+      0,
+      1536,
+      341
+    ],
+    [
+      0,
+      341,
+      384,
+      683
+    ],
+    [
+      384,
+      341,
+      768,
+      683
+    ],
+    [
+      768,
+      341,
+      1152,
+      683
+    ],
+    [
+      1152,
+      341,
+      1536,
+      683
+    ],
+    [
+      0,
+      683,
+      384,
+      1024
+    ],
+    [
+      384,
+      683,
+      768,
+      1024
+    ],
+    [
+      768,
+      683,
+      1152,
+      1024
+    ],
+    [
+      1152,
+      683,
+      1536,
+      1024
+    ]
+  ],
+  "effect_scale": 0.7251461988304093,
+  "export": "Transparent component/grid crops and proportional packing; no painted anatomy generated in code",
+  "prompts": {
+    "generator": "OpenAI built-in image_gen",
+    "cast": "Use case: stylized-concept. Supporting identity and costume reference: attached Diao Chan sheet. Create a NEW SIX-panel attack animation keypose sheet of EXACTLY the same adult woman, identical smooth black hair, gold flower/phoenix hair ornaments, plum-crimson silk embroidered split dress, closed-toe gold-trimmed shoes and two red/gold folding fans. Six full body figures, THREE columns TWO rows, clean large transparent gutters, all face to RIGHT 3/4 view, no text, effects or scenery. Maintain anatomical two arms/two hands/two legs/two shoes in every pose; distinct wrists and fingers, do not hide a hand behind a fan. First row sequence: 1 lift first open fan beside face, other fan at hip, balanced two feet; 2 coil torso with both fans raised apart, one high overhead and second in front of chest, two feet visible; 3 sweeping dance step, rightward leading fan at shoulder height, trailing fan extended to left, ribbons sweep gracefully. Second row sequence: 4 powerful decisive forward lunge, leading arm extended to RIGHT slightly upward with open fan, other arm bent with second fan clearly beside shoulder, both shoes in natural ground perspective; 5 gentle follow through, leading fan drawn diagonally down, trailing fan lifted, weight returning to rear leg; 6 return to relaxed stance holding two folded fans at waist, both hands distinct. Same polished painterly rendering as reference, no puffy hair, no additional ornaments, no mismatched costumes. Exact same relative character scale across all six panels. Complete body with padding in every cell. Real transparent alpha background.",
+    "fx": "Use case: stylized-concept. Original painted attack VFX sprite sheet for a Chinese demonic dancer wielding two folding fans, called Phoenix Pavilion Scarlet Dance. NO humans, NO hands, NO weapons, NO text, NO scenery. EXACTLY TWELVE separate visual effects arranged FOUR columns by THREE rows, row-major sequential timeline. Each effect fully isolated with large transparent padding, no trails entering another cell. Cohesive luxurious crimson, orchid-purple, luminous rose and bright antique-gold core, high contrast dramatic readable game VFX. Frames 1-3: a compact magical circle of rose petals and curving golden silk ribbons growing into a twin crescent fan-shaped aura. Frames 4-6: dynamic projectile pointing RIGHT, twin intertwined crimson and violet crescent petal blades unfolding into a luminous GOLD PHOENIX-shaped spirit with sweeping wings and long ribbon-like tail, increasing forward extension, sharp directional silhouette. Frames 7-9: spectacular impact bloom, golden phoenix wing shapes exploding into a huge layered peony-like radial burst with magenta crescent blades, gold sparks, bright ivory-gold central flare; expands then breaks apart. Frames 10-12: dispersed petal spirals and dwindling gold embers, clearly shrinking and fading each frame, final frame sparse small connected petal cluster. No opaque background/no rectangle; true transparent alpha with translucent glows. Detailed painterly fantasy spell art, delicate flower edges and dazzling energy, distinct shapes each frame, not repeated identical decals, no circles with symbols or writing.",
+    "local_repair": {
+      "input": "diaochan-cast-v1.png",
+      "output": "diaochan-cast.png",
+      "instruction": "Precise local correction to the attached six-pose Diao Chan sprite sheet. Preserve the entire sheet, all six figures, identity, hair texture, clothing, fans, hands, color and all other poses unchanged. ONLY correct the TOP RIGHT figure's lower body: she currently shows just one clear shoe. Add the anatomically plausible rear lower leg and its matching plum-and-gold closed-toe shoe emerging a little from beneath the LEFT part of her flowing skirt. Both legs should connect naturally at the pelvis with correct perspective, support a graceful dance step, have different depth and two clearly identifiable shoes. Keep her already-visible forward leg and shoe unchanged. Do not add a third leg or extra shoe. Minimal small local edit. Keep generous transparent gaps and true transparent alpha background."
+    }
+  }
+}

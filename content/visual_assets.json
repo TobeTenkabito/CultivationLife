@@ -9763,6 +9763,82 @@
         "hunt-gold-ape",
         "hunt-jade-mantis"
       ]
+    },
+    "actor.cosmetic.diaochan-female.figure": {
+      "file": "/assets/pixel/diaochan/diaochan-female-figure.png",
+      "size": [
+        256,
+        288
+      ],
+      "sha256": "64626bc3d2916b74a4499ccea1cb8ed2f3278059415b3a51cf241a32f29247c6",
+      "requires": []
+    },
+    "actor.cosmetic.diaochan-female.portrait": {
+      "file": "/assets/pixel/diaochan/diaochan-female-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "539a35511e6659c7c5c1b3eb5bfa5953796f503268f88b0b48961652623dbf80",
+      "requires": []
+    },
+    "actor.cosmetic.diaochan-female.thumbnail": {
+      "file": "/assets/pixel/diaochan/diaochan-female-thumbnail.png",
+      "size": [
+        128,
+        144
+      ],
+      "sha256": "08974a0be8750fe47264c620a6fb839d3c5379272f403283f575fcf3b4b88ff4",
+      "requires": []
+    },
+    "diaochan-female.actions": {
+      "file": "/assets/pixel/diaochan/diaochan-female-actions.png",
+      "size": [
+        1600,
+        180
+      ],
+      "sha256": "6aaf08d6bd4a939b65e12e2c8b95ae5e47e355dd721e0bf8f13d05760aebb994",
+      "requires": []
+    },
+    "base.diaochan_manifest": {
+      "file": "/assets/pixel/diaochan/manifest.json",
+      "sha256": "01e3935ca0bf44f22f98aa5bb881bdee424015e8b4e9ca55bc16ada07c02f2c2",
+      "requires": [],
+      "combat_actors": [
+        "diaochan-female"
+      ],
+      "skin_forms": [
+        {
+          "name": "貂蝉·凤仪乱红·女",
+          "gender": "female",
+          "role": "hero",
+          "scope": "path",
+          "min_realm_index": 0,
+          "static": "actor.cosmetic.diaochan-female",
+          "combat": "diaochan-female",
+          "unlock_label": "女性魔修 · 完成成就「凤仪亭」解锁 · 无境界限制",
+          "achievement": "relationship_fengyi_pavilion",
+          "path": "demonic"
+        }
+      ]
+    },
+    "diaochan-female.casting": {
+      "file": "/assets/pixel/diaochan/diaochan-female-casting.png",
+      "size": [
+        1267,
+        159
+      ],
+      "sha256": "3459ed4441a0a8b2ec580cd55c15ccce43dd3e8b206de30392e5687eb668486d",
+      "requires": []
+    },
+    "effect.diaochan_phoenix.keyframes": {
+      "file": "/assets/pixel/diaochan/diaochan-fx.png",
+      "size": [
+        1536,
+        864
+      ],
+      "sha256": "34c1c6a9c00dbeb321544b1f0dfd36dd5356ce68ba6bb45911b22ea9daa36ca8",
+      "requires": []
     }
   },
   "items": {

@@ -10,6 +10,7 @@ from ...system.monster_identity import identity
 from ...system.path_modifiers import modifier
 from ...system.npc_social import social_hint
 from ...system.npc_contacts import availability, relation_kind
+from ...system.npc_promises import projection as promise_projection
 
 import copy
 from typing import Any
@@ -30,6 +31,15 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
     world_people = {**{npc.id: npc for sect in game.sects.values() if sect.kind == "institution"
                       and sect.world == game.player.world for npc in sect.npcs},
                     **game.world_npcs, **game.notable_npcs}
+    from ...relationship_records import find_person
+    personal_ids = {r.get('id') for r in [game.player.dao_companion, game.player.master,
+                    *game.player.dao_friends, *game.player.disciples] if r}
+    if game.player.concubine_status:
+        personal_ids.add(game.player.concubine_status.get('owner_id'))
+    for person_id in personal_ids:
+        npc = find_person(game, person_id, include_inactive=True)
+        if npc and npc.world == game.player.world:
+            world_people.setdefault(npc.id, npc)
     for cached in game.encounter_npc_cache:
         saved = cached.get("npc")
         if isinstance(saved, dict):
@@ -85,7 +95,8 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
         result.append({
             **public_npc,
             "institution_name": institutions[npc.id].name if npc.id in institutions else None,
-            "contact_source": "institution" if npc.id in institutions else "fixed" if npc.id in game.world_npcs else "important" if npc.id in game.notable_npcs else "pool",
+            "contact_source": "institution" if npc.id in institutions else "fixed" if npc.id in game.world_npcs else "important" if npc.id in game.notable_npcs or npc.id in personal_ids else "pool",
+            **promise_projection(game, npc),
             "contact_relation": relation_kind(game.player, npc.id),
             "contact_actions": availability(game, npc),
             "realm_name": perception["realm_name"] if perception else deps._npc_realm_name(npc),

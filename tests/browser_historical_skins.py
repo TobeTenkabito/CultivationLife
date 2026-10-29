@@ -142,7 +142,8 @@ def main():
 
 def verify_painted_effects(page, skin):
     page.evaluate('''async skin=>{
-      const effect=skin==='nobunaga-male'?'nobunaga_command':'seimei_lunar';
+      const effect={'nobunaga-male':'nobunaga_command','seimei-male':'seimei_lunar','diaochan-female':'diaochan_phoenix'}[skin];
+      if(!effect)throw Error('Unknown painted costume');
       const actor={cast_effect:effect},sheet=HistoricalEffects.sheetFor(actor);
       const im=await createImageBitmap(await (await fetch(sheet)).blob());
       const canvas=()=>Object.assign(document.createElement('canvas'),{width:700,height:450});

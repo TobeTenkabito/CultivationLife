@@ -293,7 +293,8 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == "choice":
                 result = ENGINE.choose(game_id, payload.get("choice_id", ""), event_id=payload.get('event_id'))
             elif operation == "npc-contact":
-                result = ENGINE.contact_action(game_id, payload.get("npc_id", ""), payload.get("action", ""))
+                result = ENGINE.contact_action(game_id, payload.get("npc_id", ""), payload.get("action", ""),
+                                               payload.get('target_id', ''), payload.get('expected_unit'))
             elif operation == "relationship-violence":
                 result = ENGINE.relationship_violence(game_id, **payload)
             elif operation == "buddhist-action":

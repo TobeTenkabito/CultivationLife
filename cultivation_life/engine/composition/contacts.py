@@ -1,6 +1,7 @@
 """Bind contact operations without a system-to-engine import."""
 from ...system.npc_contact_dependencies import NpcContactDependencies
 from ..actions.relationships import manage_faction_relationship
+from ...system.npc_promises import resolve as resolve_promise
 
 
 def bind_contacts(engine) -> NpcContactDependencies:
@@ -9,6 +10,7 @@ def bind_contacts(engine) -> NpcContactDependencies:
         _find_npc=lambda *args, **kwargs: engine._find_npc(*args, **kwargs),
         _load=lambda *args, **kwargs: engine._load(*args, **kwargs),
         _promote_cached_npc=lambda *args, **kwargs: engine._promote_cached_npc(*args, **kwargs),
+        _promise_battle=lambda game, actor, target, rng: resolve_promise(game, actor, target, rng, engine._npc_power),
         _sage_affinity_gain=lambda *args, **kwargs: engine._sage_affinity_gain(*args, **kwargs),
         assert_buddhist_operation_allowed=lambda *args, **kwargs: engine.assert_buddhist_operation_allowed(*args, **kwargs),
         begin_relationship_capture=lambda *args, **kwargs: engine.begin_relationship_capture(*args, **kwargs),

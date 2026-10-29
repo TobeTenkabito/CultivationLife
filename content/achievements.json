@@ -2,6 +2,12 @@
   "schema_version": 1,
   "achievements": [
     {
+      "id": "relationship_fengyi_pavilion", "name": "凤仪亭", "category": "cultivation",
+      "description": "身为他人侍妾时，要求自己的道侣履行交战承诺，并由其实际斩杀当时的正主。美人不动手，英雄先翻脸。解锁女性魔修貂蝉皮肤。",
+      "source": {"kind": "base", "id": "base", "name": "游戏本体"},
+      "condition": {"milestone_at_least": {"id": "fengyi_pavilion", "value": 1}}
+    },
+    {
       "id": "ghost_hundred_non_ghost_kills",
       "name": "百鬼夜行",
       "description": "在同一存档内，以鬼修身份累计击杀100名非鬼修修士，解锁男性安倍晴明皮肤。",

@@ -28,6 +28,8 @@ def _matches(player, form):
     # Explicit cosmetic scope, never a wildcard for natural/bloodline forms.
     if form.get('scope') == 'all_paths':
         return form.get('gender') == player.gender
+    if form.get('scope') == 'path':
+        return form.get('gender') == player.gender and form.get('path') == player.path
     return all(form.get(k) == getattr(player, k) for k in ('path', 'race', 'gender'))
 
 
@@ -96,7 +98,7 @@ def eligible_skins(player):
     result = []
     for key in sorted(unlocked):
         form = forms.get(key)
-        if form and form.get('scope') == 'all_paths' and not _matches(player, form):
+        if form and form.get('scope') in {'all_paths', 'path'} and not _matches(player, form):
             continue
         if form and key+'.portrait' in assets and key+'.figure' in assets:
             result.append(_skin_entry(key, form, assets))
@@ -140,7 +142,7 @@ def public(player):
     assets = _assets()
     locked = [_skin_entry(form['static'], form, assets) for entry in assets.values()
               for form in entry.get('skin_forms', [])
-              if form.get('scope') == 'all_paths' and _matches(player, form) and form['static'] not in known
+              if form.get('scope') in {'all_paths', 'path'} and _matches(player, form) and form['static'] not in known
               and (form.get('achievement') or form.get('min_realm_index', 0) > _attained_realm(player))
               and form['static']+'.portrait' in assets and form['static']+'.figure' in assets]
     return dict(selected=player.character_skins.get('selected'), available=available,

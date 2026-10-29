@@ -10,6 +10,7 @@ class NpcContactDependencies:
     _find_npc: Callable[..., Any]
     _load: Callable[..., Any]
     _promote_cached_npc: Callable[..., Any]
+    _promise_battle: Callable[..., Any]
     _sage_affinity_gain: Callable[..., Any]
     assert_buddhist_operation_allowed: Callable[..., Any]
     begin_relationship_capture: Callable[..., Any]

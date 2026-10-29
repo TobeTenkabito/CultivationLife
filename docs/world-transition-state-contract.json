@@ -1,6 +1,7 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "GameState.governance_actions.npc_promise:ID / Player.milestones.fengyi_pavilion / GameState.history.SYS_NPC_PROMISE_BATTLE": "history：故人笺要求承诺沿原行动单位记录每NPC一次，保存和跨界不刷新；同界同实例同实际地点的原自由无任务人物即时交锋，无人物移动、年份或复制。历史记录双方原ID、真实死亡／镇压及最多8轮原结算。凤仪亭仅玩家当时为目标侍妾、受托者为真实道侣且原正主实际死亡时登记，同归于尽也可；元婴逃脱、假死、镇压、旁观和旧死亡文本不补算。原NPC资源及生命原位回写，不生成玩家战利品或击杀数，无新资源、时钟、路线或跨界例外。",
     "Player.milestones.ghost_non_ghost_kills / GameState.history.SYS_GHOST_CULTIVATOR_KILL": "history：原玩家击杀结算登记击杀时玩家为鬼修、对手为已确认非鬼修修士的同档累计事实；原人物编号去重，计数及明细至多100。跨界、转道、保存保留，新存档从零开始，不按旧死亡文本追认。非击杀、灵兽、凡人、未知道途、鬼修、商盟代杀及NPC后台死亡不记录；不改变击杀奖励、死亡或通行规则。",
     "GameState.history.*.state_diff.body_destroyed / lost_realm / second_rescued / mode / joined_age / former / successor": "history：原身魂成功结算记录肉身被毁及当时真实境界、第二元婴实际承接；原跨界提交记录已执行方式，原宗门财政罢免记录宗门、宗籍年龄和前后掌门编号。只作为成就行为证据保留，不复制人物、修为、通行凭证或资源；缺少旧证据不按叙事文案追造。",
     "intrigue_state.factions.sect:ID.task_board.rescue_donation": "scope：当前玩家在原宗门欠薪时实际付款后登记的救薪候选，含玩家ID、宗籍年龄、世界及原历史起点索引，不存现金。仅当前在籍同界原年度真正全员足额发薪时核验并消费；退宗或跨界记录、不同宗籍和不同玩家使候选失效，不补算离界期间。",

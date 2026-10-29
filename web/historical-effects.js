@@ -3,7 +3,8 @@
   'use strict';
   const specs=Object.freeze({
     nobunaga_command:{sheet:'/assets/pixel/historical/nobunaga-fx.png',width:350},
-    seimei_lunar:{sheet:'/assets/pixel/historical/seimei-fx.png',width:330}
+    seimei_lunar:{sheet:'/assets/pixel/historical/seimei-fx.png',width:330},
+    diaochan_phoenix:{sheet:'/assets/pixel/diaochan/diaochan-fx.png',width:380}
   });
   const clamp=x=>Math.max(0,Math.min(1,x)),mix=(a,b,t)=>a+(b-a)*t;
   const phases=[['charge',-1.4,-.65,0],['travel',-.65,0,3],
