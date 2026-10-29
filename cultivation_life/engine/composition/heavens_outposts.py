@@ -141,10 +141,72 @@ def bind_outposts(engine, ports):
         else:
             settle_claims(ports(), game, row)
 
+    def register_war(game, war):
+        from ...system.war.creation import register
+        engine._ensure_npc_formations(game)
+        register(game, war, engine._append_war_log, engine._war_side_name)
+
+    def war_round(game, war, rng, personal):
+        from ...system.war import logistics
+        from ...system.war.requirements import deployed_people
+        before = war['war_score']
+        if personal:
+            engine._resolve_player_war_round(game, war, 'attacker', rng)
+        else:
+            logistics.begin_round(game, engine.maps, war, rng, 'attacker')
+            contexts = engine._war_formation_contexts(game, war)
+            lines = [engine._resolve_field_attack(game, war, 'attacker', rng, contexts)]
+            if not engine._finish_war_by_morale(game, war):
+                lines.append(engine._resolve_field_attack(game, war, 'defender', rng, contexts))
+            war['battles'] += 1
+            engine._wear_war_guard_arrays(game, war)
+            engine._finish_war_by_morale(game, war)
+            engine._append_war_log(game, war, '驻地部众会战', ' '.join(lines))
+        if war['war_score'] > before:
+            war['frontier']['victory_battles'] += 1
+        # The ordinary one-sided empty-roster result is a real rout, not a
+        # second battle. Preserve the underlying morale/scoring settlement.
+        missing = [side for side in ('attacker', 'defender') if not deployed_people(game, war, side, arrived_only=True)]
+        if missing:
+            for side in missing:
+                war['morale'][side] = 0.
+            war['status'] = 'active'
+            engine._finish_war_by_morale(game, war)
+
+    def advance_war(game, row):
+        from ...system.heavens.outpost_conquest import advance
+        advance(ports(), game, row)
+
+    def defenders(game, row, location, identity):
+        people = local_people(game, row, location, identity)
+        # The original guest helper adopts a faction on read. Quotes must use
+        # the same original guest records without invoking that mutation.
+        record = game.intrigue_state.get('factions', {}).get(f'sect:{identity}', {})
+        guests = [g.get('npc_id') for g in record.get('guests', [])] if engine._intrigue_enabled() else []
+        deployed = {i for w in game.wars if w.get('status') in {'active', 'peace_ready', 'withdrawing'}
+                    for ids in w.get('roster', {}).values() for i in ids}
+        selected = []
+        for person in guests:
+            npc = find_person(game, person, include_inactive=True)
+            if (free(game, npc) and npc.id not in deployed and npc.world == row['destination'] and npc.location_id == location
+                    and not research_assignment(game, npc.id)):
+                selected.append(npc)
+        regular = sorted(people, key=engine._npc_power, reverse=True)[:int(engine._war_rules().get('roster_cap', 24))]
+        by_id = {n.id: n for n in [*regular, *selected]}
+        chosen = list(by_id.values())
+        if len(chosen) > 48:
+            raise ValueError('当地原守军及防御客卿超出本期战役容量，不能省略防御保证')
+        return dict(people=chosen, guests=[n.id for n in chosen if n.id in guests])
+
     return dict(outpost_owner=owner, outpost_owners=owners, outpost_control=control,
                 outpost_candidates=candidates, outpost_road=road, outpost_lane=lane,
                 outpost_prepare_npc=prepare, outpost_move_npc=move_npc,
                 outpost_player_plan=player_plan, outpost_move_player=move_player,
                 outpost_item_name=lambda key: ITEM_CATALOG[key.removeprefix('item:')].name,
                 outpost_maps=lambda: engine.maps, outpost_local_people=local_people, outpost_site_reason=site_reason,
-                advance_outpost_job=advance_job, end_outpost_job=end_job, outpost_settle_claims=settle_claims)
+                advance_outpost_job=advance_job, end_outpost_job=end_job, outpost_settle_claims=settle_claims,
+                outpost_organizations=lambda game: [*game.sects.values(), *([game.family] if game.family else [])],
+                outpost_register_war=register_war, outpost_war_round=war_round, advance_outpost_war=advance_war,
+                outpost_defenders=defenders,
+                outpost_conclude_war=lambda game, war, term: engine._conclude_war(game, war, term, 'attacker'),
+                outpost_vassal_cost=lambda: engine._dependencies.war.peace.WAR_TERM_DEFS['vassal'][1])

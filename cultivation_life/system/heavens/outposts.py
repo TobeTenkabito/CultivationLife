@@ -9,6 +9,8 @@ from .outpost_definitions import (ACTIONS, LABELS, ENDPOINTS, SITE_NAMES, WORLD_
 from . import outpost_runtime as runtime
 from . import outpost_development as development
 from .development_definitions import LABELS as DEVELOPMENT_ACTIONS
+from . import outpost_conquest as conquest
+from .conquest_definitions import LABELS as CONQUEST_ACTIONS
 
 
 def handles(state, action, target_id):
@@ -132,6 +134,8 @@ def quote(deps, game, action, target_id, options):
             require_control(deps, game, entity, row)
         if action in DEVELOPMENT_ACTIONS:
             return development.quote(deps, game, row, action, options)
+        if action in CONQUEST_ACTIONS:
+            return conquest.quote(deps, game, row, action, options)
         if action in {'outpost_dispatch', 'outpost_supply'}:
             plan = dispatch_plan(deps, game, row, entity, options['person_id'], action == 'outpost_supply')
             costs = {'organization_stones': plan['total']}
@@ -170,6 +174,8 @@ def quote(deps, game, action, target_id, options):
                 if row['status'] != 'suspended' or row['governor_id'] not in {u['person_id'] for u in residents} or balance(game, runtime.wallet(row)) < ANNUAL_COST:
                     raise ValueError('恢复须已建成、有自由驻守门人且当地经费至少100灵石')
             elif action == 'outpost_withdraw':
+                if conquest.current(game, row) or any(conquest.stores.pending(w) for w in conquest.wars(game, row)):
+                    raise ValueError('须先停战、等待原军队循路归返并结清军需')
                 if row['status'] in {'closed', 'withdrawing'}:
                     raise ValueError('驻地已经关闭或正在撤回')
                 message = '停止施工经营。原人员循路撤回，最后一位驻守者携回当地剩余钱货；无人可搬运时须从总部另派回收使者。'
@@ -202,6 +208,8 @@ def execute(deps, game, action, target_id, options, proposal, *, run_task, cance
     row = runtime.get(game, target_id)
     if action in DEVELOPMENT_ACTIONS:
         return development.execute(deps, game, row, action, options)
+    if action in CONQUEST_ACTIONS:
+        return conquest.execute(deps, game, row, action, options)
     if action in TIMED_ACTIONS:
         if action == 'outpost_depart':
             escrow = deps.reserve_resources(game, 1600, None, 0)
@@ -334,7 +342,7 @@ def project(deps, game):
         if headquarters:
             item['candidates'] = deps.outpost_candidates(game, entity)
         for action, label in LABELS.items():
-            if action in DEVELOPMENT_ACTIONS:
+            if action in DEVELOPMENT_ACTIONS or action in CONQUEST_ACTIONS:
                 continue
             options = {}
             if OPTIONS[action]:
@@ -348,6 +356,8 @@ def project(deps, game):
             item['actions'].append(control)
         state = game.heavens_state.get('runtime')
         item['development'] = development.project(deps, game, row, key,
+            actor_reason(game) or ('请先完成或取消当前亲自任务' if state and active_task(state) else None))
+        item['conquest'] = conquest.project(deps, game, row, key,
             actor_reason(game) or ('请先完成或取消当前亲自任务' if state and active_task(state) else None))
         result.append(item)
     return result

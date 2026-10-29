@@ -97,3 +97,10 @@ class HeavensDependencies:
     advance_outpost_job: Callable | None = None
     end_outpost_job: Callable | None = None
     outpost_settle_claims: Callable | None = None
+    outpost_organizations: Callable | None = None
+    outpost_register_war: Callable | None = None
+    outpost_war_round: Callable | None = None
+    outpost_conclude_war: Callable | None = None
+    outpost_vassal_cost: Callable | None = None
+    advance_outpost_war: Callable | None = None
+    outpost_defenders: Callable | None = None

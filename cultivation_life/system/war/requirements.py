@@ -20,7 +20,7 @@ def deployed_ids(war,side):
 
 def deployed_people(game, war, side, *, arrived_only=False):
     """Resolve only original roster IDs, independent of their registry container."""
-    managed = bool(war.get('strategic_war_id'))
+    managed = bool(war.get('strategic_war_id') or war.get('outpost_id'))
     if managed and arrived_only and war.get('campaign_phase') != 'engaged':
         return []
     escaped = set(war.get('escaped', {}).get(side, ())) | set(war.get('voisinage_suppressed', ()))
@@ -36,6 +36,12 @@ def deployed_people(game, war, side, *, arrived_only=False):
         if (not npc or not is_free(npc) or npc.world != source_world or instance_of(game, identity)
                 or research_assignment(game, identity, exclude_war=war.get('id')) or is_imprisoned(game, identity)):
             continue
+        if war.get('outpost_id'):
+            from .occupancy import organization
+            entity = organization(game, war['roster_owner'].get(identity))
+            if not entity or not (npc.faction_id == entity.id or any(n.id == npc.id for n in entity.npcs)
+                                  or side == 'defender' and identity in war.get('defensive_guests', [])):
+                continue
         if managed:
             journey = journeys.get(identity, {})
             if journey.get('phase') not in ({'stationed'} if arrived_only else {'outbound', 'stationed'}):
@@ -47,10 +53,10 @@ def deployed_people(game, war, side, *, arrived_only=False):
 
 
 def refresh(game, war, side, *, persist=True, participating_player_side=None):
-    people = deployed_people(game, war, side, arrived_only=bool(war.get('strategic_war_id') and war.get('campaign_phase')=='engaged'))
+    people = deployed_people(game, war, side, arrived_only=bool((war.get('strategic_war_id') or war.get('outpost_id')) and war.get('campaign_phase')=='engaged'))
     groups = Counter(n.realm_index for n in people)
     row = war.get('logistics', {}).get('sides', {}).get(side)
-    player_present = (participating_player_side == side if war.get('strategic_war_id')
+    player_present = (participating_player_side == side if war.get('strategic_war_id') or war.get('outpost_id')
                       else participating_player_side == side or war.get('player_side') == side)
     if player_present and game.player.alive and game.player.world==war['world']:
         groups[game.player.realm_index]+=1

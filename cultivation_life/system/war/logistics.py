@@ -108,6 +108,11 @@ def initialize(game,maps,war):
 
 def replenish(game,maps,war,side,amount=None):
     state=war['logistics']['sides'][side]
+    if war.get('outpost_id'):
+        if war.get('campaign_phase') == 'engaged':
+            reserve = requirements.energy(game, war, side)*4 + 500
+            supply.purchase(game,maps,war,side,war['world'],war['location_id'],max(0, balance(game,wallet(war,side))-reserve))
+        return 0
     if war.get('strategic_war_id') and (war.get('campaign_phase') != 'marching' or war.get('logistics_initialized')):
         # The initial convoy is carried with the real expedition. Once it has
         # arrived, only its remaining cash can buy goods at that actual front;
@@ -269,6 +274,8 @@ def action_quotes(game,war,side):
 
 
 def refund(game,war):
+    if war.get('outpost_id'):
+        return  # Its original army must actually return before frontier refund.
     if not war.get('logistics') or war['logistics'].get('refunded'):return
     for side in SIDES:
         source=wallet(war,side);remaining=opening=balance(game,source)

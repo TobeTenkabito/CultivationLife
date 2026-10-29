@@ -2,6 +2,7 @@
 from .outpost_definitions import ENDPOINTS, PHASES, TIMED_ACTIONS, BUILD_YEARS, CROSSING_YEARS, is_target, target
 from .development_schema import validate_development, validate_job
 from .development_definitions import LOCAL_PHASES
+from .conquest_schema import mandate, wars as validate_conquest_wars
 
 
 def counter(value):
@@ -29,7 +30,7 @@ def validate_outposts(rows):
     for key, row in rows.items():
         keys = {'id', 'owner_id', 'owner_kind', 'issuer_id', 'source', 'destination', 'home',
                 'status', 'progress', 'stock', 'units', 'sequence', 'governor_id', 'last_year', 'visit', 'history'}
-        if type(row) is not dict or set(row) - {'development'} != keys or not is_target(key) or row['id'] != key or not isinstance(row['owner_id'], str) or target(row['owner_id']) != key:
+        if type(row) is not dict or set(row) - {'development', 'military'} != keys or not is_target(key) or row['id'] != key or not isinstance(row['owner_id'], str) or target(row['owner_id']) != key:
             raise ValueError('开拓驻地身份或字段无效')
         if (row['source'] not in ENDPOINTS or row['destination'] not in ENDPOINTS or row['source'] == row['destination']
                 or row['owner_kind'] not in {'sect', 'family'} or not isinstance(row['issuer_id'], str)
@@ -43,13 +44,15 @@ def validate_outposts(rows):
         stock(row['stock'], row['source'])
         if 'development' in row:
             validate_development(row['development'])
+        if 'military' in row:
+            mandate(row['military'], row)
         if type(row['units']) is not list or len(row['units']) > 12:
             raise ValueError('开拓门人名册无效')
         wallets = set()
         if sum(u.get('phase') not in {'home', 'lost'} for u in row['units'] if isinstance(u, dict)) > 3:
             raise ValueError('开拓同时派驻人数超限')
         for unit in row['units']:
-            if type(unit) is not dict or set(unit) - {'local_job'} != {'person_id', 'phase', 'progress', 'duration', 'road', 'road_years', 'wallet', 'stock', 'courier', 'delivered', 'last_year'}:
+            if type(unit) is not dict or set(unit) - {'local_job', 'war_id'} != {'person_id', 'phase', 'progress', 'duration', 'road', 'road_years', 'wallet', 'stock', 'courier', 'delivered', 'last_year'}:
                 raise ValueError('开拓门人行程字段无效')
             identity = unit['person_id']
             if not isinstance(identity, str) or identity in people or unit['phase'] not in PHASES or type(unit['courier']) is not bool:
@@ -68,6 +71,8 @@ def validate_outposts(rows):
             if unit['phase'] not in LOCAL_PHASES and unit['duration'] not in durations:
                 raise ValueError('开拓工期与行程阶段不一致')
             validate_job(unit, row, stock)
+            if unit['phase'] == 'campaign' and (not isinstance(unit.get('war_id'), str) or not row.get('military') or unit['courier'] or not unit['delivered']):
+                raise ValueError('驻地出征须有原军令、已到场原门人及原战役引用')
             if unit.get('local_job'):
                 if unit['local_job']['wallet'] in wallets:
                     raise ValueError('地方行程资金不能与其他运输账户共用')
@@ -110,6 +115,7 @@ def validate_task(task, row):
 
 
 def validate_references(game):
+    validate_conquest_wars(game)
     rows = game.heavens_state.get('runtime', {}).get('outposts', {})
     if not rows:
         return
@@ -133,9 +139,13 @@ def validate_references(game):
                 raise ValueError('开拓门人必须只有一个权威名册及原运输账户')
             identity = unit['person_id']
             if unit['phase'] not in {'home', 'lost'}:
-                if any(identity in ids for w in game.wars if w.get('status') in {'active', 'peace_ready', 'withdrawing'}
-                       for ids in w.get('roster', {}).values()):
-                    raise ValueError('开拓人物不能同时出征其他战役')
+                for w in game.wars:
+                    if w.get('status') not in {'active', 'peace_ready', 'withdrawing'} or not any(identity in ids for ids in w.get('roster', {}).values()):
+                        continue
+                    same = w.get('outpost_id') == row['id']
+                    returned = same and any(j['person_id'] == identity and j['phase'] in {'home', 'lost'} for rows in w.get('journeys', {}).values() for j in rows)
+                    if not returned and not (same and unit.get('war_id') == w['id']):
+                        raise ValueError('开拓人物不能同时出征其他战役')
                 for echo in ([game.heavens_state['runtime']['sea_echo']] if game.heavens_state['runtime'].get('sea_echo') else []) + list(game.heavens_state['runtime'].get('contacts', {}).values()):
                     if any(echo.get(key, {}).get('status') == 'active' and echo[key].get('person_id', echo['visitor_id']) == identity for key in ('mission', 'freight', 'migration')):
                         raise ValueError('开拓人物不能重复占用其他行程')

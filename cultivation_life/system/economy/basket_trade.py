@@ -43,6 +43,24 @@ def purchase(game, market, source, item, wanted, budget, reason):
     return _commit_purchase(game,market,source,item,amount,bill,reason)
 
 
+def sale(game, market, destination, item, wanted, reason):
+    """Sell already owned goods against the original dealer's finite cash."""
+    row = market['commodities'][item]
+    dealer = f'market:{market["id"]}'
+    amount = affordable(row, 'sell', wanted, balance(game, dealer))
+    if not amount:
+        return 0, 0
+    bill = quote(row, 'sell', amount)
+    transfer_value(game, dealer, destination, bill['total'], reason)
+    transfer_value(game, dealer, f'operator:{market["id"]}', bill['fee'], reason+'手续费')
+    row['stock'] += amount
+    row['volume'] += amount
+    market['turnover'] += bill['gross']
+    market['fees'] += bill['fee']
+    reprice(game, market, row)
+    return amount, bill['total']
+
+
 def _commit_purchase(game,market,source,item,amount,bill,reason):
     """Commit a just-computed internal quote; no second affordability search."""
     row=market['commodities'][item]

@@ -12,7 +12,7 @@ def _public_war_system(deps: WarPresentationDependencies, game: GameState) -> di
     blocked = bool(game.pending_event or game.active_trial or not game.player.alive or game.player.imprisonment or game.player.ghost_captor)
     visible_wars = [
         war for war in game.wars
-        if not war.get('strategic_war_id') and (game.debug_world_news or war.get("world") == game.player.world)
+        if not war.get('strategic_war_id') and not war.get('outpost_id') and (game.debug_world_news or war.get("world") == game.player.world)
     ]
     for war in reversed(visible_wars[-20:]):
         deps._ensure_war_shape(game, war)

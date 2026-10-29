@@ -1,6 +1,9 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "GameState.heavens_state.runtime.outposts.*.military / units.*.war_id / phase.campaign": "scope：原控制者在未迁址总部明确签发的目的界当地征战军令，不为旧文书补发。仅交接已实际到场、已交货、空闲且非负责人的同一门人给原game.wars战役；原民用跨界许可、人数、返乡预留不变，不赋予军队跨界输送权限。阶段campaign只引用唯一原战役，不另计行程或重复参战；真实返回主驻地后才解除引用和人物占用。",
+    "GameState.wars.*.outpost_id / frontier / journeys / campaign_phase / defensive_guests": "scope / history：明确军令的异界当地战役复用原战争、名册、军需、会战和依附结算。frontier保存当地last_year、next_battle、deadline、player_last_year、真实获胜轮数、五年实际占领进度及一次35分目标回执；原守军真实溃败、本方实际在场且实付每年100才推进，不能凭点击或历史文本换分。自动战斗按原seed、文书、开战年龄及实际会战序号确定独立战场随机序列，不覆盖外层地区或个人RNG；本人参战仍沿个人原RNG结算。journeys为每方唯一原人道路、起讫、境界报价、工期、实际进度及原预留路费实付，冻结归目的地区补算、空间年不推进；未到场不出战，受控失路暂停，死亡不替身，撤回循原路。常规守军沿原24人限额，defensive_guests只引用原本地防御客卿；原生名册缺省地点只明确原总部既有地址，不把异地人员拉回。已真实归返者在原名册保留历史引用，不因守方仍待清算误判为重复出征。每文书六案有界历史，有未归返或未交割实物不得清理。",
+    "GameState.wars.*.logistics / economy_v2.accounts.war-supply:* / GameState.sect_relations.vassal": "scope：驻地战役实付当地30000军费及原门人独立往返路费，原总部不远程发兵或出资；守方只取本地原库有限实款。原军需货物在军队实际抵达战场后向当地市场真购，消耗沿原物理篮子；实际返回主驻地才能售原货或退原款，买方不足现金保留未售实物，原组织或运载人员失去时有实际损失。归附沿原vassal条款与原分数门槛，写原宗主／附庸关系，不搬原组织、NPC、产业或资产，不发个人奖励；旧战争交互不能绕过军令、在场和时钟。",
     "GameState.heavens_state.runtime.outposts.*.development": "scope / history：结构11可选经营记录只由本人在已运营异界驻地明确开办，不为旧文书自动生成；version=1，started_at、claims各地点实际结算游标、income实收、expense实付、counter_decade当地抵制十年段归目的地区，最多八处。不复制总部或势力；冻结入界依原当地年推进，历史补算不追演NPC抵制。",
     "GameState.heavens_state.runtime.outposts.*.units.*.local_job / phase.local_* / economy_v2.accounts.heavens-outpost:*:job:*": "scope / session：同一原派驻门人携原当地经费及原材料沿实际同界道路外出、施工和返回；记录原任务、地址、对手、往返路径及年数、唯一资金账户、实付进度、安装、取消和结果，原返乡路费独立保留。负责人留守，公共人物占用；受控、失路和离位暂停，死亡损失原货款，取消及撤回先循路返抵驻地再退款，不瞬移或生成替身。",
     "economy_v2.organization_sites.frontier_fee_cursors": "scope：本体跨界经营与原DLC共用有限手续费分配游标，按原市场ID记fees与mode。开办或DLC启停切换先采用当前累计额，不补领历史手续费；仅原实际行动期末分配新增手续费至多20%且不超过原运营现金。当地分驻地只收原份额至当地账本，原DLC组织份额沿原府库；同池只分一次，启用DLC时同步旧游标，撤回后不能重复领取。",

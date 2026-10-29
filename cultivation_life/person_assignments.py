@@ -14,10 +14,10 @@ def assignment_person(echo, row):
 def deployment_assignment(game, identity, *, exclude_war=None):
     for row in game.heavens_state.get('runtime', {}).get('outposts', {}).values():
         unit = next((u for u in row['units'] if u['person_id'] == identity and u['phase'] not in {'home', 'lost'}), None)
-        if unit:
+        if unit and (not exclude_war or unit.get('war_id') != exclude_war):
             return {**unit, 'observed': True, 'outpost_id': row['id']}
     for war in game.wars:
-        if war.get("id") == exclude_war or not war.get("strategic_war_id") or war.get("status") not in {"active", "peace_ready", "withdrawing"}:
+        if war.get("id") == exclude_war or not (war.get("strategic_war_id") or war.get('outpost_id')) or war.get("status") not in {"active", "peace_ready", "withdrawing"}:
             continue
         for journeys in war.get("journeys", {}).values():
             for row in journeys:
@@ -47,7 +47,7 @@ def research_assignment(game, identity, *, exclude_war=None):
 
 def in_transit(game, identity):
     mission = research_assignment(game, identity)
-    return bool(mission and mission['phase'] in {'gathering', 'outbound', 'transport', 'returning', 'homeward', 'local_outbound', 'local_return'})
+    return bool(mission and mission['phase'] in {'gathering', 'outbound', 'transport', 'returning', 'homeward', 'local_outbound', 'local_return', 'campaign'})
 
 
 def require_unassigned(game, identity):

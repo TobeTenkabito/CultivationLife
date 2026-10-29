@@ -10,10 +10,14 @@ from .dependencies import WarActionsDependencies
 
 
 def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: str, *, ally_id: str = "") -> dict[str, Any]:
+    from .occupancy import require_ordinary_entry
+    require_ordinary_entry(deps.store, game_id, war_id)
     game = copy.deepcopy(deps._load(game_id))
     war = next((row for row in game.wars if row.get("id") == war_id), None)
     if not war or war.get("status") not in {"active", "peace_ready"}:
         raise ValueError("这场战争已经结束或不存在")
+    if war.get('outpost_id'):
+        raise ValueError('驻地战役须通过诸天开拓原军令入口办理')
     if game.pending_event or game.active_trial or not game.player.alive or game.player.imprisonment or game.player.ghost_captor:
         raise ValueError("当前状态无法处理征伐")
     side = deps._player_war_side(game, war)

@@ -1,6 +1,14 @@
 """Whole-organization campaign occupancy, shared by every military entry."""
 
 
+def require_ordinary_entry(store, game_id, war_id):
+    # Reject a frontier command before ordinary load preparation can adopt
+    # markets or rewrite unrelated state in an otherwise rejected request.
+    game = store.load(game_id)
+    if any(w.get('id') == war_id and w.get('outpost_id') for w in game.wars):
+        raise ValueError('驻地战役须通过诸天开拓原军令入口办理')
+
+
 def participant_ids(war):
     return {war.get('attacker_id'), war.get('defender_id')} | {
         r['id'] for rows in war.get('coalitions', {}).values() for r in rows
@@ -14,7 +22,7 @@ def organization(game, identity):
 def busy(game, org, *, managed_only=False):
     members = {n.id for n in org.npcs}
     for war in game.wars:
-        if managed_only and not war.get('strategic_war_id'):
+        if managed_only and not (war.get('strategic_war_id') or war.get('outpost_id')):
             continue
         unfinished = war.get('status') in {'active', 'peace_ready', 'withdrawing'} or any(
             j.get('phase') not in {'home', 'lost'}

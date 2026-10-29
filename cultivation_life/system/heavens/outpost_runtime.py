@@ -114,6 +114,8 @@ def deliver_home(deps, game, row, unit):
 
 def advance_unit(deps, game, row, unit, year, lane_holder):
     name = unit['phase']
+    if name == 'campaign':
+        return  # The original war journey owns movement and military time.
     if name in {'home', 'lost'} or unit['last_year'] >= year:
         return
     npc = deps.resolve_person(game, unit['person_id'])
@@ -186,6 +188,8 @@ def year_step(deps, game):
     lane_holder = outpost_lane_holder(game, eligible=lambda row, unit, npc:
         deps.outpost_lane(game, row, returning=unit['phase'] == 'returning', person_id=npc.id))
     for row in game.heavens_state.get('runtime', {}).get('outposts', {}).values():
+        if row.get('military'):
+            deps.advance_outpost_war(game, row)
         year = game.player.age
         resident_ids = {u['person_id'] for u in row['units'] if u['phase'] == 'stationed' and u['last_year'] < year}
         for unit in row['units']:

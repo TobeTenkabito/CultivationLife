@@ -156,7 +156,7 @@ def _war_npc(deps: WarStateDependencies, game: GameState, npc_id: str) -> SectNp
 
 def _available_warriors(deps: WarStateDependencies, game: GameState, war: dict[str, Any], side: str, power_id: str = "") -> list[SectNpc]:
     deps._ensure_war_shape(game, war)
-    if war.get('strategic_war_id'):
+    if war.get('strategic_war_id') or war.get('outpost_id'):
         from .requirements import deployed_people
         return [npc for npc in deployed_people(game, war, side, arrived_only=True)
                 if not power_id or war['roster_owner'].get(npc.id) == power_id]

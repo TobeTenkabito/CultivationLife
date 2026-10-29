@@ -254,12 +254,16 @@ def _conclude_war(deps: WarPeaceDependencies, game: GameState, war: dict[str, An
 
 def war_peace(deps: WarPeaceDependencies, game_id: str, war_id: str, term: str, *, target_id: str = "", target_power_id: str = "",
               third_party_id: str = "", third_status: str = "neutral", concede: bool = False) -> dict[str, Any]:
+    from .occupancy import require_ordinary_entry
+    require_ordinary_entry(deps.store, game_id, war_id)
     game = copy.deepcopy(deps._load(game_id))
     if game.pending_event or game.active_trial or not game.player.alive or game.player.imprisonment or game.player.ghost_captor:
         raise ValueError("当前状态无法处理征伐")
     war = next((row for row in game.wars if row.get("id") == war_id), None)
     if not war or war.get("status") not in {"active", "peace_ready"}:
         raise ValueError("当前没有可供和谈的战争")
+    if war.get('outpost_id'):
+        raise ValueError('驻地和约须通过诸天开拓原军令入口办理')
     if war.get("controller") != "player" or not deps._player_has_war_voice(game, war):
         raise ValueError("你没有代表势力签署和约的权力")
     if war.get("strategic_war_id"):

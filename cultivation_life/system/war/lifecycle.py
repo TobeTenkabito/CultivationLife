@@ -12,6 +12,8 @@ from .dependencies import WarLifecycleDependencies
 def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: random.Random, *, campaigns=None) -> list[str]:
     news: list[str] = []
     for war in (game.wars if campaigns is None else campaigns):
+        if war.get('outpost_id'):
+            continue  # Frontier years are owned by its explicit local mandate.
         managed = bool(war.get("strategic_war_id"))
         if campaigns is None and (managed or war.get("kind") == "race"):
             continue

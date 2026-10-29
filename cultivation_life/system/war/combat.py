@@ -135,7 +135,7 @@ def _resolve_player_war_round(
     try:
         _resolve_personal_round(deps, game, war, side, rng)
     finally:
-        if war.get('strategic_war_id') and war.get('logistics'):
+        if (war.get('strategic_war_id') or war.get('outpost_id')) and war.get('logistics'):
             # The player joins this round only, never the next AI battle or upkeep.
             for supply_side, book in war['logistics']['sides'].items():
                 requirements.refresh(game, war, supply_side)
