@@ -100,6 +100,7 @@
 - [人物生存、拘禁与名册契约](npc-custody.md)
 - [存档码格式与结构迁移](save-code-format.md)
 - [诸天实装进度：十一界事务、四界往来与局部战争](heavens-implementation.md)
+- [诸天开拓第一批：跨界立足、派驻与补给](heavens-outposts.md)
 - [空间裂缝、符箓与界面排斥](spatial-talismans.md)
 - [统一跨界流程](world-transitions.md)
 - [战斗内核与资源](combat-domains.md)

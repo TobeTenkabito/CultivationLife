@@ -5,6 +5,8 @@ from ...runtime import decode_rng, encode_rng, now_iso
 from .state import active_task, create_echo, phase, record, get_echo, echo_site, site_for, contacts
 from . import mirror, ruins, omens, visits, missions, freight, migration, survey, upkeep, frontier, campaign_actions
 from . import incidents
+from . import outposts
+from .outpost_definitions import is_target as is_outpost
 from .incident_definitions import INCIDENT_IDS
 from .frontier_definitions import FRONTIER_ID
 from .campaign_definitions import CAMPAIGN_ID
@@ -22,6 +24,7 @@ LABELS.update(upkeep.LABELS)
 LABELS.update(frontier.LABELS)
 LABELS.update(campaign_actions.LABELS)
 LABELS.update(incidents.LABELS)
+LABELS.update(outposts.LABELS)
 
 
 def local_reason(deps, game, target_id=None):
@@ -31,6 +34,8 @@ def local_reason(deps, game, target_id=None):
 
 def quote(deps, game, action, target_id, options):
     runtime = game.heavens_state.get('runtime')
+    if outposts.handles(runtime, action, target_id):
+        return outposts.quote(deps, game, action, target_id, options)
     if incidents.handles(runtime, action, target_id):
         return incidents.quote(deps, game, action, target_id, options)
     if campaign_actions.handles(runtime, action, target_id):
@@ -153,6 +158,8 @@ def deadline(runtime, echo):
 
 
 def task_reason(deps, game, task):
+    if is_outpost(task.get('target_id')):
+        return outposts.task_reason(deps, game, task)
     if task.get('target_id') in INCIDENT_IDS:
         return incidents.task_reason(deps, game, task)
     if task.get('target_id') == CAMPAIGN_ID:
@@ -185,6 +192,8 @@ def task_reason(deps, game, task):
 
 
 def cancel(deps, game, task, *, failed=False, reason='主动取消'):
+    if is_outpost(task.get('target_id')):
+        return outposts.cancel(deps, game, task, failed=failed, reason=reason)
     if task['action'] in VISIT_ACTIONS:
         return visits.cancel(deps, game, task, failed=failed, reason=reason)
     deps.refund_resources(game, task['escrow'])
@@ -204,6 +213,11 @@ def reconcile(deps, game):
     if not runtime:
         return
     if not game.player.alive:
+        for row in runtime.get('outposts', {}).values():
+            visit = row['visit']
+            if visit and visit['status'] in {'preparing', 'visiting'}:
+                deps.grant_stones(game, visit['return_fare'])
+                visit.update(status='failed', return_fare=0)
         for echo in contacts(runtime):
             visit = echo.get('visit')
             if visit and visit['status'] in {'preparing', 'visiting'}:
@@ -211,6 +225,10 @@ def reconcile(deps, game):
                 visit.update(status='failed', return_fare=0)
     task = active_task(runtime)
     if task:
+        if is_outpost(task.get('target_id')):
+            if not game.player.alive:
+                cancel(deps, game, task, failed=True, reason='此生已结束')
+            return
         if task.get('target_id') in {FRONTIER_ID, CAMPAIGN_ID} | INCIDENT_IDS:
             if not game.player.alive:
                 cancel(deps, game, task, failed=True, reason='此生已结束')
@@ -248,6 +266,9 @@ def reconcile(deps, game):
 
 def execute(deps, game, action, target_id, options, proposal):
     runtime = game.heavens_state['runtime']
+    if outposts.handles(runtime, action, target_id):
+        return outposts.execute(deps, game, action, target_id, options, proposal,
+            run_task=run_segment, cancel_task=cancel, task_result=result)
     if incidents.handles(runtime, action, target_id):
         return incidents.execute(deps, game, action, target_id, options, proposal, run_task=run_segment, cancel_task=cancel, task_result=result)
     if campaign_actions.handles(runtime, action, target_id):
@@ -358,6 +379,15 @@ def run_segment(deps, game, task):
     if elapsed:
         deps.settle_activity_units(game, rng, units, elapsed, start_age, unit, news)
     reconcile(deps, game)  # Soul erosion and unit settlement may have killed or captured someone.
+    if is_outpost(task.get('target_id')):
+        if task['status'] != 'failed':
+            if task['progress'] == task['duration'] and not outposts.task_reason(deps, game, task):
+                outposts.complete(deps, game, task, rng)
+            else:
+                task['status'] = 'paused'
+        game.rng_state = encode_rng(rng)
+        game.updated_at = now_iso()
+        return
     if task.get('target_id') in INCIDENT_IDS:
         if task['status'] != 'failed':
             if task['status'] != 'paused' and task['progress'] == task['duration'] and not incidents.task_reason(deps, game, task):

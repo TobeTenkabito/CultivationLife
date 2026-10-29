@@ -109,6 +109,8 @@ def _compact_sect_roster(deps: WorldRuntimeDependencies, game: GameState, sect: 
         return False
     protected = {str(npc.get("id")) for npc in FACTION_NPC_TEMPLATES.get(sect.id, [])}
     heavens = game.heavens_state.get('runtime', {})
+    for row in heavens.get('outposts', {}).values():
+        protected.update(u['person_id'] for u in row['units'])
     echo = heavens.get('sea_echo')
     if echo:
         protected.add(echo['visitor_id'])

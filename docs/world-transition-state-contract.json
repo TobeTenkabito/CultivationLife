@@ -1,6 +1,9 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "GameState.heavens_state.runtime.outposts.*.units.delivered": "scope / history：原门人实际抵达与目的地区实际接收分开登记；冻结目的界面补算到该人抵达之后才交付原随身钱货，不能挪用未来补给支付此前养护或重写此前停办结果。交付布尔与原人物、唯一运输账户及年度游标共同去重。归返沿原NPC移动同步同一后代成长记录，不从旧家谱再创建人物。",
+    "GameState.heavens_state.runtime.outposts / economy_v2.accounts.heavens-outpost:* / economy_v2.depots": "global / scope：原势力唯一开拓文书绑定总部原址与人魔固定落点，驻地、原进口实物、施工及维护归目的地区，集结去程和返乡归来源地区；冻结后沿原年度补算，逐人和驻地游标去重。原NPC编号交接至world_npcs，公共占用防止重复任务，不复制宗门、人物或资源池。资金只在原组织府库、唯一运输账本及当地账户之间实转；本地仓储与在途货物只有一个所有者，归返卸货才入原址仓库。总部迁址不移动货物或驻地，受控、死亡、超载、失路及满仓保留明确后果。",
+    "GameState.heavens_state.runtime.outposts.*.visit / tasks.outpost_* / history": "session / history：本人往返沿统一expedition提交，8年去程与8年返程实付各800，返程预留不因驻地关闭或控制权变化消失；取消启程退未耗路费，暂缓返程保留原任务进度，不瞬移。亲自任务复用原短活动余量与末年事件恢复，零补时续行，不重发奖励。原批准者与有界纪要归真实履历，跨界、读档不刷新；新文书须原总部实际控制权，旧经营接口不获得远程权限。",
     "GameState.governance_actions.npc_promise:ID / Player.milestones.fengyi_pavilion / GameState.history.SYS_NPC_PROMISE_BATTLE": "history：故人笺要求承诺沿原行动单位记录每NPC一次，保存和跨界不刷新；同界同实例同实际地点的原自由无任务人物即时交锋，无人物移动、年份或复制。历史记录双方原ID、真实死亡／镇压及最多8轮原结算。凤仪亭仅玩家当时为目标侍妾、受托者为真实道侣且原正主实际死亡时登记，同归于尽也可；元婴逃脱、假死、镇压、旁观和旧死亡文本不补算。原NPC资源及生命原位回写，不生成玩家战利品或击杀数，无新资源、时钟、路线或跨界例外。",
     "Player.milestones.ghost_non_ghost_kills / GameState.history.SYS_GHOST_CULTIVATOR_KILL": "history：原玩家击杀结算登记击杀时玩家为鬼修、对手为已确认非鬼修修士的同档累计事实；原人物编号去重，计数及明细至多100。跨界、转道、保存保留，新存档从零开始，不按旧死亡文本追认。非击杀、灵兽、凡人、未知道途、鬼修、商盟代杀及NPC后台死亡不记录；不改变击杀奖励、死亡或通行规则。",
     "GameState.history.*.state_diff.body_destroyed / lost_realm / second_rescued / mode / joined_age / former / successor": "history：原身魂成功结算记录肉身被毁及当时真实境界、第二元婴实际承接；原跨界提交记录已执行方式，原宗门财政罢免记录宗门、宗籍年龄和前后掌门编号。只作为成就行为证据保留，不复制人物、修为、通行凭证或资源；缺少旧证据不按叙事文案追造。",

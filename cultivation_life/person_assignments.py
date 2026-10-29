@@ -12,6 +12,10 @@ def assignment_person(echo, row):
 
 
 def deployment_assignment(game, identity, *, exclude_war=None):
+    for row in game.heavens_state.get('runtime', {}).get('outposts', {}).values():
+        unit = next((u for u in row['units'] if u['person_id'] == identity and u['phase'] not in {'home', 'lost'}), None)
+        if unit:
+            return {**unit, 'observed': True, 'outpost_id': row['id']}
     for war in game.wars:
         if war.get("id") == exclude_war or not war.get("strategic_war_id") or war.get("status") not in {"active", "peace_ready", "withdrawing"}:
             continue
@@ -82,3 +86,26 @@ def route_occupied(game, source, destination, *, exclude=None):
         if (source, destination) == (a, b):
             return True
     return False
+
+
+def outpost_lane_holder(game, *, eligible=None):
+    """One civilian frontier lane; suspended foreign trips do not block entry."""
+    from .regional_context import task_active
+    from .system.heavens.outpost_definitions import is_target, ENDPOINTS
+    from .npc_custody import is_free
+    from .relationship_records import find_person
+    runtime = game.heavens_state.get('runtime', {})
+    if any(is_target(t.get('target_id')) and t['action'] in {'outpost_depart', 'outpost_return'}
+           and t['status'] in {'reserved', 'running', 'paused'} for t in runtime.get('tasks', [])):
+        return game.id
+    candidates = []
+    for row in runtime.get('outposts', {}).values():
+        for unit in row['units']:
+            world = row['source'] if unit['phase'] == 'outbound' else row['destination']
+            npc = find_person(game, unit['person_id'], include_inactive=True)
+            if (unit['phase'] in {'outbound', 'returning'} and task_active(game, world) and npc and is_free(npc)
+                    and (npc.world, npc.location_id) == (world, ENDPOINTS[world])
+                    and npc.id not in game.intrigue_state.get('npc_prisons', {})
+                    and (eligible is None or eligible(row, unit, npc))):
+                candidates.append(unit)
+    return min(candidates, key=lambda u: (-bool(u['progress']), u['wallet']))['person_id'] if candidates else None

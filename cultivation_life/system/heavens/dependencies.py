@@ -80,3 +80,14 @@ class HeavensDependencies:
     incident_restore: Callable | None = None
     incident_field_effect: Callable | None = None
     incident_mana: Callable | None = None
+    outpost_owner: Callable | None = None
+    outpost_owners: Callable | None = None
+    outpost_control: Callable | None = None
+    outpost_candidates: Callable | None = None
+    outpost_road: Callable | None = None
+    outpost_lane: Callable | None = None
+    outpost_prepare_npc: Callable | None = None
+    outpost_move_npc: Callable | None = None
+    outpost_player_plan: Callable | None = None
+    outpost_move_player: Callable | None = None
+    outpost_item_name: Callable | None = None

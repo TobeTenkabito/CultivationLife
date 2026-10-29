@@ -15,6 +15,8 @@ from . import missions, freight, migration, survey, upkeep, frontier, campaign_a
 from .frontier_definitions import FRONTIER_ID, FRONTIER_ACTIONS
 from .campaign_definitions import CAMPAIGN_ID, CAMPAIGN_ACTIONS
 from .definitions import MISSION_ACTIONS, FREIGHT_ACTIONS, MIGRATION_ACTIONS, SURVEY_ACTIONS, UPKEEP_ACTIONS
+from . import outposts
+from .outpost_definitions import OPTIONS as OUTPOST_OPTIONS, OUTPOST_ID, is_target as is_outpost
 
 
 def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict:
@@ -26,7 +28,7 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     site = (site_for(deps, game, target_id) if target_id else current_site(deps, game)) if deps else None
     if target_id and (not intelligence.knows(game, target_id) or site and intelligence.level(game.player.world, site.world) < 5 and not get_echo(runtime, site.id)):
         raise ValueError('当前只能获知远界传闻，尚不了解此处详情')
-    if target_id is not None and site is None and target_id not in {MIRROR_ID, RUINS_ID, FRONTIER_ID, CAMPAIGN_ID} | OMEN_IDS | INCIDENT_IDS:
+    if target_id is not None and site is None and target_id not in {MIRROR_ID, RUINS_ID, FRONTIER_ID, CAMPAIGN_ID, OUTPOST_ID} | OMEN_IDS | INCIDENT_IDS and not is_outpost(target_id):
         raise ValueError('诸天对象不可见或不存在')
     target_id = site.id if site else None
     echo = get_echo(runtime, target_id)
@@ -53,6 +55,11 @@ def project(game, view: str, target_id: str | None = None, *, deps=None) -> dict
     if deps and target_id:
         result['upkeep'] = upkeep.project(deps, game, target_id, detail=True)
     result['generation_available'] = bool(deps and deps.get_definitions().generation_available)
+    result['outposts'] = outposts.project(deps, game) if deps and deps.outpost_owners else []
+    if requested_target == OUTPOST_ID or is_outpost(requested_target):
+        if is_outpost(requested_target) and requested_target not in {r['id'] for r in result['outposts']}:
+            raise ValueError('开拓驻地不可见')
+        result['target_id'] = requested_target
     result['pause_on_opportunity'] = bool(runtime and runtime['pause_on_opportunity'])
     if deps and deps.read_mirror_facts:
         result['mirror'] = mirror.project(deps, game)
@@ -165,6 +172,7 @@ def plan(definitions: HeavensDefinitions, action: str, target_id, options) -> di
         allowed.update({key: {'person_id'} if key == 'migration_start' else set() for key in MIGRATION_ACTIONS})
         allowed.update({key: {'person_id'} if key == 'survey_start' else set() for key in SURVEY_ACTIONS})
         allowed.update({key: {'material_id'} if key == 'upkeep_start' else set() for key in UPKEEP_ACTIONS})
+        allowed.update(OUTPOST_OPTIONS)
         if action not in allowed or not isinstance(target_id, str) or not target_id:
             raise ValueError('诸天动作或目标无效')
         if type(options) is not dict or set(options) != allowed[action] or any(not isinstance(v,str) or not v for v in options.values()):

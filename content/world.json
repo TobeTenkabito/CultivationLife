@@ -6138,6 +6138,16 @@
     },
     "world_transition_routes": [
       {
+        "id": "expedition:human:demon", "source": "human", "destination": "demon",
+        "mode": "expedition", "enabled": true, "purpose": "organizational_outpost", "capacity": 1,
+        "source_location": "wudi_plain", "destination_location": "red_marrow_city"
+      },
+      {
+        "id": "expedition:demon:human", "source": "demon", "destination": "human",
+        "mode": "expedition", "enabled": true, "purpose": "organizational_outpost", "capacity": 1,
+        "source_location": "red_marrow_city", "destination_location": "wudi_plain"
+      },
+      {
         "id": "story:monster_realm:phantom_underworld",
         "source": "monster_realm",
         "destination": "phantom_underworld",

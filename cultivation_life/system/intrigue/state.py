@@ -126,6 +126,10 @@ def _ensure_intrigue_faction(deps: IntrigueStateDependencies, game: GameState, k
     if kind == 'sect' and leader_id:
         from .leadership import candidates
         eligible = candidates(game, record, members)
+        from ..organization_authority import chartered_member
+        if (player_controls and record['positions'].get(leader_id) == deps.PLAYER_ID
+                and chartered_member(game, entity)):
+            eligible[deps.PLAYER_ID] = game.player.name
         if leader_id not in record['positions']:
             record['positions'][leader_id] = controller if controller in eligible else next(iter(eligible), None)
         elif record['positions'][leader_id] not in eligible:

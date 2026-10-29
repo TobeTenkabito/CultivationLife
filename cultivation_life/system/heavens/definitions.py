@@ -3,6 +3,7 @@ from dataclasses import dataclass, field, asdict
 from .frontier_definitions import FRONTIER_ACTIONS
 from .campaign_definitions import CAMPAIGN_ACTIONS
 from .incident_definitions import INCIDENT_ACTIONS
+from .outpost_definitions import ACTIONS as OUTPOST_ACTIONS
 
 VIEWS = frozenset({'known', 'opportunities', 'tasks', 'history'})
 MIRROR_ID = 'mirror_field'
@@ -18,7 +19,7 @@ MISSION_ACTIONS = frozenset({'mission_start', 'mission_recall', 'mission_wait'})
 VISIT_DESTINATIONS = {'sea_echo': 'reincarnation_echo', 'asura_echo': 'sea_echo',
                       'nether_echo': 'asura_echo', 'reincarnation_echo': 'nether_echo'}
 ACTIONS = frozenset({'configure', 'watch', 'dismiss', 'observe', 'check_history',
-                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel', 'omen_study'}) | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS | SURVEY_ACTIONS | UPKEEP_ACTIONS | FRONTIER_ACTIONS | CAMPAIGN_ACTIONS | INCIDENT_ACTIONS
+                     'exchange', 'attune', 'maintain', 'correspond', 'resume', 'cancel', 'omen_study'}) | MIRROR_ACTIONS | RUINS_ACTIONS | VISIT_ACTIONS | MISSION_ACTIONS | FREIGHT_ACTIONS | MIGRATION_ACTIONS | SURVEY_ACTIONS | UPKEEP_ACTIONS | FRONTIER_ACTIONS | CAMPAIGN_ACTIONS | INCIDENT_ACTIONS | OUTPOST_ACTIONS
 
 
 @dataclass(frozen=True, slots=True)

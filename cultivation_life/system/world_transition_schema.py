@@ -16,6 +16,7 @@ class TransitionMode(str, Enum):
     PASSAGE = "passage"
     STORY = "story"
     STUDY = "study"
+    EXPEDITION = "expedition"
     RIFT = "rift"
     EXPULSION = "expulsion"
 
@@ -95,6 +96,12 @@ def validate_transition_content(profiles, routes, realms):
             raise ValueError('祖兽梦径仅连接妖界与幻冥界')
         if mode == TransitionMode.SEALED_RETURN:
             raise ValueError("返界授权仅能来自当前封印")
+        if mode == TransitionMode.EXPEDITION and (direction != TransitionDirection.LATERAL
+                or {route['source'], route['destination']} != {'human', 'demon'}
+                or route.get('purpose') != 'organizational_outpost' or route.get('capacity') != 1
+                or route.get('source_location') != {'human': 'wudi_plain', 'demon': 'red_marrow_city'}[route['source']]
+                or route.get('destination_location') != {'human': 'wudi_plain', 'demon': 'red_marrow_city'}[route['destination']]):
+            raise ValueError('首期开拓路线必须明确人魔两界落点与单人容量')
         if mode == TransitionMode.STUDY and (direction != TransitionDirection.LATERAL
                 or profiles[route['source']]['tier'] != 3 or route.get('capacity') != 1
                 or route.get('purpose') != 'personal_study'):

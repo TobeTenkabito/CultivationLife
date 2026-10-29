@@ -328,7 +328,7 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
     return news
 
 
-def _sect_finance_notices(deps, game, sect, rng):
+def _sect_finance_notices(deps: FactionDependencies, game, sect, rng):
     from ...system.sect_tasks.state import active, snapshot, record
     if not active(game,sect):return False
     board=snapshot(game,sect)

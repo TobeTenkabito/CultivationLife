@@ -74,6 +74,8 @@ def bind_missions(engine, ports):
         npc.location_id = destination.location_id
 
     def advance(game):
+        from ...system.heavens.outpost_runtime import year_step as advance_outposts
+        advance_outposts(ports(), game)
         from ...regional_context import task_year, region, ordinary_year
         from ...system.heavens.calendar import advance_contact_cycles
         advance_contact_cycles(game, task_year(game))

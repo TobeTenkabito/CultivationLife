@@ -75,7 +75,7 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
                       '运材途中，暂不可交往' if 'cargo_owner' in assignment else
                       '正在当地访学' if assignment['phase'] == 'studying' else '访学途中，暂不可交往')
         if deployment:
-            status = '正在边地执行有限任务'
+            status = ('正在异界分驻地履职' if deployment['phase'] == 'stationed' else '正在执行开拓行程') if deployment.get('outpost_id') else '正在边地执行有限任务'
         from ...system.cultivation_ranks import public_ranks
         ranks = public_ranks(npc)
         public_npc = npc.to_dict()

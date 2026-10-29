@@ -57,6 +57,7 @@
     document.querySelector('#heavens-body h3')?.focus({preventScroll:true});
   }
   function openTarget(target) {
+    if(target==='outpost_network'||target?.startsWith('outpost:')){go('worlds',target);return;}
     if((current.heavens.anomalies||[]).some(s=>s.id===target))go('anomalies',target);
     else if((current.heavens.conflicts||[]).some(s=>s.id===target))go('frontier',target);
     else if(['mirror_field','causal_ruins'].includes(target))go('anomalies',target);
@@ -102,6 +103,7 @@
     for(const row of rows){
       const box=node('article',null,'heavens-action'),info=node('div'),options={...row.options};
       const costs=[];if(row.years!=null)costs.push(`${row.years} 年`);if(row.costs?.stones)costs.push(`${amount(row.costs.stones)} 灵石`);if(row.costs?.mp)costs.push(`${amount(row.costs.mp)} 法力`);if(row.material_consumed)costs.push('消耗一件阵材');
+      if(row.costs?.organization_stones)costs.push(`府库 ${amount(row.costs.organization_stones)} 灵石`);
       info.append(node('h4',row.label),node('small',row.enabled?costs.join(' · '):row.reason));
       if(row.reward_stones)info.append(node('small',`履约酬劳 ${amount(row.reward_stones)} 灵石`));
       if(['maintain','upkeep_start','mirror_isolate','mirror_repair','ruins_replace','freight_start'].includes(row.action)&&materials.length){
@@ -109,9 +111,10 @@
         for(const m of materials){const option=node('option',m.name||m.material_id);option.value=m.id;select.append(option);}
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.material_id=select.value;};info.append(select);
       }
-      if(['migration_start','survey_start'].includes(row.action)&&people.length){
-        const select=node('select');select.setAttribute('aria-label',row.action==='survey_start'?'勘察居民':'迁居居民');
-        for(const person of people){const option=node('option',`${person.name} · 交情 ${person.affinity}`);option.value=person.id;select.append(option);}
+      if(['migration_start','survey_start','outpost_dispatch','outpost_supply','outpost_appoint','outpost_recall'].includes(row.action)&&people.length){
+        const select=node('select');select.setAttribute('aria-label',row.action.startsWith('outpost_')?'开拓门人':row.action==='survey_start'?'勘察居民':'迁居居民');
+        for(const person of people){const option=node('option',`${person.name}${person.affinity!=null?' · 交情 '+person.affinity:''}`);option.value=person.id;select.append(option);}
+        select.value=options.person_id||people[0].id;
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.person_id=select.value;};info.append(select);
       }
       const b=button(row.label,()=>propose(row.action,row.target_id,options),!row.enabled||Boolean(pending));b.dataset.heavensAction=row.action;
@@ -186,11 +189,15 @@
     const footer=node('div',null,'heavens-home-links');footer.append(button('查阅诸界联系 ›',()=>go('worlds')),button('寻找异象入口 ›',()=>go('anomalies')));host.append(footer);
   }
   function renderWorlds(host,h) {
+    if(ui.target==='outpost_network'||ui.target?.startsWith('outpost:')){
+      window.HeavensOutposts.render(host,h.outposts||[],ui,{node,title,tile,back,subview,renderActions,empty,go});return;
+    }
     const selected=h.sites.find(row=>row.id===ui.target);
     const incident=(h.incidents||[]).find(row=>row.id===ui.target);
     if(incident){window.HeavensIncidents.render(host,incident,ui,{node,title,back,subview,renderActions});return;}
     if(!selected){
       title(host,'诸界行录','从一界的地方事务开始，沿亲历留下自己的诸天档案。');
+      tile(host,{name:'跨界开拓',description:'原势力授权 · 异界驻地、派驻与补给',status:`${(h.outposts||[]).filter(r=>r.status!=='unregistered').length} 份开拓许可`,glyph:'驻',onClick:()=>go('worlds','outpost_network')});
       const regions=h.incidents||[];
       const worlds=[...regions];
       for(const site of h.sites)if(!worlds.some(r=>r.world===site.world))worlds.push(site);
@@ -505,14 +512,16 @@
       const surveys=[h.ruins,h.mirror].filter(a=>a?.survey?.status==='active');
       for(const anomaly of surveys){const survey=anomaly.survey,row=node('article',null,'heavens-task');row.append(node('h4',`${survey.name} · ${anomaly.name}同勘`),node('p',survey.phase==='outbound'?'正在赴约入场。':'本人留在场域中，只随该空间年度行动。'),button('查看同勘',()=>{openTarget(anomaly.id);ui.section='survey';render(current,ctx);}));body.append(row);}
       const away=(h.visits||[]).filter(v=>v.status==='visiting');
+      const frontierVisits=(h.outposts||[]).filter(v=>v.visit_status==='visiting');
+      for(const v of frontierVisits){const row=node('article',null,'heavens-task');row.append(node('h4',v.name),node('p','开拓返程款已独立保留，可从原驻地循约返回。'),button('查看开拓驻地与返程',()=>openTarget(v.id)));body.append(row);}
       for(const v of away){const row=node('article',null,'heavens-task');row.append(node('h4',`访学 · ${v.destination_name}`),node('p',v.studied?'现场研读已完成，可循约返程。':'已抵达，可研读或提前返程。'),button('查看访学与返程',()=>{openTarget(v.target_id);ui.section='visit';render(current,ctx);}));body.append(row);}
       if(task){
-        const names={mirror_field:'镜律场域',causal_ruins:'因果遗址',sand_glimmer:'沙中重影',stone_resonance:'旧石回声',lanjiang_frontier:'岚疆边情',lanjiang_gate:'岚疆界门'},name=h.sites.find(s=>s.id===task.target_id)?.name||names[task.target_id]||'诸天研究';
+        const names={mirror_field:'镜律场域',causal_ruins:'因果遗址',sand_glimmer:'沙中重影',stone_resonance:'旧石回声',lanjiang_frontier:'岚疆边情',lanjiang_gate:'岚疆界门'},name=h.sites.find(s=>s.id===task.target_id)?.name||(h.outposts||[]).find(s=>s.id===task.target_id)?.name||names[task.target_id]||'诸天研究';
         const row=node('article',null,'heavens-task');row.append(node('h4',name),node('p',`当前任务：${task.progress} / ${task.duration} 年`));const progress=node('progress');progress.max=task.duration;progress.value=task.progress;progress.setAttribute('aria-label','任务进度');row.append(progress);
         const controls=node('div',null,'heavens-inline');controls.append(button('继续任务',()=>propose('resume',task.id),Boolean(pending)),button('取消任务',()=>propose('cancel',task.id),Boolean(pending)),button('查看对象',()=>openTarget(task.target_id)));row.append(controls,node('small','取消前会显示可退还的未耗投入，已付法力与已耗材料不退。'));body.append(row);
       }
       if(h.registered_application)renderApplication(body,h.registered_application);
-      if(!task&&!h.registered_application&&!away.length&&!surveys.length&&!facilities.length)empty(body,'暂无进行中的行程','可从一条见闻、一处联系或一座异象开始。');
+      if(!task&&!h.registered_application&&!away.length&&!frontierVisits.length&&!surveys.length&&!facilities.length)empty(body,'暂无进行中的行程','可从一条见闻、一处联系或一座异象开始。');
     });
   }
   function renderSettings(host,h) {
