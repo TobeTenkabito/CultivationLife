@@ -37,6 +37,32 @@ SOUL_TESTS = list(dict.fromkeys(AUTHORED_TESTS + [
 ]))
 AUTHORED_BROWSERS = ['browser_authored_techniques','browser_npc_art','browser_common_elemental_techniques','browser_events_212']
 
+# All changed 3.3.0 domains since the preceding packaged version, including
+# the earlier unpublished contact, skin and lazy-panel work.
+HEAVENS_TESTS = sorted(p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').glob('test_heavens*.py')) + [
+    'tests/test_debug_heavens.py','tests/test_npc_promises.py','tests/test_npc_contacts.py',
+    'tests/test_diaochan_skin.py','tests/test_historical_skins.py','tests/test_humorous_achievements.py',
+    'tests/test_achievement_stories.py','tests/test_achievements.py','tests/test_visual_catalog_scope.py',
+    'tests/test_visual_release.py','tests/test_npc_social_update.py','tests/test_pixel_assets.py',
+    'tests/test_architecture_stage2.py','tests/test_engine.py','tests/test_engine_dependencies.py',
+    'tests/test_time_flow.py','tests/test_immortal_body_and_resources.py','tests/test_inheritance_audit_fixes.py',
+    'tests/test_survival_settlement.py','tests/test_soul_lifecycle.py',
+    'tests/test_npc_combat_lifecycle.py','tests/test_npc_custody.py','tests/test_relationship_records.py',
+    'tests/test_relationship_story_update.py','tests/test_organization_economy.py','tests/test_organization_balance.py',
+    'tests/test_economy_v2.py','tests/test_economy_diversity.py','tests/test_economy_trust.py',
+    'tests/test_territory_system.py','tests/test_war_logistics.py','tests/test_war_performance_update.py',
+    'tests/test_war_presence_fixes.py','tests/test_war_coalition_fixes.py','tests/test_war_negotiation_fixes.py',
+    'tests/test_strategic_war.py','tests/test_strategic_war_audit.py','tests/test_strategic_dispatch.py','tests/test_strategic_peace.py',
+    'tests/test_regional_calendar.py','tests/test_regional_audit_fixes.py','tests/test_regional_integration.py',
+    'tests/test_deferred_economy.py','tests/test_deferred_routing.py','tests/test_persistence_pipeline.py',
+    'tests/test_world_transition_system.py','tests/test_spatial_talismans.py','tests/test_release_211.py','tests/test_release_212.py',
+    'tests/test_save_transfer.py','tests/test_base_game_version.py','tests/test_module_dependencies.py',
+    'tests/test_android_packaging.py','tests/test_windows_release_evidence.py','tests/test_android_release_checks.py',
+]
+HEAVENS_BROWSERS = ['browser_heavens_outposts','browser_heavens_development','browser_heavens_conquest',
+    'browser_heavens_peer_worlds','browser_heavens_navigation','browser_npc_promises','browser_diaochan_skin',
+    'browser_deferred_panels','browser_deferred_upper_panels','browser_events_212']
+
 UPDATE301_TESTS = [
     'tests/test_release_301.py', 'tests/test_common_elemental_techniques.py',
     'tests/test_concubine_system.py', 'tests/test_body_bounty_update.py',
@@ -250,7 +276,7 @@ VISUAL_ALPHA6_TESTS = list(dict.fromkeys(VISUAL_ALPHA3_TESTS + [
 ]))
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens'],default='legacy')
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     parser.add_argument('--balance-tests',action='store_true',help='Schedule full regressions by prior XML timings; never reuse prior results')
@@ -273,6 +299,7 @@ def main():
     if profile=='common-techniques':selected=COMMON_TECHNIQUES_TESTS
     if profile=='combat-alpha':selected=[COMBAT_ALPHA_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='soul-lifecycle':selected=[SOUL_TESTS[i::options.shards] for i in range(options.shards)]
+    if profile=='heavens':selected=[HEAVENS_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='authored':selected=[AUTHORED_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='update301':selected=[UPDATE301_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='common-goods':selected=[COMMON_GOODS_TESTS[i::3] for i in range(3)]
@@ -290,7 +317,7 @@ def main():
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
     if options.focused_visual:
         selected=[(VISUAL_ALPHA6_TESTS if options.home_scenes else VISUAL_ALPHA5_TESTS if options.path_characters else VISUAL_ALPHA4_TESTS if options.monster_visuals else VISUAL_ALPHA3_TESTS)[i::options.shards] for i in range(options.shards)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} or (profile=='visual' and not options.focused_visual) else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
@@ -333,6 +360,7 @@ def main():
         browsers=['browser_alpha2_dlc_fixes','browser_combat_replay','browser_combat_groups','browser_events_212']
     if profile=='soul-lifecycle':browsers=['browser_combat_groups','browser_combat_replay','browser_historical_skins','browser_story_achievements','browser_tide_theme','browser_themes_139','browser_desktop_navigation','browser_secret_art_training','browser_frontier_skins','browser_release_301','browser_soul_lifecycle','browser_swimwear_skins','browser_holiday_skins','browser_sect_tasks','browser_authored_techniques','browser_events_212']
     if profile=='authored':browsers=AUTHORED_BROWSERS
+    if profile=='heavens':browsers=HEAVENS_BROWSERS
     if profile=='update301':browsers=UPDATE301_BROWSERS
     if options.monster_visuals:browsers += ['browser_monster_release','browser_monster_flora_visuals']
     if options.path_characters:browsers += ['browser_path_characters']
@@ -351,19 +379,25 @@ def main():
         log=ROOT/f'build/{name}-{tag}.log'
         with log.open('w',encoding='utf-8') as stream:
             code=subprocess.call([sys.executable,'-X','utf8',*args],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT,
-                                 env=os.environ | ({} if profile=='soul-lifecycle' else {'CULTIVATION_BROWSER_LOW_MEMORY':'1'}))
+                                 env=os.environ | ({} if profile in {'soul-lifecycle','heavens'} else {'CULTIVATION_BROWSER_LOW_MEMORY':'1'}))
         require(code==0,f'{name} failed; see {log}')
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         print(name+' passed',flush=True)
         return dict(name=name,log=str(log.relative_to(ROOT)),status='passed')
-    if profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle'}:
+    if profile=='heavens':
+        # Every job uses disposable saves, ports and browser profiles. Bound
+        # concurrent jobs while letting independent UI checks overlap shards.
+        with ThreadPoolExecutor(max_workers=options.workers) as executor:
+            runs.extend(executor.map(run,jobs))
+        jobs=[]
+    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens'}:
         # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

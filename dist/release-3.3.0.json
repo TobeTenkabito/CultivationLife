@@ -1,0 +1,280 @@
+{
+  "base_version": "3.3.0",
+  "save_schema": 11,
+  "compatible_save_schemas": [
+    11
+  ],
+  "incompatible_save_schemas": "1–10; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.3.0",
+    "authored-techniques": "1.0.0",
+    "buddhist-dharma": "1.2.0",
+    "ghost-reincarnation": "3.10.0",
+    "guixu-tide": "2.7.2",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.19.0",
+    "monster-civilizations": "1.0.1",
+    "sage-way": "1.6.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "Heavens, contacts, skins, navigation and related upstream regressions; not full repository regression. Two browser fixture expectations corrected and fully retested; original failures retained.",
+  "tests": 2206,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "status": "passed",
+      "log": "build/related-tests-0-330.log",
+      "log_sha256": "e6c83b68b4bbf8430a655bb2baaed6b33758d71764df72a53ca7c908db57a15d"
+    },
+    {
+      "name": "related-tests-1",
+      "status": "passed",
+      "log": "build/related-tests-1-330.log",
+      "log_sha256": "52fc336b8982795d1aa9e63a9b7ab6218f312d5c97514c962157b39a044b9296"
+    },
+    {
+      "name": "related-tests-2",
+      "status": "passed",
+      "log": "build/related-tests-2-330.log",
+      "log_sha256": "351175ff7fd2f64b513743bf9f9a2751deb6cc8685a78ac8490b40996566cfe4"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "status": "passed",
+      "log": "build/check_world_transition_contract-330.log",
+      "log_sha256": "15e158705915f3bc9717198851166fee99400a3adcf813465889170b71c62afb"
+    },
+    {
+      "name": "check_module_dependencies",
+      "status": "passed",
+      "log": "build/check_module_dependencies-330.log",
+      "log_sha256": "d3022eecd0bbaf5c6c0cf953c9fbad987fd67ba7df8cd99b70857c52f9df0eb5"
+    },
+    {
+      "name": "check_documentation",
+      "status": "passed",
+      "log": "build/check_documentation-330.log",
+      "log_sha256": "c6451d2bb9d7f933bc7e7da04716a14146b30b83fb78b5998eaac25983c7c9c9"
+    },
+    {
+      "name": "browser_heavens_outposts",
+      "status": "passed",
+      "log": "build/browser_heavens_outposts-330.log",
+      "log_sha256": "64a5d4a9b049215331f8fea796e12b69aebb0b283e9d252501c8c39a57c6e009"
+    },
+    {
+      "name": "browser_heavens_development",
+      "status": "passed",
+      "log": "build/browser_heavens_development-330.log",
+      "log_sha256": "4127c0e8bfbf20151ade0f4f736a20fb639699e9736fa01970c5a82b4d00d288"
+    },
+    {
+      "name": "browser_heavens_conquest",
+      "status": "passed",
+      "log": "build/browser_heavens_conquest-330.log",
+      "log_sha256": "394751dedf41e667d9259a23123ea8f2daef476aa177c2d0d25f02eee8e0194c"
+    },
+    {
+      "name": "browser_heavens_peer_worlds",
+      "status": "passed",
+      "log": "build/browser_heavens_peer_worlds-330.log",
+      "log_sha256": "2458f02aa99da122f56859129a5cbbe84f002e18d72e73a7a332cebd35d5e982"
+    },
+    {
+      "name": "browser_heavens_navigation",
+      "status": "passed",
+      "log": "build/browser_heavens_navigation-330-retest.log",
+      "log_sha256": "c2e5b8397efee08cca5adfd6b4961ee9ef2a395f2b14b234bab840b40f43cb6f"
+    },
+    {
+      "name": "browser_npc_promises",
+      "status": "passed",
+      "log": "build/browser_npc_promises-330.log",
+      "log_sha256": "3fba64b50119999d042dcc96abfd77873891be358ac957cd40103d302942f5c7"
+    },
+    {
+      "name": "browser_diaochan_skin",
+      "status": "passed",
+      "log": "build/browser_diaochan_skin-330.log",
+      "log_sha256": "40bf46bf2a1b50aea2366081fbf63322d31482d5896b4eaf0d23890b88febf87"
+    },
+    {
+      "name": "browser_deferred_panels",
+      "status": "passed",
+      "log": "build/browser_deferred_panels-330.log",
+      "log_sha256": "17931ff5a2952cf69aaeb5d1d397809d915034278ab9172045f84b6f039b13f0"
+    },
+    {
+      "name": "browser_deferred_upper_panels",
+      "status": "passed",
+      "log": "build/browser_deferred_upper_panels-330-retest.log",
+      "log_sha256": "f97cae5d30e216bd229cff43dc7c3ba0cb6528f78b524ea596feb1dd1d6732ed"
+    },
+    {
+      "name": "browser_events_212",
+      "status": "passed",
+      "log": "build/browser_events_212-330.log",
+      "log_sha256": "5d4c55fa9a15ef6ce4a2c511bcca19b9485ee5f77ff01505347079deb65142db"
+    }
+  ],
+  "regression": {
+    "collected": 2206,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 2206
+  },
+  "save_transfer_smoke_tests": 21,
+  "save_transfer_smoke_in_regression": true,
+  "save_transfer_log": "build/save-transfer-330.log",
+  "inputs_sha256": "9816d0ebacb2a479c6d72efda80012d4e8534f597b6fa836626d7b1e157d139c",
+  "regression_reconciliation": {
+    "kind": "browser-only",
+    "inputs_sha256": "9816d0ebacb2a479c6d72efda80012d4e8534f597b6fa836626d7b1e157d139c",
+    "reason": "All final-source regression shards passed. The old navigation browser expected one directory tile; the implemented outpost entry adds a second. The deferred upper-panel browser selected a desktop control before responsive resize frames completed; it now waits two real animation frames before choosing the visible control. Both complete browsers are rerun with real clicks. No production code or regression result is replaced.",
+    "original_runner": {
+      "log": "build/scoped-run-330-accepted.log",
+      "log_sha256": "b219d40e0a24ae6e8ef2ac2b4613e269abd8d0787dca423ceba078dc3f6e0975"
+    },
+    "original_runs": [
+      {
+        "xml": "build/scoped-330-0.xml",
+        "log": "build/related-tests-0-330.log",
+        "xml_sha256": "6828383faf49aad4843e25016fbf9d670b83987a5d49decdbb61463fdf60c88b",
+        "log_sha256": "e6c83b68b4bbf8430a655bb2baaed6b33758d71764df72a53ca7c908db57a15d"
+      },
+      {
+        "xml": "build/scoped-330-1.xml",
+        "log": "build/related-tests-1-330.log",
+        "xml_sha256": "e0d0c20a90ab4839f5e79589762c257fd2c87fe2d4f15c20ff4dc63a7ef1bb9b",
+        "log_sha256": "52fc336b8982795d1aa9e63a9b7ab6218f312d5c97514c962157b39a044b9296"
+      },
+      {
+        "xml": "build/scoped-330-2.xml",
+        "log": "build/related-tests-2-330.log",
+        "xml_sha256": "bb696e83f5a2e4166d2229ef777a79f544a7a742cf17b7765eaff1395bb65ba0",
+        "log_sha256": "351175ff7fd2f64b513743bf9f9a2751deb6cc8685a78ac8490b40996566cfe4"
+      }
+    ],
+    "browser_retests": [
+      {
+        "name": "browser_heavens_navigation",
+        "exit_code": 0,
+        "original_log": "build/browser_heavens_navigation-330.original.log",
+        "original_log_sha256": "8571e131665345b86b581aa885793b223617ce90927903a5f6e55e96bf75fc2e",
+        "retest_log": "build/browser_heavens_navigation-330-retest.log",
+        "retest_log_sha256": "c2e5b8397efee08cca5adfd6b4961ee9ef2a395f2b14b234bab840b40f43cb6f",
+        "test_source": "tests/browser_heavens_navigation.py",
+        "test_source_sha256": "ec03d490f93a4acb72217da0252c6312aea1397063be5582e8b66c979d44ad20"
+      },
+      {
+        "name": "browser_deferred_upper_panels",
+        "exit_code": 0,
+        "original_log": "build/browser_deferred_upper_panels-330.original.log",
+        "original_log_sha256": "ea3ec2f9dfc24d6ad94c61e5533eb617bec13d7c689613d57bf310f9bc6c7b33",
+        "retest_log": "build/browser_deferred_upper_panels-330-retest.log",
+        "retest_log_sha256": "f97cae5d30e216bd229cff43dc7c3ba0cb6528f78b524ea596feb1dd1d6732ed",
+        "test_source": "tests/browser_deferred_upper_panels.py",
+        "test_source_sha256": "89702953392da936ab7a6859a4d312efaf66884459372859558cdba8f30b6c78"
+      }
+    ],
+    "final_test_sources": {
+      "tests/test_heavens.py": "d4d6562fa2516fe4d93f8e29e66e4bfd0882543f5d541c5b58dbbc2c4d06d9fc",
+      "tests/test_heavens_autonomy.py": "6cc94fe709818cb2d2f4630c8ee1bb0d8835212b2eadb43c4dcce2c774e22337",
+      "tests/test_heavens_campaign.py": "4ebaf37dbc6766a3da5183392d68807484ba6fbbb4813a4f86707f1e6aae9d48",
+      "tests/test_heavens_conquest.py": "54771e4151b8bf8faa49a0c705810cea63550c9c65faae016c8eb450cfe6ccf6",
+      "tests/test_heavens_development.py": "29fe27746e6e33d0366e21d568bc683d7d4b164a1ce991013b0a89dd3f11a818",
+      "tests/test_heavens_freight.py": "2fb8c1c527b04b320b41a5d8304d0e0f6362fdcdf68cf461c55526b349bbe6c9",
+      "tests/test_heavens_frontier.py": "ae2131ea3c846e26fb4a37e254aaa267a1e220f08441b1f9953a8f4804c70b29",
+      "tests/test_heavens_incidents.py": "1c3b5420c9f002d29caf2f7bd593ec6a5116370e3a1098f4ae1f03c2cc7be31c",
+      "tests/test_heavens_m1.py": "630a5b8f6c6035251c7cfbeaf55e5843b5f11e08ce5fd8f85b15a1bef6709fe0",
+      "tests/test_heavens_m2_acceptance.py": "93768d696f74ecf6ed3954e58845d91500ccac118a211b19f458aa8b00b52990",
+      "tests/test_heavens_migration.py": "4283518047afa9b924337dd0e0297dcce76f272316efb7b8ebdd549483d91784",
+      "tests/test_heavens_mirror.py": "eaff7241945eb0974ff98a2464884a18c5c52a6f2d807400c36165b96363ec7a",
+      "tests/test_heavens_mirror_discovery.py": "6ece7f81c86c98d2182e1e3be81c1fc1855484bbf0ed1699ca3c6c1ac51bcdbb",
+      "tests/test_heavens_mirror_pact.py": "da76ebc0cbab101730617a2ca3c504affdb4b9b652a102d26e15b440189678cd",
+      "tests/test_heavens_mirror_survey.py": "8c0b9d5ef958933e707015e230eb5e9612a69e610c9197a0c744d33582490111",
+      "tests/test_heavens_missions.py": "6b39c5b9ab802c5cea4880bf13e0184de4733197803f194d8383a4d96db08717",
+      "tests/test_heavens_omens.py": "01ac3e881376c0fa0103294115f26cae2e0e5bcaa19c1c5c7b3aac40ab35103e",
+      "tests/test_heavens_outposts.py": "e9b7d60f57ca25d78a223605ce98ad4275c7eada54af60a27466ad787c8e3d17",
+      "tests/test_heavens_peer_worlds.py": "734b71d28933c5684f47a3d28a20eaa8b23ab892707be8cc5a8971f802ad4208",
+      "tests/test_heavens_regions.py": "7c0858def610547426ec5230ac1b01ccdc4e0b1c4ecf9a7021998f5a9129e8c0",
+      "tests/test_heavens_ruins.py": "8c2689058b9ec4770c489c3224b1858575d89084e78b9cc243cfa86b0b826d11",
+      "tests/test_heavens_settlement.py": "3bab73a36601d5e8a663d9a78ffe52681358373114d9c2a8547eee58aef6b8e0",
+      "tests/test_heavens_survey.py": "db8ac9d59cda1fa937950811b16326613b2127a5d22e72895577de05e09b745a",
+      "tests/test_heavens_upkeep.py": "8d41e2fe2c4d197469aaa49c6ff0e14bf6e9442345c8cf9595c02406c7936859",
+      "tests/test_heavens_upper_worlds.py": "82bb04ec2e21241e41af6ebb44583a090635575a7a9ac656f78861f4ae5233df",
+      "tests/test_heavens_visits.py": "13836394678feb1ffb6fc6ede22d6b177571c084999581286ac3aed030bcf47b",
+      "tests/test_debug_heavens.py": "a50e4644a9afef9bd0d98c7247502836ace897dee8da5ada62ffbe4d74ed368f",
+      "tests/test_npc_promises.py": "50db0f9b7501ceb953518593403ba0333c38b0eb1983b664114772fc95bf5794",
+      "tests/test_npc_contacts.py": "76098bd0eea126d00f21a4c9120eb93a476c485a08b410cc84173bcd19fc0d19",
+      "tests/test_diaochan_skin.py": "38f831b90d4895edf72d5d1d54cba5202ab74d1b852b6600eb61280828affad3",
+      "tests/test_historical_skins.py": "763090eb0281b5223b0b17ecf0bad5292e26805a4d53a0b5920cd2b2aee88756",
+      "tests/test_humorous_achievements.py": "f38534d0a28d8f76b8c50e7e6df89dbc6674a3f3a47e66973330271bbed0bee4",
+      "tests/test_achievement_stories.py": "0bc1c37939875673fcc729abce4fae9891a899021f17728549c1644e04c2bdbf",
+      "tests/test_achievements.py": "f0de972a3af8e4d05b910099c33c2dbf12312ee2e031e2e088b674d2c2d5c0a2",
+      "tests/test_visual_catalog_scope.py": "8d5a9a453efdc748a805607443ec1527c73c0e8e965d73ab12b6f183c61d407a",
+      "tests/test_visual_release.py": "f0bc492eadc4d3d712ecd279bcd90a92c74bf9a85ac765bb69e6ffdbbee647ba",
+      "tests/test_npc_social_update.py": "1000110f396897db88f6ac598a47c901e910a45d70d44c7c5d8f3a828dea6991",
+      "tests/test_pixel_assets.py": "a4875deff4451ba9f3ae98fb10b4fe861daa97d574e94f25a7b6383c9290cdee",
+      "tests/test_architecture_stage2.py": "def623bbc7bb63e7af9ab845e3b3dc27bdcfbd81466e05dc76e55841beb03732",
+      "tests/test_engine.py": "730080284b456d1059690dc8639ca0b7b16d9327b0fc21b6e1cbc077d42c8907",
+      "tests/test_engine_dependencies.py": "a5fc7890f6662f833b24cbb0f228a69ec67f9deccc5af8611bd2d9fc0db5c651",
+      "tests/test_time_flow.py": "d85b116ce92175773e3b8ceb4ee3a038baf6144888c81cc6219a510cf1197c40",
+      "tests/test_immortal_body_and_resources.py": "fc377674ba8e2618a7f8d9c132e6d92e40e5bdd109b3412422873c3fdd291e6f",
+      "tests/test_inheritance_audit_fixes.py": "b6b2acc615c83d9f38129768fbef11321cb22e55dd9b3d88fce9874733c64d49",
+      "tests/test_survival_settlement.py": "91c3987abed68048b536e405b7ca705d17aeef8f955c64eaaddf7dc1f00f914d",
+      "tests/test_soul_lifecycle.py": "2b9e9436967d80b5b9654cbb284d9736404efb346f2895f8ad04c5297dac7b5d",
+      "tests/test_npc_combat_lifecycle.py": "33faf5ac405fc9000b2a0ccf0570fe902d8be078566d280cd7343735703906ee",
+      "tests/test_npc_custody.py": "ac348d806d76919b56b42d640a87272fd57b9cb839d48a70df1941e96b58344e",
+      "tests/test_relationship_records.py": "09b673bc42149edd8042bb1e42c00378e4cf26abaa6c0f7d1df6c7fbe93e4358",
+      "tests/test_relationship_story_update.py": "6b2ae3390c371c369696351ddd7f4fb77cdc39bafdf96b72a15d9d26dac6ab88",
+      "tests/test_organization_economy.py": "c7081ca72d46ae25c85146576de5f6eb13ed6a52b889465731361f9aad832658",
+      "tests/test_organization_balance.py": "04e59626489afea7cd29691ae779901e6fd8c5c0d4cf32196350a67eacf361e4",
+      "tests/test_economy_v2.py": "6c82fa531c2bf3b71f39362c4f47dfba1258b03c7ec8cbe10e5d8857fa657896",
+      "tests/test_economy_diversity.py": "cb32fe8a79f866f7cf784b8cf26fc90f9d4b35d1a776d75e974ca60de794ee9b",
+      "tests/test_economy_trust.py": "97d5038b7c3bbf29c4f9dfabd94efac195607e7e399c9b68270744cf3a1f5cf4",
+      "tests/test_territory_system.py": "560fc19485380f1b599cf816c34570864f6123484837a8b4fcdd68199d536f21",
+      "tests/test_war_logistics.py": "ef99910273a7b63bae4d8dfbf293258f03c39cc9fe8b1935474bb77fe76b4a13",
+      "tests/test_war_performance_update.py": "ab04ff00b6e122326fbf0e16c1104ddc8382edde36de76a157452c1c6fcdfc04",
+      "tests/test_war_presence_fixes.py": "97afbafc4021e4190a98b5b50600caf15097515677d658352c13bcbe674f39d1",
+      "tests/test_war_coalition_fixes.py": "8edf38ce401491f9671e410cb6bc27006d76b7b5ee7a34936c36b252881501bf",
+      "tests/test_war_negotiation_fixes.py": "5068b373302bcfdd57223856a6b5075c50ebd039c8a33a26da4266d99ca9e37f",
+      "tests/test_strategic_war.py": "c309c2de08f352d77233f0b85d566aaef06f2bdc03b7186909983192a2d16910",
+      "tests/test_strategic_war_audit.py": "c0397e654a39d1f037c1d45077ced635fe7f39cd9c90d25949c2d80216b42db8",
+      "tests/test_strategic_dispatch.py": "f388273d8fdf4462741fb7825648fca543303224806eae13ae4ea62b7b5c5723",
+      "tests/test_strategic_peace.py": "a31a38406ecbed65881a9f82a22c24416c5cf423014bfcb49339d310129c179c",
+      "tests/test_regional_calendar.py": "cff165841ce13f6d4e706547874a28e9445a1ba54c1284462deefda36b8c2d43",
+      "tests/test_regional_audit_fixes.py": "5f00619e10e898d5b7e9eebd831a91cf4c4957fa598c29f28e0ccbbe43bbc263",
+      "tests/test_regional_integration.py": "076bdd88616a481667cfd1153ec53a88ca38cc6778a450962fcc70228add3797",
+      "tests/test_deferred_economy.py": "6750ddbc43d576f4dcee484ded38a7bcd602b751b284d8713fdfbe3b5da025f9",
+      "tests/test_deferred_routing.py": "001cfe66c90ee806df2d18b58204164be17c556a6013c0dd0999452ba8bf174b",
+      "tests/test_persistence_pipeline.py": "a9d878da3e5a3decd9e8947ad5ee24b357ed11e162355dd63abd69bc68a112fc",
+      "tests/test_world_transition_system.py": "d57af0550c439ebc5cac50b6020a28c208ebc44bf6a3d7be3c7d237e51304934",
+      "tests/test_spatial_talismans.py": "070567dbf73aec91f7ed10fa28247165d3f892d2eadbc870ad0330f6c10e42b2",
+      "tests/test_release_211.py": "9986dd4ce009c47b8d4ad26c127ba51e748b05cd1db6fa3de2f8457e2efd5155",
+      "tests/test_release_212.py": "884815acf1fed798ac1c85d16aa4f2795714f0e0300c846c8f7438ce9680b895",
+      "tests/test_save_transfer.py": "62e00e4a042aac0f406e02d7b065430db79b0e48986a88cb57309de56be1ce6f",
+      "tests/test_base_game_version.py": "4a89f042f18fd0af2be80db1bc6969e0e13be7f52b2da1b93141b59e4643cb8c",
+      "tests/test_module_dependencies.py": "58357c4f916bb7dceefd18084d96405bf10a413093c8116210ae5d631d432b39",
+      "tests/test_android_packaging.py": "67f3c3dc465b70d31ecda20351971016cf86e9c8372cc2ebe3924ae2e9fa50c9",
+      "tests/test_windows_release_evidence.py": "46cc18051c0ae21c9a7a19778eea99cf6c27a0b7140b327f2720a6771007c982",
+      "tests/test_android_release_checks.py": "de2eef0e9c129f499fdc332a526e59a69185cbd169c79deba4b549a6033e15c6",
+      "tests/browser_heavens_outposts.py": "3dec0fd0216ecb3c3658a2d770538f640688e15ab53cea7a3f0efc6cef4453b5",
+      "tests/browser_heavens_development.py": "738f15d56e4cdf30d55426d1542d944c23481c3f181f3264e4b5d596eb731270",
+      "tests/browser_heavens_conquest.py": "f031b671937f740f08076de9b3f099ddd86e1353d53f4bd692e34dc0682701b8",
+      "tests/browser_heavens_peer_worlds.py": "e9fac675b21b361ad3a5285d672b8ed6362b79f7cfcee481a5b2af8e33bd8cac",
+      "tests/browser_heavens_navigation.py": "ec03d490f93a4acb72217da0252c6312aea1397063be5582e8b66c979d44ad20",
+      "tests/browser_npc_promises.py": "3bc1157a1c89c73c80b20ba075576ed51db2036e807ee1e7c026ffee34a75a36",
+      "tests/browser_diaochan_skin.py": "46e5814f09c52933288d892e528efc299dc563976516e75328eb52756dc2d891",
+      "tests/browser_deferred_panels.py": "ea97ef04a3a17e0cdabda857bb153d8b639c58e14049a6b464b6b8c1d57ff1a6",
+      "tests/browser_deferred_upper_panels.py": "89702953392da936ab7a6859a4d312efaf66884459372859558cdba8f30b6c78",
+      "tests/browser_events_212.py": "fa60c3eceb1e79aad34de5106046ed0a6405d73a35c2f66e6459a4f5c3b0e0b3"
+    }
+  },
+  "platform": "Windows",
+  "exe_sha256": "a0ef0367f0335f602e5ba0fe2eebe2b6da57fe08ee8ee3208296b738776192c4",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

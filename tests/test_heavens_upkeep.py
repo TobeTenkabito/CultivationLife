@@ -184,6 +184,26 @@ def test_death_after_elapsed_world_year_refunds_only_unspent_upkeep(local):
     assert row['progress'] == 1 and row['escrow']['spent'] == 600
     assert row['escrow']['refunded'] == 29400
     assert row['escrow']['spent'] + row['escrow']['refunded'] == 30000
+    assert not get_echo(dead.heavens_state['runtime'])['maintained']
+    before=copy.deepcopy(row)
+    upkeep.year_step(local[2],dead)
+    assert row==before
+
+
+def test_death_on_last_paid_year_never_grants_maintenance(local):
+    _,material=ready(local);start(local,material)
+    game=load(local);runtime=game.heavens_state['runtime'];echo=get_echo(runtime);row=echo['upkeep']
+    # A valid prepaid facility snapshot immediately before its final year.
+    runtime.update(processed_years=49,last_year_key=49)
+    row.update(progress=49,last_year=49);row['escrow']['spent']=29400
+    game.player.alive=False
+    upkeep.year_step(local[2],game)
+    assert row['status']=='failed' and row['progress']==50
+    assert row['escrow']['spent']==30000 and row['escrow']['refunded']==0
+    assert not echo['maintained']
+    snapshot=copy.deepcopy(row);upkeep.year_step(local[2],game);assert row==snapshot
+    year_step(local[2],game,YearContext(50))
+    validate_state(game.heavens_state);validate_references(game)
 
 
 def test_same_year_replay_and_ended_facility_do_not_repeat_effects(local):

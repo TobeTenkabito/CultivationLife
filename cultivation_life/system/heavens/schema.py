@@ -539,7 +539,8 @@ def validate_upkeep(echo, runtime):
             or row['status'] == 'active' and row['last_year'] >= cutoff
             or row['status'] == 'completed' and row['last_year'] >= cutoff
             or row['status'] == 'expired' and row['last_year'] < cutoff
-            or (row['status'] == 'completed') != (row['progress'] == row['duration'])
+            or row['status'] == 'completed' and row['progress'] != row['duration']
+            or row['progress'] == row['duration'] and row['status'] not in {'completed', 'failed'}
             or row['cycle'] == echo['cycle'] and (not echo['maintenance_started'] or echo['maintained'] != (row['status'] == 'completed'))):
         raise ValueError('托管护持进度、周期或维护效果无效')
     escrow = row['escrow']

@@ -61,8 +61,7 @@ def _advance_world_year(
 ) -> bool:
     player = game.player
     from ...system.soul_lifecycle import tick
-    if not tick(game, rng, deps._die):
-        return False
+    personal_ready = tick(game, rng, deps._die)
     from ...system.economy.state import advance_economy
     if deps.advance_regions:
         deps.advance_regions(game, era_news)
@@ -74,6 +73,14 @@ def _advance_world_year(
         deps.advance_caravans(game)
     if deps.advance_organizations and not deps.advance_regions:
         deps.advance_organizations(game)
+    # Age has already advanced. Personal death or a soul interruption stops
+    # further personal actions, but cannot erase that regional/NPC year.
+    if not personal_ready:
+        if deps.advance_regions and deps.advance_researchers:
+            # Preserve the same idempotent post-region researcher hook used
+            # by a completed personal year, including its legacy clock view.
+            deps.advance_researchers(game)
+        return False
     emit(game, "time.elapsed", years=1, unit_years=WORLD_SYSTEMS["time_units"][str(player.realm_index)])
     deps._advance_buddhist_year(game)
     deps._advance_merchant_year(game)

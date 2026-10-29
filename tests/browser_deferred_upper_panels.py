@@ -132,6 +132,9 @@ def verify(page, engine, identity, preset, output):
     page.keyboard.press('Escape')
     for width, height in [(1440, 960), (390, 844), (844, 390)]:
         page.set_viewport_size(dict(width=width, height=height))
+        # Responsive navigation changes on animation frames. Observe its final
+        # layout before choosing the actual visible desktop/category control.
+        page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
         open_panel(page, 'heavens')
         assert page.locator('#heavens-content [role=tablist]').count() > 0
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')

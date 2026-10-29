@@ -20,6 +20,9 @@ def main():
     scoped=json.loads((ROOT/f'build/scoped-{tag}.json').read_text(encoding='utf-8'))
     require(scoped['version']==VERSION and scoped['inputs_sha256']==inputs_digest(ROOT),'Scoped tests do not match final sources')
     require(all(r['status']=='passed' for r in scoped['runs']),'Scoped checks incomplete')
+    for run in scoped['runs']:
+        if run.get('log_sha256'):
+            require(file_digest(ROOT/run['log'])==run['log_sha256'],'Scoped acceptance log changed')
     reconciliation = None
     if scoped.get('reconciliation'):
         report = ROOT/scoped['reconciliation']
@@ -29,7 +32,17 @@ def main():
         require(all(file_digest(ROOT/name)==digest for name,digest in reconciliation['final_test_sources'].items()),'Regression test sources changed after acceptance')
         for attempt in reconciliation['original_runs']:
             require(all(file_digest(ROOT/attempt[key])==attempt[key+'_sha256'] for key in ('xml','log')),'Original regression evidence changed')
-        require(all(file_digest(ROOT/reconciliation[key])==reconciliation[key+'_sha256'] for key in ('retest_xml','retest_log')),'Corrected module retest evidence changed')
+        if reconciliation.get('kind')=='browser-only':
+            require(scoped.get('profile')=='heavens','Unexpected browser reconciliation profile')
+            original=reconciliation['original_runner']
+            require(file_digest(ROOT/original['log'])==original['log_sha256'],'Original browser runner evidence changed')
+            retests=reconciliation['browser_retests']
+            require(len(retests)==2 and {r['name'] for r in retests}=={'browser_heavens_navigation','browser_deferred_upper_panels'},'Unexpected browser reconciliation selection')
+            for retest in retests:
+                require(retest['exit_code']==0,'Real navigation retest did not pass')
+                require(all(file_digest(ROOT/retest[key])==retest[key+'_sha256'] for key in ('original_log','retest_log','test_source')),'Navigation original/retest evidence changed')
+        else:
+            require(all(file_digest(ROOT/reconciliation[key])==reconciliation[key+'_sha256'] for key in ('retest_xml','retest_log')),'Corrected module retest evidence changed')
     suites=list(ET.parse(ROOT/f'build/scoped-{tag}.xml').getroot().iter('testsuite'))
     require(suites and all(int(s.get('failures',0))==0 and int(s.get('errors',0))==0 for s in suites),'Related regressions failed')
     tests=sum(int(s.get('tests',0)) for s in suites)
@@ -176,6 +189,20 @@ def main():
         performance=json.loads((ROOT/'build/building-performance.json').read_text(encoding='utf-8'))
         if visits:require(all(r.get('visit_claims')==r['buildings'] and r.get('landscape_claims')==r['buildings'] and r.get('city_books')==r['buildings'] for r in performance['rows']),'Building visits performance must include persistent claim and finance records')
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
+    if scoped.get('profile')=='heavens':
+        from scripts.verify_scoped_release import HEAVENS_TESTS,HEAVENS_BROWSERS
+        require({name for shard in scoped['tests'] for name in shard}==set(HEAVENS_TESTS),'Heavens release domain selection incomplete')
+        require(set(HEAVENS_BROWSERS)<={r['name'] for r in scoped['runs']},'Heavens/contact/skin/navigation browsers incomplete')
+        require(all(c.get('heavens_verified') for c in evidence['cases']),'Compiled heavens acceptance required with and without DLC')
+        required={f'build/android-heavens-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Heavens Android 12 native orientations incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Heavens native test APK changed')
+        require(all('heavens_outposts_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in required),'Actual native crossing/war/return marker required')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='soul-lifecycle':
         from scripts.verify_scoped_release import SOUL_TESTS
         require(all(c.get('hunt_verified') for c in evidence['cases']),'Hunt compiled assets required')
@@ -358,7 +385,16 @@ def main():
                  apk_sha256=file_digest(apk),native=native,physical_device_tested=False)
     am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
-        z.write(target,target.name);z.write(am,am.name);z.write(ROOT/'android/README.md','README.md')
+        z.write(target,target.name);z.write(am,am.name)
+        if scoped.get('profile') == 'heavens':
+            z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
+        else:
+            z.write(ROOT/'android/README.md','README.md')
+        if scoped.get('profile') == 'heavens':
+            for name in ('CHANGELOG.md','docs/release-330.md','docs/heavens-outposts.md',
+                         'docs/npc-promises.md','docs/diaochan-skin.md',
+                         'docs/world-transition-development.md','docs/world-transition-audit.md','docs/world-transition-state-contract.json'):
+                z.write(ROOT/name,name)
         if scoped.get('profile') == 'architecture':
             z.write(ROOT/'build/architecture-stage3/verification.json',f'architecture-{VERSION}.json')
         if scoped.get('profile') == 'regional':

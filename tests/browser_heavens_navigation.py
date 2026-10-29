@@ -76,7 +76,8 @@ def main():
                     nav('诸界')
                     visible_worlds=page.evaluate("[...new Set([...game.heavens.incidents,...game.heavens.sites].map(r=>r.world))]")
                     assert set(page.get_by_label('选择界域',exact=True).locator('option').evaluate_all('nodes=>nodes.map(n=>n.value)'))==set(visible_worlds)
-                    assert page.locator('.heavens-destination').count()==1
+                    assert page.locator('.heavens-destination').count()==2
+                    assert page.get_by_role('button',name='查看跨界开拓',exact=True).count()==1
                     assert page.locator('[data-heavens-action]').count()==0
                     # Upper contact details need a real upper-world observer.
                     upper=engine.create_game('高界情报导航','supreme_metal','dao',928,

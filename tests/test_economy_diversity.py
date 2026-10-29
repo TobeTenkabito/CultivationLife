@@ -10,6 +10,7 @@ from cultivation_life.content_registry import ITEM_CATALOG, MARKET_GOODS, WORLD_
 from cultivation_life.economy_content import ROLES, TEMPLATES, WORLD_MATERIALS, specification, material_id, product_id, inputs
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState, SectNpc
+from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 from cultivation_life.rules import add_item, has_item
 from cultivation_life.system.economy import basket_rules, basket_production, basket_consumption, organizations, depot
 from cultivation_life.system.economy.state import local_market, commodity_catalog, ensure_state, ensure_regional_market
@@ -190,7 +191,7 @@ def test_private_title_reduces_public_share_without_borrowing_private_reserves(e
     assert basket_production.produce(game,market,'background:human',item,100000)==(0,0)
 
 
-def test_schema10_adopts_new_catalog_from_zero_without_charging_old_years(economy):
+def test_current_schema_adopts_new_catalog_from_zero_without_charging_old_years(economy):
     engine,game=economy;market=local_market(game)
     market['commodities']={k:r for k,r in market['commodities'].items() if not specification(k)}
     market.pop('goods_policy');game.economy_v2.pop('demand_policy')
@@ -198,7 +199,7 @@ def test_schema10_adopts_new_catalog_from_zero_without_charging_old_years(econom
     ensure_state(game);ensure_regional_market(game,engine.maps,market['world'],market['location'])
     assert cash(game)==money and market['commodities'].items()>=old.items()
     assert all(r['stock']==0 for k,r in market['commodities'].items() if specification(k))
-    assert market['last_year']==game.player.age and game.version==10
+    assert market['last_year']==game.player.age and game.version==SAVE_SCHEMA_VERSION
     assert GameState.from_dict(game.to_dict())
 
 

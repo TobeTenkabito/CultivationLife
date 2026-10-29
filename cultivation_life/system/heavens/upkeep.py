@@ -103,14 +103,18 @@ def year_step(deps, game):
         row = echo.get('upkeep')
         if not row or row['status'] != 'active' or row['last_year'] >= year:
             continue
-        if not game.player.alive or year >= deadline(echo, row):
+        if year >= deadline(echo, row):
             close(deps, game, echo, 'failed' if not game.player.alive else 'expired', year)
             continue
         row['last_year'] = year
         row['progress'] += 1
         escrow = row['escrow']
         escrow['spent'] = escrow['total'] * row['progress'] // row['duration']
-        if row['progress'] == row['duration']:
+        if not game.player.alive:
+            # This callback owns a year which has already elapsed. Charge
+            # its prepaid service once before closing; death grants no effect.
+            close(deps, game, echo, 'failed', year)
+        elif row['progress'] == row['duration']:
             row['status'] = 'completed'
             echo['maintained'] = True
             record(game, f'{echo_site(echo).name}的托管护持完成，本周期取得维护余韵与第二次参悟名额；仍共用原收益上限。', year=year)

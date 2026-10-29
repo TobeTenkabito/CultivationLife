@@ -452,6 +452,69 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("buildings_scope","22 city stories, four themes, real city construction and original inventory, stale material recovery, yearly government cap, named ruins, identity-preserving rebuild, bounded rewards and earned event followup; zero menu years");
     }
 
+    private void heavensAction(String action, boolean stale, String gameId) throws Exception {
+        String section=action.startsWith("outpost_war_")||action.equals("outpost_military_authorize")?"conquest":action.equals("outpost_develop")||action.equals("outpost_invest")?"development":"permit";
+        waitForJs("!!document.querySelector('#heavens-section-"+section+"')","Native outpost detail loaded",120000);
+        tapSelector("#heavens-section-"+section);
+        String label=section.equals("conquest")?"选择征战事务":section.equals("development")?"选择经营事务":"选择开拓事务";
+        js("(()=>{const s=document.querySelector('select[aria-label="+label+"]');s.value="+JSONObject.quote(action)+";s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
+        if(action.equals("outpost_war_start"))js("(()=>{const s=document.querySelector('select[aria-label=征战目标]');s.value=__heavensMeta.enemy_id;s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
+        int seq=((Number)js("game.heavens.next_command_seq")).intValue();
+        tapSelector("[data-heavens-action="+action+"]");
+        waitForJs("!document.querySelector('#game-confirm-backdrop').classList.contains('hidden')","Heavens real preview",60000);
+        if(stale)python("from cultivation_life import server\ng=server.ENGINE.store.load("+JSONObject.quote(gameId)+")\nserver.ENGINE.heavens_command(g.id,g.heavens_state['command_seq']+1,g.heavens_state['revision'],'configure',None,{'watch':False})");
+        tapSelector("#game-confirm-accept");
+        waitForJs("!busy&&game.heavens.next_command_seq>="+(seq+1),"Heavens command/recovery "+action,300000);
+    }
+
+    private void runHeavens(Bundle result) throws Exception {
+        String fixture=assetText("heavens_release.py");
+        tapSelector("#theme-open");
+        if(Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
+        async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+        for(String source:new String[]{"spirit","celestial"}) {
+            int rank=source.equals("spirit")?8:12;
+            String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'诸天原生验收',spirit_root:'supreme_metal',path:'dao',seed:7330,custom_start:{world:"+JSONObject.quote(source)+",realm_index:"+rank+",layer:1}})}).then(g=>g.id)");
+            python(fixture+"\nimport json\nfrom cultivation_life import server\nserver._release_heavens=json.dumps(prepare_heavens(server.ENGINE,"+JSONObject.quote(id)+"))");
+            String metadata=com.chaquo.python.Python.getInstance().getModule("cultivation_life.server").get("_release_heavens").toString();
+            js("window.__heavensMeta="+metadata+";window.__heavensRow=()=>game.heavens.outposts.find(r=>r.id===__heavensMeta.id);true");
+            async("loadGame("+JSONObject.quote(id)+")");
+            tapSelector("[data-panel-target=heavens]");
+            waitForJs("!!document.querySelector('#heavens-primary-worlds')","Native heavens navigation loaded",120000);
+            tapSelector("#heavens-primary-worlds");tapSelector("[aria-label=查看跨界开拓]");
+            check(Boolean.TRUE.equals(js("game.heavens.outposts.length==="+(rank==8?4:3))),"Native same-tier directory");
+            js("document.querySelectorAll('[data-native-peer]').forEach(n=>n.removeAttribute('data-native-peer'));[...document.querySelectorAll('.heavens-destination')].find(n=>n.getAttribute('aria-label')==='查看'+__heavensRow().name).setAttribute('data-native-peer','1');true");
+            tapSelector("[data-native-peer]");
+            heavensAction("outpost_military_authorize",true,id);
+            check(Boolean.TRUE.equals(js("!__heavensRow().conquest.authorized")),"Native stale military order rejected");
+            heavensAction("outpost_military_authorize",false,id);
+            heavensAction("outpost_depart",false,id);
+            check(Boolean.TRUE.equals(js("game.player.world===__heavensMeta.destination&&__heavensRow().status==='active'&&__heavensRow().return_fare===8*__heavensMeta.terms.annual")),"Native actual crossing and scaled prepaid return");
+            heavensAction("outpost_develop",false,id);
+            for(int i=0;i<3;i++)heavensAction("outpost_invest",false,id);
+            heavensAction("outpost_war_start",false,id);
+            for(int i=0;i<30&&!Boolean.TRUE.equals(js("__heavensRow().conquest.war.phase==='engaged'"));i++)heavensAction("outpost_wait",false,id);
+            check(Boolean.TRUE.equals(js("__heavensRow().conquest.war.phase==='engaged'")),"Native original people reached actual battlefield");
+            tapSelector("#heavens-section-conquest");
+            js("(()=>{const s=document.querySelector('select[aria-label=选择征战事务]');s.value='outpost_war_fight';s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
+            check(Boolean.TRUE.equals(js("document.querySelector('[data-heavens-action=outpost_war_fight]').disabled")),"Native remote personal combat stays disabled");
+            for(String theme:new String[]{"a","b","d","f"}) {
+                tapSelector("#heavens-toggle");tapSelector("#theme-open");tapSelector("[data-theme-picker=dialog] [data-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+                tapSelector("[data-panel-target=heavens]");waitForPanelReady("#heavens-card");
+                check(Boolean.TRUE.equals(js("document.documentElement.scrollWidth<=innerWidth+2&&document.querySelector('#heavens-card').scrollWidth<=document.querySelector('#heavens-card').clientWidth+2")),"Native upper-tier war layout fits");
+                capture("heavens-"+source+"-"+theme+"-"+arguments.getString("orientation"));
+            }
+            heavensAction("outpost_war_stop",false,id);
+            for(int i=0;i<30&&!Boolean.TRUE.equals(js("__heavensRow().conquest.war.phase==='home'"));i++)heavensAction("outpost_wait",false,id);
+            check(Boolean.TRUE.equals(js("__heavensRow().conquest.war.phase==='home'")),"Native original troops returned before settlement");
+            heavensAction("outpost_return",false,id);
+            check(Boolean.TRUE.equals(js("game.player.world==="+JSONObject.quote(source)+"&&__heavensRow().visit_status==='returned'&&__heavensRow().return_fare===0")),"Native actual paid return and reload");
+            python(fixture+"\nimport json\nfrom cultivation_life import server\ninspect_heavens(server.ENGINE,"+JSONObject.quote(id)+",json.loads(server._release_heavens),returned=True)");
+            tapSelector("#heavens-toggle");
+        }
+        result.putString("heavens_outposts_scope","Second/third-tier original people, separate military mandate, stale rejection/recovery, formal crossings, real local expansion and scaled cash, actual battlefield and road return, remote combat disabled, prepaid personal return; four themes, signed native portrait/landscape");
+    }
+
     private void runSoulLifecycle(Bundle result) throws Exception {
         String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'身魂原生验收',spirit_root:'supreme_metal',path:'dao',seed:320,preset_id:'core'})}).then(g=>g.id)");
         python(assetText("soul_release.py")+"\nfrom cultivation_life import server\nprepare_soul(server.ENGINE,"+JSONObject.quote(id)+")");
@@ -1010,7 +1073,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("soul-lifecycle")) {
+            if(phase.equals("heavens")) {
+                runHeavens(result);
+            } else if(phase.equals("soul-lifecycle")) {
                 runSoulLifecycle(result);
             } else if(phase.equals("authored")) {
                 runAuthored(result);

@@ -169,6 +169,7 @@
 
 - [身魂、第二元婴与转道](soul-lifecycle.md)
 
+- [诸天开拓与3.3.0发行](release-330.md)
 - [猎杀妖兽形象与3.2.4发行](hunt-beasts.md)
 
 - [貂蝉皮肤](diaochan-skin.md)：凤仪亭成就奖励、女性魔修衣柜门槛与双扇金凤攻击动画。
