@@ -91,3 +91,9 @@ class HeavensDependencies:
     outpost_player_plan: Callable | None = None
     outpost_move_player: Callable | None = None
     outpost_item_name: Callable | None = None
+    outpost_maps: Callable | None = None
+    outpost_local_people: Callable | None = None
+    outpost_site_reason: Callable | None = None
+    advance_outpost_job: Callable | None = None
+    end_outpost_job: Callable | None = None
+    outpost_settle_claims: Callable | None = None

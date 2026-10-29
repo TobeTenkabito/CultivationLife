@@ -6,6 +6,7 @@ from ...regional_context import task_active
 from ..economy import depot
 from ..economy.ledger import account, balance, transfer_value
 from .outpost_definitions import ENDPOINTS, CROSSING_YEARS, BUILD_YEARS, BUILD_COST, ANNUAL_COST
+from .development_definitions import LOCAL_PHASES
 
 
 def get(game, target):
@@ -116,11 +117,13 @@ def advance_unit(deps, game, row, unit, year, lane_holder):
     if name in {'home', 'lost'} or unit['last_year'] >= year:
         return
     npc = deps.resolve_person(game, unit['person_id'])
-    owning_world = row['destination'] if name in {'stationed', 'returning'} else row['source']
+    owning_world = row['destination'] if name in {'stationed', 'returning'} | LOCAL_PHASES else row['source']
     if not task_active(game, owning_world):
         return
     unit['last_year'] = year
     if not npc or not npc.alive:
+        if unit.get('local_job', {}).get('status') == 'active':
+            deps.end_outpost_job(game, row, unit)
         if balance(game, unit['wallet']):
             transfer_value(game, unit['wallet'], f'background:{owning_world}', balance(game, unit['wallet']), '开拓途中陨落，原随身款遗失')
         unit['stock'] = {}
@@ -128,6 +131,9 @@ def advance_unit(deps, game, row, unit, year, lane_holder):
         note(game, row, '一位原派驻门人陨落，行程终止；未交货物与随身款遗失，不补生替身。')
         return
     if not free(game, npc) or npc.faction_id != row['owner_id']:
+        return
+    if name in LOCAL_PHASES:
+        deps.advance_outpost_job(game, row, unit)
         return
     if row['status'] == 'withdrawing' and name in {'gathering', 'outbound'}:
         recall(row, unit)
@@ -190,6 +196,8 @@ def year_step(deps, game):
         if not task_active(game, row['destination']) or row['last_year'] >= year:
             continue
         row['last_year'] = year
+        if row.get('development'):
+            deps.outpost_settle_claims(game, row)
         residents = [u for u in row['units'] if not u['courier'] and located(deps, game, row, u) and u['person_id'] in resident_ids]
         if row['status'] == 'withdrawing':
             if residents:

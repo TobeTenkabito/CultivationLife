@@ -40,13 +40,19 @@ def settle_unit(host,game,rng):
     balances and influence determine the period; no historical duels/production
     or hypothetical annual treasury paths are reconstructed.
     """
-    if not enabled():return
+    if not enabled():
+        from .anchors import branches
+        if branches(game): dividends(game, host.maps)
+        return
     activate(game,host.maps)
     s=state(game);clocks=s['settlement_years']
     pending=[(address,row,game.player.age-clocks[address])
              for address,row in game.economy_v2.get('organizations',{}).items()
              if address in clocks and game.player.age>clocks[address] and current(game,row['world'])]
-    if not pending:return
+    if not pending:
+        from .anchors import branches
+        if branches(game): dividends(game, host.maps)
+        return
     prepare(game,host.maps)
     for address,row,years in pending:
         entity=game.sects.get(row['identity'])
@@ -57,7 +63,7 @@ def settle_unit(host,game,rng):
         settle(game,host.maps,entity,row,years)
         if row.get('history') and row['history'][-1][0]==game.player.age:
             row['history'][-1][2]+=row.get('territory_paid',0)
-    dividends(game)
+    dividends(game, host.maps)
     refresh_bonuses(game)
     npc_proposal(host,game,rng)
 
@@ -104,26 +110,10 @@ def settle(game,maps,entity,row,years):
         r['value']=max(floor,r['value']-decay)
         if r['value']<=0: book[loc].pop(entity.id,None)
 
-def dividends(game):
-    if not enabled(): return
-    s=state(game);cursors=s.setdefault('fee_cursors',{})
-    for market in game.economy_v2.get('markets',{}).values():
-        if not current(game,market['world']):continue
-        actual=market.get('fees',0);previous=cursors.get(market['id'],actual)
-        cursors[market['id']]=actual
-        rows=s['holdings'].get(market['world'],{}).get(market['location'],{})
-        weights={identity:r['value']*(POLICIES[r['policy']]['yield_factor'] if permits(r.get('policy'),r['value']) else 1)
-                 for identity,r in rows.items() if key('sect',identity) in game.economy_v2.get('organizations',{})}
-        total=sum(weights.values())
-        if not total: continue
-        pool=min(int(max(0,actual-previous)*.2),balance(game,f'operator:{market["id"]}'))
-        for identity,weight in weights.items():
-            paid=int(pool*weight/total)
-            transfer_value(game,f'operator:{market["id"]}',key('sect',identity),paid,'当地采办与商路经营收益按相对影响力分配')
-            row=game.economy_v2['organizations'][key('sect',identity)]
-            row['income']+=paid;row['territory_income']=row.get('territory_income',0)+paid
-            if row.get('history') and row['history'][-1][0]==game.player.age:
-                row['history'][-1][1]+=paid
+def dividends(game, maps=None):
+    from .revenue import distribute
+    distribute(game, maps)
+
 
 def npc_proposal(host,game,rng):
     if not enabled(): return

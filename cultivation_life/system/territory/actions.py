@@ -8,6 +8,7 @@ from ..economy.local_market import quote
 from ..economy.state import ensure_regional_market, reprice
 from .rules import POLICIES, permits, costs
 from .state import validate_projection, snapshot, ensure, note
+from .geography import contest_chance, change_claim
 
 ACTIONS = {'expand_influence':'投放地方影响力','build_outpost':'新建地方据点','territory_policy':'地方治理政策','territory_spar':'边界论道比试','territory_harass':'边界袭扰'}
 
@@ -90,17 +91,16 @@ def apply(game,maps,entity,action,location,rng,policy='',target=''):
     book=ensure(game,maps,entity.world)
     owned=(book.get(location,{}).get(entity.id,dict(value=0.,outpost=False,policy='')) if action=='territory_harass'
            else book.setdefault(location,{}).setdefault(entity.id,dict(value=0.,outpost=False,policy='')))
-    if action=='territory_policy': owned['policy']=policy
-    elif action=='build_outpost': owned.update(outpost=True,value=max(50.,owned['value']))
-    elif action=='expand_influence': owned['value']=min(100.,owned['value']+20)
+    if action in {'territory_policy', 'build_outpost', 'expand_influence'}:
+        change_claim(book, location, entity.id, action, policy=policy)
     else:
         def rank(s):return max(participants(game,s),default=(-1,0))
         other=game.sects[target]
         own,enemy=rank(entity),rank(other)
-        chance=max(.15,min(.85,.5+.12*(own[0]-enemy[0])+.015*(own[1]-enemy[1])))
+        chance=contest_chance(own,enemy)
         won=rng.random()<chance
         if won:
-            if action=='territory_spar': owned['value']=min(100.,owned['value']+12)
+            if action=='territory_spar': change_claim(book, location, entity.id, action)
             else:
                 rival=book[location][target]
                 floor=snapshot(game,maps,entity.world)[location][target]['floor']

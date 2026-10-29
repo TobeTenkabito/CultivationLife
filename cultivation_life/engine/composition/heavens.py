@@ -194,6 +194,6 @@ def bind_heavens(engine) -> HeavensDependencies:
         **bind_visits(engine, lambda: ports),
         **bind_missions(engine, lambda: ports),
         **bind_survey(engine, lambda: ports),
-        **bind_frontier(engine), **bind_campaign(engine), **bind_incidents(engine), **bind_outposts(engine),
+        **bind_frontier(engine), **bind_campaign(engine), **bind_incidents(engine), **bind_outposts(engine, lambda: ports),
     )
     return ports

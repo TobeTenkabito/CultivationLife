@@ -1,5 +1,7 @@
 """Pure frontier shape validation. No registry, models or action imports."""
 from .outpost_definitions import ENDPOINTS, PHASES, TIMED_ACTIONS, BUILD_YEARS, CROSSING_YEARS, is_target, target
+from .development_schema import validate_development, validate_job
+from .development_definitions import LOCAL_PHASES
 
 
 def counter(value):
@@ -11,7 +13,7 @@ def stock(value, source):
     if type(value) is not dict or len(value) > 32:
         raise ValueError('开拓库存格式无效')
     for key, quantity in value.items():
-        if key not in {f'item:econ_{source}_2_{role}' for role in ('ore_structure', 'ore_conduct', 'ore_store')}:
+        if key not in {f'item:econ_{world}_2_{role}' for world in ('human', 'demon') for role in ('ore_structure', 'ore_conduct', 'ore_store')}:
             raise ValueError('开拓库存只能保存原普通物资编号')
         counter(quantity)
         if quantity > 10000:
@@ -27,7 +29,7 @@ def validate_outposts(rows):
     for key, row in rows.items():
         keys = {'id', 'owner_id', 'owner_kind', 'issuer_id', 'source', 'destination', 'home',
                 'status', 'progress', 'stock', 'units', 'sequence', 'governor_id', 'last_year', 'visit', 'history'}
-        if type(row) is not dict or set(row) != keys or not is_target(key) or row['id'] != key or not isinstance(row['owner_id'], str) or target(row['owner_id']) != key:
+        if type(row) is not dict or set(row) - {'development'} != keys or not is_target(key) or row['id'] != key or not isinstance(row['owner_id'], str) or target(row['owner_id']) != key:
             raise ValueError('开拓驻地身份或字段无效')
         if (row['source'] not in ENDPOINTS or row['destination'] not in ENDPOINTS or row['source'] == row['destination']
                 or row['owner_kind'] not in {'sect', 'family'} or not isinstance(row['issuer_id'], str)
@@ -39,13 +41,15 @@ def validate_outposts(rows):
         if row['progress'] > BUILD_YEARS or row['status'] == 'active' and row['progress'] != BUILD_YEARS:
             raise ValueError('开拓施工进度无效')
         stock(row['stock'], row['source'])
+        if 'development' in row:
+            validate_development(row['development'])
         if type(row['units']) is not list or len(row['units']) > 12:
             raise ValueError('开拓门人名册无效')
         wallets = set()
         if sum(u.get('phase') not in {'home', 'lost'} for u in row['units'] if isinstance(u, dict)) > 3:
             raise ValueError('开拓同时派驻人数超限')
         for unit in row['units']:
-            if type(unit) is not dict or set(unit) != {'person_id', 'phase', 'progress', 'duration', 'road', 'road_years', 'wallet', 'stock', 'courier', 'delivered', 'last_year'}:
+            if type(unit) is not dict or set(unit) - {'local_job'} != {'person_id', 'phase', 'progress', 'duration', 'road', 'road_years', 'wallet', 'stock', 'courier', 'delivered', 'last_year'}:
                 raise ValueError('开拓门人行程字段无效')
             identity = unit['person_id']
             if not isinstance(identity, str) or identity in people or unit['phase'] not in PHASES or type(unit['courier']) is not bool:
@@ -61,12 +65,19 @@ def validate_outposts(rows):
                 raise ValueError('开拓人员不能共享随身资金账户')
             wallets.add(unit['wallet'])
             durations = {CROSSING_YEARS} if unit['phase'] in {'outbound', 'returning'} else {unit['road_years']} if unit['phase'] == 'gathering' else {0, unit['road_years']} if unit['phase'] == 'homeward' else {0}
-            if unit['duration'] not in durations:
+            if unit['phase'] not in LOCAL_PHASES and unit['duration'] not in durations:
                 raise ValueError('开拓工期与行程阶段不一致')
+            validate_job(unit, row, stock)
+            if unit.get('local_job'):
+                if unit['local_job']['wallet'] in wallets:
+                    raise ValueError('地方行程资金不能与其他运输账户共用')
+                wallets.add(unit['local_job']['wallet'])
             if (type(unit['road']) is not list or not unit['road'] or unit['road'][0] != row['home']
                     or unit['road'][-1] != ENDPOINTS[row['source']] or any(not isinstance(loc, str) for loc in unit['road'])):
                 raise ValueError('开拓集结道路无效')
             stock(unit['stock'], row['source'])
+        if sum(row['stock'].values()) + sum(sum(u['stock'].values()) + sum(u.get('local_job', {}).get('stock', {}).values()) for u in row['units']) > 10000:
+            raise ValueError('驻地及原在途物资总量超出容量')
         if row['governor_id'] is not None and row['governor_id'] not in {u['person_id'] for u in row['units']}:
             raise ValueError('开拓负责人须引用原派驻名册')
         visit = row['visit']
@@ -115,6 +126,9 @@ def validate_references(game):
         if local not in accounts:
             raise ValueError('开拓当地原账目丢失')
         for unit in row['units']:
+            job = unit.get('local_job')
+            if job and (job['wallet'] not in accounts or not job['wallet'].startswith(f'heavens-{row["id"]}:job:')):
+                raise ValueError('地方行程原运输账户丢失')
             if raw.count(unit['person_id']) != 1 or unit['wallet'] not in accounts or not unit['wallet'].startswith(f'heavens-{row["id"]}:cargo:'):
                 raise ValueError('开拓门人必须只有一个权威名册及原运输账户')
             identity = unit['person_id']

@@ -4,18 +4,20 @@ from ..organization_heritage import decision
 from ..organization_relocation import race_site, validate as validate_relocation
 from .rules import enabled, band, POLICIES, permits, costs
 from .state import snapshot, validate_projection, resource_bonus
+from . import anchors
 
 def augment(game,maps,data):
     world=game.player.world
     if WORLD_SYSTEMS['world_profiles'].get(world,{}).get('tier') not in {1,2,3}:
         return data  # Instance-local society never exposes outside geography.
-    book=snapshot(game,maps,world) if enabled() else {}
+    book=snapshot(game,maps,world) if enabled() or anchors.branches(game, world) else {}
+    owners=anchors.owners(game, world)
     for loc in data['locations']:
         rows=book.get(loc['id'],{});total=sum(r['value'] for r in rows.values())
-        loc['influences']=[dict(id=identity,name=game.sects[identity].name,value=round(r['value'],1),
+        loc['influences']=[dict(id=identity,name=owners[identity].name,value=round(r['value'],1),
             share=round(r['value']/max(1,total)*100,1),band=band(r['value']),outpost=bool(r.get('outpost')),
-            headquarters=game.sects[identity].location_id==loc['id'],floor=r.get('floor',0),policy=r.get('policy',''),
-            policy_name=POLICIES.get(r.get('policy'),{}).get('name','常态巡守'),owned=game.player.faction_id==identity)
+            headquarters=owners[identity].world==world and owners[identity].location_id==loc['id'],floor=r.get('floor',0),policy=r.get('policy',''),
+            policy_name=POLICIES.get(r.get('policy'),{}).get('name','常态巡守'),owned=game.player.faction_id==identity or bool(game.family and game.family.id==identity))
             for identity,r in sorted(rows.items(),key=lambda pair:(-pair[1]['value'],pair[0]))]
     plans=[]
     for kind,entity in [('sect',game.sects.get(game.player.faction_id)),('family',game.family)]:
@@ -49,7 +51,7 @@ def augment(game,maps,data):
                 can_build=game.player.location_id==loc['id'] and not row.get('outpost'),
                 construction=construction_plan(game,maps,entity,loc['id']) if game.player.location_id==loc['id'] else None,
                 policies=[dict(id=p,name=d['name']) for p,d in POLICIES.items() if row and permits(p,row['value'])],
-                rivals=[dict(id=k,name=game.sects[k].name) for k in book.get(loc['id'],{}) if k!=entity.id]))
+                rivals=[dict(id=k,name=owners[k].name) for k in book.get(loc['id'],{}) if k!=entity.id]))
     row=game.economy_v2.get('organizations',{}).get(f'organization:sect:{entity.id}',{}) if entity else {}
     data['territory']=dict(enabled=enabled(),owner_id=entity.id if entity else None,can_propose=bool(entity and entity.kind=='sect' and decision(game,entity)),
         locations=own,harassment_locations=harassment,policies=POLICIES,history=[r for r in game.intrigue_state.get('territory',{}).get('history',[]) if r['world']==world][-8:],

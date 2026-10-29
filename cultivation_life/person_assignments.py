@@ -47,7 +47,7 @@ def research_assignment(game, identity, *, exclude_war=None):
 
 def in_transit(game, identity):
     mission = research_assignment(game, identity)
-    return bool(mission and mission['phase'] in {'gathering', 'outbound', 'transport', 'returning', 'homeward'})
+    return bool(mission and mission['phase'] in {'gathering', 'outbound', 'transport', 'returning', 'homeward', 'local_outbound', 'local_return'})
 
 
 def require_unassigned(game, identity):

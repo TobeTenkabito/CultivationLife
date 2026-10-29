@@ -103,7 +103,7 @@
     for(const row of rows){
       const box=node('article',null,'heavens-action'),info=node('div'),options={...row.options};
       const costs=[];if(row.years!=null)costs.push(`${row.years} 年`);if(row.costs?.stones)costs.push(`${amount(row.costs.stones)} 灵石`);if(row.costs?.mp)costs.push(`${amount(row.costs.mp)} 法力`);if(row.material_consumed)costs.push('消耗一件阵材');
-      if(row.costs?.organization_stones)costs.push(`府库 ${amount(row.costs.organization_stones)} 灵石`);
+      if(row.costs?.organization_stones)costs.push(`${['outpost_expand','outpost_build_site','outpost_spar','outpost_buy_materials'].includes(row.action)?'当地经费':'府库'} ${amount(row.costs.organization_stones)} 灵石`);
       info.append(node('h4',row.label),node('small',row.enabled?costs.join(' · '):row.reason));
       if(row.reward_stones)info.append(node('small',`履约酬劳 ${amount(row.reward_stones)} 灵石`));
       if(['maintain','upkeep_start','mirror_isolate','mirror_repair','ruins_replace','freight_start'].includes(row.action)&&materials.length){
@@ -111,11 +111,18 @@
         for(const m of materials){const option=node('option',m.name||m.material_id);option.value=m.id;select.append(option);}
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.material_id=select.value;};info.append(select);
       }
-      if(['migration_start','survey_start','outpost_dispatch','outpost_supply','outpost_appoint','outpost_recall'].includes(row.action)&&people.length){
+      if(['migration_start','survey_start','outpost_dispatch','outpost_supply','outpost_appoint','outpost_recall','outpost_expand','outpost_build_site','outpost_spar','outpost_cancel_local','outpost_export'].includes(row.action)&&people.length){
         const select=node('select');select.setAttribute('aria-label',row.action.startsWith('outpost_')?'开拓门人':row.action==='survey_start'?'勘察居民':'迁居居民');
         for(const person of people){const option=node('option',`${person.name}${person.affinity!=null?' · 交情 '+person.affinity:''}`);option.value=person.id;select.append(option);}
         select.value=options.person_id||people[0].id;
         select.disabled=!row.enabled||Boolean(pending);select.onchange=()=>{options.person_id=select.value;};info.append(select);
+      }
+      for(const [key,label,choices] of [['policy','地方政策',row.policies],['rival_id','当地论道对手',row.rivals]]){
+        if(!choices?.length)continue;
+        const select=node('select');select.setAttribute('aria-label',label);
+        for(const choice of choices){const option=node('option',choice.name);option.value=choice.id;select.append(option);}
+        select.value=options[key]||choices[0].id;select.disabled=!row.enabled||Boolean(pending);
+        select.onchange=()=>{options[key]=select.value;};info.append(select);
       }
       const b=button(row.label,()=>propose(row.action,row.target_id,options),!row.enabled||Boolean(pending));b.dataset.heavensAction=row.action;
       if(['ruins_take','mirror_assault','mirror_release'].includes(row.action))b.classList.add('heavens-danger');

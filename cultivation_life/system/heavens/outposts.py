@@ -7,6 +7,8 @@ from .state import active_task, initialize
 from .outpost_definitions import (ACTIONS, LABELS, ENDPOINTS, SITE_NAMES, WORLD_NAMES, OPTIONS,
     CROSSING_YEARS, BUILD_YEARS, BUILD_COST, WORKING_CASH, ANNUAL_COST, MAX_UNITS, TIMED_ACTIONS, target, is_target)
 from . import outpost_runtime as runtime
+from . import outpost_development as development
+from .development_definitions import LABELS as DEVELOPMENT_ACTIONS
 
 
 def handles(state, action, target_id):
@@ -66,7 +68,7 @@ def dispatch_plan(deps, game, row, entity, identity, courier):
         raise ValueError('开拓道路或已登记跨界路线不可用')
     store = depot.find(game, entity)
     cargo = {} if courier else runtime.materials(row['source'])
-    outstanding = sum(row['stock'].values()) + sum(sum(u['stock'].values()) for u in row['units'])
+    outstanding = sum(row['stock'].values()) + sum(sum(u['stock'].values()) + sum(u.get('local_job', {}).get('stock', {}).values()) for u in row['units'])
     if outstanding + sum(cargo.values()) > 10000:
         raise ValueError('当地及在途仓储容量不足，请先回收原物资')
     if not store or any(store['stock'].get(key, 0) < quantity for key, quantity in cargo.items()):
@@ -128,6 +130,8 @@ def quote(deps, game, action, target_id, options):
             raise ValueError('须先在原总部批准跨界开拓')
         if action not in {'outpost_return', 'outpost_wait'}:
             require_control(deps, game, entity, row)
+        if action in DEVELOPMENT_ACTIONS:
+            return development.quote(deps, game, row, action, options)
         if action in {'outpost_dispatch', 'outpost_supply'}:
             plan = dispatch_plan(deps, game, row, entity, options['person_id'], action == 'outpost_supply')
             costs = {'organization_stones': plan['total']}
@@ -196,6 +200,8 @@ def execute(deps, game, action, target_id, options, proposal, *, run_task, cance
         runtime.note(game, row, '总部正式批准跨界开拓，原势力与山门保持唯一。')
         return {'message': '跨界开拓许可已登记'}
     row = runtime.get(game, target_id)
+    if action in DEVELOPMENT_ACTIONS:
+        return development.execute(deps, game, row, action, options)
     if action in TIMED_ACTIONS:
         if action == 'outpost_depart':
             escrow = deps.reserve_resources(game, 1600, None, 0)
@@ -220,6 +226,8 @@ def execute(deps, game, action, target_id, options, proposal, *, run_task, cance
         for unit in row['units']:
             if unit['phase'] in {'home', 'lost'} and not balance(game, unit['wallet']):
                 game.economy_v2['accounts'].pop(unit['wallet'], None)
+                if unit.get('local_job') and not balance(game, unit['local_job']['wallet']):
+                    game.economy_v2['accounts'].pop(unit['local_job']['wallet'], None)
         row['units'] = [u for u in row['units'] if u['phase'] not in {'home', 'lost'}]
         if row['governor_id'] not in {u['person_id'] for u in row['units']}:
             row['governor_id'] = None
@@ -247,8 +255,14 @@ def execute(deps, game, action, target_id, options, proposal, *, run_task, cance
         row['status'] = 'suspended'
     elif action == 'outpost_activate':
         row['status'] = 'active'
+        if row.get('development'):
+            main = ENDPOINTS[row['destination']]
+            owned = development.book(game, row).get(main, {}).get(row['owner_id'])
+            if owned and owned['outpost']:
+                development.change_claim(development.book(game, row), main, row['owner_id'], 'build_outpost')
     elif action == 'outpost_withdraw':
         row['status'] = 'withdrawing'
+        development.abandon(game, row)
     return {'message': LABELS[action] + '已登记'}
 
 
@@ -320,6 +334,8 @@ def project(deps, game):
         if headquarters:
             item['candidates'] = deps.outpost_candidates(game, entity)
         for action, label in LABELS.items():
+            if action in DEVELOPMENT_ACTIONS:
+                continue
             options = {}
             if OPTIONS[action]:
                 choices = item['candidates'] if action in {'outpost_dispatch', 'outpost_supply'} else item['residents'] if action == 'outpost_appoint' else [u for u in item['units'] if u['phase'] in {'gathering', 'outbound', 'stationed'} and u['free']]
@@ -330,5 +346,8 @@ def project(deps, game):
             except ValueError as exc:
                 control.update(enabled=False, reason=str(exc))
             item['actions'].append(control)
+        state = game.heavens_state.get('runtime')
+        item['development'] = development.project(deps, game, row, key,
+            actor_reason(game) or ('请先完成或取消当前亲自任务' if state and active_task(state) else None))
         result.append(item)
     return result

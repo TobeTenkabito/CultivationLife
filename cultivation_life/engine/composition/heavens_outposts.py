@@ -12,7 +12,7 @@ from ...system.heavens.outpost_definitions import ENDPOINTS, route_id
 from ...system.heavens.outpost_runtime import free
 
 
-def bind_outposts(engine):
+def bind_outposts(engine, ports):
     def owner(game, identity):
         return game.family if game.family and game.family.id == identity else game.sects.get(identity)
 
@@ -111,8 +111,40 @@ def bind_outposts(engine):
         engine._apply_world_transition(game, plan)
         finish_world_transition(game, rng, engine._refresh_world_market)
 
+    def local_people(game, row, location, identity):
+        entity = owner(game, identity)
+        if not entity or entity.extinct:
+            return []
+        home = faction_site(entity, persist=False)['id']
+        return [npc for npc in engine._sect_members(game, entity)
+                if free(game, npc) and npc.world == row['destination']
+                and (npc.location_id or home) == location
+                and not research_assignment(game, npc.id)]
+
+    def site_reason(game, row, location):
+        from ...system.heavens.local_control import occupied
+        from ...system.heavens.campaign_definitions import SOURCE
+        return '当地有他方实际驻军，不能绕过封锁经营' if occupied(game, row['destination'], location) and row['owner_id'] != SOURCE else None
+
+    def advance_job(game, row, unit):
+        from ...system.heavens.outpost_development import advance_job
+        advance_job(ports(), game, row, unit)
+
+    def end_job(game, row, unit):
+        from ...system.heavens.outpost_development import end_job
+        end_job(ports(), game, row, unit, lost=True)
+
+    def settle_claims(game, row):
+        from ...system.heavens.outpost_development import settle_claims, abandon
+        if row['status'] in {'withdrawing', 'closed'}:
+            abandon(game, row)
+        else:
+            settle_claims(ports(), game, row)
+
     return dict(outpost_owner=owner, outpost_owners=owners, outpost_control=control,
                 outpost_candidates=candidates, outpost_road=road, outpost_lane=lane,
                 outpost_prepare_npc=prepare, outpost_move_npc=move_npc,
                 outpost_player_plan=player_plan, outpost_move_player=move_player,
-                outpost_item_name=lambda key: ITEM_CATALOG[key.removeprefix('item:')].name)
+                outpost_item_name=lambda key: ITEM_CATALOG[key.removeprefix('item:')].name,
+                outpost_maps=lambda: engine.maps, outpost_local_people=local_people, outpost_site_reason=site_reason,
+                advance_outpost_job=advance_job, end_outpost_job=end_job, outpost_settle_claims=settle_claims)

@@ -1,5 +1,6 @@
 """First organizational frontier: explicit, civilian, reversible tier-one lanes."""
 import re
+from .development_definitions import LABELS as DEVELOPMENT_LABELS, OPTIONS as DEVELOPMENT_OPTIONS, LOCAL_PHASES
 
 OUTPOST_ID = 'outpost_network'
 ENDPOINTS = {'human': 'wudi_plain', 'demon': 'red_marrow_city'}
@@ -24,6 +25,10 @@ TIMED_ACTIONS = frozenset({'outpost_depart', 'outpost_return', 'outpost_wait'})
 OPTIONS = {action: ({'person_id'} if action in {
     'outpost_dispatch', 'outpost_supply', 'outpost_appoint', 'outpost_recall'} else set()) for action in ACTIONS}
 PHASES = {'gathering', 'outbound', 'stationed', 'returning', 'homeward', 'home', 'lost'}
+LABELS.update(DEVELOPMENT_LABELS)
+OPTIONS.update(DEVELOPMENT_OPTIONS)
+ACTIONS = frozenset(LABELS)
+PHASES |= LOCAL_PHASES
 
 
 def target(owner_id):

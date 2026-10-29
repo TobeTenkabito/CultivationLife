@@ -1,7 +1,7 @@
 /* Civilian frontier details reuse the existing heavens navigation and command. */
 (() => {
   const status={unregistered:'尚未授权',authorized:'已获开拓许可',building:'施工中',active:'正常运营',suspended:'暂停经营',withdrawing:'撤回中',closed:'已关闭'};
-  const phase={gathering:'沿路集结',outbound:'跨界去程',stationed:'已在驻地',returning:'跨界返程',homeward:'沿路返乡',home:'已归返结清',lost:'原人物陨落'};
+  const phase={gathering:'沿路集结',outbound:'跨界去程',stationed:'已在驻地',returning:'跨界返程',homeward:'沿路返乡',home:'已归返结清',lost:'原人物陨落',local_outbound:'前往经营地点',local_work:'在当地办事',local_return:'返回异界驻地'};
   function render(host, projects, ui, api) {
     const {node,title,tile,back,subview,renderActions,empty,go}=api;
     const selected=projects.find(row=>row.id===ui.target);
@@ -16,7 +16,7 @@
     const returnLink=node('button','‹ 返回开拓目录','heavens-back');returnLink.type='button';returnLink.onclick=()=>go('worlds','outpost_network');host.append(returnLink);
     title(host,selected.name,`${selected.source_name} → ${selected.destination_name} · ${selected.location_name} · ${status[selected.status]}`);
     if(selected.notice)host.append(node('p',selected.notice,'muted'));
-    subview(host,[['permit','授权与往返'],['staff','派驻与补给'],['local','驻地与仓储'],['records','开拓纪要']],'permit',(body,section)=>{
+    subview(host,[['permit','授权与往返'],['staff','派驻与补给'],['local','驻地与仓储'],['development','地方经营'],['records','开拓纪要']],'permit',(body,section)=>{
       let actions=[];
       if(section==='permit'){
         body.append(node('p',`在原总部批准开拓，到${selected.gateway}申请个人通行。本人去返程各8年，各800灵石；首次启程同时预留返程款。`),node('p','民用开拓许可只用于派驻、施工和补给，不附带征服或宣战权。'));
@@ -34,6 +34,30 @@
           const governor=selected.residents.find(p=>p.id===selected.governor_id);body.append(node('p',`在场负责人：${governor?.name||'暂无可履职负责人'}`));
         }else body.append(node('p','库存与现任负责人须亲自抵达驻地核实。'));
         actions=selected.actions.filter(r=>['outpost_appoint','outpost_suspend','outpost_activate','outpost_withdraw'].includes(r.action));
+      }else if(section==='development'){
+        const dev=selected.development;
+        body.append(node('p','负责人留守驻地，另派已到场门人沿道路往返。联络地方5年；外驻点施工10年，使用驻地实有资材。'));
+        if(dev?.reason){body.append(node('p',dev.reason,'muted'));return;}
+        if(dev?.registered)body.append(node('p',`经营收入 ${dev.income.toLocaleString()} · 实付支出 ${dev.expense.toLocaleString()} · 当地结余 ${dev.balance.toLocaleString()} 灵石`),node('p','收入来自当地实际成交手续费的分成。运回总部须门人实际返乡交款；全处撤回也会撤去外围影响。'));
+        for(const job of dev?.jobs||[])body.append(node('p',`${job.name} · ${job.location_name} · ${job.label}：${phase[job.phase]}${job.duration?' '+job.progress+'/'+job.duration+'年':''} · ${({active:'进行中',done:'已经结清',cancelled:'取消并结清',lost:'行程损失'})[job.status]}`));
+        const selector=node('select');selector.setAttribute('aria-label','经营地点');
+        const main=node('option','驻地经营总览');main.value='';selector.append(main);
+        for(const place of dev?.locations||[]){const option=node('option',`${place.name} · 影响 ${place.value}${place.outpost?' · 已有驻点':''}`);option.value=place.id;selector.append(option);}
+        selector.value=ui.developmentLocation||'';
+        if(selector.selectedIndex<0)selector.value='';
+        const details=node('div');
+        const show=()=>{
+          ui.developmentLocation=selector.value;details.replaceChildren();
+          const place=dev?.locations.find(p=>p.id===selector.value);
+          const choices=place?.actions||dev?.actions||[];
+          const select=node('select');select.setAttribute('aria-label','选择经营事务');
+          for(const action of choices){const option=node('option',action.label);option.value=action.action;select.append(option);}
+          const remembered=ui.developmentAction;if(choices.some(a=>a.action===remembered))select.value=remembered;
+          const actionBody=node('div');const showAction=()=>{ui.developmentAction=select.value;actionBody.replaceChildren();const action=choices.find(a=>a.action===select.value);if(!action)return;
+            const people=action.action==='outpost_cancel_local'?(dev.jobs||[]).filter(j=>j.status==='active').map(j=>({id:j.person_id,name:j.name})):dev.workers;
+            renderActions(actionBody,[{...action,policies:action.action==='outpost_policy'?place?.policies:null,rivals:action.action==='outpost_spar'?place?.rivals:null}],[],action.people||people);
+          };select.onchange=showAction;details.append(select,actionBody);showAction();
+        };selector.onchange=show;body.append(selector,details);show();return;
       }else{
         for(const row of selected.history)body.append(node('p',`${row.year}岁 · ${row.text}`));
         if(!selected.history.length)body.append(node('p','正式授权后开始记录原人员、实际建设和往返结果。'));

@@ -21,6 +21,14 @@ from test_ghost_phase_two import GhostPhaseTwoTests
 
 from scripts.browser_navigation import navigation_locator, click_control
 
+def load_page(page, identity):
+    # Loading another save schedules responsive navigation on the next frame.
+    # Observe the finished layout before selecting its real visible controls.
+    page.evaluate('''async id => {
+        await loadGame(id);
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }''', identity)
+
 def verify_ghost_controls(page, engine):
     game = engine.store.load(engine.create_game('魂位验收', 'mutated_yin', 'ghost', 212)['id'])
     player = game.player
@@ -31,7 +39,7 @@ def verify_ghost_controls(page, engine):
     player.ghost_soul_slots = {'胎光': 'soul-a'}
     game.pending_event = engine._instantiate_event(engine.events_by_id['EVT_SECT_FIRST_WARNING_001'], game, random.Random(1))
     engine.store.save(game)
-    page.evaluate('async id => loadGame(id)', game.id)
+    load_page(page, game.id)
     navigation_locator(page,'[data-panel-target=ghost-soul]').click()
     page.get_by_role('button', name='卸下', exact=True).click()
     page.wait_for_function('!busy && game.ghost_system.phase_two.slots.every(s => !s.soul_id)')
@@ -46,7 +54,7 @@ def verify_ghost_controls(page, engine):
                             end_age=game.player.age + 10, participated=False,
                             souls=[GhostPhaseTwoTests._soul('parade-soul')])
     engine.store.save(game)
-    page.evaluate('async id => loadGame(id)', game.id)
+    load_page(page, game.id)
     navigation_locator(page,'[data-panel-target=ghost-parade]').click()
     page.get_by_role('button', name='参悟夜行', exact=True).click()
     page.wait_for_function('!busy && game.ghost_system.phase_two.parade.participated')
@@ -62,7 +70,7 @@ def verify_ghost_controls(page, engine):
     leave_body(game)
     enter_host_body(game.player, host)
     engine.store.save(game)
-    page.evaluate('async id => loadGame(id)', game.id)
+    load_page(page, game.id)
     navigation_locator(page,'[data-panel-target=ghost-soul]').click()
     assert page.get_by_role('button', name='入魂位', exact=True).is_disabled()
     page.get_by_role('button', name='主动离舍', exact=True).click()
@@ -70,7 +78,7 @@ def verify_ghost_controls(page, engine):
     game = engine.store.load(game.id)
     game.player.ghost_captor = dict(host, world=game.player.world, location_id=game.player.location_id)
     engine.store.save(game)
-    page.evaluate('async id => loadGame(id)', game.id)
+    load_page(page, game.id)
     for label in ('忍耐一年', '反抗拘魂者', '夺舍拘魂者'):
         assert page.get_by_role('button', name=label, exact=True).is_enabled()
 
@@ -115,7 +123,7 @@ def main():
                                 leader.alive, leader.realm_index, leader.layer = True, 5, 9
                                 setattr(player, 'master' if kind == 'master' else 'dao_companion', target.to_dict())
                                 engine.store.save(game)
-                                page.evaluate('async id => loadGame(id)', game.id)
+                                load_page(page, game.id)
                                 navigation_locator(page,'[data-panel-target=relationship]').click()
                                 click_control(page.get_by_role('button', name=label, exact=True, include_hidden=True))
                                 page.wait_for_function("!busy && game.pending_event?.id === 'EVT_SECT_FIRST_WARNING_001'")
@@ -131,7 +139,7 @@ def main():
                                 current.pending_event = engine._instantiate_event(
                                     engine.events_by_id['EVT_SECT_FIRST_WARNING_001'], current, random.Random(1))
                                 engine.store.save(current)
-                                page.evaluate('async id => loadGame(id)', game.id)
+                                load_page(page, game.id)
                                 return engine.store.load(game.id)
 
                             # Another tab already consumed the event. One failed POST must
