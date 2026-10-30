@@ -5499,7 +5499,7 @@
       "treasure_pool": [
         {
           "id": "yellow_spring_technique_01",
-          "name": "黄泉逆渡经",
+          "name": "冥津逆渡经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -10939,7 +10939,7 @@
         },
         {
           "id": "reincarnation_technique_06",
-          "name": "长夜长明典",
+          "name": "幽烛不熄典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -17296,7 +17296,7 @@
       "treasure_pool": [
         {
           "id": "guixu_hell_second_treasure_1",
-          "name": "黄泉逆渡经",
+          "name": "冥津逆渡经",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",
@@ -22741,7 +22741,7 @@
         },
         {
           "id": "guixu_reincarnation_second_treasure_6",
-          "name": "长夜长明典",
+          "name": "幽烛不熄典",
           "category": "technique",
           "kind": "technique",
           "exclusive_source": "guixu_tide",

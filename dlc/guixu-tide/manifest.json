@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.guixu-tide",
   "name": "归墟之潮：九死一生",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "kind": "dlc",
   "enabled": true,
   "load_order": 140,

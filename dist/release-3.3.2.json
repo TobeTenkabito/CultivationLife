@@ -1,0 +1,145 @@
+{
+  "base_version": "3.3.2",
+  "save_schema": 11,
+  "compatible_save_schemas": [
+    11
+  ],
+  "incompatible_save_schemas": "1–10; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.3.0",
+    "authored-techniques": "1.0.0",
+    "buddhist-dharma": "1.2.0",
+    "ghost-reincarnation": "3.10.0",
+    "guixu-tide": "2.7.3",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.19.0",
+    "monster-civilizations": "1.0.1",
+    "sage-way": "1.6.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 780,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_tutorial_interface",
+      "log": "build\\browser_tutorial_interface-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_desktop_navigation",
+      "log": "build\\browser_desktop_navigation-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_start_layout",
+      "log": "build\\browser_start_layout-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_handbook_revision",
+      "log": "build\\browser_handbook_revision-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_common_elemental_techniques",
+      "log": "build\\browser_common_elemental_techniques-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_content_naming",
+      "log": "build\\browser_content_naming-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "tutorial-practice-text",
+      "log": "build\\tutorial-practice-text-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "tutorial-practice-pixel-phone",
+      "log": "build\\tutorial-practice-pixel-phone-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "tutorial-practice-pixel-desktop",
+      "log": "build\\tutorial-practice-pixel-desktop-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "tutorial-practice-pixel-landscape",
+      "log": "build\\tutorial-practice-pixel-landscape-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "handbook-matrix",
+      "log": "build\\handbook-matrix-332.log",
+      "status": "passed"
+    }
+  ],
+  "regression": {
+    "collected": 780,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 780
+  },
+  "save_transfer_smoke_tests": 21,
+  "save_transfer_smoke_in_regression": true,
+  "save_transfer_log": "build/save-transfer-332.log",
+  "inputs_sha256": "6cef0f6f500e13c4e3f0f9568062704b026fdf8c269cd8fc5c951873edfe544c",
+  "platform": "Windows",
+  "exe_sha256": "c3e1fd1b18df8f55b6cf5b5739593568d36d3e9b5a5af03770e0f0cf74ea2702",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

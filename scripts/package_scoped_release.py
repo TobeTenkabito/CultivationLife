@@ -189,17 +189,24 @@ def main():
         performance=json.loads((ROOT/'build/building-performance.json').read_text(encoding='utf-8'))
         if visits:require(all(r.get('visit_claims')==r['buildings'] and r.get('landscape_claims')==r['buildings'] and r.get('city_books')==r['buildings'] for r in performance['rows']),'Building visits performance must include persistent claim and finance records')
         require(performance.get('source_sha256')==inputs_digest(ROOT) and performance.get('version')==VERSION and all(r['economy_identical'] for r in performance['rows']),'Matched building performance/conservation evidence required')
-    if scoped.get('profile')=='tutorial':
-        from scripts.verify_scoped_release import TUTORIAL_TESTS,TUTORIAL_BROWSERS,TUTORIAL_PRACTICE
+    if scoped.get('profile') in {'tutorial','handbook'}:
+        from scripts.verify_scoped_release import TUTORIAL_TESTS,TUTORIAL_BROWSERS,TUTORIAL_PRACTICE,HANDBOOK_TESTS,HANDBOOK_BROWSERS
+        if scoped.get('profile')=='handbook':TUTORIAL_TESTS,TUTORIAL_BROWSERS=HANDBOOK_TESTS,HANDBOOK_BROWSERS
         require({name for shard in scoped['tests'] for name in shard}==set(TUTORIAL_TESTS),'Tutorial domain selection incomplete')
         require(set(TUTORIAL_BROWSERS)|set(TUTORIAL_PRACTICE)<={r['name'] for r in scoped['runs']},'Tutorial/browser/practice checks incomplete')
         report=json.loads((ROOT/'build/tutorial-interface/report.json').read_text(encoding='utf-8'))
         require(report['status']=='passed' and report['inputs_sha256']==scoped['inputs_sha256'] and len(report['scenarios'])==14,'Final-source interface browser report required')
         require(all(c.get('tutorial_verified') for c in evidence['cases']),'Compiled tutorial acceptance required with and without DLC')
+        if scoped.get('profile')=='handbook':
+            require('handbook-matrix' in {r['name'] for r in scoped['runs']},'2048 DLC handbook matrix required')
+            require(all(c.get('handbook_verified') for c in evidence['cases']),'Compiled current names and handbook required')
+            revision=json.loads((ROOT/'build/handbook-revision/report.json').read_text(encoding='utf-8'))
+            require(revision.get('status')=='passed' and revision.get('inputs_sha256')==scoped['inputs_sha256'] and revision.get('scenarios')==4,'Final-source names/handbook browser report required')
         required={f'build/android-tutorial-ui-{o}-{tag}.log' for o in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Tutorial Android 12 orientations incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Tutorial native test APK changed')
         require(all(all(marker in (ROOT/name).read_text(encoding='utf-8-sig') for marker in ('tutorial_interface_scope','tutorial_practice_scope')) for name in required),'Native interface and practice markers required')
+        if scoped.get('profile')=='handbook':require(all('handbook_revision_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in required),'Native actual names/handbook acceptance required')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
@@ -402,13 +409,14 @@ def main():
     am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(target,target.name);z.write(am,am.name)
-        if scoped.get('profile') in {'heavens','tutorial'}:
+        if scoped.get('profile') in {'heavens','tutorial','handbook'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
         else:
             z.write(ROOT/'android/README.md','README.md')
-        if scoped.get('profile') == 'tutorial':
-            for name in ('CHANGELOG.md','docs/release-331.md','docs/tutorial-1480.md','docs/tutorial-1481.md'):
-                z.write(ROOT/name,name)
+        if scoped.get('profile') in {'tutorial','handbook'}:
+            z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
+            for path in (ROOT/'docs').rglob('*'):
+                if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
         if scoped.get('profile') == 'heavens':
             for name in ('CHANGELOG.md','docs/release-330.md','docs/heavens-outposts.md',
                          'docs/npc-promises.md','docs/diaochan-skin.md',

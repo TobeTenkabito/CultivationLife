@@ -635,9 +635,41 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             python("from cultivation_life import server\nimport json\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\nbefore=json.loads(server._tutorial_ui_bytes)\nafter=json.loads(server.ENGINE.store._path(g.id).read_bytes())\nassert g.player.tutorial_state['guide_completed']\nassert g.player.master['realm_index']==3\nassert g.player.faction_id in g.sects\nassert after['rng_state']==before['rng_state']\nassert after['player']['age']==before['player']['age']");
             async("loadGame("+JSONObject.quote(id)+")");
             check(Boolean.TRUE.equals(js("!TutorialGuide.isGuiding()&&game.tutorial.guide.completed")),"Practice completion must survive reload");
+            runHandbookRevision(palette);
         }
         result.putString("tutorial_interface_scope","Two pixel palettes; actual native taps, IME search, native back pause/resume, unchanged save bytes; signed Android 12 portrait/landscape");
         result.putString("tutorial_practice_scope","Both pixel palettes; all 32 live teaching steps, native back resume, real master and sect, unchanged age and RNG, completion after reload");
+        result.putString("handbook_revision_scope","Both pixel palettes; old saved book titles, actual manual upgrade, custom-name and stock preservation, native IME handbook searches, no reading save mutations");
+    }
+
+    private void runHandbookRevision(String palette) throws Exception {
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'书各有名',spirit_root:'supreme_metal',path:'dao',seed:332})}).then(g=>g.id)");
+        String fixture=assetText("technique_names_release.py");
+        python(fixture+"\nfrom cultivation_life import server\nprepare_technique_names(server.ENGINE,"+JSONObject.quote(id)+")");
+        async("loadGame("+JSONObject.quote(id)+")");
+        tapSelector(".hud-identity");
+        if(!Boolean.TRUE.equals(js("document.querySelector('.technique-library').open")))tapSelector(".technique-library > summary");
+        check(Boolean.TRUE.equals(js("document.querySelector('#known-technique-list').textContent.includes('抱朴养真经')&&document.querySelector('#known-technique-list').textContent.includes('晦烛含魄篇')&&!document.querySelector('#known-technique-list').textContent.includes('长夜抱朴归真经')")),"New complete book names not rendered");
+        js("Array.from(document.querySelectorAll('#known-technique-list .known-technique')).find(n=>n.textContent.includes('抱朴养真经')).querySelector('.technique-upgrade').id='release-332-upgrade';true");
+        tapSelector("#release-332-upgrade");
+        waitForJs("!busy&&game.player.known_techniques.some(t=>t.id==='TECH_OPEN_SONGCHUANG_NEUTRAL_MAIN'&&t.level===6)","Native renamed-book upgrade failed");
+        python(fixture+"\nfrom cultivation_life import server\ninspect_technique_names(server.ENGINE,"+JSONObject.quote(id)+",True)\nserver._handbook_revision_bytes=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+        tapSelector("[data-close-dialog=player-details-dialog]");
+        tapSelector("[data-panel-target=settings]");
+        js("Array.from(document.querySelectorAll('.handbook-categories button')).find(n=>n.textContent==='全部').id='release-332-all';true");
+        tapSelector("#release-332-all");
+        String[][] terms={{"跨界开拓：","heavens-outposts"},{"第二元婴：","second-nascent"},{"故人笺：","contacts-promises"}};
+        for(String[] term:terms) {
+            enterNumericField("#handbook-search","百科检索",term[0]);
+            runOnMainSync(()->((android.view.inputmethod.InputMethodManager)activity.getSystemService(Activity.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(web.getWindowToken(),0));
+            Thread.sleep(500);waitForNativeFrame();
+            String selector="[data-chapter="+term[1]+"]";
+            check(Boolean.TRUE.equals(js("(()=>{const e=document.querySelector("+JSONObject.quote(selector)+");return e&&!e.hidden&&e.open&&e.scrollWidth<=e.clientWidth+2;})()")),"Native handbook search/overflow: "+term[1]);
+            capture("handbook-332-"+palette+"-"+term[1]+"-"+arguments.getString("orientation"));
+        }
+        check(Boolean.TRUE.equals(js("(()=>{const ids=TutorialHandbook.build(configData,game).map(c=>c.id);return ['interface-guide','common-techniques','body-soul','second-nascent','possession-path','heavens-intelligence','heavens-outposts','heavens-development','heavens-conquest','contacts-promises','sect-task-board','regional-time','combat-review','achievements-wardrobe'].every(id=>ids.includes(id))&&ids.includes('dlc-authored')===configData.extensions.some(e=>e.id==='official.authored-techniques'&&e.status==='loaded');})()")),"Native handbook chapters or loaded-DLC gate failed");
+        python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._handbook_revision_bytes");
+        tapSelector("#settings-toggle");
     }
 
     private void runTideTheme(Bundle result) throws Exception {

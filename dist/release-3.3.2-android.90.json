@@ -1,0 +1,165 @@
+{
+  "base_version": "3.3.2",
+  "save_schema": 11,
+  "compatible_save_schemas": [
+    11
+  ],
+  "incompatible_save_schemas": "1–10; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.3.0",
+    "authored-techniques": "1.0.0",
+    "buddhist-dharma": "1.2.0",
+    "ghost-reincarnation": "3.10.0",
+    "guixu-tide": "2.7.3",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.19.0",
+    "monster-civilizations": "1.0.1",
+    "sage-way": "1.6.0",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 780,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_tutorial_interface",
+      "log": "build\\browser_tutorial_interface-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_desktop_navigation",
+      "log": "build\\browser_desktop_navigation-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_start_layout",
+      "log": "build\\browser_start_layout-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_handbook_revision",
+      "log": "build\\browser_handbook_revision-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_common_elemental_techniques",
+      "log": "build\\browser_common_elemental_techniques-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_content_naming",
+      "log": "build\\browser_content_naming-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "tutorial-practice-text",
+      "log": "build\\tutorial-practice-text-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "tutorial-practice-pixel-phone",
+      "log": "build\\tutorial-practice-pixel-phone-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "tutorial-practice-pixel-desktop",
+      "log": "build\\tutorial-practice-pixel-desktop-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "tutorial-practice-pixel-landscape",
+      "log": "build\\tutorial-practice-pixel-landscape-332.log",
+      "status": "passed"
+    },
+    {
+      "name": "handbook-matrix",
+      "log": "build\\handbook-matrix-332.log",
+      "status": "passed"
+    }
+  ],
+  "regression": {
+    "collected": 780,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 780
+  },
+  "save_transfer_smoke_tests": 21,
+  "save_transfer_smoke_in_regression": true,
+  "save_transfer_log": "build/save-transfer-332.log",
+  "inputs_sha256": "6cef0f6f500e13c4e3f0f9568062704b026fdf8c269cd8fc5c951873edfe544c",
+  "platform": "Android 12",
+  "android_version": "3.3.2-android.90",
+  "version_code": 90,
+  "apk_sha256": "2ed306f1ece5e8e6a5a3823054b21c34a2153be519dede549c393f858b53b239",
+  "native": {
+    "version": "3.3.2",
+    "apk_sha256": "2ed306f1ece5e8e6a5a3823054b21c34a2153be519dede549c393f858b53b239",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-tutorial-ui-portrait-332.log",
+      "build/android-tutorial-ui-landscape-332.log"
+    ],
+    "test_apk_sha256": "c773dae362f172d6873fd12213f1add68e877f5ae56f7548a2b918b68ffaab3c",
+    "log_hashes": {
+      "build/android-tutorial-ui-portrait-332.log": "8a06b5612fdafce4cb5059ae4f000745b0e181a19090bcb94784cab564ce9f69",
+      "build/android-tutorial-ui-landscape-332.log": "8a06b5612fdafce4cb5059ae4f000745b0e181a19090bcb94784cab564ce9f69"
+    },
+    "scope": "Two pixel palettes, real native tutorial taps and IME search, native back pause/resume, unchanged interface-tour saves and all 32 original teaching steps; signed Android 12 portrait/landscape"
+  },
+  "physical_device_tested": false
+}

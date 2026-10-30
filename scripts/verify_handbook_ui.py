@@ -28,26 +28,34 @@ def verify_matrix(page, config):
                            status='loaded' if mask & (1 << i) else 'disabled')
                       for i, (key, id_, name, *_) in enumerate(packages)]
         reports.append(dict(**config, extensions=extensions))
-    results = page.evaluate('(configs)=>configs.map(c=>TutorialHandbook.build(c,{player:{realm_index:9,world:"asura"},asura:{available:true}}))', reports)
-    for mask, chapters in enumerate(results):
-        by_id = {c['id']: c for c in chapters}
-        assert len(by_id) == len(chapters)
-        assert 'routes' in by_id and 'worlds' in by_id and 'save' in by_id
-        economics = ('economic-materials', 'economic-recipes', 'economic-demand', 'economic-estates', 'economic-war')
-        assert all(key in by_id for key in economics), mask
-        economy_text = json.dumps([by_id[key] for key in economics], ensure_ascii=False)
-        assert all(value in economy_text for value in ('四十五种', '七十二种', '一百零八种'))
-        assert all(word not in economy_text for word in ('分桶', '缓存', '代表商品', '后台循环', '聚合近似'))
-        assert '500 年' not in json.dumps(by_id, ensure_ascii=False)
+    # Keep only compact assertions across the bridge, rather than 2048 copies
+    # of every chapter. Each configuration is still assembled and checked.
+    results = page.evaluate('''configs=>configs.map(c=>{
+        const chapters=TutorialHandbook.build(c,{player:{realm_index:9,world:'asura'},asura:{available:true}});
+        const by=Object.fromEntries(chapters.map(c=>[c.id,c]));
+        const economics=['economic-materials','economic-recipes','economic-demand','economic-estates','economic-war'];
+        const text=JSON.stringify(economics.map(id=>by[id]));
+        return {ids:chapters.map(c=>c.id),count:chapters.length,
+          economics:economics.every(id=>!!by[id]),
+          quantities:['四十五种','七十二种','一百零八种'].every(s=>text.includes(s)),
+          playerLanguage:['分桶','缓存','代表商品','后台循环','聚合近似'].every(s=>!text.includes(s)),
+          validUnits:!JSON.stringify(by).includes('500 年'),
+          routes:JSON.stringify(by.routes),intelligence:by.commissions.sections.at(-1)[1]};
+    })''', reports)
+    for mask, row in enumerate(results):
+        by_id = set(row['ids'])
+        assert len(by_id) == row['count']
+        assert {'routes','worlds','save','heavens-outposts','second-nascent','interface-guide'} <= by_id
+        assert all(row[k] for k in ('economics','quantities','playerLanguage','validUnits')), mask
         for i, (key, *_) in enumerate(packages):
             chapter_id = 'trial-sites' if key == 'trial' else f'dlc-{key}'
             assert (chapter_id in by_id) == bool(mask & (1 << i)), (mask, key)
-        route_text = json.dumps(by_id['routes'], ensure_ascii=False)
+        route_text = row['routes']
         assert '妖界与幻冥界都是二级' in route_text
         assert '魔气必须达到 8 级' in route_text
         assert ('没有本体替代' in route_text) == (not bool(mask & (1 << positions['monster'])))
         assert ('不按灵气与阴气经验分流' in route_text) == (not bool(mask & (1 << positions['buddhist'])))
-        intelligence = by_id['commissions']['sections'][-1][1]
+        intelligence = row['intelligence']
         assert ('每颗星有一次线索尝试' in intelligence) == bool(mask & (1 << positions['tianji']))
     # Enabled preferences are not necessarily loaded: errors/pending restart stay inactive.
     for status in ('disabled', 'error', 'incompatible'):
@@ -67,7 +75,7 @@ def verify_matrix(page, config):
     mod = {**config, 'extensions':[dict(id='example',name='示例',kind='mod',status='loaded')]}
     page.evaluate('c=>TutorialGuide.configure(c)',mod)
     assert '纯本体规则' not in page.locator('.handbook-edition').inner_text()
-    print(f"Chapters: base {len(results[0])}, all DLC {len(results[-1])}",flush=True)
+    print(f"Chapters: base {results[0]['count']}, all DLC {results[-1]['count']}",flush=True)
     print(f'{1 << len(packages)} DLC combinations, failed loads and restart preferences passed', flush=True)
     return reports[0], reports[-1]
 

@@ -75,6 +75,7 @@ def main():
             require((ROOT/name).stat().st_mtime >= (ROOT/'android/app/build/outputs/apk/release/app-release.apk').stat().st_mtime,'Heavens native log predates the final APK')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if heavens:require('heavens_outposts_scope' in text,f'Missing native heavens/war/return acceptance: {name}')
+        if '--handbook' in sys.argv:require('handbook_revision_scope' in text,f'Missing native handbook and current catalog: {name}')
         if tutorial:require('tutorial_interface_scope' in text and 'tutorial_practice_scope' in text,f'Missing actual native interface and practice course: {name}')
         if soul:require('soul_lifecycle_scope' in text,f'Missing soul native acceptance: {name}')
         if soul:require('frontier_skin_scope' in text,f'Missing frontier/swimwear native acceptance: {name}')

@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from tools.common_technique_names import technique_name
 PREFIX = 'TECH_OPEN_'
 ATTRIBUTES = (.08, .15, .23, .32, .43, .55, .65, .75, .90, 1.05, 1.25, 1.45)
 POWER = (16, 48, 145, 3300, 19100, 99600, 676800, 3144000, 11200000, 63000000, 350000000, 2100000000)
@@ -24,7 +27,7 @@ LINES = {
     'ghost': ('yin', ('残灯','寒泉','孤冢','幽台','忘川','黄泉','长夜','轮台','三生','无始','彼岸','大寂'),
               ('CANDENG','HANQUAN','GUZHONG','YOUTAI','WANGCHUAN','HUANGQUAN','CHANGYE','LUNTAI','SANSHENG','WUSHI','BIAN','DAJI')),
 }
-# Main/support/combat titles. Every rank uses the same literary series form.
+# Historical title seeds remain for old-name fixtures; only roots define a family.
 FAMILIES = {
     'neutral': ((), ('抱朴归真经','静渊养元录','长空御剑诀')),
     'metal': (('metal',), ('太白凝真经','金城护元录','庚光斩影诀')),
@@ -79,7 +82,7 @@ def definitions(profiles, purity_caps):
                     limits = [{'source':{'id':key,'op':'<=','level':value}}
                               for key,value in purity_caps.get(path,{}).items()]
                     requirement = {'all':[source_requirement,*limits]} if limits else source_requirement
-                    technique = dict(id=identity, name=title + names[i], path=path,
+                    technique = dict(id=identity, name=technique_name(path,grade,family,role), path=path,
                                      element='five_elements' if len(roots)==5 else roots[0] if roots else 'neutral',
                                      grade=grade, level=1, category='spiritual', growth_preference=role,
                                      opportunity_bonus=round(ATTRIBUTES[grade-1]*weights[0]*premium,6),
@@ -94,6 +97,8 @@ def definitions(profiles, purity_caps):
                         if path==native_path and grade<=int(profiles[world]['npc_realm_cap']):
                             goods.append(dict(world=world,kind='technique',content_id=identity,tier=grade,
                                               price=round(PRICES[grade-1]*premium)))
+    if len({row['name'] for row in techniques}) != len(techniques):
+        raise ValueError('通用功法书名重复，须修订完整书名，不能追加系列前缀')
     return techniques, goods
 
 
@@ -106,6 +111,8 @@ def main():
         path=ROOT/'content'/filename;doc=json.loads(path.read_text(encoding='utf-8'))
         existing=[r for r in doc[key] if not str(r.get('id' if key=='techniques' else 'content_id','')).startswith(PREFIX)]
         expected=existing+generated
+        if key == 'techniques' and len({r['name'] for r in expected}) != len(expected):
+            raise SystemExit('完整功法目录书名重复，须修改书名后再生成')
         if args.write:
             # Keep authored entries readable; generated rows each occupy one line.
             marker='__GENERATED_OPEN_TECHNIQUES__'

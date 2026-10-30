@@ -52,6 +52,18 @@ TUTORIAL_PRACTICE = {
     'tutorial-practice-pixel-desktop': ['--pixel','--desktop'],
     'tutorial-practice-pixel-landscape': ['--pixel','--short-landscape'],
 }
+HANDBOOK_TESTS = list(dict.fromkeys(TUTORIAL_TESTS + [
+    'tests/test_technique_names_332.py','tests/test_content_naming.py',
+    'tests/test_common_elemental_techniques.py','tests/test_technique_leveling.py',
+    'tests/test_content_registry.py','tests/test_guixu_tide.py','tests/test_guixu_companions.py',
+    'tests/test_authored_techniques.py','tests/test_soul_lifecycle.py',
+    'tests/test_heavens_peer_worlds.py','tests/test_heavens_outposts.py',
+    'tests/test_heavens_development.py','tests/test_heavens_conquest.py',
+    'tests/test_npc_promises.py','tests/test_sect_tasks.py',
+]))
+HANDBOOK_BROWSERS = TUTORIAL_BROWSERS + [
+    'browser_handbook_revision','browser_common_elemental_techniques','browser_content_naming',
+]
 
 # All changed 3.3.0 domains since the preceding packaged version, including
 # the earlier unpublished contact, skin and lazy-panel work.
@@ -292,7 +304,7 @@ VISUAL_ALPHA6_TESTS = list(dict.fromkeys(VISUAL_ALPHA3_TESTS + [
 ]))
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook'],default='legacy')
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     parser.add_argument('--balance-tests',action='store_true',help='Schedule full regressions by prior XML timings; never reuse prior results')
@@ -316,6 +328,7 @@ def main():
     if profile=='combat-alpha':selected=[COMBAT_ALPHA_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='soul-lifecycle':selected=[SOUL_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='heavens':selected=[HEAVENS_TESTS[i::options.shards] for i in range(options.shards)]
+    if profile=='handbook':selected=[HANDBOOK_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='tutorial':selected=[TUTORIAL_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='authored':selected=[AUTHORED_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='update301':selected=[UPDATE301_TESTS[i::options.shards] for i in range(options.shards)]
@@ -334,7 +347,7 @@ def main():
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
     if options.focused_visual:
         selected=[(VISUAL_ALPHA6_TESTS if options.home_scenes else VISUAL_ALPHA5_TESTS if options.path_characters else VISUAL_ALPHA4_TESTS if options.monster_visuals else VISUAL_ALPHA3_TESTS)[i::options.shards] for i in range(options.shards)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} or (profile=='visual' and not options.focused_visual) else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
@@ -379,6 +392,7 @@ def main():
     if profile=='authored':browsers=AUTHORED_BROWSERS
     if profile=='heavens':browsers=HEAVENS_BROWSERS
     if profile=='tutorial':browsers=TUTORIAL_BROWSERS
+    if profile=='handbook':browsers=HANDBOOK_BROWSERS
     if profile=='update301':browsers=UPDATE301_BROWSERS
     if options.monster_visuals:browsers += ['browser_monster_release','browser_monster_flora_visuals']
     if options.path_characters:browsers += ['browser_path_characters']
@@ -390,7 +404,8 @@ def main():
                      'browser_monster_fox_visuals','browser_monster_insect_visuals',
                      'browser_monster_serpent_visuals','browser_monster_turtle_visuals']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
-    if profile=='tutorial':jobs += [(name,['scripts/verify_tutorial_ui.py',*args]) for name,args in TUTORIAL_PRACTICE.items()]
+    if profile in {'tutorial','handbook'}:jobs += [(name,['scripts/verify_tutorial_ui.py',*args]) for name,args in TUTORIAL_PRACTICE.items()]
+    if profile=='handbook':jobs.append(('handbook-matrix',['scripts/verify_handbook_ui.py']))
     if profile=='common-goods':
         jobs.append(('combat-upstream',['tools/verify_combat_upstream_2151.py']))
     def run(job):
@@ -398,25 +413,25 @@ def main():
         log=ROOT/f'build/{name}-{tag}.log'
         with log.open('w',encoding='utf-8') as stream:
             code=subprocess.call([sys.executable,'-X','utf8',*args],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT,
-                                 env=os.environ | ({} if profile in {'soul-lifecycle','heavens','tutorial'} else {'CULTIVATION_BROWSER_LOW_MEMORY':'1'}))
+                                 env=os.environ | ({} if profile in {'soul-lifecycle','heavens','tutorial','handbook'} else {'CULTIVATION_BROWSER_LOW_MEMORY':'1'}))
         require(code==0,f'{name} failed; see {log}')
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         print(name+' passed',flush=True)
         return dict(name=name,log=str(log.relative_to(ROOT)),status='passed')
-    if profile in {'heavens','tutorial'}:
+    if profile in {'heavens','tutorial','handbook'}:
         # Every job uses disposable saves, ports and browser profiles. Bound
         # concurrent jobs while letting independent UI checks overlap shards.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs))
         jobs=[]
-    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial'}:
+    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook'}:
         # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

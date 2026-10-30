@@ -10,9 +10,9 @@ import re
 
 BASE_GAME_ID = "cultivation-life"
 BASE_GAME_NAME = "浮生问道"
-BASE_GAME_VERSION = "3.3.1"
+BASE_GAME_VERSION = "3.3.2"
 # Windows file metadata requires numeric components even for the public alpha label.
-BASE_GAME_VERSION_TUPLE = (3, 3, 1)
+BASE_GAME_VERSION_TUPLE = (3, 3, 2)
 
 
 def release_order(value: str) -> tuple:

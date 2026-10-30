@@ -8,12 +8,15 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from playwright.sync_api import sync_playwright
+from cultivation_life.engine import GameEngine
+from scripts.verify_handbook_revision import verify_revision
+from fixtures.technique_names_release import prepare_technique_names
 
 
 def verify_tutorial(base,with_dlc,folder):
     walk=runpy.run_path(str(ROOT/'tests/browser_tutorial_interface.py'))['walk']
     output=ROOT/'build/tutorial-exe';output.mkdir(exist_ok=True)
-    for asset in ('tutorial.js','tutorial-interface.js','tutorial-steps.js','tutorial.css','index.html'):
+    for asset in ('tutorial.js','tutorial-interface.js','tutorial-steps.js','tutorial.css','handbook-content.js','index.html'):
         with urllib.request.urlopen(base+'/'+asset,timeout=10) as response:
             assert response.read()==(ROOT/'web'/asset).read_bytes(),asset
     with sync_playwright() as pw:
@@ -51,6 +54,11 @@ def verify_tutorial(base,with_dlc,folder):
                 assert after['notable_npcs'][mentor]['realm_index']==3 and after['player']['faction_id']
                 page.evaluate('(id)=>loadGame(id)',identity)
                 assert not page.locator('.tutorial-tour').is_visible()
+                naming=page.evaluate("async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'书名成品',spirit_root:'supreme_metal',path:'dao',seed:332})});return g.id;}")
+                fixture_engine=GameEngine(ROOT,folder/'data/saves')
+                prepare_technique_names(fixture_engine,naming)
+                page.evaluate('id=>loadGame(id)',naming)
+                verify_revision(page,fixture_engine,naming,output,f'{with_dlc}-{palette}-332')
                 assert not errors,errors
                 page.close()
                 print(f'Compiled tutorial passed: DLC={with_dlc}, {palette}, {width}x{height}; view-only tour plus all 32 practice steps',flush=True)
