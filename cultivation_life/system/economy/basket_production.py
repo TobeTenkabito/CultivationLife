@@ -45,7 +45,8 @@ def recipe(market, item):
     return {material:units}
 
 
-def produce(game, market, owner, item, wanted, *, labor_credit=None, allow_loss=False):
+def produce(game, market, owner, item, wanted, *, labor_credit=None, allow_loss=False,
+            _recipe_cache=None):
     row = market['commodities'][item]
     if row.get('imported'):
         return 0, 0
@@ -54,7 +55,13 @@ def produce(game, market, owner, item, wanted, *, labor_credit=None, allow_loss=
         wanted = min(wanted, int(labor_credit / row['reference']))
     if wanted <= 0:
         return 0, 0
-    inputs = recipe(market, item)
+    if _recipe_cache is None:
+        inputs = recipe(market, item)
+    else:
+        key = (recipe, item)
+        if key not in _recipe_cache:
+            _recipe_cache[key] = recipe(market, item)
+        inputs = _recipe_cache[key]
     if inputs is None:
         return 0, 0
     from .resource_access import public_allowance,record_extraction

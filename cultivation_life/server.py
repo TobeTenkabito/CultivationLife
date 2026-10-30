@@ -8,12 +8,13 @@ import mimetypes
 import os
 import sys
 import uuid
+from inspect import signature
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from functools import wraps
 from contextlib import nullcontext
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 from .content_registry import (
     FACTION_DEFINITIONS,
@@ -170,20 +171,32 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(dict(available=enabled(), lineages=rows))
             elif path == '/api/domain-styles':
                 from .domain_styles import catalog, available, controls
-                from urllib.parse import parse_qs
                 identity = parse_qs(urlparse(self.path).query).get('id', [''])[0]
                 character_path = ENGINE.store.load(identity).player.path if identity else None
                 self._json(dict(catalog=catalog(), available=[r['id'] for r in available(character_path)], path=character_path,
                                 controls=controls(all_paths=True), available_controls=[r['id'] for r in controls(character_path)]))
             elif path == "/api/visual-assets":
                 self._json(public_catalog(ENGINE_ROOT, EXTENSION_REPORT, APP_ROOT))
+            elif path == "/api/fleet-goods":
+                from .system.economy.state import commodity_catalog
+                self._json({'goods': [dict(id=key, name=row['name'])
+                                      for key, row in commodity_catalog().items()]})
             elif path == "/api/games":
                 self._json({"games": ENGINE.list_games()})
             elif path == "/api/achievements":
                 self._json(ENGINE.list_achievements())
             elif path.startswith("/api/games/"):
                 game_id = path.removeprefix("/api/games/").strip("/")
-                self._json(ENGINE.get_game(game_id))
+                try:
+                    parameters = signature(ENGINE.get_game).parameters
+                except (TypeError, ValueError):
+                    parameters = {}
+                if {'as_json', 'defer_order_goods'} <= parameters.keys():
+                    query = parse_qs(urlparse(self.path).query)
+                    self._json(ENGINE.get_game(game_id, as_json=True,
+                        defer_order_goods=query.get('fleet_goods') == ['deferred']))
+                else:
+                    self._json(ENGINE.get_game(game_id))
             else:
                 self._static(path)
         except Exception as error:  # boundary: translate domain errors to JSON
@@ -739,7 +752,9 @@ class Handler(BaseHTTPRequestHandler):
         return data
 
     def _json(self, data: object, status: HTTPStatus = HTTPStatus.OK) -> None:
-        body = json.dumps(data, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        from .engine.presentation.projection import PreparedJsonGameView
+        body = data.body if isinstance(data, PreparedJsonGameView) else json.dumps(
+            data, ensure_ascii=False, allow_nan=False).encode("utf-8")
         if getattr(self, '_defer_json', False):
             self._pending_json = (body, status)
             return

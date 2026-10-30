@@ -602,8 +602,17 @@ class GameEngine:
                                      lambda npc, world, now: move_world(npc, world, now, WORLD_SYSTEMS.get("transcendent_combat", {})))
         return apply_world_transition(game, plan, ports, entourage=entourage)
 
-    def get_game(self, game_id: str) -> dict[str, Any]:
-        return self.present(self._load(game_id))
+    def get_game(self, game_id: str, *, as_json: bool = False,
+                 defer_order_goods: bool = False) -> dict[str, Any] | view_projection.PreparedJsonGameView:
+        game = self._load(game_id)
+        if not as_json:
+            return self.present(game)
+        # Existing embedding/subclass hooks still own their original response.
+        if any(name in self.__dict__ or getattr(type(self), name) is not original
+               for name, original in _HTTP_RESPONSE_HOOKS):
+            return view_projection.PreparedJsonGameView(self.present(game))
+        return response_flow.prepare_json_response(self._dependencies.response, game,
+                                                   defer_order_goods=defer_order_goods)
 
     def delete_game(self, game_id: str) -> None:
         self.store.delete(game_id)
@@ -3744,3 +3753,9 @@ class GameEngine:
 
     def upper_institution_action(self, game_id, action, target_id=""):
         return institution_runtime.run_action(self._dependencies.character.upper_institution, game_id, action, target_id)
+
+
+# Capture the native adapters once. Later class-level patches, instance hooks
+# and subclass overrides must keep their legacy response path too.
+_HTTP_RESPONSE_HOOKS = tuple((name, getattr(GameEngine, name))
+                            for name in ('present', 'prepare_response', 'project_game'))

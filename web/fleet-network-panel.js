@@ -1,7 +1,44 @@
 (() => {
   const node = (tag, text, cls = '') => { const e = document.createElement(tag); e.textContent = text ?? ''; e.className = cls; return e; };
   const money = n => Number(n || 0).toLocaleString('zh-CN');
-  function render(statement, system, act) {
+  let revision = 0;
+  const schedule = (name, draw) => window.UtilityPanels ? window.UtilityPanels.schedule(name, draw) : draw();
+  function render(statement, system, act, capabilities = {}) {
+    const currentRevision = ++revision;
+    const current = () => currentRevision === revision && (capabilities.isCurrent?.() ?? true);
+    paintStatement(statement);
+    const draw = () => {
+      if (!system.order_goods_deferred) { paintNetwork(system, act); return; }
+      const root = document.querySelector('#fleet-network-content');
+      root.replaceChildren(node('p', '正在读取商路商品目录…'));
+      Promise.resolve().then(() => capabilities.loadGoods()).then(goods => {
+        if (!current()) return;
+        if (!Array.isArray(goods)) throw new Error('商品目录格式无效');
+        schedule('merchant', () => {
+          if (!current()) return;
+          paintNetwork({...system, order_goods: goods}, act);
+          window.PanelPages?.refresh();
+          window.renderButtons?.();
+        });
+      }).catch(error => {
+        if (!current()) return;
+        schedule('merchant', () => {
+          if (!current()) return;
+          const retry = node('button', '重新读取商品目录'); retry.type = 'button';
+          retry.onclick = draw;
+          // PanelPages assigns tabpanel semantics to top-level sections;
+          // keep the retry button inside one so it retains its button role.
+          const section = node('section');
+          section.append(node('h3', '商路商品目录'), node('p', error.message || '商品目录读取失败'), retry);
+          root.replaceChildren(section);
+          window.PanelPages?.refresh();
+          window.renderButtons?.();
+        });
+      });
+    };
+    schedule('merchant', draw);
+  }
+  function paintStatement(statement) {
     const personal = document.querySelector('#personal-economy-content');
     personal.replaceChildren(node('h3', `现有灵石 ${money(statement.balance)}`),
       node('p', `自第 ${statement.since ?? 0} 年起 · 期初 ${money(statement.opening)} · 现金流入 ${money(statement.income)} · 现金流出 ${money(statement.expense)}（含注资、提款及本金归还）`),
@@ -10,6 +47,8 @@
     for (const entry of statement.entries || []) records.append(node('p', `第 ${entry.year} 年 · ${entry.reason} · ${entry.destination === 'player' ? '+' : '−'}${money(entry.amount)}`));
     if (!statement.entries?.length) records.append(node('p', '尚无已记录的个人现金交易。'));
     personal.append(records);
+  }
+  function paintNetwork(system, act) {
     const root = document.querySelector('#fleet-network-content');
     root.replaceChildren();
     if (!system.fleets) return;

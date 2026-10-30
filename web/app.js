@@ -27,6 +27,9 @@ const timelineText = value => (
 );
 
 async function api(path, options = {}) {
+  if ((!options.method || options.method === 'GET') && /^\/api\/games\/[^/?]+$/.test(path)) {
+    path += '?fleet_goods=deferred';
+  }
   const response = await fetch(path, {...options, headers: {'Content-Type': 'application/json',
     ...options.headers, ...window.DebugConsole?.headers(path)}});
   const data = await response.json();
@@ -706,7 +709,10 @@ function render(data) {
   window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
   window.ImmortalEconomyPanel?.render(data, payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload), payload=>mutate(`/api/games/${data.id}/immortal-action`,payload));
   window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm, immortal:payload=>mutate(`/api/games/${data.id}/immortal-action`, payload)});
-  window.FleetNetworkPanel?.render(data.personal_economy || {}, data.fleet_network || {}, payload => mutate(`/api/games/${data.id}/fleet-action`, payload));
+  window.FleetNetworkPanel?.render(data.personal_economy || {}, data.fleet_network || {}, payload => mutate(`/api/games/${data.id}/fleet-action`, payload), {
+    isCurrent: () => game === data,
+    loadGoods: async () => (await api('/api/fleet-goods')).goods,
+  });
   window.LocalEconomy?.prepare(data.map?.economy,data,payload=>mutate(`/api/games/${data.id}/local-market-trade`,payload),payload=>mutate(`/api/games/${data.id}/fleet-action`,payload));
   UtilityPanels.schedule('inventory',()=>{renderInventory(p.inventory);window.PanelPages?.refresh(data.id);}); renderArtSkills(data.art_skills || []); UtilityPanels.schedule('spirit-field',()=>renderSpiritField(data.spirit_field || {})); renderDemonicSystem(data.demonic_system || {}); renderAsura(data.asura || {}); UtilityPanels.schedule('map',()=>{renderMap(data.map, data.auction_system);window.ExplorationPanel?.renderMap(data,mutate);}); window.GuixuPanel?.render(data.guixu_tide || {}, payload => mutate(`/api/games/${data.id}/guixu-action`, payload)); renderMarket(data.market); renderAuction(data.auction_system || {}); renderExchange(data.exchange_system || {}); window.MerchantPanel?.render(data.merchant_system || {}, payload => mutate(`/api/games/${data.id}/merchant-action`, payload), {debug:!!configData?.console_available && !!window.DebugConsole?.active(), debugGrant:alliance_id=>mutate(`/api/games/${data.id}/merchant-debug-hq`,{alliance_id}), preview:payload=>api(`/api/games/${data.id}/merchant-preview`,{method:"POST",body:JSON.stringify(payload)})}); renderFaction(data.faction); renderIntrigue(data.intrigue_system || {}); renderSageSystem(data.sage_system || {}); window.BuddhistPanel?.render(data.buddhist_system || {}, payload => mutate(`/api/games/${data.id}/buddhist-action`, payload), {pending:!!data.pending_event,alive:data.player.alive}); renderWars(data.war_system || {}); renderFamily(data.family, data.governance); renderWorldNpcs(data.world_npcs || []); renderSpiritRanking(data.spirit_ranking); renderRaceSystem(data.race_system); renderWorldRoute(data.world_route); renderTianji(data.tianji_artifacts || {}); renderCrafting(data.crafting_system || {}); renderFormation(data.formation_system || {}); renderNatalArtifact(data.natal_artifact || {}); renderHeavenlyCourt(data.heavenly_court || {}); renderHistory(data.history); renderSettings(data.settings || {}); renderBattleReport(data.last_combat_report); renderEvent(); window.ExplorationPanel?.render(data, mutate);
   $('#ending-card').classList.toggle('hidden', p.alive);

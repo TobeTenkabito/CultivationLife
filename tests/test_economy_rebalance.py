@@ -8,6 +8,7 @@ import pytest
 
 from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState
+from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 from cultivation_life.content_registry import WORLD_SYSTEMS
 from cultivation_life.system.economy import basket_rules, basket_production, basket_consumption, organizations, depot
 from cultivation_life.system.economy.state import local_market, settle_market, advance_economy
@@ -286,7 +287,7 @@ def test_departed_roster_member_does_not_remain_deployed(economy):
     assert sum(requirements.refresh(game,war,'attacker').values())==len(before)-1
 
 
-def test_old_schema10_adopts_without_retroactive_consumption(economy):
+def test_current_schema_adopts_policy_without_retroactive_consumption(economy):
     engine,game=economy
     from cultivation_life.system.economy.enterprise_acquisition import acquire
     from cultivation_life.system.economy.enterprise_operations import start_job
@@ -302,4 +303,4 @@ def test_old_schema10_adopts_without_retroactive_consumption(economy):
     ensure_state(game);organizations.advance_organizations(game,engine.maps)
     assert cash(game)==before and local_market(game)['commodities']==stocks
     assert row['last_year']==game.player.age and row['arrears']==0 and row['job']==original_job
-    assert game.version==10
+    assert game.version==SAVE_SCHEMA_VERSION

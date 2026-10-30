@@ -8,6 +8,16 @@ from ...content_registry import MARKET_SETTINGS
 
 
 def settle(game, market, years):
+    # This one market's basket settlement changes stocks/prices/funds, but not
+    # catalog membership, tiers or reference prices used to choose recipes.
+    # Discard the plans before returning; another market/batch re-reads them.
+    recipes = {}
+    def prepared_recipe(item):
+        key = (recipe, item)
+        if key not in recipes:
+            recipes[key] = recipe(market, item)
+        return recipes[key]
+
     groups = purpose_index(market)
     source = f'background:{market["world"]}'
     rotation = game.player.age//20
@@ -28,12 +38,14 @@ def settle(game, market, years):
             amount=wanted//len(items)+int(position<wanted%len(items))
             batch=min(amount,int(row['initial_target']*.10*years))
             if batch:
-                for key,units in (recipe(market,item) or {}).items():
+                for key,units in (prepared_recipe(item) or {}).items():
                     missing=max(0,batch*units-int(market['commodities'][key]['stock']))
                     if missing:
-                        made,_=produce(game,market,source,key,missing)
+                        made,_=produce(game,market,source,key,missing,
+                                       _recipe_cache=recipes)
                         production+=made
-                made, _ = produce(game, market, source, item, batch)
+                made, _ = produce(game, market, source, item, batch,
+                                   _recipe_cache=recipes)
             else:made=0
             production += made
             quantity, paid = (purchase(game, market, source, item, amount, balance(game, source), '居民实际购买并消费')

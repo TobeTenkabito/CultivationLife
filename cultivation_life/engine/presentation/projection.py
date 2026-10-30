@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from collections.abc import Mapping
 from typing import Any
+import json
 
 
 class _ListValue(tuple):
@@ -44,6 +45,19 @@ class PreparedGameView:
             raise TypeError('视图快照须从已准备的展示数据创建')
         # Freeze only the exposed response, never a GameState, NPC registry or pool.
         object.__setattr__(self, '_payload', _freeze(payload))
+
+
+@dataclass(frozen=True, slots=True, init=False)
+class PreparedJsonGameView:
+    """Detached HTTP bytes; Python projections keep their original key/tuple types."""
+    body: bytes
+
+    def __init__(self, payload: dict[str, Any]):
+        if not isinstance(payload, dict):
+            raise TypeError('视图快照须从已准备的展示数据创建')
+        body = json.dumps(payload, ensure_ascii=False, allow_nan=False,
+                          separators=(',', ':')).encode('utf-8')
+        object.__setattr__(self, 'body', body)
 
 
 def project_game(prepared: PreparedGameView) -> dict[str, Any]:
