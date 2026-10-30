@@ -29,6 +29,7 @@ def main():
     update301 = '--update301' in sys.argv[2:]
     soul = '--soul-lifecycle' in sys.argv[2:]
     heavens = '--heavens' in sys.argv[2:]
+    tutorial = '--tutorial' in sys.argv[2:]
     authored = '--authored' in sys.argv[2:]
     tag=BASE_GAME_VERSION.replace('.','')
     phases=('economy-trust','economy-enterprises','economy-network') if economy else ()
@@ -67,12 +68,14 @@ def main():
         logs=[f'build/android-update301-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if soul:logs=[f'build/android-soul-lifecycle-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if heavens:logs=[f'build/android-heavens-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
+    if tutorial:logs=[f'build/android-tutorial-ui-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
-        if heavens:
+        if heavens or tutorial:
             require((ROOT/name).stat().st_mtime >= (ROOT/'android/app/build/outputs/apk/release/app-release.apk').stat().st_mtime,'Heavens native log predates the final APK')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if heavens:require('heavens_outposts_scope' in text,f'Missing native heavens/war/return acceptance: {name}')
+        if tutorial:require('tutorial_interface_scope' in text and 'tutorial_practice_scope' in text,f'Missing actual native interface and practice course: {name}')
         if soul:require('soul_lifecycle_scope' in text,f'Missing soul native acceptance: {name}')
         if soul:require('frontier_skin_scope' in text,f'Missing frontier/swimwear native acceptance: {name}')
         if soul:require('tide_theme_scope' in text,f'Missing tide/theme native acceptance: {name}')
@@ -146,6 +149,7 @@ def main():
     if combat:receipt['scope']='User-requested focused combat CG, single/group defeat, Guixu factual use, true/replica intelligence, read-only replay and disposal; four themes, native portrait/landscape, not full repository'
     if soul:receipt['scope']='Soul secrets, energy, captive refinement and equipment; holiday and 1890s frontier skins, actual gun FX, Integration swimwear gate, wardrobe nested back, four themes; signed Android 12 portrait/landscape'
     if heavens:receipt['scope']='Second/third-tier original staff, independent military mandates, stale recovery, real crossing, finite local funds and physical war deployment/return; remote personal combat disabled and prepaid return; four themes, signed Android 12 portrait/landscape'
+    if tutorial:receipt['scope']='Two pixel palettes, real native tutorial taps and IME search, native back pause/resume, unchanged interface-tour saves and all 32 original teaching steps; signed Android 12 portrait/landscape'
     if authored:receipt['scope']='Authored DLC create, paid manual and upgrade, one-generation inheritance, four themes and contact art text containment; native portrait/landscape, focused scope'
     if update301:receipt['scope']='3.0.1 focused four-theme skin selection, actual earlier-form figure, unchanged gameplay and ecology observation; portrait/landscape, not full repository'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')

@@ -37,6 +37,22 @@ SOUL_TESTS = list(dict.fromkeys(AUTHORED_TESTS + [
 ]))
 AUTHORED_BROWSERS = ['browser_authored_techniques','browser_npc_art','browser_common_elemental_techniques','browser_events_212']
 
+TUTORIAL_TESTS = [
+    'tests/test_tutorial.py','tests/test_tutorial_walkthrough.py','tests/test_ui_preferences.py',
+    'tests/test_visual_release.py','tests/test_pixel_assets.py','tests/test_extension_system.py',
+    'tests/test_persistence_pipeline.py','tests/test_save_transfer.py','tests/test_release_212.py',
+    'tests/test_world_transition_system.py','tests/test_spatial_talismans.py','tests/test_release_211.py',
+    'tests/test_base_game_version.py','tests/test_module_dependencies.py','tests/test_android_packaging.py',
+    'tests/test_windows_release_evidence.py','tests/test_android_release_checks.py',
+]
+TUTORIAL_BROWSERS = ['browser_tutorial_interface','browser_desktop_navigation','browser_start_layout','browser_events_212']
+TUTORIAL_PRACTICE = {
+    'tutorial-practice-text': [],
+    'tutorial-practice-pixel-phone': ['--pixel'],
+    'tutorial-practice-pixel-desktop': ['--pixel','--desktop'],
+    'tutorial-practice-pixel-landscape': ['--pixel','--short-landscape'],
+}
+
 # All changed 3.3.0 domains since the preceding packaged version, including
 # the earlier unpublished contact, skin and lazy-panel work.
 HEAVENS_TESTS = sorted(p.relative_to(ROOT).as_posix() for p in (ROOT/'tests').glob('test_heavens*.py')) + [
@@ -276,7 +292,7 @@ VISUAL_ALPHA6_TESTS = list(dict.fromkeys(VISUAL_ALPHA3_TESTS + [
 ]))
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial'],default='legacy')
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     parser.add_argument('--balance-tests',action='store_true',help='Schedule full regressions by prior XML timings; never reuse prior results')
@@ -300,6 +316,7 @@ def main():
     if profile=='combat-alpha':selected=[COMBAT_ALPHA_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='soul-lifecycle':selected=[SOUL_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='heavens':selected=[HEAVENS_TESTS[i::options.shards] for i in range(options.shards)]
+    if profile=='tutorial':selected=[TUTORIAL_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='authored':selected=[AUTHORED_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='update301':selected=[UPDATE301_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='common-goods':selected=[COMMON_GOODS_TESTS[i::3] for i in range(3)]
@@ -317,7 +334,7 @@ def main():
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
     if options.focused_visual:
         selected=[(VISUAL_ALPHA6_TESTS if options.home_scenes else VISUAL_ALPHA5_TESTS if options.path_characters else VISUAL_ALPHA4_TESTS if options.monster_visuals else VISUAL_ALPHA3_TESTS)[i::options.shards] for i in range(options.shards)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} or (profile=='visual' and not options.focused_visual) else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
@@ -361,6 +378,7 @@ def main():
     if profile=='soul-lifecycle':browsers=['browser_combat_groups','browser_combat_replay','browser_historical_skins','browser_story_achievements','browser_tide_theme','browser_themes_139','browser_desktop_navigation','browser_secret_art_training','browser_frontier_skins','browser_release_301','browser_soul_lifecycle','browser_swimwear_skins','browser_holiday_skins','browser_sect_tasks','browser_authored_techniques','browser_events_212']
     if profile=='authored':browsers=AUTHORED_BROWSERS
     if profile=='heavens':browsers=HEAVENS_BROWSERS
+    if profile=='tutorial':browsers=TUTORIAL_BROWSERS
     if profile=='update301':browsers=UPDATE301_BROWSERS
     if options.monster_visuals:browsers += ['browser_monster_release','browser_monster_flora_visuals']
     if options.path_characters:browsers += ['browser_path_characters']
@@ -372,6 +390,7 @@ def main():
                      'browser_monster_fox_visuals','browser_monster_insect_visuals',
                      'browser_monster_serpent_visuals','browser_monster_turtle_visuals']
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
+    if profile=='tutorial':jobs += [(name,['scripts/verify_tutorial_ui.py',*args]) for name,args in TUTORIAL_PRACTICE.items()]
     if profile=='common-goods':
         jobs.append(('combat-upstream',['tools/verify_combat_upstream_2151.py']))
     def run(job):
@@ -379,25 +398,25 @@ def main():
         log=ROOT/f'build/{name}-{tag}.log'
         with log.open('w',encoding='utf-8') as stream:
             code=subprocess.call([sys.executable,'-X','utf8',*args],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT,
-                                 env=os.environ | ({} if profile in {'soul-lifecycle','heavens'} else {'CULTIVATION_BROWSER_LOW_MEMORY':'1'}))
+                                 env=os.environ | ({} if profile in {'soul-lifecycle','heavens','tutorial'} else {'CULTIVATION_BROWSER_LOW_MEMORY':'1'}))
         require(code==0,f'{name} failed; see {log}')
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         print(name+' passed',flush=True)
         return dict(name=name,log=str(log.relative_to(ROOT)),status='passed')
-    if profile=='heavens':
+    if profile in {'heavens','tutorial'}:
         # Every job uses disposable saves, ports and browser profiles. Bound
         # concurrent jobs while letting independent UI checks overlap shards.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs))
         jobs=[]
-    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens'}:
+    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial'}:
         # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

@@ -38,4 +38,7 @@
 .faction-brief>.tutorial-faction-join{grid-column:1 / -1;justify-self:start;min-width:min(230px,100%)}
 .tutorial-coach select{box-sizing:border-box;width:100%;min-width:0;font:inherit;font-size:13px;margin:4px 0 8px}
 .tutorial-coach select[hidden]{display:none!important}
+.tutorial-interface-entry{margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:var(--radius,6px)}
+.tutorial-interface-entry h3{margin:0 0 8px;font-size:16px}.tutorial-interface-entry p{font-size:13px;line-height:1.8;color:var(--muted)}
+.tutorial-coach>div{flex-wrap:wrap}.tutorial-coach #guide-interface-start{width:100%;border-color:var(--pine);color:var(--pine)}
 @media(max-height:560px){.tutorial-coach{padding:10px 12px}.tutorial-coach p{font-size:12px;line-height:1.5}.tutorial-coach h2{font-size:16px}#guide-hint{display:none}}

@@ -38,6 +38,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
     }
 
     private Object js(String expression) throws Exception {
+        check(web!=null,"Release WebView is not ready for a page probe");
         CountDownLatch done=new CountDownLatch(1);
         AtomicReference<String> result=new AtomicReference<>();
         runOnMainSync(() -> web.evaluateJavascript(expression,value->{result.set(value);done.countDown();}));
@@ -578,6 +579,67 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("hunt_beasts_scope","Four real hunt button actions, exact species, decoded offline art and portrait/landscape layout");
     }
 
+    private void tapTutorialTarget(String selector) throws Exception {
+        check(Boolean.TRUE.equals(js("(()=>{document.querySelectorAll('[data-native-guide-target]').forEach(n=>n.removeAttribute('data-native-guide-target'));const target=[...document.querySelectorAll("+JSONObject.quote(selector)+")].find(n=>{const r=n.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(n).visibility==='visible'&&!n.closest('.hidden');});if(!target||target.disabled)return false;target.setAttribute('data-native-guide-target','true');return true;})()")),"Missing live tutorial target: "+selector);
+        tapSelector("[data-native-guide-target]");
+    }
+
+    private void runTutorialUI(Bundle result) throws Exception {
+        for(String palette:new String[]{"light","dark"}) {
+            js("showStart();true");tapSelector("#theme-open");
+            if(!Boolean.TRUE.equals(js("GameThemes.preferences.pixel_art")))tapSelector("#theme-dialog [data-pixel-setting]");
+            tapSelector("[data-theme-picker=dialog] [data-pixel-theme-choice="+palette+"]");
+            async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'界面指路',spirit_root:'supreme_wood',path:'dao',seed:331})});return g.id;})()");
+            async("loadGame("+JSONObject.quote(id)+")");
+            python("from cultivation_life import server\nserver._tutorial_ui_bytes=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+            tapSelector("#action-card [data-tutorial-open]");tapSelector("#tutorial-interface-start");
+            int total=((Number)js("TutorialInterface.keys().length")).intValue();
+            for(int i=0;i<total;i++) {
+                String step=(String)js("document.querySelector('.tutorial-tour').dataset.step");
+                check(step.startsWith("ui_"),"Wrong interface step: "+step);
+                if(step.equals("ui_actions")) {
+                    sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
+                    waitForJs("!TutorialGuide.isGuiding()","Native back must pause interface tour");
+                    tapSelector("#action-card [data-tutorial-open]");tapSelector("#tutorial-interface-start");
+                    check(step.equals(js("document.querySelector('.tutorial-tour').dataset.step")),"Interface resume lost its step");
+                }
+                check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('.tutorial-coach').getBoundingClientRect();return r.left>=0&&r.top>=0&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1;})()")),"Interface coach outside viewport: "+step);
+                if(step.equals("ui_scenery")||step.equals("ui_search"))capture("tutorial-ui-"+palette+"-"+step+"-"+arguments.getString("orientation"));
+                if(Boolean.TRUE.equals(js("TutorialInterface.resolve(document.querySelector('.tutorial-tour').dataset.step).input"))) {
+                    enterNumericField("#navigation-search","界面导览搜索","行囊");
+                    runOnMainSync(()->((android.view.inputmethod.InputMethodManager)activity.getSystemService(Activity.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(web.getWindowToken(),0));
+                    Thread.sleep(500);waitForNativeFrame();
+                } else if(Boolean.TRUE.equals(js("!document.querySelector('#guide-next').hidden")))tapSelector("#guide-next");
+                else tapTutorialTarget((String)js("TutorialInterface.resolve(document.querySelector('.tutorial-tour').dataset.step).target"));
+                waitForJs("!TutorialGuide.isGuiding()||document.querySelector('.tutorial-tour').dataset.step!=="+JSONObject.quote(step),"Native interface tap did not advance: "+step);
+            }
+            check(Boolean.TRUE.equals(js("!TutorialGuide.isGuiding()")),"Interface tour must finish");
+            python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._tutorial_ui_bytes");
+            tapSelector("#setting-tutorial-open");tapSelector("#tutorial-start");
+            for(int i=0;i<32;i++) {
+                String step=(String)js("game.tutorial.guide.step");
+                check(Boolean.TRUE.equals(js("TutorialGuide.isGuiding()")),"Practice guide missing: "+step);
+                if(step.equals("gain")) {
+                    sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK);
+                    waitForJs("!busy&&!TutorialGuide.isGuiding()&&!game.tutorial.enabled","Practice pause failed");
+                    tapSelector("#action-card [data-tutorial-open]");tapSelector("#tutorial-start");
+                    waitForJs("!busy&&TutorialGuide.isGuiding()&&game.tutorial.guide.step==='gain'","Practice resume failed");
+                }
+                if(step.equals("practice")||step.equals("join"))capture("tutorial-practice-"+palette+"-"+step+"-"+arguments.getString("orientation"));
+                if(Boolean.TRUE.equals(js("!document.querySelector('#guide-next').hidden")))tapSelector("#guide-next");
+                else if(step.equals("mentor_choice"))tapSelector("[data-guide-choice=guide_accept]");
+                else tapTutorialTarget((String)js("TutorialSteps[game.tutorial.guide.step].target"));
+                waitForJs("!busy&&(game.tutorial.guide.step!=="+JSONObject.quote(step)+"||game.tutorial.guide.completed)","Native practice tap did not advance: "+step);
+            }
+            python("from cultivation_life import server\nimport json\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\nbefore=json.loads(server._tutorial_ui_bytes)\nafter=json.loads(server.ENGINE.store._path(g.id).read_bytes())\nassert g.player.tutorial_state['guide_completed']\nassert g.player.master['realm_index']==3\nassert g.player.faction_id in g.sects\nassert after['rng_state']==before['rng_state']\nassert after['player']['age']==before['player']['age']");
+            async("loadGame("+JSONObject.quote(id)+")");
+            check(Boolean.TRUE.equals(js("!TutorialGuide.isGuiding()&&game.tutorial.guide.completed")),"Practice completion must survive reload");
+        }
+        result.putString("tutorial_interface_scope","Two pixel palettes; actual native taps, IME search, native back pause/resume, unchanged save bytes; signed Android 12 portrait/landscape");
+        result.putString("tutorial_practice_scope","Both pixel palettes; all 32 live teaching steps, native back resume, real master and sect, unchanged age and RNG, completion after reload");
+    }
+
     private void runTideTheme(Bundle result) throws Exception {
         tapSelector("#theme-open");
         if(!Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked")))tapSelector("#theme-dialog [data-pixel-setting]");
@@ -1056,7 +1118,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             activity=startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             if("portrait".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
             if("landscape".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
-            long deadline=System.currentTimeMillis()+60000;
+            long deadline=System.currentTimeMillis()+(requested.equals("tutorial-ui")?180000:60000);
             while(web==null && System.currentTimeMillis()<deadline) {
                 runOnMainSync(()->web=findWeb(activity.findViewById(android.R.id.content)));
                 Thread.sleep(150);
@@ -2598,6 +2660,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 check(Boolean.TRUE.equals(js("TutorialHandbook.build(configData,game).some(c=>c.id==='immortal-trials' && JSON.stringify(c).includes('战前准备') && !JSON.stringify(c).includes('复制'))")),"Missing trial handbook");
                 capture("trials-victory-1520");
                 result.putString("trials_scope","Six themes; native training tap and back; five-round field-only backlash; real growth and reload persistence; unlimited three-corpses handbook");
+            } else if(phase.equals("tutorial-ui")) {
+                runTutorialUI(result);
             } else if(phase.equals("tutorial")) {
                 for(String theme:new String[]{"a","b","d","f"}) {
                     js("showStart();document.querySelector('[data-theme-picker=start] [data-theme-choice="+theme+"]').click()");async("GameThemes.saved");
