@@ -1,4 +1,4 @@
-"""Compatibility for renamed catalog identifiers within schema 10.
+"""Current-schema compatibility for renamed catalog references.
 
 Pure decoding only: no files, catalog imports, RNG, stats, or save-schema upgrade.
 Only exact identifiers in reference fields/maps are changed. Player text, logs,
@@ -86,29 +86,58 @@ def normalize_content_references(value: Any, field: str = '') -> Any:
     inputs share the exact same alias table. Reject ambiguous map collisions
     rather than silently discarding either stock or currency history.
     """
-    if isinstance(value, str):
-        return canonical_content_id(value) if field in _REFERENCE_FIELDS else value
-    if isinstance(value, list):
+    return _normalize(value, field, {})
+
+
+_SCALAR_TYPES = frozenset((int, float, bool, type(None), tuple))
+_MISSING, _UNCHANGED = object(), object()
+
+
+def _normalize(node, reference_field, canonical_keys):
+    if isinstance(node, str):
+        return canonical_content_id(node) if reference_field in _REFERENCE_FIELDS else node
+    if isinstance(node, list):
         result = None
-        for index, child in enumerate(value):
-            updated = normalize_content_references(child, field)
+        for index, child in enumerate(node):
+            child_type = type(child)
+            if child_type in _SCALAR_TYPES:
+                updated = child
+            elif child_type is str:
+                updated = canonical_content_id(child) if reference_field in _REFERENCE_FIELDS else child
+            else:
+                updated = _normalize(child, reference_field, canonical_keys)
             if updated is not child:
                 if result is None:
-                    result = list(value)
+                    result = list(node)
                 result[index] = updated
-        return value if result is None else result
-    if isinstance(value, dict):
+        return node if result is None else result
+    if isinstance(node, dict):
         result = None
-        for key, child in value.items():
-            canonical_key = canonical_content_id(key) if isinstance(key, str) else key
-            if canonical_key != key and canonical_key in value:
+        for key, child in node.items():
+            if isinstance(key, str):
+                canonical_key = canonical_keys.get(key, _MISSING)
+                if canonical_key is _MISSING:
+                    canonical_key = canonical_content_id(key)
+                    if len(canonical_keys) < 4096:
+                        canonical_keys[key] = _UNCHANGED if canonical_key is key else canonical_key
+                elif canonical_key is _UNCHANGED:
+                    canonical_key = key
+            else:
+                canonical_key = key
+            if canonical_key != key and canonical_key in node:
                 raise ValueError(f'物品标识同时存在新旧记录，不能自动覆盖：{key} / {canonical_key}')
-            updated = normalize_content_references(child, key)
+            child_type = type(child)
+            if child_type in _SCALAR_TYPES:
+                updated = child
+            elif child_type is str:
+                updated = canonical_content_id(child) if key in _REFERENCE_FIELDS else child
+            else:
+                updated = _normalize(child, key, canonical_keys)
             if canonical_key != key or updated is not child:
                 if result is None:
-                    result = dict(value)
+                    result = dict(node)
                 if canonical_key != key:
                     del result[key]
                 result[canonical_key] = updated
-        return value if result is None else result
-    return value
+        return node if result is None else result
+    return node
