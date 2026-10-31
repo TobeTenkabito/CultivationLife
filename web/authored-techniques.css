@@ -16,3 +16,50 @@
 @keyframes authored-paper-flash{0%,100%{opacity:0}30%{opacity:.12}}
 
 #authored-card>.section-title{top:0;padding:8px 0;background:var(--surface);margin:0}
+
+/* Ink-purple volumes and a gold spine distinguish the expansion from base actions.
+   Semantic theme colors also cover the optional light/dark pixel palettes. */
+html[data-theme] .strategy-dock button[data-dlc=authored],
+html[data-theme] .navigation-shortcut[data-dlc=authored]{
+  --dock-color:var(--violet);
+  position:relative;color:var(--dock-color);
+  border-color:color-mix(in srgb,var(--dock-color) 45%,var(--surface));
+  border-radius:4px 12px 12px 4px;
+  background:color-mix(in srgb,var(--dock-color) 12%,var(--surface));
+  box-shadow:inset 3px 0 var(--gold),inset 0 0 0 1px color-mix(in srgb,var(--dock-color) 18%,transparent);
+}
+html[data-theme] .authored-dock-button::after{
+  content:'';position:absolute;left:7px;top:10px;bottom:10px;width:1px;
+  background:currentColor;opacity:.3;pointer-events:none;
+}
+html[data-theme] .navigation-shortcut[data-dlc=authored]::before{
+  content:'◆';position:absolute;right:5px;top:3px;font-size:9px;color:inherit;pointer-events:none;
+}
+html[data-theme] .navigation-shortcut[data-dlc=authored]:hover:not(:disabled){background:var(--dock-color);color:var(--on-accent)}
+html[data-theme] #navigation-grid button[data-dlc=authored]{box-shadow:inset 3px 0 var(--gold)}
+html[data-theme] #authored-card{--authored-accent:var(--violet)}
+html[data-theme] #authored-card button:not(#authored-toggle){
+  color:var(--authored-accent);border:1px solid color-mix(in srgb,var(--authored-accent) 45%,var(--surface));
+  background:color-mix(in srgb,var(--authored-accent) 8%,var(--surface));
+  border-radius:4px 10px 10px 4px;box-shadow:inset 3px 0 color-mix(in srgb,var(--gold) 65%,transparent);
+}
+html[data-theme] #authored-card button:not(#authored-toggle):hover:not(:disabled){background:color-mix(in srgb,var(--authored-accent) 18%,var(--surface));border-color:var(--authored-accent)}
+html[data-theme] #authored-card button[data-author-create]{background:var(--authored-accent);color:var(--on-accent);border-color:var(--authored-accent)}
+html[data-theme] #authored-card button[data-author-create]:hover:not(:disabled){background:color-mix(in srgb,var(--authored-accent) 88%,var(--ink));color:var(--on-accent)}
+html[data-theme] #authored-card button:focus-visible,
+html[data-theme] .authored-dock-button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+html[data-theme] #authored-card button:disabled{opacity:.45;cursor:not-allowed}
+html[data-theme] #authored-card .at-eyebrow,
+html[data-theme] #authored-card .at-balance{color:var(--authored-accent)!important}
+html[data-theme] #authored-card .at-preview{border-top-color:var(--authored-accent)}
+
+/* The pixel rail has stronger compact styling than the classic DLC dock. */
+:root[data-visual=pixel] .in-game .strategy-dock[data-desktop-dock] button[data-dlc=authored]{
+  color:var(--dock-color);border:1px solid color-mix(in srgb,var(--dock-color) 45%,var(--surface));
+  border-radius:4px 10px 10px 4px;background:color-mix(in srgb,var(--dock-color) 12%,var(--surface));
+  box-shadow:inset 3px 0 var(--gold);
+}
+:root[data-visual=pixel] .in-game .strategy-dock[data-desktop-dock] button[data-dlc=authored]:hover:not(:disabled),
+:root[data-visual=pixel] .in-game .strategy-dock[data-desktop-dock] button[data-dlc=authored].active{
+  background:var(--dock-color);color:var(--on-accent);border-color:var(--dock-color);
+}

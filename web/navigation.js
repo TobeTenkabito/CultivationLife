@@ -48,6 +48,7 @@
   function shortcut(id){
     const row=entries.get(id), b=el('button');b.type='button';b.dataset.navigationShortcut=id;
     b.className='navigation-shortcut';
+    if(row.button.dataset.dlc==='authored'){b.dataset.dlc='authored';b.classList.add('authored-dock-button');b.title=row.button.title;}
     b.append(el('span',row.button.querySelector('span')?.textContent),el('small',title(row)));
     b.disabled=row.button.disabled;b.onclick=()=>activate(id);shortcuts.push({button:b,id});return b;
   }
