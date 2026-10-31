@@ -80,6 +80,29 @@ def test_all_remaining_routes_have_typed_metadata_and_no_exclusions(isolated):
             registry.structured(name, args)
 
 
+def test_release_333_commands_keep_real_guards_and_atomic_debug_state(isolated):
+    _, manager, sid = isolated
+    call(manager, sid, 'skin select', skin_id='')
+    for command, arguments in [
+        ('skin select', {'skin_id':'actor.cosmetic.diaochan-female'}),
+        ('soul action', {'action':'leave','revision':0}),
+        ('sect task', {'action':'donate','owner_id':'missing','revision':0,'amount':100}),
+        ('authored action', {'action':'manual','revision':999,'id':'missing','level':1}),
+    ]:
+        before=manager.load(sid)['current']
+        with pytest.raises(RuntimeError) as denied:
+            call(manager,sid,command,**arguments)
+        assert isinstance(denied.value.__cause__, ValueError)
+        assert manager.load(sid)['current']==before
+    registry=build_registry()
+    for command, arguments in [
+        ('soul action', {'action':'leave','revision':True}),
+        ('sect task', {'action':'donate','owner_id':'test','revision':0,'amount':True}),
+        ('authored action', {'action':'create','revision':0,'design':{'script':'arbitrary'}}),
+    ]:
+        with pytest.raises(CommandError):registry.structured(command,arguments)
+
+
 @pytest.mark.parametrize('cap', DLC_CAPABILITIES, ids=lambda cap: cap.operation)
 def test_disabled_dlc_never_reaches_engine_or_changes_game(isolated, monkeypatch, cap):
     _, manager, sid = isolated

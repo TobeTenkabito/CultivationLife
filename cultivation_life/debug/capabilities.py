@@ -11,6 +11,7 @@ from .registry import Argument, Command
 from ..system.crafted_artifact_rules import STAT_NAMES
 from ..system.heavens.definitions import ACTIONS as HEAVENS_ACTIONS
 from ..system.merchant_definitions import METRICS as FORMATION_METRICS
+from ..authored_technique_schema import SLOTS as AUTHOR_SLOTS, STATS as AUTHOR_STATS, EFFECTS as AUTHOR_EFFECTS
 
 
 def S(name, *, required=True, choices=()):
@@ -89,6 +90,38 @@ class Capability:
 
 
 CAPABILITIES = (
+    Capability('skin select', 'character-skin', (S('skin_id', required=False),),
+        lambda e,g,p:e.select_character_skin(g,p.get('skin_id',''))),
+    Capability('soul action', 'soul',
+        (S('action', choices=('study','leave','leave_host','return','convert','resist','refine','cancel_refine',
+                              'assimilate','auto','equip','unequip','technique','dismiss')),
+         I('revision', required=True), S('id', required=False), I('index'),
+         S('slot', required=False, choices=tuple(AUTHOR_SLOTS))),
+        lambda e,g,p:e.soul_action(g,p['action'],p)),
+    Capability('sect task', 'sect-task',
+        (S('action', choices=('donate','minimum','recruitment','dismiss','expel','publish','cancel','complete','redeem')),
+         S('owner_id'), I('revision', required=True), I('amount'), I('realm',0,12), B('enabled'),
+         S('successor',required=False), S('npc_id',required=False), S('kind',required=False),
+         S('item',required=False), I('quantity',1,10000), S('war_id',required=False), S('task_id',required=False)),
+        lambda e,g,p:e.sect_task_action(g,p)),
+    Capability('authored action', 'authored-technique',
+        (S('action', choices=('create','manual')), I('revision',required=True),
+         S('id',required=False), I('level',1,9),
+         O('design', {
+             'name': {'type':'string','minLength':2,'maxLength':24},
+             'grade': {'type':'integer','minimum':1,'maximum':12},
+             'category': {'type':'string','enum':['main','support','combat','body','divine_sense','transformation']},
+             'element': STRING,
+             'allocations': {'type':'object','properties':{k:INTEGER for k in AUTHOR_STATS},'additionalProperties':False},
+             'buffs': {'type':'array','maxItems':4,'items':{'type':'object','additionalProperties':False,
+                 'required':['slot','effect','value','level','condition','round'], 'properties':{
+                     'slot':{'type':'string','enum':list(AUTHOR_SLOTS)},
+                     'effect':{'type':'string','enum':list(AUTHOR_EFFECTS)},
+                     'value':{'type':'integer','minimum':1,'maximum':50},
+                     'level':{'type':'integer','minimum':1,'maximum':9},
+                     'condition':{'type':'string','enum':['always','from_round','at_round']},
+                     'round':{'type':'integer','minimum':1,'maximum':8}}}},
+         })), lambda e,g,p:e.authored_technique_action(g,p['action'],p), dlc='official.authored-techniques'),
     Capability('building action', 'building-action',
         (S('action', choices=('enter', 'construct', 'temple-plan', 'city-plan', 'manage', 'choose')),
          S('building_id', required=False), S('event_id', required=False), S('choice_id', required=False)),

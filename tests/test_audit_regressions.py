@@ -340,14 +340,18 @@ def test_expelled_template_npc_is_not_restored_and_old_duplicate_is_repaired(eng
     engine.store.save(game)
     engine.intrigue_personnel_action(game.id, 'sect', 'expel', original.id)
     saved = engine.store.load(game.id)
-    affinity = saved.world_npcs[original.id].affinity
+    # Faction release retains the original person in the notable free roster.
+    affinity = saved.notable_npcs[original.id].affinity
+    assert original.id not in saved.world_npcs
+    assert saved.notable_npcs[original.id].faction_id is None
     # Simulate a copy already persisted by the old loader.
     saved.sects[sect.id].npcs.append(original)
     engine.store.save(saved)
     for _ in range(2):
         loaded = engine._load(game.id)
         assert not any(npc.id == original.id for npc in loaded.sects[sect.id].npcs)
-        assert loaded.world_npcs[original.id].affinity == affinity
+        assert loaded.notable_npcs[original.id].affinity == affinity
+        assert original.id not in loaded.world_npcs
         engine.store.save(loaded)
 
 

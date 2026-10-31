@@ -69,6 +69,8 @@ def main():
     if soul:logs=[f'build/android-soul-lifecycle-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if heavens:logs=[f'build/android-heavens-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if tutorial:logs=[f'build/android-tutorial-ui-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
+    if '--performance' in sys.argv:
+        logs += [f'build/android-authored-{o}-{tag}.log' for o in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
         if heavens or tutorial:
@@ -76,11 +78,11 @@ def main():
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if heavens:require('heavens_outposts_scope' in text,f'Missing native heavens/war/return acceptance: {name}')
         if '--handbook' in sys.argv:require('handbook_revision_scope' in text,f'Missing native handbook and current catalog: {name}')
-        if tutorial:require('tutorial_interface_scope' in text and 'tutorial_practice_scope' in text,f'Missing actual native interface and practice course: {name}')
+        if tutorial and 'tutorial-ui' in name:require('tutorial_interface_scope' in text and 'tutorial_practice_scope' in text,f'Missing actual native interface and practice course: {name}')
         if soul:require('soul_lifecycle_scope' in text,f'Missing soul native acceptance: {name}')
         if soul:require('frontier_skin_scope' in text,f'Missing frontier/swimwear native acceptance: {name}')
         if soul:require('tide_theme_scope' in text,f'Missing tide/theme native acceptance: {name}')
-        if authored:require('authored_scope' in text,f'Missing authoring native acceptance: {name}')
+        if authored or ('--performance' in sys.argv and 'android-authored' in name):require('authored_scope' in text,f'Missing authoring native acceptance: {name}')
         if update301:require('update301_scope' in text,f'Missing 3.0.1 native skin and ecology acceptance: {name}')
         if visual and BASE_GAME_VERSION=='3.0.0-alpha.4':require('monster_visual_scope' in text,f'Missing alpha.4 native monster scope: {name}')
         if visual and BASE_GAME_VERSION=='3.0.0-alpha.5':require('path_character_scope' in text,f'Missing alpha.5 native path scope: {name}')
@@ -152,6 +154,7 @@ def main():
     if heavens:receipt['scope']='Second/third-tier original staff, independent military mandates, stale recovery, real crossing, finite local funds and physical war deployment/return; remote personal combat disabled and prepaid return; four themes, signed Android 12 portrait/landscape'
     if tutorial:receipt['scope']='Two pixel palettes, real native tutorial taps and IME search, native back pause/resume, unchanged interface-tour saves and all 32 original teaching steps; signed Android 12 portrait/landscape'
     if authored:receipt['scope']='Authored DLC create, paid manual and upgrade, one-generation inheritance, four themes and contact art text containment; native portrait/landscape, focused scope'
+    if '--performance' in sys.argv:receipt['scope']='Final 3.3.3 signed Android 12: native tutorial and all 32 practice steps, handbook, authored create/manual/upgrade/inheritance and contact layout; portrait and landscape. Performance and concurrency correctness is additionally covered by final-source domain/browser regressions, not a device speed benchmark.'
     if update301:receipt['scope']='3.0.1 focused four-theme skin selection, actual earlier-form figure, unchanged gameplay and ecology observation; portrait/landscape, not full repository'
     (ROOT/f'build/android-{tag}-scoped.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('Signed Android native scope passed; installed APK matches artifact SHA-256')

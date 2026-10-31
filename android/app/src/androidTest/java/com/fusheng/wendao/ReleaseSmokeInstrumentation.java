@@ -617,6 +617,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             check(Boolean.TRUE.equals(js("!TutorialGuide.isGuiding()")),"Interface tour must finish");
             python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._tutorial_ui_bytes");
             tapSelector("#setting-tutorial-open");tapSelector("#tutorial-start");
+            waitForJs("!busy&&TutorialGuide.isGuiding()&&game.tutorial.guide.active","Native practice start did not settle",60000);
             for(int i=0;i<32;i++) {
                 String step=(String)js("game.tutorial.guide.step");
                 check(Boolean.TRUE.equals(js("TutorialGuide.isGuiding()")),"Practice guide missing: "+step);

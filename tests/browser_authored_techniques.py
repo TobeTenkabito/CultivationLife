@@ -75,6 +75,30 @@ def main():
                     page.locator('#new-game-form button[type=submit]').click();page.wait_for_function('!busy&&game&&game.player.name==="继承界面验收"')
                     assert page.evaluate('game.authored_techniques.books[0].own') is False
                     assert page.evaluate('game.authored_techniques.books[0].level')==0
+                    # Release 3.3.3: exercise the new book-shaped controls in
+                    # both pixel palettes through the original navigation.
+                    inherited_id=page.evaluate('game.id')
+                    # A just-created inherited save has not yet had its first
+                    # normal load preparation (rosters, economy and wardrobe).
+                    # Establish that baseline through the real loading route.
+                    page.evaluate('id=>loadGame(id)',inherited_id)
+                    page.wait_for_function('!busy')
+                    saved_bytes=(Path(folder)/'saves'/f'{inherited_id}.json').read_bytes()
+                    for palette in ['light','dark']:
+                        set_theme(page,palette)
+                        for width,height in [(1440,960),(390,844),(844,390)]:
+                            page.set_viewport_size(dict(width=width,height=height))
+                            navigation_locator(page,'[data-panel-target=authored]').click()
+                            page.locator('#authored-card').wait_for(state='visible')
+                            page.wait_for_timeout(350)
+                            assert page.locator('#authored-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
+                            page.screenshot(path=str(output/f'author-pixel-{palette}-{width}.png'))
+                            page.locator('#authored-toggle').click()
+                    after_bytes=(Path(folder)/'saves'/f'{inherited_id}.json').read_bytes()
+                    if after_bytes!=saved_bytes:
+                        (output/'pixel-before.json').write_bytes(saved_bytes)
+                        (output/'pixel-after.json').write_bytes(after_bytes)
+                    assert after_bytes==saved_bytes
                     assert not errors,errors
                     browser.close()
             finally:http.shutdown();http.server_close()
