@@ -29,7 +29,8 @@ from .content_registry import (
 )
 from .content_identifiers import normalize_content_references
 from .engine import GameEngine
-from .engine.transactions import request_scope
+from .engine.transactions import request_scope, independent_query_allowed
+from .engine.query_policy import committed_save_summaries
 from .errors import AccessDeniedError, NotFoundError
 from .error_reporting import report_internal_error
 from .system.extension_system import write_extension_preference
@@ -51,6 +52,26 @@ BUNDLED_ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
 ENGINE_ROOT = APP_ROOT if (APP_ROOT / "content").is_dir() else BUNDLED_ROOT
 WEB_ROOT = (APP_ROOT / "web") if (APP_ROOT / "web").is_dir() else (BUNDLED_ROOT / "web")
 ENGINE = GameEngine(ENGINE_ROOT, PERSISTENCE_ROOT / "data" / "saves")
+
+
+def _independent_api_read(command, handler, engine):
+    # Classification applies to this exact HTTP adapter, after validation.
+    # Custom adapters and isolated Debug requests keep their original boundary.
+    if (command is not _READ_QUERY_HANDLER or handler.command != 'GET'
+            or handler.headers.get('X-Cultivation-Debug')):
+        return False
+    parsed = urlparse(handler.path)
+    if parsed.path in {'/api/config', '/api/ui-preferences', '/api/visual-assets', '/api/fleet-goods'}:
+        return True
+    if parsed.path == '/api/domain-styles':
+        return not parse_qs(parsed.query).get('id', [''])[0]
+    if parsed.path == '/api/games':
+        return independent_query_allowed(engine, engine.list_games)
+    if parsed.path == '/api/achievements':
+        return independent_query_allowed(engine, engine.list_achievements)
+    if parsed.path == '/api/authored-lineages':
+        return committed_save_summaries(engine)
+    return False
 
 
 def local_request(command):
@@ -75,7 +96,12 @@ def local_request(command):
                         context = request_engine(handler, ENGINE, ENGINE_ROOT, PERSISTENCE_ROOT)
                     with context as engine:
                         handler.request_engine = engine
-                        scope = nullcontext() if urlparse(handler.path).path == '/api/debug/command' else request_scope(engine)
+                        if urlparse(handler.path).path == '/api/debug/command':
+                            scope = nullcontext()
+                        elif _independent_api_read(command, handler, engine):
+                            scope = request_scope(engine, serialized=False)
+                        else:
+                            scope = request_scope(engine)
                         with scope:
                             command(handler)
                 finally:
@@ -822,6 +848,9 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: object) -> None:
         if sys.stdout is not None:
             print(f"[浮生问道] {self.address_string()} - {format % args}")
+
+
+_READ_QUERY_HANDLER = Handler.do_GET.__wrapped__
 
 
 def main() -> None:

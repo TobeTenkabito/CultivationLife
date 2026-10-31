@@ -5,6 +5,7 @@ import os
 import tempfile
 import threading
 import hashlib
+from contextlib import nullcontext
 from collections import OrderedDict
 from dataclasses import dataclass
 from weakref import WeakValueDictionary
@@ -12,6 +13,7 @@ from pathlib import Path
 
 from .models import GameState
 from .errors import NotFoundError
+from .file_access import directory_io_lock
 from .version import BASE_GAME_VERSION
 from .save_schema import SAVE_SCHEMA_VERSION, migrate_document, migration_path, schema_version
 
@@ -64,6 +66,8 @@ class SaveStore:
         self.directory.mkdir(parents=True, exist_ok=True)
         self._summary_index = OrderedDict()
         self._summary_bytes = 0
+        self._summary_lock = threading.RLock()
+        self._file_lock = directory_io_lock(directory)
         with self._registry_lock:
             key = os.path.normcase(str(directory.resolve()))
             self.lock = self._locks.setdefault(key, threading.RLock())
@@ -90,7 +94,8 @@ class SaveStore:
                                                  prefix=f'{game_id}.', suffix='.tmp', delete=False) as output:
                     temporary = Path(output.name)
                     output.write(data)
-                temporary.replace(path)
+                with self._file_lock:
+                    temporary.replace(path)
             finally:
                 if temporary is not None:
                     temporary.unlink(missing_ok=True)
@@ -115,7 +120,8 @@ class SaveStore:
         path = self._path(game_id)
         with self.lock:
             try:
-                path.unlink()
+                with self._file_lock:
+                    path.unlink()
             except FileNotFoundError:
                 raise NotFoundError("存档不存在") from None
 
@@ -156,14 +162,18 @@ class SaveStore:
 
     def list_games(self) -> list[dict]:
         # Preserve the original per-call resource binding, before taking the
-        # directory lock. Cached facts never freeze labels or schema policy.
+        # summary lock. Cached facts never freeze labels or schema policy.
         from .content_registry import REALMS, WORLD_SYSTEMS, PATH_NAMES
         labels = (REALMS, WORLD_SYSTEMS, PATH_NAMES)
-        with self.lock:
+        # Read only committed JSON paths; writers atomically replace them. This
+        # lock owns the private index, not game mutation. Never acquire the
+        # directory lock while holding it (commands may list while locked).
+        with (nullcontext() if supports_committed_summaries(self) else self.lock), self._summary_lock:
             paths = []
             for path in self.directory.glob('*.json'):
                 try:
-                    paths.append((path, path.stat().st_mtime))
+                    with self._file_lock:
+                        paths.append((path, path.stat().st_mtime))
                 except FileNotFoundError:
                     continue
             present = {path.name for path, _ in paths}
@@ -172,7 +182,8 @@ class SaveStore:
             games = []
             for path, _ in sorted(paths, key=lambda row: row[1], reverse=True):
                 try:
-                    raw = path.read_bytes()
+                    with self._file_lock:
+                        raw = path.read_bytes()
                 except FileNotFoundError:
                     self._discard_summary(path.name)
                     continue
@@ -183,3 +194,14 @@ class SaveStore:
                     except (KeyError, TypeError, ValueError, IndexError):
                         continue
             return games
+
+
+_COMMITTED_SAVE_PORTS = tuple((name, getattr(SaveStore, name)) for name in
+    ('list_games', '_path', 'load', 'save', 'delete', '_write_document'))
+
+
+def supports_committed_summaries(store):
+    """Only the native atomic-file implementation may read without its writer lock."""
+    return type(store) is SaveStore and all(
+        getattr(getattr(store, name, None), '__func__', None) is original
+        for name, original in _COMMITTED_SAVE_PORTS)

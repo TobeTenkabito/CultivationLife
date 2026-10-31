@@ -53,7 +53,8 @@ from .presentation import character as character_view
 from .presentation import world as world_view
 from .presentation import factions as faction_view
 from .wiring import bind_dependencies, bind_npc_class_dependencies
-from .transactions import serialized_commands
+from .transactions import serialized_commands, directory_independent_query
+from .query_policy import committed_save_summaries, committed_achievements
 from ..system import buildings
 from ..system.heavens import operations as heavens_operations
 from ..system.court import state as court_state
@@ -617,9 +618,11 @@ class GameEngine:
     def delete_game(self, game_id: str) -> None:
         self.store.delete(game_id)
 
+    @directory_independent_query(committed_save_summaries)
     def list_games(self) -> list[dict[str, str]]:
         return self.store.list_games()
 
+    @directory_independent_query(committed_achievements)
     def list_achievements(self) -> dict[str, Any]:
         return self.achievements.public_catalog()
 

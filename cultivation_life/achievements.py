@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import copy
 import json
-import threading
 from pathlib import Path
 from typing import Any
 
 from .models import GameState
 from .errors import MetadataReadError
+from .file_access import directory_io_lock, metadata_lock
 from .runtime import now_iso
 
 from .achievement_definitions import (
@@ -27,14 +27,15 @@ class GlobalMetadataStore:
 
     def __init__(self, save_directory: Path):
         self.path = save_directory / self.filename
-        self._lock = threading.RLock()
+        self._lock = metadata_lock(save_directory)
+        self._file_lock = directory_io_lock(save_directory)
 
     @staticmethod
     def _empty() -> dict[str, Any]:
         return {"schema_version": 1, "achievements": {}}
 
     def ensure_exists(self) -> None:
-        with self._lock:
+        with self._lock, self._file_lock:
             try:
                 self.path.stat()
             except FileNotFoundError:
@@ -45,7 +46,9 @@ class GlobalMetadataStore:
     def read(self) -> dict[str, Any]:
         with self._lock:
             try:
-                data = json.loads(self.path.read_text(encoding="utf-8"))
+                with self._file_lock:
+                    raw = self.path.read_text(encoding="utf-8")
+                data = json.loads(raw)
             except FileNotFoundError:
                 return self._empty()
             except (OSError, UnicodeError, json.JSONDecodeError) as error:
@@ -79,10 +82,11 @@ class GlobalMetadataStore:
             return fresh
 
     def _write(self, data: dict[str, Any]) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = self.path.with_suffix(".tmp")
-        temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        temporary.replace(self.path)
+        with self._file_lock:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            temporary = self.path.with_suffix(".tmp")
+            temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            temporary.replace(self.path)
 
 
 class AchievementSystem:
