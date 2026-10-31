@@ -10,7 +10,7 @@ from ..system.path_modifiers import modifier, pursuit_immunity, projected_resour
 from ..rules import effective_fame, effective_sha_qi, effective_karma
 from ..system.instant_actions import public as instant_actions
 
-import copy
+from ..snapshot_copy import copy_plain_data
 from typing import Any
 from ..content_registry import PATH_NAMES, RACE_DEFINITIONS, ROOT_DEFINITIONS, ACTIONS, FACTION_DEFINITIONS, KARMA_FACTORS, REALMS, WORLD_SYSTEMS
 from ..models import GameState, HistoryRecord, SectNpc
@@ -250,9 +250,9 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
         "player": player_data,
         "pending_event": game.pending_event,
         "generated_event": {"pending": bool(game.generated_event_state.get("active")),
-                            "last_result": copy.deepcopy(game.generated_event_state.get("last_result"))},
+                            "last_result": copy_plain_data(game.generated_event_state.get("last_result"))},
         "trial_site": public_trial_sites(game, deps.maps),
-        "last_combat_report": copy.deepcopy(game.last_combat_report),
+        "last_combat_report": copy_plain_data(game.last_combat_report),
         "settings": {**game.settings, 'manual_combat_plan': bool(game.player.combat_plan.get('manual'))},
         "combat_plan": public_plan(game.player),
         "tutorial": public_tutorial(game),
@@ -306,7 +306,7 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
         "concubine_system": deps._public_concubine_system(game),
         "party": party,
         "wanted": deps._public_wanted(game),
-        "imprisonment": copy.deepcopy(game.player.imprisonment),
+        "imprisonment": copy_plain_data(game.player.imprisonment),
         "demonic_system": deps._public_demonic_system(game.player, game),
         "asura": public_asura(game),
         "ghost_system": deps._public_ghost_system(game),

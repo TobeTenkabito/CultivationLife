@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from .snapshot_copy import copy_plain_data
 from .authored_technique_schema import validate_library as validate_authored_library
 from dataclasses import asdict, dataclass, field
 from typing import Any
@@ -359,7 +360,7 @@ class SectState:
             allegiance_race=value.get("allegiance_race"),
             location_id=value.get("location_id"),
             player_founded_site=bool(value.get("player_founded_site", value.get("founded_by_player", False))),
-            heritage=copy.deepcopy(value.get('heritage', {})),
+            heritage=copy_plain_data(value.get('heritage', {})),
         )
 
 
@@ -630,8 +631,8 @@ class Player:
             max(0, int(i.get('quantity', 0))) for i in data.get('inventory', []) if i.get('id') == 'immortal_trace')
         data['inventory'] = [i for i in data.get('inventory', []) if i.get('id') != 'immortal_trace']
         data['immortal_vein_pity'] = {str(k): max(0, int(v)) for k, v in data.get('immortal_vein_pity', {}).items()}
-        data['immortal_body'] = copy.deepcopy(data.get('immortal_body', {}))
-        data['world_voisinages'] = copy.deepcopy(data.get('world_voisinages', {}))
+        data['immortal_body'] = copy_plain_data(data.get('immortal_body', {}))
+        data['world_voisinages'] = copy_plain_data(data.get('world_voisinages', {}))
         if data.get('cultivation_ranks_schema', 1) < 2:
             from .cultivation_coordinates import legacy_sense
             data['divine_sense_rank'] = legacy_sense(int(data.get('divine_sense_rank', 0)))
@@ -641,17 +642,17 @@ class Player:
         if data["gender"] not in {"male", "female"}:
             data["gender"] = "male"
         data["concubines"] = [
-            copy.deepcopy(row) for row in data.get("concubines", []) if isinstance(row, dict)
+            copy_plain_data(row) for row in data.get("concubines", []) if isinstance(row, dict)
         ]
         saved_concubine_status = data.get("concubine_status")
         data["concubine_status"] = (
-            copy.deepcopy(saved_concubine_status) if isinstance(saved_concubine_status, dict) else None
+            copy_plain_data(saved_concubine_status) if isinstance(saved_concubine_status, dict) else None
         )
         data["concubine_breakthrough_bonus"] = max(
             0.0, min(0.02, float(data.get("concubine_breakthrough_bonus", 0.0)))
         )
         data["concubine_rejection_aftermath"] = [
-            copy.deepcopy(row)
+            copy_plain_data(row)
             for row in data.get("concubine_rejection_aftermath", []) if isinstance(row, dict)
         ]
         data["concubine_escape_reputation"] = max(0, int(data.get("concubine_escape_reputation", 0)))
@@ -681,20 +682,20 @@ class Player:
             int(value) for value in data.get("ghost_erosion_thresholds_seen", [])
         ))
         data["ghost_bound_souls"] = [
-            copy.deepcopy(row) for row in data.get("ghost_bound_souls", []) if isinstance(row, dict)
+            copy_plain_data(row) for row in data.get("ghost_bound_souls", []) if isinstance(row, dict)
         ]
         data["ghost_soul_slots"] = {
             str(slot): str(soul_id) for slot, soul_id in data.get("ghost_soul_slots", {}).items()
         } if isinstance(data.get("ghost_soul_slots", {}), dict) else {}
         for key in ("ghost_attachment", "ghost_captor", "ghost_core_state", "ghost_host_body"):
             saved = data.get(key)
-            data[key] = copy.deepcopy(saved) if isinstance(saved, dict) else None
+            data[key] = copy_plain_data(saved) if isinstance(saved, dict) else None
         data["possession_count"] = max(0, int(data.get("possession_count", 0)))
         data["crafting_materials"] = [
-            copy.deepcopy(row) for row in data.get("crafting_materials", []) if isinstance(row, dict)
+            copy_plain_data(row) for row in data.get("crafting_materials", []) if isinstance(row, dict)
         ]
         data["crafted_artifacts"] = [
-            copy.deepcopy(row) for row in data.get("crafted_artifacts", []) if isinstance(row, dict)
+            copy_plain_data(row) for row in data.get("crafted_artifacts", []) if isinstance(row, dict)
         ]
         known_artifact_ids = {str(row.get("id")) for row in data["crafted_artifacts"]}
         data["equipped_crafted_artifact_ids"] = list(dict.fromkeys(
@@ -702,32 +703,32 @@ class Player:
             if str(value) in known_artifact_ids
         ))[:3]
         data["crafting_blueprints"] = [
-            copy.deepcopy(row) for row in data.get("crafting_blueprints", []) if isinstance(row, dict)
+            copy_plain_data(row) for row in data.get("crafting_blueprints", []) if isinstance(row, dict)
         ]
         data["crafting_sequence"] = max(
             int(data.get("crafting_sequence", 0)), len(data["crafted_artifacts"]), 0,
         )
         data["formation_materials"] = [
-            copy.deepcopy(row) for row in data.get("formation_materials", []) if isinstance(row, dict)
+            copy_plain_data(row) for row in data.get("formation_materials", []) if isinstance(row, dict)
         ]
         data["formation_loadouts"] = [
-            copy.deepcopy(row) for row in data.get("formation_loadouts", []) if isinstance(row, dict)
+            copy_plain_data(row) for row in data.get("formation_loadouts", []) if isinstance(row, dict)
         ]
         active_formation_id = data.get("active_formation_id")
         data["active_formation_id"] = str(active_formation_id) if active_formation_id else None
         data["formation_active_bindings"] = [
-            copy.deepcopy(row) if isinstance(row, dict) else None
+            copy_plain_data(row) if isinstance(row, dict) else None
             for row in data.get("formation_active_bindings", [])
         ][:9]
         saved_formation_profile = data.get("formation_profile_cache", {})
         data["formation_profile_cache"] = (
-            copy.deepcopy(saved_formation_profile) if isinstance(saved_formation_profile, dict) else {}
+            copy_plain_data(saved_formation_profile) if isinstance(saved_formation_profile, dict) else {}
         )
         data["formation_sequence"] = max(
             int(data.get("formation_sequence", 0)), len(data["formation_loadouts"]), 0,
         )
         data["formation_ground_arrays"] = [
-            copy.deepcopy(row) for row in data.get("formation_ground_arrays", []) if isinstance(row, dict)
+            copy_plain_data(row) for row in data.get("formation_ground_arrays", []) if isinstance(row, dict)
         ]
         data["formation_repair_supplies"] = {
             str(key): max(0, int(quantity))
@@ -790,7 +791,7 @@ class Player:
             map(str, data.get("monster_acquired_bloodline_traits", []))
         ))
         data["monster_generated_bloodline_traits"] = [
-            copy.deepcopy(row) for row in data.get("monster_generated_bloodline_traits", [])
+            copy_plain_data(row) for row in data.get("monster_generated_bloodline_traits", [])
             if isinstance(row, dict)
         ]
         data["monster_general_traits"] = list(dict.fromkeys(map(str, data.get("monster_general_traits", []))))
@@ -799,7 +800,7 @@ class Player:
             for key, count in data.get("monster_lineage_deeds", {}).items()
         } if isinstance(data.get("monster_lineage_deeds", {}), dict) else {}
         saved_lineage = data.get("monster_custom_lineage")
-        data["monster_custom_lineage"] = copy.deepcopy(saved_lineage) if isinstance(saved_lineage, dict) else None
+        data["monster_custom_lineage"] = copy_plain_data(saved_lineage) if isinstance(saved_lineage, dict) else None
         saved_lineage_id = data.get("monster_custom_lineage_id")
         if not saved_lineage_id and isinstance(data["monster_custom_lineage"], dict):
             saved_lineage_id = data["monster_custom_lineage"].get("id")
@@ -819,7 +820,7 @@ class Player:
         )
         saved_suppression = data.get("cultivation_suppression")
         data["cultivation_suppression"] = (
-            copy.deepcopy(saved_suppression) if isinstance(saved_suppression, dict) else None
+            copy_plain_data(saved_suppression) if isinstance(saved_suppression, dict) else None
         )
         technique = data.get("technique")
         data["technique"] = Technique(**technique) if technique else None
@@ -1161,7 +1162,7 @@ class GameState:
             sect_relations=dict(value.get("sect_relations", {})),
             story_trigger_attempts={str(key): int(count) for key, count in value.get("story_trigger_attempts", {}).items()},
             family=SectState.from_dict(value["family"]) if value.get("family") else None,
-            family_state=copy.deepcopy(value.get("family_state", {})),
+            family_state=copy_plain_data(value.get("family_state", {})),
             player_bounties=list(value.get("player_bounties", [])),
             governance_actions={str(key): int(age) for key, age in value.get("governance_actions", {}).items()},
             market_realm_index=value.get("market_realm_index"),
@@ -1169,45 +1170,45 @@ class GameState:
             market_location_id=value.get("market_location_id"),
             market_age=value.get("market_age"),
             market_offers=value.get("market_offers", []),
-            economy_v2=copy.deepcopy(value.get("economy_v2", {})),
-            world_simulation=copy.deepcopy(value.get("world_simulation", {})),
-            map_journey=copy.deepcopy(value.get("map_journey")),
+            economy_v2=copy_plain_data(value.get("economy_v2", {})),
+            world_simulation=copy_plain_data(value.get("world_simulation", {})),
+            map_journey=copy_plain_data(value.get("map_journey")),
             auction_state=dict(value.get("auction_state", {})),
             exchange_state=dict(value.get("exchange_state", {})),
             exchange_sequence=int(value.get("exchange_sequence", 0)),
-            merchant_state=copy.deepcopy(value.get("merchant_state", {})),
+            merchant_state=copy_plain_data(value.get("merchant_state", {})),
             auction_sequence=int(value.get("auction_sequence", 0)),
             debug_world_news=bool(value.get("debug_world_news", False)),
             active_trial=value.get("active_trial"),
             diplomacy_unit=int(value.get("diplomacy_unit", 0)),
             wars=list(value.get("wars", [])),
-            strategic_war_state=copy.deepcopy(value.get("strategic_war_state", {})),
-            upper_institutions=copy.deepcopy(value.get("upper_institutions", {})),
-            spatial_state=copy.deepcopy(value.get("spatial_state", {})),
-            authored_techniques=validate_authored_library(copy.deepcopy(value.get('authored_techniques', {}))),
+            strategic_war_state=copy_plain_data(value.get("strategic_war_state", {})),
+            upper_institutions=copy_plain_data(value.get("upper_institutions", {})),
+            spatial_state=copy_plain_data(value.get("spatial_state", {})),
+            authored_techniques=validate_authored_library(copy_plain_data(value.get('authored_techniques', {}))),
             heavenly_court=dict(value.get("heavenly_court", {})),
             natal_artifact=dict(value.get("natal_artifact", {})),
             last_combat_report=value.get("last_combat_report"),
-            ghost_parade=copy.deepcopy(value.get("ghost_parade", {})),
+            ghost_parade=copy_plain_data(value.get("ghost_parade", {})),
             npc_formations={
-                str(npc_id): copy.deepcopy(formation)
+                str(npc_id): copy_plain_data(formation)
                 for npc_id, formation in value.get("npc_formations", {}).items()
                 if isinstance(formation, dict)
             } if isinstance(value.get("npc_formations", {}), dict) else {},
-            intrigue_state=copy.deepcopy(value.get("intrigue_state", {}))
+            intrigue_state=copy_plain_data(value.get("intrigue_state", {}))
             if isinstance(value.get("intrigue_state", {}), dict) else {},
-            buddhist_state=copy.deepcopy(value.get("buddhist_state", {})) if isinstance(value.get("buddhist_state", {}), dict) else {},
+            buddhist_state=copy_plain_data(value.get("buddhist_state", {})) if isinstance(value.get("buddhist_state", {}), dict) else {},
             building_state=decode_building_state(value.get("building_state", {})),
-            sage_state=copy.deepcopy(value.get("sage_state", {}))
+            sage_state=copy_plain_data(value.get("sage_state", {}))
             if isinstance(value.get("sage_state", {}), dict) else {},
-            guixu_state=copy.deepcopy(value.get("guixu_state", {}))
+            guixu_state=copy_plain_data(value.get("guixu_state", {}))
             if isinstance(value.get("guixu_state", {}), dict) else {},
             heavens_state=decode_heavens_state(value.get("heavens_state", {})),
-            tianji_state=copy.deepcopy(value.get("tianji_state", {}))
+            tianji_state=copy_plain_data(value.get("tianji_state", {}))
             if isinstance(value.get("tianji_state", {}), dict) else {},
-            yaochi_state=copy.deepcopy(value.get('yaochi_state', {})) if isinstance(value.get('yaochi_state', {}), dict) else {},
-            monster_civilization_state=copy.deepcopy(value.get('monster_civilization_state', {})),
-            doctrine_state=copy.deepcopy(value.get("doctrine_state", {}))
+            yaochi_state=copy_plain_data(value.get('yaochi_state', {})) if isinstance(value.get('yaochi_state', {}), dict) else {},
+            monster_civilization_state=copy_plain_data(value.get('monster_civilization_state', {})),
+            doctrine_state=copy_plain_data(value.get("doctrine_state", {}))
             if isinstance(value.get("doctrine_state", {}), dict) else {},
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),

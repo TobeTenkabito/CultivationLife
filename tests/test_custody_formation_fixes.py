@@ -126,6 +126,13 @@ def test_closed_intrigue_dlc_preserves_original_remaining_sentence(api, monkeypa
 def test_partial_unit_map_trip_deducts_only_actual_travel_years(api):
     engine, act = api
     game, identity = organization_game(engine)
+    # This case needs an uninterrupted partial action unit. Fund the original
+    # treasury so the later payroll-conflict event cannot interrupt the trip.
+    from cultivation_life.system.economy.depot import treasury
+    from cultivation_life.system.economy.ledger import transfer_value
+    transfer_value(game, f'background:{game.player.world}',
+        treasury(game, game.sects['audit_org']), 100000, '刑期旅行隔离验收资金')
+    engine.store.save(game)
     plans = [engine.maps.travel_plan(game.player.world, game.player.location_id, row['id'], game.player.realm_index)
              for row in engine.maps.worlds[game.player.world]['locations'] if row['id']!=game.player.location_id]
     plan = min((p for p in plans if p.status=='ok'), key=lambda p:p.years)

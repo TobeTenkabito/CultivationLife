@@ -1,0 +1,6 @@
+{
+  "cultivation_life/models.py:SectState.from_dict": "42ed6cdcde4df411933126cca2ab85819f26c877635884a4da7f792f27647cb7",
+  "cultivation_life/models.py:Player.from_dict": "cac190b1b27a0d58e94950d1f40da0960890693773aacc3370a80020779a6daa",
+  "cultivation_life/models.py:GameState.from_dict": "7480487754873d6de6756de00bf556d410990c8dc92124d3385a5f0aeb5751cc",
+  "cultivation_life/engine/engine_presentation.py:prepare_view": "8fa70ee96a72dafbdbdef30e31882a243685c48828e23bb03d062242ace474dd"
+}
