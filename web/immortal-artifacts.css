@@ -1,0 +1,44 @@
+#immortal-artifacts-card{--ia-accent:var(--gold);width:min(940px,calc(100vw - 300px));padding:24px;overflow-wrap:anywhere}
+#immortal-artifacts-card>.section-title{position:sticky;top:-24px;z-index:2;padding:20px 0 16px;margin:-20px 0 0;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 -24px 0 var(--surface),0 5px 0 var(--surface)}
+#immortal-artifacts-card>.section-title h2{letter-spacing:2px}
+.ia-intro{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:26px 0}
+.ia-eyebrow{color:var(--ia-accent);font-size:11px;letter-spacing:3px;margin:0 0 10px}
+.ia-intro h3{font-size:26px;font-weight:600;letter-spacing:2px;margin:0 0 10px}
+.immortal-artifact-lead{color:var(--muted);font-size:12px;line-height:1.8;margin:0}
+.ia-tally{flex:none;display:grid;justify-items:center;gap:4px;padding:6px 22px;border-left:1px solid var(--line);color:var(--ia-accent)}
+.ia-tally strong{font-size:36px;font-weight:400;line-height:1}.ia-tally span{font-size:11px;letter-spacing:1px;color:var(--muted)}
+.ia-section-heading{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:8px 0 14px}
+.ia-section-heading h3{font-size:14px;letter-spacing:2px;margin:0}.ia-section-heading>span{color:var(--muted);font-size:11px}
+.immortal-artifact-materials{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 28px}
+.immortal-artifact-materials figure{position:relative;display:grid;grid-template-columns:1fr auto;gap:10px 4px;align-content:start;min-width:0;margin:0;padding:14px 12px 12px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--ia-accent) 4%,var(--surface))}
+.ia-material-art{grid-column:1/-1;display:grid;place-items:center;height:68px;background:radial-gradient(ellipse,color-mix(in srgb,var(--ia-accent) 12%,transparent),transparent 70%)}
+.immortal-artifact-materials img{width:64px;height:64px;object-fit:contain;image-rendering:pixelated}
+.immortal-artifact-materials figcaption{grid-column:1/-1;display:grid;gap:5px;min-width:0}.immortal-artifact-materials figcaption strong{font-size:13px;font-weight:500}.immortal-artifact-materials figcaption small{font-size:10px;color:var(--muted)}
+.ia-stock{display:flex;align-items:baseline;gap:6px}.ia-stock small{font-size:10px;color:var(--muted)}.ia-stock b{font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ia-accent)}
+.ia-material-use{align-self:end;justify-self:end;font-size:10px;color:var(--muted);white-space:nowrap}
+.ia-material-seal{font-size:30px;line-height:1;color:var(--ia-accent);border:1px solid var(--line);padding:10px;transform:rotate(-5deg)}
+.immortal-artifact-list{display:grid;gap:16px}
+.immortal-artifact-entry{min-width:0;padding:20px;border:1px solid var(--line);border-radius:9px;background:var(--surface);box-shadow:inset 3px 0 0 color-mix(in srgb,var(--ia-accent) 65%,transparent)}
+.ia-item-heading{display:flex;gap:16px;align-items:center}.ia-grade-seal{display:grid;justify-items:center;align-content:center;width:54px;height:60px;flex:none;gap:1px;color:var(--ia-accent);border:1px solid color-mix(in srgb,var(--ia-accent) 45%,var(--line));border-radius:18px 18px 4px 4px;background:color-mix(in srgb,var(--ia-accent) 7%,var(--surface))}
+.ia-grade-seal strong{font-size:24px;line-height:1.2;font-weight:400}.ia-grade-seal small{font-size:10px;letter-spacing:2px}
+.ia-item-name{min-width:0;flex:1}.ia-item-name h3{font-size:19px;line-height:1.5;margin:0 0 3px}.ia-source{font-size:11px;color:var(--muted)}
+.ia-damage{flex:none;font-size:10px;color:var(--ia-accent);padding:4px 8px;border:1px solid var(--line);border-radius:20px}
+.ia-grade-track{display:flex;list-style:none;padding:0;margin:22px 0;gap:0}
+.ia-grade-track li{flex:1;position:relative;text-align:center;padding-top:15px;color:var(--muted);font-size:11px;line-height:1.7}
+.ia-grade-track li:before{content:'';position:absolute;top:3px;left:0;right:0;height:1px;background:var(--line)}
+.ia-grade-track li:first-child:before{left:50%}.ia-grade-track li:last-child:before{right:50%}
+.ia-grade-track li:after{content:'';position:absolute;top:0;left:calc(50% - 3px);width:7px;height:7px;border:1px solid var(--line);background:var(--surface);transform:rotate(45deg);box-sizing:border-box}
+.ia-grade-track .complete:after{border-color:var(--ia-accent);background:var(--ia-accent)}
+.ia-grade-track .current{color:var(--ia-accent);font-weight:700}.ia-grade-track .current:after{border-color:var(--ia-accent);background:var(--ia-accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--ia-accent) 15%,transparent)}
+.ia-item-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:16px;border-top:1px solid var(--line)}
+.ia-cost{display:grid;gap:4px;min-width:0}.ia-cost small{font-size:10px;color:var(--muted)}.ia-cost strong{font-size:13px;font-weight:500}.ia-cost span{font-size:10px;color:var(--muted)}.ia-cost .ia-short{color:var(--red)}
+.ia-action{display:grid;justify-items:end;gap:6px;max-width:50%}.ia-action small{font-size:11px;color:var(--muted);text-align:right;line-height:1.6}
+#immortal-artifacts-card [data-immortal-refine]{min-height:44px;padding:10px 18px;color:var(--on-accent);border:1px solid var(--ia-accent);border-radius:5px;background:var(--ia-accent);font-size:12px;letter-spacing:1px}
+#immortal-artifacts-card [data-immortal-refine]:hover:not(:disabled){filter:brightness(1.1)}
+#immortal-artifacts-card button:focus-visible{outline:2px solid var(--ia-accent);outline-offset:3px}
+#immortal-artifacts-card [data-immortal-refine]:disabled{background:color-mix(in srgb,var(--ia-accent) 6%,var(--surface));color:var(--muted);border-color:var(--line);cursor:not-allowed}
+.immortal-artifact-max{color:var(--ia-accent);font-size:12px;margin:0;letter-spacing:1px}
+.ia-empty{padding:32px 24px;text-align:center;border:1px dashed var(--line);border-radius:8px}.ia-empty-seal{display:block;font-size:30px;color:var(--ia-accent);margin-bottom:12px}.ia-empty h3{font-size:16px;font-weight:500;margin:0 0 8px}.ia-empty p{max-width:360px;margin:auto;font-size:12px;line-height:1.9;color:var(--muted)}
+.natal-promotion{padding:12px;border:1px solid var(--gold);border-radius:6px;font-size:13px;line-height:1.8}.natal-promotion button{margin-top:8px}
+@media(max-width:700px){#immortal-artifacts-card{width:calc(100vw - 24px);padding:16px}#immortal-artifacts-card>.section-title{top:-16px;box-shadow:0 -16px 0 var(--surface),0 5px 0 var(--surface);padding:16px 0 12px;margin-top:-16px}.ia-intro{gap:12px;padding:22px 0}.ia-intro h3{font-size:20px;letter-spacing:1px}.ia-eyebrow{font-size:10px;letter-spacing:2px}.ia-tally{padding:4px 0 4px 14px}.ia-tally strong{font-size:30px}.ia-tally span{font-size:10px}.ia-section-heading>span{font-size:10px}.immortal-artifact-materials{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:24px}.immortal-artifact-materials figure{padding:10px}.ia-material-art{height:52px}.immortal-artifact-materials img{width:48px;height:48px}.immortal-artifact-materials figcaption strong{font-size:12px}.ia-material-seal{font-size:24px;padding:8px}.immortal-artifact-entry{padding:16px}.ia-item-heading{gap:10px}.ia-grade-seal{width:44px;height:52px}.ia-item-name h3{font-size:17px}.ia-damage{padding:3px 6px;font-size:9px}.ia-grade-track{margin:20px 0}.ia-item-footer{align-items:start;gap:10px}.ia-action{max-width:48%}#immortal-artifacts-card [data-immortal-refine]{padding:10px 12px;font-size:11px;letter-spacing:0}.ia-cost strong{font-size:12px}}
+@media(max-width:370px){.ia-item-heading{flex-wrap:wrap}.ia-damage{margin-left:54px}.ia-item-footer{flex-direction:column}.ia-action{max-width:100%;width:100%;justify-items:stretch}.ia-action small{text-align:left}}

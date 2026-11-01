@@ -704,6 +704,7 @@ function render(data) {
   window.UpperInstitutionPanel?.render(data,payload=>mutate(`/api/games/${data.id}/upper-institution`,payload));
   window.SoulPanel?.render(data,payload=>mutate(`/api/games/${data.id}/soul`,payload));
   window.AuthoredTechniques?.render(data,payload=>api(`/api/games/${data.id}/authored-technique`,{method:'POST',body:JSON.stringify(payload)}),payload=>payload.action==='upgrade'?mutate(`/api/games/${data.id}/technique-upgrade`,{technique_id:payload.id}):mutate(`/api/games/${data.id}/authored-technique`,payload));
+  window.ImmortalArtifacts?.render(data,payload=>mutate(`/api/games/${data.id}/immortal-artifact`,payload));
   window.MonsterCivilizationsPanel?.render(data,payload=>api(`/api/games/${data.id}/civilizations-view`,{method:'POST',body:JSON.stringify(payload)}),payload=>mutate(`/api/games/${data.id}/civilizations-action`,payload));
   window.UpperVoisinagePanel?.render(data,payload=>mutate(`/api/games/${data.id}/upper-voisinage`,payload));
   window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
@@ -1252,6 +1253,9 @@ function paintNatalArtifact(system) {
   const refineTools=document.createElement('div');refineTools.className='natal-refine-tools';
   const refine=document.createElement('button');refine.className='natal-action';refine.textContent=`灵石温养 · ${number(system.refine_cost)}`;refine.dataset.natalUnavailable=system.can_refine?'0':'1';refine.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'refine'});
   const refineAll=document.createElement('button');refineAll.className='natal-action natal-refine-all';refineAll.textContent=`一键温养 ×${number(system.refine_all_count||0)} · ${number(system.refine_all_cost||0)}`;refineAll.dataset.natalUnavailable=system.can_refine_all?'0':'1';refineAll.title='连续消耗灵石温养，直到当前灵石不足；本命法宝等级没有上限';refineAll.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'refine_all'});refineTools.append(refine,refineAll);head.append(identity,refineTools);root.appendChild(head);
+  const promotion=document.createElement('section');promotion.className='natal-promotion';
+  const promotionInfo=document.createElement('p');promotionInfo.textContent=`实际温养 ${number(system.refinement_count||0)} 次 · 伤害类型：${system.damage_type||'凡'}。超过36次后可用三铸神魔铁×1进阶，原战力与温养等级不变。`;
+  const promote=document.createElement('button');promote.className='natal-action natal-promote';promote.textContent='三铸进阶 · 伤害升仙';promote.dataset.natalUnavailable=system.can_promote?'0':'1';promote.title=system.promote_reason||'消耗三铸神魔铁×1';promote.onclick=()=>mutate(`/api/games/${game.id}/natal-artifact`,{action:'promote'});promotion.append(promotionInfo,promote);root.append(promotion);
   const progress=document.createElement('div');progress.className='natal-level-progress';const fill=document.createElement('i');fill.style.width=`${Math.min(100,Number(system.experience)/Math.max(1,Number(system.experience_required))*100)}%`;const label=document.createElement('span');label.textContent=`祭炼经验 ${system.experience}/${system.experience_required}`;progress.append(fill,label);root.appendChild(progress);
   const bonuses=document.createElement('div');bonuses.className='natal-bonuses';[['战斗力',number(system.bonuses.combat_bonus)],['下一级战力增益',`+${number(system.bonuses.next_level_combat_gain)}`],['最大 HP',number(system.bonuses.hp_bonus)],['最大 MP',number(system.bonuses.mp_bonus)],['机缘效率',`+${Math.round(system.bonuses.opportunity_bonus*100)}%`],['雷劫减免',`+${Math.round(system.bonuses.tribulation_reduction*100)}%`]].forEach(([name,value])=>{const row=document.createElement('span'),small=document.createElement('small'),strong=document.createElement('b');small.textContent=name;strong.textContent=value;row.append(small,strong);bonuses.appendChild(row);});root.appendChild(bonuses);
   if(system.pricing_description){const pricing=document.createElement('p');pricing.className='muted';pricing.textContent=system.pricing_description;root.appendChild(pricing);}
@@ -4367,7 +4371,7 @@ function renderButtons() {
   $('#ghost-wangsheng-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
   $('#ghost-wangsheng-all-action').disabled = busy || !game?.ghost_system?.can_spend_wangsheng;
   $('#ghost-reincarnate-action').disabled = busy || !game?.ghost_system?.can_reincarnate;
-  document.querySelectorAll('.map-travel, .map-teleport').forEach(button => {
+  document.querySelectorAll('[data-immortal-refine], .map-travel, .map-teleport').forEach(button => {
     button.disabled = busy || button.dataset.unavailable === '1' || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
   });
   const bodyTrain = $('#body-train-action');
@@ -4410,7 +4414,7 @@ function renderButtons() {
     button.disabled = busy || (preset ? !preset.enabled || speciesMissing || choiceMissing : false);
   });
   if (game?.trial_site?.active) {
-    document.querySelectorAll('.map-travel, .map-teleport, .market-buy, .market-lock, .relationship-action, .contact-action, .party-action, .companion-action, .friend-action, .relationship-exit, .technique-upgrade, .technique-merge, .bloodline-evolve, #body-train-action, #sense-train-action, #breakthrough-action, #body-breakthrough-action, #sense-breakthrough-action, #spirit-crossing-action, #cross-world-action, #cross-world-secondary-action').forEach(button => { button.disabled = true; });
+    document.querySelectorAll('[data-immortal-refine], .map-travel, .map-teleport, .market-buy, .market-lock, .relationship-action, .contact-action, .party-action, .companion-action, .friend-action, .relationship-exit, .technique-upgrade, .technique-merge, .bloodline-evolve, #body-train-action, #sense-train-action, #breakthrough-action, #body-breakthrough-action, #sense-breakthrough-action, #spirit-crossing-action, #cross-world-action, #cross-world-secondary-action').forEach(button => { button.disabled = true; });
   }
 }
 

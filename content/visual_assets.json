@@ -9839,6 +9839,78 @@
       ],
       "sha256": "34c1c6a9c00dbeb321544b1f0dfd36dd5356ce68ba6bb45911b22ea9daa36ca8",
       "requires": []
+    },
+    "material.triple_forged_god_demon_iron": {
+      "file": "/assets/pixel/immortal-refinement/triple_forged_god_demon_iron-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "b2c89a32e46f0b60802ee6eb163749bc2fabd59edb0ec7d2d61c1ea6dea45bdd",
+      "requires": []
+    },
+    "material.triple_forged_god_demon_iron.portrait": {
+      "file": "/assets/pixel/immortal-refinement/triple_forged_god_demon_iron-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b9aef466a323a4ce35fae1fcc34e895bf752bc5f6b4138062e3ed7e52ebefe3f",
+      "requires": []
+    },
+    "material.yin_yang_hespring_steel": {
+      "file": "/assets/pixel/immortal-refinement/yin_yang_hespring_steel-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "240d7549ae6f8404613daa3e3c17c70340af9115c5d7e51429949105def42c4c",
+      "requires": []
+    },
+    "material.yin_yang_hespring_steel.portrait": {
+      "file": "/assets/pixel/immortal-refinement/yin_yang_hespring_steel-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "3bcb513da078b3b8054c9282184522c85a43969cd35bed4717a6777ab375d988",
+      "requires": []
+    },
+    "material.primordial_taiyi_silver": {
+      "file": "/assets/pixel/immortal-refinement/primordial_taiyi_silver-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "92d7d371e6874af6186ce440c5171f2d0d11d82973726da5d4c26bb28050e848",
+      "requires": []
+    },
+    "material.primordial_taiyi_silver.portrait": {
+      "file": "/assets/pixel/immortal-refinement/primordial_taiyi_silver-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "66086a1a28af6856cb845a0eb366076457f84a677aa4a57e5b82569239458de8",
+      "requires": []
+    },
+    "material.innate_yuanhe_alloy": {
+      "file": "/assets/pixel/immortal-refinement/innate_yuanhe_alloy-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "845183b8c129914c45f6dcff5cb443e801b964a63b6e2a4ac98d99c2bba074fe",
+      "requires": []
+    },
+    "material.innate_yuanhe_alloy.portrait": {
+      "file": "/assets/pixel/immortal-refinement/innate_yuanhe_alloy-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "b02426c45477bcfed813db6cfa2740ee48e5c1837c99e5e791efcf9081c04277",
+      "requires": []
     }
   },
   "items": {
@@ -15380,6 +15452,22 @@
     },
     "natal_reincarnation_eternal_crystal": {
       "asset": "material.guixu_weir_material_03",
+      "requires": []
+    },
+    "triple_forged_god_demon_iron": {
+      "asset": "material.triple_forged_god_demon_iron",
+      "requires": []
+    },
+    "yin_yang_hespring_steel": {
+      "asset": "material.yin_yang_hespring_steel",
+      "requires": []
+    },
+    "primordial_taiyi_silver": {
+      "asset": "material.primordial_taiyi_silver",
+      "requires": []
+    },
+    "innate_yuanhe_alloy": {
+      "asset": "material.innate_yuanhe_alloy",
       "requires": []
     }
   },

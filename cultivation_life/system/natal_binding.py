@@ -19,7 +19,9 @@ def require_access(game):
 
 def bind_standard(game, item_id):
     item = next((i for i in game.player.inventory if i.id == item_id and i.quantity > 0), None)
+    source = item.to_dict() | {'quantity':1} if item else None
     if game.natal_artifact or not item or not remove_item(game.player, item_id):
         raise ValueError('本命法宝已存在或物品已不在背包')
     game.natal_artifact = dict(item_id=item_id, name=item.name, level=1, experience=0,
-                              bound_age=game.player.age, slots=[], slot_rule_version=2)
+                              bound_age=game.player.age, slots=[], slot_rule_version=2,
+                              source_item=source,refinement_count=0,immortal_grade=item.immortal_grade)

@@ -110,7 +110,7 @@ def sell_black_market_asset(deps: BlackMarketDependencies, game_id: str, kind: s
         name = item.name
         plant_value = deps._plant_item_value(item)
         price = max(1, round(
-            (plant_value or deps._catalog_price("item", asset_id)) * (
+            (plant_value or deps._catalog_price("item", item.artifact_origin_id or asset_id)) * (
                 float(deps._spirit_field_rules()["black_market_sell_ratio"])
                 if plant_value is not None else ratio
             )

@@ -435,7 +435,8 @@
     "Player.cultivation_suppression/sealed_cultivation/ghost_core_state": "各自保留原修为、封印返界和寄身核心的权威归属；轮回在这些可恢复修为的状态下禁止提交，不通过清空保存记录来修正旧提示。旧轮回提示可放弃并保留原后续奖励。夺舍各入口拒绝压制或封印状态；寄身期间禁止启停压制，旧压制后寄身状态须先离舍再解除压制，避免将本魂原修为写到宿身或被离舍快照覆盖。",
     "Player.master/disciples/disciple_requests": "关系保留不等于当面操作权限；按用户明确要求撤回此前统一新增的存活校验，原分支条件保留，死亡后规则留待细化。赠物、师门请求与收徒校验权威人物所在界面及实例；不同普通界面不能即时交付。can_interact 仅为只读投影，不持久化、不迁移人物或创建运输路线，不自动复活玩家。",
     "Player.crafting_materials/inventory/crafted_artifacts": "材料唯一实例与既有成品不迁移、不复制、不自动重算；新炼器按普通/动态定义品阶、原归墟入场境界及灵田实生年份确认主材基准，不因持有者跨界或升阶改变主材品阶。归墟来源目录为纯只读有界缓存。",
-    "Player.ghost_soul_erosion_time_progress": "归墟旧按年修炼与主行动修炼复用公共年度收尾，保留实际经过年份的魂蚀分数；宿身死亡后即使本魂存活也停止后续年份。魂基归零只保护展示计算，不恢复本源。"
+    "Player.ghost_soul_erosion_time_progress": "归墟旧按年修炼与主行动修炼复用公共年度收尾，保留实际经过年份的魂蚀分数；宿身死亡后即使本魂存活也停止后续年份。魂基归零只保护展示计算，不恢复本源。",
+    "Item.artifact_origin_id / immortal_grade / GameState.natal_artifact.source_item / refinement_count / force_tier / immortal_grade": "personal / global：品阶归同一真实装备，普通叠放仙器培养只分离一件，保存原定义编号与实际属性；后续买入不继承品阶。原类型条件及成就沿定义编号识别，交付扣实际件数；既有附物指针随同一实物编号更新，非新增附身。炼器成品品阶只归原炼器记录。原本命认主转交完整物品，source_item只保存被移出行囊的该一件原物，非额外库存；解绑原样归还一次。实际手动温养计数按实际扣费次数，旧结构11仅从当前绑定后的明确温养回执核实，不由等级或被动年份猜测。超过36次的三铸进阶只改该原物仙级伤害资格；五至一品不参与战力公式。品阶跨界保留，培养只在三级普通界面，过期页面按原updated_at快照和当前品阶拒绝。无新移动、资源池或时间入口，不接受旧结构迁移。"
   },
   "release_2130_ownership_notes": {
     "GameState.economy_v2.organizations.*.dividend_due/dividend_paid/dividend_rate": "原组织唯一府库年度分红的应付、实付及当期比例；沿 welfare_year 防重，本界在籍活着的玩家领取，跨界不追发。无新增现金或年度人物扫描。",

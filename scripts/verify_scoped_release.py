@@ -376,8 +376,17 @@ VISUAL_ALPHA6_TESTS = list(dict.fromkeys(VISUAL_ALPHA3_TESTS + [
     'tests/test_demonic_system.py','tests/test_extension_system.py',
 ]))
 
+IMMORTAL_TESTS = list(dict.fromkeys(TUTORIAL_TESTS + [
+    'tests/test_immortal_artifacts.py','tests/test_natal_artifact_system.py',
+    'tests/test_natal_materials_expansion.py','tests/test_combat_semantics.py',
+    'tests/test_tianji_artifacts.py','tests/test_tianji_theme_rules.py','tests/test_crafting_system.py',
+    'tests/test_auction_update.py','tests/test_rules.py','tests/test_achievements.py',
+    'tests/test_ghost_system.py','tests/test_content_naming.py',
+]))
+IMMORTAL_BROWSERS = ['browser_immortal_artifacts','browser_natal_materials','browser_events_212','browser_desktop_navigation']
+
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal'],default='legacy')
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     parser.add_argument('--balance-tests',action='store_true',help='Schedule full regressions by prior XML timings; never reuse prior results')
@@ -401,6 +410,7 @@ def main():
     if profile=='combat-alpha':selected=[COMBAT_ALPHA_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='soul-lifecycle':selected=[SOUL_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='heavens':selected=[HEAVENS_TESTS[i::options.shards] for i in range(options.shards)]
+    if profile=='immortal':selected=[IMMORTAL_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='performance':selected=[PERFORMANCE_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='handbook':selected=[HANDBOOK_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='tutorial':selected=[TUTORIAL_TESTS[i::options.shards] for i in range(options.shards)]
@@ -421,7 +431,7 @@ def main():
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
     if options.focused_visual:
         selected=[(VISUAL_ALPHA6_TESTS if options.home_scenes else VISUAL_ALPHA5_TESTS if options.path_characters else VISUAL_ALPHA4_TESTS if options.monster_visuals else VISUAL_ALPHA3_TESTS)[i::options.shards] for i in range(options.shards)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} or (profile=='visual' and not options.focused_visual) else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
@@ -466,6 +476,7 @@ def main():
     if profile=='authored':browsers=AUTHORED_BROWSERS
     if profile=='heavens':browsers=HEAVENS_BROWSERS
     if profile=='tutorial':browsers=TUTORIAL_BROWSERS
+    if profile=='immortal':browsers=IMMORTAL_BROWSERS
     if profile=='performance':browsers=PERFORMANCE_BROWSERS
     if profile=='handbook':browsers=HANDBOOK_BROWSERS
     if profile=='update301':browsers=UPDATE301_BROWSERS
@@ -478,6 +489,7 @@ def main():
                      'browser_asura_prison','browser_trial_variants','browser_monster_aquatic_visuals',
                      'browser_monster_fox_visuals','browser_monster_insect_visuals',
                      'browser_monster_serpent_visuals','browser_monster_turtle_visuals']
+    if profile=='immortal':jobs.append(('immortal-material-assets',['scripts/prepare_immortal_material_assets.py','--check']))
     jobs += [(name,[f'tests/{name}.py']) for name in browsers]
     if profile in {'tutorial','handbook','performance'}:jobs += [(name,['scripts/verify_tutorial_ui.py',*args]) for name,args in TUTORIAL_PRACTICE.items()]
     if profile=='handbook':jobs.append(('handbook-matrix',['scripts/verify_handbook_ui.py']))
@@ -499,14 +511,14 @@ def main():
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs))
         jobs=[]
-    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance'}:
+    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal'}:
         # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)

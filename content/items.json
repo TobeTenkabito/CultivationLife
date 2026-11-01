@@ -11985,6 +11985,46 @@
         "market",
         "native_world:reincarnation"
       ]
+    },
+    {
+      "id": "triple_forged_god_demon_iron",
+      "name": "三铸神魔铁",
+      "description": "本命实际温养超过36次后消耗1件，将非仙伤害本命升为仙；仙器五品升四品消耗3件。品阶不直接增加战斗力。十一界均有流通，界层越高可获取的坊市品阶越多。",
+      "tags": [
+        "immortal_refinement_material",
+        "material"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "yin_yang_hespring_steel",
+      "name": "阴阳和泉钢",
+      "description": "仙器四品升三品消耗3件。品阶不直接增加战斗力。仅在仙界、修罗界、幽冥界、轮回界流通。",
+      "tags": [
+        "immortal_refinement_material",
+        "material"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "primordial_taiyi_silver",
+      "name": "原初太一银",
+      "description": "仙器三品升二品消耗3件。品阶不直接增加战斗力。仅在仙界、修罗界、幽冥界、轮回界流通。",
+      "tags": [
+        "immortal_refinement_material",
+        "material"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "innate_yuanhe_alloy",
+      "name": "先天元合金",
+      "description": "仙器二品升一品消耗3件。品阶不直接增加战斗力。仅在仙界、修罗界、幽冥界、轮回界流通。",
+      "tags": [
+        "immortal_refinement_material",
+        "material"
+      ],
+      "force_tier": 1
     }
   ]
 }

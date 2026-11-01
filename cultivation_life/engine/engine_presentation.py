@@ -361,6 +361,8 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
     result['monster_civilizations'] = marker(game)
     from ..system.authored_techniques import public as authored_public
     result['authored_techniques'] = authored_public(game)
+    from ..system.immortal_artifacts import public as immortal_artifact_public
+    result['immortal_artifacts'] = immortal_artifact_public(game)
     from ..system.soul_presentation import public as soul_public
     result['soul'] = soul_public(game)
     from ..system.sect_tasks.presentation import public as sect_tasks_public

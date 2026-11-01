@@ -1,0 +1,35 @@
+{
+  "method": "built-in image_gen",
+  "reference": "design/inventory-icons-v2-20261020/source/special_materials.png",
+  "reference_sha256": "74c827382410eb7bb599eb77fe79177d43d473a302f208777cab28a8c6489642",
+  "style": "Existing 32x32 logical pixel inventory set; dark outline, 3-5 material shades, top-left highlights, transparent alpha. Reference sheet used directly; distinct single sprite per prompt.",
+  "normalization": "Mechanical alpha crop, 26-pixel longest edge, 32x32 binary alpha, 128x128 nearest-neighbor portrait.",
+  "assets": [
+    {
+      "id": "triple_forged_god_demon_iron",
+      "name": "三铸神魔铁",
+      "source": "design\\immortal-artifacts-20261101\\source\\triple_forged_god_demon_iron-pixel-v1.png",
+      "source_sha256": "acd32dfe28b30d009a522aaf6344f4eefbf57feb605df1283e851f9e67b07b8d"
+    },
+    {
+      "id": "yin_yang_hespring_steel",
+      "name": "阴阳和泉钢",
+      "source": "design\\immortal-artifacts-20261101\\source\\yin_yang_hespring_steel-pixel-v1.png",
+      "source_sha256": "abfbb26101a61ce7d2620eceed58d8dd7a9b52415f69fb3d4e285ac1b6f57440"
+    },
+    {
+      "id": "primordial_taiyi_silver",
+      "name": "原初太一银",
+      "source": "design\\immortal-artifacts-20261101\\source\\primordial_taiyi_silver-pixel-v1.png",
+      "source_sha256": "4e2798c308788bf127942e8e4b82256f6cb243ad60366d7f9d15de74c2571c43"
+    },
+    {
+      "id": "innate_yuanhe_alloy",
+      "name": "先天元合金",
+      "source": "design\\immortal-artifacts-20261101\\source\\innate_yuanhe_alloy-pixel-v1.png",
+      "source_sha256": "117627179534463788a1de7a21e1940f7c910eb8581ca92a7bd773e9db19543d"
+    }
+  ],
+  "prompt_file": "prompts.json",
+  "exporter": "scripts/prepare_immortal_material_assets.py"
+}

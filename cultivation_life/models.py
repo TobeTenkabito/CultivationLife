@@ -75,6 +75,16 @@ class Item:
     force_tier: int = 1
     combat_interventions: list[dict[str, Any]] = field(default_factory=list)
 
+    # Independent immortal quality belongs to this real equipment instance.
+    artifact_origin_id: str | None = None
+    immortal_grade: int | None = None
+
+    def __post_init__(self):
+        if self.immortal_grade is not None and (type(self.immortal_grade) is not int or not 1 <= self.immortal_grade <= 5):
+            raise ValueError('仙器品阶无效')
+        if self.artifact_origin_id is not None and not isinstance(self.artifact_origin_id,str):
+            raise ValueError('仙器原始物品编号无效')
+
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 

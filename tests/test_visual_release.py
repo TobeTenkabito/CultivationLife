@@ -14,8 +14,8 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_shipped_reviewed_assets_are_self_contained():
     from cultivation_life.content_registry import EXTENSION_REPORT
     source=dict(catalog(ROOT), assets=public_catalog(ROOT,EXTENSION_REPORT)['assets'])
-    assert len(source['assets'])==1641 and len(source['maps'])==11
-    assert len(source['items'])==1165
+    assert len(source['assets'])==1649 and len(source['maps'])==11
+    assert len(source['items'])==1169
     packages={json.loads(p.read_text(encoding='utf-8'))['id']:p.parent for p in (ROOT/'dlc').glob('*/manifest.json')}
     for identity,row in source['assets'].items():
         if row['file'].startswith('/extension-assets/'):
@@ -53,6 +53,11 @@ def test_shipped_reviewed_assets_are_self_contained():
                     assert image.size=={'portrait':(128,128),'figure':(256,288),'thumbnail':(128,144)}[identity.rsplit('.',1)[1]]
                 else:assert (identity.endswith(('.actions','.casting')) or identity in {'effect.tidal_wave.keyframes','effect.nobunaga_command.keyframes','effect.seimei_lunar.keyframes','effect.christmas.keyframes','effect.diaochan_phoenix.keyframes'}) and max(image.size)<=2048
             elif identity.startswith('map.'):assert image.size==(768,576)
+            elif identity.startswith('material.') and identity.endswith('.portrait'):
+                from cultivation_life.system.immortal_artifacts import MATERIALS
+                assert identity in {'material.'+key+'.portrait' for key,_ in MATERIALS}
+                assert image.mode=='RGBA' and image.size==(128,128)
+                assert set(image.getchannel('A').getdata()) <= {0,255}
             else:
                 assert image.mode=='RGBA' and image.size==(32,32)
                 assert set(image.getchannel('A').getdata()) <= {0,255}

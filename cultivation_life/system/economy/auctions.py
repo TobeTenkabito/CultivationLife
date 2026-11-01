@@ -121,7 +121,8 @@ def _make_auction_lot(
     deps: AuctionsDependencies, game: GameState, rng: Any, *, kind: str, content_id: str, tier: int,
     start_price: int, seller: str = "npc", suffix: str, rated_price: int | None = None,
 ) -> dict[str, Any]:
-    name, description = deps._auction_content(kind, content_id)
+    instance=next((r['item_instance'] for r in game.auction_state.get('consignments',[]) if r.get('content_id')==content_id and r.get('item_instance')),None) if kind=='item' else None
+    name, description = (instance['name'],instance['description']) if instance else deps._auction_content(kind, content_id)
     bidder_names = list(deps._auction_rules()["bidder_aliases"])
     rated_price = int(rated_price or deps._catalog_price(kind, content_id))
     return {
@@ -133,6 +134,7 @@ def _make_auction_lot(
         "maximum_bid":max(1, math.floor(rated_price * float(deps._auction_rules()["consignment_max_price_ratio"]))),
         "current_bidder":"npc", "current_bidder_name":rng.choice(bidder_names),
         "seller":seller, "closed":False,
+        **({'item_instance':instance} if instance else {}),
     }
 
 
@@ -237,16 +239,16 @@ def consign_auction_item(deps: AuctionsDependencies, game_id: str, item_id: str,
     game = deps._load(game_id)
     state = deps._require_auction_access(game, {"scheduled", "open"})
     item = next((entry for entry in game.player.inventory if entry.id == item_id and entry.quantity > 0), None)
-    if not item or item_id == "spirit_stone" or limited_trade_item(item_id):
+    if not item or item_id == "spirit_stone" or limited_trade_item(item.artifact_origin_id or item_id):
         raise ValueError("该物品无法送拍")
     if (item.technique_id or '').startswith('TECH_AUTHORED_'):
         raise ValueError('自创传承玉简不可转售或寄拍')
     if item.crafted_artifact_id:
         raise ValueError("组合炼器法宝请使用包裹内该物品自己的寄拍按钮")
-    tier = max((int(row['tier']) for row in MARKET_GOODS if row['kind'] == 'item' and row['content_id'] == item_id), default=1)
+    tier = max((int(row['tier']) for row in MARKET_GOODS if row['kind'] == 'item' and row['content_id'] == (item.artifact_origin_id or item_id)), default=1)
     if state.get('rank_band') and tier not in state['rank_band']:
         raise ValueError('该物品品阶不在本场拍卖的境界档内')
-    base_price = deps._plant_item_value(item) or deps._catalog_price("item", item_id)
+    base_price = deps._plant_item_value(item) or deps._catalog_price("item", item.artifact_origin_id or item_id)
     rules = deps._auction_rules()
     minimum = max(1, math.ceil(base_price * float(rules["consignment_min_price_ratio"])))
     maximum = max(minimum, math.floor(base_price * float(rules["consignment_max_price_ratio"])))
@@ -264,6 +266,7 @@ def consign_auction_item(deps: AuctionsDependencies, game_id: str, item_id: str,
     consignment = {
         "content_id":item_id, "start_price":start_price, "tier":tier,
         "rated_price":base_price, "listing_fee":listing_fee,
+        **({'item_instance':item.to_dict() | {'quantity':1}} if item.artifact_origin_id else {}),
     }
     state.setdefault("consignments", []).append(consignment)
     if state["status"] == "open":
@@ -382,7 +385,9 @@ def _finish_auction(deps: AuctionsDependencies, game: GameState, rng: Any, reaso
             add_item(game.player, "spirit_stone", old_bid - int(lot["current_bid"]))
         lot["closed"] = True
         if lot.get("current_bidder") == "player":
-            if lot['kind']=='authored_technique':
+            if lot.get('item_instance'):
+                _return_consignment(game.player,lot)
+            elif lot['kind']=='authored_technique':
                 from ..authored_techniques import grant_market
                 grant_market(game,lot['content_id'])
             else:
@@ -483,14 +488,14 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
         lot["minimum_increment"] = deps._auction_increment(row)
         lots.append(lot)
     inventory = [
-        {"id":item.id, "name":item.name, "quantity":item.quantity,
-         "rated_price":(rated := deps._plant_item_value(item) or deps._catalog_price("item", item.id)),
+        {"id":item.id, "name":item.name, "quantity":item.quantity,"artifact_origin_id":item.artifact_origin_id,
+         "rated_price":(rated := deps._plant_item_value(item) or deps._catalog_price("item", item.artifact_origin_id or item.id)),
          "minimum_start_price":max(1, math.ceil(rated * float(deps._auction_rules()["consignment_min_price_ratio"]))),
          "maximum_start_price":max(1, math.floor(rated * float(deps._auction_rules()["consignment_max_price_ratio"]))),
          "listing_fee":max(1, math.ceil(rated * float(deps._auction_rules()["consignment_listing_fee_ratio"]))),
          "suggested_start_price":max(1, round(rated * 0.8)),
-         "private_base_price":max(1, round((deps._plant_item_value(item) or deps._catalog_price("item", item.id)) * float(deps._auction_rules()["private_trade_sell_multiplier"]))),
-         "black_market_price":max(1, round((deps._plant_item_value(item) or deps._catalog_price("item", item.id)) * (
+         "private_base_price":max(1, round((deps._plant_item_value(item) or deps._catalog_price("item", item.artifact_origin_id or item.id)) * float(deps._auction_rules()["private_trade_sell_multiplier"]))),
+         "black_market_price":max(1, round((deps._plant_item_value(item) or deps._catalog_price("item", item.artifact_origin_id or item.id)) * (
              float(deps._spirit_field_rules()["black_market_sell_ratio"])
              if deps._plant_item_value(item) is not None else float(deps._auction_rules()["black_market_sell_ratio"])
          ))) }
@@ -498,8 +503,8 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
         if item.id != "spirit_stone" and item.quantity > 0 and not item.crafted_artifact_id
     ]
     allowed_ids = {row['content_id'] for row in _class_pool(deps, state) if row['kind'] == 'item'}
-    consignable_inventory = [row for row in inventory if row["id"] in ITEM_CATALOG and not limited_trade_item(row['id'])
-                            and (not state.get('rank_band') or row['id'] in allowed_ids)]
+    consignable_inventory = [row for row in inventory if (row.get('artifact_origin_id') or row['id']) in ITEM_CATALOG and not limited_trade_item(row.get('artifact_origin_id') or row['id'])
+                            and (not state.get('rank_band') or (row.get('artifact_origin_id') or row['id']) in allowed_ids)]
     from ...puppet_state import usable
     sellable_puppets = [
         {"id":str(row.get("id")), "name":str(row.get("name", "无名傀儡")),
@@ -529,7 +534,10 @@ def _public_auction(deps: AuctionsDependencies, game: GameState) -> dict[str, An
 
 
 def _return_consignment(player: Player, row: dict[str, Any]) -> None:
-    if row.get('kind') == 'crafted_artifact' and isinstance(row.get('artifact'), dict):
+    if isinstance(row.get('item_instance'),dict):
+        from ...models import Item
+        add_item(player,Item.from_dict(row['item_instance']))
+    elif row.get('kind') == 'crafted_artifact' and isinstance(row.get('artifact'), dict):
         from ..crafting_system import store_crafted_artifact
         store_crafted_artifact(player, copy.deepcopy(row['artifact']))
     else:

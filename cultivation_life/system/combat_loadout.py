@@ -12,18 +12,8 @@ from .cultivation_ranks import npc_golden_light
 
 
 def _tier(entry):
-    if not entry:
-        return 1
-    # Existing economic bag copies can retain the pre-2.7.2 commercial grade
-    # in force_tier. Resolve their qualification from the authoritative catalog
-    # once at the battle boundary; never rewrite inventories or scan them yearly.
-    identity = read(entry, 'id', '')
-    if isinstance(identity, str) and identity.startswith('econ_'):
-        definition = ITEM_CATALOG.get(identity)
-        if definition and ('economic_raw' in definition.tags or 'economic_product' in definition.tags):
-            entry = definition
-    return max(int(read(entry, 'force_tier', 1)),
-               2 if 'immortal_attack' in read(entry, 'tags', ()) or read(entry, 'requires_immortal_power', False) else 1)
+    from .item_qualification import force_tier
+    return force_tier(entry)
 
 
 def _responses(entry, source):
@@ -56,6 +46,11 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
         resistance = golden_light_resistance(owner)
         from .crafting_system import active_crafted_artifacts
         artifacts.extend(active_crafted_artifacts(owner))
+        # The bound item has left the ordinary bag. Its real capability still
+        # participates once; a cultivation grade never supplies attack tier.
+        if game.natal_artifact:
+            from .immortal_artifacts import active_natal_tier
+            artifacts.append({'force_tier':active_natal_tier(game)})
     else:
         key = read(owner, 'main_technique_id')
         from .npc_techniques import resolve

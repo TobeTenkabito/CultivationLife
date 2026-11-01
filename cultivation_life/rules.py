@@ -923,14 +923,32 @@ def remove_item(player: Player, item_id: str, quantity: int = 1) -> bool:
             item.quantity -= quantity
             if item.quantity == 0:
                 player.inventory.remove(item)
-                if player.ghost_attachment and player.ghost_attachment.get('item_id') == item_id:
+                if player.ghost_attachment and player.ghost_attachment.get('item_id') == item.id:
                     reconcile_ghost_attachment(player)
             return True
+    # A refined equipment instance keeps its original item type, but costs
+    # still consume actual units. Ordinary successful removals stay above.
+    matching=[i for i in player.inventory if i.id==item_id or i.artifact_origin_id==item_id]
+    if not any(i.artifact_origin_id==item_id for i in matching) or sum(i.quantity for i in matching)<quantity:
+        return False
+    remaining=quantity
+    for item in matching:
+        amount=min(item.quantity,remaining);item.quantity-=amount;remaining-=amount
+        if item.quantity==0:
+            player.inventory.remove(item)
+            if player.ghost_attachment and player.ghost_attachment.get('item_id')==item.id:
+                reconcile_ghost_attachment(player)
+        if remaining==0:return True
     return False
 
 
 def has_item(player: Player, item_id: str, quantity: int = 1) -> bool:
-    return any(item.id == item_id and item.quantity >= quantity for item in player.inventory)
+    total=0
+    for item in player.inventory:
+        if item.id==item_id or item.artifact_origin_id==item_id:
+            total+=item.quantity
+            if total>=quantity:return True
+    return False
 
 
 def intrinsic_resource_breakdown(player: Player) -> dict[str, Any]:

@@ -14,7 +14,7 @@
   function resolve(item={},state={}){
     if(!manifest)return null;
     const artifact=(state.crafting_system?.artifacts||[]).find(row=>row.id===item.crafted_artifact_id);
-    let id=artifact ? manifest.molds[artifact.mold_id]||'gear.other' : manifest.items[item.id||item.item_id];
+    let id=artifact ? manifest.molds[artifact.mold_id]||'gear.other' : manifest.items[item.artifact_origin_id||item.id||item.item_id];
     const tags=item.tags||[];
     if(!id && item.plant_id)id=manifest.plants[item.plant_id];
     if(!id && item.definition_id)id=manifest.crafting_materials[item.definition_id];

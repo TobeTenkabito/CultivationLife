@@ -68,7 +68,7 @@ def sell_private_trade_item(deps: PrivateTradeDependencies, game_id: str, npc_id
         raise ValueError('自创传承玉简不可转售或寄拍')
     if item.crafted_artifact_id:
         raise ValueError("组合炼器法宝须按其唯一实例价值出售或寄拍")
-    base = deps._plant_item_value(item) or deps._catalog_price("item", item_id)
+    base = deps._plant_item_value(item) or deps._catalog_price("item", item.artifact_origin_id or item_id)
     multiplier = float(deps._auction_rules()["private_trade_sell_multiplier"])
     multiplier *= float(attendee.get("sell_bargains", {}).get(item_id, 1.0))
     price = max(1, round(base * multiplier))

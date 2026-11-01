@@ -261,6 +261,20 @@ def main():
         require(all('tide_theme_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Tide/two-theme native marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+    if scoped.get('profile')=='immortal':
+        from scripts.verify_scoped_release import IMMORTAL_TESTS, IMMORTAL_BROWSERS
+        require(all(c.get('immortal_verified') for c in evidence['cases']),'Compiled immortal acceptance required with and without DLC')
+        require({name for shard in scoped['tests'] for name in shard}==set(IMMORTAL_TESTS),'Immortal domain/upstream selection incomplete')
+        require(set(IMMORTAL_BROWSERS)|{'immortal-material-assets'}<={r['name'] for r in scoped['runs']},'Immortal browser/art acceptance incomplete')
+        required={f'build/android-immortal-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Immortal native scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test APK changed')
+        require(all('immortal_artifacts_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in required),'Native immortal marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='authored':
         from scripts.verify_scoped_release import AUTHORED_TESTS, AUTHORED_BROWSERS
         require(all(c.get('authored_verified') for c in evidence['cases']),'3.1.0 compiled acceptance required with and without DLC')
@@ -423,6 +437,10 @@ def main():
     am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(target,target.name);z.write(am,am.name)
+        if scoped.get('profile')=='immortal':
+            z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
+            for name in ('docs/immortal-artifacts.md','docs/release-340.md'):
+                z.write(ROOT/name,name)
         if scoped.get('profile') in {'heavens','tutorial','handbook','performance'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
         else:

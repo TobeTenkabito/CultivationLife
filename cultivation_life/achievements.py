@@ -199,7 +199,7 @@ class AchievementSystem:
         if set(condition) == {"any"}:
             return any(self._matches(child, game, player_rank=player_rank, history_index=history_index) for child in condition["any"])
         if "item" in condition:
-            quantity = sum(item.quantity for item in player.inventory if item.id == condition["item"])
+            quantity = sum(item.quantity for item in player.inventory if (item.artifact_origin_id or item.id) == condition["item"])
             return quantity >= max(1, int(condition.get("minimum_quantity", 1)))
         if "flag" in condition:
             return condition["flag"] in player.story_flags
@@ -309,7 +309,7 @@ class AchievementSystem:
             expected = condition["natal_artifact"]
             return bool(
                 game.natal_artifact
-                and game.natal_artifact.get("item_id") == expected.get("item_id")
+                and ((game.natal_artifact.get('source_item') or {}).get('artifact_origin_id') or game.natal_artifact.get("item_id")) == expected.get("item_id")
                 and float(player.natal_artifact_combat_bonus) >= float(expected.get("minimum_combat_bonus", 0))
             )
         if "heavenly_court_controls" in condition:

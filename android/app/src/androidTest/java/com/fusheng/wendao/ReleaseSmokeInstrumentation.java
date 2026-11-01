@@ -786,6 +786,44 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("frontier_skin_scope","Four frontier/swimwear skins, rank-seven gate, wardrobe beside art, portraits, reload, actual revolver renderer, signed portrait/landscape");
     }
 
+    private void runImmortal(Bundle result) throws Exception {
+        String fixture=assetText("immortal_release.py");
+        for(String theme:new String[]{"a","b","d","f","light","dark"}) {
+            boolean pixel=theme.equals("light")||theme.equals("dark");
+            tapSelector("#theme-open");
+            if(Boolean.TRUE.equals(js("document.querySelector('#theme-dialog [data-pixel-setting]').checked"))!=pixel)tapSelector("#theme-dialog [data-pixel-setting]");
+            tapSelector(pixel?"#theme-dialog [data-pixel-theme-choice="+theme+"]":"#theme-dialog [data-theme-choice="+theme+"]");
+            async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'仙器原生验收',spirit_root:'supreme_metal',path:'demonic',seed:340,preset_id:'asura_upper'})}).then(g=>g.id)");
+            python(fixture+"\nfrom cultivation_life import server\nprepare_immortal_release(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");
+            tapSelector("[data-panel-target=natal-artifact]");waitForPanelReady("#natal-artifact-card");
+            check(Boolean.TRUE.equals(js("document.querySelector('.natal-promote').disabled")),"36 refinements must reject promotion");
+            tapSelector(".natal-refine-tools .natal-action");waitForJs("!busy&&game.natal_artifact.refinement_count===37","Actual 37th paid refinement");
+            python(fixture+"\nfrom cultivation_life import server\nmark_immortal_release(server.ENGINE,"+JSONObject.quote(id)+")");
+            tapSelector(".natal-promote");waitForJs("!busy&&game.natal_artifact.damage_type==='仙'","Actual iron promotion");
+            check(Boolean.TRUE.equals(js("document.querySelector('.natal-promote').disabled")),"Duplicate promotion remains disabled");
+            tapSelector("#natal-artifact-toggle");tapSelector("[data-panel-target=immortal-artifacts]");waitForPanelReady("#immortal-artifacts-card");
+            check(Boolean.TRUE.equals(js("document.querySelector('#immortal-artifacts-card h2').textContent==='魔器培养'&&document.querySelector('.ia-grade-track [aria-current=step]').textContent==='五品'")),"Path label and initial grade");
+            check(Boolean.TRUE.equals(js("document.querySelector('#immortal-artifacts-card').scrollWidth<=document.querySelector('#immortal-artifacts-card').clientWidth+2")),"Immortal page fits native viewport");
+            if(pixel)waitForJs("[...document.querySelectorAll('.immortal-artifact-materials img')].length===4&&[...document.querySelectorAll('.immortal-artifact-materials img')].every(i=>i.complete&&i.naturalWidth===128)","Four offline reference-matched portraits");
+            capture("immortal-ready-"+theme+"-"+arguments.getString("orientation"));
+            async("api('/api/games/'+game.id+'/immortal-artifact',{method:'POST',body:JSON.stringify({artifact_id:game.immortal_artifacts.equipment[0].id,expected_grade:5,expected_revision:game.immortal_artifacts.revision})})");
+            tapSelector("[data-immortal-refine]");waitForJs("!busy&&game.immortal_artifacts.equipment[0].grade===4","Stale native click recovers once");
+            for(int rank=4;rank>=2;rank--) {
+                tapSelector("[data-immortal-refine]");waitForJs("!busy&&game.immortal_artifacts.equipment[0].grade==="+(rank-1),"Paid next immortal grade");
+            }
+            check(Boolean.TRUE.equals(js("!document.querySelector('[data-immortal-refine]')&&document.querySelector('.ia-grade-track [aria-current=step]').textContent==='一品'")),"One-grade cap");
+            python(fixture+"\nfrom cultivation_life import server\ninspect_immortal_release(server.ENGINE,"+JSONObject.quote(id)+")\nserver._immortal_view_bytes=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+            capture("immortal-complete-"+theme+"-"+arguments.getString("orientation"));
+            tapSelector("#immortal-artifacts-toggle");tapSelector("[data-panel-target=immortal-artifacts]");waitForPanelReady("#immortal-artifacts-card");
+            python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._immortal_view_bytes");
+            tapSelector("#immortal-artifacts-toggle");async("loadGame("+JSONObject.quote(id)+")");
+            check(Boolean.TRUE.equals(js("game.immortal_artifacts.equipment[0].grade===1")),"Final grade survives reload");
+        }
+        result.putString("immortal_artifacts_scope","Four legacy themes and both pixel palettes: real 37th refinement, iron promotion, independent path-labelled UI, offline portraits, exact four-grade costs, stale touch recovery, grade cap, unchanged power/time/RNG and reload; native portrait/landscape");
+    }
+
     private void runAuthored(Bundle result) throws Exception {
         String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'创法原生验收',spirit_root:'supreme_metal',path:'dao',seed:310,preset_id:'core'})}).then(g=>g.id)");
         python("from cultivation_life import server\ne=server.ENGINE\ng=e._load("+JSONObject.quote(id)+")\ng.pending_event=None\nfor t in g.player.known_techniques:t.level=9\ne.store.save(g)");
@@ -1168,7 +1206,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("heavens")) {
+            if(phase.equals("immortal")) {
+                runImmortal(result);
+            } else if(phase.equals("heavens")) {
                 runHeavens(result);
             } else if(phase.equals("soul-lifecycle")) {
                 runSoulLifecycle(result);

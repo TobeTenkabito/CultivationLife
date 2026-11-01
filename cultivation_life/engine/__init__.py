@@ -665,6 +665,20 @@ class GameEngine:
         accept_committed_game(self, game)
         return self.present(game)
 
+    def immortal_artifact_action(self, game_id: str, artifact_id: str, expected_grade: int, expected_revision: str) -> dict[str, Any]:
+        from ..system.immortal_artifacts import cultivate
+        from .transactions import accept_committed_game
+        import copy
+        game=copy.deepcopy(self._load(game_id))
+        if not isinstance(expected_revision,str) or expected_revision!=game.updated_at:
+            raise ValueError("仙器页面已过期，请刷新后再培养")
+        summary=cultivate(game,artifact_id,expected_grade)
+        game.history.append(HistoryRecord('SYS_IMMORTAL_ARTIFACT',1,game.player.age,'仙器培养',artifact_id,'cultivated',summary,{},['artifact','cultivation']))
+        game.updated_at=now_iso()
+        self.store.save(game)
+        accept_committed_game(self,game)
+        return self.present(game)
+
     def authored_technique_action(self, game_id: str, action: str, payload: dict) -> dict[str, Any]:
         from ..system import authored_techniques as authored
         game = self._load(game_id)

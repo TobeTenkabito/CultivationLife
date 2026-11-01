@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .path_modifiers import adjusted_cost
+from .immortal_artifacts import source_item as natal_source_item, promotion as natal_promotion
 
 import math
 from typing import Any
@@ -57,13 +58,13 @@ def _natal_artifact_candidate(deps: NatalStateDependencies, item: Any) -> bool:
     tags = set(item.tags)
     return bool(getattr(item, "crafted_artifact_id", None)) or item.combat_bonus > 0 and (
         bool(tags.intersection({"artifact", "equipment"}))
-        or item.id in deps._natal_artifact_config().get("eligible_item_ids", [])
+        or (getattr(item,'artifact_origin_id',None) or item.id) in deps._natal_artifact_config().get("eligible_item_ids", [])
     )
 
 
 def _crafted_natal_source(game: GameState) -> dict[str, Any] | None:
     artifact_id = str(game.natal_artifact.get("crafted_artifact_id", "")) if game.natal_artifact else ""
-    if not artifact_id and game.natal_artifact and game.natal_artifact.get("item_id") not in ITEM_CATALOG:
+    if not artifact_id and game.natal_artifact and not game.natal_artifact.get('source_item') and game.natal_artifact.get("item_id") not in ITEM_CATALOG:
         artifact_id = str(game.natal_artifact.get("item_id", ""))
     return next(
         (row for row in game.player.crafted_artifacts if str(row.get("id", "")) == artifact_id),
@@ -85,6 +86,7 @@ def _bind_crafted_natal_artifact(deps: NatalStateDependencies, game: GameState, 
         "name":str(artifact.get("name", "无名法宝")), "level":1,
         "experience":0, "bound_age":game.player.age, "slots":[],
         "slot_rule_version":2,
+        "refinement_count":0,
     }
     deps._sync_natal_artifact_bonuses(game)
 
@@ -135,7 +137,7 @@ def _natal_refine_cost(deps: NatalStateDependencies, level: int, game: GameState
             stats = crafted.get("actual_stats", {})
             power = max(0.0, float(stats.get("combat_power", 0)))
         else:
-            item = ITEM_CATALOG[str(game.natal_artifact["item_id"])]
+            item = natal_source_item(game)
             power = max(0.0, item.combat_bonus)
     level = max(1, int(level))
     # Lv.1 is priced solely by immutable, unsuppressed base combat power.
@@ -237,8 +239,8 @@ def _sync_natal_artifact_bonuses(deps: NatalStateDependencies, game: GameState) 
             "opportunity_bonus":float(stats.get("opportunity_efficiency", 0.0)) * growth,
             "tribulation_reduction":float(stats.get("tribulation_reduction", 0.0)) * growth,
         }
-    elif artifact.get("item_id") in ITEM_CATALOG:
-        base = ITEM_CATALOG[str(artifact["item_id"])]
+    elif artifact.get('source_item') or artifact.get("item_id") in ITEM_CATALOG:
+        base = natal_source_item(game)
         totals = {
             "hp_bonus":float(base.hp_bonus) * scale,
             "mp_bonus":float(base.mp_bonus) * scale,
@@ -384,7 +386,8 @@ def natal_artifact_action(
         if old.get("crafted_artifact_id"):
             deps._unbind_crafted_natal_artifact(game, old["crafted_artifact_id"])
         else:
-            add_item(player, str(old["item_id"]))
+            from .immortal_artifacts import release_natal_item
+            add_item(player, release_natal_item(game))
             for material_id in old.get("slots", []):
                 if material_id:
                     add_item(player, str(material_id))
@@ -392,6 +395,11 @@ def natal_artifact_action(
             player.natal_origin_penalty += .10
         summary = f"你解除{old['name']}的本命联系，法宝与镶材归还，温养散去。本源受损，下次修为突破概率降低10个百分点。"
         result = "unbound"
+    elif action == 'promote':
+        from .immortal_artifacts import promote_natal
+        promote_natal(game)
+        summary = f"消耗三铸神魔铁×1，{game.natal_artifact['name']}伤害类型升为仙；原等级与战力不变。"
+        result = 'promoted'
     elif action in {"refine", "refine_all"}:
         if not game.natal_artifact:
             raise ValueError("尚未选择本命法宝")
@@ -405,6 +413,8 @@ def natal_artifact_action(
             cost = deps._natal_refine_cost(level, game)
         if not remove_item(player, "spirit_stone", cost):
             raise ValueError(f"本次温养需要 {cost} 枚灵石")
+        from .immortal_artifacts import refinement_count
+        game.natal_artifact['refinement_count'] = refinement_count(game) + refine_count
         old_level, new_level = deps._add_natal_artifact_experience(
             game, int(deps._natal_artifact_config()["manual_refine_xp"]) * refine_count,
         )
@@ -512,7 +522,7 @@ def _public_natal_artifact(deps: NatalViewDependencies, game: GameState) -> dict
             "tribulation_reduction":float(stats.get("tribulation_reduction", 0.0)),
         }
     else:
-        base = ITEM_CATALOG[artifact["item_id"]]
+        base = natal_source_item(game)
         description = base.description
         displayed_base = {key:0.0 for key in (
             "combat_bonus", "hp_bonus", "mp_bonus", "opportunity_bonus", "tribulation_reduction",
@@ -521,7 +531,7 @@ def _public_natal_artifact(deps: NatalViewDependencies, game: GameState) -> dict
     if crafted:
         growth_base_combat = float(crafted.get("actual_stats", {}).get("combat_power", 0.0))
     else:
-        growth_base_combat = float(ITEM_CATALOG[str(artifact["item_id"])].combat_bonus)
+        growth_base_combat = float(natal_source_item(game).combat_bonus)
     next_level_combat_gain = (
         growth_base_combat * (deps._natal_level_scale(level + 1) - deps._natal_level_scale(level))
         + deps._natal_flat_combat_growth(level + 1) - deps._natal_flat_combat_growth(level)
@@ -541,8 +551,10 @@ def _public_natal_artifact(deps: NatalViewDependencies, game: GameState) -> dict
     slot_interval = max(1, int(deps._natal_artifact_config().get("slot_interval", 10)))
     return {
         "visible": True, "bound": True, "item_id": artifact["item_id"], "name": artifact["name"],
+        **natal_promotion(game),
         "operation_available": operation_available,
         "crafted_artifact_id":artifact.get("crafted_artifact_id"),
+        "artifact_origin_id":natal_source_item(game).artifact_origin_id if not crafted else None,
         "description":description, "level": level, "max_level": None, "unbounded": True,
         "is_tianji":bool(crafted and crafted.get("tianji")),
         "experience": int(artifact["experience"]),
@@ -573,9 +585,12 @@ def _public_natal_artifact(deps: NatalViewDependencies, game: GameState) -> dict
 def _natal_artifact_inventory_item(game: GameState) -> dict[str, Any] | None:
     if game.natal_artifact.get("crafted_artifact_id"):
         return None
-    if not game.natal_artifact or game.natal_artifact.get("item_id") not in ITEM_CATALOG:
+    if not game.natal_artifact:
         return None
-    item = ITEM_CATALOG[game.natal_artifact["item_id"]].to_dict()
+    from .immortal_artifacts import natal_tier
+    item = natal_source_item(game).to_dict()
+    item['force_tier'] = natal_tier(game)
+    item['immortal_grade'] = game.natal_artifact.get('immortal_grade',item.get('immortal_grade'))
     item.update(
         quantity=1, is_natal_artifact=True,
         description=f"本命法宝 · {game.natal_artifact['level']}级。已收入丹田，不可交易。",

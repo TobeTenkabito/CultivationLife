@@ -671,6 +671,8 @@ class Handler(BaseHTTPRequestHandler):
                     game_id, payload.get("action", ""), payload.get("target_id", ""),
                     payload.get("enact"), int(payload.get("influence_spend", 0) or 0),
                 )
+            elif operation == 'immortal-artifact':
+                result = ENGINE.immortal_artifact_action(game_id,str(payload.get('artifact_id','')),payload.get('expected_grade'),payload.get('expected_revision'))
             elif operation == "natal-artifact":
                 result = ENGINE.natal_artifact_action(
                     game_id, payload.get("action", ""), payload.get("item_id", ""),

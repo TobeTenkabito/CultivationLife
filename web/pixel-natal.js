@@ -1,7 +1,7 @@
 /* Presentation of real natal shape and existing, unbounded slot controls. */
 (() => {
   'use strict';
-  function item(system){return {id:system.item_id,crafted_artifact_id:system.crafted_artifact_id};}
+  function item(system){return {id:system.item_id,crafted_artifact_id:system.crafted_artifact_id,artifact_origin_id:system.artifact_origin_id};}
   function decorate(system,state){
     if(!PixelLibrary.active())return;
     const root=document.getElementById('natal-artifact-content');root.classList.add('pixel-natal-content');

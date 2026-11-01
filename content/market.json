@@ -5536,6 +5536,629 @@
       "price": 43200000000,
       "world": "reincarnation"
     },
+    {
+      "world": "human",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 5,
+      "price": 100000
+    },
+    {
+      "world": "demon",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 5,
+      "price": 100000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 6,
+      "price": 200000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 7,
+      "price": 200000
+    },
+    {
+      "world": "spirit",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 8,
+      "price": 200000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 6,
+      "price": 200000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 7,
+      "price": 200000
+    },
+    {
+      "world": "true_demon",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 8,
+      "price": 200000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 6,
+      "price": 200000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 7,
+      "price": 200000
+    },
+    {
+      "world": "phantom_underworld",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 8,
+      "price": 200000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 6,
+      "price": 200000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 7,
+      "price": 200000
+    },
+    {
+      "world": "hell",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 8,
+      "price": 200000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 9,
+      "price": 300000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 10,
+      "price": 300000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 11,
+      "price": 300000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 12,
+      "price": 300000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 9,
+      "price": 300000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 10,
+      "price": 300000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 11,
+      "price": 300000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 12,
+      "price": 300000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 9,
+      "price": 300000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 10,
+      "price": 300000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 11,
+      "price": 300000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 12,
+      "price": 300000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 9,
+      "price": 300000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 10,
+      "price": 300000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 11,
+      "price": 300000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 12,
+      "price": 300000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 6,
+      "price": 200000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 7,
+      "price": 200000
+    },
+    {
+      "world": "monster_realm",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 8,
+      "price": 200000
+    },
+    {
+      "world": "rift",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 9,
+      "price": 100000
+    },
+    {
+      "world": "rift",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 10,
+      "price": 100000
+    },
+    {
+      "world": "rift",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 11,
+      "price": 100000
+    },
+    {
+      "world": "rift",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 12,
+      "price": 100000
+    },
+    {
+      "world": "lost",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 9,
+      "price": 100000
+    },
+    {
+      "world": "lost",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 10,
+      "price": 100000
+    },
+    {
+      "world": "lost",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 11,
+      "price": 100000
+    },
+    {
+      "world": "lost",
+      "kind": "item",
+      "content_id": "triple_forged_god_demon_iron",
+      "tier": 12,
+      "price": 100000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 9,
+      "price": 600000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 10,
+      "price": 600000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 11,
+      "price": 600000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 12,
+      "price": 600000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 9,
+      "price": 600000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 10,
+      "price": 600000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 11,
+      "price": 600000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 12,
+      "price": 600000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 9,
+      "price": 600000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 10,
+      "price": 600000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 11,
+      "price": 600000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 12,
+      "price": 600000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 9,
+      "price": 600000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 10,
+      "price": 600000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 11,
+      "price": 600000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "yin_yang_hespring_steel",
+      "tier": 12,
+      "price": 600000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 9,
+      "price": 900000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 10,
+      "price": 900000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 11,
+      "price": 900000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 12,
+      "price": 900000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 9,
+      "price": 900000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 10,
+      "price": 900000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 11,
+      "price": 900000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 12,
+      "price": 900000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 9,
+      "price": 900000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 10,
+      "price": 900000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 11,
+      "price": 900000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 12,
+      "price": 900000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 9,
+      "price": 900000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 10,
+      "price": 900000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 11,
+      "price": 900000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "primordial_taiyi_silver",
+      "tier": 12,
+      "price": 900000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 9,
+      "price": 1200000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 10,
+      "price": 1200000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 11,
+      "price": 1200000
+    },
+    {
+      "world": "celestial",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 12,
+      "price": 1200000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 9,
+      "price": 1200000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 10,
+      "price": 1200000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 11,
+      "price": 1200000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 12,
+      "price": 1200000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 9,
+      "price": 1200000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 10,
+      "price": 1200000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 11,
+      "price": 1200000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 12,
+      "price": 1200000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 9,
+      "price": 1200000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 10,
+      "price": 1200000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 11,
+      "price": 1200000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "innate_yuanhe_alloy",
+      "tier": 12,
+      "price": 1200000
+    },
     {"world":"human","kind":"technique","content_id":"TECH_OPEN_SONGCHUANG_NEUTRAL_MAIN","tier":1,"price":80},
     {"world":"spirit","kind":"technique","content_id":"TECH_OPEN_SONGCHUANG_NEUTRAL_MAIN","tier":1,"price":80},
     {"world":"celestial","kind":"technique","content_id":"TECH_OPEN_SONGCHUANG_NEUTRAL_MAIN","tier":1,"price":80},
