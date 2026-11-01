@@ -71,10 +71,10 @@
     window.UtilityPanels.schedule('immortal-body', () => {
       const body = document.querySelector('#immortal-body-content'); body.replaceChildren();
       const b = data.immortal_body;
-      body.append(el('h3', `真仙之躯 · 第 ${b.level} 层`), el('p', `炼体 ${b.body_training} / ${b.required_training} 层 · ${b.body_training >= b.required_training ? '已具备淬炼根基' : '须先将炼体修至百层'}`),
-        el('p', `护体金光：${b.golden_light ? '已解锁' : `第 ${b.golden_light_level} 层解锁`} · 冲击金仙须仙躯达到第 20 层。`, 'doctrine-note'),
+      body.append(el('h3', `真仙之躯 · ${b.body_stage} · 第 ${b.level} / ${b.max_level} 层`), el('p', `炼体 ${b.body_training} / ${b.required_training} 层 · ${b.body_training >= b.required_training ? '已具备淬炼根基' : '须先将炼体修至百层'}`),
+        el('p', `五色神光：${b.golden_light ? '已解锁' : `第 ${b.golden_light_level} 层解锁`} · 仙躯每十层解锁一道神光。`, 'doctrine-note'),
         meter(b.level, b.golden_light ? b.max_level : b.golden_light_level, '仙躯修炼进度'),
-        el('p', `仙躯增加本源气血 ${fmt(b.hp_bonus)}、本源法力 ${fmt(b.mp_bonus)}。护体金光是仙躯被动防护，不消耗仙灵力，储量耗尽仍然有效。`, 'muted'));
+        el('p', `仙躯增加本源气血 ${fmt(b.hp_bonus)}、本源法力 ${fmt(b.mp_bonus)}。五色神光随仙躯解锁并可独立修炼，具体触发与静默结果见战斗文本。`, 'muted'));
       const manuals = b.manuals.filter(m=>m.owned);
       if (!manuals.length) body.append(el('p', '尚未掌握仙躯功法。右侧「瑶池」可用功勋求取传承与淬体药材；旧炼体功法不能用于仙躯。'));
       for (const manual of manuals) body.append(button(`${b.manual === manual.id ? '当前修习：' : '改修：'}《${manual.name}》`, {action:'select_body_manual',supply_id:manual.id}, b.manual === manual.id, options.immortal));

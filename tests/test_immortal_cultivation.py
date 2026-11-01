@@ -49,7 +49,7 @@ def test_true_immortal_time_and_unbounded_reserve(prepared):
     assert game.player.realm_index == 9 and game.player.layer == 1
 
 
-def test_every_three_veins_requires_manual_layer_and_body_20_for_major(prepared):
+def test_every_three_veins_requires_manual_layer_and_body_10_for_major(prepared):
     engine, game, _ = prepared
     before = game.player.opportunity
     with patch('cultivation_life.system.immortal_system.decode_rng', side_effect=lambda *a: random.Random(1)), \
@@ -62,10 +62,10 @@ def test_every_three_veins_requires_manual_layer_and_body_20_for_major(prepared)
             with pytest.raises(ValueError, match='手动'):
                 engine.immortal_action(game.id, 'open_vein')
             if layer == 9:
-                with pytest.raises(ValueError, match='20'):
+                with pytest.raises(ValueError, match='10'):
                     engine.immortal_action(game.id, 'breakthrough')
                 saved = engine.store.load(game.id)
-                saved.player.immortal_body = {'level': 20}
+                saved.player.immortal_body = {'level': 10}
                 engine.store.save(saved)
             shown = engine.immortal_action(game.id, 'breakthrough')
     assert shown['player']['realm_index'] == 9
@@ -147,13 +147,13 @@ def test_major_trial_uses_new_fee_but_preserves_body_gate(prepared):
     engine, game, _ = prepared
     game.player.layer = 9
     game.player.immortal_veins['9'] = 27
-    game.player.immortal_body = {'level': 19}
+    game.player.immortal_body = {'level': 9}
     game.player.opportunity = 35280
     engine.store.save(game)
-    with pytest.raises(ValueError, match='20'):
+    with pytest.raises(ValueError, match='10'):
         engine.immortal_action(game.id, 'breakthrough')
     assert engine.store.load(game.id).player.opportunity == 35280
-    game.player.immortal_body['level'] = 20
+    game.player.immortal_body['level'] = 10
     engine.store.save(game)
     shown = engine.immortal_action(game.id, 'breakthrough')
     assert shown['player']['realm_index'] == 9

@@ -57,7 +57,7 @@ def validate(data, spirit_root, path):
     if not isinstance(roots, list) or any(r not in {'metal', 'wood', 'water', 'fire', 'earth'} for r in roots):
         raise ValueError('补全灵根须选择五行属性')
     data['additional_roots'] = list(dict.fromkeys(roots))
-    for key, default, cap in [('body_training', 0, 100), ('immortal_body_level', 0, 100),
+    for key, default, cap in [('body_training', 0, 100), ('immortal_body_level', 0, 50),
                                ('divine_sense_rank', 0, 1000), ('domain_rank', 0, 13), ('warming', 0, 100),
                                ('tianji_bracket', 0, 15)]:
         data[key] = integer(data, key, default, 0, cap)

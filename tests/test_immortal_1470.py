@@ -45,7 +45,7 @@ def test_npc_independent_ranks_and_rare_late_fields():
         late += npc_voisinage_limit(npc) >= 4
         npc.realm_index = 10
         ensure_npc(npc)
-        assert npc.immortal_body_level >= 20 and npc.body_training == 100
+        assert 13<=npc.immortal_body_level<=24 and npc.body_training == 100
     assert 8 <= late <= 45
 
 

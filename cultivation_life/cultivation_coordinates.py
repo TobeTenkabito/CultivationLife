@@ -27,9 +27,13 @@ def describe(rank):
 def body_rank(mortal, immortal):
     if not immortal:
         return min(100, mortal)
-    realm = min(12, 9 + (immortal - 1) // 20)
-    offset = min(19, immortal - 1 - (realm - 9) * 20)
-    return rank_for(realm, min(9, 1 + offset * 9 // 20))
+    value=max(1,min(50,int(immortal)))
+    intervals=((1,4,9,1),(5,8,9,4),(9,12,9,7),
+               (13,16,10,1),(17,20,10,4),(21,24,10,7),
+               (25,28,11,1),(29,32,11,4),(33,36,11,7),
+               (37,40,12,1),(41,45,12,4),(46,50,12,7))
+    low,high,realm,layer=next(row for row in intervals if row[0]<=value<=row[1])
+    return rank_for(realm,layer+min(2,(value-low)*3//(high-low+1)))
 
 
 def legacy_sense(rank):
@@ -40,3 +44,14 @@ def legacy_sense(rank):
     if rank >= 104:
         return STARTS[12] + (rank - 104) * 3
     return rank_for(min(12, 2 + (rank - 14) // 9), 1 + (rank - 14) % 9)
+
+
+def validate_immortal_body(record):
+    if not isinstance(record,dict):raise ValueError('仙躯记录须为对象')
+    level=record.get('level',0)
+    if type(level) is not int or not 0<=level<=50:raise ValueError('仙躯层数须为0至50')
+    lights=record.get('divine_lights',{})
+    if not isinstance(lights,dict) or set(lights)-{'kun','zhen','kan','li','qian'}:
+        raise ValueError('五色神光记录无效')
+    if any(type(v) is not int or not 0<=v<=10 for v in lights.values()):raise ValueError('神光修炼等级须为0至10')
+    return record

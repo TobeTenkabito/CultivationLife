@@ -40,16 +40,19 @@ def begin(b, n=1):
 
 
 @pytest.mark.parametrize('healer', ['player', 'enemy'])
-def test_contested_field_healing_keeps_ordinary_attack_on_both_sides(healer):
+@pytest.mark.parametrize('unlocked',[False,True])
+def test_contested_field_healing_spends_ordinary_until_zhen_unlock(healer,unlocked):
     d = domain(VoisinageEffect('restore_body', 3, .2, target='self'), stability=200)
-    b = VoisinageBattle([actor(key, key, caster(d), integrity=.8 if key == healer else 1,
+    b = VoisinageBattle([actor(key, key, caster(d,divine_lights={'zhen':1} if unlocked and key==healer else {}), integrity=.8 if key == healer else 1,
                               body_integrity=.8 if key == healer else 1)
                          for key in ('player', 'enemy')])
     frame = begin(b)
-    assert frame.ordinary_player and frame.ordinary_enemy
+    assert frame.ordinary_player==(unlocked or healer!='player')
+    assert frame.ordinary_enemy==(unlocked or healer!='enemy')
     assert b.units[healer].body == 1
     assert b.units[healer].current == 95  # opening + upkeep + healing
-    assert b.ordinary_damage(.1, .1) == pytest.approx((.1, .1))
+    expected=(.1 if unlocked or healer!='player' else 0,.1 if unlocked or healer!='enemy' else 0)
+    assert b.ordinary_damage(.1, .1) == pytest.approx(expected)
 
 
 def test_field_strike_and_ordinary_attack_can_hit_different_opponents():
@@ -248,9 +251,9 @@ def test_loadout_is_persistent_independent_of_treasure_and_resolved_once(monkeyp
 def test_npc_golden_light_uses_body_not_cultivation():
     npc = SectNpc('a', 'a', '', 9, 9, 100, None)
     assert not npc_golden_light(npc)
-    npc.immortal_body_level = 14
+    npc.immortal_body_level = 9
     assert not npc_golden_light(npc)
-    npc.immortal_body_level = 15
+    npc.immortal_body_level = 10
     assert npc_golden_light(npc)
     npc.realm_index = 8
     assert npc_golden_light(npc)

@@ -173,7 +173,6 @@ def enter_host_body(player: Player, target: dict[str, Any], *, technique=None) -
         "realm_index": realm_index, "layer": layer,
         "immortal_body_level": max(0, int(target.get('immortal_body_level', 0))),
         "body_training": max(0, int(coordinates['body_training'])),
-        "golden_light_rank": max(1, min(5, int(target.get('golden_light_rank', 1)))),
     }
     player.name = f"{target_name}（{original_name}）"
     player.gender = str(target.get("gender", "male"))

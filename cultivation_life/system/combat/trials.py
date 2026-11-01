@@ -74,8 +74,10 @@ def run_batch(battle, state, rng, *, batch_size=24):
                     s.pressure = s.field_strain = 0
                     s.controls.clear()
                     s.current = s.unit.capabilities.capacity
+        scores={side:state['stats'][side]['mobility']+state['stats'][side]['sense'] for side in ('player','enemy')}
         frame = battle.begin_round(n, player_condition=player.vitality, enemy_condition=1,
-                                   player_mp=state['mp_ratio'], enemy_mp=1)
+                                   player_mp=state['mp_ratio'], enemy_mp=1,rng=rng,
+                                   first_side='player' if scores['player']>=scores['enemy'] else 'enemy')
         dealt = received = 0
         initiative = 'voisinage'
         exchange = None
@@ -85,7 +87,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
             if not endurance and battle._available('player'):
                 for key, victim in battle.units.items():
                     if victim.unit.side == 'enemy' and (0 < victim.vitality <= .12 or victim.suppressed):
-                        if battle.attack_tier(player) >= victim.unit.capabilities.ward_tier:
+                        if battle.attack_tier(player) >= battle.ward_tier(key):
                             battle.attack_tier(player, pay=True)
                             battle._lose(key, victim.vitality)
                             victim.suppressed = False
@@ -104,6 +106,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
             p_condition *= p['sustain'] / max(1., state['stats']['player']['sustain'])
             p_condition *= .6 + .4 * player.morale / 100
             first = p['mobility'] + p['sense'] >= e['mobility'] + e['sense']
+            if frame.divine_first is not None:first=frame.divine_first=='player'
             semantic_factors = battle.semantic_initiative(first)
             for side in ('player', 'enemy'):
                 for stat, factor in semantic_factors[side].items():
@@ -116,7 +119,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
                                        e['breach'] / max(1, p['guard']), rng.uniform(.9, 1.1),
                                        coefficient=.125, minimum=.035, maximum=.4)
             # The actual golden-body passive helps withstand heavenly decay.
-            if player.unit.capabilities.ward_tier >= 2:
+            if battle.ward_tier('player') >= 2:
                 received *= .75
             dealt *= 1.05 if first else .97
             received *= .96 if first else 1.04
@@ -150,7 +153,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
             for key, attacker in battle.units.items():
                 if attacker.unit.side != 'enemy' or not attacker.fighting:
                     continue
-                if battle.attack_tier(attacker) >= player.unit.capabilities.ward_tier:
+                if battle.attack_tier(attacker) >= battle.ward_tier('player'):
                     battle.attack_tier(attacker, pay=True)
                     battle._lose('player', player.vitality)
                     player.body = 0

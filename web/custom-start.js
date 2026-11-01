@@ -22,7 +22,7 @@
     const species=select(identity,'妖修种属',Object.fromEntries(Object.entries(config.monster_species).map(([k,v])=>[k,v.name])),'species');
     const world=select(identity,'出生界面',c.worlds,'world'),realm=select(identity,'修为境界',Object.fromEntries(c.realms.map(r=>[r.id,r.name])),'realm');realm.value='1';
     const layer=select(identity,'修为层数',{},'layer');
-    const body=input(identity,'普通炼体等级','body',0,0,100),higher=input(identity,'高阶肉身等级','higher-body',0,0,100),sense=input(identity,'神识等级','sense',4,0,1000);
+    const body=input(identity,'普通炼体等级','body',0,0,100),higher=input(identity,'高阶肉身等级','higher-body',0,0,50),sense=input(identity,'神识等级','sense',4,0,1000);
     const roots=el('div',null,'custom-roots');roots.append(el('span','补全灵根'));
     for(const [id,name] of Object.entries({metal:'金',wood:'木',water:'水',fire:'火',earth:'土'})){const l=el('label',name),check=el('input');check.type='checkbox';check.value=id;check.dataset.additionalRoot='1';l.append(check);roots.append(l);}identity.append(roots);
     const org=group('宗门与家族');const sect=select(org,'所属宗门',{},'sect'),sectName=input(org,'自建宗门名称','sect-name','',null,null),family=select(org,'所属家族',{},'family'),familyName=input(org,'自建家族名称','family-name','',null,null);
@@ -68,7 +68,7 @@
         const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k),pick=(o,k,label)=>{if(!own(o,k))throw Error(label+'不可用，可能需要启用对应 DLC');};
         pick(config.paths,p.path,'道途');pick(config.spirit_roots,p.spirit_root,'灵根');pick(c.worlds,v.world,'出生界面');if(p.path==='monster')pick(config.monster_species,p.monster_species_id,'妖修种属');
         const r=c.realms.find(r=>r.id===v.realm_index);if(!r)throw Error('修为境界无效');
-        for(const [key,min,max] of [['layer',1,r.layers],['body_training',0,100],['immortal_body_level',0,100],['divine_sense_rank',0,1000],['domain_rank',0,['celestial','asura','nether','reincarnation'].includes(v.world)?13:9],['warming',0,99],['tianji_bracket',0,c.tianji_enabled?c.tianji_brackets:0]])if(!Number.isSafeInteger(v[key])||v[key]<min||v[key]>max)throw Error(key+' 数值无效或扩展未启用');
+        for(const [key,min,max] of [['layer',1,r.layers],['body_training',0,100],['immortal_body_level',0,50],['divine_sense_rank',0,1000],['domain_rank',0,['celestial','asura','nether','reincarnation'].includes(v.world)?13:9],['warming',0,99],['tianji_bracket',0,c.tianji_enabled?c.tianji_brackets:0]])if(!Number.isSafeInteger(v[key])||v[key]<min||v[key]>max)throw Error(key+' 数值无效或扩展未启用');
         if(typeof p.name!=='string'||p.name.length>80||!['male','female'].includes(p.gender)||p.seed!=null&&!Number.isSafeInteger(p.seed))throw Error('人物或种子配置无效');
         if(!Array.isArray(v.inventory)||v.inventory.length>2000||new Set(v.inventory.map(i=>i.id)).size!==v.inventory.length||v.inventory.some(i=>!c.items.some(x=>x.id===i.id)||!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>1e12))throw Error('行囊包含不可用或无效物品');
         if(!Array.isArray(v.techniques)||v.techniques.length>2000||new Set(v.techniques).size!==v.techniques.length||v.techniques.some(id=>!c.techniques.some(t=>t.id===id)))throw Error('功法不可用');

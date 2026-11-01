@@ -1,7 +1,8 @@
 """Deterministic voisinage arbitration with per-unit coverage and resource ledgers.
 
-There is no game-state mutation, RNG, world lookup or cultivation progression
-here. Definitions express capabilities, not executable content or callbacks.
+There is no game-state mutation, world lookup or cultivation progression here.
+Probabilistic divine lights use only the caller's explicit battle RNG.
+Definitions express capabilities, not executable content or callbacks.
 """
 from __future__ import annotations
 
@@ -10,6 +11,7 @@ from typing import Any
 
 from .effects import VoisinageEffects
 from .semantics import CombatSemantics
+from .divine_lights import DivineLights
 from .contracts import Combatant, VoisinageDefinition, PhaseRound, ResourceSupply, VoisinageSeal, number
 
 
@@ -52,7 +54,7 @@ class Field:
     authority: float | None = None
 
 
-class VoisinageBattle(CombatSemantics, VoisinageEffects):
+class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
     """One battle's upper layer. Ordinary combat remains the damage provider."""
 
     def __init__(self, units: list[Combatant], *, contest_ratio: float = 1.25,
@@ -82,6 +84,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
         self._blocked_pairs: set[tuple[str, str]] = set()
         self._released: set[str] = set()
         self._disrupted: set[str] = set()
+        self._light_muted={};self._light_trace=[];self._light_resists={};self._light_extra={}
+        self._light_rng=None;self._responded=set()
         self.primary_ordinary_loss = 0.0
         self.objectives = {"player": "kill", "enemy": "kill"}
         self.escape_forbidden_sides: frozenset[str] = frozenset()
@@ -94,7 +98,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
 
     @property
     def enabled(self) -> bool:
-        return self.semantics is not None or any(s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
+        return self.semantics is not None or any(s.unit.capabilities.divine_lights or s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
                    or s.unit.capabilities.ward_tier > 1 or s.unit.capabilities.technique_tier > 1
                    or s.unit.capabilities.artifact_tier > 1 for s in self.units.values())
 
@@ -181,13 +185,16 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
         return None
 
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
-                    player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None) -> PhaseRound:
+                    player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None,
+                    rng=None, first_side=None) -> PhaseRound:
         self.frame = PhaseRound(round_no)
         self.animation = {'version': 1, 'opening': [max(0., 1 - self.ordinary_loss(side))
                           for side in ('player', 'enemy')], 'effects': [], 'interventions': []}
         self._ordinary_acted.clear()
         self._released.clear()
         self._disrupted.clear()
+        self._responded.clear()
+        self._begin_lights(rng,first_side)
         self._semantic_begin(round_no, player_mp, enemy_mp, player_morale, enemy_morale)
         # Scripted interventions happen before maintenance, coverage or effects.
         # Only this battle's immutable snapshot changes, never the saved owner.
@@ -247,10 +254,15 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
                 if defense and attack_strength <= defense_strength * self.contest_ratio:
                     relation = "pressed" if attack_strength > defense_strength else "contested"
                 else:
-                    relation = "dominated"
-                    self._dominated[key] = attack.owner
-                    state.escape_locked = True
-                    self.frame.events.append(f"{self.units[attack.owner].unit.name}封禁{state.unit.name}的神识、身法与退路。")
+                    if attack.owner in self._light_muted:
+                        relation='silenced'
+                        self.frame.events.append(f'{self.units[attack.owner].unit.name}的邻域封禁被乾古素光静默，未作用于{state.unit.name}。')
+                    elif self._resist_light_seal(key,attack.owner):relation='resisted'
+                    else:
+                        relation = "dominated"
+                        self._dominated[key] = attack.owner
+                        state.escape_locked = True
+                        self.frame.events.append(f"{self.units[attack.owner].unit.name}封禁{state.unit.name}的神识、身法与退路。")
             self.frame.relations[key] = {
                 "relation": relation, "attacker": attack.owner if attack else None,
                 "protector": defense.owner if defense else None,
@@ -294,7 +306,9 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
         # This is a bounded report projection, never an input to settlement.
         self.animation['fields'] = self.report()['fields']
         self.animation['relations'] = {key: dict(value) for key, value in self.frame.relations.items()}
+        self._field_lights()
         self._resolve_effects(previous)
+        if any(self._light_extra.values()):self._resolve_effects(previous,extra=True)
         self.animation['after'] = [max(0., 1 - self.ordinary_loss(side)) for side in ('player', 'enemy')]
         for side in ('player', 'enemy'):
             members = [s for s in self.units.values() if s.unit.side == side]
@@ -347,7 +361,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
                 continue
             tiers[key] = self.attack_tier(state, pay=True)
         # Golden light belongs to the body; an empty energy pool cannot remove it.
-        ward_tiers = {key: s.unit.capabilities.ward_tier for key, s in self.units.items()}
+        ward_tiers = {key: self.ward_tier(key) for key in self.units}
         for side, damage in (("player", dealt), ("enemy", received)):
             if damage <= 0:
                 continue
@@ -366,6 +380,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
                     ward_tier = ward_tiers[target_key]
                     if tier < ward_tier:
                         self._blocked_pairs.add((key, target_key))
+                        pair=(key,target_key)
+                        self._light_prevented[pair]=self._light_prevented.get(pair,0.)+contribution*self.totals[target.unit.side]/target_total
                         continue
                     amount = contribution * self.totals[target.unit.side] / target_total
                     if self.semantics is not None:
@@ -402,7 +418,10 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
         self.primary_ordinary_loss = (primary_before - self.units["player"].vitality
                                       if "player" in self.units else 0.0)
         for source, target in sorted(self._blocked_pairs):
-            self.frame.events.append(f"{self.units[source].unit.name}的作用至道不足，无法撼动{self.units[target].unit.name}的护体金光。")
+            if self.light_value(target,'kun'):
+                amount=self._light_prevented.get((source,target),0.)
+                self._light_note('kun',target,f'{self.units[target].unit.name}的坤元缃光免疫了{self.units[source].unit.name}的凡属性伤害，拦下预计{amount:.2%}战斗态势损耗（{amount*self.units[target].unit.power:.1f}点）。',source=source,prevented=amount)
+            else:self.frame.events.append(f"{self.units[source].unit.name}的作用至道不足，无法撼动{self.units[target].unit.name}的护体金光。")
         return self.frame.enemy_loss - before_e, self.frame.player_loss - before_p
 
     def mp_ratio(self, side: str, fallback: float) -> float:
@@ -433,9 +452,9 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
         live = {f.owner for f in self.fields}
         for key, state in self.units.items():
             state.controls = {kind: owner for kind, owner in state.controls.items()
-                              if owner in live and key not in self._released}
+                              if owner in live and owner not in self._light_muted and key not in self._released}
             owner = self._dominated.get(key)
-            if owner not in live or key in self._released:
+            if owner not in live or owner in self._light_muted or key in self._released:
                 self._dominated.pop(key, None)
                 state.escape_locked = False
                 if key in self.frame.relations and self.frame.relations[key]['relation'] == 'dominated':
@@ -494,6 +513,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects):
 
     def report(self) -> dict[str, Any]:
         return {
+            **({'divine_lights':dict(events=list(self._light_trace),silenced_by=dict(self._light_muted),first_side=self.frame.divine_first)} if self._light_trace else {}),
             **({'animation': self.animation} if self.animation and self.animation.get('fields') else {}),
             **({'semantics': self.semantic_report()} if self.semantics is not None else {}),
             "relations": self.frame.relations,

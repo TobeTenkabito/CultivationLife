@@ -14,15 +14,15 @@ def item_quantity(player, item_id):
     return sum(item.quantity for item in player.inventory if item.id == item_id)
 
 
-def immortal_action(deps: ImmortalActionDependencies, game_id, action, doctrine_id=None, axis=None, supply_id=None):
+def immortal_action(deps: ImmortalActionDependencies, game_id, action, doctrine_id=None, axis=None, supply_id=None, expected_level=None):
     if action in {'buy_body_manual', 'buy_body_supply'}:
         return deps.yaochi_action(game_id, 'buy', supply_id)
     game = deps._cultivation_game(game_id)
     p, record, rules = game.player, player_record(game), config()["cultivation"]
     if action == "gather":
         return deps.advance(game_id, "cultivate", 1)
-    if action == 'temper_golden_light':
-        return deps._temper_golden_light(game)
+    if action in {'temper_golden_light','train_divine_light'}:
+        return deps._temper_golden_light(game,axis,expected_level)
     if action in {'train_body', 'buy_body_manual', 'select_body_manual', 'buy_body_supply'}:
         return deps._immortal_body_action(game, action, supply_id)
     if action == 'breakthrough':

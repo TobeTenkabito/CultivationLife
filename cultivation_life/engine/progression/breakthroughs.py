@@ -278,7 +278,7 @@ def _major_breakthrough_requirement(player: Player) -> dict[str, Any]:
         from ...system.immortal_cultivation import golden_light
         met = golden_light(player)
         return {'met': met, 'reason': '仙脉与真仙之躯圆满，可冲击金仙。' if met else
-                '进阶金仙须将真仙之躯修至第 20 层，解锁护体金光。', 'missing_affinities': []}
+                '进阶金仙须将真仙之躯修至第 10 层，解锁坤元缃光。', 'missing_affinities': []}
     if player.path == "demonic" and player.world == "demon" and player.realm_index == 5:
         return {
             "met": False,

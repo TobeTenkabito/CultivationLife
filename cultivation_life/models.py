@@ -641,7 +641,8 @@ class Player:
             max(0, int(i.get('quantity', 0))) for i in data.get('inventory', []) if i.get('id') == 'immortal_trace')
         data['inventory'] = [i for i in data.get('inventory', []) if i.get('id') != 'immortal_trace']
         data['immortal_vein_pity'] = {str(k): max(0, int(v)) for k, v in data.get('immortal_vein_pity', {}).items()}
-        data['immortal_body'] = copy_plain_data(data.get('immortal_body', {}))
+        from .cultivation_coordinates import validate_immortal_body
+        data['immortal_body'] = validate_immortal_body(copy_plain_data(data.get('immortal_body', {})))
         data['world_voisinages'] = copy_plain_data(data.get('world_voisinages', {}))
         if data.get('cultivation_ranks_schema', 1) < 2:
             from .cultivation_coordinates import legacy_sense

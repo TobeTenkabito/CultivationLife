@@ -55,7 +55,7 @@ def _select_npc_treasure(npc: SectNpc, rng: random.Random) -> str | None:
 
 def _npc_power(deps: NpcDependencies, npc: SectNpc) -> float:
     if (npc.body_training is None or npc.divine_sense_rank is None
-            or (npc.realm_index >= 10 and (npc.immortal_body_level < 20 or npc.body_training < 100))):
+            or (npc.realm_index >= 10 and (npc.immortal_body_level <= 0 or npc.body_training < 100))):
         from ...system.cultivation_ranks import ensure_npc
         ensure_npc(npc)
     treasure = ITEM_CATALOG.get(npc.treasure_item_id or "")

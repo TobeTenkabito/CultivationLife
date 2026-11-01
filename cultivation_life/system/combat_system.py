@@ -490,10 +490,23 @@ class PlayerCombatSystem:
             ordinary_start_player, ordinary_start_enemy = player_hp, enemy_hp
             replay_opening = [round(player_power_max * player_hp, 1), round(enemy_power * enemy_hp, 1)]
             if phases is not None:
+                light_first=None
+                if getattr(phases,'has_qian',lambda:False)():
+                    p_init=player_stats['mobility']*.58+player_stats['sense']*.42
+                    e_init=enemy_stats['mobility']*.58+enemy_stats['sense']*.42
+                    if round_no==1:
+                        if target.get('ambush') or target.get('preparation')=='ambushed':e_init*=1.20
+                        if target.get('player_ambush'):p_init*=1.20
+                        if natural=='开阔' and 'airborne' in transformation_traits:p_init*=1.08
+                    if '迅影' in soul_traits and round_no<=2:p_init*=1.12
+                    first=True if dragon_pressure_active and round_no<=2 else p_init*cls._wave(rng,.96,1.04)>=e_init
+                    if round_no==1 and target.get('enemy_first_round'):first=False
+                    light_first='player' if first else 'enemy'
                 phase = phases.begin_round(
                     round_no, player_condition=player_hp, enemy_condition=enemy_hp,
                     player_mp=player_mp, enemy_mp=enemy_mp,
                     player_morale=player_morale, enemy_morale=enemy_morale,
+                    rng=rng,first_side=light_first,
                 )
                 player_mp = phases.mp_ratio("player", player_mp)
                 enemy_mp = phases.mp_ratio("enemy", enemy_mp)
@@ -692,6 +705,7 @@ class PlayerCombatSystem:
             if round_no == 1 and natural == "开阔" and "airborne" in transformation_traits:
                 p_init *= 1.08
             player_first = (
+                phase.divine_first=='player' if phase is not None and phase.divine_first is not None else
                 True if dragon_pressure_active and round_no <= 2
                 else p_init * cls._wave(rng, 0.96, 1.04) >= e_init
             )

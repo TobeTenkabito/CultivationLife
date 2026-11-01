@@ -4224,6 +4224,9 @@ function renderEvent() {
 }
 
 function renderButtons() {
+  document.querySelectorAll('[data-divine-light-train]').forEach(button=>{
+    button.disabled=busy||button.dataset.unavailable==='1'||!game?.player?.alive||!!game?.pending_event||!!game?.trial?.active||!!game?.imprisonment;
+  });
   window.HomeMapModes?.syncBusy();
   window.StrategicWarPanel?.syncBusy();
   window.MapAtlas?.syncBusy();

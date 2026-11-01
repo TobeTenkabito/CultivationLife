@@ -26,24 +26,23 @@ def at_pool(engine, game):
     engine.store.save(game)
 
 
-def test_golden_light_unlock_training_costs_and_reload(prepared):
+def test_five_lights_unlock_training_costs_and_reload(prepared):
+    from cultivation_life.system.divine_lights import definitions,profile,recipe
     e,g,_=prepared
     assert not e.present(g)['golden_light']['available']
-    with pytest.raises(ValueError, match='解锁'):
-        e.immortal_action(g.id,'temper_golden_light')
-    g.player.immortal_body['level']=20
-    assert golden_light_resistance(g.player)==.01
-    for stage in rules()['golden_light']['stages'][1:]:
-        for key,count in stage['recipe'].items(): add_item(g.player,key,count)
+    with pytest.raises(ValueError,match='选择'):e.immortal_action(g.id,'temper_golden_light')
+    g.player.immortal_body['level']=50
+    for row in definitions():
+        for key,count in recipe(row,0).items():add_item(g.player,key,count)
     e.store.save(g)
-    for rank in range(2,6):
-        shown=e.immortal_action(g.id,'temper_golden_light')['golden_light']
-        assert shown['rank']==rank
-        assert shown['resistance']==[.01,.02,.04,.06,.10][rank-1]
+    for row in definitions():
+        shown=e.immortal_action(g.id,'train_divine_light',axis=row['id'],expected_level=0)['golden_light']
+        assert next(r for r in shown['lights'] if r['id']==row['id'])['level']==1
     saved=e._load(g.id)
-    assert project_loadout(saved,saved.player,player=True).body_voisinage_resistance==.1
-    assert all(i.quantity==0 for i in saved.player.inventory if i.id in {k for s in rules()['golden_light']['stages'] for k in s['recipe']})
-    with pytest.raises(ValueError,match='大圆满'):e.immortal_action(g.id,'temper_golden_light')
+    assert profile(saved.player,player=True)[1]=={r['id']:1 for r in definitions()}
+    assert project_loadout(saved,saved.player,player=True).body_voisinage_resistance==0
+    assert all(i.quantity==0 for i in saved.player.inventory if i.id in {k for r in definitions() for k in r['recipe']})
+    assert GameState.from_dict(saved.to_dict()).player.immortal_body==saved.player.immortal_body
 
 
 @pytest.mark.parametrize('resistance',[.01,.02,.04,.06,.1])

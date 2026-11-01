@@ -117,12 +117,15 @@ def test_copies_power_and_actual_domain_capped_at_eight(ready, realm, ratios, fi
     engine, game = ready
     game.player.realm_index = realm
     route(game.player, level=9, rank=rank)
+    game.player.immortal_body={'level':50,'divine_lights':dict(kun=8,zhen=7,kan=6,li=5,qian=4)}
     power = combat_power(game.player)
     asura_trials.start(engine._dependencies.asura_trials, game, 'asura_breakthrough')
     battle = load_battle(game.active_trial['snapshot'])
     assert battle.escape_forbidden_sides == {'player', 'enemy'}
     for i, (ratio, field) in enumerate(zip(ratios, fields)):
         enemy = battle.units[f'enemy-{i}'].unit
+        assert enemy.capabilities.divine_lights==battle.units['player'].unit.capabilities.divine_lights
+        assert enemy.capabilities.divine_light_levels==battle.units['player'].unit.capabilities.divine_light_levels
         assert enemy.power == pytest.approx(power * ratio)
         assert bool(enemy.capabilities.voisinages) == field
         if field:

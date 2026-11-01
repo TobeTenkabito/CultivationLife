@@ -395,8 +395,8 @@ class GameEngine:
     def _save_cultivation(self, game, summary):
         return cultivation_session._save_cultivation(self._dependencies.cultivation.commit, game, summary)
 
-    def immortal_action(self, game_id, action, doctrine_id=None, axis=None, supply_id=None):
-        return immortal_actions.immortal_action(self._dependencies.cultivation.immortal_actions, game_id, action, doctrine_id, axis, supply_id)
+    def immortal_action(self, game_id, action, doctrine_id=None, axis=None, supply_id=None, expected_level=None):
+        return immortal_actions.immortal_action(self._dependencies.cultivation.immortal_actions, game_id, action, doctrine_id, axis, supply_id, expected_level)
 
     @staticmethod
     def _spend_cultivation(player, cost):
@@ -405,8 +405,8 @@ class GameEngine:
     def _public_immortal(self, game):
         return immortal_actions._public_immortal(self._dependencies.cultivation.immortal_view, game)
 
-    def _temper_golden_light(self, game):
-        return immortal_body._temper_golden_light(self._dependencies.cultivation.body, game)
+    def _temper_golden_light(self, game, key=None, expected_level=None):
+        return immortal_body._temper_golden_light(self._dependencies.cultivation.body, game, key, expected_level)
 
     @staticmethod
     def _public_golden_light(game):

@@ -357,7 +357,7 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.upper_voisinage_action(game_id, str(payload.get("action", "")), payload.get("voisinage_id"))
             elif operation == "immortal-action":
                 result = ENGINE.immortal_action(game_id, str(payload.get("action", "")),
-                                                payload.get("doctrine_id"), payload.get("axis"), payload.get("supply_id"))
+                                                payload.get("doctrine_id"), payload.get("axis"), payload.get("supply_id"),payload.get('expected_level'))
             elif operation == 'yaochi-action':
                 result = ENGINE.yaochi_action(game_id, payload.get('action',''), payload.get('target_id',''), payload.get('amount',1))
             elif operation == "tianji-action":

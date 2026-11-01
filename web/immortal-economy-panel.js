@@ -12,13 +12,23 @@
     }
     window.UtilityPanels.schedule('golden-light',golden.available?()=>{
       const light=document.querySelector('#golden-light-content');light.replaceChildren();
-      if(golden.available) {
-        light.append(el('h3',`${golden.stages[golden.rank-1].name} · 肉身邻域抵抗 ${Math.round(golden.resistance*100)}%`),el('p','护体金光随仙躯而生，削弱肉身承受的敌方邻域威能与持续压迫。此功效不增加自身邻域的稳固、侵夺或权能，也不消耗仙灵力。','muted'));
-        const track=el('div',null,'voisinage-stages');
-        golden.stages.forEach((s,i)=>{const n=el('span',s.name,i+1===golden.rank?'current':i+1<golden.rank?'completed':'');n.append(el('small',`${Math.round(s.resistance*100)}%`));track.append(n);});light.append(track);
-        if(golden.next_name)light.append(el('p',`锤炼至${golden.next_name}：${golden.recipe.map(r=>`${r.name} ${fmt(r.owned)} / ${fmt(r.needed)}`).join(' · ')}`),el('p','资材可于瑶池功勋商店求取。备齐后在仙界锤炼，材料消耗后晋阶。','muted'),button('锤炼护体金光',{action:'temper_golden_light'},!golden.can_train,temper));
-        else light.append(el('p','金光大圆满，肉身邻域抵抗已达上限。','doctrine-note'));
+      light.append(el('h3',`五色神光 · 已解锁 ${golden.unlocked_count} / 5`),el('p',`独立炼体：${golden.body_stage} · 第 ${golden.body_level} / 50 层。每十层解锁一道神光，各光可独立修炼至十重。`,'muted'));
+      const grid=el('div',null,'divine-light-grid');
+      for(const row of golden.lights){
+        const card=el('section',null,'divine-light-card');card.dataset.light=row.id;card.classList.toggle('locked',!row.unlocked);
+        card.append(el('h4',row.name),el('small',`仙躯${row.unlock_level}层解锁 · ${row.unlocked?row.level+' / 10 重':'尚未解锁'}`),el('p',row.description));
+        if(row.unlocked){
+          const text=row.id==='kun'?`凡属性伤害免疫 · 抵抗封禁 ${(row.value*100).toFixed(0)}%`:row.id==='zhen'?`治疗保留普通出手 · 治疗增强 ${(row.value*100).toFixed(0)}%`:row.id==='li'?`基础态势削弱 ${(row.value*100).toFixed(1)}% · 按邻域威能折算`:`每回合触发概率 ${(row.value*100).toFixed(0)}%`;
+          card.append(el('p',text,'divine-light-value'));
+          if(row.level<10){
+            card.append(el('p',row.recipe.map(r=>`${r.name} ${fmt(r.owned)} / ${fmt(r.needed)}`).join(' · '),'muted'));
+            const train=button('修炼至第'+(row.level+1)+'重',{action:'train_divine_light',axis:row.id,expected_level:row.level},!row.can_train,temper);
+            train.dataset.unavailable=row.can_train?'0':'1';train.dataset.divineLightTrain=row.id;card.append(train);
+          }else card.append(el('p','此光已臻十重','doctrine-note'));
+        }
+        if(row.reason)card.append(el('small',row.reason));grid.append(card);
       }
+      light.append(grid,el('p','邻域治疗占用邻域行动；未解锁震合缥光时，还占用一次普通出手。乾古素光按先后手判定，先成功者令后手本回合无法发动。','muted'));
     }:null);
     window.UtilityPanels.schedule('yaochi',pool.available?()=>{
       const root=document.querySelector('#yaochi-content');root.replaceChildren();if(!pool.available)return;

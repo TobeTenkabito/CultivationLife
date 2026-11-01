@@ -65,7 +65,7 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
         artifact = ITEM_CATALOG.get(read(owner, 'combat_artifact_id'))
         artifacts = [artifact] if artifact else []
         ward = 2 if npc_golden_light(owner) else 1
-        resistance = .01 if ward == 2 else 0.0
+        resistance = 0.0
         artifacts.extend(tianji_artifacts)
         second = getattr(getattr(game, 'player', None), 'nascent_state', {}).get('second', {})
         if second and second.get('id') == read(owner, 'id'):
@@ -78,8 +78,11 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
             artifacts = [a for a in artifacts if not read(a, 'tianji')]
     responses = tuple(r for t in techniques for r in _responses(t, 'technique')) + tuple(r for i in artifacts for r in _responses(i, 'artifact'))
     from .authored_techniques import combat_rules
+    from .divine_lights import profile
+    lights,levels=profile(owner,player=player)
     return replace(source, semantic_rules=source.semantic_rules + combat_rules(game, owner, player=player),
                    technique_tier=max((_tier(t) for t in techniques), default=1),
                    artifact_tier=max((_tier(i) for i in artifacts), default=1), passive_ward_tier=ward,
                    body_voisinage_resistance=resistance,
+                   divine_lights=lights,divine_light_levels=levels,
                    interventions=responses[:8])

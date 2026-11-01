@@ -97,14 +97,17 @@ def test_body_visible_before_prerequisite_and_old_body_manual_is_insufficient(pr
         engine.immortal_action(game.id, 'train_body')
 
 
-def test_body_purchase_recipe_failure_pity_switch_and_level20(prepared):
+def test_body_purchase_recipe_failure_pity_switch_and_level10(prepared):
     engine, game, _ = prepared
     game.player.body_training = 100
-    game.player.immortal_body = {'level': 19}
+    game.player.immortal_body = {'level': 9}
     game.player.location_id = 'expanse_celestial_8'
     game.yaochi_state['merit'] = 10000
     engine.store.save(game)
     engine.immortal_action(game.id, 'buy_body_manual', supply_id='jade_marrows')
+    saved=engine.store.load(game.id)
+    saved.player.inventory=[i for i in saved.player.inventory if i.id not in {'immortal_jade_herb','nine_leaf_immortal_lingzhi','golden_lotus_elixir'}]
+    engine.store.save(saved)
     with pytest.raises(ValueError, match='药'):
         engine.immortal_action(game.id, 'train_body')
     saved = engine.store.load(game.id)
@@ -114,9 +117,9 @@ def test_body_purchase_recipe_failure_pity_switch_and_level20(prepared):
     with patch('cultivation_life.system.immortal_body_system.decode_rng', return_value=random.Random(2)):
         shown = engine.immortal_action(game.id, 'train_body')
     assert shown['doctrines']['immortal_body']['failures'] == 1
-    assert shown['doctrines']['immortal_body']['level'] == 19
+    assert shown['doctrines']['immortal_body']['level'] == 9
     p = engine.store.load(game.id).player
-    assert next(i.quantity for i in p.inventory if i.id == 'immortal_jade_herb') == 1880
+    assert next(i.quantity for i in p.inventory if i.id == 'immortal_jade_herb') == 1880  # 12 herbs x target layer 10
     engine.immortal_action(game.id, 'buy_body_manual', supply_id='golden_lotus')
     shown = engine.immortal_action(game.id, 'select_body_manual', supply_id='golden_lotus')
     assert shown['doctrines']['immortal_body']['failures'] == 1

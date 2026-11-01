@@ -86,6 +86,9 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             imitation = bool(source and any(d.id.startswith('spirit:') for d in source.voisinages))
             resources[npc.id] = prepare(npc, now, config, imitation=imitation)
             capabilities = resolve_source(resources[npc.id].state, definitions, (sources or {}).get(npc.id))
+            from ..divine_lights import profile
+            lights,levels=profile(npc)
+            capabilities=replace(capabilities,divine_lights=lights,divine_light_levels=levels,body_voisinage_resistance=0.)
             if capabilities.resource_link != "independent":
                 raise ValueError("NPC resources must be independent")
             from ..cultivation_ranks import rank_for
@@ -102,11 +105,13 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
     for round_no in range(1, max(1, min(8, max_rounds)) + 1):
         p = max(0.0, 1 - battle.ordinary_loss("player"))
         e = max(0.0, 1 - battle.ordinary_loss("enemy"))
-        frame = battle.begin_round(round_no, player_condition=p, enemy_condition=e, player_mp=1, enemy_mp=1)
+        frame = battle.begin_round(round_no, player_condition=p, enemy_condition=e, player_mp=1, enemy_mp=1,
+                                   rng=rng,first_side='player' if battle.totals['player']>=battle.totals['enemy'] else 'enemy')
         if frame.ordinary and battle.verdict() is None:
             p_power, e_power = battle.totals["player"], battle.totals["enemy"]
             semantic = battle.semantic_ordinary_start()
             first = p_power * (semantic['player']['mobility'] + semantic['player']['sense']) >= e_power * (semantic['enemy']['mobility'] + semantic['enemy']['sense'])
+            if frame.divine_first is not None:first=frame.divine_first=='player'
             after = battle.semantic_initiative(first)
             for side in ('player', 'enemy'):
                 for stat in semantic[side]:

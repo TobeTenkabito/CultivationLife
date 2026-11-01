@@ -132,6 +132,8 @@ def initialize(game, trial):
             if key != 'player':
                 state.unit = replace(state.unit, capabilities=replace(state.unit.capabilities,
                     capacity=own.capacity, current=own.current, usable_capacity=own.usable_capacity,
+                    divine_lights=dict(own.divine_lights),divine_light_levels=dict(own.divine_light_levels),
+                    ward_tier=own.ward_tier,body_voisinage_resistance=own.body_voisinage_resistance,
                     investment=own.investment if key == 'enemy-2' else 0,
                     investment_limit=own.investment_limit if key == 'enemy-2' else None))
                 state.current = own.current

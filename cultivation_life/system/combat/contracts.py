@@ -145,6 +145,9 @@ class CapabilitySource:
     interventions: tuple[Intervention, ...] = ()
     semantic_rules: tuple[Mapping[str, Any], ...] = ()
 
+    divine_lights: Mapping[str, float] = field(default_factory=dict)
+    divine_light_levels: Mapping[str, int] = field(default_factory=dict)
+
 
 def resolve_source(state, definitions, source: CapabilitySource | None = None, **kwargs):
     if source and source.voisinages:
@@ -161,6 +164,8 @@ def resolve_source(state, definitions, source: CapabilitySource | None = None, *
                          ward_tier=result.ward_tier if source.passive_ward_tier is None else source.passive_ward_tier,
                          interventions=source.interventions or result.interventions,
                          semantic_rules=source.semantic_rules or result.semantic_rules)
+        result = replace(result, divine_lights=dict(source.divine_lights),
+                         divine_light_levels=dict(source.divine_light_levels))
     return result
 
 
@@ -192,8 +197,15 @@ class CombatCapabilities:
     interventions: tuple[Intervention, ...] = ()
     body_voisinage_resistance: float = 0.0
     semantic_rules: tuple[Mapping[str, Any], ...] = ()
+    divine_lights: Mapping[str, float] = field(default_factory=dict)
+    divine_light_levels: Mapping[str, int] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
+        allowed={'kun','kun_resist','zhen','zhen_heal','kan','li','qian'}
+        if set(self.divine_lights)-allowed or any(number(v,'divine light')>1 for v in self.divine_lights.values()):
+            raise ValueError('Invalid divine light capability')
+        if set(self.divine_light_levels)-{'kun','zhen','kan','li','qian'} or any(type(v) is not int or not 0<=v<=10 for v in self.divine_light_levels.values()):
+            raise ValueError('Invalid divine light training level')
         if self.semantic_rules:
             from ...combat_semantics import parse_rules
             object.__setattr__(self, 'semantic_rules', parse_rules(self.semantic_rules))
@@ -269,6 +281,7 @@ class PhaseRound:
     stat_factors: dict[str, dict[str, float]] = field(default_factory=dict)
     primary_restore: float = 0.0
     blocked_actions: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    divine_first: str | None = None
 
     @property
     def ordinary(self) -> bool:
@@ -310,7 +323,8 @@ class CombatPhases(Protocol):
     def enabled(self) -> bool: ...
 
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
-                    player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None) -> PhaseRound: ...
+                    player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None,
+                    rng=None, first_side=None) -> PhaseRound: ...
     def ordinary_damage(self, dealt: float, received: float) -> tuple[float, float]: ...
     def sync_resources(self, *, player_mp: float, enemy_mp: float) -> None: ...
     def semantic_ordinary_start(self) -> dict[str, dict[str, float]]: ...

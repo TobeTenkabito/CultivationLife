@@ -40,7 +40,7 @@ class CombatSemantics:
             field_id=s.active_voisinage or '', stance=c.stance, fighting=s.fighting,
             suppressed=s.suppressed, escaped=s.escaped, escape_locked=s.escape_locked,
             dominated=key in self._dominated, has_field=bool(c.voisinages), field_sealed=c.sealed,
-            force_tier=c.force_tier, ward_tier=c.ward_tier, resource_tier=c.resource_tier,
+            force_tier=c.force_tier, ward_tier=self.ward_tier(key), resource_tier=c.resource_tier,
             technique_tier=c.technique_tier, artifact_tier=c.artifact_tier,
             ally_count=sum(v.fighting and v.unit.side == s.unit.side and k != key for k, v in self.units.items()),
             enemy_count=sum(v.fighting and v.unit.side != s.unit.side for v in self.units.values()),

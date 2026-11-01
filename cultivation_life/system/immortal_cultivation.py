@@ -7,23 +7,18 @@ def rules():
 
 
 def golden_light(player):
-    from .possession_system import is_possessed
-    if is_possessed(player):
-        from .npc_cultivation import npc_golden_light
-        return npc_golden_light(player.ghost_host_body)
-    return int(player.immortal_body.get('level', 0)) >= rules()['body']['golden_light_level']
+    from .divine_lights import profile
+    return bool(profile(player,player=True)[0].get('kun'))
 
 
 def golden_light_rank(player):
-    from .possession_system import is_possessed
-    if is_possessed(player):
-        return max(1, min(5, int(player.ghost_host_body.get('golden_light_rank', 1)))) if golden_light(player) else 0
-    return max(1, min(5, int(player.immortal_body.get('golden_light_rank', 1)))) if golden_light(player) else 0
+    from .divine_lights import profile
+    return len(profile(player,player=True)[1])
 
 
 def golden_light_resistance(player):
-    rank = golden_light_rank(player)
-    return rules()['golden_light']['stages'][rank - 1]['resistance'] if rank else 0.0
+    # The old uniform domain resistance is replaced by five separate effects.
+    return 0.0
 
 
 def vein_intrinsic_bonus(player, resource):
