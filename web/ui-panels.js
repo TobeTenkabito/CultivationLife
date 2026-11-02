@@ -3,7 +3,7 @@
   const pending = new Map();
   let saveId = null;
   panelNames.push('civilizations','authored','nascent','immortal-artifacts');
-  panelNames.push('trial-site');
+  panelNames.push('trial-site','monster-body','ghost-body');
 
   function reset() {
     pending.clear();

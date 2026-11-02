@@ -70,6 +70,10 @@ def initialize(game):
                 lights,levels=profile(body)
                 from ...system.wuyun import profile as aggregate_profile
                 aggregates=aggregate_profile(body)
+                from ...system.monster_body import profile as monster_profile
+                aggregates=aggregates or monster_profile(body)
+                from ...system.ghost_body import profile as ghost_profile
+                aggregates=aggregates or ghost_profile(body)
                 tier = 2 if int(body.get('immortal_body_level') or 0) > 0 else 1
                 caps = replace(actor.capabilities, capacity=own.capacity, current=own.current,
                     usable_capacity=own.usable_capacity, force_tier=tier, ward_tier=2 if lights.get('kun') else 1,

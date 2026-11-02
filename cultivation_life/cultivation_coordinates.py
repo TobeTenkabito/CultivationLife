@@ -54,4 +54,10 @@ def validate_immortal_body(record):
     if not isinstance(lights,dict) or set(lights)-{'kun','zhen','kan','li','qian'}:
         raise ValueError('五色神光记录无效')
     if any(type(v) is not int or not 0<=v<=10 for v in lights.values()):raise ValueError('神光修炼等级须为0至10')
+    if 'monster' in record:
+        from .monster_body_content import validate_record
+        validate_record(record['monster'])
+    if 'ghost_training' in record:
+        from .ghost_body_content import validate_training
+        validate_training(record['ghost_training'])
     return record

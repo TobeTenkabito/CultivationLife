@@ -416,6 +416,9 @@
           "cost": {
             "souls": 10,
             "opportunity_multiplier": 1
+          },
+          "recipe": {
+            "asura_blood_amber": 4
           }
         },
         {
@@ -437,6 +440,9 @@
           "cost": {
             "souls": 20,
             "opportunity_multiplier": 2
+          },
+          "recipe": {
+            "asura_pain_heartstone": 6
           }
         },
         {
@@ -464,6 +470,9 @@
           "cost": {
             "souls": 30,
             "opportunity_multiplier": 3
+          },
+          "recipe": {
+            "asura_formless_marrow": 8
           }
         },
         {
@@ -485,6 +494,9 @@
           "cost": {
             "souls": 40,
             "opportunity_multiplier": 4
+          },
+          "recipe": {
+            "asura_karma_lotus": 10
           }
         },
         {
@@ -510,6 +522,9 @@
           "cost": {
             "souls": 50,
             "opportunity_multiplier": 5
+          },
+          "recipe": {
+            "asura_awareness_soul_crystal": 12
           }
         }
       ]

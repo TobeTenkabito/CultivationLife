@@ -15469,6 +15469,66 @@
     "innate_yuanhe_alloy": {
       "asset": "material.innate_yuanhe_alloy",
       "requires": []
+    },
+    "asura_blood_amber": {
+      "asset": "material.asura_blood_amber",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "asura_pain_heartstone": {
+      "asset": "material.asura_pain_heartstone",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "asura_formless_marrow": {
+      "asset": "material.asura_formless_marrow",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "asura_karma_lotus": {
+      "asset": "material.asura_karma_lotus",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "asura_awareness_soul_crystal": {
+      "asset": "material.asura_awareness_soul_crystal",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "monster_celestial_jade": {
+      "asset": "material.monster_celestial_jade",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster_reverse_bone": {
+      "asset": "material.monster_reverse_bone",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster_aperture_marrow": {
+      "asset": "material.monster_aperture_marrow",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster_ancestral_blood": {
+      "asset": "material.monster_ancestral_blood",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "monster_return_soul_amber": {
+      "asset": "material.monster_return_soul_amber",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
     }
   },
   "molds": {

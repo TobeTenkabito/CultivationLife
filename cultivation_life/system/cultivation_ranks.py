@@ -21,6 +21,8 @@ def public_ranks(actor, *, player=False):
         ensure_npc(actor)
     immortal = actor.immortal_body.get('level', 0) if player else read(actor, 'immortal_body_level', 0)
     if player:
+        from .monster_body import enabled_for as monster_enabled,active_level as monster_level
+        if monster_enabled(actor):immortal=monster_level(actor,player=True)
         from .asura import enabled
         if enabled() and actor.path == 'demonic':
             immortal = max(immortal, actor.asura_cultivation.get('body_level', 0))

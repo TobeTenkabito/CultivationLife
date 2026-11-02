@@ -173,17 +173,25 @@ def test_other_path_mirrors_copy_light_values_and_freeze_them(prepared,world,pat
     p.world=world;p.path=path;p.realm_index=11;p.layer=9
     p.location_id=e.maps.normalize_location(world,None)
     p.immortal_body={'level':50,'divine_lights':dict(kun=7,zhen=6,kan=5,li=4,qian=3)}
+    if path=='monster':p.immortal_body['monster']={'level':50,'training':{'shenhun':3}}
+    if path=='ghost':p.immortal_body['ghost_training']={'yinguo':3}
     e._start_upper_trial(g,path+'_upper')
     battle=load_battle(g.active_trial['snapshot']);own=battle.units['player'].unit.capabilities
-    assert own.divine_light_levels['qian']==3
+    assert len(own.body_mechanisms)==5 and not own.divine_light_levels
     enemies=[s.unit.capabilities for s in battle.units.values() if s.unit.side=='enemy']
     assert len(enemies)==2
     for cap in enemies:
         assert cap.divine_lights==own.divine_lights
         assert cap.divine_light_levels==own.divine_light_levels
+        assert cap.body_mechanisms==own.body_mechanisms
     p.immortal_body['divine_lights']['qian']=10
     resumed=load_battle(g.active_trial['snapshot'])
-    assert all(s.unit.capabilities.divine_light_levels['qian']==3 for s in resumed.units.values())
+    if path=='monster':
+        p.immortal_body['monster']['training']['shenhun']=10
+        assert all(next(r for r in s.unit.capabilities.body_mechanisms if r.id=='shenhun').effects['exchange_threshold']==pytest.approx(.46) for s in resumed.units.values())
+    else:
+        p.immortal_body['ghost_training']['yinguo']=10
+        assert all(next(r for r in s.unit.capabilities.body_mechanisms if r.id=='yinguo').effects['karma_threshold']==pytest.approx(.425) for s in resumed.units.values())
 
 
 def test_real_npc_combat_uses_body_lights_and_same_text():

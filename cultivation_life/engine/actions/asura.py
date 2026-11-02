@@ -28,7 +28,8 @@ def asura_action(deps: AsuraActionDependencies, game_id, action, target_id='', b
     rng = decode_rng(game.seed, game.rng_state)
     if action=='train_aggregate':
         from ...system.wuyun_cultivation import train
-        summary=train(game,target_id,expected_level)
+        from ...rules import has_item,remove_item
+        summary=train(game,target_id,expected_level,has_item=has_item,remove_item=remove_item)
     elif action == 'purify':
         soul = next((b for b in p.foreign_souls if b.get('id') == target_id and b.get('refined')), None)
         if not soul:

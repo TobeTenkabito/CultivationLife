@@ -175,7 +175,7 @@ CAPABILITIES = (
     Capability('upper institution', 'upper-institution', (S('action'), S('target_id', required=False)),
         lambda e, g, p: e.upper_institution_action(g, str(p.get('action', '')), str(p.get('target_id', '')))),
     Capability('upper voisinage', 'upper-voisinage', (S('action', choices=('select', 'train')), S('voisinage_id', required=False)),
-        lambda e, g, p: e.upper_voisinage_action(g, str(p.get('action', '')), p.get('voisinage_id'))),
+        lambda e, g, p: e.upper_voisinage_action(g, str(p.get('action', '')), p.get('voisinage_id'),p.get('expected_level'))),
     Capability('immortal action', 'immortal-action', (S('action'), S('doctrine_id', required=False), S('axis', required=False), S('supply_id', required=False), I('expected_level',0,10,required=False)),
         lambda e, g, p: e.immortal_action(g, str(p.get('action', '')), p.get('doctrine_id'), p.get('axis'), p.get('supply_id'),p.get('expected_level'))),
     Capability('yaochi action', 'yaochi-action', (S('action'), S('target_id', required=False), I('amount', 0, 1000000000000000)),

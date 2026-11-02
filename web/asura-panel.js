@@ -55,12 +55,27 @@
         const e=row.effects||{},text={
           se:`免疫凡属性伤害，邻域威能提高${pct(e.authority)}。`,
           shou:`每轮${pct(row.probability)}概率令合法数值施权暴击，效果为基础的200%。`,
-          xiang:`本轮实际邻域暴击后可额外施权一次，${pct(e.free)}概率免除此额外施权费；不递归追加。`,
+          xiang:`实际邻域暴击后可额外施权一次，${pct(e.free)}概率免除此额外施权费；不同机制可联动，同一角色机制不能沿自身因果链重入。`,
           xing:`目标轮首原始触发的每种炼体机制，使对其邻域或战斗态势的既有削弱增加${pct(e.exploit)}；随后静默不重算数量。`,
           shi:`敌方每实际完成一次额外施权，回复自身${pct(e.restore_state)}战斗态势与${pct(e.restore_energy)}可用元力；不恢复肉身。`
         }[row.id];
         const card=section(`${row.name} · ${row.unlocked?`${row.level}/${row.max_level}重`:`魔躯${row.unlock_level}层解锁`}`,row.unlocked?text:'达到对应层数后解锁，并可单独培养。');
         card.classList.add('asura-aggregate-card');card.classList.toggle('locked',!row.unlocked);
+        for(const material of row.materials||[]){
+          const supply=el('div',null,'asura-aggregate-material');supply.dataset.material=material.id;
+          if(window.PixelLibrary?.active()){
+            const image=el('img');image.alt=material.name;image.width=image.height=64;image.loading='lazy';
+            supply.append(image);
+            window.PixelLibrary.ensure().then(catalog=>{
+              const asset=catalog?.assets[material.asset+'.portrait'];
+              if(image.isConnected&&asset)image.src=asset.file;
+            });
+          }
+          const info=el('div');info.append(el('strong',material.name),
+            el('p',`持有 ${fmt(material.owned)}${row.level<row.max_level?` / 本次所需 ${fmt(material.needed)}`:' · 培养圆满'}`),
+            el('small',`仅${material.origin_name}产出 · 坊市、黑市与拍卖`));
+          supply.append(info);card.append(supply);
+        }
         if(row.level<row.max_level){
           card.append(note(`下一重：${fmt(row.cost.souls)}精魂 · ${fmt(row.cost.opportunity)}机缘`));
           const train=button(`修炼${row.name}至第${row.level+1}重`,'train_aggregate',{target_id:row.id,expected_level:row.level},!row.can_train);

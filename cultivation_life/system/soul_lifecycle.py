@@ -46,6 +46,8 @@ def leave_body(game, *, destroyed=False):
         entered=p.age, deadline=p.age + unit_years(p), address=address(game))
     if destroyed:
         p.body_training = 0
+        from .possession_system import is_possessed
+        if not is_possessed(p):p.immortal_body.pop('monster',None)
         p.body_progress = 0.
         p.awaiting_body_breakthrough = False
         p.body_energy = 0.

@@ -24,7 +24,23 @@ def validate_config(config):
         if not isinstance(row.get('cost'),dict):raise ValueError('Invalid aggregate costs')
         if any(type(v) is not int or v<=0 for v in row['cost'].values()) or set(row['cost'])!={'souls','opportunity_multiplier'}:
             raise ValueError('Aggregate costs must be positive')
+        recipe=row.get('recipe')
+        if not isinstance(recipe,dict) or len(recipe)!=1 or any(
+                not isinstance(k,str) or type(v) is not int or v<=0 for k,v in recipe.items()):
+            raise ValueError('Each aggregate requires one real material with a positive quantity')
     for rank in range(11):validate_mechanisms(tuple(build(row,rank) for row in rows))
+
+
+def validate_material_sources(config,items,goods):
+    """Natural supply is world-local; carried inventory and resale keep ownership."""
+    for row in config.get('five_aggregates',[]):
+        for key in row['recipe']:
+            item=items.get(key)
+            sources=[r for r in goods if r.get('kind')=='item' and r.get('content_id')==key]
+            if item is None or 'wuyun_material' not in item.tags:
+                raise ValueError('Unknown five-aggregate material')
+            if not sources or any(r.get('world','human')!='asura' or r.get('tier') not in range(9,13) for r in sources):
+                raise ValueError('Five-aggregate materials must originate only in Asura')
 
 
 def validate_state(record):

@@ -6,6 +6,7 @@ contain only bounded actor state; they do not consult or advance the NPC world.
 """
 from dataclasses import asdict
 import copy
+from math import isfinite
 
 from .contracts import Combatant, CombatCapabilities, VoisinageDefinition
 from .voisinages import VoisinageBattle
@@ -30,8 +31,17 @@ def load_battle(snapshot):
         units.append(Combatant(**row, capabilities=CombatCapabilities(**caps)))
     battle = VoisinageBattle(units)
     for key, values in snapshot['states'].items():
+        credit=values.get('karma_spent',0.)
+        history=values.get('last_attack_targets')
+        if (isinstance(credit,bool) or not isinstance(credit,(int,float)) or not isfinite(credit) or not 0<=credit<1
+                or type(values.get('death_observed',False)) is not bool):
+            raise ValueError('Invalid body event snapshot')
+        if history is not None:
+            if (not isinstance(history,(list,tuple)) or any(not isinstance(k,str) or k not in battle.units for k in history)
+                    or len(set(history))!=len(history)):
+                raise ValueError('Invalid attack target history')
         for name, value in values.items():
-            setattr(battle.units[key], name, copy.deepcopy(value))
+            setattr(battle.units[key], name, tuple(value) if name=='last_attack_targets' and value is not None else copy.deepcopy(value))
     battle._dominated = dict(snapshot['dominated'])
     battle.escape_forbidden_sides = frozenset(snapshot.get('escape_forbidden_sides', ()))
     if snapshot.get('semantic_runtime'):
@@ -90,6 +100,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
                         if battle.attack_tier(player) >= battle.ward_tier(key):
                             battle.attack_tier(player, pay=True)
                             battle._lose(key, victim.vitality)
+                            battle._drain_body_events()
                             victim.suppressed = False
                             frame.events.append(f'你以可用的主战手段彻底斩灭{victim.unit.name}。')
             stats = copy.deepcopy(state['stats'])
@@ -157,6 +168,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
                     battle.attack_tier(attacker, pay=True)
                     battle._lose('player', player.vitality)
                     player.body = 0
+                    battle._drain_body_events()
                     rows[-1]['events'].append('劫相击杀了被镇压的肉身。')
                     rows[-1].update(player_hp_ratio=0, player_combat_state=0, voisinage=battle.report())
                     break

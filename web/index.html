@@ -25,7 +25,8 @@
   <link rel="stylesheet" href="/npc-contacts.css?v=1.51.1">
   <link rel="stylesheet" href="/asura-court-panel.css?v=1.55.0">
   <link rel="stylesheet" href="/upper-energy.css?v=1.55.0">
-  <link rel="stylesheet" href="/asura-panel.css?v=wuyun1">
+  <link rel="stylesheet" href="/asura-panel.css?v=wuyun-materials1">
+  <link rel="stylesheet" href="/monster-body.css?v=standalone1">
   <link rel="stylesheet" href="/meridian-atlas.css?v=2">
   <link rel="stylesheet" href="/local-economy.css?v=1">
   <link rel="stylesheet" href="/war-logistics.css?v=290">
@@ -405,6 +406,8 @@
 <article id="asura-powers-card" class="paper utility-panel immortal-panel asura-system-panel hidden" role="dialog" aria-label="神通"><div class="section-title"><h2>神通</h2><button id="asura-powers-toggle" type="button">关闭</button></div><div id="asura-powers-content" class="immortal-content"></div></article>
 <article id="puppet-workshop-card" class="paper utility-panel immortal-panel" role="dialog" aria-label="傀儡工坊"><div class="section-title"><h2>傀儡工坊</h2><button id="puppet-workshop-toggle" type="button">关闭</button></div><div id="puppet-workshop" class="puppet-workshop"></div></article>
 <article id="upper-voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="本界邻域"><div class="section-title"><h2>本界邻域</h2><button id="upper-voisinage-toggle" type="button">关闭</button></div><div id="upper-voisinage-content" class="immortal-content"></div></article>
+<article id="monster-body-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="妖躯"><div class="section-title"><h2>妖躯</h2><button id="monster-body-toggle" type="button">关闭</button></div><div id="monster-body-content" class="immortal-content"></div></article>
+<article id="ghost-body-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="鬼躯"><div class="section-title"><h2>鬼躯</h2><button id="ghost-body-toggle" type="button">关闭</button></div><div id="ghost-body-content" class="immortal-content"></div></article>
 <article id="golden-light-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="五色神光"><div class="section-title"><h2>五色神光</h2><button id="golden-light-toggle" type="button">关闭</button></div><div id="golden-light-content" class="immortal-content"></div></article>
 <article id="yaochi-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="瑶池"><div class="section-title"><h2>瑶池 · 功勋司</h2><button id="yaochi-toggle" type="button">关闭</button></div><div id="yaochi-content" class="immortal-content"></div></article>
 <article id="immortal-body-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="真仙之躯"><div class="section-title"><h2>真仙之躯</h2><button id="immortal-body-toggle" type="button">关闭</button></div><div id="immortal-body-content" class="immortal-content"></div></article>
@@ -523,6 +526,8 @@
 <button type="button" data-panel-target="asura-domain" data-dlc="asura" title="修罗显圣 · 魔域" class="hidden"><span>域</span><small>魔域</small></button>
 <button type="button" data-panel-target="asura-powers" data-dlc="asura" title="修罗显圣 · 神通" class="hidden"><span>通</span><small>神通</small></button>
         <button type="button" data-panel-target="upper-voisinage" title="本界邻域" class="hidden"><span>域</span><small>修域</small></button>
+        <button type="button" data-panel-target="monster-body" data-dlc="bloodline" title="妖躯" class="hidden"><span>躯</span><small>妖躯</small></button>
+        <button type="button" data-panel-target="ghost-body" data-dlc="ghost" title="鬼躯" class="hidden"><span>冥</span><small>鬼躯</small></button>
         <button type="button" data-panel-target="golden-light" title="五色神光" class="hidden"><span>光</span><small>神光</small></button>
         <button type="button" data-panel-target="immortal-body" title="真仙之躯" class="hidden"><span>躯</span><small>仙躯</small></button>
         <button type="button" data-panel-target="voisinage" title="仙域管理与温养" class="hidden"><span>域</span><small>仙域</small></button>
@@ -612,8 +617,8 @@
   </dialog>
   <div id="toast" class="toast"></div>
   <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"><span class="achievement-toast-seal">成</span><div><small>成就已解锁</small><b id="achievement-toast-name"></b><p id="achievement-toast-description"></p></div></div>
-  <script src="/ui-panels.js?v=2.0.1"></script>
-  <script src="/navigation.js?v=authored-ink-1"></script>
+  <script src="/ui-panels.js?v=ghost-body1"></script>
+  <script src="/navigation.js?v=ghost-body1"></script>
   <script src="/guixu-panel.js?v=20260921-6"></script>
   <script src="/merchant-commission-panel.js?v=2.0.1"></script>
   <script src="/trade-orders-panel.js?v=1"></script>
@@ -652,11 +657,13 @@
   <script src="/meridian-atlas.js?v=3"></script>
   <script src="/doctrine-panel.js?v=2"></script>
   <script src="/immortal-aperture-panel.js?v=2"></script>
-  <script src="/upper-voisinage-panel.js?v=251-1"></script>
+  <script src="/monster-body.js?v=body-events1"></script>
+  <script src="/ghost-body.js?v=ghost-body1"></script>
+  <script src="/upper-voisinage-panel.js?v=monster-body-nav1"></script>
   <script src="/asura-court-panel.js?v=1.58.0-spatial"></script>
   <script src="/puppet-workshop.js?v=1.55.0"></script>
   <script src="/asura-meridians.js?v=1.55.0-atlas"></script>
-  <script src="/asura-panel.js?v=wuyun1"></script>
+  <script src="/asura-panel.js?v=wuyun-materials1"></script>
   <script src="/upper-institution-panel.js?v=1.55.0"></script>
   <script src="/monster-civilizations.js?v=2100"></script>
   <script src="/authored-techniques.js?v=310"></script>
@@ -665,7 +672,7 @@
   <script src="/character-skins.js?v=321a"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>
-  <script src="/handbook-content.js?v=body-round1"></script>
+  <script src="/handbook-content.js?v=body-events1"></script>
   <script src="/tutorial-steps.js?v=desktop-1"></script>
   <script src="/tutorial-interface.js?v=1"></script>
   <script src="/tutorial.js?v=ui-tour-1"></script>
@@ -724,7 +731,7 @@
   <script src="/event-scenes.js?v=fx3"></script>
   <script src="/combat-beasts.js?v=beasts1-monster-418"></script>
   <script src="/combat-replay.js?v=divine1"></script>
-  <script src="/app.js?v=fx3"></script>
+  <script src="/app.js?v=ghost-body1"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

@@ -1,0 +1,31 @@
+{
+  "method": "built-in image_gen",
+  "reference": "design/inventory-icons-v2-20261020/source/special_materials.png",
+  "assets": [
+    {
+      "id": "asura_blood_amber",
+      "name": "凝煞血珀",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG inventory material sprite and matching item portrait. The attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE NEW material object, matching one individual object of that reference sheet, not a contact sheet. Deliberately low-resolution 32x32 logical pixel-art design enlarged with nearest-neighbor hard square pixel blocks. Dark 1-pixel stepped outline, 3 to 5 clustered shades per surface, strongest highlight upper left, clear silhouette, restrained 3/4 view, compact centered isolated object. Preserve substantial transparent padding, no background, no ground plane or drop shadow, no frame, no lettering, no labels, no symbols, no human, no scenery, no smooth painting, no photorealism, no antialiasing, no bloom. Subject: A single angular cluster of dark blood-red amber, three broad facets with trapped crimson vein inclusions, smoky black base, a few warm gold highlights. No loose particles."
+    },
+    {
+      "id": "asura_pain_heartstone",
+      "name": "九窍痛心石",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG inventory material sprite and matching item portrait. The attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE NEW material object, matching one individual object of that reference sheet, not a contact sheet. Deliberately low-resolution 32x32 logical pixel-art design enlarged with nearest-neighbor hard square pixel blocks. Dark 1-pixel stepped outline, 3 to 5 clustered shades per surface, strongest highlight upper left, clear silhouette, restrained 3/4 view, compact centered isolated object. Preserve substantial transparent padding, no background, no ground plane or drop shadow, no frame, no lettering, no labels, no symbols, no human, no scenery, no smooth painting, no photorealism, no antialiasing, no bloom. Subject: A single rugged purple-black heart-shaped porous stone with five irregular natural cavities and muted red light in cracks. Mineral rather than anatomy, asymmetric chiseled silhouette. No literal human heart or blood."
+    },
+    {
+      "id": "asura_formless_marrow",
+      "name": "无相幻髓",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG inventory material sprite and matching item portrait. The attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE NEW material object, matching one individual object of that reference sheet, not a contact sheet. Deliberately low-resolution 32x32 logical pixel-art design enlarged with nearest-neighbor hard square pixel blocks. Dark 1-pixel stepped outline, 3 to 5 clustered shades per surface, strongest highlight upper left, clear silhouette, restrained 3/4 view, compact centered isolated object. Preserve substantial transparent padding, no background, no ground plane or drop shadow, no frame, no lettering, no labels, no symbols, no human, no scenery, no smooth painting, no photorealism, no antialiasing, no bloom. Subject: A squat ancient bone-white vial with two small side ridges and a dark violet stopper, translucent center holding teal-violet primordial marrow, one pearly highlight. Single compact recognizable item, no aura."
+    },
+    {
+      "id": "asura_karma_lotus",
+      "name": "业火劫莲",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG inventory material sprite and matching item portrait. The attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE NEW material object, matching one individual object of that reference sheet, not a contact sheet. Deliberately low-resolution 32x32 logical pixel-art design enlarged with nearest-neighbor hard square pixel blocks. Dark 1-pixel stepped outline, 3 to 5 clustered shades per surface, strongest highlight upper left, clear silhouette, restrained 3/4 view, compact centered isolated object. Preserve substantial transparent padding, no background, no ground plane or drop shadow, no frame, no lettering, no labels, no symbols, no human, no scenery, no smooth painting, no photorealism, no antialiasing, no bloom. Subject: A single compact five-petal black-and-rust-red crystal lotus, ember orange inner petal facets, dark charcoal jagged outer petals, a few tiny golden highlights. Broad readable petal shapes, no flame cloud."
+    },
+    {
+      "id": "asura_awareness_soul_crystal",
+      "name": "冥觉魂晶",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG inventory material sprite and matching item portrait. The attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE NEW material object, matching one individual object of that reference sheet, not a contact sheet. Deliberately low-resolution 32x32 logical pixel-art design enlarged with nearest-neighbor hard square pixel blocks. Dark 1-pixel stepped outline, 3 to 5 clustered shades per surface, strongest highlight upper left, clear silhouette, restrained 3/4 view, compact centered isolated object. Preserve substantial transparent padding, no background, no ground plane or drop shadow, no frame, no lettering, no labels, no symbols, no human, no scenery, no smooth painting, no photorealism, no antialiasing, no bloom. Subject: A single deep indigo-violet pointed crystal with a small silver curled seed suspended inside, two shorter asymmetrical crystal spurs, broad stepped facets, blue-violet shadows. No eye symbol or floating particles."
+    }
+  ]
+}

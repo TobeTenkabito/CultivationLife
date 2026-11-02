@@ -126,6 +126,9 @@ def create_game(
         player.body_training = max(0, int(preset.get("body_training", player.body_training)))
         player.body_progress = max(0.0, float(preset.get("body_progress", player.body_progress)))
         player.immortal_body = copy.deepcopy(preset.get('immortal_body', {}))
+        from ...system.monster_body import enabled_for as monster_body_enabled
+        if monster_body_enabled(player) and 'monster' not in player.immortal_body:
+            player.immortal_body['monster']={'level':player.immortal_body.pop('level',0)}
         if player.world == 'celestial' and player.realm_index >= 9:
             # Birth prerequisites, never a load-time grant to an existing life.
             player.immortal_veins = {str(rank): 27 for rank in range(9, player.realm_index)}

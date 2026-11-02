@@ -86,12 +86,16 @@ def public_upper_voisinages(player, game=None):
     true_form = monster_true_form.public(player)
     if true_form and not true_form['reason'] and not true_form['blueprint']:
         true_form['first_cost'] = quote(player, 1, game)
+    from .monster_body_training import public as public_monster_body
+    from .ghost_body_training import public as public_ghost_body
     return dict(available=True, world=player.world, title=world['title'], energy=world['energy'],
         description=world['description'], opportunity=player.opportunity, stones=stones, rows=rows,
-        true_form=true_form, soul_form=ghost_soul_form.public(player, game))
+        true_form=true_form, soul_form=ghost_soul_form.public(player, game),
+        monster_body=public_monster_body(game) if game is not None else dict(available=False),
+        ghost_body=public_ghost_body(game) if game is not None else dict(available=False))
 
 
-def act(deps: ApertureDependencies, game_id, action, voisinage_id):
+def act(deps: ApertureDependencies, game_id, action, voisinage_id,expected_level=None):
     game = deps._load(game_id)
     p = game.player
     from .asura import active as asura_active
@@ -106,6 +110,17 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id):
     from .possession_system import is_possessed
     if is_possessed(p):
         raise ValueError('寄身期间本魂邻域修行冻结')
+    if action.startswith('ghost_body_'):
+        from .ghost_body_training import act as train_ghost
+        summary=train_ghost(game,action,voisinage_id,expected_level)
+        game.history.append(HistoryRecord('SYS_GHOST_BODY',1,p.age,'鬼躯五法',action,'completed',summary,{},['cultivation','body']))
+        game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
+    if action.startswith('monster_body_'):
+        from .monster_body_training import act as train_monster
+        from ..rules import has_item
+        summary=train_monster(game,action,voisinage_id,expected_level,has_item=has_item,remove_item=remove_item)
+        game.history.append(HistoryRecord('SYS_MONSTER_BODY',1,p.age,'妖躯五蜕',action,'completed',summary,{},['cultivation','body']))
+        game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
     if action == 'soul_form_contemplate':
         return deps._soul_contemplate(game, voisinage_id)
     if action.startswith('soul_form_'):

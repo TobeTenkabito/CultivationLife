@@ -40,6 +40,10 @@ def main():
                         made=engine.create_game('五蕴验收','supreme_metal','demonic',470,preset_id='asura_upper')
                         g=engine._load(made['id']);g.pending_event=None;g.player.next_tribulation_age=None
                         g.player.asura_cultivation.update(conversion=5,body_level=9,souls=100000)
+                        from cultivation_life.system.wuyun import definitions
+                        from cultivation_life.rules import add_item
+                        for row in definitions():
+                            for key in row['recipe']:add_item(g.player,key,1000)
                         g.player.body_training=100;g.player.opportunity=10**12;engine.store.save(g)
                         page=browser.new_page(viewport=dict(width=width,height=height),reduced_motion='reduce');errors=[]
                         page.on('pageerror',lambda e:errors.append(str(e)))
@@ -58,6 +62,7 @@ def main():
                         assert not page.locator('[data-aggregate=se]').is_disabled()
                         bill=page.evaluate('game.asura.aggregates[0].cost');saved=engine._load(g.id)
                         old_souls=saved.player.asura_cultivation['souls'];old_op=saved.player.opportunity;old_rng=saved.rng_state;old_age=saved.player.age
+                        old_materials={i.id:i.quantity for i in saved.player.inventory}
                         payload=dict(action='train_aggregate',target_id='se',expected_level=0)
                         assert page.request.post(base+f'/api/games/{g.id}/asura',data=payload).status==200
                         with page.expect_response(lambda r:r.url.endswith('/asura')) as response:
@@ -67,7 +72,23 @@ def main():
                         saved=engine._load(g.id)
                         assert saved.player.asura_cultivation['souls']==old_souls-bill['souls']
                         assert saved.player.opportunity==old_op-bill['opportunity']
+                        for key,amount in bill['materials'].items():
+                            assert next(i.quantity for i in saved.player.inventory if i.id==key)==old_materials[key]-amount
                         assert saved.rng_state==old_rng and saved.player.age==old_age
+                        from cultivation_life.rules import remove_item
+                        for key in bill['materials']:
+                            remove_item(saved.player,key,next(i.quantity for i in saved.player.inventory if i.id==key))
+                        engine.store.save(saved);before=engine.store._path(g.id).read_bytes()
+                        with page.expect_response(lambda r:r.url.endswith('/asura')) as missing_response:
+                            click_control(page.locator('[data-aggregate=se]'))
+                        assert missing_response.value.status==400
+                        page.wait_for_function('!busy&&!game.asura.aggregates[0].can_train')
+                        assert page.locator('[data-aggregate=se]').is_disabled()
+                        assert engine.store._path(g.id).read_bytes()==before
+                        assert '培养材料不足' in page.locator('#asura-body-content').inner_text()
+                        saved=engine._load(g.id)
+                        for key in bill['materials']:add_item(saved.player,key,1000)
+                        engine.store.save(saved)
                         click_control(page.locator('#asura-body-toggle'))
                         navigation_locator(page,'[data-panel-target=asura-route]').click()
                         assert '10层' in page.locator('#asura-route-content').inner_text()
@@ -76,6 +97,12 @@ def main():
                         page.evaluate('id=>loadGame(id)',g.id);navigation_locator(page,'[data-panel-target=asura-body]').click()
                         page.wait_for_function('document.querySelectorAll(".asura-aggregate-card.locked").length===0')
                         assert page.locator('.asura-body-track span').count()==50
+                        assert page.locator('.asura-aggregate-material').count()==5
+                        assert '仅修罗界产出' in page.locator('#asura-body-content').inner_text()
+                        if pixel:
+                            for image in page.locator('.asura-aggregate-material img').all():image.scroll_into_view_if_needed()
+                            page.wait_for_function('''() => [...document.querySelectorAll('.asura-aggregate-material img')].length===5 && [...document.querySelectorAll('.asura-aggregate-material img')].every(i=>i.complete&&i.naturalWidth===128)''')
+                            page.locator('.asura-aggregate-material').first.scroll_into_view_if_needed()
                         card=page.locator('#asura-body-card')
                         assert card.evaluate('n=>n.scrollWidth<=n.clientWidth+2')
                         path=engine.store._path(g.id);before=path.read_bytes()
@@ -90,7 +117,7 @@ def main():
                         assert all(name in text for name in ('色蕴','受蕴','想蕴','行蕴','识蕴'))
                         assert '轮首暴击判定' in text and page.evaluate('game.last_combat_report.rounds.some(r=>r.voisinage?.body_mechanisms)')
                         assert not errors,errors
-                        results.append(dict(theme=theme,width=width,real_tenth_layer=True,stale_safe=True,paid_once=True,readonly=True,battle_text=True))
+                        results.append(dict(theme=theme,width=width,real_tenth_layer=True,stale_safe=True,paid_once=True,readonly=True,battle_text=True,missing_material_recovery=True,material_art=pixel))
                         page.close()
                     browser.close()
             finally:http.shutdown();http.server_close()

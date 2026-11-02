@@ -707,6 +707,8 @@ function render(data) {
   window.ImmortalArtifacts?.render(data,payload=>mutate(`/api/games/${data.id}/immortal-artifact`,payload));
   window.MonsterCivilizationsPanel?.render(data,payload=>api(`/api/games/${data.id}/civilizations-view`,{method:'POST',body:JSON.stringify(payload)}),payload=>mutate(`/api/games/${data.id}/civilizations-action`,payload));
   window.UpperVoisinagePanel?.render(data,payload=>mutate(`/api/games/${data.id}/upper-voisinage`,payload));
+  window.MonsterBody?.render(data,payload=>mutate(`/api/games/${data.id}/upper-voisinage`,payload));
+  window.GhostBody?.render(data,payload=>mutate(`/api/games/${data.id}/upper-voisinage`,payload));
   window.CombatPlanPanel?.render(data, payload=>mutate(`/api/games/${data.id}/combat-plan`,payload));
   window.ImmortalEconomyPanel?.render(data, payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload), payload=>mutate(`/api/games/${data.id}/immortal-action`,payload));
   window.DoctrinePanel?.render(data.doctrines || {}, payload => mutate(`/api/games/${data.id}/doctrine-action`, payload), {pending:!!data.pending_event, alive:data.player.alive, confirm:openGameConfirm, immortal:payload=>mutate(`/api/games/${data.id}/immortal-action`, payload)});

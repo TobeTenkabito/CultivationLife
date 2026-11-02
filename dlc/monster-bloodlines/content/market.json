@@ -28,6 +28,146 @@
       "content_id": "self_lineage_dao_seed",
       "tier": 12,
       "price": 2800000000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_celestial_jade",
+      "tier": 9,
+      "price": 500000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_celestial_jade",
+      "tier": 10,
+      "price": 500000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_celestial_jade",
+      "tier": 11,
+      "price": 500000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_celestial_jade",
+      "tier": 12,
+      "price": 500000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_reverse_bone",
+      "tier": 9,
+      "price": 650000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_reverse_bone",
+      "tier": 10,
+      "price": 650000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_reverse_bone",
+      "tier": 11,
+      "price": 650000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_reverse_bone",
+      "tier": 12,
+      "price": 650000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_aperture_marrow",
+      "tier": 9,
+      "price": 800000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_aperture_marrow",
+      "tier": 10,
+      "price": 800000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_aperture_marrow",
+      "tier": 11,
+      "price": 800000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_aperture_marrow",
+      "tier": 12,
+      "price": 800000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_ancestral_blood",
+      "tier": 9,
+      "price": 1000000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_ancestral_blood",
+      "tier": 10,
+      "price": 1000000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_ancestral_blood",
+      "tier": 11,
+      "price": 1000000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_ancestral_blood",
+      "tier": 12,
+      "price": 1000000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_return_soul_amber",
+      "tier": 9,
+      "price": 1200000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_return_soul_amber",
+      "tier": 10,
+      "price": 1200000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_return_soul_amber",
+      "tier": 11,
+      "price": 1200000
+    },
+    {
+      "world": "nether",
+      "kind": "item",
+      "content_id": "monster_return_soul_amber",
+      "tier": 12,
+      "price": 1200000
     }
   ]
 }

@@ -6601,6 +6601,116 @@
         "official.monster-bloodlines"
       ],
       "domain_art": true
+    },
+    "material.monster_celestial_jade": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_celestial_jade-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "113d10f1aedae8c56054cbca227067c6db3665ca706359d57bdc775ebd86dea9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_celestial_jade.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_celestial_jade-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ed97b39d81fcd80bd78c4f9af5095242ecf8817d143cfafbe6b899691d60910e",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_reverse_bone": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_reverse_bone-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "277c952b47f461ec3e0514e4eb42f6a4e28bcc95ed88eabffdad54ea5c8b6253",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_reverse_bone.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_reverse_bone-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "5d5c8883eabcb032fc1e3b78d8b04e05d41b418e075c867db80b53d7016633fa",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_aperture_marrow": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_aperture_marrow-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "81df6b5639afd679534d0e3da75711fb4feae44b1808624afe19646c7ce576f3",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_aperture_marrow.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_aperture_marrow-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "0a6931b3e957a9e2cca3c0654c7fb467b3ab0b597baac768d31df4cc0a31c3ab",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_ancestral_blood": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_ancestral_blood-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "8018feaf2bff880647cea3038fd6e174d309073048630cdfe156438e34495147",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_ancestral_blood.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_ancestral_blood-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "1e8b03c8512863b1e76554cbdbdce7d9ab54bf784a3fa2fc5958a76b626c9634",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_return_soul_amber": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_return_soul_amber-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "69ab3acf79690cfd115ec765af0621b5518a51ae65395dea0f69b05c4a6da86f",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "material.monster_return_soul_amber.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/body-materials/monster_return_soul_amber-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "a82d34547c2b9d29ee5b6a29b2bbb92755c457da35cae4168f68b111cf0917d9",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
     }
   }
 }

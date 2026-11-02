@@ -1,0 +1,31 @@
+{
+  "method": "built-in image_gen",
+  "reference": "design/inventory-icons-v2-20261020/source/special_materials.png",
+  "assets": [
+    {
+      "id": "monster_celestial_jade",
+      "name": "天妖玄玉",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG material inventory sprite. Attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE new isolated material object, not a sheet. Match its dark stepped outlines, compact 3/4 item silhouette, top-left highlights and clustered 3-5 tones per surface. Low-resolution logical 32x32 pixel art enlarged with hard nearest-neighbor square blocks. Centered compact readable object, transparent padding. No ground, shadow, background, frame, lettering, people, scenery, bloom, smooth painting or photorealism. Subject: An angular deep teal and dark jade mineral shard with three broad facets and pale gold natural inclusions, smoky dark base, one bright upper-left highlight."
+    },
+    {
+      "id": "monster_reverse_bone",
+      "name": "逆纹龙骨",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG material inventory sprite. Attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE new isolated material object, not a sheet. Match its dark stepped outlines, compact 3/4 item silhouette, top-left highlights and clustered 3-5 tones per surface. Low-resolution logical 32x32 pixel art enlarged with hard nearest-neighbor square blocks. Centered compact readable object, transparent padding. No ground, shadow, background, frame, lettering, people, scenery, bloom, smooth painting or photorealism. Subject: A short curved ivory ancient beast bone segment, thick compact crescent silhouette with three deep blue reverse-running grain grooves and a small weathered gold mineral knot. One object, no skeleton."
+    },
+    {
+      "id": "monster_aperture_marrow",
+      "name": "百窍灵髓",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG material inventory sprite. Attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE new isolated material object, not a sheet. Match its dark stepped outlines, compact 3/4 item silhouette, top-left highlights and clustered 3-5 tones per surface. Low-resolution logical 32x32 pixel art enlarged with hard nearest-neighbor square blocks. Centered compact readable object, transparent padding. No ground, shadow, background, frame, lettering, people, scenery, bloom, smooth painting or photorealism. Subject: A squat bone-white marrow vial with moss-green stopper, translucent aqua-green center holding a single pale golden drop, two small side ridges, hard pixel shapes."
+    },
+    {
+      "id": "monster_ancestral_blood",
+      "name": "赤祖血晶",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG material inventory sprite. Attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE new isolated material object, not a sheet. Match its dark stepped outlines, compact 3/4 item silhouette, top-left highlights and clustered 3-5 tones per surface. Low-resolution logical 32x32 pixel art enlarged with hard nearest-neighbor square blocks. Centered compact readable object, transparent padding. No ground, shadow, background, frame, lettering, people, scenery, bloom, smooth painting or photorealism. Subject: A single compact cluster of blood-red crystals with dark brown base, gold branching vein inclusions and warm amber upper-left facets. Three short asymmetrical points."
+    },
+    {
+      "id": "monster_return_soul_amber",
+      "name": "归元魂珀",
+      "prompt": "Use case: stylized-concept. Asset type: Chinese cultivation RPG material inventory sprite. Attached existing special_materials.png is STYLE REFERENCE ONLY. Create exactly ONE new isolated material object, not a sheet. Match its dark stepped outlines, compact 3/4 item silhouette, top-left highlights and clustered 3-5 tones per surface. Low-resolution logical 32x32 pixel art enlarged with hard nearest-neighbor square blocks. Centered compact readable object, transparent padding. No ground, shadow, background, frame, lettering, people, scenery, bloom, smooth painting or photorealism. Subject: A single egg-shaped golden amber gemstone, charcoal dark mineral rim, a tiny curled sapphire-blue seed suspended inside, stepped facets, compact broad outline."
+    }
+  ]
+}

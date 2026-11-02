@@ -31,10 +31,13 @@ class VoisinageEffect:
     restriction: str | None = None
     defense: str = 'bypass'
     tier: int = 2
+    target_mode: str = 'all'
 
     def __post_init__(self):
         if self.kind not in EFFECT_KINDS or self.target not in {'enemy', 'self', 'ally'}:
             raise ValueError('Unknown voisinage effect or target')
+        if self.target_mode not in {'all','single'}:
+            raise ValueError('Unknown voisinage target mode')
         if self.kind.startswith('restore_') != (self.target != 'enemy'):
             raise ValueError('Restoration requires a friendly target')
         if self.defense not in {'bypass', 'ward'} or type(self.tier) is not int or self.tier < 1:
@@ -322,6 +325,7 @@ class ResourceSupply:
 class CombatPhases(Protocol):
     """The conventional engine depends only on this round-level contract."""
     primary_ordinary_loss: float
+    primary_ordinary_body_loss: float
 
     @property
     def enabled(self) -> bool: ...

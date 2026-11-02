@@ -1,0 +1,40 @@
+{
+  "method": "built-in image_gen",
+  "reference": "design/inventory-icons-v2-20261020/source/special_materials.png",
+  "reference_sha256": "74c827382410eb7bb599eb77fe79177d43d473a302f208777cab28a8c6489642",
+  "prompt_file": "dlc/monster-bloodlines/assets/visual/body-materials/prompts.json",
+  "normalization": "Alpha>=128 crop; longest edge 26px; centered 32px binary alpha; 128px nearest-neighbor portrait.",
+  "exporter": "scripts/prepare_wuyun_material_assets.py",
+  "assets": [
+    {
+      "id": "monster_celestial_jade",
+      "name": "天妖玄玉",
+      "source": "design/monster-body-20261102/source/monster_celestial_jade-pixel-v1.png",
+      "source_sha256": "17b130ef5fe1faddc65d584dfc943fad5934c10217a212a9d08306a558f4bf21"
+    },
+    {
+      "id": "monster_reverse_bone",
+      "name": "逆纹龙骨",
+      "source": "design/monster-body-20261102/source/monster_reverse_bone-pixel-v1.png",
+      "source_sha256": "4ce3067491743f6ef8a06d65a6a40733e4abe9428ff4cd558523155cba694c00"
+    },
+    {
+      "id": "monster_aperture_marrow",
+      "name": "百窍灵髓",
+      "source": "design/monster-body-20261102/source/monster_aperture_marrow-pixel-v1.png",
+      "source_sha256": "05473584775bcceb3f9dfe9c66938aa91671bb7d4158969937bedccbdab86c6c"
+    },
+    {
+      "id": "monster_ancestral_blood",
+      "name": "赤祖血晶",
+      "source": "design/monster-body-20261102/source/monster_ancestral_blood-pixel-v1.png",
+      "source_sha256": "9c1f6fe194296bb526801f754d3a44328626b488f68e934724adffac226e7f0a"
+    },
+    {
+      "id": "monster_return_soul_amber",
+      "name": "归元魂珀",
+      "source": "design/monster-body-20261102/source/monster_return_soul_amber-pixel-v1.png",
+      "source_sha256": "e1c58dbe8643ceaca1843465c4333dd9a7b6162cee8ae979b960a34a9a303a3a"
+    }
+  ]
+}

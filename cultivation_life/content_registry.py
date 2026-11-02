@@ -255,9 +255,13 @@ class ContentRegistry:
             if "buddhist_way.json" in documents:
                 from .buddhist_content import validate_buddhist_content
                 validate_buddhist_content(documents["buddhist_way.json"], documents)
-            from .body_mechanism_content import validate_config as validate_body_config
+            from .body_mechanism_content import validate_config as validate_body_config,validate_material_sources
             try:
-                validate_body_config(documents.get('world.json',{}).get('systems',{}).get('asura_manifestation',{}))
+                body_config=documents.get('world.json',{}).get('systems',{}).get('asura_manifestation',{})
+                validate_body_config(body_config)
+                validate_material_sources(body_config,registry.items,registry.market_goods)
+                from .monster_body_content import validate_content as validate_monster_body
+                validate_monster_body(documents.get('world.json',{}).get('systems',{}).get('monster_body',{}),registry.items,registry.market_goods)
             except (ValueError,KeyError,TypeError) as error:
                 raise ContentError(f'五蕴内容不合法：{error}') from error
             if "doctrines.json" in documents:

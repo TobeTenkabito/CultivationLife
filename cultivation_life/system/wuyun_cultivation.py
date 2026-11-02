@@ -1,5 +1,5 @@
 """Paid five-aggregate actions and presentation, separate from combat projection."""
-from ..content_registry import CONTENT_DOCUMENTS
+from ..content_registry import CONTENT_DOCUMENTS,ITEM_CATALOG
 from .wuyun import enabled_for,definitions,profile
 
 
@@ -22,7 +22,8 @@ def training_reason(game):
 def quote(row,rank):
     base=CONTENT_DOCUMENTS['doctrines.json']['cultivation']['vein_opportunity_base']
     return dict(souls=row['cost']['souls']*(rank+1),
-                opportunity=base*row['cost']['opportunity_multiplier']*(rank+1))
+                opportunity=base*row['cost']['opportunity_multiplier']*(rank+1),
+                materials={key:amount*(rank+1) for key,amount in row['recipe'].items()})
 
 
 def public(game):
@@ -34,14 +35,19 @@ def public(game):
         if not blocked and rank>=10:blocked='已修炼至十重'
         if not blocked and (p.asura_cultivation.get('souls',0)<bill.get('souls',0) or p.opportunity<bill.get('opportunity',0)):
             blocked='精魂或机缘不足'
+        materials=[dict(id=key,name=ITEM_CATALOG[key].name,needed=bill.get('materials',{}).get(key,0),
+            owned=sum(i.quantity for i in p.inventory if i.id==key or i.artifact_origin_id==key),
+            origin_world='asura',origin_name='修罗界',asset='material.'+key) for key in row['recipe']]
+        if not blocked and any(r['owned']<r['needed'] for r in materials):blocked='培养材料不足，仅修罗界产出'
         rows.append(dict(id=row['id'],name=row['name'],unlock_level=row['unlock_level'],unlocked=mechanism is not None,
                          level=rank,max_level=10,cost=bill,can_train=not blocked,reason=blocked,
+                         materials=materials,
                          probability=mechanism.chance if mechanism else row['chance']['base'],
                          effects=dict(mechanism.effects) if mechanism else {}))
     return rows
 
 
-def train(game,key,expected_level):
+def train(game,key,expected_level,*,has_item,remove_item):
     reason=training_reason(game)
     if reason:raise ValueError(reason)
     row=next((r for r in definitions() if r['id']==key),None)
@@ -52,6 +58,10 @@ def train(game,key,expected_level):
     if rank>=10:raise ValueError('此蕴已达十重上限')
     bill=quote(row,rank);p=game.player;s=p.asura_cultivation
     if s.get('souls',0)<bill['souls'] or p.opportunity<bill['opportunity']:raise ValueError('修炼五蕴的精魂或机缘不足')
+    if any(not has_item(p,key,amount) for key,amount in bill['materials'].items()):
+        raise ValueError('五蕴培养材料不足；对应材料仅在修罗界产出')
+    for material_id,amount in bill['materials'].items():remove_item(p,material_id,amount)
     s['souls']-=bill['souls'];p.opportunity-=bill['opportunity']
     s.setdefault('aggregates',{})[key]=rank+1
-    return f"{row['name']}修炼至{rank+1}重，实付{bill['souls']}精魂、{bill['opportunity']:g}机缘。"
+    paid='、'.join(f'{ITEM_CATALOG[item].name}×{amount}' for item,amount in bill['materials'].items())
+    return f"{row['name']}修炼至{rank+1}重，实付{bill['souls']}精魂、{bill['opportunity']:g}机缘及{paid}。"

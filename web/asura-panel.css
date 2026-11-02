@@ -40,3 +40,4 @@ html[data-theme] .strategy-dock button[data-dlc]{color:var(--dock-color);border-
 html[data-theme] .strategy-dock button[data-dlc]:hover:not(:disabled),html[data-theme] .strategy-dock button[data-dlc].active{color:var(--on-accent);background:var(--dock-color)}
 .asura-aggregate-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
 .asura-aggregate-card{margin:0;min-width:0}.asura-aggregate-card.locked{opacity:.66}
+.asura-aggregate-material{display:flex;align-items:center;gap:10px;padding:10px 0;min-width:0}.asura-aggregate-material img{flex:0 0 64px;image-rendering:pixelated;object-fit:contain}.asura-aggregate-material>div{min-width:0;overflow-wrap:anywhere}.asura-aggregate-material p{margin:4px 0}.asura-aggregate-material small{color:var(--muted)}

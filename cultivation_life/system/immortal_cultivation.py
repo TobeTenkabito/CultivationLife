@@ -9,7 +9,9 @@ def rules():
 def golden_light(player):
     from .divine_lights import profile
     from .wuyun import profile as aggregate_profile
-    return bool(profile(player,player=True)[0].get('kun') or any(r.effects.get('ward',0)>=2 for r in aggregate_profile(player,player=True)))
+    from .monster_body import profile as monster_profile
+    from .ghost_body import profile as ghost_profile
+    return bool(profile(player,player=True)[0].get('kun') or any(r.effects.get('ward',0)>=2 for r in (*aggregate_profile(player,player=True),*monster_profile(player,player=True),*ghost_profile(player,player=True))))
 
 
 def golden_light_rank(player):
@@ -85,4 +87,6 @@ def body_recipe(player):
 
 
 def body_intrinsic_bonus(player, resource):
+    from .monster_body import enabled_for,active_level,config
+    if enabled_for(player):return active_level(player,player=True)*config()[resource+'_per_level']
     return player.immortal_body.get('level', 0) * rules()['body'][f'{resource}_per_level']

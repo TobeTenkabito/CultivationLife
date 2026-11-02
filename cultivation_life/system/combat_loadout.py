@@ -82,6 +82,10 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
     lights,levels=profile(owner,player=player)
     from .wuyun import profile as aggregate_profile
     body=aggregate_profile(owner,player=player)
+    from .monster_body import profile as monster_profile
+    body=body or monster_profile(owner,player=player)
+    from .ghost_body import profile as ghost_profile
+    body=body or ghost_profile(owner,player=player)
     return replace(source, semantic_rules=source.semantic_rules + combat_rules(game, owner, player=player),
                    technique_tier=max((_tier(t) for t in techniques), default=1),
                    artifact_tier=max((_tier(i) for i in artifacts), default=1), passive_ward_tier=ward,

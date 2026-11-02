@@ -1,8 +1,8 @@
 """Bounded effect selection and explicit intervention; no content/actor lookup.
 
-Each established field consumes its finite round-start action allowances, with
+Each established field consumes causal action allowances, with
 one response per protector per round. Effects
-and responses never recursively dispatch one another. Resources are reserved
+and responses dispatch through the shared event queue. Resources are reserved
 before simultaneous actions execute; ordinary initiative cannot undo control.
 """
 from dataclasses import dataclass, replace
@@ -20,6 +20,8 @@ class EffectIntent:
     semantic: object = None
     allowance: object = None
     critical: bool = False
+    direct_power: bool = False
+    segment_scale: float = 1.
 
 
 class VoisinageEffects:
@@ -31,7 +33,7 @@ class VoisinageEffects:
                 and 'technique' not in state.restrictions and c.force_tier > tier):
             tier = c.force_tier
             if pay:
-                state.current -= c.attack_cost
+                self._energy(state.unit.id,state.current-c.attack_cost)
         return tier
 
     def _crush(self, field, key):
@@ -61,6 +63,12 @@ class VoisinageEffects:
     def _select_effect(self, field, previous, allowance):
         owner = self.units[field.owner]
         if field.owner in self._light_muted or not owner.fighting:return None
+        if allowance.requires_evade:
+            selected=self._reaction_effect(field,allowance)
+            if selected is None:return None
+            effect,targets=selected
+            return EffectIntent(field,effect,targets,allowance=allowance,
+                critical=bool(self._body_round.channel(field.owner,'critical',allowance.chain)))
         victims = [k for k in field.targets if self.units[k].fighting and self._covered_by(field,k)]
         purpose = self.objectives[owner.unit.side]
         ready = [k for k in victims if self._crush(field, k) and previous.get(k) == field.owner]
@@ -115,7 +123,7 @@ class VoisinageEffects:
         intent=min(candidates,key=lambda row:row[:2])[2]
         numeric=(intent.effect.kind=='strike' or intent.effect.kind.startswith('restore_') or
                  intent.effect.kind in {'suppress','seal'} and field.definition.authority is not None)
-        critical=bool(not intent.ordinary and numeric and self._body_round.value(field.owner,'critical')>1
+        critical=bool(not intent.ordinary and numeric and self._body_round.channel(field.owner,'critical',allowance.chain)
                       and any(k not in intent.terminal for k in intent.targets))
         return replace(intent,allowance=allowance,critical=critical)
 
@@ -142,7 +150,7 @@ class VoisinageEffects:
                     continue
                 if response.kind == 'escape' and (key != victim or target.unit.side in self.escape_forbidden_sides):
                     continue
-                protector.current -= response.cost
+                self._energy(key,protector.current-response.cost,intent.allowance.chain)
                 responded.add(key)
                 if response.kind == 'escape':
                     target.escaped = True
@@ -167,14 +175,19 @@ class VoisinageEffects:
             allowance=self._body_round.take(field.owner)
             if allowance is None:continue
             mutual = self._dominated.get(self._dominated.get(field.owner)) == field.owner
-            if field.owner in self._dominated and not mutual:
+            if field.owner in self._dominated and not mutual and not allowance.requires_evade:
                 continue
             intent = self._select_effect(field, previous,allowance)
             if intent:
                 plans.append(intent)
         responded, pending = self._responded, []
         for intent in plans:
-            keys = tuple(k for k in intent.targets if not self._intervene(intent, k, responded))
+            keys=intent.targets
+            if intent.effect.target!='self' and intent.effect.target_mode=='single' and keys:
+                split=not intent.ordinary and not intent.terminal and self._split_entry(intent.field.owner,intent.allowance.chain)
+                index=min(len(keys)-1,int(self._light_rng.random()*len(keys))) if split else 0
+                keys=(keys[index],)
+            keys = tuple(k for k in keys if not self._intervene(intent, k, responded))
             if keys:
                 pending.append((intent, keys))
         self._refresh_relations()
@@ -184,7 +197,9 @@ class VoisinageEffects:
             if intent.field.owner in self._disrupted:
                 continue
             if intent.effect.target == 'enemy':
-                keys = tuple(k for k in keys if self._covered_by(intent.field,k))
+                if intent.allowance.requires_evade:
+                    keys=tuple(k for k in keys if k==intent.allowance.target and self.units[k].fighting and self._can_reach(owner,k))
+                else:keys = tuple(k for k in keys if self._covered_by(intent.field,k))
             if not keys:
                 continue
             cost = intent.effect.cost
@@ -196,40 +211,45 @@ class VoisinageEffects:
                 self.attack_tier(owner, pay=True)
                 self._ordinary_acted.add(intent.field.owner)
             elif owner.current >= cost:
-                owner.current -= cost
+                self._energy(intent.field.owner,owner.current-cost,intent.allowance.chain)
                 channels = set() if intent.allowance.free else {'field.effect_cost'}
                 self._semantic_commit(intent.semantic, channels)
             else:
                 continue
             if intent.effect.kind.startswith('restore_'):
                 zhen=self.light_value(intent.field.owner,'zhen')
-                if not zhen:self._ordinary_acted.add(intent.field.owner)
+                if not zhen and not intent.allowance.requires_evade:self._ordinary_acted.add(intent.field.owner)
                 name=owner.unit.name
-                if zhen:self._light_note('zhen_action',intent.field.owner,f'{name}以震合缥光维持治疗：消耗一次邻域行动与{cost:g}元力，保留普通出手。',cost=cost,ordinary_spent=False)
+                if intent.allowance.requires_evade:self._light_note('body_reaction',intent.field.owner,f'{name}以烈脏兑现免费治疗，不占普通出手或基础邻域行动。',cost=0,ordinary_spent=False)
+                elif zhen:self._light_note('zhen_action',intent.field.owner,f'{name}以震合缥光维持治疗：消耗一次邻域行动与{cost:g}元力，保留普通出手。',cost=cost,ordinary_spent=False)
                 else:self.frame.events.append(f'{name}尚未解锁震合缥光，邻域治疗占用本回合一次普通出手，并消耗{cost:g}元力。')
             if not intent.ordinary:
                 source='额外' if intent.allowance.source else '基础'
                 message=f'{owner.unit.name}完成一次{source}邻域施权，元力消耗{cost:g}'
                 if intent.critical:message+='，轮首暴击生效，数值为基础的200%'
-                if intent.allowance.free:message+='（轮首免费判定成功）'
+                if intent.allowance.free and not intent.allowance.requires_evade:message+='（该份额外施权免费判定成功）'
+                if intent.allowance.requires_evade:message+=f'，烈脏本次择一执行{self._body_effect_label(intent.effect)}'
                 self._light_note('body_action',intent.field.owner,message+'。',source=intent.allowance.source,
                                  cost=cost,critical=intent.critical,free=intent.allowance.free)
             paid.append((intent, keys))
         # Simultaneous qualified actions survive a mutual breach; no list-order advantage.
         completed=[]
         for intent, keys in sorted(paid, key=lambda row: row[0].effect.kind.startswith('restore_')):
-            applied=False
-            for key in keys:
-                applied=bool(self._apply_effect(intent, key)) or applied
-            if not intent.ordinary:completed.append((intent.field.owner,intent.allowance,intent.critical and applied))
+            applied,chain=self._perform_body_intent(intent,keys)
+            if not intent.ordinary:completed.append((intent.field.owner,replace(intent.allowance,chain=chain),intent.critical and applied))
         self._refresh_relations()
         self._complete_body_actions(completed)
+        self._drain_body_events()
 
     def _apply_effect(self, intent, key):
         target = self.units[key]
         effect, field = intent.effect, intent.field
         kind = effect.kind
         if not intent.ordinary and field.owner in self._light_muted:return
+        if effect.target=='enemy' and self._body_evade(intent,key):return False
+        if (intent.segment_scale<1 and (kind in {'restrict','isolate'} or
+                kind in {'suppress','seal'} and field.definition.authority is None)
+                and self._light_rng.random()>=intent.segment_scale):return False
         if kind in {'seal','restrict','isolate'} and self._resist_light_seal(key,field.owner):return
         if kind.startswith('restore_') and not target.fighting:
             return
@@ -237,7 +257,7 @@ class VoisinageEffects:
             'caster', effect=effect.kind, restriction=effect.restriction or '', terminal=key in intent.terminal)
         incoming = None if intent.ordinary else self._semantic_preview(key, 'effect_before_apply', field.owner,
             'recipient', effect=effect.kind, restriction=effect.restriction or '', terminal=key in intent.terminal)
-        power = effect.power if intent.ordinary else self._effect_power(field, effect, target, semantic,critical=intent.critical)
+        power = effect.power if intent.ordinary or intent.direct_power else self._effect_power(field, effect, target, semantic,critical=intent.critical)
         if kind.startswith('restore_'):
             bonus=self.light_value(field.owner,'zhen_heal')
             if bonus:
@@ -270,7 +290,9 @@ class VoisinageEffects:
         if kind == 'strike':
             amount = min(cap, power * mitigation)
             amount = amount if purpose == 'kill' else min(amount, max(0, target.vitality - .13))
-            self._lose(key, amount)
+            injury=amount
+            if effect.tier>=2:amount=self._guard_state(key,amount)
+            self._lose(key, amount,body_amount=injury)
             extra=min(max(0,cap-amount),amount*self._body_round.amplification(field.owner,key))
             if purpose!='kill':extra=min(extra,max(0,target.vitality-.13))
             if extra:
@@ -279,7 +301,9 @@ class VoisinageEffects:
         elif kind == 'suppress':
             amount = target.vitality * (1 - target.unit.capabilities.body_voisinage_resistance) if field.definition.authority is None else power
             amount *= 1+self._body_round.amplification(field.owner,key)
-            self._lose(key, min(cap, amount * mitigation), physical=False)
+            amount=min(cap,amount*mitigation)
+            if effect.tier>=2:amount=self._guard_state(key,amount)
+            self._lose(key, amount, physical=False)
             target.suppressed = target.vitality <= .12
         elif kind == 'seal':
             if field.definition.authority is not None:
@@ -308,7 +332,7 @@ class VoisinageEffects:
             self.frame.morale_loss[side] = self.frame.morale_loss.get(side, 0) - gain * target.unit.power / self.totals[side]
             self._restore_state(key, power)
         elif kind == 'restore_field':
-            target.field_strain = max(0, target.field_strain - power)
+            target.field_strain = max(0, target.field_strain - self._body_recovery(key,power))
         labels = {'strike': '杀伤', 'suppress': '镇压' if target.suppressed else '镇压侵蚀', 'seal': '封锁传讯与支援', 'restrict': '禁制',
                   'isolate': '隔离', 'restore_body': '修复肉身', 'restore_spirit': '稳定心神', 'restore_field': '修复邻域稳固'}
         self.frame.events.append(f'{self.units[field.owner].unit.name}的【{field.definition.name}】对{target.unit.name}施行{labels[kind]}。')
@@ -341,7 +365,7 @@ class VoisinageEffects:
         target = self.units[key]
         if not target.fighting:
             return
-        gain = min(amount, 1 - target.vitality)
+        gain = min(self._body_recovery(key,amount), 1 - target.vitality)
         target.vitality += gain
         attr = 'player_loss' if target.unit.side == 'player' else 'enemy_loss'
         setattr(self.frame, attr, getattr(self.frame, attr) - gain * target.unit.power / self.totals[target.unit.side])

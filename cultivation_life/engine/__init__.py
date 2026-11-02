@@ -419,8 +419,8 @@ class GameEngine:
     def _public_immortal_body(game):
         return immortal_body._public_immortal_body(game)
 
-    def upper_voisinage_action(self, game_id, action, voisinage_id):
-        return immortal_aperture.upper_voisinage_action(self._dependencies.cultivation.aperture, game_id, action, voisinage_id)
+    def upper_voisinage_action(self, game_id, action, voisinage_id,expected_level=None):
+        return immortal_aperture.upper_voisinage_action(self._dependencies.cultivation.aperture, game_id, action, voisinage_id,expected_level)
 
     def aperture_action(self, game_id, action, manual_id=None):
         return immortal_aperture.aperture_action(self._dependencies.cultivation.aperture, game_id, action, manual_id)

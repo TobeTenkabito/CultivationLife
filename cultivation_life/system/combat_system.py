@@ -491,7 +491,7 @@ class PlayerCombatSystem:
             replay_opening = [round(player_power_max * player_hp, 1), round(enemy_power * enemy_hp, 1)]
             if phases is not None:
                 light_first=None
-                if getattr(phases,'has_qian',lambda:False)():
+                if getattr(phases,'needs_body_initiative',getattr(phases,'has_qian',lambda:False))():
                     p_init=player_stats['mobility']*.58+player_stats['sense']*.42
                     e_init=enemy_stats['mobility']*.58+enemy_stats['sense']*.42
                     if round_no==1:
@@ -991,7 +991,7 @@ class PlayerCombatSystem:
                 key_events.append(f"第{round_no}轮，{guard_event}")
             body_received_amount = max(0.0, received_amount - absorbed_amount)
             body_damage_ratio += (body_received_amount / core_power * 0.46 if phases is None
-                                  else phases.primary_ordinary_loss * 0.46)
+                                  else getattr(phases,'primary_ordinary_body_loss',phases.primary_ordinary_loss*0.46))
             actual_received = (received if phases is not None else
                                0.0 if round_no == 1 and "first_round_full_state" in transformation_traits else max(0.012, received))
             if phases is None:

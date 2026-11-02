@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "goods": [
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_blood_amber",
+      "tier": 9,
+      "price": 500000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_blood_amber",
+      "tier": 10,
+      "price": 500000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_blood_amber",
+      "tier": 11,
+      "price": 500000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_blood_amber",
+      "tier": 12,
+      "price": 500000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_pain_heartstone",
+      "tier": 9,
+      "price": 650000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_pain_heartstone",
+      "tier": 10,
+      "price": 650000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_pain_heartstone",
+      "tier": 11,
+      "price": 650000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_pain_heartstone",
+      "tier": 12,
+      "price": 650000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_formless_marrow",
+      "tier": 9,
+      "price": 800000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_formless_marrow",
+      "tier": 10,
+      "price": 800000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_formless_marrow",
+      "tier": 11,
+      "price": 800000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_formless_marrow",
+      "tier": 12,
+      "price": 800000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_karma_lotus",
+      "tier": 9,
+      "price": 1000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_karma_lotus",
+      "tier": 10,
+      "price": 1000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_karma_lotus",
+      "tier": 11,
+      "price": 1000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_karma_lotus",
+      "tier": 12,
+      "price": 1000000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_awareness_soul_crystal",
+      "tier": 9,
+      "price": 1200000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_awareness_soul_crystal",
+      "tier": 10,
+      "price": 1200000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_awareness_soul_crystal",
+      "tier": 11,
+      "price": 1200000
+    },
+    {
+      "world": "asura",
+      "kind": "item",
+      "content_id": "asura_awareness_soul_crystal",
+      "tier": 12,
+      "price": 1200000
+    }
+  ]
+}

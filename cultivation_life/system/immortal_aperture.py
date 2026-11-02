@@ -70,9 +70,9 @@ def public_aperture(player, game=None):
             'active_manual': player.spirit_voisinage_manual}
 
 
-def upper_voisinage_action(deps: ApertureDependencies, game_id, action, voisinage_id):
+def upper_voisinage_action(deps: ApertureDependencies, game_id, action, voisinage_id,expected_level=None):
     from .upper_voisinage import act
-    return act(deps, game_id, action, voisinage_id)
+    return act(deps, game_id, action, voisinage_id,expected_level)
 
 
 def aperture_action(deps: ApertureDependencies, game_id, action, manual_id=None):

@@ -77,6 +77,56 @@
         "integration",
         "treasure"
       ]
+    },
+    {
+      "id": "monster_celestial_jade",
+      "name": "天妖玄玉",
+      "description": "妖躯五蜕之玄肤培养材料，仅幽冥界产出。可随身携带，材料自身不提供战力。",
+      "tags": [
+        "material",
+        "monster_body_material"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "monster_reverse_bone",
+      "name": "逆纹龙骨",
+      "description": "妖躯五蜕之逆骨培养材料，仅幽冥界产出。可随身携带，材料自身不提供战力。",
+      "tags": [
+        "material",
+        "monster_body_material"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "monster_aperture_marrow",
+      "name": "百窍灵髓",
+      "description": "妖躯五蜕之烈脏培养材料，仅幽冥界产出。可随身携带，材料自身不提供战力。",
+      "tags": [
+        "material",
+        "monster_body_material"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "monster_ancestral_blood",
+      "name": "赤祖血晶",
+      "description": "妖躯五蜕之沸血培养材料，仅幽冥界产出。可随身携带，材料自身不提供战力。",
+      "tags": [
+        "material",
+        "monster_body_material"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "monster_return_soul_amber",
+      "name": "归元魂珀",
+      "description": "妖躯五蜕之神魂培养材料，仅幽冥界产出。可随身携带，材料自身不提供战力。",
+      "tags": [
+        "material",
+        "monster_body_material"
+      ],
+      "force_tier": 1
     }
   ]
 }

@@ -29,13 +29,13 @@ def offensive(*,free=0,extra=1,cost=3,current=100,enemy=None,targets=1):
 
 def test_critical_and_extra_are_paid_once_per_cast_not_per_victim():
     b=offensive(targets=3);start(b)
-    assert all(s.vitality==pytest.approx(.6) for k,s in b.units.items() if k!='player')
+    assert all(s.vitality==pytest.approx(.7) for k,s in b.units.items() if k!='player')
     assert b.units['player'].current==92
     assert len([e for e in b._light_trace if e['kind']=='body_action'])==2
     assert sum(t.spent for t in b._body_round.allowances['player'])==2
 
 
-@pytest.mark.parametrize('free,expected',[(0,.8),(1,.6)])
+@pytest.mark.parametrize('free,expected',[(0,.8),(1,.7)])
 def test_free_extra_is_quoted_before_affordability_with_zero_remaining_energy(free,expected):
     b=offensive(free=free,current=5);start(b)
     assert b.units['player'].current==0
@@ -61,7 +61,7 @@ def test_generic_budget_supports_multiple_declared_extra_actions_without_new_rol
     assert len([e for e in b._light_trace if e['kind']=='body_action'])==4
 
 
-def test_critical_and_free_randomness_is_sampled_once_at_round_start():
+def test_critical_is_frozen_and_free_is_sampled_once_when_extra_is_created():
     class Dice:
         calls=0
         def random(self):self.calls+=1;return .1
@@ -71,7 +71,7 @@ def test_critical_and_free_randomness_is_sampled_once_at_round_start():
     b.units['player'].unit=replace(b.units['player'].unit,capabilities=replace(b.units['player'].unit.capabilities,body_mechanisms=rows))
     start(b,rng=dice)
     assert dice.calls==2
-    assert b.units['enemy-0'].vitality==pytest.approx(.6)
+    assert b.units['enemy-0'].vitality==pytest.approx(.7)
 
 
 def test_counter_heals_state_and_usable_energy_once_for_a_free_multi_target_cast():
@@ -79,9 +79,9 @@ def test_counter_heals_state_and_usable_energy_once_for_a_free_multi_target_cast
                               body_mechanisms=(m('shi',restore_state=.1,restore_energy=.1),))
     b=offensive(free=1,enemy=counter,targets=2);start(b)
     for key in ('enemy-0','enemy-1'):
-        assert b.units[key].vitality==pytest.approx(.7)
+        assert b.units[key].vitality==pytest.approx(.8)
         assert b.units[key].current==26
-        assert b.units[key].body==pytest.approx(1-.4*.46)
+        assert b.units[key].body==pytest.approx(1-.3*.46)
     notes=[e for e in b._light_trace if e['kind']=='counter_restore']
     assert len(notes)==2 and all(e['count']==1 for e in notes)
 
@@ -175,7 +175,11 @@ def test_invalid_dependency_graphs_fail_before_combat(rows):
 
 
 def test_paid_training_is_independent_stale_safe_and_time_rng_neutral(ready):
-    e,g=ready;g.player.asura_cultivation['body_level']=50;g.player.opportunity=10**12;e.store.save(g)
+    from cultivation_life.rules import add_item
+    e,g=ready;g.player.asura_cultivation['body_level']=50;g.player.opportunity=10**12
+    for row in definitions():
+        for key in row['recipe']:add_item(g.player,key,100)
+    e.store.save(g)
     e.get_game(g.id);before=e.store.load(g.id);shown=e.asura_action(g.id,'train_aggregate','shou',expected_level=0)
     saved=e.store.load(g.id);assert saved.player.asura_cultivation['aggregates']=={'shou':1}
     assert saved.player.age==before.player.age and saved.rng_state==before.rng_state
@@ -211,8 +215,9 @@ def test_magic_mirrors_copy_exact_body_mechanisms_and_freeze_training(ready):
 
 def test_busy_training_cannot_spend_resources_or_rng(ready):
     from cultivation_life.system.wuyun_cultivation import train
+    from cultivation_life.rules import has_item,remove_item
     _,g=ready;g.map_journey={'destination':'busy'};before=copy.deepcopy(g)
-    with pytest.raises(ValueError,match='旅行'):train(g,'se',0)
+    with pytest.raises(ValueError,match='旅行'):train(g,'se',0,has_item=has_item,remove_item=remove_item)
     assert g==before
 
 
@@ -242,15 +247,18 @@ def test_real_npc_combat_uses_its_own_magic_body_without_player_growth():
 
 def test_wuyun_record_survives_canonical_sealed_descent_and_return(ready):
     from cultivation_life.runtime import decode_rng,encode_rng
+    from cultivation_life.rules import add_item,has_item
     from cultivation_life.system.world_transition_system import finish_world_transition
     e,g=ready;g.player.asura_cultivation.update(body_level=50,aggregates=dict(se=1,shou=2,xiang=3,xing=4,shi=5))
     original=copy.deepcopy(g.player.asura_cultivation);expected=profile(g.player,player=True)
+    material=next(iter(definitions()[0]['recipe']));add_item(g.player,material,27)
     rng=decode_rng(g.seed,g.rng_state)
     for destination,mode in [('true_demon','sealed_descent'),('asura','sealed_return')]:
         before=g.to_dict();plan=e._plan_world_transition(g,destination,mode)
         assert g.to_dict()==before
         e._apply_world_transition(g,plan);finish_world_transition(g,rng,e._refresh_world_market)
         assert g.player.asura_cultivation==original and profile(g.player,player=True)==expected
+        assert has_item(g.player,material,27) and not has_item(g.player,material,28)
     g.rng_state=encode_rng(rng);e.store.save(g)
     assert e.store.load(g.id).player.asura_cultivation==original
 

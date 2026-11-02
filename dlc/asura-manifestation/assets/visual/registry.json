@@ -250,6 +250,116 @@
         "official.asura-manifestation"
       ],
       "domain_art": true
+    },
+    "material.asura_blood_amber": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_blood_amber-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "c9c2292b1fbf9f9268b3acf66470f72232d1d99b1055ceaabe15824baf6f5519",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_blood_amber.portrait": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_blood_amber-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "559d202810c51263e8d5eb09c8d97f972610b25c8953cd8a06550962887cca97",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_pain_heartstone": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_pain_heartstone-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "caab149742b86a733b696678d8a53eb21b5022f0991da916e22ce08083373a80",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_pain_heartstone.portrait": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_pain_heartstone-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "e6efa307df2766ab88079f5e559ff7b137c0db5210cbe036ba19f3631612c484",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_formless_marrow": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_formless_marrow-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "77cfbc6ce9a2385a8085baf648f448da64fab35c1b1aea977e7b0b9a3f008421",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_formless_marrow.portrait": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_formless_marrow-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "ab0f76c31c5e47eb9f828aef72a77e61c83f1b7c73e47d356411520de221d7a6",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_karma_lotus": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_karma_lotus-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "ab34f3149bd82aae8beea161455a3d7439c3f837f1c5d661c06cbc3e94308dc3",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_karma_lotus.portrait": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_karma_lotus-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "6e849e86305132fded2b61ec7129654d88306f957e244f571926cd226cba7175",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_awareness_soul_crystal": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_awareness_soul_crystal-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "1c7329b0e48b7581fc9f533cb84d9608727c0d8935a95a9795ff0bc3c6c14860",
+      "requires": [
+        "official.asura-manifestation"
+      ]
+    },
+    "material.asura_awareness_soul_crystal.portrait": {
+      "file": "/extension-assets/official.asura-manifestation/visual/wuyun-materials/asura_awareness_soul_crystal-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "42404740de6f5c3fd02ab0f0b33df892a2bc3731d35fbbbea5d4df15a55d1baf",
+      "requires": [
+        "official.asura-manifestation"
+      ]
     }
   }
 }

@@ -110,6 +110,106 @@
         "phantom_underworld": 5,
         "nether": 9
       }
+    },
+    "monster_body": {
+      "enabled": true,
+      "max_level": 50,
+      "hp_per_level": 5000,
+      "mp_per_level": 4000,
+      "body_material": "monster_celestial_jade",
+      "mechanisms": [
+        {
+          "id": "xuanfu",
+          "name": "玄肤",
+          "unlock_level": 10,
+          "priority": 0,
+          "requires": [],
+          "effects": {
+            "ward": {
+              "base": 2,
+              "growth": 0
+            },
+            "state_guard": {
+              "base": 0.05,
+              "growth": 0.025
+            }
+          },
+          "opportunity_multiplier": 1,
+          "recipe": {
+            "monster_celestial_jade": 4
+          }
+        },
+        {
+          "id": "nigu",
+          "name": "逆骨",
+          "unlock_level": 20,
+          "priority": 10,
+          "requires": [],
+          "effects": {
+            "evade": {
+              "base": 0.1,
+              "growth": 0.03
+            }
+          },
+          "opportunity_multiplier": 2,
+          "recipe": {
+            "monster_reverse_bone": 6
+          }
+        },
+        {
+          "id": "liezang",
+          "name": "烈脏",
+          "unlock_level": 30,
+          "priority": 20,
+          "requires": [
+            "nigu"
+          ],
+          "effects": {
+            "retaliate_power": {
+              "base": 0.12,
+              "growth": 0.004
+            }
+          },
+          "opportunity_multiplier": 3,
+          "recipe": {
+            "monster_aperture_marrow": 8
+          }
+        },
+        {
+          "id": "feixue",
+          "name": "沸血",
+          "unlock_level": 40,
+          "priority": 30,
+          "requires": [],
+          "effects": {
+            "release_cost": {
+              "base": 0.15,
+              "growth": -0.01
+            }
+          },
+          "opportunity_multiplier": 4,
+          "recipe": {
+            "monster_ancestral_blood": 10
+          }
+        },
+        {
+          "id": "shenhun",
+          "name": "神魂",
+          "unlock_level": 50,
+          "priority": 40,
+          "requires": [],
+          "effects": {
+            "exchange_threshold": {
+              "base": 0.4,
+              "growth": 0.02
+            }
+          },
+          "opportunity_multiplier": 5,
+          "recipe": {
+            "monster_return_soul_amber": 12
+          }
+        }
+      ]
     }
   }
 }

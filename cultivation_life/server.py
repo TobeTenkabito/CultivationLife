@@ -354,7 +354,7 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.asura_action(game_id, str(payload.get("action", "")),
                     str(payload.get("target_id", "")), payload.get("body_ids"), str(payload.get("name", "")),payload.get('expected_level'))
             elif operation == "upper-voisinage":
-                result = ENGINE.upper_voisinage_action(game_id, str(payload.get("action", "")), payload.get("voisinage_id"))
+                result = ENGINE.upper_voisinage_action(game_id, str(payload.get("action", "")), payload.get("voisinage_id"),payload.get('expected_level'))
             elif operation == "immortal-action":
                 result = ENGINE.immortal_action(game_id, str(payload.get("action", "")),
                                                 payload.get("doctrine_id"), payload.get("axis"), payload.get("supply_id"),payload.get('expected_level'))

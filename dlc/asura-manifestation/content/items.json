@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "id": "asura_blood_amber",
+      "name": "凝煞血珀",
+      "description": "五蕴色蕴专用培养材料，仅修罗界产出。零升一重需4件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "wuyun_material",
+        "asura"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "asura_pain_heartstone",
+      "name": "九窍痛心石",
+      "description": "五蕴受蕴专用培养材料，仅修罗界产出。零升一重需6件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "wuyun_material",
+        "asura"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "asura_formless_marrow",
+      "name": "无相幻髓",
+      "description": "五蕴想蕴专用培养材料，仅修罗界产出。零升一重需8件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "wuyun_material",
+        "asura"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "asura_karma_lotus",
+      "name": "业火劫莲",
+      "description": "五蕴行蕴专用培养材料，仅修罗界产出。零升一重需10件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "wuyun_material",
+        "asura"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "asura_awareness_soul_crystal",
+      "name": "冥觉魂晶",
+      "description": "五蕴识蕴专用培养材料，仅修罗界产出。零升一重需12件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "wuyun_material",
+        "asura"
+      ],
+      "force_tier": 1
+    }
+  ]
+}

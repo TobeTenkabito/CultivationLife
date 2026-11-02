@@ -12,6 +12,7 @@ from typing import Any
 from .effects import VoisinageEffects
 from .semantics import CombatSemantics
 from .divine_lights import DivineLights
+from .body_events import BodyEvents
 from .contracts import Combatant, VoisinageDefinition, PhaseRound, ResourceSupply, VoisinageSeal, number
 
 
@@ -32,6 +33,10 @@ class UnitState:
     field_strain: float = 0.0
     escaped: bool = False
     controls: dict[str, str] = field(default_factory=dict)
+    exchange_used: bool = False
+    karma_spent: float = 0.
+    last_attack_targets: tuple | None = None
+    death_observed: bool = False
 
     @property
     def restrictions(self):
@@ -40,7 +45,7 @@ class UnitState:
     @property
     def fighting(self) -> bool:
         threshold = 0.0 if self.unit.id == "player" else 0.12
-        return self.vitality > threshold and not self.suppressed and not self.escaped
+        return self.vitality > threshold and self.body>0 and not self.suppressed and not self.escaped
 
 
 @dataclass(frozen=True)
@@ -54,7 +59,7 @@ class Field:
     authority: float | None = None
 
 
-class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
+class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvents):
     """One battle's upper layer. Ordinary combat remains the damage provider."""
 
     def __init__(self, units: list[Combatant], *, contest_ratio: float = 1.25,
@@ -87,7 +92,10 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
         self._light_muted={};self._light_trace=[];self._light_resists={};self._light_extra={}
         self._light_rng=None;self._responded=set()
         self._body_round=None
+        self._init_body_events()
+        for state in self.units.values():state.death_observed=state.vitality<=0 or state.body<=0
         self.primary_ordinary_loss = 0.0
+        self.primary_ordinary_body_loss = 0.0
         self.objectives = {"player": "kill", "enemy": "kill"}
         self.escape_forbidden_sides: frozenset[str] = frozenset()
         self._init_semantics()
@@ -154,7 +162,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
                 continue
             limit = definition.max_investment if c.investment_limit is None else c.investment_limit
             investment = min(c.investment, limit, owner.current - cost)
-            owner.current -= cost + investment
+            self._energy(owner.unit.id,owner.current-cost-investment)
             used = {'field.upkeep_cost'}
             if not continued:
                 used.add('field.opening_cost')
@@ -196,7 +204,12 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
         self._released.clear()
         self._disrupted.clear()
         self._responded.clear()
+        for state in self.units.values():
+            if state.unit.capabilities.resource_link=='legacy_mp':
+                ratio=player_mp if state.unit.side=='player' else enemy_mp
+                state.current=min(state.current,max(0.,ratio)*state.unit.capabilities.capacity)
         self._begin_lights(rng,first_side)
+        self._swap_body_energy()
         self._semantic_begin(round_no, player_mp, enemy_mp, player_morale, enemy_morale)
         # Scripted interventions happen before maintenance, coverage or effects.
         # Only this battle's immutable snapshot changes, never the saved owner.
@@ -216,9 +229,6 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
         self.fields = []
         for state in self.units.values():
             state.escape_locked = False
-            if state.unit.capabilities.resource_link == "legacy_mp":
-                ratio = player_mp if state.unit.side == "player" else enemy_mp
-                state.current = min(state.current, max(0.0, ratio) * state.unit.capabilities.capacity)
         for supply in self.supplies:
             owner = self.units[supply.owner]
             if (not owner.fighting or "supply" in owner.restrictions or owner.unit.capabilities.resource_tier < 2
@@ -272,6 +282,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
                 "defense_strength": round(defense_strength, 4),
             }
             state.resisted = relation in {"pressed", "contested"}
+        self._release_body_domination()
         # Publish only after every directional contest has settled; newly gained
         # marks cannot retroactively change this round's contests.
         for key, relation in self.frame.relations.items():
@@ -291,7 +302,10 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
             erosion *= 1+self._body_round.amplification(owner,key)
             target.pressure = min(.85, target.pressure + erosion)
             before_pressure_loss = target.vitality
-            self._lose(key, min(max(0, target.vitality - .13), erosion), physical=False)
+            state_loss=min(max(0,target.vitality-.13),erosion)
+            source_field=next(f for f in self.fields if f.owner==owner)
+            if max(e.tier for e in source_field.definition.actions())>=2:state_loss=self._guard_state(key,state_loss)
+            self._lose(key,state_loss,physical=False)
             lost = min(target.morale, erosion * 80)
             target.morale -= lost
             side = target.unit.side
@@ -312,6 +326,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
         self.animation['fields'] = self.report()['fields']
         self.animation['relations'] = {key: dict(value) for key, value in self.frame.relations.items()}
         self._field_lights()
+        self._drain_body_events()
         self._execute_field_actions(previous)
         self.animation['after'] = [max(0., 1 - self.ordinary_loss(side)) for side in ('player', 'enemy')]
         for side in ('player', 'enemy'):
@@ -334,19 +349,22 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
                 and any(s.fighting and s.unit.side != side and key not in self._dominated
                         for key, s in self.units.items()))
 
-    def _lose(self, key: str, amount: float, *, physical=True) -> float:
+    def _lose(self, key: str, amount: float, *, physical=True,body_amount=None) -> float:
         state = self.units[key]
+        before=state.vitality
         actual = min(state.vitality, max(0.0, amount))
         state.vitality -= actual
         if physical:
-            state.body = max(0, state.body - actual * .46)
+            injury=actual if body_amount is None else min(before,max(0,body_amount))
+            state.body = max(0, state.body - injury * .46)
             if key == "player":
-                self.frame.primary_loss += actual
+                self.frame.primary_loss += injury
         weighted = actual * state.unit.power / self.totals[state.unit.side]
         if state.unit.side == "player":
             self.frame.player_loss += weighted
         else:
             self.frame.enemy_loss += weighted
+        self._body_death(key)
         return weighted
 
     def ordinary_damage(self, dealt: float, received: float) -> tuple[float, float]:
@@ -356,7 +374,10 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
         the existing six-stat exchange. No new minimum-damage floor is applied.
         """
         amounts: dict[str, float] = {}
+        primary_body_before=self.units['player'].body if 'player' in self.units else 0.
+        body_amounts: dict[str,float] = {}
         semantic_hits, semantic_caps = [], {}
+        attack_targets={}
         # Reserve both sides' attack resources before resolving either side's wards.
         tiers: dict[str, int] = {}
         ordinary_sides = {side: self._has_ordinary(side) for side in ("player", "enemy")}
@@ -379,6 +400,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
                 if source.unit.side != side:
                     continue
                 contribution = damage * source.unit.power / self.totals[side]
+                attack_targets[key]=tuple(sorted(s.unit.id for s in opponents))
                 for target in opponents:
                     target_key = target.unit.id
                     ward_tier = ward_tiers[target_key]
@@ -396,7 +418,9 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
                         semantic_caps[target_key] = min(semantic_caps.get(target_key, 1.), incoming.cap('ordinary.received_cap'))
                         self._semantic_commit(outgoing, {'ordinary.dealt'})
                         self._semantic_commit(incoming, {'ordinary.received', 'ordinary.received_cap'})
-                        semantic_hits.append((key, target_key, amount))
+                    body_amounts[target_key]=body_amounts.get(target_key,0.)+amount
+                    if tier>=2:amount=self._guard_state(target_key,amount)
+                    semantic_hits.append((key,target_key,amount))
                     amounts[target_key] = amounts.get(target_key, 0.0) + amount
         before_p, before_e = self.frame.player_loss, self.frame.enemy_loss
         primary_before = self.units["player"].vitality if "player" in self.units else 0.0
@@ -405,7 +429,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
             target = self.units[key]
             before = target.vitality
             body_before = target.body
-            self._lose(key, min(amount, semantic_caps.get(key, amount)))
+            self._lose(key, min(amount, semantic_caps.get(key, amount)),
+                       body_amount=min(body_amounts[key],semantic_caps.get(key,body_amounts[key])))
             actual_losses[key] = before - target.vitality
             actual_body_losses[key] = body_before - target.body
         # Damage is simultaneous. Post-damage facts contain actual, tier-gated
@@ -421,10 +446,18 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
             self._semantic_event(target, 'ordinary_after_damage', source, 'defender', **event)
         self.primary_ordinary_loss = (primary_before - self.units["player"].vitality
                                       if "player" in self.units else 0.0)
+        self.primary_ordinary_body_loss=(actual_body_losses.get('player',0.) if self._body_round.value('player','state_guard') else self.primary_ordinary_loss*.46)
+        for source in sorted(attack_targets):
+            hits=[(target,actual_losses[target]*amount/max(1e-12,amounts[target]))
+                  for s,target,amount in semantic_hits if s==source]
+            self._queue_forget(source,attack_targets[source],dict(hits),())
+        self._drain_body_events()
+        self._execute_field_actions(dict(self._dominated))
+        self.primary_ordinary_body_loss=(primary_body_before-self.units['player'].body if 'player' in self.units else 0.)
         for source, target in sorted(self._blocked_pairs):
             if self.light_value(target,'kun'):
                 amount=self._light_prevented.get((source,target),0.)
-                self._light_note('kun',target,f'{self.units[target].unit.name}的坤元缃光免疫了{self.units[source].unit.name}的凡属性伤害，拦下预计{amount:.2%}战斗态势损耗（{amount*self.units[target].unit.power:.1f}点）。',source=source,prevented=amount)
+                self._light_note('kun',target,f'{self.units[target].unit.name}的{self._body_name(target,"ward")}免疫了{self.units[source].unit.name}的凡属性伤害，拦下预计{amount:.2%}战斗态势损耗（{amount*self.units[target].unit.power:.1f}点）。',source=source,prevented=amount)
             else:self.frame.events.append(f"{self.units[source].unit.name}的作用至道不足，无法撼动{self.units[target].unit.name}的护体金光。")
         return self.frame.enemy_loss - before_e, self.frame.player_loss - before_p
 
@@ -438,7 +471,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
         for state in self.units.values():
             if state.unit.capabilities.resource_link == "legacy_mp":
                 ratio = player_mp if state.unit.side == "player" else enemy_mp
-                state.current = min(state.current, max(0.0, ratio) * state.unit.capabilities.capacity)
+                self._energy(state.unit.id,min(state.current,max(0.0,ratio)*state.unit.capabilities.capacity))
             if not state.fighting:
                 state.active_voisinage = None
         self._refresh_relations()
@@ -447,6 +480,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
         self.sync_resources(player_mp=player_mp, enemy_mp=enemy_mp)
         self._semantic_mp = {'player': player_mp, 'enemy': enemy_mp}
         self._semantic_end()
+        self._drain_body_events()
+        self._execute_field_actions(dict(self._dominated))
         self._refresh_relations()
 
     def _refresh_relations(self):

@@ -104,9 +104,14 @@ def _immortal_body_action(deps: ImmortalBodyDependencies, game, action, key):
             grant_intrinsic_progression_if_new_highwater(p)
             p.hp, p.mp = max_hp(p) * min(1, hp_ratio), max_mp(p) * min(1, mp_ratio)
             summary = f'真仙之躯修至第 {level + 1} 层（成功率 {probability:.0%}）。'
-            from .divine_lights import definitions
-            unlocked=next((r for r in definitions() if r['unlock_level']==level+1),None)
-            if unlocked:summary+=f" {unlocked['name']}已解锁，可独立修炼。"
+            from .ghost_body import enabled_for as ghost_enabled
+            if ghost_enabled(p):
+                from ..ghost_body_content import NAMES
+                if (level+1)%10==0:summary+=f' {NAMES[(level+1)//10-1]}已解锁，可从鬼躯入口独立修炼。'
+            else:
+                from .divine_lights import definitions
+                unlocked=next((r for r in definitions() if r['unlock_level']==level+1),None)
+                if unlocked:summary+=f" {unlocked['name']}已解锁，可独立修炼。"
         else:
             state['failures'] = state.get('failures', 0) + 1
             summary = f'淬体未成，本次药材已消耗；下次成功率 {body_probability(p):.0%}。'

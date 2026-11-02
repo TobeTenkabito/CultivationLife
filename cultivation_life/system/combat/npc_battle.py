@@ -89,8 +89,10 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             from ..divine_lights import profile
             lights,levels=profile(npc)
             from ..wuyun import profile as aggregate_profile
+            from ..monster_body import profile as monster_profile
+            from ..ghost_body import profile as ghost_profile
             capabilities=replace(capabilities,divine_lights=lights,divine_light_levels=levels,
-                                 body_mechanisms=aggregate_profile(npc),body_voisinage_resistance=0.)
+                                 body_mechanisms=aggregate_profile(npc) or monster_profile(npc) or ghost_profile(npc),body_voisinage_resistance=0.)
             if capabilities.resource_link != "independent":
                 raise ValueError("NPC resources must be independent")
             from ..cultivation_ranks import rank_for

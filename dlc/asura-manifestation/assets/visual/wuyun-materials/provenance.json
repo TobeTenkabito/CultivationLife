@@ -1,0 +1,40 @@
+{
+  "method": "built-in image_gen",
+  "reference": "design/inventory-icons-v2-20261020/source/special_materials.png",
+  "reference_sha256": "74c827382410eb7bb599eb77fe79177d43d473a302f208777cab28a8c6489642",
+  "prompt_file": "dlc/asura-manifestation/assets/visual/wuyun-materials/prompts.json",
+  "normalization": "Alpha>=128 crop; longest edge 26px; centered 32px binary alpha; 128px nearest-neighbor portrait.",
+  "exporter": "scripts/prepare_wuyun_material_assets.py",
+  "assets": [
+    {
+      "id": "asura_blood_amber",
+      "name": "凝煞血珀",
+      "source": "design/wuyun-materials-20261102/source/asura_blood_amber-pixel-v1.png",
+      "source_sha256": "09f5a34ee23f983037709dd183ac885254e3dc40bbc5748d0fad71246fae5cd4"
+    },
+    {
+      "id": "asura_pain_heartstone",
+      "name": "九窍痛心石",
+      "source": "design/wuyun-materials-20261102/source/asura_pain_heartstone-pixel-v1.png",
+      "source_sha256": "ab40ac059ee77796f7b51c23b2545e5e76318f915ef74d1c47b515f895012931"
+    },
+    {
+      "id": "asura_formless_marrow",
+      "name": "无相幻髓",
+      "source": "design/wuyun-materials-20261102/source/asura_formless_marrow-pixel-v1.png",
+      "source_sha256": "bede8fad27f5c0ed655ff487111a6874325a308c06680674313535e690be005c"
+    },
+    {
+      "id": "asura_karma_lotus",
+      "name": "业火劫莲",
+      "source": "design/wuyun-materials-20261102/source/asura_karma_lotus-pixel-v1.png",
+      "source_sha256": "ec42124e5346aa7eafdab203690c1b34ffeddf490728035f34fbeb3e18941bd1"
+    },
+    {
+      "id": "asura_awareness_soul_crystal",
+      "name": "冥觉魂晶",
+      "source": "design/wuyun-materials-20261102/source/asura_awareness_soul_crystal-pixel-v1.png",
+      "source_sha256": "e6e9f1b816edbee9e989a20f783783fc63386cdb407ec0f64d8dcae26d0d5235"
+    }
+  ]
+}
