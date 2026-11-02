@@ -12,7 +12,7 @@ def reason(game):
     p=game.player
     if not enabled_for(p) or p.world!='nether' or p.realm_index<9:return '须开启万妖归宗并在幽冥界达到第九阶'
     if cultivation_blocked(game):return '请先处理事件、劫战或拘束；寄身期间不能培养原妖躯'
-    if p.spirit_state.get('mode')=='wandering' and not p.spirit_state.get('body_intact'):return '肉身已毁，须先取得肉身'
+    if p.spirit_state.get('mode')=='wandering':return '神游期间不能培养原妖躯，请先返回或取得肉身'
     if p.sealed_cultivation or p.cultivation_suppression:return '修为受压制，不能修炼妖躯五蜕'
     if game.map_journey:return '请先完成当前旅行'
     if game.guixu_state.get('player_session'):return '请先离开归墟'

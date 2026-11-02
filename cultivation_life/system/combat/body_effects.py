@@ -71,7 +71,7 @@ class BodyEffects:
         success=result['success']
         self._light_note('field_evade',key,
             f'{state.unit.name}的邻域以逆骨闪避{self.units[intent.field.owner].unit.name}的{self._body_effect_label(intent.effect)}：'+
-            ('成功，此次作用无效，对方已付费用不退。' if success else '未成，继续结算。')+f'（轮首概率{result["probability"]:.1%}）',
+            ('成功，此次作用无效，对方已付费用不退。' if success else '未成，继续结算。')+f'（本段闪避概率{result["probability"]:.1%}）',
             source=intent.field.owner,slot=intent.allowance.slot,**result)
         if success:
             if self._body_round.arm_reaction(key,intent.field.owner,result['chain']):

@@ -161,7 +161,8 @@ class DivineLights(BodyEffects):
         try:
             for source,token,_ in completed:
                 if not token.source:continue
-                for key,state in self.units.items():
+                for key in self._unit_order():
+                    state=self.units[key]
                     if not state.fighting or state.unit.side==self.units[source].unit.side:continue
                     entry=self._body_round.channel(key,'restore_state',token.chain)
                     if not entry:continue

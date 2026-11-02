@@ -105,6 +105,9 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             raise ValueError('Unknown battle objective')
         self.objectives = {"player": player, "enemy": enemy}
 
+    def _unit_order(self):
+        return self._body_round.order if self._body_round is not None else sorted(self.units)
+
     @property
     def enabled(self) -> bool:
         return self.semantics is not None or any(s.unit.capabilities.body_mechanisms or s.unit.capabilities.divine_lights or s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
@@ -138,7 +141,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                              and self.units[key].fighting and "support" not in self.units[key].restrictions and self._can_reach(owner, key)]
             targets = []
             if c.stance == "press":
-                preferred = c.target_ids or tuple(self.units)
+                preferred = c.target_ids or tuple(sorted(self.units))
                 targets = [key for key in preferred if key in self.units
                            and self.units[key].unit.side != owner.unit.side
                            and self.units[key].fighting and self._can_reach(owner, key)]
@@ -244,7 +247,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             if gained:
                 self.frame.events.append(f"{owner.unit.name}获得明确仙力供给 {gained:g}。")
         # All affordable fields are established before any domination effects.
-        for state in self.units.values():
+        for key in self._unit_order():
+            state=self.units[key]
             field = self._field(state, state.vitality)
             if field:
                 self.fields.append(field)
@@ -349,7 +353,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                 and any(s.fighting and s.unit.side != side and key not in self._dominated
                         for key, s in self.units.items()))
 
-    def _lose(self, key: str, amount: float, *, physical=True,body_amount=None) -> float:
+    def _lose(self, key: str, amount: float, *, physical=True,body_amount=None,lethal=True) -> float:
         state = self.units[key]
         before=state.vitality
         actual = min(state.vitality, max(0.0, amount))
@@ -364,7 +368,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             self.frame.player_loss += weighted
         else:
             self.frame.enemy_loss += weighted
-        self._body_death(key)
+        if lethal:self._body_death(key)
         return weighted
 
     def ordinary_damage(self, dealt: float, received: float) -> tuple[float, float]:
@@ -381,7 +385,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         # Reserve both sides' attack resources before resolving either side's wards.
         tiers: dict[str, int] = {}
         ordinary_sides = {side: self._has_ordinary(side) for side in ("player", "enemy")}
-        for key, state in self.units.items():
+        for key in self._unit_order():
+            state=self.units[key]
             if not self._available(key) or not ordinary_sides[state.unit.side]:
                 continue
             tiers[key] = self.attack_tier(state, pay=True)
@@ -390,8 +395,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         for side, damage in (("player", dealt), ("enemy", received)):
             if damage <= 0:
                 continue
-            opponents = [s for key, s in self.units.items() if s.unit.side != side
-                         and s.fighting and key not in self._dominated]
+            opponents = [self.units[key] for key in self._unit_order() if self.units[key].unit.side != side
+                         and self.units[key].fighting and key not in self._dominated]
             target_total = sum(s.unit.power for s in opponents)
             if target_total <= 0:
                 continue
@@ -462,13 +467,15 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         return self.frame.enemy_loss - before_e, self.frame.player_loss - before_p
 
     def mp_ratio(self, side: str, fallback: float) -> float:
-        linked = next((s for s in self.units.values() if s.unit.side == side
-                       and s.unit.capabilities.resource_link == "legacy_mp"), None)
+        primary='player' if side=='player' else 'enemy-0'
+        linked = next((self.units[key] for key in sorted(self.units,key=lambda k:(k!=primary,k)) if self.units[key].unit.side == side
+                       and self.units[key].unit.capabilities.resource_link == "legacy_mp"), None)
         return linked.current / max(1.0, linked.unit.capabilities.capacity) if linked else fallback
 
     def sync_resources(self, *, player_mp: float, enemy_mp: float) -> None:
         self._semantic_mp = {'player': player_mp, 'enemy': enemy_mp}
-        for state in self.units.values():
+        for key in self._unit_order():
+            state=self.units[key]
             if state.unit.capabilities.resource_link == "legacy_mp":
                 ratio = player_mp if state.unit.side == "player" else enemy_mp
                 self._energy(state.unit.id,min(state.current,max(0.0,ratio)*state.unit.capabilities.capacity))

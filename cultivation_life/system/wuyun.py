@@ -1,7 +1,7 @@
 """Read-only demonic body projection; combat receives only resolved snapshots."""
 from ..content_registry import WORLD_SYSTEMS
 from ..body_mechanism_content import build
-from .combat.actor_state import read
+from .combat.actor_state import read,has_body
 
 
 def enabled_for(owner):
@@ -15,6 +15,7 @@ def profile(owner,*,player=False):
     if player:
         from .possession_system import is_possessed
         if is_possessed(owner):owner=owner.ghost_host_body;player=False
+    if not has_body(owner):return ()
     if not enabled_for(owner):return ()
     record=owner.asura_cultivation if player else dict(body_level=read(owner,'immortal_body_level',0) or 0)
     level=record.get('body_level',0);ranks=record.get('aggregates',{})

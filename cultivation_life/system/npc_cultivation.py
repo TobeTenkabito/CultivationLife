@@ -39,5 +39,5 @@ def npc_voisinage_limit(npc):
 
 
 def npc_golden_light(npc):
-    from .combat.actor_state import read
-    return int(read(npc, 'immortal_body_level', 0) or 0)>=10
+    from .combat.actor_state import read,has_body
+    return has_body(npc) and int(read(npc, 'immortal_body_level', 0) or 0)>=10

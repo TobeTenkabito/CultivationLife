@@ -18,6 +18,7 @@ def _divine_training_reason(game):
     p=game.player
     if p.world!='celestial' or p.realm_index<9:return '须在仙界达到真仙境界'
     if cultivation_blocked(game):return '当前状态无法修持，请先处理事件或脱离拘束'
+    if p.spirit_state.get('mode')=='wandering':return '神游期间不能修持原仙躯神光，请先返回或取得肉身'
     if p.sealed_cultivation or p.cultivation_suppression:return '修为受压制，不能修炼神光'
     if game.map_journey:return '请先完成当前旅行'
     if game.guixu_state.get('player_session'):return '请先离开归墟再修炼神光'
@@ -77,6 +78,7 @@ def _immortal_body_action(deps: ImmortalBodyDependencies, game, action, key):
         state['active_manual'] = key
         summary = f"改修《{manuals[key]['name']}》，仙躯层数与失败保底保留。"
     elif action == 'train_body':
+        if p.spirit_state.get('mode')=='wandering':raise ValueError('神游期间不能淬炼原仙躯，请先返回或取得肉身')
         if p.body_training < cfg['required_training']:
             raise ValueError('须先将炼体修至 100 层')
         if p.sealed_cultivation or p.cultivation_suppression:
@@ -135,7 +137,8 @@ def _public_immortal_body(game):
         'hp_bonus': level * cfg['hp_per_level'], 'mp_bonus': level * cfg['mp_per_level'],
         'can_train': p.body_training >= cfg['required_training'] and p.immortal_power_converted
             and bool(manual) and level < cfg['max_level'] and not p.cultivation_suppression
-            and not p.sealed_cultivation and all(r['owned'] >= r['needed'] for r in recipe),
+            and not p.sealed_cultivation and p.spirit_state.get('mode')!='wandering'
+            and all(r['owned'] >= r['needed'] for r in recipe),
         'manuals': [{**m, 'owned': m['id'] in p.immortal_body.get('manuals', [])} for m in cfg['manuals']],
         'supplies': [{**s, 'name': ITEM_CATALOG[s['id']].name, 'owned': quantity(p, s['id'])}
                      for s in cfg['supplies']],

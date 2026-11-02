@@ -6,6 +6,11 @@ def read(owner: Any, key: str, default=None):
     return owner.get(key, default) if isinstance(owner, dict) else getattr(owner, key, default)
 
 
+def has_body(owner: Any) -> bool:
+    """A wandering soul cannot borrow the body left behind, even if intact."""
+    return read(owner,'spirit_state',{}).get('mode')!='wandering'
+
+
 def _write(owner: Any, key: str, value: Any) -> None:
     if isinstance(owner, dict):
         owner[key] = value

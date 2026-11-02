@@ -8,13 +8,17 @@ from dataclasses import asdict
 import copy
 from math import isfinite
 
-from .contracts import Combatant, CombatCapabilities, VoisinageDefinition
+from .contracts import Combatant, CombatCapabilities, VoisinageDefinition,ResourceSupply,VoisinageSeal
 from .voisinages import VoisinageBattle
 from .ordinary import exchange_damage
 
 
 def dump_battle(battle):
     return {'units': [asdict(s.unit) for s in battle.units.values()],
+            'objectives':dict(battle.objectives),'contest_ratio':battle.contest_ratio,
+            'supplies':[asdict(s) for s in battle.supplies], 'seals':[asdict(s) for s in battle.seals],
+            'applied_seals':sorted(battle._applied_seals),
+            'death_exempt':sorted(battle._death_exempt),
             **({'semantic_runtime': battle.semantics.dump()} if battle.semantics else {}),
             **({'semantic_environment': dict(battle._semantic_environment)} if battle.semantics else {}),
             'states': {key: {k: copy.deepcopy(v) for k, v in vars(s).items() if k != 'unit'}
@@ -29,7 +33,22 @@ def load_battle(snapshot):
         caps = row.pop('capabilities')
         caps['voisinages'] = tuple(VoisinageDefinition(**d) for d in caps['voisinages'])
         units.append(Combatant(**row, capabilities=CombatCapabilities(**caps)))
-    battle = VoisinageBattle(units)
+    battle = VoisinageBattle(units,contest_ratio=snapshot.get('contest_ratio',1.25),
+        supplies=tuple(ResourceSupply(**r) for r in snapshot.get('supplies',())),
+        seals=tuple(VoisinageSeal(**r) for r in snapshot.get('seals',())))
+    objectives=snapshot.get('objectives',{'player':'kill','enemy':'kill'})
+    if not isinstance(objectives,dict) or set(objectives)!={'player','enemy'}:
+        raise ValueError('Invalid battle objectives')
+    battle.set_objectives(objectives['player'],objectives['enemy'])
+    applied=snapshot.get('applied_seals',[])
+    if (not isinstance(applied,list) or any(type(i) is not int or not 0<=i<len(battle.seals) for i in applied)
+            or len(set(applied))!=len(applied)):
+        raise ValueError('Invalid applied seal snapshot')
+    battle._applied_seals=set(applied)
+    exempt=snapshot.get('death_exempt',[])
+    if not isinstance(exempt,list) or any(not isinstance(k,str) or k not in battle.units for k in exempt) or len(set(exempt))!=len(exempt):
+        raise ValueError('Invalid nonlethal unit snapshot')
+    battle._death_exempt=frozenset(exempt)
     for key, values in snapshot['states'].items():
         credit=values.get('karma_spent',0.)
         history=values.get('last_attack_targets')
@@ -71,6 +90,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
     fusion = state['mode'] == 'asura_fusion'
     endurance = state['mode'] not in {'three_corpses', 'asura_fusion', 'asura_breakthrough', 'upper_final'}
     only_fields = state['mode'] == 'voisinage_backlash'
+    battle._death_exempt=frozenset(k for k,s in battle.units.items() if endurance and s.unit.side=='enemy')
     player = battle.units['player']
     for _ in range(batch_size):
         n = state.get('round', 0) + 1
@@ -83,11 +103,13 @@ def run_batch(battle, state, rng, *, batch_size=24):
                     s.suppressed = s.escaped = False
                     s.pressure = s.field_strain = 0
                     s.controls.clear()
-                    s.current = s.unit.capabilities.capacity
+                    s.current = battle._usable_energy(s)
+                    s.death_observed=False
         scores={side:state['stats'][side]['mobility']+state['stats'][side]['sense'] for side in ('player','enemy')}
         frame = battle.begin_round(n, player_condition=player.vitality, enemy_condition=1,
                                    player_mp=state['mp_ratio'], enemy_mp=1,rng=rng,
                                    first_side='player' if scores['player']>=scores['enemy'] else 'enemy')
+        state['mp_ratio']=battle.mp_ratio('player',state['mp_ratio'])
         dealt = received = 0
         initiative = 'voisinage'
         exchange = None
@@ -137,6 +159,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
             before = [player.unit.power*player.vitality,
                       battle.totals['enemy']*(1-battle.ordinary_loss('enemy'))]
             dealt, received = battle.ordinary_damage(dealt, received)
+            state['mp_ratio']=battle.mp_ratio('player',state['mp_ratio'])
             if frame.ordinary:
                 exchange = dict(opening=before, before=before,
                     after=[player.unit.power*player.vitality,
@@ -146,6 +169,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
                 state['mp_ratio'] = max(0, state['mp_ratio'] - .035)
             frame.events.append(f'本轮普通交锋：敌方态势损耗 {dealt:.1%}，己方态势损耗 {received:.1%}。')
         battle.finish_round(player_mp=state['mp_ratio'], enemy_mp=1)
+        state['mp_ratio']=battle.mp_ratio('player',state['mp_ratio'])
         state['round'] = n
         rows.append({'round': n, 'initiative': initiative if frame.ordinary else 'voisinage',
                      'events': list(frame.events), 'player_hp_ratio': max(0, player.vitality),

@@ -10,7 +10,7 @@ def reason(game):
     p=game.player
     if not enabled_for(p) or p.world!='reincarnation' or p.realm_index<9:return '须开启鬼修道途并在轮回界达到第九阶'
     if cultivation_blocked(game):return '请先处理事件、劫战或拘束；寄身期间无法修持本魂鬼躯'
-    if p.spirit_state.get('mode')=='wandering' and not p.spirit_state.get('body_intact'):return '原躯已毁，须先取得肉身'
+    if p.spirit_state.get('mode')=='wandering':return '神游期间不能修持原鬼躯，请先返回或取得肉身'
     if p.sealed_cultivation or p.cultivation_suppression:return '修为受压制，不能修持鬼躯'
     if game.map_journey or game.guixu_state.get('player_session'):return '请先完成旅行或离开归墟'
     if game.heavens_state.get('runtime'):

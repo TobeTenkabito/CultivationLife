@@ -15,6 +15,7 @@ from .contracts import VoisinageEffect
 class BodyEvents:
     def _init_body_events(self):
         self._body_queue=deque();self._body_chain=();self._draining_body=False
+        self._death_exempt=frozenset()
 
     def _energy(self,key,value,chain=None):
         state=self.units[key];before=state.current
@@ -41,6 +42,7 @@ class BodyEvents:
 
     def _body_death(self,key):
         state=self.units[key]
+        if key in self._death_exempt:return
         if not state.death_observed and (state.vitality<=0 or state.body<=0):
             state.death_observed=True
             self._body_queue.append(('death',dict(target=key,chain=self._body_chain)))
@@ -149,7 +151,7 @@ class BodyEvents:
                     if value<=0 or self.ward_tier(key,damage=True)>2:continue
                     before=self.units[key].vitality
                     multiplier=self._body_round.value(owner,'critical') if event['critical'] else 1.
-                    intent=EffectIntent(field,VoisinageEffect('strike',0,min(1.,value*event['scale']*multiplier),tier=2),targets,
+                    intent=EffectIntent(field,VoisinageEffect('strike',0,min(1.,value*multiplier)*event['scale'],tier=2),targets,
                         allowance=token,direct_power=True)
                     if self._intervene(intent,key,self._responded):continue
                     applied=self._apply_effect(intent,key)
@@ -180,13 +182,16 @@ class BodyEvents:
                 if index and (not self.units[owner].fighting or owner in self._disrupted):break
                 candidates=keys if not index else intent.targets
                 valid=tuple(k for k in candidates if (self._body_attackable(k) if intent.effect.target=='enemy' else self.units[k].fighting))
+                if index and intent.effect.target=='enemy':
+                    valid=tuple(k for k in valid if self._can_reach(self.units[owner],k) and
+                        (k==intent.allowance.target if intent.allowance.requires_evade else self._covered_by(intent.field,k)))
                 # A field whose coverage contains several targets remains an AoE;
                 # an explicitly single-target field chooses one live target per segment.
                 if index and intent.effect.target!='self' and intent.effect.target_mode=='single' and valid:
                     choice=min(len(valid)-1,int(self._light_rng.random()*len(valid))) if split else 0
                     valid=(valid[choice],)
                 token=replace(intent.allowance,chain=chain)
-                segment=replace(intent,allowance=token,segment_scale=scale,effect=replace(intent.effect,power=intent.effect.power*scale))
+                segment=replace(intent,allowance=token,segment_scale=scale)
                 if index:valid=tuple(k for k in valid if not self._intervene(segment,k,self._responded))
                 losses={};self._body_chain=chain
                 for key in valid:

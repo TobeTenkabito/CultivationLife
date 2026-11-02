@@ -8,6 +8,7 @@ def training_reason(game):
     p=game.player
     if not enabled_for(p) or p.world!='asura' or p.realm_index<9:return '须开启修罗道途并在修罗界达到修罗境'
     if cultivation_blocked(game):return '请先处理当前事件、劫战或拘束'
+    if p.spirit_state.get('mode')=='wandering':return '神游期间不能锻炼原魔躯或修炼五蕴，请先返回或取得肉身'
     if p.sealed_cultivation or p.cultivation_suppression:return '修为受压制，不能锻炼魔躯或修炼五蕴'
     if game.map_journey:return '请先完成当前旅行'
     if game.guixu_state.get('player_session'):return '请先离开归墟'

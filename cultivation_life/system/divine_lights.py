@@ -10,18 +10,20 @@ def definitions():
 
 
 def body_record(owner, *, player=False):
-    from .combat.actor_state import read
+    from .combat.actor_state import read,has_body
     from .monster_body import enabled_for as monster_enabled
     from .ghost_body import enabled_for as ghost_enabled
     if player:
         from .possession_system import is_possessed
         from .wuyun import enabled_for
         if not is_possessed(owner):
+            if not has_body(owner):return {},True
             if enabled_for(owner) or monster_enabled(owner) or ghost_enabled(owner):return {}, True
             record=owner.immortal_body
             return record, True
         owner = owner.ghost_host_body
     from .wuyun import enabled_for
+    if not has_body(owner):return {},False
     if enabled_for(owner) or monster_enabled(owner) or ghost_enabled(owner):return {}, False
     level = max(0, min(50, int(read(owner, 'immortal_body_level', 0) or 0)))
     # NPC advancement follows its independent body coordinate, never its realm.

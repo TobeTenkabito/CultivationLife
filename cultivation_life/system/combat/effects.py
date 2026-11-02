@@ -171,7 +171,8 @@ class VoisinageEffects:
 
     def _resolve_effects(self, previous):
         plans = []
-        for field in sorted(self.fields, key=lambda f: f.owner):
+        priority={key:i for i,key in enumerate(self._unit_order())}
+        for field in sorted(self.fields, key=lambda f:priority[f.owner]):
             allowance=self._body_round.take(field.owner)
             if allowance is None:continue
             mutual = self._dominated.get(self._dominated.get(field.owner)) == field.owner
@@ -263,6 +264,7 @@ class VoisinageEffects:
             if bonus:
                 original=power;power=min(1.,power*(1+bonus))
                 self._light_note('zhen_heal',field.owner,f'{self.units[field.owner].unit.name}的震合缥光令治疗比例提高{bonus:.0%}，本次治疗强度由{original:.2%}提升至{power:.2%}。',target=key,bonus=bonus,before=original,after=power)
+        power*=intent.segment_scale
         before, body_before = target.vitality, target.body
         channels = {f'field.{kind}'} if kind in {'strike', 'suppress', 'seal', 'restore_body', 'restore_spirit', 'restore_field'} else set()
         if field.definition.authority is not None:
@@ -303,7 +305,7 @@ class VoisinageEffects:
             amount *= 1+self._body_round.amplification(field.owner,key)
             amount=min(cap,amount*mitigation)
             if effect.tier>=2:amount=self._guard_state(key,amount)
-            self._lose(key, amount, physical=False)
+            self._lose(key, amount, physical=False,lethal=False)
             target.suppressed = target.vitality <= .12
         elif kind == 'seal':
             if field.definition.authority is not None:
@@ -354,7 +356,7 @@ class VoisinageEffects:
         loss = max(0., before - target.vitality)
         self._semantic_record_loss(intent.field.owner, key, loss, source)
         event = dict(effect=intent.effect.kind, restriction=intent.effect.restriction or '',
-                     cost=intent.effect.cost, damage_source=source, amount=intent.effect.power,
+                     cost=intent.effect.cost, damage_source=source, amount=intent.effect.power*intent.segment_scale,
                      actual_loss=loss, body_loss=max(0., body_before - target.body),
                      restored=max(0., target.vitality - before), terminal=key in intent.terminal)
         self._semantic_event(intent.field.owner, 'effect_resolved', key, 'caster', **event)
