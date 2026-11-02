@@ -255,6 +255,11 @@ class ContentRegistry:
             if "buddhist_way.json" in documents:
                 from .buddhist_content import validate_buddhist_content
                 validate_buddhist_content(documents["buddhist_way.json"], documents)
+            from .body_mechanism_content import validate_config as validate_body_config
+            try:
+                validate_body_config(documents.get('world.json',{}).get('systems',{}).get('asura_manifestation',{}))
+            except (ValueError,KeyError,TypeError) as error:
+                raise ContentError(f'五蕴内容不合法：{error}') from error
             if "doctrines.json" in documents:
                 from .system.doctrine.generation import validate_content
                 try:

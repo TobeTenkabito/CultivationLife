@@ -8,7 +8,7 @@ from ...system import asura
 from ..dependencies import AsuraActionDependencies
 
 
-def asura_action(deps: AsuraActionDependencies, game_id, action, target_id='', body_ids=None, name=''):
+def asura_action(deps: AsuraActionDependencies, game_id, action, target_id='', body_ids=None, name='',expected_level=None):
     game = deps._load(game_id)
     p = game.player
     if not asura.enabled() or p.path != 'demonic':
@@ -19,10 +19,17 @@ def asura_action(deps: AsuraActionDependencies, game_id, action, target_id='', b
             or (game.guixu_state.get('player_session') or {}).get('trapped')
             or p.sealed_cultivation or p.cultivation_suppression):
         raise ValueError('当前状态无法修持八部')
+    if action in {'train_body','train_aggregate'}:
+        from ...system.wuyun_cultivation import training_reason
+        reason=training_reason(game)
+        if reason:raise ValueError(reason)
     asura.ensure(game)
     s = p.asura_cultivation
     rng = decode_rng(game.seed, game.rng_state)
-    if action == 'purify':
+    if action=='train_aggregate':
+        from ...system.wuyun_cultivation import train
+        summary=train(game,target_id,expected_level)
+    elif action == 'purify':
         soul = next((b for b in p.foreign_souls if b.get('id') == target_id and b.get('refined')), None)
         if not soul:
             raise ValueError('只能提纯已炼化且尚未提纯的元神')
@@ -65,14 +72,15 @@ def _asura_cultivate(deps: AsuraActionDependencies, game, action, target_id, bod
     s = p.asura_cultivation
     if action == 'train_body':
         level = s.get('body_level', 0)
-        if level >= 20 or p.body_training < 100:
-            raise ValueError('须凡躯炼体达到100层，修罗之躯上限20层')
+        if level >= cfg.get('body_max_level',50) or p.body_training < 100:
+            raise ValueError('须凡躯炼体达到100层，修罗之躯上限50层')
         cost = asura.body_cost(p)
         if p.opportunity < cost:
             raise ValueError('锻炼修罗之躯的机缘不足')
         p.opportunity -= cost
         s['body_level'] = level + 1
-        return f'修罗之躯达到 {level + 1}/20 层。'
+        unlocked=next((r['name'] for r in cfg.get('five_aggregates',[]) if r['unlock_level']==level+1),None)
+        return f'修罗之躯达到 {level + 1}/50 层。'+(f'解锁{unlocked}。' if unlocked else '')
     if action == 'open_vein':
         quote = asura.public_meridians(p)
         if not quote['can_open']:
@@ -93,8 +101,8 @@ def _asura_cultivate(deps: AsuraActionDependencies, game, action, target_id, bod
         failures[key] = failures.get(key, 0) + 1
         return f'开脉失败（成功率 {probability:.0%}），已积累下次保底。'
     if action == 'condense':
-        if s.get('route') or s.get('body_level', 0) < 20:
-            raise ValueError('须修罗之躯20层且尚未确定本命')
+        if s.get('route') or s.get('body_level', 0) < 10:
+            raise ValueError('须修罗之躯10层且尚未确定本命')
         candidates = p.prisoners + p.puppets
         body = next((b for b in candidates if b['id'] == target_id and b.get('alive', True)), None)
         if not body:
@@ -113,8 +121,8 @@ def _asura_cultivate(deps: AsuraActionDependencies, game, action, target_id, bod
             p.puppets.remove(body)
         return f'{facts["name"]}凝练完成，肉身战力 {facts["power"]:.0f}，等待融合。'
     if action == 'fuse':
-        if s.get('route') or s.get('body_level', 0) < 20:
-            raise ValueError('本命仅能确定一次，且须修罗之躯20层')
+        if s.get('route') or s.get('body_level', 0) < 10:
+            raise ValueError('本命仅能确定一次，且须修罗之躯10层')
         if (not isinstance(body_ids, list) or not 1 <= len(body_ids) <= 2
                 or any(not isinstance(key, str) for key in body_ids)
                 or len(body_ids) != len(set(body_ids))):

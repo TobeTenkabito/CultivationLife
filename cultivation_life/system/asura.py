@@ -27,7 +27,7 @@ def body_cost(player):
     """Use the immortal meridian's base resource scale, not the legacy realm bar."""
     from .immortal_cultivation import rules
     level = player.asura_cultivation.get('body_level', 0)
-    return rules()['vein_opportunity_base'] * (level + 1) if level < 20 else 0
+    return rules()['vein_opportunity_base'] * (level + 1) if level < config().get('body_max_level',50) else 0
 
 
 def power_reroll_quote(state):
@@ -261,6 +261,7 @@ def public(game):
     bodies = [dict(public_body(b), source=kind) for kind, rows in (('prisoner', p.prisoners), ('puppet', p.puppets))
               for b in rows if b.get('alive', True)]
     exposed = copy.deepcopy(s)
+    exposed.pop('aggregates',None)
     for rows in exposed.get('branches', {}).values():
         for branch in rows:
             branch['descriptions'] = [describe_rule(r) for r in branch['rules']]
@@ -269,10 +270,12 @@ def public(game):
     exposed['bodies'] = [dict(b, **{k:v for k,v in public_body(b).items() if k not in b}) for b in s.get('bodies', [])]
     field = field_for(p) if active(p) else None
     from .conversion import quote
+    from .wuyun_cultivation import public as public_aggregates,training_reason
     return dict(available=True, can_cultivate=active(p), **exposed, conversion_quote=quote(game, asura=True),
         route_name=route.get('name', ''), part=route.get('part', ''),
         routes=[dict(id=k, **v) for k, v in config()['routes'].items()],
         candidates=bodies, meridians=public_meridians(p),
+        body_max_level=config().get('body_max_level',50),aggregates=public_aggregates(game),body_training_reason=training_reason(game),
         body_cost=body_cost(p), power_reroll=power_reroll_quote(s),
         minimum_body_training=config()['minimum_body_training'],
         domain_stats={key:getattr(field,key) for key in ('stability','incursion','authority')} if field else {},

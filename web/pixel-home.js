@@ -29,7 +29,8 @@
   toggle.append(VisualAssets.icon('panel')); $('.brand').append(toggle);
   const portrait = document.createElement('img');
   portrait.className = 'pixel-portrait'; portrait.alt = ''; portrait.hidden = true;
-  $('.hud-identity').prepend(portrait);
+  const portraitFrame=document.createElement('span');portraitFrame.className='pixel-portrait-frame';portraitFrame.hidden=true;
+  portraitFrame.append(portrait);$('.hud-identity').prepend(portraitFrame);
   const details = $('#player-details-dialog'), detailsContent = $('#player-details-content');
   const figure = document.createElement('figure');
   figure.className = 'pixel-details-art'; figure.hidden = true;
@@ -50,6 +51,8 @@
   const active = () => root.dataset.visual === 'pixel';
   async function updateFigure() {
     const identity = active() ? VisualAssets.actor(current?.player) : null;
+    DivineLightVisuals.mount(figure,identity?current?.player?.visual_lights:[]);
+    DivineLightVisuals.mount(portraitFrame,identity?current?.player?.visual_lights:[]);
     const natal=current?.natal_artifact;
     if(identity&&details.open&&natal?.bound)PixelLibrary.bind(natalFigure,{id:natal.item_id,crafted_artifact_id:natal.crafted_artifact_id},current);
     else {natalFigure.hidden=true;natalFigure.removeAttribute('src');}
@@ -93,7 +96,7 @@
     scene.hidden = !active();
     updateFigure();
     placement();
-    if (!active()) {revision++; scene.dataset.assetKey = ''; portrait.hidden = true; portrait.removeAttribute('src');clearPainting();return;}
+    if (!active()) {revision++; scene.dataset.assetKey = ''; portrait.hidden = portraitFrame.hidden = true; portrait.removeAttribute('src');clearPainting();return;}
     hud.append($('.hud-resources')); $('.hud-resources').append($('#hud-opportunity'));
     $('.primary-actions').prepend($('#cultivation-core'));
     for (const name of ['rest', 'befriend_neighbors']) $('.primary-actions').append($(`[data-action=${name}]`));
@@ -155,7 +158,7 @@
     const ticket = ++revision;
     scene.dataset.assetKey = assetKey;
     scene.dataset.art = 'text';
-    portrait.hidden = true;
+    portrait.hidden = portraitFrame.hidden = true;
     const landscape = active() && showArt ? await PixelMap.landscape(p.world) : null;
     if (ticket !== revision || !active()) return;
     if(landscape&&current.map){
@@ -166,7 +169,7 @@
     if (!identity) return;
     const head = await VisualAssets.load(identity + '.portrait');
     if (ticket !== revision || !active()) return;
-    if (head) {portrait.src = head.src; portrait.hidden = false;}
+    if (head) {portrait.src = head.src; portrait.hidden = portraitFrame.hidden = false;}
   }
   toggle.onclick = () => {if (!active() || !drawerMode || !current) return; drawer.showModal(); toggle.setAttribute('aria-expanded','true'); update();};
   drawer.addEventListener('close', () => toggle.setAttribute('aria-expanded','false'));

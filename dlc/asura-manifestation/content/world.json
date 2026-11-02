@@ -390,6 +390,128 @@
         "progression_asura_12_star",
         "progression_asura_12_law",
         "progression_asura_12_neutral"
+      ],
+      "body_max_level": 50,
+      "five_aggregates": [
+        {
+          "id": "se",
+          "name": "色蕴",
+          "unlock_level": 10,
+          "priority": 0,
+          "chance": {
+            "base": 1,
+            "growth": 0
+          },
+          "effects": {
+            "ward": {
+              "base": 2,
+              "growth": 0
+            },
+            "authority": {
+              "base": 0,
+              "growth": 0.03
+            }
+          },
+          "requires": [],
+          "cost": {
+            "souls": 10,
+            "opportunity_multiplier": 1
+          }
+        },
+        {
+          "id": "shou",
+          "name": "受蕴",
+          "unlock_level": 20,
+          "priority": 10,
+          "chance": {
+            "base": 0.1,
+            "growth": 0.03
+          },
+          "effects": {
+            "critical": {
+              "base": 2,
+              "growth": 0
+            }
+          },
+          "requires": [],
+          "cost": {
+            "souls": 20,
+            "opportunity_multiplier": 2
+          }
+        },
+        {
+          "id": "xiang",
+          "name": "想蕴",
+          "unlock_level": 30,
+          "priority": 20,
+          "chance": {
+            "base": 1,
+            "growth": 0
+          },
+          "effects": {
+            "critical_extra": {
+              "base": 1,
+              "growth": 0
+            },
+            "free": {
+              "base": 0.1,
+              "growth": 0.04
+            }
+          },
+          "requires": [
+            "shou"
+          ],
+          "cost": {
+            "souls": 30,
+            "opportunity_multiplier": 3
+          }
+        },
+        {
+          "id": "xing",
+          "name": "行蕴",
+          "unlock_level": 40,
+          "priority": 30,
+          "chance": {
+            "base": 1,
+            "growth": 0
+          },
+          "effects": {
+            "exploit": {
+              "base": 0.02,
+              "growth": 0.006
+            }
+          },
+          "requires": [],
+          "cost": {
+            "souls": 40,
+            "opportunity_multiplier": 4
+          }
+        },
+        {
+          "id": "shi",
+          "name": "识蕴",
+          "unlock_level": 50,
+          "priority": 40,
+          "chance": {
+            "base": 1,
+            "growth": 0
+          },
+          "effects": {
+            "restore_state": {
+              "base": 0.01,
+              "growth": 0.002
+            },
+            "restore_energy": {
+              "base": 0.01,
+              "growth": 0.002
+            }
+          },
+          "requires": [],
+          "cost": {
+            "souls": 50,
+            "opportunity_multiplier": 5
+          }
+        }
       ]
     }
   }

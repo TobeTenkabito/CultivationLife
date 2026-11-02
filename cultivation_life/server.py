@@ -352,7 +352,7 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.upper_institution_action(game_id, str(payload.get("action", "")), str(payload.get("target_id", "")))
             elif operation == "asura":
                 result = ENGINE.asura_action(game_id, str(payload.get("action", "")),
-                    str(payload.get("target_id", "")), payload.get("body_ids"), str(payload.get("name", "")))
+                    str(payload.get("target_id", "")), payload.get("body_ids"), str(payload.get("name", "")),payload.get('expected_level'))
             elif operation == "upper-voisinage":
                 result = ENGINE.upper_voisinage_action(game_id, str(payload.get("action", "")), payload.get("voisinage_id"))
             elif operation == "immortal-action":

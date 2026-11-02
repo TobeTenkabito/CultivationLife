@@ -7,7 +7,7 @@
   const abort=new AbortController();
   const variants=window.ActorVariants?.create();
   let disposed=false;
-  const layers=['background','hero','npc','rear','front','projectile','energy','stage','domainRear','domainFront'];
+  const layers=['background','hero','npc','rear','front','projectile','energy','stage','domainRear','domainFront','lightRear','lightFront'];
   const make=()=>document.createElement('canvas');
   const context=c=>c.getContext('2d',{willReadFrequently:true});
   function load(path){
@@ -255,6 +255,18 @@
     }
     for(const v of [...m.participants].sort((a,b)=>a.y-b.y)){
       const c=context(s.stage);c.save();c.globalAlpha=.18;ring(c,v.x,v.y,22*s.scale,3*s.scale,'#243c3b',0,TAU,2);c.restore();
+      if(options.effects!==false&&v.visualLights?.length){
+        const shape=v.actor.guard_shape??{cx:0,cy:-88,rx:68,ry:94};
+        let box={x:v.x+(shape.cx??0)*s.scale,y:v.y+shape.cy*s.scale,w:shape.rx*2.2*s.scale,h:shape.ry*2.2*s.scale};
+        if(v.mode==='defeat'){
+          const r=v.group.rects[v.index],dir=v.dir*(v.group.facing??1);
+          box={x:v.x+(r[4]+r[2]/2-v.anchor[0])*dir*s.scale,
+            y:v.y+(r[5]+r[3]/2-v.anchor[1])*s.scale,w:r[2]*s.scale,h:r[3]*s.scale,
+            opacity:1-.7*Math.min(1,v.local/1.2)};
+        }
+        window.DivineLightVisuals?.draw(context(s.lightRear),v.visualLights,box,time,false);
+        window.DivineLightVisuals?.draw(context(s.lightFront),v.visualLights,box,time,true);
+      }
       if(variants)variants.draw(context(s[v.side]),c=>drawBody(c,v,s),v.visualVariant,state.time);
       else drawBody(context(s[v.side]),v,s);
       if(options.effects!==false)guard(s,v,time);
@@ -274,7 +286,9 @@
       const age=state.time-(state.landed[state.landed.length-1]?.t??-Infinity);
       if(age>=0&&age<.18)offset=Math.round(Math.sin(age*150)*2*(1-age/.18));
     }
-    out.save();out.translate(offset,0);for(const k of ['stage','domainRear','hero','npc','domainFront','energy'])out.drawImage(s[k],0,0);out.restore();
+    out.save();out.translate(offset,0);for(const k of ['stage','domainRear','lightRear','hero','npc','domainFront','energy','lightFront']){
+      out.globalAlpha=k.startsWith('light')?.7:1;out.drawImage(s[k],0,0);
+    }out.restore();
     out.setTransform(1,0,0,1,0,0);s.cameraOffset=offset;return state;
   }
   function dispose(s){

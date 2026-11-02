@@ -1,7 +1,7 @@
 """Bounded effect selection and explicit intervention; no content/actor lookup.
 
-One action per established field, independent of ordinary actions, and one
-response per protector per round. Effects
+Each established field consumes its finite round-start action allowances, with
+one response per protector per round. Effects
 and responses never recursively dispatch one another. Resources are reserved
 before simultaneous actions execute; ordinary initiative cannot undo control.
 """
@@ -18,6 +18,8 @@ class EffectIntent:
     terminal: tuple[str, ...] = ()
     ordinary: bool = False
     semantic: object = None
+    allowance: object = None
+    critical: bool = False
 
 
 class VoisinageEffects:
@@ -38,22 +40,25 @@ class VoisinageEffects:
                 and not target.unit.capabilities.voisinages
                 and self.frame.relations[key]['protector'] is None)
 
-    def _effect_power(self, field, effect, target, semantic=None):
+    def _effect_power(self, field, effect, target, semantic=None, *, critical=False):
         power = effect.power
         d = field.definition
         if semantic is None:
             semantic = self._semantic_preview(field.owner, 'effect_before_apply', target.unit.id,
                                                'caster', effect=effect.kind, restriction=effect.restriction or '', terminal=False)
         power *= self._semantic_factor(semantic, f'field.{effect.kind}')
+        if d.authority is None:
+            power *= 1+self._body_round.value(field.owner,'authority')
         if d.authority is not None:
             power = min(1, power * field.authority * self._semantic_factor(semantic, 'field.authority') / d.authority_reference)
             if target.vitality < .5 and effect.kind == 'strike':
                 power = min(1, power * (1 + next((f['value'] for f in d.features if f['kind'] == 'execution'), 0)))
         if effect.target == 'enemy':
             power *= 1 - target.unit.capabilities.body_voisinage_resistance
+        if critical:power *= self._body_round.value(field.owner,'critical')
         return min(1., power)
 
-    def _select_effect(self, field, previous):
+    def _select_effect(self, field, previous, allowance):
         owner = self.units[field.owner]
         if field.owner in self._light_muted or not owner.fighting:return None
         victims = [k for k in field.targets if self.units[k].fighting and self._covered_by(field,k)]
@@ -65,7 +70,7 @@ class VoisinageEffects:
         # Only eligible attack sources count; an objective never fabricates one.
         tier = self.attack_tier(owner)
         terminal_targets = tuple(k for k in ready if tier >= self.ward_tier(k))
-        if terminal_targets and 'ordinary' not in owner.restrictions and field.owner not in self._ordinary_acted:
+        if terminal_targets and not allowance.source and 'ordinary' not in owner.restrictions and field.owner not in self._ordinary_acted:
             c = owner.unit.capabilities
             passive = max(c.artifact_tier if 'artifact' not in owner.restrictions else 1,
                           c.technique_tier if 'technique' not in owner.restrictions else 1)
@@ -79,6 +84,7 @@ class VoisinageEffects:
             semantic = self._semantic_preview(field.owner, 'effect_prepare', role='caster',
                                                effect=effect.kind, restriction=effect.restriction or '')
             effect = replace(effect, cost=effect.cost * self._semantic_factor(semantic, 'field.effect_cost'))
+            if allowance.free:effect=replace(effect,cost=0)
             if effect.cost > owner.current:
                 continue
             if effect.target == 'enemy':
@@ -105,7 +111,13 @@ class VoisinageEffects:
                 terminal = tuple(k for k in keys if k in ready and effect.target == 'enemy'
                                  and effect.kind in {'strike', 'suppress', 'seal'})
                 candidates.append((priority, index + 1, EffectIntent(field, effect, tuple(keys), terminal, semantic=semantic)))
-        return min(candidates, key=lambda row: row[:2])[2] if candidates else None
+        if not candidates:return None
+        intent=min(candidates,key=lambda row:row[:2])[2]
+        numeric=(intent.effect.kind=='strike' or intent.effect.kind.startswith('restore_') or
+                 intent.effect.kind in {'suppress','seal'} and field.definition.authority is not None)
+        critical=bool(not intent.ordinary and numeric and self._body_round.value(field.owner,'critical')>1
+                      and any(k not in intent.terminal for k in intent.targets))
+        return replace(intent,allowance=allowance,critical=critical)
 
     def _intervene(self, intent, victim, responded):
         """An explicit response can protect only its owner or declared allies."""
@@ -125,7 +137,7 @@ class VoisinageEffects:
                         or (intent.effect.kind not in response.effects
                             and not (victim in intent.terminal and 'execute' in response.effects))):
                     continue
-                required = intent.field.strength if response.kind in {'shelter', 'disrupt'} else self._effect_power(intent.field, intent.effect, target)
+                required = intent.field.strength if response.kind in {'shelter', 'disrupt'} else self._effect_power(intent.field, intent.effect, target,critical=intent.critical)
                 if response.strength < required:
                     continue
                 if response.kind == 'escape' and (key != victim or target.unit.side in self.escape_forbidden_sides):
@@ -149,14 +161,15 @@ class VoisinageEffects:
                 return True
         return False
 
-    def _resolve_effects(self, previous, *, extra=False):
+    def _resolve_effects(self, previous):
         plans = []
         for field in sorted(self.fields, key=lambda f: f.owner):
-            if extra and not self._light_extra.get(field.owner):continue
+            allowance=self._body_round.take(field.owner)
+            if allowance is None:continue
             mutual = self._dominated.get(self._dominated.get(field.owner)) == field.owner
             if field.owner in self._dominated and not mutual:
                 continue
-            intent = self._select_effect(field, previous)
+            intent = self._select_effect(field, previous,allowance)
             if intent:
                 plans.append(intent)
         responded, pending = self._responded, []
@@ -184,7 +197,8 @@ class VoisinageEffects:
                 self._ordinary_acted.add(intent.field.owner)
             elif owner.current >= cost:
                 owner.current -= cost
-                self._semantic_commit(intent.semantic, {'field.effect_cost'})
+                channels = set() if intent.allowance.free else {'field.effect_cost'}
+                self._semantic_commit(intent.semantic, channels)
             else:
                 continue
             if intent.effect.kind.startswith('restore_'):
@@ -193,12 +207,23 @@ class VoisinageEffects:
                 name=owner.unit.name
                 if zhen:self._light_note('zhen_action',intent.field.owner,f'{name}以震合缥光维持治疗：消耗一次邻域行动与{cost:g}元力，保留普通出手。',cost=cost,ordinary_spent=False)
                 else:self.frame.events.append(f'{name}尚未解锁震合缥光，邻域治疗占用本回合一次普通出手，并消耗{cost:g}元力。')
+            if not intent.ordinary:
+                source='额外' if intent.allowance.source else '基础'
+                message=f'{owner.unit.name}完成一次{source}邻域施权，元力消耗{cost:g}'
+                if intent.critical:message+='，轮首暴击生效，数值为基础的200%'
+                if intent.allowance.free:message+='（轮首免费判定成功）'
+                self._light_note('body_action',intent.field.owner,message+'。',source=intent.allowance.source,
+                                 cost=cost,critical=intent.critical,free=intent.allowance.free)
             paid.append((intent, keys))
         # Simultaneous qualified actions survive a mutual breach; no list-order advantage.
+        completed=[]
         for intent, keys in sorted(paid, key=lambda row: row[0].effect.kind.startswith('restore_')):
+            applied=False
             for key in keys:
-                self._apply_effect(intent, key)
+                applied=bool(self._apply_effect(intent, key)) or applied
+            if not intent.ordinary:completed.append((intent.field.owner,intent.allowance,intent.critical and applied))
         self._refresh_relations()
+        self._complete_body_actions(completed)
 
     def _apply_effect(self, intent, key):
         target = self.units[key]
@@ -212,7 +237,7 @@ class VoisinageEffects:
             'caster', effect=effect.kind, restriction=effect.restriction or '', terminal=key in intent.terminal)
         incoming = None if intent.ordinary else self._semantic_preview(key, 'effect_before_apply', field.owner,
             'recipient', effect=effect.kind, restriction=effect.restriction or '', terminal=key in intent.terminal)
-        power = effect.power if intent.ordinary else self._effect_power(field, effect, target, semantic)
+        power = effect.power if intent.ordinary else self._effect_power(field, effect, target, semantic,critical=intent.critical)
         if kind.startswith('restore_'):
             bonus=self.light_value(field.owner,'zhen_heal')
             if bonus:
@@ -246,8 +271,14 @@ class VoisinageEffects:
             amount = min(cap, power * mitigation)
             amount = amount if purpose == 'kill' else min(amount, max(0, target.vitality - .13))
             self._lose(key, amount)
+            extra=min(max(0,cap-amount),amount*self._body_round.amplification(field.owner,key))
+            if purpose!='kill':extra=min(extra,max(0,target.vitality-.13))
+            if extra:
+                self._lose(key,extra,physical=False)
+                self.frame.events.append(f'{self.units[field.owner].unit.name}的炼体增幅额外削弱{target.unit.name}战斗态势{extra:.2%}，不增加肉身伤害。')
         elif kind == 'suppress':
             amount = target.vitality * (1 - target.unit.capabilities.body_voisinage_resistance) if field.definition.authority is None else power
+            amount *= 1+self._body_round.amplification(field.owner,key)
             self._lose(key, min(cap, amount * mitigation), physical=False)
             target.suppressed = target.vitality <= .12
         elif kind == 'seal':
@@ -282,6 +313,7 @@ class VoisinageEffects:
                   'isolate': '隔离', 'restore_body': '修复肉身', 'restore_spirit': '稳定心神', 'restore_field': '修复邻域稳固'}
         self.frame.events.append(f'{self.units[field.owner].unit.name}的【{field.definition.name}】对{target.unit.name}施行{labels[kind]}。')
         self._semantic_effect_result(intent, key, before, body_before)
+        return True
 
     def _semantic_effect_result(self, intent, key, before, body_before):
         if self.animation is not None:

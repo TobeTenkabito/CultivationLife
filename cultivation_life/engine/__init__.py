@@ -577,8 +577,8 @@ class GameEngine:
     def _advance_concubine_status(self, game: GameState, units: int = 1) -> float:
         return relationships_dependents._advance_concubine_status(self._dependencies.relationships.dependents, game, units)
 
-    def asura_action(self, game_id, action, target_id='', body_ids=None, name=''):
-        return asura_actions.asura_action(self._dependencies.asura_actions, game_id, action, target_id, body_ids, name)
+    def asura_action(self, game_id, action, target_id='', body_ids=None, name='',expected_level=None):
+        return asura_actions.asura_action(self._dependencies.asura_actions, game_id, action, target_id, body_ids, name,expected_level)
 
     def _asura_cultivate(self, game, action, target_id, body_ids, name, rng):
         return asura_actions._asura_cultivate(self._dependencies.asura_actions, game, action, target_id, body_ids, name, rng)

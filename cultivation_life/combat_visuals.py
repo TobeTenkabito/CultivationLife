@@ -96,6 +96,11 @@ def _team_visuals(game, target, hero, player_units=None):
                 weight=round(max(.001, float(row.get('power', 1)) * float(row.get('integrity', 1))), 4))
             if variant in MIRROR_VARIANTS:
                 member['visual_variant'] = variant
+            from .system.divine_lights import visual_lights
+            lights = (visual_lights(game.player, player=True) if kind == 'player' or variant in MIRROR_VARIANTS
+                      else visual_lights(person or cached or facts) if kind not in {'mechanical', 'corpse'} else [])
+            if lights:
+                member['visual_lights'] = lights
             team.append(member)
             pools.append(pool)
             requests.append(member)
@@ -138,7 +143,24 @@ def report_visuals(game, target, report, *, identity=None):
         roster = None
     if identity is not None and not domains:
         return identity
-    visual = dict(identity) if identity is not None else combat_identity(game, target, player_units=roster)
+    import copy
+    visual = copy.deepcopy(identity) if identity is not None else combat_identity(game, target, player_units=roster)
+    # Resumable trials project the frozen battle capabilities, never today's body.
+    from .system.divine_lights import IDS
+    profiles = {event['owner']: event.get('effects', {}) for row in report.get('rounds', [])
+                for event in row.get('voisinage', {}).get('divine_lights', {}).get('events', [])
+                if event.get('kind') == 'profile'}
+    trial = game.active_trial or {}
+    frozen = {row['id']: row.get('capabilities', {}).get('divine_lights', {})
+              for row in trial.get('snapshot', {}).get('units', [])}
+    for members in visual.get('teams', {}).values():
+        for member in members:
+            effects = frozen.get(member['id'], profiles.get(member['id']))
+            if effects is not None:
+                member.pop('visual_lights', None)
+                lights = [key for key in IDS if effects.get(key)]
+                if lights:
+                    member['visual_lights'] = lights
     if domains:
         # Local presentation preferences and OS entropy never consume combat RNG.
         from .runtime import persistence_root

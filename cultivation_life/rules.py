@@ -971,6 +971,8 @@ def public_player(player: Player) -> dict[str, Any]:
     appearance = skin_appearance(player)
     data['visual_actor'] = appearance['static'] if appearance else None
     data['character_skins'] = public_skins(player)
+    from .system.divine_lights import visual_lights
+    data['visual_lights'] = visual_lights(player, player=True)
     data["world_age"] = player.age
     data["age"] = current_body_age(player)
     data.pop("ghost_core_state", None)

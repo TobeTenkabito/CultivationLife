@@ -138,7 +138,8 @@
     const r=plan.rounds.find(r=>time>=r.start&&time<r.end)??
       (plan.finisher&&time>=plan.finisher.start&&time<plan.finisher.end?plan.finisher:null);
     const teams=Object.fromEntries(['hero','npc'].map(side=>[side,plan.teams[side].map((member,slot)=>({
-      id:member.asset,unitId:member.id,name:member.name,visualVariant:member.visual_variant,side,slot,mode:'idle',local:time%4,dir:side==='hero'?1:-1}))]));
+      id:member.asset,unitId:member.id,name:member.name,visualVariant:member.visual_variant,
+      visualLights:window.DivineLightVisuals?.ids(member.visual_lights)??[],side,slot,mode:'idle',local:time%4,dir:side==='hero'?1:-1}))]));
     const actors={hero:teams.hero[0],npc:teams.npc[0]};
     let phase=time>=plan.duration?'战报回放结束':'调息回位';
     if(r){

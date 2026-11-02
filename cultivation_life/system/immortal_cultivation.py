@@ -8,7 +8,8 @@ def rules():
 
 def golden_light(player):
     from .divine_lights import profile
-    return bool(profile(player,player=True)[0].get('kun'))
+    from .wuyun import profile as aggregate_profile
+    return bool(profile(player,player=True)[0].get('kun') or any(r.effects.get('ward',0)>=2 for r in aggregate_profile(player,player=True)))
 
 
 def golden_light_rank(player):

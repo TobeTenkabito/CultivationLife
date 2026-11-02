@@ -30,6 +30,12 @@ window.NpcArt = (() => {
     return pool[hash%pool.length];
   }
   function resolve(n){return n&&people.get(n.id)||n;}
+  function frame(img,n,portrait=false){
+    if(!img||!window.DivineLightVisuals?.ids(n.visual_lights).length)return img;
+    const wrap=el('span',undefined,portrait?'npc-light-portrait':'npc-light-figure');
+    img.addEventListener('error',()=>wrap.remove(),{once:true});
+    wrap.append(img);window.DivineLightVisuals.mount(wrap,n.visual_lights);return wrap;
+  }
   function image(n,kind,onFailure,roster=false){
     const key=active()||roster?select(n):null;if(!key)return null;
     const img=el('img',undefined,`npc-art-${kind}`);img.alt=`${n.name}${kind==='portrait'?'头像':'立绘'}`;
@@ -61,7 +67,7 @@ window.NpcArt = (() => {
     const head=el('header',undefined,'npc-art-heading'),title=el('h2',n.name);title.id='npc-art-title';
     const close=el('button','关闭');close.type='button';close.onclick=()=>dialog.close();head.append(title,close);
     const body=el('div',undefined,'npc-art-profile'),figure=image(n,'figure',null,roster),facts=el('div');
-    if(figure)body.append(figure);
+    if(figure)body.append(frame(figure,n));
     for(const text of [n.title,[n.realm_name,n.path_name,n.race_name,n.gender_name].filter(Boolean).join(' · '),
       n.status,n.relationship,n.affinity==null?'':`好感 ${Number(n.affinity).toFixed(0)}`])if(text)facts.append(el('p',text));
     // These labels come only from the public row; no fresh remote whereabouts are inferred.
@@ -77,7 +83,7 @@ window.NpcArt = (() => {
     if(!select(n))return;
     const b=el('button',undefined,'npc-art-avatar');b.type='button';b.setAttribute('aria-label',`查看${n.name}的人物卡`);
     const img=image(n,'portrait',()=>b.remove(),roster);if(!img)return;
-    b.append(img);b.onclick=()=>open(n,roster);row.prepend(b);
+    b.append(img);window.DivineLightVisuals?.mount(b,n.visual_lights);b.onclick=()=>open(n,roster);row.prepend(b);
   }
   function selfAvatar(row,player,openDetails){
     const key=active()?window.VisualAssets?.actor(player):null;if(!key)return;
@@ -89,18 +95,19 @@ window.NpcArt = (() => {
       if(!bitmap||!active()){b.remove();return;}
       const img=el('img',undefined,'npc-art-portrait');img.alt=`${player.name}头像`;
       img.width=img.height=48;img.dataset.art=key;img.onerror=()=>b.remove();img.src=bitmap.src;b.append(img);
+      window.DivineLightVisuals?.mount(b,player.visual_lights);
     });
   }
   function contactPortrait(button,n){
     const img=image(n,'portrait',()=>button.classList.remove('npc-art-person'));
-    if(img){button.classList.add('npc-art-person');button.prepend(img);}
+    if(img){button.classList.add('npc-art-person');button.prepend(frame(img,n,true));}
   }
   function contactFigure(header,n){
     if(!active()||!select(n))return;
     const seal=header.querySelector('.contact-seal'),b=el('button',undefined,'npc-art-contact-figure');
     b.type='button';b.setAttribute('aria-label',`查看${n.name}的人物卡`);
     const img=image(n,'figure',()=>{b.remove();if(seal)seal.hidden=false;});
-    if(seal)seal.hidden=true;b.append(img);b.onclick=()=>open(n);header.prepend(b);
+    if(seal)seal.hidden=true;b.append(img);window.DivineLightVisuals?.mount(b,n.visual_lights);b.onclick=()=>open(n);header.prepend(b);
   }
   function event(value){
     const body=document.querySelector('#event-body');if(!body)return;
@@ -116,10 +123,10 @@ window.NpcArt = (() => {
     const n=participants.find(n=>n.id===selectedEvent)||participants[0];
     const b=el('button',undefined,'npc-event-person');b.type='button';b.setAttribute('aria-label',`查看${n.name}的人物卡`);
     const figure=image(n,'figure',()=>{if(stage.contains(figure)){stage.hidden=true;layout.classList.remove('has-npc-art');}});
-    b.append(figure,el('span',n.name));b.onclick=()=>open(n);stage.append(b);
+    b.append(frame(figure,n),el('span',n.name));b.onclick=()=>open(n);stage.append(b);
     if(participants.length>1){
       const nav=el('nav',undefined,'npc-event-participants');nav.setAttribute('aria-label','在场人物');
-      for(const p of participants){const pick=el('button');pick.type='button';pick.title=p.name;pick.setAttribute('aria-label',p.name);pick.setAttribute('aria-pressed',String(p.id===n.id));pick.append(image(p,'portrait'));pick.onclick=()=>{selectedEvent=p.id;event(value);};nav.append(pick);}stage.append(nav);
+      for(const p of participants){const pick=el('button');pick.type='button';pick.title=p.name;pick.setAttribute('aria-label',p.name);pick.setAttribute('aria-pressed',String(p.id===n.id));pick.append(image(p,'portrait'));window.DivineLightVisuals?.mount(pick,p.visual_lights);pick.onclick=()=>{selectedEvent=p.id;event(value);};nav.append(pick);}stage.append(nav);
     }
     stage.hidden=false;layout.classList.add('has-npc-art');
   }

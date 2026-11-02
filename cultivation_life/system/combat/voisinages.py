@@ -86,6 +86,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
         self._disrupted: set[str] = set()
         self._light_muted={};self._light_trace=[];self._light_resists={};self._light_extra={}
         self._light_rng=None;self._responded=set()
+        self._body_round=None
         self.primary_ordinary_loss = 0.0
         self.objectives = {"player": "kill", "enemy": "kill"}
         self.escape_forbidden_sides: frozenset[str] = frozenset()
@@ -98,7 +99,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
 
     @property
     def enabled(self) -> bool:
-        return self.semantics is not None or any(s.unit.capabilities.divine_lights or s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
+        return self.semantics is not None or any(s.unit.capabilities.body_mechanisms or s.unit.capabilities.divine_lights or s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
                    or s.unit.capabilities.ward_tier > 1 or s.unit.capabilities.technique_tier > 1
                    or s.unit.capabilities.artifact_tier > 1 for s in self.units.values())
 
@@ -178,6 +179,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
             authority = definition.authority
             if authority is not None:
                 authority *= 1 + investment / max(1.0, definition.max_investment)
+                authority *= 1 + self._body_round.value(owner.unit.id,'authority')
             return Field(owner.unit.id, definition, strength, tuple(protects), tuple(targets), stability, authority)
         if candidates:
             self.frame.events.append(f"{owner.unit.name}仙灵力不足，无法展开或维持仙域。")
@@ -286,6 +288,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
             gap = self.frame.relations[key]['attack_strength'] / max(1.0, self.frame.relations[key]['defense_strength'])
             erosion = min(.55, .12 + .08 * max(0, gap - self.contest_ratio))
             erosion *= 1 - target.unit.capabilities.body_voisinage_resistance
+            erosion *= 1+self._body_round.amplification(owner,key)
             target.pressure = min(.85, target.pressure + erosion)
             before_pressure_loss = target.vitality
             self._lose(key, min(max(0, target.vitality - .13), erosion), physical=False)
@@ -301,14 +304,15 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
             self._semantic_event(key, 'pressure_resolved', owner, 'defender', **event)
         for key, relation in self.frame.relations.items():
             if relation['relation'] in {'pressed', 'dominated'} and self.units[key].active_voisinage:
-                self.units[key].field_strain = min(.5, self.units[key].field_strain + .05)
+                source=relation.get('attacker')
+                bonus=self._body_round.amplification(source,key) if source else 0
+                self.units[key].field_strain = min(.5, self.units[key].field_strain + .05*(1+bonus))
         # Capture established coverage before effects can release or destroy it.
         # This is a bounded report projection, never an input to settlement.
         self.animation['fields'] = self.report()['fields']
         self.animation['relations'] = {key: dict(value) for key, value in self.frame.relations.items()}
         self._field_lights()
-        self._resolve_effects(previous)
-        if any(self._light_extra.values()):self._resolve_effects(previous,extra=True)
+        self._execute_field_actions(previous)
         self.animation['after'] = [max(0., 1 - self.ordinary_loss(side)) for side in ('player', 'enemy')]
         for side in ('player', 'enemy'):
             members = [s for s in self.units.values() if s.unit.side == side]
@@ -513,6 +517,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights):
 
     def report(self) -> dict[str, Any]:
         return {
+            **({'body_mechanisms':self._body_round.report()} if self._body_round and any(self._body_round.records.values()) else {}),
             **({'divine_lights':dict(events=list(self._light_trace),silenced_by=dict(self._light_muted),first_side=self.frame.divine_first)} if self._light_trace else {}),
             **({'animation': self.animation} if self.animation and self.animation.get('fields') else {}),
             **({'semantics': self.semantic_report()} if self.semantics is not None else {}),

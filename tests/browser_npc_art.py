@@ -27,7 +27,8 @@ def main():
         game = engine.store.load(identity)
         game.player.faction_id = 'tianjian'
         npc = SectNpc(id='art-generic', name='游历女修', title='散修', realm_index=1, layer=1,
-                      age=26, lifespan=150, gender='female', path='demonic', race='human', world='human', affinity=10)
+                      age=26, lifespan=150, gender='female', path='demonic', race='human', world='human', affinity=10,
+                      body_training=100, immortal_body_level=20)
         game.notable_npcs[npc.id] = npc
         game.pending_event = engine._instantiate_event(engine.events_by_id['EVT_XIANG_NODE_001'], game, random.Random(1))
         engine.store.save(game)
@@ -52,6 +53,9 @@ def main():
                     page.wait_for_function('configData && window.GameThemes && window.NpcArt')
                     page.evaluate('GameThemes.ready')
                     page.evaluate('async id => loadGame(id)', identity)
+                    # Rosters are now drawn on demand; exercise the real navigation.
+                    navigation_locator(page, '[data-panel-target=faction]').click()
+                    page.locator('.roster-identity .npc-art-avatar').first.wait_for(state='attached')
                     assert page.locator('.roster-identity .npc-art-avatar').count() > 0
 
                     def toggle(value):
@@ -132,13 +136,15 @@ def main():
                     page.locator('.contact-person').click()
                     page.locator('.contact-detail .npc-art-figure').wait_for(state='visible')
                     assert page.locator('.contact-person img').get_attribute('data-art') == generic_key
+                    assert page.locator('.contact-detail [data-light]').count() == 2
                     assert page.evaluate('JSON.stringify(game)') == before
                     assert engine.store._path(identity).read_bytes() == saved
 
                     toggle(False)
                     # Sect portraits are available in the original interface too.
                     assert page.locator('.roster-identity .npc-art-avatar').count() > 0
-                    assert page.locator('.npc-art-contact-figure').count() == 0
+                    # Inactive utility pages retain their DOM under lazy rendering.
+                    assert all(not art.is_visible() for art in page.locator('.npc-art-contact-figure').all())
                     assert page.locator('#npc-event-art').is_hidden()
                     toggle(True)
                     page.locator('#npc-event-art .npc-art-figure').wait_for(state='visible')
@@ -224,7 +230,7 @@ def main():
                     failure.wait_for_function('!document.querySelector(".npc-art-contact-figure")')
                     assert failure.locator('.contact-seal').is_visible()
                     assert failure.locator('.contact-detail h3').inner_text() == '顾长庚'
-                    assert failure.locator('.contact-action').count() == 10
+                    assert failure.locator('.contact-action').count() == 11  # includes the existing promise action
                     assert not errors, errors
                     browser.close()
             finally:

@@ -29,7 +29,7 @@
     const hero=el('header',null,'asura-hero'),seal=el('div',s.route_name?.slice(0,1)||'煞','asura-sigil'),heading=el('div');
     seal.setAttribute('aria-hidden','true');heading.append(el('small','修罗显圣 · 无法无天','asura-eyebrow'),el('h3',s.route?`${s.route_name} · ${s.part}`:'凝身入道'),el('p',s.route?`${s.domain_name} · ${s.domain_label}`:'锻炼己身，凝练肉身，融合本命。'));hero.append(seal,heading);
     if(tab==='route')root.append(hero);
-    const metrics=el('div',null,'asura-metrics');metrics.append(metric('精魂',fmt(s.souls)),metric('修罗之躯',`${s.body_level||0}/20 层`),metric('本境魔脉',`${s.opened||0}/27`));if(['body','route','domain','powers'].includes(tab))root.append(metrics);
+    const metrics=el('div',null,'asura-metrics');metrics.append(metric('精魂',fmt(s.souls)),metric('修罗之躯',`${s.body_level||0}/${s.body_max_level||50} 层`),metric('本境魔脉',`${s.opened||0}/27`));if(['body','route','domain','powers'].includes(tab))root.append(metrics);
     const handbook=el('button','八部条件与修炼规则 → 百科','asura-help');handbook.type='button';handbook.onclick=()=>window.TutorialGuide?.showChapter('dlc-asura');if(tab==='route')root.append(handbook);
     if(!s.can_cultivate){root.append(note('已炼化元神可在御傀面板提纯。登临修罗界、达到修罗境后开启此处修持。'));return;}
     const content=el('div',null,'asura-page');content.dataset.page=tab;root.append(content);
@@ -40,12 +40,35 @@
       content.append(conversion);
     }
     if(tab==='body'){
-      const body=section('锻炼自己的修罗之躯',`玩家普通炼体 ${p.body_training}/100 层；普通炼体达到100层后，才能以机缘锻炼修罗之躯。修罗之躯单独计层，上限20层。`);
-      const track=el('div',null,'asura-body-track');track.setAttribute('aria-label',`修罗之躯 ${s.body_level||0}/20 层`);for(let i=1;i<=20;i++){const n=el('span',String(i));n.classList.toggle('is-open',i<=(s.body_level||0));track.append(n);}body.append(track);
-      body.append(note('达到修罗之躯20层后，可凝练外界肉身并融合本命。这里显示的是玩家己身，与俘虏、傀儡的炼体层数分开。'));
-      if((s.body_level||0)<20)body.append(el('p',`下一层费用：${fmt(s.body_cost)} 机缘 · 当前 ${fmt(p.opportunity)}`),button('锻炼下一层修罗之躯','train_body',{},!converted||p.body_training<100||p.opportunity<s.body_cost));
-      else body.append(note('修罗之躯已达20层，可前往「八部」选择凝练肉身。'));
+      const cap=s.body_max_level||50;
+      const body=section('锻炼自己的修罗之躯',`玩家普通炼体 ${p.body_training}/100 层；普通炼体达到100层后，才能以机缘锻炼修罗之躯。上限${cap}层，每十层依次解锁色、受、想、行、识。`);
+      const track=el('div',null,'asura-body-track');track.setAttribute('aria-label',`修罗之躯 ${s.body_level||0}/${cap} 层`);for(let i=1;i<=cap;i++){const n=el('span',String(i));n.classList.toggle('is-open',i<=(s.body_level||0));track.append(n);}body.append(track);
+      body.append(note('达到修罗之躯10层后，可凝练外界肉身并融合本命。这里显示的是玩家己身，与俘虏、傀儡的炼体层数分开。'));
+      if((s.body_level||0)<cap)body.append(el('p',`下一层费用：${fmt(s.body_cost)} 机缘 · 当前 ${fmt(p.opportunity)}`),button('锻炼下一层修罗之躯','train_body',{},!converted||p.body_training<100||p.opportunity<s.body_cost||!!s.body_training_reason));
+      else body.append(note('修罗之躯已达五十层，五蕴可分别继续培养至十重。'));
+      if(s.body_training_reason)body.append(note(s.body_training_reason));
       content.append(body);
+      const five=section('五蕴 · 独立修炼','轮首统一确定原始触发与暴击、免费结果，随后裁决静默；追加施权只兑现当轮登记的行动额度。');
+      const list=el('div',null,'asura-aggregate-list');
+      const pct=value=>`${(Number(value||0)*100).toFixed(1)}%`;
+      for(const row of s.aggregates||[]){
+        const e=row.effects||{},text={
+          se:`免疫凡属性伤害，邻域威能提高${pct(e.authority)}。`,
+          shou:`每轮${pct(row.probability)}概率令合法数值施权暴击，效果为基础的200%。`,
+          xiang:`本轮实际邻域暴击后可额外施权一次，${pct(e.free)}概率免除此额外施权费；不递归追加。`,
+          xing:`目标轮首原始触发的每种炼体机制，使对其邻域或战斗态势的既有削弱增加${pct(e.exploit)}；随后静默不重算数量。`,
+          shi:`敌方每实际完成一次额外施权，回复自身${pct(e.restore_state)}战斗态势与${pct(e.restore_energy)}可用元力；不恢复肉身。`
+        }[row.id];
+        const card=section(`${row.name} · ${row.unlocked?`${row.level}/${row.max_level}重`:`魔躯${row.unlock_level}层解锁`}`,row.unlocked?text:'达到对应层数后解锁，并可单独培养。');
+        card.classList.add('asura-aggregate-card');card.classList.toggle('locked',!row.unlocked);
+        if(row.level<row.max_level){
+          card.append(note(`下一重：${fmt(row.cost.souls)}精魂 · ${fmt(row.cost.opportunity)}机缘`));
+          const train=button(`修炼${row.name}至第${row.level+1}重`,'train_aggregate',{target_id:row.id,expected_level:row.level},!row.can_train);
+          train.dataset.aggregate=row.id;card.append(train);
+        }
+        if(row.reason)card.append(note(row.reason));list.append(card);
+      }
+      five.append(list);content.append(five);
     }
     if(tab==='veins'){
       const v=s.meridians, next=v.opened+1;
@@ -67,13 +90,13 @@
     }
     if(tab==='route'){
       if(!s.route){
-        content.append(note(`凝练门槛：候选俘虏或傀儡自身的「普通炼体」至少 ${s.minimum_body_training}/100 层；玩家还须修罗之躯20层。两者分别判定。`));
+        content.append(note(`凝练门槛：候选俘虏或傀儡自身的「普通炼体」至少 ${s.minimum_body_training}/100 层；玩家还须修罗之躯10层。两者分别判定。`));
         const candidates=section('可凝练肉身','只列出你实际持有的俘虏与傀儡。凝练消耗精魂，并将其移入待融合名录。');
         if(!s.candidates?.length)candidates.append(note('暂无可用肉身，可先获得俘虏或制作傀儡。路线材料条件见百科。'));
-        for(const b of s.candidates||[]){const row=section(`${b.name} · ${b.source==='prisoner'?'俘虏':'傀儡'}`);row.append(el('p',`自身普通炼体 ${b.body_training}/100 层 · 高阶肉身 ${b.immortal_body_level} 层 · 炼体境界 ${b.body_realm}`),el('p',`可继承肉身战力 ${fmt(b.body_power)} · ${b.eligible?'普通炼体门槛已满足':'普通炼体不足，无法凝练'}`,'asura-description'),button(`凝练肉身 · ${fmt(b.condense_cost)} 精魂`,'condense',{target_id:b.id},!converted||!b.eligible||(s.body_level||0)<20||s.souls<b.condense_cost));candidates.append(row);}content.append(candidates);
+        for(const b of s.candidates||[]){const row=section(`${b.name} · ${b.source==='prisoner'?'俘虏':'傀儡'}`);row.append(el('p',`自身普通炼体 ${b.body_training}/100 层 · 高阶肉身 ${b.immortal_body_level} 层 · 炼体境界 ${b.body_realm}`),el('p',`可继承肉身战力 ${fmt(b.body_power)} · ${b.eligible?'普通炼体门槛已满足':'普通炼体不足，无法凝练'}`,'asura-description'),button(`凝练肉身 · ${fmt(b.condense_cost)} 精魂`,'condense',{target_id:b.id},!converted||!b.eligible||(s.body_level||0)<10||s.souls<b.condense_cost));candidates.append(row);}content.append(candidates);
         const fusion=section('待融合肉身','选择一至两具已凝练肉身。单具按身体条件匹配本命；两具合格肉身进入阿修罗。融合后本命永久确定。');
         const preview=note(''),fight=button('融合所选肉身（开始生死战）','fuse',{},true);
-        const update=()=>{const rows=(s.bodies||[]).filter(b=>selected.has(b.id)),name=rows.length===2?'阿修罗':rows[0]?.matched_route;preview.textContent=rows.length?`已选 ${rows.length} 具 · ${name?`将进入${name}本命`:'此单具不符合本命条件，需搭配另一具肉身'}`:'尚未选择肉身';fight.disabled=blocked||!converted||(s.body_level||0)<20||!name||rows.length>2;};
+        const update=()=>{const rows=(s.bodies||[]).filter(b=>selected.has(b.id)),name=rows.length===2?'阿修罗':rows[0]?.matched_route;preview.textContent=rows.length?`已选 ${rows.length} 具 · ${name?`将进入${name}本命`:'此单具不符合本命条件，需搭配另一具肉身'}`:'尚未选择肉身';fight.disabled=blocked||!converted||(s.body_level||0)<10||!name||rows.length>2;};
         for(const b of s.bodies||[]){const row=el('label',null,'asura-body-choice'),box=el('input');box.type='checkbox';box.checked=selected.has(b.id);box.onchange=()=>{if(box.checked)selected.add(b.id);else selected.delete(b.id);update();};row.append(box,el('span',`${b.name} · 普通炼体 ${b.body_training}/100 · 高阶肉身 ${b.immortal_body_level||0} 层 · 肉身战力 ${fmt(b.power)}`));fusion.append(row);}
         fight.onclick=()=>act({action:'fuse',body_ids:[...selected]});fusion.append(preview,fight,note('融合战双方不可逃跑。须镇压或击杀全部凝练肉身；失败可能身死。只继承肉身炼体战力，不复制其装备与功法。'));update();content.append(fusion);
       }else{

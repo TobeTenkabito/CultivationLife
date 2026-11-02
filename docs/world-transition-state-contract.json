@@ -428,6 +428,8 @@
     "GameState.trial_site_state": "万象试境 DLC 十一普通界面：入口固定原 world/location，按权威 tier 使用 7/14/22 层；五节点、守关有限资源、首次奖励收据按原遗迹保留，不随移动复制。活动指针为本地会话，不移动人物。无年度或行动时间钩子，正式提交沿原效果/战斗/奖励入口及原子保存。关闭 DLC 冻结数据，安全会话摘除活动指针，真实受控或封逃结果不得借开关解除；后续奖励保留。重新开启只恢复原记录，返访须亲至原入口；结构 10，不转换 1–9。"
   },
   "non_economy_audit_ownership_notes": {
+    "Player.asura_cultivation.body_level / aggregates / GameState.active_trial.snapshot.units.*.capabilities.body_mechanisms / GameState.last_combat_report.rounds.*.voisinage.body_mechanisms": "personal / session：魔躯原层数扩至50，五蕴0–10重归原aggregates；精魂与机缘从原账本实扣，跨界保留个人记录而按原修持地点限制执行。NPC无新增持久养成字段，沿真实独立炼体投影；镜像能力复制并冻结于原劫战快照。原始触发、依赖、轮首概率、静默、有限行动额度与兑现记录只归原战斗轮及有界战报，续战按保存的战斗RNG生成下一轮，不重取人物养成。识蕴是用户授权的额外施权反应回复，只恢复本场态势及原可用元力账本，封存容量、肉身与永久魂基不变；不建立新资源池，不复活被制伏或死亡人物。八部玩家十层门槛与材料自身普通炼体六十层分别校验。无新移动、人物复制、年度循环或顶层字段；结构仍12，拒绝1–11，不迁移或覆盖旧文件。",
+    "GameState.last_combat_report.visual.teams.*.*.visual_lights": "session：用户授权的五色神光环绕外观，每方原至多三名真实参战者各保存至多五个已解锁光ID，不保存动画帧、粒子、时钟或新人物。战前读取原实际炼体，劫战沿原active_trial.snapshot冻结能力；旧战报缺失不补造，重播不读取当前养成。公开人物visual_lights仅为请求内只读投影，NPC沿原探明边界，不存入Player或NPC记录。跨界沿原战报session处理，无新移动、资源或RNG；结构仍为12。",
     "GameState.merchant_state.posted.*.delivery_location/delivery_goods/delivery_claimed/claimed_age": "采购委托完成时生成的唯一物资及领取收据：地址归原发布界面与地图，物资只归订单托管，领取后从订单移到本人原背包一次；不随玩家转场，不重抽品质、改编号或改制成年份。已付款领取不依赖后续成员身份；待领订单计入十二条上限且不被历史清理。既有结构10无发布地图时只沿用原本界交付，不推定地点，不处理旧结构1–9。",
     "Player.ghost_host_body.body_training/immortal_body_level/golden_light_rank": "进入宿身时登记同一宿主已有的身体与金光资格，寄身投影只读宿主事实，不借用本魂仙躯；缺失记录不补发资格或修改旧档。原本魂仙躯账本保留，离舍后恢复。原仙窍在寄身期间沉寂，凝练拒绝不改两者资源或RNG。",
     "Player.sealed_cultivation.visit_only": "已使用秘法压制的正式下界仅记录归路凭证；realm_index/layer 为原有效压制境界，真正修为仍独立归 cultivation_suppression。返界复用 sealed_return，只解除归路凭证；回原界后才能解除秘法。不得解除压制借界面排斥触发永久离宗，不新增人物或库存副本。",

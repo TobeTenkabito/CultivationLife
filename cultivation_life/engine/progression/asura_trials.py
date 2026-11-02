@@ -68,10 +68,12 @@ def initialize(game):
                 body = trial['bodies'][index]
                 from ...system.divine_lights import profile
                 lights,levels=profile(body)
+                from ...system.wuyun import profile as aggregate_profile
+                aggregates=aggregate_profile(body)
                 tier = 2 if int(body.get('immortal_body_level') or 0) > 0 else 1
                 caps = replace(actor.capabilities, capacity=own.capacity, current=own.current,
                     usable_capacity=own.usable_capacity, force_tier=tier, ward_tier=2 if lights.get('kun') else 1,
-                    divine_lights=lights,divine_light_levels=levels,
+                    divine_lights=lights,divine_light_levels=levels,body_mechanisms=aggregates,
                     voisinages=(), semantic_rules=())
             else:
                 caps = replace(own, voisinages=copied.voisinages if has_field else (),

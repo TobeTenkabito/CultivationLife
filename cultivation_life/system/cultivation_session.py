@@ -10,13 +10,7 @@ from .cultivation_dependencies import (
 )
 from .doctrine.provider import ensure
 from .possession_system import is_possessed
-
-
-def cultivation_blocked(game):
-    p = game.player
-    return bool(not p.alive or game.pending_event or game.active_trial or p.imprisonment
-                or p.ghost_captor or is_possessed(p)
-                or (game.guixu_state.get('player_session') or {}).get('trapped'))
+from .cultivation_guard import cultivation_blocked
 
 
 def _cultivation_game(deps: CultivationSessionDependencies, game_id):

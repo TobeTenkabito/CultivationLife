@@ -38,3 +38,5 @@
 html[data-theme] .strategy-dock button[data-dlc=asura]{--dock-color:var(--energy-asura)}
 html[data-theme] .strategy-dock button[data-dlc]{color:var(--dock-color);border-color:color-mix(in srgb,var(--dock-color) 45%,var(--surface));background:color-mix(in srgb,var(--dock-color) 12%,var(--surface))}
 html[data-theme] .strategy-dock button[data-dlc]:hover:not(:disabled),html[data-theme] .strategy-dock button[data-dlc].active{color:var(--on-accent);background:var(--dock-color)}
+.asura-aggregate-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.asura-aggregate-card{margin:0;min-width:0}.asura-aggregate-card.locked{opacity:.66}

@@ -30,6 +30,9 @@ def public_ranks(actor, *, player=False):
 
 
 def mask_unrevealed(public, perception):
+    from .divine_lights import visual_lights
+    # The existing visibility boundary also governs cosmetic body information.
+    public['visual_lights'] = visual_lights(public) if perception and perception.get('revealed') else []
     if perception and not perception.get('revealed'):
         public['cultivation_ranks'] = {
             'cultivation': {'name': perception['realm_name']},

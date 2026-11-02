@@ -1,0 +1,18 @@
+.divine-light-host{position:relative;isolation:isolate}
+.divine-light-orbits{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:hidden;shape-rendering:geometricPrecision}
+.divine-light-rear{z-index:0}.divine-light-front{z-index:2}
+.divine-light-host>img:not(.pixel-natal-on-actor),.divine-light-host>canvas{position:relative;z-index:1}
+.divine-light-orbits path{animation:divine-light-flow var(--light-period) linear infinite;animation-delay:var(--light-offset)}
+.divine-light-orbits g{transform-origin:50px 70px;animation:divine-light-breath calc(var(--light-period)*1.7) ease-in-out infinite;animation-delay:var(--light-offset)}
+@keyframes divine-light-flow{from{stroke-dashoffset:var(--light-start)}to{stroke-dashoffset:calc(var(--light-start) - var(--light-travel))}}
+@keyframes divine-light-breath{0%,100%{transform:translate(0,0)}50%{transform:translate(.7px,-.8px)}}
+.pixel-portrait-frame{display:none;flex:none;position:relative}
+.pixel-portrait-frame[hidden]{display:none!important}
+:root[data-visual=pixel] .in-game .pixel-portrait-frame{display:block;width:64px;height:64px}
+.pixel-portrait-frame .pixel-portrait{border-bottom:0!important}
+.npc-light-figure{display:block;width:fit-content;max-width:100%}
+.npc-light-portrait{display:block;float:left;width:48px;height:48px;margin:0 8px 4px 0}
+.npc-art-person .npc-light-portrait .npc-art-portrait{float:none;margin:0}
+[data-lights-paused] .divine-light-orbits path,[data-lights-paused] .divine-light-orbits g{animation-play-state:paused}
+@media(max-width:600px){:root[data-visual=pixel] .in-game .pixel-portrait-frame{width:56px;height:56px}}
+@media(prefers-reduced-motion:reduce){.divine-light-orbits path,.divine-light-orbits g{animation:none;stroke-dashoffset:calc(var(--light-start,0px) - 9px)}}

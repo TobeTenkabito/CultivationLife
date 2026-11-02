@@ -643,6 +643,8 @@ class Player:
         data['immortal_vein_pity'] = {str(k): max(0, int(v)) for k, v in data.get('immortal_vein_pity', {}).items()}
         from .cultivation_coordinates import validate_immortal_body
         data['immortal_body'] = validate_immortal_body(copy_plain_data(data.get('immortal_body', {})))
+        from .body_mechanism_content import validate_state as validate_asura_body
+        data['asura_cultivation'] = validate_asura_body(copy_plain_data(data.get('asura_cultivation',{})))
         data['world_voisinages'] = copy_plain_data(data.get('world_voisinages', {}))
         if data.get('cultivation_ranks_schema', 1) < 2:
             from .cultivation_coordinates import legacy_sense
