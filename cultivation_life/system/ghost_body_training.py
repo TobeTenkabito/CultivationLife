@@ -1,6 +1,6 @@
 """World-local ghost-body cultivation on existing body and material ledgers."""
-from ..content_registry import CONTENT_DOCUMENTS
-from ..ghost_body_content import IDS,NAMES,build
+from ..content_registry import CONTENT_DOCUMENTS,ITEM_CATALOG
+from ..ghost_body_content import IDS,NAMES,build,recipe
 from .ghost_body import enabled_for
 from .cultivation_guard import cultivation_blocked
 from .upper_voisinage_rules import config
@@ -40,17 +40,22 @@ def public(game):
     def problem(cost,extra=''):
         return blocked or extra or ('机缘或轮回界筑域材料不足' if cost and (p.opportunity<cost['opportunity'] or owned<cost['materials']) else '')
     for i,key in enumerate(IDS,1):
-        rank=ranks.get(key,0);cost=bill(rank,i) if rank<10 else None
-        error=problem(cost,'鬼躯层数尚未解锁' if level<i*10 else '已达十重' if rank>=10 else '')
+        rank=ranks.get(key,0);cost=dict(opportunity=bill(rank,i)['opportunity'],materials=recipe(key,rank)) if rank<10 else None
+        materials=[dict(id=k,name=ITEM_CATALOG[k].name,needed=n if cost else 0,
+            owned=sum(item.quantity for item in p.inventory if item.id==k or item.artifact_origin_id==k),
+            asset='material.'+k,origin_name='轮回界') for k,n in recipe(key,rank).items()]
+        error=blocked or ('鬼躯层数尚未解锁' if level<i*10 else '已达十重' if rank>=10 else '')
+        if not error and (p.opportunity<cost['opportunity'] or any(m['owned']<m['needed'] for m in materials)):
+            error='机缘或鬼躯专属培养材料不足；五种材料仅轮回界产出'
         rows.append(dict(id=key,name=NAMES[i-1],level=rank,unlock_level=i*10,unlocked=level>=i*10,
-            effects=build(key,rank).effects,cost=cost,reason=error,can_train=not error))
+            effects=build(key,rank).effects,cost=cost,materials=materials,reason=error,can_train=not error))
     cost=bill(level) if level<50 else None
     body_reason=problem(cost,'须普通炼体100层' if p.body_training<100 else '鬼躯已达50层' if level>=50 else '')
     return dict(available=True,level=level,max_level=50,rows=rows,body_cost=cost,body_reason=body_reason,
         can_train_body=not body_reason,material_name=material['name'],material_owned=owned,reason=blocked)
 
 
-def act(game,action,key,expected_level):
+def act(game,action,key,expected_level,*,has_item,remove_item):
     data=public(game)
     if not data['available']:raise ValueError('鬼修道途未开启')
     p=game.player
@@ -63,8 +68,12 @@ def act(game,action,key,expected_level):
     else:raise ValueError('未知鬼躯操作')
     if error:raise ValueError(error)
     if type(expected_level) is not int or expected_level!=rank:raise ValueError('鬼躯等级已变化，请刷新后重试')
-    materials=stock(p)[:cost['materials']]
+    if action=='ghost_body_refine' and any(not has_item(p,k,n) for k,n in cost['materials'].items()):
+        raise ValueError('鬼躯专属培养材料不足')
+    materials=stock(p)[:cost['materials']] if action=='ghost_body_train' else []
     for material in materials:p.crafting_materials.remove(material)
+    if action=='ghost_body_refine':
+        for material,amount in cost['materials'].items():remove_item(p,material,amount)
     p.opportunity-=cost['opportunity']
     if action=='ghost_body_train':
         from ..rules import max_hp,max_mp
@@ -74,4 +83,5 @@ def act(game,action,key,expected_level):
         grant_intrinsic_progression_if_new_highwater(p)
         p.hp=max_hp(p)*min(1,hp_ratio);p.mp=max_mp(p)*min(1,mp_ratio)
     else:p.immortal_body.setdefault('ghost_training',{})[key]=rank+1
-    return f'{label}修至{rank+1}'+('层' if action=='ghost_body_train' else '重')+f'，消耗{cost["opportunity"]:g}机缘及{data["material_name"]}×{len(materials)}。'
+    paid=f'{data["material_name"]}×{len(materials)}' if action=='ghost_body_train' else '、'.join(f'{ITEM_CATALOG[k].name}×{n}' for k,n in cost['materials'].items())
+    return f'{label}修至{rank+1}'+('层' if action=='ghost_body_train' else '重')+f'，消耗{cost["opportunity"]:g}机缘及{paid}。'

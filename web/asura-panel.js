@@ -41,6 +41,8 @@
     }
     if(tab==='body'){
       const cap=s.body_max_level||50;
+      window.BodyCultivationUI.hero(content,{family:'demonic',title:`修罗魔躯 · ${s.body_level||0}/${cap}层`,level:s.body_level||0,
+        names:['色蕴','受蕴','想蕴','行蕴','识蕴'],description:'以煞铸身，以蕴应战。五蕴各自凝炼，专属培养材料仅修罗界产出。'});
       const body=section('锻炼自己的修罗之躯',`玩家普通炼体 ${p.body_training}/100 层；普通炼体达到100层后，才能以机缘锻炼修罗之躯。上限${cap}层，每十层依次解锁色、受、想、行、识。`);
       const track=el('div',null,'asura-body-track');track.setAttribute('aria-label',`修罗之躯 ${s.body_level||0}/${cap} 层`);for(let i=1;i<=cap;i++){const n=el('span',String(i));n.classList.toggle('is-open',i<=(s.body_level||0));track.append(n);}body.append(track);
       body.append(note('达到修罗之躯10层后，可凝练外界肉身并融合本命。这里显示的是玩家己身，与俘虏、傀儡的炼体层数分开。'));
@@ -48,10 +50,10 @@
       else body.append(note('修罗之躯已达五十层，五蕴可分别继续培养至十重。'));
       if(s.body_training_reason)body.append(note(s.body_training_reason));
       content.append(body);
-      const five=section('五蕴 · 独立修炼','轮首统一确定原始触发与暴击、免费结果，随后裁决静默；追加施权只兑现当轮登记的行动额度。');
+      const five=section('五蕴 · 独立修炼','轮首确定资格、暴击与静默，实际暴击后判定额外施权是否免费；不同机制按因果链联动。');
       const list=el('div',null,'asura-aggregate-list');
       const pct=value=>`${(Number(value||0)*100).toFixed(1)}%`;
-      for(const row of s.aggregates||[]){
+      for(const [index,row] of (s.aggregates||[]).entries()){
         const e=row.effects||{},text={
           se:`免疫凡属性伤害，邻域威能提高${pct(e.authority)}。`,
           shou:`每轮${pct(row.probability)}概率令合法数值施权暴击，效果为基础的200%。`,
@@ -61,20 +63,9 @@
         }[row.id];
         const card=section(`${row.name} · ${row.unlocked?`${row.level}/${row.max_level}重`:`魔躯${row.unlock_level}层解锁`}`,row.unlocked?text:'达到对应层数后解锁，并可单独培养。');
         card.classList.add('asura-aggregate-card');card.classList.toggle('locked',!row.unlocked);
+        window.BodyCultivationUI.card(card,{index,name:row.name,level:row.level,unlocked:row.unlocked,unlockLevel:row.unlock_level});
         for(const material of row.materials||[]){
-          const supply=el('div',null,'asura-aggregate-material');supply.dataset.material=material.id;
-          if(window.PixelLibrary?.active()){
-            const image=el('img');image.alt=material.name;image.width=image.height=64;image.loading='lazy';
-            supply.append(image);
-            window.PixelLibrary.ensure().then(catalog=>{
-              const asset=catalog?.assets[material.asset+'.portrait'];
-              if(image.isConnected&&asset)image.src=asset.file;
-            });
-          }
-          const info=el('div');info.append(el('strong',material.name),
-            el('p',`持有 ${fmt(material.owned)}${row.level<row.max_level?` / 本次所需 ${fmt(material.needed)}`:' · 培养圆满'}`),
-            el('small',`仅${material.origin_name}产出 · 坊市、黑市与拍卖`));
-          supply.append(info);card.append(supply);
+          window.BodyCultivationUI.material(card,material,'asura-aggregate-material');
         }
         if(row.level<row.max_level){
           card.append(note(`下一重：${fmt(row.cost.souls)}精魂 · ${fmt(row.cost.opportunity)}机缘`));

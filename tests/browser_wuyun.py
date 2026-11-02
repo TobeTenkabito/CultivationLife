@@ -98,6 +98,8 @@ def main():
                         page.wait_for_function('document.querySelectorAll(".asura-aggregate-card.locked").length===0')
                         assert page.locator('.asura-body-track span').count()==50
                         assert page.locator('.asura-aggregate-material').count()==5
+                        assert page.locator('[data-body-family=demonic] .body-cultivation-stages li').count()==5
+                        assert page.locator('[data-body-family=demonic] [role=meter]').count()==5
                         assert '仅修罗界产出' in page.locator('#asura-body-content').inner_text()
                         if pixel:
                             for image in page.locator('.asura-aggregate-material img').all():image.scroll_into_view_if_needed()

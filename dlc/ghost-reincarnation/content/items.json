@@ -40,6 +40,61 @@
         "rare",
         "equipment"
       ]
+    },
+    {
+      "id": "ghost_formless_amber",
+      "name": "无相空珀",
+      "description": "鬼躯五法·无相专用培养材料，仅轮回界产出。零升一重需4件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "ghost_body_material",
+        "ghost"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "ghost_karma_mirror",
+      "name": "照业冥镜",
+      "description": "鬼躯五法·照业专用培养材料，仅轮回界产出。零升一重需6件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "ghost_body_material",
+        "ghost"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "ghost_returning_lotus",
+      "name": "归魂幽莲",
+      "description": "鬼躯五法·御魂专用培养材料，仅轮回界产出。零升一重需8件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "ghost_body_material",
+        "ghost"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "ghost_oblivion_crystal",
+      "name": "忘川泪晶",
+      "description": "鬼躯五法·忘情专用培养材料，仅轮回界产出。零升一重需10件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "ghost_body_material",
+        "ghost"
+      ],
+      "force_tier": 1
+    },
+    {
+      "id": "ghost_causality_thread",
+      "name": "因果赤丝",
+      "description": "鬼躯五法·因果专用培养材料，仅轮回界产出。零升一重需12件，后续费用乘目标重数。可随身携带，材料本身不提供战力。",
+      "tags": [
+        "material",
+        "ghost_body_material",
+        "ghost"
+      ],
+      "force_tier": 1
     }
   ]
 }

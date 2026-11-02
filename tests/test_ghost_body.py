@@ -9,6 +9,8 @@ from cultivation_life.system.upper_voisinage_rules import config
 from cultivation_life.system.crafting_system import crafting_material_definitions,make_crafting_material_instance
 from cultivation_life.system.combat_loadout import project_loadout
 from cultivation_life.cultivation_coordinates import validate_immortal_body
+from cultivation_life.ghost_body_content import MATERIAL_IDS
+from cultivation_life.rules import add_item,has_item
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -17,6 +19,7 @@ def supply_materials(g,count=80):
     definition=crafting_material_definitions()[config()['worlds']['reincarnation']['material_id']]
     rng=random.Random(17)
     g.player.crafting_materials.extend(make_crafting_material_instance(definition,rng,source='test',origin_world='reincarnation') for _ in range(count))
+    for key in MATERIAL_IDS:add_item(g.player,key,count)
 
 
 @pytest.fixture
@@ -39,6 +42,7 @@ def test_body_unlock_and_independent_training_spend_exactly_once(ready_ghost):
     e.upper_voisinage_action(g.id,'ghost_body_refine','wuxiang',expected_level=0)
     trained=e._load(g.id);assert profile(trained.player,player=True)[0].effects['recovery_bonus']==pytest.approx(.03)
     assert trained.player.age==age and trained.rng_state==rng
+    assert next(i.quantity for i in trained.player.inventory if i.id==MATERIAL_IDS[0])==76
     e.get_game(g.id);path=e.store._path(g.id);blob=path.read_bytes()
     with pytest.raises(ValueError,match='等级已变化'):e.upper_voisinage_action(g.id,'ghost_body_refine','wuxiang',expected_level=0)
     assert path.read_bytes()==blob
@@ -50,6 +54,15 @@ def test_missing_materials_and_unlocked_requirements_are_atomic(ready_ghost):
     with pytest.raises(ValueError,match='材料不足'):e.upper_voisinage_action(g.id,'ghost_body_train',None,expected_level=9)
     with pytest.raises(ValueError,match='尚未解锁'):e.upper_voisinage_action(g.id,'ghost_body_refine','yinguo',expected_level=0)
     assert path.read_bytes()==blob
+
+
+def test_refining_requires_its_own_inventory_material_not_generic_alloy(ready_ghost):
+    e,g=ready_ghost;g.player.immortal_body['level']=50
+    key=MATERIAL_IDS[1];g.player.inventory=[i for i in g.player.inventory if i.id!=key]
+    e.store.save(g);e.get_game(g.id);path=e.store._path(g.id);blob=path.read_bytes()
+    with pytest.raises(ValueError,match='专属培养材料不足'):
+        e.upper_voisinage_action(g.id,'ghost_body_refine','zhaoye',expected_level=0)
+    assert path.read_bytes()==blob and len(stock(e._load(g.id).player))==80
 
 
 def test_all_five_values_freeze_in_loadout_and_do_not_stack_with_lights(ready_ghost):

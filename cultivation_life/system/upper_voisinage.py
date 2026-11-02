@@ -112,7 +112,8 @@ def act(deps: ApertureDependencies, game_id, action, voisinage_id,expected_level
         raise ValueError('寄身期间本魂邻域修行冻结')
     if action.startswith('ghost_body_'):
         from .ghost_body_training import act as train_ghost
-        summary=train_ghost(game,action,voisinage_id,expected_level)
+        from ..rules import has_item
+        summary=train_ghost(game,action,voisinage_id,expected_level,has_item=has_item,remove_item=remove_item)
         game.history.append(HistoryRecord('SYS_GHOST_BODY',1,p.age,'鬼躯五法',action,'completed',summary,{},['cultivation','body']))
         game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
     if action.startswith('monster_body_'):

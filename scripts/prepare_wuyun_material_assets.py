@@ -22,7 +22,7 @@ def save(path,value):
 def main():
     global OWNER,DIRECTORY,DESIGN
     parser=argparse.ArgumentParser()
-    parser.add_argument('--family',choices=['wuyun','monster-body'],default='wuyun')
+    parser.add_argument('--family',choices=['wuyun','monster-body','ghost-body'],default='wuyun')
     mode=parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--write',action='store_true');mode.add_argument('--check',action='store_true')
     args=parser.parse_args()
@@ -30,6 +30,10 @@ def main():
         OWNER='official.monster-bloodlines'
         DIRECTORY=ROOT/'dlc/monster-bloodlines/assets/visual/body-materials'
         DESIGN=ROOT/'design/monster-body-20261102'
+    elif args.family=='ghost-body':
+        OWNER='official.ghost-reincarnation'
+        DIRECTORY=ROOT/'dlc/ghost-reincarnation/assets/visual/body-materials'
+        DESIGN=ROOT/'design/ghost-body-materials-20261103'
     registry_path=DIRECTORY.parent/'registry.json'
     mapping_path=ROOT/'content/visual_assets.json'
     registry=json.loads(registry_path.read_text(encoding='utf-8'))

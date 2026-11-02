@@ -1,0 +1,40 @@
+{
+  "method": "built-in image_gen",
+  "reference": "design/inventory-icons-v2-20261020/source/special_materials.png",
+  "reference_sha256": "74c827382410eb7bb599eb77fe79177d43d473a302f208777cab28a8c6489642",
+  "prompt_file": "dlc/ghost-reincarnation/assets/visual/body-materials/prompts.json",
+  "normalization": "Alpha>=128 crop; longest edge 26px; centered 32px binary alpha; 128px nearest-neighbor portrait.",
+  "exporter": "scripts/prepare_wuyun_material_assets.py",
+  "assets": [
+    {
+      "id": "ghost_formless_amber",
+      "name": "无相空珀",
+      "source": "design/ghost-body-materials-20261103/source/ghost_formless_amber-pixel-v1.png",
+      "source_sha256": "f9e770abe230ba2d4245435fde2b52b2fd97b6c7dae16303b077fc0bddde9479"
+    },
+    {
+      "id": "ghost_karma_mirror",
+      "name": "照业冥镜",
+      "source": "design/ghost-body-materials-20261103/source/ghost_karma_mirror-pixel-v1.png",
+      "source_sha256": "7dd591fd3e3676224ad0492f78d38ef7d24f3fbdc27a70995e66888098a5b193"
+    },
+    {
+      "id": "ghost_returning_lotus",
+      "name": "归魂幽莲",
+      "source": "design/ghost-body-materials-20261103/source/ghost_returning_lotus-pixel-v1.png",
+      "source_sha256": "c25beebef242b75af40b380636d6a74764d5539c1926eca7c2230b9ac3b45dd4"
+    },
+    {
+      "id": "ghost_oblivion_crystal",
+      "name": "忘川泪晶",
+      "source": "design/ghost-body-materials-20261103/source/ghost_oblivion_crystal-pixel-v1.png",
+      "source_sha256": "9d68672481b918b73f23016414c1176850442edecbf9a329f1bb32cc213ee8b6"
+    },
+    {
+      "id": "ghost_causality_thread",
+      "name": "因果赤丝",
+      "source": "design/ghost-body-materials-20261103/source/ghost_causality_thread-pixel-v1.png",
+      "source_sha256": "f8f6265407724df8581bf23e76913f03faef78279ed68b3afd0165f7ca572240"
+    }
+  ]
+}

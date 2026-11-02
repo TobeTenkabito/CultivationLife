@@ -262,6 +262,9 @@ class ContentRegistry:
                 validate_material_sources(body_config,registry.items,registry.market_goods)
                 from .monster_body_content import validate_content as validate_monster_body
                 validate_monster_body(documents.get('world.json',{}).get('systems',{}).get('monster_body',{}),registry.items,registry.market_goods)
+                if documents.get('world.json',{}).get('systems',{}).get('ghost_cultivation',{}).get('enabled'):
+                    from .ghost_body_content import validate_material_content as validate_ghost_materials
+                    validate_ghost_materials(registry.items,registry.market_goods)
             except (ValueError,KeyError,TypeError) as error:
                 raise ContentError(f'五蕴内容不合法：{error}') from error
             if "doctrines.json" in documents:

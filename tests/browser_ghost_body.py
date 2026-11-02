@@ -12,6 +12,7 @@ from cultivation_life.rules import max_hp,max_mp
 from cultivation_life.runtime import decode_rng,encode_rng
 from cultivation_life.content_registry import WORLD_SYSTEMS
 from test_ghost_body import supply_materials
+from cultivation_life.ghost_body_content import MATERIAL_IDS
 from scripts.browser_navigation import navigation_locator,click_control,reveal_subpage
 
 
@@ -58,7 +59,7 @@ def main():
                         assert stale.value.status==400
                         page.wait_for_function('!busy&&game.upper_voisinages.ghost_body.rows[0].level===2')
                         assert e._load(g.id).player.opportunity==op
-                        saved=e._load(g.id);saved.player.crafting_materials.clear();e.store.save(saved)
+                        saved=e._load(g.id);saved.player.inventory=[i for i in saved.player.inventory if i.id not in MATERIAL_IDS];e.store.save(saved)
                         with page.expect_response(lambda r:r.url.endswith('/upper-voisinage')) as missing:
                             click_control(page.locator('[data-ghost-refine=wuxiang]'))
                         assert missing.value.status==400
@@ -67,11 +68,21 @@ def main():
                         g=e._load(g.id);g.player.immortal_body={'level':50};supply_materials(g);e.store.save(g)
                         page.evaluate('id=>loadGame(id)',g.id)
                         assert page.locator('.ghost-body-change').count()==5
+                        if pixel:
+                            for img in page.locator('.ghost-body-material img').all():img.scroll_into_view_if_needed()
+                            page.wait_for_function('''()=>[...document.querySelectorAll('.ghost-body-material img')].length===5&&[...document.querySelectorAll('.ghost-body-material img')].every(i=>i.complete&&i.naturalWidth===128)''')
+                        assert page.locator('[data-body-family=ghost] .body-cultivation-card').count()==5
                         assert page.locator('.ghost-body').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
                         page.locator('.ghost-body-title').scroll_into_view_if_needed();page.screenshot(path=str(output/f'{theme}-{width}.png'))
                         click_control(page.locator('#ghost-body-toggle'))
                         navigation_locator(page,'[data-panel-target=ghost-body]').click()
                         assert page.locator('.ghost-body-title').inner_text().endswith('50/50层')
+                        capped=e._load(g.id);capped.player.immortal_body['ghost_training']={'wuxiang':10};e.store.save(capped)
+                        page.evaluate('id=>loadGame(id)',g.id)
+                        assert page.locator('[data-ghost-refine=wuxiang]').is_disabled()
+                        assert page.locator('[data-ghost-refine=wuxiang]').inner_text()=='已修至十重'
+                        assert page.locator('[data-ghost-change=wuxiang] [role=meter]').get_attribute('aria-valuenow')=='10'
+                        assert '培养圆满' in page.locator('[data-ghost-change=wuxiang]').inner_text()
                         click_control(page.locator('#ghost-body-toggle'))
                         g=e._load(g.id);g.pending_event=None;g.settings.update(combat_popup=False,silent_events=True)
                         field=WORLD_SYSTEMS['upper_voisinages']['worlds']['reincarnation']['fields'][0]['id']

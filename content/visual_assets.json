@@ -15529,6 +15529,36 @@
       "requires": [
         "official.monster-bloodlines"
       ]
+    },
+    "ghost_formless_amber": {
+      "asset": "material.ghost_formless_amber",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost_karma_mirror": {
+      "asset": "material.ghost_karma_mirror",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost_returning_lotus": {
+      "asset": "material.ghost_returning_lotus",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost_oblivion_crystal": {
+      "asset": "material.ghost_oblivion_crystal",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "ghost_causality_thread": {
+      "asset": "material.ghost_causality_thread",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
     }
   },
   "molds": {

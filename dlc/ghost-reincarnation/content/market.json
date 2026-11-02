@@ -42,6 +42,146 @@
       "content_id": "TECH_BUTTERFLY_DREAM_CANON",
       "tier": 8,
       "price": 7600000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_formless_amber",
+      "tier": 9,
+      "price": 500000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_formless_amber",
+      "tier": 10,
+      "price": 500000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_formless_amber",
+      "tier": 11,
+      "price": 500000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_formless_amber",
+      "tier": 12,
+      "price": 500000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_karma_mirror",
+      "tier": 9,
+      "price": 650000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_karma_mirror",
+      "tier": 10,
+      "price": 650000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_karma_mirror",
+      "tier": 11,
+      "price": 650000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_karma_mirror",
+      "tier": 12,
+      "price": 650000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_returning_lotus",
+      "tier": 9,
+      "price": 800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_returning_lotus",
+      "tier": 10,
+      "price": 800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_returning_lotus",
+      "tier": 11,
+      "price": 800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_returning_lotus",
+      "tier": 12,
+      "price": 800000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_oblivion_crystal",
+      "tier": 9,
+      "price": 950000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_oblivion_crystal",
+      "tier": 10,
+      "price": 950000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_oblivion_crystal",
+      "tier": 11,
+      "price": 950000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_oblivion_crystal",
+      "tier": 12,
+      "price": 950000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_causality_thread",
+      "tier": 9,
+      "price": 1100000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_causality_thread",
+      "tier": 10,
+      "price": 1100000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_causality_thread",
+      "tier": 11,
+      "price": 1100000
+    },
+    {
+      "world": "reincarnation",
+      "kind": "item",
+      "content_id": "ghost_causality_thread",
+      "tier": 12,
+      "price": 1100000
     }
   ]
 }

@@ -71,6 +71,8 @@
     window.UtilityPanels.schedule('immortal-body', () => {
       const body = document.querySelector('#immortal-body-content'); body.replaceChildren();
       const b = data.immortal_body;
+      window.BodyCultivationUI.hero(body,{family:'immortal',title:'仙躯 · 五炁归元',level:b.level,max:b.max_level,
+        names:['坤元缃光','震合缥光','坎道玄光','离上朱光','乾古素光'],description:'以仙药淬躯，以五炁成光。炼体进境与独立神光修持，沿同一真实仙躯积累。'});
       body.append(el('h3', `真仙之躯 · ${b.body_stage} · 第 ${b.level} / ${b.max_level} 层`), el('p', `炼体 ${b.body_training} / ${b.required_training} 层 · ${b.body_training >= b.required_training ? '已具备淬炼根基' : '须先将炼体修至百层'}`),
         el('p', `五色神光：${b.golden_light ? '已解锁' : `第 ${b.golden_light_level} 层解锁`} · 仙躯每十层解锁一道神光。`, 'doctrine-note'),
         meter(b.level, b.golden_light ? b.max_level : b.golden_light_level, '仙躯修炼进度'),

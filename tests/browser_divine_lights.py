@@ -83,6 +83,8 @@ def main():
                         engine.store.save(saved);page.evaluate('id=>loadGame(id)',g.id)
                         navigation_locator(page,'[data-panel-target=golden-light]').click()
                         assert page.locator('.divine-light-card.locked').count()==0
+                        assert page.locator('#golden-light-content[data-body-family=immortal] .body-cultivation-stages li').count()==5
+                        assert page.locator('#golden-light-content [role=meter]').count()==5
                         path=engine.store._path(g.id);snapshot=path.read_bytes()
                         assert page.locator('#golden-light-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
                         assert page.locator('#golden-light-card').evaluate("n=>{const h=n.querySelector('h2').getBoundingClientRect(),r=n.getBoundingClientRect();return h.top>=r.top&&h.bottom<=r.bottom}")

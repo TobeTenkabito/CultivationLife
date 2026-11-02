@@ -12,11 +12,13 @@
     }
     window.UtilityPanels.schedule('golden-light',golden.available?()=>{
       const light=document.querySelector('#golden-light-content');light.replaceChildren();
-      light.append(el('h3',`五色神光 · 已解锁 ${golden.unlocked_count} / 5`),el('p',`独立炼体：${golden.body_stage} · 第 ${golden.body_level} / 50 层。每十层解锁一道神光，各光可独立修炼至十重。`,'muted'));
+      window.BodyCultivationUI.hero(light,{family:'immortal',title:`五色神光 · 已解锁 ${golden.unlocked_count} / 5`,level:golden.body_level,
+        names:golden.lights.map(r=>r.name),description:`${golden.body_stage} · 五炁循躯，十层启光。五道神光各可独立修至十重。`});
       const grid=el('div',null,'divine-light-grid');
-      for(const row of golden.lights){
+      for(const [index,row] of golden.lights.entries()){
         const card=el('section',null,'divine-light-card');card.dataset.light=row.id;card.classList.toggle('locked',!row.unlocked);
         card.append(el('h4',row.name),el('small',`仙躯${row.unlock_level}层解锁 · ${row.unlocked?row.level+' / 10 重':'尚未解锁'}`),el('p',row.description));
+        window.BodyCultivationUI.card(card,{index,name:row.name,level:row.level,unlocked:row.unlocked,unlockLevel:row.unlock_level});
         if(row.unlocked){
           const text=row.id==='kun'?`凡属性伤害免疫 · 抵抗封禁 ${(row.value*100).toFixed(0)}%`:row.id==='zhen'?`治疗保留普通出手 · 治疗增强 ${(row.value*100).toFixed(0)}%`:row.id==='li'?`基础态势削弱 ${(row.value*100).toFixed(1)}% · 按邻域威能折算`:`每回合触发概率 ${(row.value*100).toFixed(0)}%`;
           card.append(el('p',text,'divine-light-value'));

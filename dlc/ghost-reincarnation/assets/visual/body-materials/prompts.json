@@ -1,0 +1,31 @@
+{
+  "method": "built-in image_gen",
+  "reference": "design/inventory-icons-v2-20261020/source/special_materials.png",
+  "assets": [
+    {
+      "id": "ghost_formless_amber",
+      "name": "无相空珀",
+      "prompt": "Use case: stylized-concept. Create ONE new Chinese cultivation RPG inventory material sprite. The attached images are STYLE REFERENCES ONLY, not edit targets. Match the existing compact item art: logical 32x32 pixel art enlarged in hard square nearest-neighbor blocks, dark stepped outlines, 3–5 clustered shades per surface, top-left highlight, compact three-quarter silhouette, ample transparent padding. ONE centered object, no sheet, no ground, no shadow, no frame, no lettering, no people, no scenery, no bloom, no smooth painting or photorealism. Actual transparent background. Subject: A broad irregular pale celadon mineral amber with a single hollow dark center, frosted silver rim and angular translucent mint facets. Compact almost-round silhouette, dark charcoal lower edge."
+    },
+    {
+      "id": "ghost_karma_mirror",
+      "name": "照业冥镜",
+      "prompt": "Use case: stylized-concept. Create ONE new Chinese cultivation RPG inventory material sprite. The attached images are STYLE REFERENCES ONLY, not edit targets. Match the existing compact item art: logical 32x32 pixel art enlarged in hard square nearest-neighbor blocks, dark stepped outlines, 3–5 clustered shades per surface, top-left highlight, compact three-quarter silhouette, ample transparent padding. ONE centered object, no sheet, no ground, no shadow, no frame, no lettering, no people, no scenery, no bloom, no smooth painting or photorealism. Actual transparent background. Subject: A small ancient bronze hand mirror with a very short handle, round dark violet glass split into THREE broad reflecting facets, muted gold frame and one icy blue highlight. Compact readable outline."
+    },
+    {
+      "id": "ghost_returning_lotus",
+      "name": "归魂幽莲",
+      "prompt": "Use case: stylized-concept. Create ONE new Chinese cultivation RPG inventory material sprite. The attached images are STYLE REFERENCES ONLY, not edit targets. Match the existing compact item art: logical 32x32 pixel art enlarged in hard square nearest-neighbor blocks, dark stepped outlines, 3–5 clustered shades per surface, top-left highlight, compact three-quarter silhouette, ample transparent padding. ONE centered object, no sheet, no ground, no shadow, no frame, no lettering, no people, no scenery, no bloom, no smooth painting or photorealism. Actual transparent background. Subject: A compact ghostly cyan lotus flower with five thick angular petals surrounding three small lilac seed flames, dark jade base, luminous colors expressed ONLY as hard pixel clusters without glow."
+    },
+    {
+      "id": "ghost_oblivion_crystal",
+      "name": "忘川泪晶",
+      "prompt": "Use case: stylized-concept. Create ONE new Chinese cultivation RPG inventory material sprite. The attached images are STYLE REFERENCES ONLY, not edit targets. Match the existing compact item art: logical 32x32 pixel art enlarged in hard square nearest-neighbor blocks, dark stepped outlines, 3–5 clustered shades per surface, top-left highlight, compact three-quarter silhouette, ample transparent padding. ONE centered object, no sheet, no ground, no shadow, no frame, no lettering, no people, no scenery, no bloom, no smooth painting or photorealism. Actual transparent background. Subject: A single stout teardrop-shaped frosted ice-blue crystal, a tiny muted rose core, silver top-left highlight and dark indigo lower facets. Bold simple silhouette."
+    },
+    {
+      "id": "ghost_causality_thread",
+      "name": "因果赤丝",
+      "prompt": "Use case: stylized-concept. Create ONE new Chinese cultivation RPG inventory material sprite. The attached images are STYLE REFERENCES ONLY, not edit targets. Match the existing compact item art: logical 32x32 pixel art enlarged in hard square nearest-neighbor blocks, dark stepped outlines, 3–5 clustered shades per surface, top-left highlight, compact three-quarter silhouette, ample transparent padding. ONE centered object, no sheet, no ground, no shadow, no frame, no lettering, no people, no scenery, no bloom, no smooth painting or photorealism. Actual transparent background. Subject: A compact bundle of deep crimson silk thread tied in a loose two-loop knot around one small old jade bead, three broad red-gold folded strands and charcoal outlines, no floating strands or text."
+    }
+  ]
+}

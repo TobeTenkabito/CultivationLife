@@ -355,6 +355,116 @@
         "official.ghost-reincarnation"
       ],
       "domain_art": true
+    },
+    "material.ghost_formless_amber": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_formless_amber-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "8e558180ede5616784a331f23142aec80e01c3d0299d72faa0d766b043c55155",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_formless_amber.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_formless_amber-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "14c60154bb85229a37688c7434f9c2893124330abf7b23cd9df1f1d172e181f2",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_karma_mirror": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_karma_mirror-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "957c40f70b96f79ab09683985ba11531b24c5ad0787ad05a02ea8863e1e9d5ff",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_karma_mirror.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_karma_mirror-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "2204d8cf0b1b1f3844e9a22ead819cf118c67da0f3c73eb1b06c064e83fa564f",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_returning_lotus": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_returning_lotus-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "38c3b326dc7afca6dcb5428469849852beeabe506da2593e9d42f64a850c8401",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_returning_lotus.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_returning_lotus-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "821bfe56f744f6a37c791b9eb94c7f3c03d360b05e0ceb3dd0042879ea779a67",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_oblivion_crystal": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_oblivion_crystal-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "8c5e8d5ee0f11f1ee7e4b8cca0059b6f6bbe1ab762cbc18bb9b509567263a4f9",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_oblivion_crystal.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_oblivion_crystal-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "631b8dd5dc4b14caee7e1f336aae9209525924dd29ba1994b5f4598211daf88c",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_causality_thread": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_causality_thread-icon.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "3b81cfc711640fad7650a09273bbd43d8f268f244d524bc371d4901b9058bff4",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "material.ghost_causality_thread.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/body-materials/ghost_causality_thread-portrait.png",
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "9a1690812ce36ca11176ff5487c5714f7d652aa41307c5b9119e552e7ad8d76b",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
     }
   }
 }
