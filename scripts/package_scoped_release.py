@@ -261,6 +261,20 @@ def main():
         require(all('tide_theme_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Tide/two-theme native marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+    if scoped.get('profile')=='body-ui':
+        from scripts.body_ui_release_scope import TESTS as BODY_TESTS,BROWSERS as BODY_BROWSERS
+        require(all(c.get('body_ui_verified') for c in evidence['cases']),'Final EXE body/UI acceptance required with and without DLC')
+        require({name for shard in scoped['tests'] for name in shard}==set(BODY_TESTS),'3.5.0 declared body/UI selection incomplete')
+        require(set(BODY_BROWSERS)<={r['name'] for r in scoped['runs']},'Body/UI real browsers incomplete')
+        required={f'build/android-body-ui-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Body/UI native scope incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test APK changed')
+        require(all('body_ui_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in required),'Native body/UI marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='immortal':
         from scripts.verify_scoped_release import IMMORTAL_TESTS, IMMORTAL_BROWSERS
         require(all(c.get('immortal_verified') for c in evidence['cases']),'Compiled immortal acceptance required with and without DLC')
@@ -437,6 +451,10 @@ def main():
     am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(target,target.name);z.write(am,am.name)
+        if scoped.get('profile')=='body-ui':
+            z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
+            for path in (ROOT/'docs').rglob('*'):
+                if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
         if scoped.get('profile')=='immortal':
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for name in ('docs/immortal-artifacts.md','docs/release-340.md'):
@@ -487,6 +505,14 @@ def main():
                 z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc=package,version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
             with zipfile.ZipFile(destination) as z:
                 require(z.testzip() is None,'DLC archive damaged')
+    if scoped.get('profile')=='body-ui':
+        for package,label in [('asura-manifestation','修罗显圣'),('monster-bloodlines','万妖归宗'),('ghost-reincarnation','百鬼夜行')]:
+            version=json.loads((ROOT/'dlc'/package/'manifest.json').read_text(encoding='utf8'))['version']
+            with zipfile.ZipFile(ROOT/f'dist/{label}-v{version}-更新包.zip','w',zipfile.ZIP_DEFLATED) as z:
+                for path in (ROOT/'dlc'/package).rglob('*'):
+                    if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
+                z.write(ROOT/'docs/release-350.md','更新说明.md')
+                z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅支持结构12。覆盖对应dlc目录后重启；Android请安装同版签名APK。')
     print(json.dumps(dict(version=VERSION,tests=tests,windows=str(output),android=str(target)),ensure_ascii=False))
 
 

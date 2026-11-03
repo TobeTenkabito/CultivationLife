@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="a" data-motion="full">
+<html lang="zh-CN" data-theme="a" data-visual="pixel" data-pixel-theme="light" data-motion="full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>浮生问道</title>
-  <script src="/theme-boot.js?v=323-2.1.0"></script>
+  <script src="/theme-boot.js?v=350"></script>
   <link rel="stylesheet" href="/style.css?v=2.0.1">
   <link rel="stylesheet" href="/buddhist-panel.css?v=1.45.0">
   <link rel="stylesheet" href="/panels.css?v=1.45.0">
@@ -13,19 +13,16 @@
   <link rel="stylesheet" href="/authored-techniques.css?v=dlc-ink-1">
   <link rel="stylesheet" href="/soul.css?v=320">
   <link rel="stylesheet" href="/immortal-artifacts.css?v=2">
+  <link rel="stylesheet" href="/themes/pixel-base.css?v=350">
   <link rel="stylesheet" href="/themes/common.css?v=1.45.0">
   <link rel="stylesheet" href="/themes/composition.css?v=1.45.0">
-  <link rel="stylesheet" href="/themes/a.css?v=1.45.0">
-  <link rel="stylesheet" href="/themes/b.css?v=1.45.0">
-  <link rel="stylesheet" href="/themes/d.css?v=1.45.0">
-  <link rel="stylesheet" href="/themes/f.css?v=1.45.0">
   <link rel="stylesheet" href="/save-transfer.css?v=1.45.0">
   <link rel="stylesheet" href="/doctrine-panel.css?v=251">
   <link rel="stylesheet" href="/tutorial.css?v=ui-tour-1">
   <link rel="stylesheet" href="/npc-contacts.css?v=1.51.1">
   <link rel="stylesheet" href="/asura-court-panel.css?v=1.55.0">
   <link rel="stylesheet" href="/upper-energy.css?v=1.55.0">
-  <link rel="stylesheet" href="/asura-panel.css?v=wuyun-materials1">
+  <link rel="stylesheet" href="/asura-panel.css?v=eightfold1">
   <link rel="stylesheet" href="/monster-body.css?v=standalone1">
   <link rel="stylesheet" href="/meridian-atlas.css?v=2">
   <link rel="stylesheet" href="/local-economy.css?v=1">
@@ -43,7 +40,7 @@
     <header class="brand">
       <div class="seal">道</div>
       <div><p class="eyebrow">CULTIVATION LIFE</p><h1>浮生问道</h1><p>一念为因，百年成果。</p><small id="base-game-version" class="base-game-version">本体版本读取中……</small></div>
-      <button id="theme-open" type="button" class="theme-open" aria-haspopup="dialog">主题 · 松烟书院</button>
+      <button id="theme-open" type="button" class="theme-open" aria-haspopup="dialog">绘景 · 山海图志</button>
       <button id="new-game-button" class="text-button hidden">另启一世</button>
     </header>
 
@@ -493,7 +490,7 @@
         </article>
         <article id="settings-card" class="paper utility-panel settings-panel" role="dialog" aria-modal="false" aria-label="游戏设置">
           <div class="section-title"><div><p class="eyebrow">GAME SETTINGS</p><h2>设置</h2></div><div class="panel-heading"><button id="settings-toggle" type="button">关闭</button></div></div>
-          <section class="settings-appearance"><h3>界面主题</h3><div class="theme-choices" data-theme-picker="settings"></div><label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label><label class="settings-row"><span><b>侧栏悬停显示名称</b><small>电脑侧栏平时仅显示单字，悬停或键盘聚焦时显示全名；关闭后始终显示全名。</small></span><input type="checkbox" data-dock-label-setting></label><label class="settings-row"><span><b>减弱动态效果</b><small>减少星月、山水字幕和翻页动效，不影响游戏进度。</small></span><input type="checkbox" data-motion-setting></label></section>
+          <section class="settings-appearance"><h3>界面主题</h3><div class="theme-choices" data-theme-picker="settings"></div><label class="settings-row"><span><b>侧栏悬停显示名称</b><small>电脑侧栏平时仅显示单字，悬停或键盘聚焦时显示全名；关闭后始终显示全名。</small></span><input type="checkbox" data-dock-label-setting></label><label class="settings-row"><span><b>减弱动态效果</b><small>减少星月、山水字幕和翻页动效，不影响游戏进度。</small></span><input type="checkbox" data-motion-setting></label></section>
           <section class="settings-appearance"><h3>邻域外观</h3><p class="muted">搭配自己的邻域轮廓、意象、配色与控制样式。</p><button type="button" data-voisinage-editor>邻域编辑器</button></section>
           <section class="settings-save-transfer"><h3>存档传承</h3><p class="muted">进度已自动保存。导出当前修行卷，或用存档码恢复另一段旅程。</p><div class="transfer-actions"><button type="button" data-save-export-current>导出当前存档</button><button type="button" data-save-import>导入存档</button></div></section>
           <div class="settings-list">
@@ -600,7 +597,7 @@
     <p class="muted">主题会立即应用并记住选择，可随时切换。</p>
     <div class="theme-choices" data-theme-picker="dialog"></div>
     <label class="settings-row"><span><b>减弱动态效果</b><small>保留静态主题与全部操作，系统的减弱动态设置也会生效。</small></span><input type="checkbox" data-motion-setting></label>
-    <label class="settings-row"><span><b>启用新版界面</b></span><input type="checkbox" data-pixel-setting></label><label class="settings-row"><span><b>侧栏悬停显示名称</b><small>电脑侧栏平时仅显示单字，悬停或键盘聚焦时显示全名；关闭后始终显示全名。</small></span><input type="checkbox" data-dock-label-setting></label>
+    <label class="settings-row"><span><b>侧栏悬停显示名称</b><small>电脑侧栏平时仅显示单字，悬停或键盘聚焦时显示全名；关闭后始终显示全名。</small></span><input type="checkbox" data-dock-label-setting></label>
     <p class="theme-save-status" role="status" aria-live="polite"></p>
   </dialog>
   <dialog id="player-details-dialog" class="appearance-dialog player-details-dialog" aria-labelledby="player-details-title">
@@ -630,12 +627,12 @@
   <script src="/local-economy.js?v=3"></script>
   <script src="/map-directory.js?v=territory-ui2"></script>
   <script src="/upper-energy.js?v=1.55.0"></script>
-  <script src="/theme-manager.js?v=323"></script>
+  <script src="/theme-manager.js?v=350"></script>
   <script src="/desktop-labels.js?v=323"></script>
   <link rel="stylesheet" href="/voisinage-editor.css?v=2">
   <script src="/voisinage-appearance.js?v=1"></script>
   <script src="/voisinage-editor.js?v=fx3"></script>
-  <script src="/theme-composition.js?v=2.1.0"></script>
+  <script src="/theme-composition.js?v=350"></script>
   <script src="/assets/pixel/v1/catalog.js?v=3-alpha-3-static-2"></script>
   <script src="/visual-assets.js?v=monster-418"></script>
   <link rel="stylesheet" href="/divine-light-visuals.css?v=2">
@@ -659,13 +656,13 @@
   <script src="/body-cultivation-ui.js?v=four-paths1"></script>
   <script src="/doctrine-panel.js?v=four-paths1"></script>
   <script src="/immortal-aperture-panel.js?v=2"></script>
-  <script src="/monster-body.js?v=body-balance1"></script>
+  <script src="/monster-body.js?v=feixue-recovery1"></script>
   <script src="/ghost-body.js?v=body-balance1"></script>
   <script src="/upper-voisinage-panel.js?v=monster-body-nav1"></script>
   <script src="/asura-court-panel.js?v=1.58.0-spatial"></script>
   <script src="/puppet-workshop.js?v=1.55.0"></script>
   <script src="/asura-meridians.js?v=1.55.0-atlas"></script>
-  <script src="/asura-panel.js?v=body-balance1"></script>
+  <script src="/asura-panel.js?v=eightfold1"></script>
   <script src="/upper-institution-panel.js?v=1.55.0"></script>
   <script src="/monster-civilizations.js?v=2100"></script>
   <script src="/authored-techniques.js?v=310"></script>
@@ -674,7 +671,7 @@
   <script src="/character-skins.js?v=321a"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>
-  <script src="/handbook-content.js?v=body-balance1"></script>
+  <script src="/handbook-content.js?v=350"></script>
   <script src="/tutorial-steps.js?v=desktop-1"></script>
   <script src="/tutorial-interface.js?v=1"></script>
   <script src="/tutorial.js?v=ui-tour-1"></script>

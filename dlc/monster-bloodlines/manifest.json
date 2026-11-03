@@ -3,11 +3,11 @@
   "api_version": 1,
   "id": "official.monster-bloodlines",
   "name": "万妖归宗：血脉进化",
-  "version": "4.19.0",
+  "version": "4.20.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 100,
   "requires": [],
-  "description": "八源265节点血脉进化；八族143套分境静态形象、139套战斗形象独立装载，返祖、自成血脉与本相铸域沿原入口启停。配套本体3.0.0-alpha.4。",
+  "description": "配套本体3.5.0：八源血脉、本相铸域、妖躯五蜕独修与真实战斗联动。",
   "visual_registry": "visual/registry.json"
 }

@@ -130,8 +130,8 @@
               "growth": 0
             },
             "state_guard": {
-              "base": 0.05,
-              "growth": 0.013
+              "base": 0.075,
+              "growth": 0.016
             }
           },
           "opportunity_multiplier": 1,
@@ -166,7 +166,7 @@
           ],
           "effects": {
             "retaliate_power": {
-              "base": 0.032,
+              "base": 0.017,
               "growth": 0.0025
             },
             "retaliate_control": {
@@ -187,8 +187,12 @@
           "requires": [],
           "effects": {
             "release_cost": {
-              "base": 0.4,
-              "growth": -0.0125
+              "base": 0.25,
+              "growth": -0.01
+            },
+            "release_recovery": {
+              "base": 1,
+              "growth": 0
             }
           },
           "opportunity_multiplier": 4,

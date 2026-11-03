@@ -37,6 +37,19 @@ def power_reroll_quote(state):
                 cost=100 * 2 ** len(locked))
 
 
+def _project_pressure_rule(raw):
+    """Read old generated Asura rules at the correct scale without rewriting saves."""
+    rule = copy.deepcopy(raw)
+    fixes = {'承压增威': ('effect_before_apply', 'target.pressure', 20, .2),
+             '逆势守域': ('contest_prepare', 'self.pressure', 15, .15)}
+    fix = fixes.get(rule.get('name'))
+    if fix:
+        trigger, fact, old, corrected = fix
+        if rule.get('trigger') == trigger and rule.get('when') == {'fact': fact, 'op': 'ge', 'value': old}:
+            rule['when']['value'] = corrected
+    return rule
+
+
 def generate_rule(rng, key, preferred=None):
     templates = config()['semantic_templates']
     index = preferred if preferred is not None and rng.random() < .65 else rng.randrange(len(templates))
@@ -134,7 +147,8 @@ def field_for(player, cap=None):
         kind, 24, .2, max_investment=120, max_targets=3, extra_target_cost=5,
         stability=strength * (1.15 if kind.startswith('restore') else 1),
         incursion=strength * (1.15 if kind == 'strike' else 1), authority=strength,
-        effects=(VoisinageEffect(kind, 24, .2, target='self' if kind.startswith('restore') else 'enemy'),))
+        effects=(VoisinageEffect(kind, 24, .2, target='self' if kind.startswith('restore') else 'enemy'),),
+        restore_threshold=config().get('restore_threshold',1.) if kind.startswith('restore') else 1.)
     from .spirit_inheritance_rules import asura_field
     return asura_field(player, field)
 
@@ -144,12 +158,11 @@ def source(player, cap=None):
         return CapabilitySource()
     s, rules = player.asura_cultivation, []
     field = field_for(player, cap)
-    route = config()['routes'][s['route']]
-    for index, unlock in enumerate((2, 4, 7)):
-        if s['level'] >= unlock:
-            rule = copy.deepcopy(config()['semantic_templates'][(route['preferred'] + index * 4) % len(config()['semantic_templates'])])
-            rule.update(schema_version=3, id=f'base:{index}', source_id=f'asura:{s["route"]}:base:{index}')
-            rules.append(rule)
+    from ..asura_discipline_content import build
+    field_discipline=build(s,config())
+    if (getattr(player,'spirit_state',{}) or {}).get('mode')=='wandering' or (
+            isinstance(getattr(player,'ghost_host_body',None),dict) and isinstance(getattr(player,'ghost_core_state',None),dict)):
+        field_discipline=None
     branch = next((b for b in s['branches'][s['route']] if b['id'] == s.get('branch')), None)
     if branch:
         level = s.get('branch_level', 1)
@@ -159,7 +172,8 @@ def source(player, cap=None):
                 action['value'] = round(action['value'] * (1 + .05 * (level - 1)), 3)
             rules.append(rule)
     rules.extend(s.get('powers', []))
-    return CapabilitySource((field,), {field.attainment: 1}, semantic_rules=tuple(copy.deepcopy(rules)))
+    return CapabilitySource((field,), {field.attainment: 1}, semantic_rules=tuple(_project_pressure_rule(r) for r in rules),
+                            field_discipline=field_discipline)
 
 
 def inherited_power(player):
@@ -234,6 +248,7 @@ def public_body(body):
 
 
 def describe_rule(rule):
+    rule = _project_pressure_rule(rule)
     conditions = {
         'self.body': '自身肉身完整度', 'target.body': '目标肉身完整度',
         'self.energy_ratio': '剩余煞元比例', 'target.pressure': '目标承压',
@@ -247,7 +262,7 @@ def describe_rule(rule):
     c, a = rule['when'], rule['actions'][0]
     value = c['value']
     suffix = '' if isinstance(value, bool) else (
-        f"{value:.0%}" if c['fact'].endswith(('.body', '_ratio')) else str(value))
+        f"{value:.0%}" if c['fact'].endswith(('.body', '_ratio', '.pressure')) else str(value))
     comparison = '' if isinstance(value, bool) else {'lt':'低于', 'le':'不超过', 'ge':'达到'}[c['op']]
     return (f"当{conditions[c['fact']]}{comparison}{suffix}时，"
             f"{effects[a['channel']]}{'提高' if a['value'] > 0 else '降低'} {abs(a['value']):.1%}。")
@@ -271,14 +286,19 @@ def public(game):
     field = field_for(p) if active(p) else None
     from .conversion import quote
     from .wuyun_cultivation import public as public_aggregates,training_reason
+    from ..asura_discipline_content import public as discipline_public,STYLES
+    for rows in exposed.get('branches',{}).values():
+        for i,branch in enumerate(rows):branch['discipline_style']=STYLES[i%3][1]
     return dict(available=True, can_cultivate=active(p), **exposed, conversion_quote=quote(game, asura=True),
         route_name=route.get('name', ''), part=route.get('part', ''),
-        routes=[dict(id=k, **v) for k, v in config()['routes'].items()],
+        routes=[dict(id=k, **v,discipline=config().get('field_disciplines',{}).get(k)) for k, v in config()['routes'].items()],
+        field_discipline=discipline_public(s,config()),
         candidates=bodies, meridians=public_meridians(p),
         body_max_level=config().get('body_max_level',50),aggregates=public_aggregates(game),body_training_reason=training_reason(game),
         body_cost=body_cost(p), power_reroll=power_reroll_quote(s),
         minimum_body_training=config()['minimum_body_training'],
         domain_stats={key:getattr(field,key) for key in ('stability','incursion','authority')} if field else {},
+        domain_restore_threshold=field.restore_threshold if field else 1.,
         domain_label=label(s.get('domain_rank', 1)),
         slots=config()['slots'][max(0, s.get('level', 1) - 1)],
         opened=s.get('veins', {}).get(str(p.realm_index), 0),

@@ -256,8 +256,15 @@ class ContentRegistry:
                 from .buddhist_content import validate_buddhist_content
                 validate_buddhist_content(documents["buddhist_way.json"], documents)
             from .body_mechanism_content import validate_config as validate_body_config,validate_material_sources
+            from .system.combat.trial_difficulty import validate as validate_trial_pressure
+            try:
+                validate_trial_pressure(documents.get('world.json',{}).get('systems',{}))
+            except (ValueError,KeyError,TypeError) as error:
+                raise ContentError(f'高阶劫战参数不合法：{error}') from error
             try:
                 body_config=documents.get('world.json',{}).get('systems',{}).get('asura_manifestation',{})
+                from .asura_discipline_content import validate as validate_field_disciplines
+                validate_field_disciplines(body_config)
                 validate_body_config(body_config)
                 validate_material_sources(body_config,registry.items,registry.market_goods)
                 from .monster_body_content import validate_content as validate_monster_body

@@ -7,7 +7,7 @@ CHANNELS = frozenset({'ward','seal_resist','heal_preserve','heal_bonus','extra',
     'state_guard','evade','retaliate_heal','retaliate_suppress','retaliate_seal','retaliate_power',
     'retaliate_choice','retaliate_spirit','retaliate_field','retaliate_technique','retaliate_artifact',
     'retaliate_support','retaliate_supply','retaliate_voisinage','release_cost','exchange_threshold',
-    'recovery_bonus','split','forget','death_restore','karma_threshold','karma_power','incursion','retaliate_control'})
+    'recovery_bonus','split','forget','death_restore','karma_threshold','karma_power','incursion','retaliate_control','release_recovery'})
 REACTION_KINDS=('heal','spirit','field','suppress','seal','technique','artifact','support','supply','voisinage')
 MAX_EXTRA_ACTIONS = 8
 
@@ -35,7 +35,7 @@ class BodyMechanism:
             upper=8 if k in {'extra','critical_extra'} else len(REACTION_KINDS) if k=='retaliate_choice' else 2 if k in {'ward','critical'} else 1
             if isinstance(v,bool) or not isinstance(v,(int,float)) or not isfinite(v) or not 0<=v<=upper:
                 raise ValueError('Invalid body mechanism output value')
-            if k in {'extra','critical_extra','retaliate_choice'} and int(v)!=v:raise ValueError('Action allowances and choices must be integers')
+            if k in {'extra','critical_extra','retaliate_choice','release_recovery'} and int(v)!=v:raise ValueError('Action allowances and choices must be integers')
         if not isinstance(self.requires,(list,tuple)) or len(self.requires)>8 or any(not isinstance(k,str) for k in self.requires):
             raise ValueError('Invalid mechanism dependencies')
         object.__setattr__(self,'requires',tuple(self.requires))

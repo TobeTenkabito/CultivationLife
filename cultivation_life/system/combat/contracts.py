@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from math import isfinite
 from typing import Any, Mapping, Protocol
 from .body_mechanisms import BodyMechanism, validate_mechanisms
+from .field_contracts import FieldDiscipline,discipline
 
 
 def number(value: Any, name: str, *, minimum: float = 0.0) -> float:
@@ -93,6 +94,7 @@ class VoisinageDefinition:
     authority_reference: float | None = None
     features: tuple[Mapping[str, Any], ...] = ()
     effects: tuple[VoisinageEffect, ...] = ()
+    restore_threshold: float = 1.0
 
     def actions(self) -> tuple[VoisinageEffect, ...]:
         return self.effects or (VoisinageEffect(self.effect, self.effect_cost, self.effect_power),)
@@ -120,6 +122,9 @@ class VoisinageDefinition:
             raise ValueError("Voisinage max_targets must be a positive integer")
         if self.effect_power > 1:
             raise ValueError("Voisinage effect_power must be <= 1")
+        if (isinstance(self.restore_threshold,bool) or not isinstance(self.restore_threshold,(int,float))
+                or not 0<number(self.restore_threshold,'restore_threshold')<=1):
+            raise ValueError('Restoration threshold must be within (0, 1]')
         for key in ("stability", "incursion", "authority"):
             if getattr(self, key) is not None:
                 number(getattr(self, key), key)
@@ -155,6 +160,7 @@ class CapabilitySource:
     divine_lights: Mapping[str, float] = field(default_factory=dict)
     divine_light_levels: Mapping[str, int] = field(default_factory=dict)
     body_mechanisms: tuple[BodyMechanism, ...] = ()
+    field_discipline: FieldDiscipline | None = None
 
 
 def resolve_source(state, definitions, source: CapabilitySource | None = None, **kwargs):
@@ -173,7 +179,8 @@ def resolve_source(state, definitions, source: CapabilitySource | None = None, *
                          interventions=source.interventions or result.interventions,
                          semantic_rules=source.semantic_rules or result.semantic_rules)
         result = replace(result, divine_lights=dict(source.divine_lights),
-                         divine_light_levels=dict(source.divine_light_levels),body_mechanisms=tuple(source.body_mechanisms))
+                         divine_light_levels=dict(source.divine_light_levels),body_mechanisms=tuple(source.body_mechanisms),
+                         field_discipline=source.field_discipline)
     return result
 
 
@@ -208,8 +215,10 @@ class CombatCapabilities:
     divine_lights: Mapping[str, float] = field(default_factory=dict)
     divine_light_levels: Mapping[str, int] = field(default_factory=dict)
     body_mechanisms: tuple[BodyMechanism, ...] = ()
+    field_discipline: FieldDiscipline | None = None
 
     def __post_init__(self) -> None:
+        object.__setattr__(self,'field_discipline',discipline(self.field_discipline))
         object.__setattr__(self,'body_mechanisms',validate_mechanisms(self.body_mechanisms))
         allowed={'kun','kun_resist','zhen','zhen_heal','kan','li','qian'}
         if set(self.divine_lights)-allowed or any(number(v,'divine light')>1 for v in self.divine_lights.values()):
@@ -399,4 +408,5 @@ def resolve_capabilities(
         usable_capacity=capacity * conversion,
         interventions=tuple(state.get('interventions', ())),
         semantic_rules=tuple(state.get('semantic_rules', ())),
+        field_discipline=state.get('field_discipline'),
     )

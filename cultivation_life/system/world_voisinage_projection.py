@@ -4,7 +4,7 @@ from .combat.contracts import VoisinageDefinition, VoisinageEffect
 
 
 def project(definition, rank, cap=None):
-    strength = WORLD_SYSTEMS['upper_voisinages']['strengths'][min(rank, cap or 13) - 1]
+    strength = WORLD_SYSTEMS['upper_voisinages']['strengths'][min(rank, cap or 13) - 1]*definition.get('strength_factor',1.)
     cost = 20 + 4 * rank
     kinds = list(definition['effects'])
     weights = [definition[k] for k in ('stability', 'incursion', 'authority')]

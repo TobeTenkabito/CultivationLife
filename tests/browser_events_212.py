@@ -98,7 +98,7 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser = None if low_memory else pw.chromium.launch()
-                    for theme in (('a',) if low_memory else ('a', 'b', 'd', 'f')):
+                    for theme in (('light',) if low_memory else ('light','dark')):
                         for width, height in ((393, 852), (1440, 960)):
                             if browser is None: browser = pw.chromium.launch(args=['--disable-gpu','--renderer-process-limit=1'])
                             page = browser.new_page(viewport=dict(width=width, height=height),reduced_motion='reduce' if low_memory else 'no-preference')
@@ -110,7 +110,7 @@ def main():
                             page.on('dialog', lambda dialog: dialog.accept())
                             page.goto(f'http://127.0.0.1:{httpd.server_port}')
                             page.wait_for_function('window.GameThemes && configData')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            page.locator(f'[data-theme-picker=start] [data-pixel-theme-choice={theme}]').click()
                             for kind, label in (('master', '截杀师父'), ('companion', '截杀道侣')):
                                 game = engine.store.load(engine.create_game('旧事验收', 'heavenly', 'demonic', 212, preset_id='core')['id'])
                                 player = game.player
@@ -181,7 +181,7 @@ def main():
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Events UI passed: '+('low-memory theme a' if low_memory else 'four themes')+', mobile/desktop, interception, stale-state recovery, rewards and ghost controls')
+    print('Events UI passed: '+('low-memory theme a' if low_memory else 'two pixel palettes')+', mobile/desktop, interception, stale-state recovery, rewards and ghost controls')
 
 
 if __name__ == '__main__':

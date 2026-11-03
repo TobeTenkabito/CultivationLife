@@ -26,7 +26,7 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser=pw.chromium.launch()
-                    for theme,width,height in [('light',1440,1000),('dark',390,844),('f',754,365)]:
+                    for theme,width,height in [('light',1440,1000),('dark',390,844),('light',754,365)]:
                         made=e.create_game('妖躯验收','supreme_metal','monster',111,preset_id='nether_upper',monster_species_id='serpent')
                         g=e._load(made['id']);g.pending_event=None;g.player.body_training=100;g.player.opportunity=10**12;g.player.next_tribulation_age=None
                         g.player.immortal_body['monster']={'level':9}
@@ -36,8 +36,7 @@ def main():
                         page.on('pageerror',lambda error:errors.append(str(error)))
                         base=f'http://127.0.0.1:{http.server_port}';page.goto(base);page.wait_for_function('!!configData&&!busy')
                         page.locator('#theme-open').click();pixel=theme!='f'
-                        page.locator('#theme-dialog [data-pixel-setting]').set_checked(pixel)
-                        page.locator('#theme-dialog '+(f'[data-pixel-theme-choice={theme}]' if pixel else '[data-theme-choice=f]')).click()
+                        page.locator(f'#theme-dialog [data-pixel-theme-choice={theme}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click();page.evaluate('id=>loadGame(id)',g.id)
                         navigation_locator(page,'[data-panel-target=upper-voisinage]').click()
                         assert page.locator('#upper-voisinage-content .monster-body').count()==0
@@ -74,7 +73,11 @@ def main():
                         page.wait_for_function('!busy&&game.upper_voisinages.monster_body.reaction==="seal"')
                         assert e._load(g.id).player.immortal_body['monster']['reaction']=='seal'
                         assert page.locator('.monster-change').count()==5
-                        assert '数值效果4.5%' in page.locator('[data-change=liezang]').inner_text()
+                        effect=next(r['effects']['retaliate_power'] for r in page.evaluate('game.upper_voisinages.monster_body.rows') if r['id']=='liezang')
+                        shown=page.evaluate('n=>Number(n*100).toLocaleString("zh-CN",{maximumFractionDigits:1})',effect)
+                        assert f'数值效果{shown}%' in page.locator('[data-change=liezang]').inner_text()
+                        assert '下一回合调息' in page.locator('[data-change=feixue]').inner_text()
+                        assert '免伤、闪避等被动保留' in page.locator('[data-change=feixue]').inner_text()
                         assert '成功率15%' in page.locator('[data-change=liezang]').inner_text()
                         assert page.locator('[data-body-family=monster] .body-cultivation-stages li').count()==5
                         assert page.locator('[data-body-family=monster] [role=meter]').count()==5

@@ -4,6 +4,9 @@ from .body_mechanisms import REACTION_KINDS
 
 
 class BodyEffects:
+    def _action_paused(self,key):
+        return self.frame.round_no>0 and self.units[key].release_recovery_round==self.frame.round_no
+
     @staticmethod
     def _body_effect_label(effect):
         names={'strike':'杀伤','suppress':'镇压','seal':'封锁','restrict':'禁制','isolate':'隔绝',
@@ -47,6 +50,7 @@ class BodyEffects:
         for key in self._body_round.order:
             if key not in self._dominated:continue
             state=self.units[key];fraction=self._body_round.value(key,'release_cost')
+            if self._action_paused(key):continue
             capacity=self._usable_energy(state);cost=capacity*fraction
             if not fraction or not state.fighting:continue
             if capacity<=0 or state.current<cost:
@@ -57,6 +61,10 @@ class BodyEffects:
             entry=self._body_round.channel(key,'release_cost')
             self._energy(key,state.current-cost,entry[1] if entry else ())
             self.frame.relations[key]['relation']='released'
+            if self._body_round.value(key,'release_recovery'):
+                state.release_recovery_round=self.frame.round_no+1
+                self._light_note('release_recovery_plan',key,
+                    f'{state.unit.name}沸血解控后将在第{state.release_recovery_round}回合调息，暂停普通出手与全部邻域施权；仍支付维持费并保留被动。',round=state.release_recovery_round)
             self._light_note('domination_release',key,
                 f'{state.unit.name}以沸血消耗{cost:g}元力（本场可用容量{fraction:.1%}），解除{self.units[source].unit.name}对自身的支配；本轮不重算邻域对抗，行动资格重新核验。',
                 success=True,cost=cost,source=source)
@@ -74,7 +82,7 @@ class BodyEffects:
             ('成功，此次作用无效，对方已付费用不退。' if success else '未成，继续结算。')+f'（本段闪避概率{result["probability"]:.1%}）',
             source=intent.field.owner,slot=intent.allowance.slot,**result)
         if success:
-            if self._body_round.arm_reaction(key,intent.field.owner,result['chain']):
+            if not self._action_paused(key) and self._body_round.arm_reaction(key,intent.field.owner,result['chain']):
                 self._light_note('reaction_ready',key,f'{state.unit.name}实际闪避成功，兑现一份烈脏免费施权额度；从已解锁功能中择一，因果链禁止同一角色机制重入。',target=intent.field.owner)
         return success
 

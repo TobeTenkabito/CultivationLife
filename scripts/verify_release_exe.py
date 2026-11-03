@@ -42,6 +42,10 @@ def verify(with_dlc):
             else:
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
+            if '--body-ui' in sys.argv:
+                from scripts.verify_body_ui_exe import verify_body_ui
+                verify_body_ui(base,with_dlc,folder)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,body_ui_verified=True)
             if '--immortal' in sys.argv:
                 from scripts.verify_immortal_exe import verify_immortal
                 verify_immortal(base,with_dlc,folder)

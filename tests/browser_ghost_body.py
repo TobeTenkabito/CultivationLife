@@ -27,7 +27,7 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser=pw.chromium.launch()
-                    for theme,width,height in [('light',1440,1000),('dark',390,844),('f',754,365)]:
+                    for theme,width,height in [('light',1440,1000),('dark',390,844),('light',754,365)]:
                         made=e.create_game('鬼躯验收','supreme_metal','ghost',221,preset_id='reincarnation_upper')
                         g=e._load(made['id']);g.pending_event=None;g.player.body_training=100;g.player.opportunity=10**12;g.player.next_tribulation_age=None
                         g.player.immortal_body={'level':9};supply_materials(g,120);e.store.save(g)
@@ -35,8 +35,7 @@ def main():
                         page.on('pageerror',lambda error:errors.append(str(error)))
                         page.goto(f'http://127.0.0.1:{http.server_port}');page.wait_for_function('!!configData&&!busy')
                         page.locator('#theme-open').click();pixel=theme!='f'
-                        page.locator('#theme-dialog [data-pixel-setting]').set_checked(pixel)
-                        page.locator('#theme-dialog '+(f'[data-pixel-theme-choice={theme}]' if pixel else '[data-theme-choice=f]')).click()
+                        page.locator(f'#theme-dialog [data-pixel-theme-choice={theme}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click();page.evaluate('id=>loadGame(id)',g.id)
                         page.wait_for_function('!busy&&!!game?.upper_voisinages?.ghost_body?.available')
                         before=e.store._path(g.id).read_bytes()

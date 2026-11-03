@@ -3,11 +3,11 @@
   "api_version": 1,
   "id": "official.ghost-reincarnation",
   "name": "百鬼夜行：往生轮回",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 110,
   "requires": [],
-  "description": "地狱地域地图迁入本体；魂蚀、魂性、百鬼夜行、往生轮回等专属系统保持独立。 通用物品与功法定义归入本体，保留专属功能和剧情。",
+  "description": "配套本体3.5.0：魂蚀、百鬼夜行、鬼躯五法独修、因果事件与往生轮回。",
   "visual_registry": "visual/registry.json"
 }

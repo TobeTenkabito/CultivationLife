@@ -111,7 +111,7 @@ def test_five_paid_conversion_commands(ready):
         engine.asura_action(game.id, 'convert')
 
 
-@pytest.mark.parametrize('realm,ratios,fields', [(9,[1.],[False]),(10,[1.,.8],[True,False]),(11,[1.5,1.],[True,True])])
+@pytest.mark.parametrize('realm,ratios,fields', [(9,[1.],[False]),(10,[1.,.6],[True,False]),(11,[1.5,1.],[True,True])])
 @pytest.mark.parametrize('rank', [2,8,13])
 def test_copies_power_and_actual_domain_capped_at_eight(ready, realm, ratios, fields, rank):
     engine, game = ready
@@ -129,7 +129,8 @@ def test_copies_power_and_actual_domain_capped_at_eight(ready, realm, ratios, fi
         assert enemy.power == pytest.approx(power * ratio)
         assert bool(enemy.capabilities.voisinages) == field
         if field:
-            assert enemy.capabilities.voisinages[0] == asura.field_for(game.player, cap=8)
+            from cultivation_life.system.combat.trial_difficulty import copied_field
+            assert enemy.capabilities.voisinages[0] == copied_field(asura.field_for(game.player, cap=8),.65 if realm==10 else 1.)
             assert enemy.capabilities.semantic_rules == asura.source(game.player).semantic_rules
     assert game.player.asura_cultivation['domain_rank'] == rank
 

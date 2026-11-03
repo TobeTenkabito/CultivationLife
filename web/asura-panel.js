@@ -106,11 +106,17 @@
         for(const b of s.bodies||[]){const row=el('label',null,'asura-body-choice'),box=el('input');box.type='checkbox';box.checked=selected.has(b.id);box.onchange=()=>{if(box.checked)selected.add(b.id);else selected.delete(b.id);update();};row.append(box,el('span',`${b.name} · 普通炼体 ${b.body_training}/100 · 高阶肉身 ${b.immortal_body_level||0} 层 · 肉身战力 ${fmt(b.power)}`));fusion.append(row);}
         fight.onclick=()=>act({action:'fuse',body_ids:[...selected]});fusion.append(preview,fight,note('融合战双方不可逃跑。须镇压或击杀全部凝练肉身；失败可能身死。只继承肉身炼体战力，不复制其装备与功法。'));update();content.append(fusion);
       }else{
-        const route=section(`${s.route_name}本命 · ${s.part} ${s.level}/9级`,`融合所得永久肉身战力 ${fmt(s.inherited_power)}。本命已经确定。`);route.append(button(`修炼本体 · ${fmt(60*s.level)} 精魂`,'train_route',{},!converted||s.level>=9||s.souls<60*s.level));content.append(route);
+        const route=section(`${s.route_name}本命 · ${s.part} ${s.level}/9级`,`融合所得永久肉身战力 ${fmt(s.inherited_power)}。本命已经确定。`);route.append(button(`修炼本体 · ${fmt(60*s.level)} 精魂`,'train_route',{expected_level:s.level},!converted||s.level>=9||s.souls<60*s.level||!!s.body_training_reason));content.append(route);
+        if(s.field_discipline){
+          const d=s.field_discipline,box=section(d.name,`本命2／4／7级依次解锁，不另消耗培养材料。当前分支倾向：${d.policy_name}。`),grid=el('div',null,'asura-field-abilities');
+          box.dataset.fieldDiscipline=d.id;
+          for(const a of d.abilities){const entry=el('article',null,'asura-field-ability'+(a.unlocked?'':' locked'));entry.dataset.fieldAbility=a.id;entry.append(el('small',`${a.level}级 · ${a.unlocked?'已解锁':'尚未解锁'}`),el('h4',a.name),el('p',a.description));grid.append(entry);}
+          box.append(grid);for(const metric of d.metrics||[])box.append(note(metric));content.append(box);
+        }
         if(!s.branch&&(s.level<5||p.realm_index<10))content.append(note('本体达到5级，并进入非天境后，开放本命分支选择。'));
         else for(const b of s.branches?.[s.route]||[]){
           if(s.branch&&s.branch!==b.id)continue;
-          const branch=section(`${b.name}${s.branch?` · ${s.branch_level}/9级`:''}`);b.descriptions.forEach((desc,i)=>branch.append(el('p',`${[1,4,7][i]}级：${desc}`,'asura-description')));
+          const branch=section(`${b.name}${s.branch?` · ${s.branch_level}/9级`:''}`);branch.append(note(`本命机制倾向：${b.discipline_style||'均衡'}。`));b.descriptions.forEach((desc,i)=>branch.append(el('p',`${[1,4,7][i]}级：${desc}`,'asura-description')));
           branch.append(s.branch?button(`修炼分支 · ${fmt(80*s.branch_level)} 精魂`,'train_branch',{},!converted||s.branch_level>=9||s.souls<80*s.branch_level):button('确定此分支（不可更换）','choose_branch',{target_id:b.id},!converted));content.append(branch);
         }
       }
@@ -119,10 +125,29 @@
       if(!s.route)content.append(note('完成肉身融合、确定本命后获得自己的魔域。'));
       else{
         const domain=section(s.domain_name,`${s.domain_label} · 威能滋养 ${s.domain_power||0}/99`),stats=el('div',null,'asura-quote');for(const [key,label] of [['stability','稳固'],['incursion','侵夺'],['authority','权能']])stats.append(metric(label,fmt(s.domain_stats[key])));domain.append(stats);
+        if(s.domain_restore_threshold<1){
+          const kind=s.routes.find(r=>r.id===s.route)?.effect,threshold=s.domain_restore_threshold;
+          const condition=kind==='restore_body'?`肉身或战斗态势低于${fmt(threshold*100)}%`:kind==='restore_spirit'?`${s.field_discipline?.kind==='echo'?'战斗态势或':''}战意低于${fmt(threshold*100)}%或精神压力超过${fmt((1-threshold)*100)}%`:`领域稳固损耗超过${fmt((1-threshold)*100)}%`;
+          domain.append(note(`自动修复：${condition}时施疗。轻伤时保留普通出手；实际施疗仍占普通出手并支付原费用。`));
+        }
         const rankCost=50*((s.domain_rank||1)+1),powerCost=50*((s.domain_power||0)+1);
         domain.append(button(`提升境界 · ${fmt(rankCost)} 精魂`,'train_domain',{},!converted||s.domain_rank>=13||s.souls<rankCost),button(`滋养威能 · ${fmt(powerCost)} 精魂`,'nourish_domain',{},!converted||s.domain_power>=99||s.souls<powerCost));
         const naming=el('details',null,'asura-details');naming.append(el('summary','为魔域更名'));const input=el('input');input.maxLength=24;input.value=s.domain_name;input.setAttribute('aria-label','魔域名称');const rename=button('保存名称','rename');rename.onclick=()=>act({action:'rename',name:input.value});naming.append(input,rename);domain.append(naming);content.append(domain);
-        const effects=section('当前生效的魔域能力');(s.rule_descriptions||[]).forEach(rule=>effects.append(el('p',rule,'asura-description')));if(!s.rule_descriptions?.length)effects.append(note('本命2级起逐步解锁基础能力。'));content.append(effects);
+        const effects=section('额外分支与神通');(s.rule_descriptions||[]).forEach(rule=>effects.append(el('p',rule,'asura-description')));if(!s.rule_descriptions?.length)effects.append(note('尚未配置额外分支或随机神通；本命权能与预案见下方。'));content.append(effects);
+        if(s.field_discipline){
+          const d=s.field_discipline,plan=section(d.name+' · 战前预案','八部权能与五蕴共同结算，入战后冻结。在进逼预案下，恢复型领域缺少反攻条件时会收拢覆盖，形成天威或听律记录后再进逼。');
+          const label=el('label','八部权能预案','asura-field-plan'),select=el('select');select.setAttribute('aria-label','八部权能预案');select.disabled=blocked||!converted||!!s.body_training_reason;
+          for(const m of d.modes){const o=el('option',m.name+(m.unlocked?'':`（${m.level}级）`));o.value=m.id;o.disabled=!m.unlocked;select.append(o);}select.value=d.mode;
+          select.onchange=()=>act({action:'set_field_plan',target_id:'mode:'+select.value,expected_level:s.level});label.append(select);plan.append(label);
+          if(d.kind==='melody'){
+            const startLabel=el('label','三奏起曲','asura-field-plan'),opening=el('select');opening.setAttribute('aria-label','三奏起曲');opening.disabled=select.disabled||d.level<2;
+            ['稳域曲','削敌曲','归元曲'].forEach((name,i)=>{const o=el('option',name);o.value=String(i);opening.append(o);});opening.value=String(d.opening);
+            opening.onchange=()=>act({action:'set_field_plan',target_id:'opening:'+opening.value,expected_level:s.level});startLabel.append(opening);plan.append(startLabel);
+          }
+          for(const a of d.abilities.filter(a=>a.unlocked))plan.append(el('p',`${a.name}：${a.description}`,'asura-description'));
+          for(const metric of d.metrics||[])plan.append(note(metric));
+          if(s.body_training_reason)plan.append(note(s.body_training_reason));content.append(plan);
+        }
       }
     }
     if(tab==='powers'){

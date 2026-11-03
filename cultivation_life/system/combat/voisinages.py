@@ -6,6 +6,7 @@ Definitions express capabilities, not executable content or callbacks.
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field, replace
 from typing import Any
 
@@ -13,6 +14,9 @@ from .effects import VoisinageEffects
 from .semantics import CombatSemantics
 from .divine_lights import DivineLights
 from .body_events import BodyEvents
+from .field_powers import FieldPowers
+from .field_events import FieldEvents
+from .field_economy import FieldEconomy
 from .contracts import Combatant, VoisinageDefinition, PhaseRound, ResourceSupply, VoisinageSeal, number
 
 
@@ -37,10 +41,14 @@ class UnitState:
     karma_spent: float = 0.
     last_attack_targets: tuple | None = None
     death_observed: bool = False
+    release_recovery_round: int = 0
+    field_memory: dict = field(default_factory=dict)
+    timed_controls: dict = field(default_factory=dict)
+    field_debts: dict = field(default_factory=dict)
 
     @property
     def restrictions(self):
-        return self.controls.keys()
+        return tuple(sorted(set(self.controls)|set(self.timed_controls)))
 
     @property
     def fighting(self) -> bool:
@@ -59,7 +67,7 @@ class Field:
     authority: float | None = None
 
 
-class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvents):
+class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvents, FieldPowers, FieldEvents, FieldEconomy):
     """One battle's upper layer. Ordinary combat remains the damage provider."""
 
     def __init__(self, units: list[Combatant], *, contest_ratio: float = 1.25,
@@ -93,6 +101,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self._light_rng=None;self._responded=set()
         self._body_round=None
         self._init_body_events()
+        self._init_field_powers()
         for state in self.units.values():state.death_observed=state.vitality<=0 or state.body<=0
         self.primary_ordinary_loss = 0.0
         self.primary_ordinary_body_loss = 0.0
@@ -127,6 +136,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             d.strength + d.strength_per_level * max(0, c.attainments.get(d.attainment, 0) - d.required_level), d.id),
             reverse=True)
         for definition in candidates:
+            if self._action_paused(owner.unit.id) and owner.active_voisinage!=definition.id:
+                continue
             features = {row["kind"]: row["value"] for row in definition.features}
             continued = owner.active_voisinage == definition.id
             semantic = self._semantic_preview(owner.unit.id, 'field_prepare', continued=continued)
@@ -145,6 +156,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                 targets = [key for key in preferred if key in self.units
                            and self.units[key].unit.side != owner.unit.side
                            and self.units[key].fighting and self._can_reach(owner, key)]
+                targets=self._field_coverage_targets(owner,definition,targets)
             protects = list(dict.fromkeys(protects))[:definition.max_targets]
             targets = list(dict.fromkeys(targets))[:definition.max_targets]
             opening = definition.opening_cost * opening_factor if not continued else 0.0
@@ -193,7 +205,9 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                 authority *= 1 + investment / max(1.0, definition.max_investment)
                 authority *= 1 + self._body_round.value(owner.unit.id,'authority')
             return Field(owner.unit.id, definition, strength, tuple(protects), tuple(targets), stability, authority)
-        if candidates:
+        if candidates and self._action_paused(owner.unit.id) and owner.active_voisinage is None:
+            self.frame.events.append(f"{owner.unit.name}沸血调息中，本回合不能新展开邻域。")
+        elif candidates:
             self.frame.events.append(f"{owner.unit.name}仙灵力不足，无法展开或维持仙域。")
         owner.active_voisinage = None
         return None
@@ -213,6 +227,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                 ratio=player_mp if state.unit.side=='player' else enemy_mp
                 state.current=min(state.current,max(0.,ratio)*state.unit.capabilities.capacity)
         self._begin_lights(rng,first_side)
+        self._begin_field_powers()
         self._swap_body_energy()
         self._semantic_begin(round_no, player_mp, enemy_mp, player_morale, enemy_morale)
         # Scripted interventions happen before maintenance, coverage or effects.
@@ -248,12 +263,20 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             if gained:
                 self.frame.events.append(f"{owner.unit.name}获得明确仙力供给 {gained:g}。")
         # All affordable fields are established before any domination effects.
+        held_fields={key for key,s in self.units.items() if 'voisinage' in s.timed_controls}
         for key in self._unit_order():
             state=self.units[key]
             field = self._field(state, state.vitality)
             if field:
                 self.fields.append(field)
-        for key, state in self.units.items():
+        self._expire_field_controls(live=True)
+        for key in self._unit_order():
+            state=self.units[key]
+            if key in held_fields and 'voisinage' not in state.restrictions and state.active_voisinage is None:
+                field=self._field(state,state.vitality)
+                if field:self.fields.append(field)
+        for key in self._unit_order():
+            state=self.units[key]
             attackers = [f for f in self.fields if key in f.targets]
             defenders = [f for f in self.fields if key in f.protects]
             attack = max(attackers, key=lambda f: (f.strength, f.owner), default=None)
@@ -335,18 +358,18 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self._execute_field_actions(previous)
         self.animation['after'] = [max(0., 1 - self.ordinary_loss(side)) for side in ('player', 'enemy')]
         for side in ('player', 'enemy'):
-            members = [s for s in self.units.values() if s.unit.side == side]
+            members = [self.units[key] for key in sorted(self.units) if self.units[key].unit.side == side]
             # Lingering disruption survives loss of the field, within this battle.
             factor = sum(s.unit.power * (0 if s.unit.id in self._dominated else 1 - s.pressure)
                          for s in members) / self.totals[side]
             self.frame.stat_factors[side] = {'sense': factor, 'mobility': factor}
         self.frame.ordinary_player = self._has_ordinary("player")
         self.frame.ordinary_enemy = self._has_ordinary("enemy")
-        self.frame.blocked_actions = {key: tuple(s.restrictions) for key, s in self.units.items() if s.controls}
+        self.frame.blocked_actions = {key: tuple(s.restrictions) for key, s in self.units.items() if s.restrictions}
         return self.frame
 
     def _available(self, key: str) -> bool:
-        return (self.units[key].fighting and key not in self._dominated and key not in self._ordinary_acted
+        return (self.units[key].fighting and not self._action_paused(key) and key not in self._dominated and key not in self._ordinary_acted
                 and "ordinary" not in self.units[key].restrictions)
 
     def _has_ordinary(self, side: str) -> bool:
@@ -381,11 +404,13 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         amounts: dict[str, float] = {}
         primary_body_before=self.units['player'].body if 'player' in self.units else 0.
         body_amounts: dict[str,float] = {}
+        body_hit_weights = {}
         semantic_hits, semantic_caps = [], {}
         attack_targets={}
         # Reserve both sides' attack resources before resolving either side's wards.
         tiers: dict[str, int] = {}
         ordinary_sides = {side: self._has_ordinary(side) for side in ("player", "enemy")}
+        attempted={key for key,s in self.units.items() if self._available(key) and ordinary_sides[s.unit.side]}
         for key in self._unit_order():
             state=self.units[key]
             if not self._available(key) or not ordinary_sides[state.unit.side]:
@@ -425,6 +450,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                         self._semantic_commit(outgoing, {'ordinary.dealt'})
                         self._semantic_commit(incoming, {'ordinary.received', 'ordinary.received_cap'})
                     body_amounts[target_key]=body_amounts.get(target_key,0.)+amount
+                    body_hit_weights[key,target_key]=amount
                     if tier>=2:amount=self._guard_state(target_key,amount)
                     semantic_hits.append((key,target_key,amount))
                     amounts[target_key] = amounts.get(target_key, 0.0) + amount
@@ -456,7 +482,11 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         for source in sorted(attack_targets):
             hits=[(target,actual_losses[target]*amount/max(1e-12,amounts[target]))
                   for s,target,amount in semantic_hits if s==source]
+            body_hits={target:actual_body_losses[target]*amount/max(1e-12,body_amounts[target])
+                       for (origin,target),amount in body_hit_weights.items() if origin==source}
             self._queue_forget(source,attack_targets[source],dict(hits),())
+            self._field_ordinary_hits(source,dict(hits),body_hits)
+        self._field_attempted_ordinary(attempted)
         self._drain_body_events()
         self._execute_field_actions(dict(self._dominated))
         self.primary_ordinary_body_loss=(primary_body_before-self.units['player'].body if 'player' in self.units else 0.)
@@ -490,6 +520,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self._semantic_end()
         self._drain_body_events()
         self._execute_field_actions(dict(self._dominated))
+        self._finish_field_powers()
         self._refresh_relations()
 
     def _refresh_relations(self):
@@ -497,6 +528,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self.fields = [f for f in self.fields if self.units[f.owner].fighting
                        and f.owner not in self._disrupted]
         live = {f.owner for f in self.fields}
+        self._expire_field_controls(live=True)
         for key, state in self.units.items():
             state.controls = {kind: owner for kind, owner in state.controls.items()
                               if owner in live and owner not in self._light_muted and key not in self._released}
@@ -514,8 +546,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                 relation['defense_strength'] = 0
 
     def ordinary_loss(self, side: str) -> float:
-        return 1.0 - sum(s.unit.power * s.vitality for s in self.units.values()
-                         if s.unit.side == side) / self.totals[side]
+        return 1.0 - sum(self.units[key].unit.power * self.units[key].vitality for key in sorted(self.units)
+                         if self.units[key].unit.side == side) / self.totals[side]
 
     def restore_ordinary(self, side: str, amount: float) -> None:
         """Apply conventional recovery only to survivors, never resurrect a captive."""
@@ -565,7 +597,14 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             **({'animation': self.animation} if self.animation and self.animation.get('fields') else {}),
             **({'semantics': self.semantic_report()} if self.semantics is not None else {}),
             "relations": self.frame.relations,
-            "restrictions": {k: list(s.restrictions) for k, s in self.units.items() if s.controls},
+            "release_recovery": {k:s.release_recovery_round for k,s in self.units.items() if self._action_paused(k)},
+            "restrictions": {k: list(s.restrictions) for k, s in self.units.items() if s.restrictions},
+            **({'field_powers':{k:dict(discipline=s.unit.capabilities.field_discipline.id,
+                    level=s.unit.capabilities.field_discipline.level,memory=copy.deepcopy(s.field_memory))
+                    for k,s in self.units.items() if s.unit.capabilities.field_discipline},
+                'timed_controls':{k:dict(s.timed_controls) for k,s in self.units.items() if s.timed_controls},
+                'field_debts':{k:dict(s.field_debts) for k,s in self.units.items() if s.field_debts}}
+               if any(s.unit.capabilities.field_discipline for s in self.units.values()) else {}),
             "morale": {k: s.morale for k, s in self.units.items()},
             "pressure": {key: s.pressure for key, s in self.units.items() if s.pressure},
             "stat_factors": self.frame.stat_factors,

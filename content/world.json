@@ -6812,9 +6812,9 @@
               "id": "nether:nine_abyss",
               "name": "九幽镇域",
               "description": "镇锁幽途，封锁退路，以幽冥之力杀伤受制之敌。",
-              "stability": 1.05,
-              "incursion": 1.05,
-              "authority": 1,
+              "stability": 1.1,
+              "incursion": 1.2,
+              "authority": 1.1,
               "effects": [
                 "strike",
                 "seal"
@@ -6822,15 +6822,17 @@
               "feature": {
                 "kind": "frugal",
                 "value": 0.1
-              }
+              },
+              "strength_factor": 1.15,
+              "upkeep_factor": 0.9
             },
             {
               "id": "nether:yellow_spring",
               "name": "黄泉回生域",
               "description": "黄泉生机修复肉身，兼有杀伤，适合长久交锋。",
               "stability": 1.25,
-              "incursion": 0.85,
-              "authority": 1,
+              "incursion": 1.15,
+              "authority": 1.05,
               "effects": [
                 "strike",
                 "restore_body"
@@ -6838,7 +6840,9 @@
               "feature": {
                 "kind": "fortify",
                 "value": 0.08
-              }
+              },
+              "strength_factor": 1.15,
+              "upkeep_factor": 0.9
             }
           ]
         },

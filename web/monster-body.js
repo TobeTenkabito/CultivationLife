@@ -25,6 +25,7 @@
       const card=el('section',null,'doctrine-entry monster-change');card.dataset.change=row.id;card.append(el('h3',`${row.name} · ${row.unlocked?`${row.level}/10重`:`妖躯${row.unlock_level}层解锁`}`));
       const e=row.effects;const text={xuanfu:`免疫凡伤，仙级攻击的战斗态势削减降低${pct(e.state_guard)}；肉身损伤另计。`,nigu:`自身邻域存在时，每段敌方主动施权有${pct(e.evade)}概率闪避，在该段实际作用时判定。`,liezang:'实际闪避后免费施权一次。初始治疗，培养逐渐开放心神、稳固、镇压、封锁及禁制；每次择一，不同机制可联动，同一角色机制不得沿因果链重入。',feixue:`被支配后消耗本场可用容量的${pct(e.release_cost)}元力解除支配，本轮不重算对抗。`,shenhun:`每场一次，轮首元力比例低于${pct(e.exchange_threshold)}且低于对手时交换比例，按各自可用容量回写。`}[row.id];
       card.append(el('p',row.unlocked?text:'达到解锁层数后可独立培养。'));
+      if(row.unlocked&&row.id==='feixue'&&e.release_recovery)card.append(el('p','解除当回合仍可行动，下一回合调息：暂停普通出手、邻域基础、追加与反击施权，不能再次发动沸血。已展开领域照常维持付费，免伤、闪避等被动保留。'));
       if(row.unlocked&&row.id==='liezang')card.append(el('p',`数值效果${pct(e.retaliate_power)}；封锁与禁制类反击成功率${pct(e.retaliate_control??1)}，仍须通过目标抵抗。`));
       materials(card,row.materials);
       window.BodyCultivationUI.card(card,{index,name:row.name,level:row.level,unlocked:row.unlocked,unlockLevel:row.unlock_level});

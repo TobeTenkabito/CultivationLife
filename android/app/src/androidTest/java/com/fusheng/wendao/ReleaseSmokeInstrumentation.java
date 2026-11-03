@@ -278,6 +278,39 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         if(Boolean.TRUE.equals(js("!document.querySelector("+JSONObject.quote(selector)+").open"))) tapSelector(selector+" > summary");
     }
 
+    private void runBodyUi(Bundle result) throws Exception {
+        check(Boolean.TRUE.equals(js("document.documentElement.dataset.visual==='pixel' && document.querySelectorAll('[data-pixel-setting],[data-theme-choice]').length===0 && document.querySelectorAll('[data-theme-picker=start] [data-pixel-theme-choice]').length===2")),"Only two new palettes may be offered");
+        check(((Number)async("fetch('/api/ui-preferences',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pixel_art:false})}).then(r=>r.status)")).intValue()==400,"Retired UI cannot be enabled through API");
+        String[] families={"dao","demonic","monster","ghost"};
+        String[] presets={"true_immortal","asura_upper","nether_upper","reincarnation_upper"};
+        String[] panels={"golden-light","asura-body","monster-body","ghost-body"};
+        String[] buttons={"[data-divine-light-train=kun]","[data-aggregate=se]","[data-monster-change=xuanfu]","[data-ghost-refine=wuxiang]"};
+        String[] levels={"game.golden_light.lights[0].level","game.asura.aggregates[0].level","game.upper_voisinages.monster_body.rows[0].level","game.upper_voisinages.ghost_body.rows[0].level"};
+        for(int i=0;i<families.length;i++) {
+            String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'原生炼体验收',spirit_root:'supreme_metal',path:"+JSONObject.quote(families[i])+",preset_id:"+JSONObject.quote(presets[i])+",monster_species_id:'serpent',seed:350})});return g.id})()");
+            python("from cultivation_life import server\nexec("+JSONObject.quote(assetText("body_ui_release.py"))+")\nprepare_body_ui(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");
+            for(String palette:new String[]{"light","dark"}) {
+                tapSelector("#theme-open");tapSelector("#theme-dialog [data-pixel-theme-choice="+palette+"]");
+                async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+                check(Boolean.TRUE.equals(js("document.documentElement.dataset.visual==='pixel' && document.documentElement.dataset.pixelTheme==="+JSONObject.quote(palette))),"Native palette selection");
+                tapSelector("[data-panel-target="+panels[i]+"]");
+                check(Boolean.TRUE.equals(js("document.querySelector('#"+panels[i]+"-card').scrollWidth<=document.querySelector('#"+panels[i]+"-card').clientWidth+2")),"Native body layout "+families[i]);
+                if(palette.equals("light")) {
+                    tapSelector(buttons[i]);waitForJs("!busy&&"+levels[i]+"===2","Actual paid body training "+families[i]);
+                }
+                capture("body-ui-"+families[i]+"-"+palette);tapSelector("#"+panels[i]+"-toggle");
+            }
+            tapSelector("#battle-report-open");
+            waitForJs("document.querySelectorAll('#battle-round-list section').length>0","Native combat report");
+            revealSubpage("#battle-round-list");
+            if(!Boolean.TRUE.equals(js("document.querySelector('.battle-round-details').open")))tapSelector(".battle-round-details>summary");
+            check(Boolean.TRUE.equals(js("document.querySelector('#battle-round-list').innerText.length>0")),"Body combat text");
+            tapSelector("#battle-report-toggle");
+        }
+        result.putString("body_ui_scope","Two immutable pixel palettes, no retired controls, real paid four-family cultivation, materials and combat report; signed native touches");
+    }
+
     private void python(String code) {
         com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",code,
             com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("dict"));
@@ -1206,7 +1239,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("immortal")) {
+            if(phase.equals("body-ui")) {
+                runBodyUi(result);
+            } else if(phase.equals("immortal")) {
                 runImmortal(result);
             } else if(phase.equals("heavens")) {
                 runHeavens(result);
@@ -3033,7 +3068,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 capture("release-action");
             }
             result.putString("status","passed");result.putString("phase",phase);
-            result.putString("scope",BuildConfig.DEBUG ? "Debug test APK, Android 12, isolated developer verification" : "Signed release APK, Android 12, offline upgrade preservation and four themes");
+            result.putString("scope",BuildConfig.DEBUG ? "Debug test APK, Android 12, isolated developer verification" : phase.equals("body-ui") ? "Signed release APK, Android 12, only two pixel palettes and four-body cultivation" : "Signed release APK, Android 12, legacy phase acceptance");
             if(dlcPreferences!=null){if(previousDlcPreferences!=null)java.nio.file.Files.write(dlcPreferences.toPath(),previousDlcPreferences);else java.nio.file.Files.deleteIfExists(dlcPreferences.toPath());}
             finish(Activity.RESULT_OK,result);
         } catch(Throwable failure) {

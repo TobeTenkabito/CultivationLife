@@ -91,7 +91,7 @@
           "when": {
             "fact": "target.pressure",
             "op": "ge",
-            "value": 20
+            "value": 0.2
           },
           "actions": [
             {
@@ -155,7 +155,7 @@
           "when": {
             "fact": "self.pressure",
             "op": "ge",
-            "value": 15
+            "value": 0.15
           },
           "actions": [
             {
@@ -412,7 +412,7 @@
               "growth": 0.04
             },
             "incursion": {
-              "base": 0.3,
+              "base": 0.25,
               "growth": 0.02
             }
           },
@@ -531,7 +531,305 @@
             "asura_awareness_soul_crystal": 12
           }
         }
-      ]
+      ],
+      "breakthrough_trials": {
+        "10": {
+          "enemy_ratios": [
+            1.0,
+            0.6
+          ],
+          "field_copy_scale": 0.65
+        }
+      },
+      "restore_threshold": 0.85,
+      "field_disciplines": {
+        "deva": {
+          "name": "天相·生息天罚",
+          "kind": "restoration_charge",
+          "abilities": [
+            {
+              "id": "grow",
+              "name": "生息",
+              "level": 2,
+              "description": "真实肉身治疗与态势恢复取较大值积累天威；普通攻击实际命中后可消费天威形成一段仙伤，满血空疗不积累。"
+            },
+            {
+              "id": "guard",
+              "name": "护世",
+              "level": 4,
+              "description": "本次治疗可改为本域护持范围内的一位友方，仍只占原领域额度，治疗照常占普通出手。"
+            },
+            {
+              "id": "judge",
+              "name": "天罚",
+              "level": 7,
+              "description": "天威足额时，可将本次施权改为消费天威的仙级杀伤；本次不同时治疗。"
+            }
+          ],
+          "parameters": {},
+          "branch_modifiers": [
+            {},
+            {
+              "threshold": -0.025,
+              "release": 0.04,
+              "gain": -0.1
+            },
+            {
+              "capacity": 0.12,
+              "gain": 0.1,
+              "ordinary": -0.015
+            }
+          ]
+        },
+        "naga": {
+          "name": "龙躯·潮缚决堤",
+          "kind": "pressure_bond",
+          "abilities": [
+            {
+              "id": "bind",
+              "name": "潮缚",
+              "level": 2,
+              "description": "实际镇压命中增加目标原承压，受暴击与逐段继承影响，承压上限仍为85%。"
+            },
+            {
+              "id": "tithe",
+              "name": "索元",
+              "level": 4,
+              "description": "潮缚为目标留下限期束缚，下一次付费施权需额外耗元；不足则本次失败，束缚消费，不部分扣费。"
+            },
+            {
+              "id": "burst",
+              "name": "决堤",
+              "level": 7,
+              "description": "可消费合法目标的一部分现有承压，换成一次仙级杀伤；消耗压力后压制也随之减少。"
+            }
+          ],
+          "parameters": {},
+          "branch_modifiers": [
+            {},
+            {
+              "consume": 0.08,
+              "bonus": 0.1,
+              "pressure": -0.025
+            },
+            {
+              "pressure": 0.025,
+              "surcharge": 0.08,
+              "bonus": -0.08
+            }
+          ]
+        },
+        "yaksha": {
+          "name": "夜叉·猎首追命",
+          "kind": "hunter",
+          "abilities": [
+            {
+              "id": "hunt",
+              "name": "猎首",
+              "level": 2,
+              "description": "锁定一个合法领域目标集中杀伤；标记绑定本场人物，不能追击场外目标。"
+            },
+            {
+              "id": "ambush",
+              "name": "追命",
+              "level": 4,
+              "description": "可留下一份已有领域额度，猎物真实回复后才重新核验并付费追击；没等到回复则本轮过期。"
+            },
+            {
+              "id": "feed",
+              "name": "食煞",
+              "level": 7,
+              "description": "猎物在本场真实阵亡后回复有限元力，下次正常施权可换猎物；镇压、逃离不算死亡。"
+            }
+          ],
+          "parameters": {},
+          "branch_modifiers": [
+            {},
+            {
+              "restore": -0.03
+            },
+            {
+              "restore": 0.04
+            }
+          ]
+        },
+        "gandharva": {
+          "name": "香音·听律断弦",
+          "kind": "echo",
+          "abilities": [
+            {
+              "id": "listen",
+              "name": "听律",
+              "level": 2,
+              "description": "记录同场可触及敌人实际生效的出手类别，最多一份；净心也会响应自身战斗态势缺口。"
+            },
+            {
+              "id": "echo",
+              "name": "反调",
+              "level": 4,
+              "description": "消费记录，用自身领域威能付费施展对应反制或同类自疗；不复制敌人数值、资格、五蕴与额外行动。"
+            },
+            {
+              "id": "rupture",
+              "name": "断弦",
+              "level": 7,
+              "description": "可将任一有效记录消费为一次仙级杀伤，不必等待敌人使用进攻类别。"
+            }
+          ],
+          "parameters": {},
+          "branch_modifiers": [
+            {},
+            {
+              "rupture": 0.03,
+              "scale": -0.1
+            },
+            {
+              "scale": 0.1,
+              "rupture": -0.025
+            }
+          ]
+        },
+        "mahoraga": {
+          "name": "巨蟒·禁印闭域",
+          "kind": "interdict",
+          "abilities": [
+            {
+              "id": "seal",
+              "name": "缄言",
+              "level": 2,
+              "description": "原封锁实际命中后留下有期限的禁印；未命中不积累。"
+            },
+            {
+              "id": "lock",
+              "name": "锁术",
+              "level": 4,
+              "description": "消费禁印，择一短封功法或法宝；目标下次普通尝试后或期限到达即解除，有刷新间隔。"
+            },
+            {
+              "id": "close",
+              "name": "闭域",
+              "level": 7,
+              "description": "增加短封邻域选项，与封功、封器互斥；仍须通过原抵抗，不会无限延长。"
+            }
+          ],
+          "parameters": {},
+          "branch_modifiers": [
+            {},
+            {},
+            {}
+          ]
+        },
+        "kinnara": {
+          "name": "合鸣·三奏转调",
+          "kind": "melody",
+          "abilities": [
+            {
+              "id": "cycle",
+              "name": "三奏",
+              "level": 2,
+              "description": "依序稳域、削敌态势、回复己方态势，每次只奏一种；每轮至多推进一个曲位，无收益可放弃基础额度换曲。"
+            },
+            {
+              "id": "shift",
+              "name": "转调",
+              "level": 4,
+              "description": "施权前可付额外元力跳过曲位，保留本轮施权；放弃此前未完成的合鸣进度。"
+            },
+            {
+              "id": "chorus",
+              "name": "合鸣",
+              "level": 7,
+              "description": "实际完成三个不同曲位后，下次可施展同效果群奏；消费资格，不增加行动，仍受真实覆盖限制。"
+            }
+          ],
+          "parameters": {},
+          "branch_modifiers": [
+            {},
+            {
+              "power": 0.025,
+              "switch_cost": 3.0
+            },
+            {
+              "power": -0.015,
+              "switch_cost": -4.0
+            }
+          ]
+        },
+        "garuda": {
+          "name": "双翼·掠界摧巢",
+          "kind": "field_breaker",
+          "abilities": [
+            {
+              "id": "strain",
+              "name": "掠界",
+              "level": 2,
+              "description": "可将部分实际杀伤换为敌域稳固损耗；继续使用原稳固尺度，不新增领域HP。"
+            },
+            {
+              "id": "break",
+              "name": "断域",
+              "level": 4,
+              "description": "敌域稳固损耗达到门槛后，用一次施权尝试短封邻域，替代当次杀伤；有抵抗、期限和刷新间隔。"
+            },
+            {
+              "id": "pursue",
+              "name": "摧巢",
+              "level": 7,
+              "description": "被自己断域的目标确实无法维持领域时，可用一份剩余原额度杀伤，凭据只消费一次，不免费追加。"
+            }
+          ],
+          "parameters": {},
+          "branch_modifiers": [
+            {},
+            {
+              "fraction": -0.12,
+              "threshold": 0.025
+            },
+            {
+              "fraction": 0.12,
+              "threshold": -0.025
+            }
+          ]
+        },
+        "asura": {
+          "name": "修罗·歃血六臂",
+          "kind": "blood",
+          "abilities": [
+            {
+              "id": "blood",
+              "name": "歃血",
+              "level": 2,
+              "description": "用真实肉身代付一次施权元力费，按实际费用折算；不免维持、覆盖，已免费的费用不能再刷血祭。"
+            },
+            {
+              "id": "arms",
+              "name": "六臂",
+              "level": 4,
+              "description": "每轮首次实际完成血祭施权后取得一份额外领域额度，仍须付费；本部派生不能再次触发六臂。"
+            },
+            {
+              "id": "annihilate",
+              "name": "俱灭",
+              "level": 7,
+              "description": "额外支付不可减免的真实肉身费用，将一次杀伤改为合法范围全体攻击；仍只算一次施权，不能自祭致死。"
+            }
+          ],
+          "parameters": {},
+          "branch_modifiers": [
+            {},
+            {
+              "body_cost": 0.007,
+              "aoe_scale": 0.1,
+              "auto_health": -0.05
+            },
+            {
+              "body_cost": -0.008,
+              "auto_health": 0.1,
+              "aoe_scale": -0.08
+            }
+          ]
+        }
+      }
     }
   }
 }

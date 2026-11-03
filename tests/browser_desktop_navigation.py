@@ -34,13 +34,13 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser = pw.chromium.launch()
-                    for theme in 'abdf':
+                    for theme in ('light','dark'):
                         page = browser.new_page(viewport=dict(width=1440, height=960))
                         errors = []
                         page.on('pageerror', lambda e: errors.append(str(e)))
                         page.goto(f'http://127.0.0.1:{http.server_port}')
                         page.wait_for_function('!!configData && !busy')
-                        page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                        page.locator(f'[data-theme-picker=start] [data-pixel-theme-choice={theme}]').click()
                         page.evaluate('async id=>loadGame(id)', identity)
                         before = engine.store._path(identity).read_bytes()
                         page.evaluate('window.originalMapButton=document.querySelector("[data-panel-target=map]")')
@@ -85,7 +85,7 @@ def main():
                             assert page.locator('[data-panel-target=map]').count() == 1
                         page.evaluate('GameNavigation.saved')
                         assert engine.store._path(identity).read_bytes() == before
-                        if theme == 'a':
+                        if theme == 'light':
                             # Hold an actual clicked action request while resizing the window.
                             held = []
                             page.route('**/advance', lambda route: held.append(route))
@@ -135,7 +135,7 @@ def main():
                 http.shutdown()
                 http.server_close()
     (output / 'report.json').write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding='utf-8')
-    print('Desktop navigation passed: four themes, three desktop sizes, repeated responsive relocation, node identity, direct map/inventory/settings clicks, Escape, unchanged saves and three Android/touch layouts')
+    print('Desktop navigation passed: two pixel palettes, three desktop sizes, repeated responsive relocation, node identity, direct map/inventory/settings clicks, Escape, unchanged saves and three Android/touch layouts')
 
 
 if __name__ == '__main__':

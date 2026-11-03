@@ -8,8 +8,8 @@ import re
 from pathlib import Path
 from threading import RLock
 
-THEMES = frozenset("abdf")
-DEFAULTS = {"theme": "a", "reduced_motion": False, "pixel_art": False,
+THEMES = frozenset({"a"})  # Fixed shared layout; only pixel_theme is selectable.
+DEFAULTS = {"theme": "a", "reduced_motion": False, "pixel_art": True,
             "pixel_theme": "light", "compact_docks": True}
 _LOCK = RLock()
 
@@ -59,9 +59,9 @@ def load_ui_preferences(root: Path) -> dict:
         if not isinstance(data, dict):
             return dict(DEFAULTS)
         result = {
-            "theme": ({"c": "a", "e": "f"}.get(data["theme"], data["theme"])) if isinstance(data.get("theme"), str) and data["theme"] in THEMES | {"c", "e"} else "a",
+            "theme": "a",
             "reduced_motion": data.get("reduced_motion") if isinstance(data.get("reduced_motion"), bool) else False,
-            "pixel_art": data.get("pixel_art") is True,
+            "pixel_art": True,
             "pixel_theme": 'dark' if data.get('pixel_theme') == 'dark' else 'light',
             "compact_docks": data.get('compact_docks') is not False,
         }
@@ -82,11 +82,11 @@ def write_ui_preferences(root: Path, payload: dict, *, character_path=None) -> d
     if not isinstance(payload, dict) or not payload or set(payload) - (DEFAULTS.keys() | {'navigation', 'voisinage_appearance'}):
         raise ValueError("界面偏好字段无效")
     if "theme" in payload and (not isinstance(payload["theme"], str) or payload["theme"] not in THEMES):
-        raise ValueError("请选择松烟书院、月下观星、丹砂金阙或竹简纪年")
+        raise ValueError("旧文字主题已停用，请选择山海图志或沧海夜色")
     if "reduced_motion" in payload and not isinstance(payload["reduced_motion"], bool):
         raise ValueError("减弱动态效果必须为布尔值")
-    if "pixel_art" in payload and not isinstance(payload["pixel_art"], bool):
-        raise ValueError("像素绘景必须为布尔值")
+    if "pixel_art" in payload and payload["pixel_art"] is not True:
+        raise ValueError("新版界面为唯一界面，不能关闭")
     if 'pixel_theme' in payload and payload['pixel_theme'] not in ('light', 'dark'):
         raise ValueError('新版界面仅支持浅色和暗色主题')
     if 'compact_docks' in payload and not isinstance(payload['compact_docks'], bool):

@@ -37,6 +37,10 @@ class DivineLights(BodyEffects):
         side=first_side or ('player' if self.totals['player']>=self.totals['enemy'] else 'enemy')
         if side not in {'player','enemy'}:raise ValueError('Invalid body-mechanism initiative')
         self._body_round=BodyRound(self.units,rng,side)
+        for key in self._body_round.order:
+            if self._action_paused(key):
+                self._light_note('release_recovery',key,
+                    f'{self.units[key].unit.name}因上回合沸血解控而调息，本回合不能普通出手、施权或反击，也不能再次发动沸血；领域维持与被动照常。',round=self.frame.round_no)
         self._light_muted=self._body_round.muted
         for key,records in self._body_round.records.items():
             if records:
@@ -44,7 +48,8 @@ class DivineLights(BodyEffects):
                 self._light_note('body_rolls',key,f'{self.units[key].unit.name}轮首统一判定，原始触发：{triggered}；此清单在静默裁决后保留。')
         if self.frame.round_no==1:
             names={'kun':'坤元缃光','zhen':'震合缥光','kan':'坎道玄光','li':'离上朱光','qian':'乾古素光'}
-            for key,state in self.units.items():
+            for key in self._unit_order():
+                state=self.units[key]
                 caps=state.unit.capabilities;rows=[]
                 for light,name in names.items():
                     if not caps.divine_lights.get(light):continue
@@ -58,7 +63,7 @@ class DivineLights(BodyEffects):
                         if 'incursion' in e:return f'免疫凡伤，邻域威能提高{e.get("authority",0):.1%}、侵夺提高{e["incursion"]:.1%}'
                         if 'evade' in e:return f'逐次闪避概率{e["evade"]:.1%}'
                         if 'state_guard' in e:return f'免疫凡伤，仙级态势减伤{e["state_guard"]:.1%}'
-                        if 'release_cost' in e:return f'解除支配消耗可用容量{e["release_cost"]:.1%}'
+                        if 'release_cost' in e:return f'解除支配消耗可用容量{e["release_cost"]:.1%}'+('，下一回合调息，暂停普通出手与全部邻域施权' if e.get('release_recovery') else '')
                         if 'exchange_threshold' in e:return f'元力比例低于{e["exchange_threshold"]:.1%}且低于对手时交换，本场一次'
                         if 'retaliate_power' in e:return f'闪避后免费择一，数值效果{e["retaliate_power"]:.1%}，控制成功率{e.get("retaliate_control",1):.1%}'
                         if 'recovery_bonus' in e:return f'免疫凡伤，态势与邻域回复效率提高{e["recovery_bonus"]:.1%}'

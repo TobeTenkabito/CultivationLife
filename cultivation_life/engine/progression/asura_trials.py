@@ -6,6 +6,7 @@ from ...content_registry import WORLD_SYSTEMS
 from ...rules import combat_power, max_hp, max_mp, public_player
 from ...system import asura
 from ...system.combat.trials import dump_battle, load_battle, run_batch
+from ...system.combat.trial_difficulty import stage as trial_pressure,copied_field
 from ...system.combat.voisinages import VoisinageBattle
 from ...system.combat_system import BattleUnit, PlayerCombatSystem
 from ...system.immortal_aperture import commit_energy, ensure_aperture
@@ -44,6 +45,11 @@ def initialize(game):
         10: [('心魔', 1., True), ('域外天魔', .8, False)],
         11: [('心魔', 1.5, True), ('域外天魔', 1., True)],
     }[p.realm_index]
+    copy_cap,copy_scale=8,1.
+    if not fusion:
+        ratios,copy_cap,copy_scale=trial_pressure(asura.config().get('breakthrough_trials',{}),p.realm_index,
+                                               tuple(ratio for _,ratio,_ in specs))
+        specs=[(name,ratio,field) for (name,_,field),ratio in zip(specs,ratios)]
     members = [dict(name=name, power=trial['power'] * ratio, realm_index=p.realm_index, layer=p.layer,
                     path=p.path, kind='environment') for name, ratio, field in specs]
     if not fusion:
@@ -57,7 +63,7 @@ def initialize(game):
     binding = bind_capabilities(game, units, target, WORLD_SYSTEMS['transcendent_combat'])
     original = binding.battle
     own = original.units['player'].unit.capabilities
-    copied = asura.source(p, cap=8)
+    copied = asura.source(p, cap=copy_cap)
     actors = []
     for key, state in original.units.items():
         actor = state.unit
@@ -80,7 +86,7 @@ def initialize(game):
                     divine_lights=lights,divine_light_levels=levels,body_mechanisms=aggregates,
                     voisinages=(), semantic_rules=())
             else:
-                caps = replace(own, voisinages=copied.voisinages if has_field else (),
+                caps = replace(own, voisinages=tuple(copied_field(f,copy_scale) for f in copied.voisinages) if has_field else (),
                     attainments=copied.attainments if has_field else {},
                     semantic_rules=copied.semantic_rules if has_field else (),
                     investment=own.investment if has_field else 0)

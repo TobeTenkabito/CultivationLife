@@ -1,17 +1,11 @@
-/* One live game tree, four presentations. Theme changes never call game actions. */
+/* One pixel layout, two palettes. Appearance never calls game actions. */
 (() => {
   'use strict';
   const $ = s => document.querySelector(s);
   const root = document.documentElement;
-  const themes = [
-    {id:'a', name:'松烟书院', caption:'页首状态 · 温纸松绿', motto:'这一程，向道而行。', bg:'#F9F6ED', ink:'#315C47', symbol:'砚'},
-    {id:'b', name:'月下观星', caption:'星月修行 · 深靛月金', motto:'天地辽阔，道在此身。', bg:'#172632', ink:'#DEC58B', symbol:'月'},
-    {id:'d', name:'丹砂金阙', caption:'三栏铭牌 · 玄漆赤铜', motto:'道心不移，各证其途。', bg:'#2C2925', ink:'#DAB677', symbol:'印'},
-    {id:'f', name:'竹简纪年', caption:'卷首命籍 · 双页纪事', motto:'凡所经历，皆入此卷。', bg:'#F4E9D2', ink:'#52624A', symbol:'卷'},
-  ];
   const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
   const narrowQuery = matchMedia('(max-width: 1000px)');
-  let preferences = {theme:root.dataset.theme || 'a', reduced_motion:root.dataset.motion === 'reduced', pixel_art:root.dataset.visual === 'pixel', pixel_theme:root.dataset.pixelTheme || 'light', compact_docks:root.dataset.compactDocks!=='false'};
+  let preferences = {theme:'a', reduced_motion:root.dataset.motion === 'reduced', pixel_art:true, pixel_theme:root.dataset.pixelTheme || 'light', compact_docks:root.dataset.compactDocks!=='false'};
   let revision = 0, saveQueue = Promise.resolve(), current = null, feedbackTimer = null;
   const stage = document.createElement('section'); stage.className = 'theme-play-area';
   stage.setAttribute('aria-label','修行与生平纪事');
@@ -50,34 +44,27 @@
   }
   const closeDialogs=()=>document.querySelectorAll('.appearance-dialog[open]').forEach(d=>d.close());
   function reflow() {
-    const theme=preferences.pixel_art?'a':preferences.theme;
     const focus=document.activeElement;
     const restore=focus&&hud.contains(focus);
-    if(theme==='b') core.insertBefore(opportunity,$('#cultivate-action'));
-    else resources.prepend(opportunity);
-    if(theme==='a'||theme==='b') action.prepend(hud);
-    else stage.prepend(hud);
+    resources.prepend(opportunity);
+    action.prepend(hud);
     scenery.remove();
-    window.ThemeComposition?.arrange(theme);
+    window.ThemeComposition?.arrange();
     if(restore&&focus.isConnected)focus.focus({preventScroll:true});
   }
   function cache() { try{localStorage.setItem('cultivation-appearance',JSON.stringify(preferences));}catch(_){} }
   function apply() {
     root.classList.add('theme-switching');
-    root.dataset.theme=preferences.pixel_art?'a':preferences.theme;
+    root.dataset.theme='a';
     root.dataset.pixelTheme=preferences.pixel_theme;
     root.dataset.compactDocks=String(preferences.compact_docks);
     root.dataset.motion=preferences.reduced_motion?'reduced':'full';
-    root.dataset.visual=preferences.pixel_art?'pixel':'text';
-    const theme=themes.find(t=>t.id===preferences.theme);
-    $('#theme-open').textContent=preferences.pixel_art?`绘景 · ${preferences.pixel_theme==='dark'?'沧海夜色':'山海图志'}`:`主题 · ${theme.name}`;
-    document.querySelectorAll('[data-theme-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.themeChoice===preferences.theme)));
-    document.querySelectorAll('[data-theme-choice]').forEach(b=>b.hidden=preferences.pixel_art);
-    document.querySelectorAll('[data-pixel-theme-choice]').forEach(b=>{b.hidden=!preferences.pixel_art;b.setAttribute('aria-pressed',String(b.dataset.pixelThemeChoice===preferences.pixel_theme));});
+    root.dataset.visual='pixel';
+    $('#theme-open').textContent=`绘景 · ${preferences.pixel_theme==='dark'?'沧海夜色':'山海图志'}`;
+    document.querySelectorAll('[data-pixel-theme-choice]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pixelThemeChoice===preferences.pixel_theme)));
     document.querySelectorAll('[data-dock-label-setting]').forEach(i=>i.checked=preferences.compact_docks);
     document.querySelectorAll('[data-motion-setting]').forEach(i=>i.checked=preferences.reduced_motion);
-    document.querySelectorAll('[data-pixel-setting]').forEach(i=>i.checked=preferences.pixel_art);
-    $('.theme-motto').textContent=theme.motto;
+    $('.theme-motto').textContent='一程山水，一程修行。';
     reflow();cache();
     void root.offsetWidth;
     requestAnimationFrame(()=>root.classList.remove('theme-switching'));
@@ -95,9 +82,6 @@
     return saveQueue;
   }
   document.querySelectorAll('[data-theme-picker]').forEach(container=>{
-    for(const t of themes){const b=document.createElement('button');b.type='button';b.dataset.themeChoice=t.id;b.className='theme-choice';b.setAttribute('aria-pressed','false');b.style.setProperty('--choice-bg',t.bg);b.style.setProperty('--choice-ink',t.ink);
-      b.innerHTML=`<span class="theme-choice-art" aria-hidden="true"><i>${t.symbol}</i></span><span><b>${t.name}</b><small>${t.caption}</small></span><span class="theme-chosen" aria-hidden="true">✓</span>`;
-      b.addEventListener('click',()=>save({theme:t.id}));container.append(b);}
     for(const [id,name,caption,bg,ink,symbol]of [['light','山海图志','浅色 · 松绿温纸','#f6f8ef','#237c76','山'],['dark','沧海夜色','暗色 · 深海月青','#17282d','#7dd9ce','月']]){
       const b=document.createElement('button');b.type='button';b.dataset.pixelThemeChoice=id;b.className='theme-choice';b.style.setProperty('--choice-bg',bg);b.style.setProperty('--choice-ink',ink);
       b.innerHTML=`<span class="theme-choice-art" aria-hidden="true"><i>${symbol}</i></span><span><b>${name}</b><small>${caption}</small></span><span class="theme-chosen" aria-hidden="true">✓</span>`;
@@ -105,7 +89,6 @@
     }
   });
   document.querySelectorAll('[data-motion-setting]').forEach(i=>i.addEventListener('change',()=>save({reduced_motion:i.checked})));
-  document.querySelectorAll('[data-pixel-setting]').forEach(i=>i.addEventListener('change',()=>save({pixel_art:i.checked})));
   document.querySelectorAll('[data-dock-label-setting]').forEach(i=>i.addEventListener('change',()=>save({compact_docks:i.checked})));
   const dlc={guixu:'guixu','ghost-soul':'ghost','ghost-attachment':'ghost','ghost-parade':'ghost',sage:'sage','sage-inner-outer':'sage',bloodline:'bloodline',intrigue:'intrigue',tianji:'tianji'};
   for(const [name,family] of Object.entries(dlc)){const b=$(`[data-panel-target="${name}"]`);if(b){b.dataset.dlc=family;b.title=`${b.title} · DLC`;}}
@@ -176,9 +159,8 @@
   narrowQuery.addEventListener('change',reflow);
   motionQuery.addEventListener('change',()=>{if(reduced())document.querySelectorAll('.theme-feedback-active,.cultivation-pulse').forEach(n=>n.classList.remove('theme-feedback-active','cultivation-pulse'));});
   document.addEventListener('visibilitychange',()=>root.dataset.paused=String(document.hidden));
-  window.addEventListener('game:panel-open',e=>{if(preferences.theme==='f')feedback(e.detail.target);});
   apply();
   const initialRevision=revision;
-  const ready=fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(saved=>{if(revision===initialRevision){preferences={theme:themes.some(t=>t.id===saved.theme)?saved.theme:'a',reduced_motion:saved.reduced_motion===true,pixel_art:saved.pixel_art===true,pixel_theme:saved.pixel_theme==='dark'?'dark':'light',compact_docks:saved.compact_docks!==false};apply();}}).catch(()=>{});
+  const ready=fetch('/api/ui-preferences').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(saved=>{if(revision===initialRevision){preferences={theme:'a',reduced_motion:saved.reduced_motion===true,pixel_art:true,pixel_theme:saved.pixel_theme==='dark'?'dark':'light',compact_docks:saved.compact_docks!==false};apply();}}).catch(()=>{});
   window.GameThemes={render,showStart,ready,get preferences(){return {...preferences};},get saved(){return saveQueue;}};
 })();

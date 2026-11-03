@@ -215,6 +215,8 @@ def test_possession_rejects_adaptation_without_consuming_the_hosts_book(api):
     game, _ = prepared(engine, 'reincarnation', 'ghost')
     target = dict(id='host', name='宿身', race='human', path='dao', realm_index=9, layer=1,
                   age=100, lifespan=None, alive=True)
+    from cultivation_life.system.soul_lifecycle import leave_body
+    leave_body(game)
     enter_host_body(game.player, target)
     book = next(iter(catalog(game).values()))
     grant(game, book.id, 4)

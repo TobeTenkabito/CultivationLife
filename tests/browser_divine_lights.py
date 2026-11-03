@@ -45,7 +45,7 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser=pw.chromium.launch()
-                    for theme,width,height in [('a',1440,1000),('f',390,844),('light',390,844),('dark',754,365)]:
+                    for theme,width,height in [('light',1440,1000),('dark',390,844),('light',754,365)]:
                         made=engine.create_game('五色神光验收','supreme_metal','dao',350,preset_id='true_immortal')
                         g=engine._load(made['id']);g.pending_event=None;g.player.next_tribulation_age=None
                         g.player.immortal_body.update(level=9,manuals=['jade_marrows'],active_manual='jade_marrows',failures=100)
@@ -55,8 +55,7 @@ def main():
                         page.on('pageerror',lambda error:errors.append(str(error)))
                         base=f'http://127.0.0.1:{http.server_port}';page.goto(base);page.wait_for_function('!!configData&&!busy')
                         page.locator('#theme-open').click();pixel=theme in ('light','dark')
-                        page.locator('#theme-dialog [data-pixel-setting]').set_checked(pixel)
-                        page.locator('#theme-dialog '+(f'[data-pixel-theme-choice={theme}]' if pixel else f'[data-theme-choice={theme}]')).click()
+                        page.locator(f'#theme-dialog [data-pixel-theme-choice={theme}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click();page.evaluate('GameThemes.saved')
                         page.evaluate('id=>loadGame(id)',g.id)
                         assert page.evaluate('!game.golden_light.available')

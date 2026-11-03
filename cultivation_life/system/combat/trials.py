@@ -11,6 +11,7 @@ from math import isfinite
 from .contracts import Combatant, CombatCapabilities, VoisinageDefinition,ResourceSupply,VoisinageSeal
 from .voisinages import VoisinageBattle
 from .ordinary import exchange_damage
+from .field_contracts import validate_memory,validate_leases
 
 
 def dump_battle(battle):
@@ -50,6 +51,11 @@ def load_battle(snapshot):
         raise ValueError('Invalid nonlethal unit snapshot')
     battle._death_exempt=frozenset(exempt)
     for key, values in snapshot['states'].items():
+        validate_memory(values.get('field_memory',{}),battle.units)
+        validate_leases(values.get('timed_controls',{}),values.get('field_debts',{}),battle.units)
+        recovery=values.get('release_recovery_round',0)
+        if type(recovery) is not int or not 0<=recovery<=1000000000:
+            raise ValueError('Invalid release recovery round')
         credit=values.get('karma_spent',0.)
         history=values.get('last_attack_targets')
         if (isinstance(credit,bool) or not isinstance(credit,(int,float)) or not isfinite(credit) or not 0<=credit<1

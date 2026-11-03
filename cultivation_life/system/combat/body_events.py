@@ -48,6 +48,7 @@ class BodyEvents:
             self._body_queue.append(('death',dict(target=key,chain=self._body_chain)))
 
     def _death_response(self,event):
+        self._field_death(event)
         for key in sorted(self.units):
             state=self.units[key]
             entry=self._body_round.channel(key,'death_restore',event['chain'])
@@ -120,7 +121,7 @@ class BodyEvents:
                         self._complete_body_actions([(event['owner'],group['token'],group['critical_hit'])])
                     continue
                 owner=event['owner'];state=self.units[owner]
-                if not state.fighting:continue
+                if not state.fighting or self._action_paused(owner):continue
                 if kind=='attack':
                     group=None
                     critical=self._body_round.channel(owner,'critical',event['chain']) if event['extra'] else None

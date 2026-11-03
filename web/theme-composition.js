@@ -39,7 +39,6 @@
     else {history.querySelectorAll('#history-filters input').forEach(i=>{i.checked=mode==='all'||i.value==='self';i.dispatchEvent(new Event('change',{bubbles:true}));});tools.querySelectorAll('[aria-pressed]').forEach(n=>n.setAttribute('aria-pressed',String(n===b)));}
   };
   const footer=document.createElement('footer');footer.className='theme-signature';footer.innerHTML='<span></span><small></small>';stage.after(footer);
-  const names={a:['松烟书院','页首状态带 · 常看信息与行动同处一屏'],b:['月下观星','机缘入月轮 · 血蓝置于行动上缘'],d:['丹砂金阙','人物铭牌与三栏仪表'],f:['竹简纪年','卷首命籍 · 左页修行，右页纪事']};
   for(const [node,glyph] of [[$('#cultivate-action'),'修'],[$('#body-train-action'),'体'],[$('#sense-train-action'),'识'],[rest,'息'],[neighbors,'缘']]){
     const emblem=document.createElement('i');emblem.className='action-emblem';emblem.setAttribute('aria-hidden','true');emblem.textContent=glyph;node.prepend(emblem);
     const time=document.createElement('small');time.className='action-duration';node.append(time);
@@ -60,24 +59,17 @@
   }
   $('#action-units').onchange=e=>{units=Math.max(1,Math.min(10,Math.trunc(Number(e.target.value)||1)));updateTimes();};
   nav.querySelectorAll('[data-unit-step]').forEach(b=>b.onclick=()=>{units=Math.max(1,Math.min(10,units+Number(b.dataset.unitStep)));updateTimes();});
-  function arrange(theme){
-    // These are separate compositions; no theme inherits A's card layout.
+  function arrange(){
     hud.prepend(identity);hud.append(resources);resources.prepend($('#hud-opportunity'));
     primary.prepend(core);primary.append(rest,neighbors);dock.remove();details.remove();
     action.insertBefore(nav,primary);action.insertBefore(resources,primary);hud.append(resources);
-    if(theme==='a')action.prepend(hud);
-    else if(theme==='b'){
-      action.prepend(hud);core.prepend($('#hud-opportunity'));action.append(core,details);
-    }else if(theme==='d'){
-      action.prepend(hud);nav.after(resources);dock.append(rest,neighbors);primary.after(dock);dock.hidden=selected!=='daily';
-    }
-    else stage.prepend(hud);
-    if(theme==='b'&&selected!=='daily') {core.classList.add('core-summary');action.append(core);}else core.classList.remove('core-summary');
+    action.prepend(hud);
+    core.classList.remove('core-summary');
     const landscape=$('#main-scenery');
     if(landscape&&!landscape.dataset.originalArt){landscape.dataset.originalArt='true';landscape.innerHTML='<img class="original-landscape" src="/themes/landscape.svg" alt=""><p class="landscape-eyebrow">山中无历日</p><div class="landscape-title-mask"><div class="landscape-title-track"><span>一程山水，一程修行。</span><span aria-hidden="true">一程山水，一程修行。</span></div></div><p class="landscape-place"></p><small class="landscape-date"></small>';}
-    $('#cultivate-action .action-cta').textContent=theme==='f'?'→':'入定修炼 →';
-    for(const n of [$('#body-train-action'),$('#sense-train-action'),rest,neighbors])n.querySelector('.action-cta').textContent=theme==='d'&&![rest,neighbors].includes(n)?'开始修行 →':theme==='f'?'→':'›';
-    footer.firstElementChild.textContent=`${names[theme][0]}`;footer.lastElementChild.textContent=names[theme][1];
+    $('#cultivate-action .action-cta').textContent='入定修炼 →';
+    for(const n of [$('#body-train-action'),$('#sense-train-action'),rest,neighbors])n.querySelector('.action-cta').textContent='›';
+    footer.firstElementChild.textContent='山海图志';footer.lastElementChild.textContent='一程山水，一程修行。';
     if(current)updateWorld();
     updateTimes();
     window.PixelHome?.arrange();

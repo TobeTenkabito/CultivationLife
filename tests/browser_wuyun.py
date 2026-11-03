@@ -36,7 +36,7 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser=pw.chromium.launch()
-                    for theme,width,height in [('light',1440,1000),('dark',390,844),('f',754,365)]:
+                    for theme,width,height in [('light',1440,1000),('dark',390,844),('light',754,365)]:
                         made=engine.create_game('五蕴验收','supreme_metal','demonic',470,preset_id='asura_upper')
                         g=engine._load(made['id']);g.pending_event=None;g.player.next_tribulation_age=None
                         g.player.asura_cultivation.update(conversion=5,body_level=9,souls=100000)
@@ -49,8 +49,7 @@ def main():
                         page.on('pageerror',lambda e:errors.append(str(e)))
                         base=f'http://127.0.0.1:{http.server_port}';page.goto(base);page.wait_for_function('!!configData&&!busy')
                         page.locator('#theme-open').click();pixel=theme!='f'
-                        page.locator('#theme-dialog [data-pixel-setting]').set_checked(pixel)
-                        page.locator('#theme-dialog '+(f'[data-pixel-theme-choice={theme}]' if pixel else f'[data-theme-choice={theme}]')).click()
+                        page.locator(f'#theme-dialog [data-pixel-theme-choice={theme}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click();page.evaluate('GameThemes.saved')
                         page.evaluate('id=>loadGame(id)',g.id)
                         navigation_locator(page,'[data-panel-target=asura-body]').click()
@@ -76,7 +75,7 @@ def main():
                             assert next(i.quantity for i in saved.player.inventory if i.id==key)==old_materials[key]-amount
                         assert saved.rng_state==old_rng and saved.player.age==old_age
                         assert '威能提高4.0%' in page.locator('[data-aggregate=se]').locator('..').inner_text()
-                        assert '侵夺强度提高32.0%' in page.locator('[data-aggregate=se]').locator('..').inner_text()
+                        assert '侵夺强度提高27.0%' in page.locator('[data-aggregate=se]').locator('..').inner_text()
                         from cultivation_life.rules import remove_item
                         for key in bill['materials']:
                             remove_item(saved.player,key,next(i.quantity for i in saved.player.inventory if i.id==key))
@@ -113,6 +112,25 @@ def main():
                         page.screenshot(path=str(output/f'{theme}-{width}.png'))
                         assert path.read_bytes()==before
                         click_control(page.locator('#asura-body-toggle'))
+                        saved=engine._load(g.id);saved.player.asura_cultivation.update(route='deva',level=9,domain_rank=8,domain_name='天部修复验收魔域')
+                        engine.store.save(saved);page.evaluate('id=>loadGame(id)',g.id)
+                        navigation_locator(page,'[data-panel-target=asura-domain]').click()
+                        assert '低于85%' in page.locator('#asura-domain-content').inner_text()
+                        assert '实际施疗仍占普通出手并支付原费用' in page.locator('#asura-domain-content').inner_text()
+                        click_control(page.locator('#asura-domain-toggle'))
+                        from cultivation_life.system import asura
+                        saved=engine._load(g.id);saved.player.asura_cultivation.update(route='naga',level=9,powers=[])
+                        for index,old in ((1,20),(5,15)):
+                            raw=json.loads(json.dumps(asura.config()['semantic_templates'][index]))
+                            raw.update(schema_version=3,id=f'asura:power:{index}',source_id=f'asura:power:{index}')
+                            raw['when']['value']=old;saved.player.asura_cultivation['powers'].append(raw)
+                        original=json.loads(json.dumps(saved.player.asura_cultivation['powers']))
+                        engine.store.save(saved);page.evaluate('id=>loadGame(id)',g.id)
+                        navigation_locator(page,'[data-panel-target=asura-domain]').click()
+                        text=page.locator('#asura-domain-content').inner_text()
+                        assert '目标承压达到20%' in text and '自身承压达到15%' in text
+                        assert engine._load(g.id).player.asura_cultivation['powers']==original
+                        click_control(page.locator('#asura-domain-toggle'))
                         prepare_combat(engine,engine._load(g.id));page.evaluate('id=>loadGame(id)',g.id)
                         navigation_locator(page,'#battle-report-open').click();page.locator('#battle-round-list section').first.wait_for(state='attached')
                         reveal_subpage(page,page.locator('#battle-round-list'))

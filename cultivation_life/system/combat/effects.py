@@ -22,6 +22,8 @@ class EffectIntent:
     critical: bool = False
     direct_power: bool = False
     segment_scale: float = 1.
+    discipline_action: str = ''
+    discipline_data: dict | None = None
 
 
 class VoisinageEffects:
@@ -62,7 +64,7 @@ class VoisinageEffects:
 
     def _select_effect(self, field, previous, allowance):
         owner = self.units[field.owner]
-        if field.owner in self._light_muted or not owner.fighting:return None
+        if field.owner in self._light_muted or not owner.fighting or self._action_paused(field.owner):return None
         if allowance.requires_evade:
             selected=self._reaction_effect(field,allowance)
             if selected is None:return None
@@ -88,12 +90,13 @@ class VoisinageEffects:
             effect = VoisinageEffect('strike' if purpose == 'kill' else 'suppress', cost, 1,
                                       defense='ward', tier=tier)
             candidates.append((-1, 0, EffectIntent(field, effect, terminal_targets, terminal_targets, True)))
-        for index, effect in enumerate(field.definition.actions()):
+        for index, option in enumerate(self._field_options(field,allowance)):
+            effect=option.effect
             semantic = self._semantic_preview(field.owner, 'effect_prepare', role='caster',
                                                effect=effect.kind, restriction=effect.restriction or '')
             effect = replace(effect, cost=effect.cost * self._semantic_factor(semantic, 'field.effect_cost'))
             if allowance.free:effect=replace(effect,cost=0)
-            if effect.cost > owner.current:
+            if not self._field_can_quote(field.owner,effect.cost,dict(option.data,chain=allowance.chain)):
                 continue
             if effect.target == 'enemy':
                 keys = [*normal, *ready]
@@ -108,18 +111,28 @@ class VoisinageEffects:
                     continue
                 keys = [field.owner] if effect.target == 'self' else list(field.protects)
                 keys = [k for k in keys if self.units[k].fighting]
+                threshold=field.definition.restore_threshold
                 if effect.kind == 'restore_body':
-                    keys = [k for k in keys if self.units[k].body < 1 or self.units[k].vitality < 1]
+                    keys = [k for k in keys if min(self.units[k].body,self.units[k].vitality) < threshold]
                 elif effect.kind == 'restore_spirit':
-                    keys = [k for k in keys if self.units[k].pressure > 0 or self.units[k].morale < 100]
+                    d=self._discipline(field.owner)
+                    keys = [k for k in keys if self.units[k].pressure > 1-threshold or self.units[k].morale < 100*threshold or
+                            d and (d.kind=='echo' or option.data.get('state_only')) and self.units[k].vitality<threshold]
                 else:
-                    keys = [k for k in keys if self.units[k].field_strain > 0 and self.units[k].active_voisinage]
+                    keys = [k for k in keys if self.units[k].field_strain > 1-threshold and self.units[k].active_voisinage]
+                if not keys and threshold<1 and not allowance.source:
+                    self.frame.events.append(f'{owner.unit.name}的【{field.definition.name}】未达{threshold:.0%}自动修复阈值，本次不施疗，普通出手仍按原资格结算。')
                 priority = 0 if any(self.units[k].body < .5 or self.units[k].vitality < .5 for k in keys) else 2
-            if keys:
+            keys=self._field_option_targets(field,option,keys)
+            if keys and (not option.action or self._field_action_path(field.owner,option.action,allowance.chain) is not None):
                 terminal = tuple(k for k in keys if k in ready and effect.target == 'enemy'
                                  and effect.kind in {'strike', 'suppress', 'seal'})
-                candidates.append((priority, index + 1, EffectIntent(field, effect, tuple(keys), terminal, semantic=semantic)))
-        if not candidates:return None
+                candidates.append((priority if option.priority is None else option.priority, index + 1,
+                    EffectIntent(field,effect,tuple(keys),terminal,semantic=semantic,
+                                 discipline_action=option.action,discipline_data=option.data)))
+        if not candidates:
+            self._field_idle(field.owner,allowance)
+            return None
         intent=min(candidates,key=lambda row:row[:2])[2]
         numeric=(intent.effect.kind=='strike' or intent.effect.kind.startswith('restore_') or
                  intent.effect.kind in {'suppress','seal'} and field.definition.authority is not None)
@@ -179,7 +192,7 @@ class VoisinageEffects:
             if field.owner in self._dominated and not mutual and not allowance.requires_evade:
                 continue
             intent = self._select_effect(field, previous,allowance)
-            if intent:
+            if intent and not self._field_hold(intent):
                 plans.append(intent)
         responded, pending = self._responded, []
         for intent in plans:
@@ -211,12 +224,12 @@ class VoisinageEffects:
                     continue
                 self.attack_tier(owner, pay=True)
                 self._ordinary_acted.add(intent.field.owner)
-            elif owner.current >= cost:
-                self._energy(intent.field.owner,owner.current-cost,intent.allowance.chain)
+            else:
+                intent=self._pay_field_intent(intent)
+                if intent is None:continue
+                cost=intent.discipline_data['actual_cost']
                 channels = set() if intent.allowance.free else {'field.effect_cost'}
                 self._semantic_commit(intent.semantic, channels)
-            else:
-                continue
             if intent.effect.kind.startswith('restore_'):
                 zhen=self.light_value(intent.field.owner,'zhen')
                 if not zhen and not intent.allowance.requires_evade:self._ordinary_acted.add(intent.field.owner)
@@ -237,6 +250,7 @@ class VoisinageEffects:
         completed=[]
         for intent, keys in sorted(paid, key=lambda row: row[0].effect.kind.startswith('restore_')):
             applied,chain=self._perform_body_intent(intent,keys)
+            self._field_action_completed(intent,chain)
             if not intent.ordinary:completed.append((intent.field.owner,replace(intent.allowance,chain=chain),intent.critical and applied))
         self._refresh_relations()
         self._complete_body_actions(completed)
@@ -275,6 +289,8 @@ class VoisinageEffects:
                 self._light_note('zhen_heal',field.owner,f'{self.units[field.owner].unit.name}的震合缥光令治疗比例提高{bonus:.0%}，本次治疗强度由{original:.2%}提升至{power:.2%}。',target=key,bonus=bonus,before=original,after=power)
         power*=intent.segment_scale
         before, body_before = target.vitality, target.body
+        power_before=dict(state=before,body=body_before,pressure=target.pressure,morale=target.morale,
+            strain=target.field_strain,seal=target.seal_progress,restrictions=tuple(target.restrictions))
         channels = {f'field.{kind}'} if kind in {'strike', 'suppress', 'seal', 'restore_body', 'restore_spirit', 'restore_field'} else set()
         if field.definition.authority is not None:
             channels.add('field.authority')
@@ -323,7 +339,8 @@ class VoisinageEffects:
             target.controls['communication'] = field.owner
             target.controls['support'] = field.owner
         elif kind in {'restrict', 'isolate'}:
-            target.controls[effect.restriction] = field.owner
+            if (intent.discipline_data or {}).get('timed'):self._install_field_control(intent,key)
+            else:target.controls[effect.restriction] = field.owner
             if effect.restriction == 'voisinage':
                 self._disrupted.add(key)
                 target.active_voisinage = None
@@ -336,11 +353,12 @@ class VoisinageEffects:
                 self.frame.primary_restore += restored
             self._restore_state(key, power)
         elif kind == 'restore_spirit':
-            target.pressure = max(0, target.pressure - power)
-            gain = min(100 - target.morale, power * 80)
-            target.morale += gain
-            side = target.unit.side
-            self.frame.morale_loss[side] = self.frame.morale_loss.get(side, 0) - gain * target.unit.power / self.totals[side]
+            if not (intent.discipline_data or {}).get('state_only'):
+                target.pressure = max(0, target.pressure - power)
+                gain = min(100 - target.morale, power * 80)
+                target.morale += gain
+                side = target.unit.side
+                self.frame.morale_loss[side] = self.frame.morale_loss.get(side, 0) - gain * target.unit.power / self.totals[side]
             self._restore_state(key, power)
         elif kind == 'restore_field':
             target.field_strain = max(0, target.field_strain - self._body_recovery(key,power))
@@ -348,6 +366,7 @@ class VoisinageEffects:
                   'isolate': '隔离', 'restore_body': '修复肉身', 'restore_spirit': '稳定心神', 'restore_field': '修复邻域稳固'}
         self.frame.events.append(f'{self.units[field.owner].unit.name}的【{field.definition.name}】对{target.unit.name}施行{labels[kind]}。')
         self._semantic_effect_result(intent, key, before, body_before)
+        self._field_after_effect(intent,key,power_before,power)
         return True
 
     def _semantic_effect_result(self, intent, key, before, body_before):
@@ -378,5 +397,6 @@ class VoisinageEffects:
             return
         gain = min(self._body_recovery(key,amount), 1 - target.vitality)
         target.vitality += gain
+        self._field_healed(key,gain)
         attr = 'player_loss' if target.unit.side == 'player' else 'enemy_loss'
         setattr(self.frame, attr, getattr(self.frame, attr) - gain * target.unit.power / self.totals[target.unit.side])

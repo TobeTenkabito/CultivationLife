@@ -9,6 +9,7 @@ from ...system.combat_system import BattleUnit, PlayerCombatSystem
 from ...system.combat_adapter import bind_capabilities
 from ...system.combat.voisinages import VoisinageBattle
 from ...system.combat.trials import dump_battle, load_battle, run_batch
+from ...system.combat.trial_difficulty import stage as trial_pressure,copied_field
 from ...system.upper_voisinage_rules import player_source
 from ...system.immortal_aperture import commit_energy
 from ...system import ghost_soul_form
@@ -50,13 +51,15 @@ def start(deps: Dependencies, game, kind, *, evolution=None, lineage=None):
     if kind not in KINDS or not eligible(p) or kind != p.path + '_upper' or game.active_trial:
         raise ValueError('当前无法引发此道途劫难')
     stage = p.realm_index - 9
-    source = player_source(p, cap=8)
     names = NAMES[kind][stage]
     if kind == 'monster_upper' and stage == 1 and '_SELF_' in str(p.monster_evolution_id):
         names = ('新脉劫相',)
+    ratios,copy_cap,copy_scale=trial_pressure(WORLD_SYSTEMS['upper_voisinages'].get('breakthrough_trials',{}).get(p.path,{}),
+                                            p.realm_index,(1.,)*len(names))
+    source = player_source(p, cap=copy_cap)
     power = combat_power(p)
-    members = [dict(name=name, power=power, realm_index=p.realm_index, layer=p.layer, path=p.path, kind='environment') for name in names]
-    target = dict(target_name=TITLES[kind][stage], target_power=power*len(names), members=members,
+    members = [dict(name=name, power=power*ratio, realm_index=p.realm_index, layer=p.layer, path=p.path, kind='environment') for name,ratio in zip(names,ratios)]
+    target = dict(target_name=TITLES[kind][stage], target_power=power*sum(ratios), members=members,
                   target_realm_index=p.realm_index, target_layer=p.layer, combat_type='trial', objective='kill', enemy_objective='kill')
     units = [BattleUnit('player', p.name, 'player', power, p.realm_index, p.path, integrity=min(1., p.hp/max_hp(p)))]
     original = bind_capabilities(game, units, target, WORLD_SYSTEMS['transcendent_combat']).battle
@@ -65,7 +68,7 @@ def start(deps: Dependencies, game, kind, *, evolution=None, lineage=None):
     for key, state in original.units.items():
         actor = state.unit
         if key != 'player':
-            fields = tuple(replace(f, id=f'{key}:{f.id}', attainment=f'{key}:{f.attainment}', name=f'{actor.name}·{f.name}') for f in source.voisinages) if stage else ()
+            fields = tuple(replace(copied_field(f,copy_scale), id=f'{key}:{f.id}', attainment=f'{key}:{f.attainment}', name=f'{actor.name}·{f.name}') for f in source.voisinages) if stage else ()
             actor = replace(actor, capabilities=replace(own, voisinages=fields,
                 attainments={f.attainment: 9 for f in fields}, semantic_rules=(),
                 investment=own.investment if fields else 0))
@@ -74,7 +77,7 @@ def start(deps: Dependencies, game, kind, *, evolution=None, lineage=None):
     battle.escape_forbidden_sides = frozenset({'player', 'enemy'})
     stats = PlayerCombatSystem._aggregate_stats(units, player=p, terrain_tags=['开阔'])
     state = dict(mode='upper_final' if stage == 2 else 'upper_endurance', round=0,
-                 mp_ratio=min(1., p.mp/max_mp(p)), stats={'player':stats, 'enemy':{k:v*len(names) for k,v in stats.items()}})
+                 mp_ratio=min(1., p.mp/max_mp(p)), stats={'player':stats, 'enemy':{k:v*sum(ratios) for k,v in stats.items()}})
     p.joint_companion_breakthrough = None
     game.active_trial = dict(kind=kind, major=True, lethal=True, old_label=public_player(p)['realm_name'],
         source_realm=p.realm_index, target_realm=p.realm_index+1, title=TITLES[kind][stage],

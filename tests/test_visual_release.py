@@ -14,8 +14,8 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_shipped_reviewed_assets_are_self_contained():
     from cultivation_life.content_registry import EXTENSION_REPORT
     source=dict(catalog(ROOT), assets=public_catalog(ROOT,EXTENSION_REPORT)['assets'])
-    assert len(source['assets'])==1649 and len(source['maps'])==11
-    assert len(source['items'])==1169
+    assert len(source['assets'])==1679 and len(source['maps'])==11
+    assert len(source['items'])==1184
     packages={json.loads(p.read_text(encoding='utf-8'))['id']:p.parent for p in (ROOT/'dlc').glob('*/manifest.json')}
     for identity,row in source['assets'].items():
         if row['file'].startswith('/extension-assets/'):
@@ -41,7 +41,22 @@ def test_shipped_reviewed_assets_are_self_contained():
             continue
         with Image.open(path) as image:
             assert list(image.size)==row['size']
-            if row.get('domain_art'):
+            if identity.startswith('material.'):
+                from cultivation_life.system.immortal_artifacts import MATERIALS
+                from cultivation_life.system.wuyun import definitions
+                from cultivation_life.system.monster_body import config
+                from cultivation_life.ghost_body_content import MATERIAL_IDS
+                material_ids={key for key,_ in MATERIALS}|set(MATERIAL_IDS)
+                from cultivation_life.system.crafting_system import crafting_material_definitions
+                material_ids.update(crafting_material_definitions())
+                from cultivation_life.content_registry import ITEM_CATALOG
+                material_ids.update(ITEM_CATALOG)
+                material_ids.update(source['items'])
+                material_ids.update(key for row in [*definitions(),*config()['mechanisms']] for key in row['recipe'])
+                assert identity.removeprefix('material.').removesuffix('.portrait') in material_ids
+                assert image.mode=='RGBA' and image.size==((128,128) if identity.endswith('.portrait') else (32,32))
+                assert set(image.getchannel('A').getdata()) <= {0,255}
+            elif row.get('domain_art'):
                 assert image.mode=='RGBA' and image.getchannel('A').histogram()[0]/(image.width*image.height)>.60
             elif 'official.monster-bloodlines' in row.get('requires',[]):
                 assert image.mode=='RGBA'
@@ -55,7 +70,12 @@ def test_shipped_reviewed_assets_are_self_contained():
             elif identity.startswith('map.'):assert image.size==(768,576)
             elif identity.startswith('material.') and identity.endswith('.portrait'):
                 from cultivation_life.system.immortal_artifacts import MATERIALS
-                assert identity in {'material.'+key+'.portrait' for key,_ in MATERIALS}
+                from cultivation_life.system.wuyun import definitions
+                from cultivation_life.system.monster_body import config
+                from cultivation_life.ghost_body_content import MATERIAL_IDS
+                material_ids={key for key,_ in MATERIALS}|set(MATERIAL_IDS)
+                material_ids.update(key for row in [*definitions(),*config()['mechanisms']] for key in row['recipe'])
+                assert identity in {'material.'+key+'.portrait' for key in material_ids}
                 assert image.mode=='RGBA' and image.size==(128,128)
                 assert set(image.getchannel('A').getdata()) <= {0,255}
             else:
@@ -135,9 +155,9 @@ def test_dlc_exclusive_assets_require_actual_loaded_package_and_safe_path(tmp_pa
 
 def test_default_mode_and_no_battle_animation_or_state_fields():
     from cultivation_life.ui_preferences import DEFAULTS
-    assert DEFAULTS['pixel_art'] is False
+    assert DEFAULTS['pixel_art'] is True
     html=(ROOT/'web/index.html').read_text(encoding='utf-8')
-    assert html.count('<b>启用新版界面</b>')==2
+    assert 'data-pixel-setting' not in html and '<b>启用新版界面</b>' not in html
     for name in ['pixel-library.js','pixel-inventory.js','pixel-map.js','pixel-natal.js']:
         source=(ROOT/'web'/name).read_text(encoding='utf-8')
         assert 'setInterval(' not in source and 'Math.random(' not in source

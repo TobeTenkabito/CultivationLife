@@ -453,6 +453,17 @@
     "Player.inventory/known_techniques/crafted_artifacts": "种子遗宝落入原个人字段，随玩家保留；使用、配置与本命化继续按原入口和力量资格验证，不因关闭DLC删除。",
     "sect_leadership": "沿用 intrigue_state.factions.positions.leader 作为独立组织职务；任命不改变控制、决策权、成员或空间归属。客卿禁任；候选限同界存活正式成员。"
   },
+  "trial_pressure_and_release_ownership_notes": {
+    "Player.asura_cultivation.discipline_plan": "personal：八部本命战前预案mode及紧那罗起曲opening，归原asura_cultivation，不新增培养等级或库存。沿原asura命令验证活着、转换、忙碌、旅行、诸天、寄身／神游与所见本命等级，选择无费用、时间或RNG消耗；原世界归属不变，跨界或关闭DLC只沉寂，不重置或自动改选。八部本体仍沿原1–9级成长与费用解锁2／4／7级能力。",
+    "GameState.active_trial.snapshot.units.*.capabilities.field_discipline": "session：从实际八部本命、等级、原分支及其培养、当前预案一次投影的有界领域权能描述；八部独有机制与五蕴分别分类，不增加行蕴的高阶炼体触发数。NPC只有明确授予的原资格才投影，镜像逐值复制，未展域者不得凭描述获益；神游／寄身不借原八部肉身。完整配置、费用与选择冻结入战，续战不重取养成。已有结构12快照缺此描述则保留原行为，结构1–11仍拒绝，无兼容迁移。",
+    "GameState.active_trial.snapshot.states.*.field_memory": "session：原参战者本场天威、猎物ID、单份听律、曲位／合鸣、禁印、冷却与破域凭据；均有上限，引用本场原战斗ID，按回合而非世界年龄过期。真实治疗、实际作用与真实阵亡才产生收益，不把同笔肉身与态势恢复重复计。标记不复制人物或资源；JSON及切批次保留，结束本场即随原战斗销毁。留招只占本轮原有额度，未触发轮末作废，不跨轮／读档制造额外行动。",
+    "GameState.active_trial.snapshot.states.*.timed_controls / field_debts": "session：有明确原施术者、本场回合期限及普通尝试消费规则的短封，以及下一次付费施权索元束缚。统一用原覆盖、抵抗、真实支付与控制期限入口，不向永久controls写入无清理的键，不叠加刷新成永久封禁；来源失去领域／死亡／被静默时按入口清理。血祭实扣原UnitState.body并沿原HP回写，元力与其他代价沿原单一账本，免费施权不凭空血祭；不足原子拒绝。无新Player资源池、世界移动或时钟。",
+    "Player.asura_cultivation.branches.*.rules / powers / GameState.active_trial.snapshot.units.*.capabilities.semantic_rules (pressure repair)": "personal / session：八部承压以原UnitState.pressure比例0–0.85判断。新模板使用0.20与0.15；原结构12分支与神通完全匹配承压增威／逆势守域旧条件时，仅在asura.source和说明投影中按比例解释，不改写原生成记录、锁定、随机幅度或修炼值，不投骰、不推进世界时间。已入战语义规则维持原冻结值，续战装载不做补发或转换。无新持久字段、人物或资源池，不加载结构1–11。",
+    "GameState.active_trial.snapshot.states.*.release_recovery_round": "session：沸血成功解控且当前冻结描述声明release_recovery=1时，登记同一参战单位下一回合编号。该回合暂停普通出手、邻域基础／追加／反击及事件派生攻击，保留已展开邻域维持与被动；不得再次沸血延续调息。费用仍实扣同一原元力账本，切批次及JSON续战保留编号，读档不重取养成、不重复抽签。缺失编号明确为0，不替旧入战描述补发新机制；结构仍12，结构1–11依旧拒绝。",
+    "GameState.active_trial.snapshot.units.*.capabilities.body_mechanisms.*.effects.release_recovery": "session：入战时从实际妖躯沸血投影的0／1标志，劫相复制玩家的完整机制与培养数值。新战斗为1；已冻结且缺失标志的战斗保持原解控行为，不扫描、改写用户游玩存档。无新Player字段、NPC副本或世界时间。",
+    "GameState.active_trial.snapshot.units.*.capabilities.voisinages.*.restore_threshold": "session：普通邻域自动治疗／稳定／修复的实际选择阈值，随原入战定义冻结。轻伤跳过施疗不消耗普通出手；达到阈值的施疗仍付原费用并使用原普通／邻域额度，烈脏免费反应沿实际闪避事件不受此阈值限制。旧已冻结定义缺失时明确为1，继续原修复行为。",
+    "GameState.active_trial.target / battle_state.stats / snapshot.units.*.capabilities.voisinages": "session：作者配置的劫相战力比例、复制邻域上限与三轴缩放在原劫战创建时一次投影，目标名册、总战力及六维属性使用同一比例。保留原敌人数和完整炼体镜像、邻域费用与威能基准；续战只读原快照，不因内容调参重建人物、补满资源或刷新敌方数值。配置只调整虚构劫相，不迁移真实NPC、物品或世界资源。"
+  },
   "soul_lifecycle_ownership_notes": {
     "Player.body_energy/soul_energy": "随原玩家保留的唯一个人能量；统一行动、战斗、世界年和空间年结算，读投影不扣费。",
     "Player.spirit_state": "元婴离体状态与固定期限；address为原肉身固定地址，归体须同界同地点同实例，不移动人物。肉身被毁不恢复炼体。",

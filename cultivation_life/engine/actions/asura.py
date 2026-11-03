@@ -19,12 +19,20 @@ def asura_action(deps: AsuraActionDependencies, game_id, action, target_id='', b
             or (game.guixu_state.get('player_session') or {}).get('trapped')
             or p.sealed_cultivation or p.cultivation_suppression):
         raise ValueError('当前状态无法修持八部')
-    if action in {'train_body','train_aggregate'}:
+    if action in {'train_body','train_aggregate','train_route','set_field_plan'}:
         from ...system.wuyun_cultivation import training_reason
         reason=training_reason(game)
         if reason:raise ValueError(reason)
     asura.ensure(game)
     s = p.asura_cultivation
+    if action=='set_field_plan':
+        from ...asura_discipline_content import select_plan
+        if s.get('conversion',0)<5:raise ValueError('须先完成五重煞元转化')
+        summary=select_plan(s,asura.config(),target_id,expected_level)
+        game.updated_at=now_iso();deps.store.save(game)
+        return deps.present(game)
+    if action=='train_route' and expected_level is not None and (type(expected_level) is not int or expected_level!=s.get('level',1)):
+        raise ValueError('本命等级已变化，请刷新后重新修炼')
     rng = decode_rng(game.seed, game.rng_state)
     if action=='train_aggregate':
         from ...system.wuyun_cultivation import train

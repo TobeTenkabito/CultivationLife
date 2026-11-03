@@ -39,5 +39,10 @@ html[data-theme] .strategy-dock button[data-dlc=asura]{--dock-color:var(--energy
 html[data-theme] .strategy-dock button[data-dlc]{color:var(--dock-color);border-color:color-mix(in srgb,var(--dock-color) 45%,var(--surface));background:color-mix(in srgb,var(--dock-color) 12%,var(--surface))}
 html[data-theme] .strategy-dock button[data-dlc]:hover:not(:disabled),html[data-theme] .strategy-dock button[data-dlc].active{color:var(--on-accent);background:var(--dock-color)}
 .asura-aggregate-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.asura-field-abilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.asura-field-ability{min-width:0;padding:14px;border:1px solid var(--line);border-top:3px solid var(--asura-accent);background:var(--surface);border-radius:6px;overflow-wrap:anywhere}
+.asura-field-ability small{color:var(--muted)}.asura-field-ability h4{margin:8px 0}.asura-field-ability p{font-size:12px;line-height:1.8}.asura-field-ability.locked{opacity:.62}
+.asura-field-plan{display:grid;gap:8px;margin:12px 0;font-size:13px}.asura-field-plan select{width:100%;min-width:0;padding:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:5px}
+@media(max-width:640px){.asura-field-abilities{grid-template-columns:1fr}}
 .asura-aggregate-card{margin:0;min-width:0}.asura-aggregate-card.locked{opacity:.66}
 .asura-aggregate-material{display:flex;align-items:center;gap:10px;padding:10px 0;min-width:0}.asura-aggregate-material img{flex:0 0 64px;image-rendering:pixelated;object-fit:contain}.asura-aggregate-material>div{min-width:0;overflow-wrap:anywhere}.asura-aggregate-material p{margin:4px 0}.asura-aggregate-material small{color:var(--muted)}
