@@ -26,7 +26,7 @@
           zhaoye:`一次邻域行动分为三段，每段继承${pct(e.split)}。随机合法目标，全体攻击仍为三段全体；只付费、计次一次。`,
           yuhun:`每名角色真实阵亡，回复${pct(e.death_restore)}态势与本场可用元力；制伏、逃离不算阵亡。`,
           wangqing:`按每段实际目标集合比较：不同则向其余敌人溢出${pct(e.forget)}实际伤害，相同则追加同比例一段伤害。`,
-          yinguo:`每累计减少本场可用元力容量的${pct(e.karma_threshold)}，免费释放一次全体攻击；回复不清空累计进度，可与照业、忘情联动。`}[row.id];
+          yinguo:`每累计减少本场可用元力容量的${pct(e.karma_threshold)}，免费释放一次强度${pct(e.karma_power)}的全体攻击；回复不清空累计进度，可与照业、忘情联动。`}[row.id];
         card.append(el('h3',`${row.name} · ${row.unlocked?`${row.level}/10重`:`${row.unlock_level}层解锁`}`),el('p',text),el('p',`下一重：${price(row.cost)}`));
         window.BodyCultivationUI.card(card,{index,name:row.name,level:row.level,unlocked:row.unlocked,unlockLevel:row.unlock_level});
         for(const material of row.materials||[])window.BodyCultivationUI.material(card,material,'ghost-body-material');

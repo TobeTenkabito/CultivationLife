@@ -248,6 +248,15 @@ class VoisinageEffects:
         kind = effect.kind
         if not intent.ordinary and field.owner in self._light_muted:return
         if effect.target=='enemy' and self._body_evade(intent,key):return False
+        if (intent.allowance and intent.allowance.requires_evade and
+                (kind in {'seal','restrict','isolate'} or kind=='suppress' and field.definition.authority is None)):
+            configured=any('retaliate_control' in row['effects'] for row in self._body_round.records[field.owner].values())
+            chance=min(1.,self._body_round.value(field.owner,'retaliate_control')) if configured else 1.
+            success=chance>=1 or chance>0 and self._light_rng.random()<chance
+            self._light_note('reaction_control',field.owner,
+                f'{self.units[field.owner].unit.name}的烈脏控制反击判定'+('成功' if success else '未成')+f'（概率{chance:.1%}）。',
+                target=key,probability=chance,success=success)
+            if not success:return False
         if (intent.segment_scale<1 and (kind in {'restrict','isolate'} or
                 kind in {'suppress','seal'} and field.definition.authority is None)
                 and self._light_rng.random()>=intent.segment_scale):return False

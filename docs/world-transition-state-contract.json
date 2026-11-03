@@ -1,6 +1,7 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "GameState.active_trial.snapshot.units.*.capabilities.body_mechanisms.*.effects.incursion / retaliate_control / voisinages.*.authority_reference": "session：2026-11-03数值平衡。色蕴侵夺加成与烈脏控制成功率由同一真实肉身的原培养等级只读投影，随原入战能力冻结；旧会话缺少控制通道保持原显式反应语义，不补造新数值。未显式给定威能基准的新邻域采用max(100,基础强度)，显式基准及原快照保留，不读档重算。随机判定沿原战斗RNG，费用和回复沿原可用元力，不建新人物、资源池、移动例外或时钟。原Player培养记录不改结构，仍只接受12，不迁移或覆盖旧文件。",
     "GameState.heavens_state.runtime.*.upkeep.progress / last_year / escrow / status (terminal paid year)": "scope / session：原托管护持在已实际经过的普通地区年按唯一游标支付该年原预算，再因本人死亡终止并退回未耗款；死亡恰逢末年可记录progress等于duration且status为failed，但不得登记maintained或参悟收益。completed仍必须完成全部工期并取得原效果，active／cancelled／expired不得伪装满工期。重复回调不重扣；普通查询reconcile只结清原已耗进度，不补造年份。字段均已存在，无新增顶层字段、旧档迁移或预算重算。",
     "GameState.heavens_state.runtime.outposts.*.id / source / destination / units / visit (peer-world expansion)": "scope：17组同层双界的34个显式方向；旧结构11人魔outpost:原组织ID原样保留，不映射或覆盖。其他双界按outpost:原组织ID:目的界唯一登记，源／目的须同一已登记普通层级，未知界面、跨层和空间拒绝。各组双向共用一条单人通道，其他组各自占用；原NPC只有一个活动任务，真实归返历史可被后续另一目的界引用，不克隆人物。各目的界文书、军令、实物、府库、当地年和返程预付款分别保留，同一原组织仍受整宗战争占用；本人先结束原往返才开启另一组行程。每档八份、每处三人及原历史限额保持。",
     "GameState.heavens_state.runtime.outposts.*.stock / units.*.stock / local_job / visit / GameState.wars.*.logistics (peer-tier costs)": "scope：三档界层分别采用二／六／九阶原资材，现金成本沿原地方一／五十／一千六百倍；主驻地与行旅年费、建设、初始款、注资、运回款、地方事务、实际抵制及军费一致定价，不留低界费用旁路。原预算和库存只在本组源／目的地址之间真实交接，单程八年、首建十年不变，实际抵达后才交货，返乡后才退款。本人未耗返程仍绑定原文书；商品只接受该组两界的相应品阶，第三界不冒充本地或原仓库。无新增Player／GameState顶层字段，无旧存档迁移或余额重算。",

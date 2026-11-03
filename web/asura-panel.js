@@ -55,7 +55,7 @@
       const pct=value=>`${(Number(value||0)*100).toFixed(1)}%`;
       for(const [index,row] of (s.aggregates||[]).entries()){
         const e=row.effects||{},text={
-          se:`免疫凡属性伤害，邻域威能提高${pct(e.authority)}。`,
+          se:`免疫凡属性伤害，邻域威能提高${pct(e.authority)}，侵夺强度提高${pct(e.incursion)}。`,
           shou:`每轮${pct(row.probability)}概率令合法数值施权暴击，效果为基础的200%。`,
           xiang:`实际邻域暴击后可额外施权一次，${pct(e.free)}概率免除此额外施权费；不同机制可联动，同一角色机制不能沿自身因果链重入。`,
           xing:`目标轮首原始触发的每种炼体机制，使对其邻域或战斗态势的既有削弱增加${pct(e.exploit)}；随后静默不重算数量。`,

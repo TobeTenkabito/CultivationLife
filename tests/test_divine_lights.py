@@ -135,7 +135,7 @@ def test_independent_training_pays_once_and_rejects_stale_level(prepared):
     saved=e.store.load(g.id)
     assert saved.player.immortal_body['divine_lights']=={'kun':1}
     assert saved.rng_state==before and saved.player.age==age
-    assert profile(saved.player,player=True)[0]['kun_resist']==.02
+    assert profile(saved.player,player=True)[0]['kun_resist']==.03
     path=e.store._path(g.id);snapshot=path.read_bytes()
     with pytest.raises(ValueError,match='等级已变化'):e.immortal_action(g.id,'train_divine_light',axis='kun',expected_level=0)
     assert path.read_bytes()==snapshot
@@ -163,7 +163,7 @@ def test_three_corpses_copy_exact_light_values_and_keep_snapshot():
     saved=dump_battle(b);g.player.immortal_body['divine_lights']['qian']=10
     resumed=load_battle(saved)
     assert resumed.units['enemy-2'].unit.capabilities.divine_light_levels['qian']==3
-    assert resumed.units['enemy-2'].unit.capabilities.divine_lights['qian']==pytest.approx(.19)
+    assert resumed.units['enemy-2'].unit.capabilities.divine_lights['qian']==pytest.approx(.0575)
 
 
 @pytest.mark.parametrize('world,path', [('nether','monster'),('reincarnation','ghost')])
@@ -188,10 +188,10 @@ def test_other_path_mirrors_copy_light_values_and_freeze_them(prepared,world,pat
     resumed=load_battle(g.active_trial['snapshot'])
     if path=='monster':
         p.immortal_body['monster']['training']['shenhun']=10
-        assert all(next(r for r in s.unit.capabilities.body_mechanisms if r.id=='shenhun').effects['exchange_threshold']==pytest.approx(.46) for s in resumed.units.values())
+        assert all(next(r for r in s.unit.capabilities.body_mechanisms if r.id=='shenhun').effects['exchange_threshold']==pytest.approx(.43) for s in resumed.units.values())
     else:
         p.immortal_body['ghost_training']['yinguo']=10
-        assert all(next(r for r in s.unit.capabilities.body_mechanisms if r.id=='yinguo').effects['karma_threshold']==pytest.approx(.425) for s in resumed.units.values())
+        assert all(next(r for r in s.unit.capabilities.body_mechanisms if r.id=='yinguo').effects['karma_threshold']==pytest.approx(.395) for s in resumed.units.values())
 
 
 def test_real_npc_combat_uses_body_lights_and_same_text():

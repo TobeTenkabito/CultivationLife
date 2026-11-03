@@ -75,6 +75,8 @@ def main():
                         for key,amount in bill['materials'].items():
                             assert next(i.quantity for i in saved.player.inventory if i.id==key)==old_materials[key]-amount
                         assert saved.rng_state==old_rng and saved.player.age==old_age
+                        assert '威能提高4.0%' in page.locator('[data-aggregate=se]').locator('..').inner_text()
+                        assert '侵夺强度提高32.0%' in page.locator('[data-aggregate=se]').locator('..').inner_text()
                         from cultivation_life.rules import remove_item
                         for key in bill['materials']:
                             remove_item(saved.player,key,next(i.quantity for i in saved.player.inventory if i.id==key))

@@ -55,11 +55,12 @@ class DivineLights(BodyEffects):
                 if caps.body_mechanisms:
                     def description(row):
                         e=row.effects
+                        if 'incursion' in e:return f'免疫凡伤，邻域威能提高{e.get("authority",0):.1%}、侵夺提高{e["incursion"]:.1%}'
                         if 'evade' in e:return f'逐次闪避概率{e["evade"]:.1%}'
                         if 'state_guard' in e:return f'免疫凡伤，仙级态势减伤{e["state_guard"]:.1%}'
                         if 'release_cost' in e:return f'解除支配消耗可用容量{e["release_cost"]:.1%}'
                         if 'exchange_threshold' in e:return f'元力比例低于{e["exchange_threshold"]:.1%}且低于对手时交换，本场一次'
-                        if 'retaliate_power' in e:return f'闪避后免费择一，数值效果{e["retaliate_power"]:.1%}'
+                        if 'retaliate_power' in e:return f'闪避后免费择一，数值效果{e["retaliate_power"]:.1%}，控制成功率{e.get("retaliate_control",1):.1%}'
                         if 'recovery_bonus' in e:return f'免疫凡伤，态势与邻域回复效率提高{e["recovery_bonus"]:.1%}'
                         if 'split' in e:return f'一次行动三段，每段继承{e["split"]:.1%}，全体攻击仍为全体'
                         if 'death_restore' in e:return f'每人真实阵亡回复态势与可用元力{e["death_restore"]:.1%}'
@@ -138,6 +139,7 @@ class DivineLights(BodyEffects):
             for target in field.targets:
                 victim=self.units[target]
                 if not victim.fighting:continue
+                if self.frame.relations.get(target,{}).get('attacker')!=key:continue
                 defense=self.frame.relations.get(target,{}).get('defense_strength',0.)
                 might=field.authority if field.authority is not None else field.strength
                 reference=field.definition.authority_reference if field.authority is not None else max(1.,defense)

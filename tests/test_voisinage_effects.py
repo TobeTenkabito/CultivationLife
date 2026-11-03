@@ -20,7 +20,7 @@ from test_domain_combat import engine_game
 def domain(*effects, **kw):
     data = dict(id='test', name='邻域', attainment='test', required_level=4, strength=100,
                 opening_cost=1, upkeep_cost=1, effect='seal', effect_cost=10, effect_power=.2,
-                authority=100, effects=effects, max_targets=3)
+                authority=100, authority_reference=100, effects=effects, max_targets=3)
     data.update(kw)
     return VoisinageDefinition(**data)
 

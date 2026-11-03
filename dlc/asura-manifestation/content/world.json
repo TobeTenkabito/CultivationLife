@@ -409,7 +409,11 @@
             },
             "authority": {
               "base": 0,
-              "growth": 0.03
+              "growth": 0.04
+            },
+            "incursion": {
+              "base": 0.3,
+              "growth": 0.02
             }
           },
           "requires": [],
@@ -427,8 +431,8 @@
           "unlock_level": 20,
           "priority": 10,
           "chance": {
-            "base": 0.1,
-            "growth": 0.03
+            "base": 0.14,
+            "growth": 0.034
           },
           "effects": {
             "critical": {
@@ -460,8 +464,8 @@
               "growth": 0
             },
             "free": {
-              "base": 0.1,
-              "growth": 0.04
+              "base": 0.15,
+              "growth": 0.03
             }
           },
           "requires": [
@@ -487,7 +491,7 @@
           "effects": {
             "exploit": {
               "base": 0.02,
-              "growth": 0.006
+              "growth": 0.007
             }
           },
           "requires": [],
@@ -510,12 +514,12 @@
           },
           "effects": {
             "restore_state": {
-              "base": 0.01,
-              "growth": 0.002
+              "base": 0.012,
+              "growth": 0.0028
             },
             "restore_energy": {
-              "base": 0.01,
-              "growth": 0.002
+              "base": 0.012,
+              "growth": 0.0028
             }
           },
           "requires": [],

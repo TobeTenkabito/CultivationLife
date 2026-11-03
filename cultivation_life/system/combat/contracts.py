@@ -90,7 +90,7 @@ class VoisinageDefinition:
     stability: float | None = None
     incursion: float | None = None
     authority: float | None = None
-    authority_reference: float = 100.0
+    authority_reference: float | None = None
     features: tuple[Mapping[str, Any], ...] = ()
     effects: tuple[VoisinageEffect, ...] = ()
 
@@ -123,6 +123,9 @@ class VoisinageDefinition:
         for key in ("stability", "incursion", "authority"):
             if getattr(self, key) is not None:
                 number(getattr(self, key), key)
+        if self.authority_reference is None:
+            # Normalize newly constructed fields; explicit/frozen references stay intact.
+            object.__setattr__(self,'authority_reference',max(100.,self.strength) if self.authority is not None else 100.)
         if number(self.authority_reference, 'authority_reference') <= 0:
             raise ValueError('Authority reference must be positive')
         if len(self.features) > 3:

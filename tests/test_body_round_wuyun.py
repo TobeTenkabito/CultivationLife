@@ -185,7 +185,7 @@ def test_paid_training_is_independent_stale_safe_and_time_rng_neutral(ready):
     assert saved.player.age==before.player.age and saved.rng_state==before.rng_state
     assert saved.player.asura_cultivation['souls']<before.player.asura_cultivation['souls']
     assert saved.player.opportunity<before.player.opportunity
-    assert next(r for r in profile(saved.player,player=True) if r.id=='shou').chance==pytest.approx(.13)
+    assert next(r for r in profile(saved.player,player=True) if r.id=='shou').chance==pytest.approx(.174)
     path=e.store._path(g.id);data=path.read_bytes()
     with pytest.raises(ValueError,match='等级已变化'):e.asura_action(g.id,'train_aggregate','shou',expected_level=0)
     assert path.read_bytes()==data and len(shown['asura']['aggregates'])==5

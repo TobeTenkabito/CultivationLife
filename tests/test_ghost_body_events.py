@@ -39,7 +39,7 @@ def test_karma_invokes_three_aoe_segments_and_one_extra_action():
     assert len(notes)==3 and all(e['targets']==['a','b','c'] for e in notes)
     for k in ('a','b','c'):
         assert b.units[k].current==11
-        assert b.units[k].vitality==pytest.approx(1-.12*.4*3+.01)
+        assert b.units[k].vitality==pytest.approx(1-.18*.4*3+.01)
     assert len([e for e in b._light_trace if e['kind']=='counter_restore'])==3
 
 
@@ -90,7 +90,7 @@ def test_sibling_segments_can_each_invoke_forget_without_recursive_self_damage()
     emit(b,power=.1)
     assert len([e for e in b._light_trace if e['kind']=='forget'])==2
     assert len([e for e in b._light_trace if e['kind']=='body_attack'])==5
-    assert b.units['a'].vitality==pytest.approx(1-.04*3-.04*.15*2)
+    assert b.units['a'].vitality==pytest.approx(1-.04*3-.04*.25*2)
 
 
 def test_single_target_split_locks_a_b_b_and_each_sibling_observes_history():

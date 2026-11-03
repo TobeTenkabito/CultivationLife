@@ -1037,7 +1037,7 @@
         "unlock_level": 10,
         "base": 1.0,
         "growth": 0.0,
-        "resist_growth": 0.02,
+        "resist_growth": 0.03,
         "recipe": {
           "great_sun_divine_light": 8
         },
@@ -1049,7 +1049,7 @@
         "unlock_level": 20,
         "base": 1.0,
         "growth": 0.0,
-        "heal_growth": 0.05,
+        "heal_growth": 0.055,
         "recipe": {
           "heavenly_gang_gold": 16
         },
@@ -1059,8 +1059,8 @@
         "id": "kan",
         "name": "坎道玄光",
         "unlock_level": 30,
-        "base": 0.1,
-        "growth": 0.03,
+        "base": 0.15,
+        "growth": 0.025,
         "recipe": {
           "glazed_pure_heaven_water": 24
         },
@@ -1070,26 +1070,26 @@
         "id": "li",
         "name": "离上朱光",
         "unlock_level": 40,
-        "base": 0.02,
-        "growth": 0.003,
+        "base": 0.011,
+        "growth": 0.0017,
         "recipe": {
           "samadhi_true_fire": 40
         },
-        "description": "己方邻域存在时，每回合按威能削弱覆盖敌人的战斗态势；修炼提高削弱比例。"
+        "description": "每回合随有效攻击邻域的威能削弱覆盖敌人的战斗态势，同侧重叠邻域不重复侵蚀；修炼提高削弱比例。"
       },
       {
         "id": "qian",
         "name": "乾古素光",
         "unlock_level": 50,
-        "base": 0.1,
-        "growth": 0.03,
+        "base": 0.035,
+        "growth": 0.0075,
         "recipe": {
           "great_sun_divine_light": 4,
           "heavenly_gang_gold": 8,
           "glazed_pure_heaven_water": 12,
           "samadhi_true_fire": 20
         },
-        "description": "按先后手，每回合有概率静默敌方邻域及五色神光效果；修炼提高概率。"
+        "description": "按先后手，每回合有概率静默敌方邻域及全部高阶炼体机制；修炼提高概率。"
       }
     ]
   }

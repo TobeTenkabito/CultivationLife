@@ -74,6 +74,8 @@ def main():
                         page.wait_for_function('!busy&&game.upper_voisinages.monster_body.reaction==="seal"')
                         assert e._load(g.id).player.immortal_body['monster']['reaction']=='seal'
                         assert page.locator('.monster-change').count()==5
+                        assert '数值效果4.5%' in page.locator('[data-change=liezang]').inner_text()
+                        assert '成功率15%' in page.locator('[data-change=liezang]').inner_text()
                         assert page.locator('[data-body-family=monster] .body-cultivation-stages li').count()==5
                         assert page.locator('[data-body-family=monster] [role=meter]').count()==5
                         assert page.locator('.monster-body').evaluate('n=>n.scrollWidth<=n.clientWidth+2')

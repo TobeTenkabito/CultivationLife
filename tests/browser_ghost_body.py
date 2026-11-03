@@ -77,12 +77,16 @@ def main():
                         click_control(page.locator('#ghost-body-toggle'))
                         navigation_locator(page,'[data-panel-target=ghost-body]').click()
                         assert page.locator('.ghost-body-title').inner_text().endswith('50/50层')
-                        capped=e._load(g.id);capped.player.immortal_body['ghost_training']={'wuxiang':10};e.store.save(capped)
+                        capped=e._load(g.id);capped.player.immortal_body['ghost_training']={k:10 for k in ('wuxiang','zhaoye','yuhun','wangqing','yinguo')};e.store.save(capped)
                         page.evaluate('id=>loadGame(id)',g.id)
                         assert page.locator('[data-ghost-refine=wuxiang]').is_disabled()
                         assert page.locator('[data-ghost-refine=wuxiang]').inner_text()=='已修至十重'
                         assert page.locator('[data-ghost-change=wuxiang] [role=meter]').get_attribute('aria-valuenow')=='10'
                         assert '培养圆满' in page.locator('[data-ghost-change=wuxiang]').inner_text()
+                        assert '每段继承65%' in page.locator('[data-ghost-change=zhaoye]').inner_text()
+                        assert '溢出60%' in page.locator('[data-ghost-change=wangqing]').inner_text()
+                        assert '容量的15%' in page.locator('[data-ghost-change=yinguo]').inner_text()
+                        assert '强度18%' in page.locator('[data-ghost-change=yinguo]').inner_text()
                         click_control(page.locator('#ghost-body-toggle'))
                         g=e._load(g.id);g.pending_event=None;g.settings.update(combat_popup=False,silent_events=True)
                         field=WORLD_SYSTEMS['upper_voisinages']['worlds']['reincarnation']['fields'][0]['id']

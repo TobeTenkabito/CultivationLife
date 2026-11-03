@@ -278,12 +278,15 @@ def test_unlimited_battle_survives_real_save_reload_without_resource_reset(prepa
 
 def test_final_backlash_death_does_not_grant_perfection(prepared):
     engine, game, _=prepared
-    profile=fixture('voisinage_backlash',field_rank=12,energy=0)
+    # Make this a lethal settlement case independently of five-round body/RNG balance.
+    profile=fixture('voisinage_backlash',field_rank=12,energy=0,hp_ratio=.01)
     game.player=profile.player; game.doctrine_state=profile.doctrine_state
     game.active_trial=profile.active_trial; game.pending_event=profile.pending_event
     engine.store.save(game)
     shown=engine.choose(game.id,'fight')
     assert not shown['player']['alive']
     assert '同化' in shown['player']['death_reason']
+    assert shown['last_combat_report']['result']=='dead'
     saved=engine.store.load(game.id)
+    assert saved.active_trial is None
     assert saved.doctrine_state['player']['voisinage_training'][profile.active_trial['doctrine_id']]['rank']==12

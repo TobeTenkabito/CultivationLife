@@ -7,7 +7,7 @@ CHANNELS = frozenset({'ward','seal_resist','heal_preserve','heal_bonus','extra',
     'state_guard','evade','retaliate_heal','retaliate_suppress','retaliate_seal','retaliate_power',
     'retaliate_choice','retaliate_spirit','retaliate_field','retaliate_technique','retaliate_artifact',
     'retaliate_support','retaliate_supply','retaliate_voisinage','release_cost','exchange_threshold',
-    'recovery_bonus','split','forget','death_restore','karma_threshold','karma_power'})
+    'recovery_bonus','split','forget','death_restore','karma_threshold','karma_power','incursion','retaliate_control'})
 REACTION_KINDS=('heal','spirit','field','suppress','seal','technique','artifact','support','supply','voisinage')
 MAX_EXTRA_ACTIONS = 8
 

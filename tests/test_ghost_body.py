@@ -69,7 +69,7 @@ def test_all_five_values_freeze_in_loadout_and_do_not_stack_with_lights(ready_gh
     e,g=ready_ghost;p=g.player;p.immortal_body={'level':50,'ghost_training':{'yinguo':4,'zhaoye':3},'divine_lights':{'qian':10}}
     caps=project_loadout(g,p,player=True)
     assert not caps.divine_lights and len(caps.body_mechanisms)==5
-    assert next(r for r in caps.body_mechanisms if r.id=='yinguo').effects['karma_threshold']==pytest.approx(.4)
+    assert next(r for r in caps.body_mechanisms if r.id=='yinguo').effects['karma_threshold']==pytest.approx(.36)
     p.immortal_body['ghost_training']['yinguo']=10
     assert next(r for r in caps.body_mechanisms if r.id=='yinguo').level==4
     assert profile(dict(path='ghost',immortal_body_level=20))[-1].id=='zhaoye'
@@ -94,7 +94,7 @@ def test_real_npc_ghost_uses_independent_body_and_all_five_mechanisms():
     report=resolve_npc_engagement([(a,100)],[(b,100)],WORLD_SYSTEMS['transcendent_combat'],random.Random(19),max_rounds=2)
     raw=report.rounds[0]['voisinage']['body_mechanisms']['raw']
     assert len(raw[a.id])==5 and not raw[b.id]
-    assert raw[a.id]['yinguo']['effects']['karma_threshold']==pytest.approx(.25)
+    assert raw[a.id]['yinguo']['effects']['karma_threshold']==pytest.approx(.15)
 
 
 @pytest.mark.parametrize('training',[{'nope':1},{'yinguo':11},{'zhaoye':True},{'wuxiang':float('nan')}])

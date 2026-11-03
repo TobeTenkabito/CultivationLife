@@ -182,6 +182,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             strength *= 1 + (features.get("opening", 0) if rounds == 1 else 0)
             strength *= 1 + (features.get("retaliate", 0) if owner.resisted and continued else 0)
             strength *= 1 + features.get("sacrifice", 0)
+            strength *= 1+self._body_round.value(owner.unit.id,'incursion')
             stability *= 1 - features.get("sacrifice", 0)
             owner.active_voisinage = definition.id
             owner.sustained_rounds = rounds

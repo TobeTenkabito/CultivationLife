@@ -131,7 +131,7 @@
             },
             "state_guard": {
               "base": 0.05,
-              "growth": 0.025
+              "growth": 0.013
             }
           },
           "opportunity_multiplier": 1,
@@ -147,8 +147,8 @@
           "requires": [],
           "effects": {
             "evade": {
-              "base": 0.1,
-              "growth": 0.03
+              "base": 0.105,
+              "growth": 0.012
             }
           },
           "opportunity_multiplier": 2,
@@ -166,8 +166,12 @@
           ],
           "effects": {
             "retaliate_power": {
-              "base": 0.12,
-              "growth": 0.004
+              "base": 0.032,
+              "growth": 0.0025
+            },
+            "retaliate_control": {
+              "base": 0.1,
+              "growth": 0.01
             }
           },
           "opportunity_multiplier": 3,
@@ -183,8 +187,8 @@
           "requires": [],
           "effects": {
             "release_cost": {
-              "base": 0.15,
-              "growth": -0.01
+              "base": 0.4,
+              "growth": -0.0125
             }
           },
           "opportunity_multiplier": 4,
@@ -201,7 +205,7 @@
           "effects": {
             "exchange_threshold": {
               "base": 0.4,
-              "growth": 0.02
+              "growth": 0.01
             }
           },
           "opportunity_multiplier": 5,
