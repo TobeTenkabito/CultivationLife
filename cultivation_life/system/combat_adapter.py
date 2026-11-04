@@ -76,6 +76,11 @@ class CapabilityBinding:
             owner = self.owners.get(update["id"])
             if owner is None:
                 continue
+            if 'operating_energy' in update and isinstance(owner, dict):
+                owner['operating_energy'] = update['operating_energy']
+                # Asset damage has its own integrity/control settlement. It
+                # neither regenerates nor spends the source person's energy.
+                continue
             if update["resource_link"] == "legacy_mp":
                 # Linked resource costs are authoritative, including voisinage-only
                 # rounds and stories which normally waive conventional MP loss.
@@ -109,16 +114,19 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
     rosters = (("player", player_units), ("enemy", PlayerCombatSystem._enemy_units(target)))
     persistent = persistent_owners(game, {unit.id for _, units in rosters for unit in units})
     static_ids = set(target.get('static_resource_ids', ()))
+    puppet_ids = {str(row.get('id')) for row in game.player.puppets}
     for key in static_ids:
         if key in persistent or key not in ephemeral or ephemeral[key].get('kind') not in {'mechanical', 'artifact', 'formation', 'environment'}:
             raise ValueError('Static combat resources require an owned non-person battlefield object')
-    sources = battle_sources(game, {**ephemeral, **persistent})
+    sources = battle_sources(game, {k:v for k,v in {**ephemeral, **persistent}.items() if k not in puppet_ids})
     for side, units in rosters:
         for unit in units:
             owner = persistent.get(unit.id)
             if owner is None:
                 owner = ephemeral.get(unit.id)
             state = owner.get("transcendence") if isinstance(owner, dict) else getattr(owner, "transcendence", None)
+            if side == 'player' and unit.id in puppet_ids:
+                state = None
             # Absence means legacy content, for players and NPCs alike. The
             # conversion/attainment provider explicitly opts actors into this
             # schema; realm alone must not fabricate resource mastery.
@@ -153,9 +161,23 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
             from .asura import active as asura_active
             ward = (golden_light(game.player) or (asura_active(game.player) and game.player.asura_cultivation.get('body_level', 0) >= 20)) if unit.id == 'player' else npc_golden_light(owner)
             capabilities = replace(capabilities, ward_tier=2 if ward else 1, ward_cost=0)
+            if side == 'player' and unit.id in puppet_ids:
+                from .puppet_energy import current, attack_cost,force_tier,operation
+                from .combat_plan import effective_plan
+                # Owned assets consume their stored charge and borrow only actual
+                # attack payments from the player's one battle energy ledger.
+                use=operation(owner)
+                capabilities = replace(capabilities, operating_energy=current(owner), operating_cost=use['cost'],
+                    operating_compatible=use['compatible'],
+                    attack_resource_owner='player', sponsored_attack_cost=attack_cost(owner),
+                    operating_tier=force_tier(owner),allow_sponsor=effective_plan(game.player)['puppet_supply'],
+                    force_tier=2 if int(owner.get('realm_index', 0)) >= 9 else 1,
+                    technique_tier=1, artifact_tier=1, voisinages=(), stance='off',
+                    capacity=0., current=0., usable_capacity=0., body_mechanisms=(), divine_lights={})
             from .cultivation_ranks import rank_for
             from .combat.npc_lifecycle import read
             if unit.id == 'player':
+                capabilities=replace(capabilities,mana_capacity=max_mp(game.player))
                 from .aperture_resources import true_realm, investment_multiplier
                 from .combat_plan import effective_plan
                 plan = effective_plan(game.player)

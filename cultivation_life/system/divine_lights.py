@@ -1,5 +1,6 @@
 """Five body-born lights. Only the adapter reads cultivation/content records."""
 from ..content_registry import CONTENT_DOCUMENTS
+from .npc_body_attainments import rank as trained_rank
 
 IDS = ('kun', 'zhen', 'kan', 'li', 'qian')
 NAMES = ('坤元缃光', '震合缥光', '坎道玄光', '离上朱光', '乾古素光')
@@ -27,7 +28,7 @@ def body_record(owner, *, player=False):
     if enabled_for(owner) or monster_enabled(owner) or ghost_enabled(owner):return {}, False
     level = max(0, min(50, int(read(owner, 'immortal_body_level', 0) or 0)))
     # NPC advancement follows its independent body coordinate, never its realm.
-    return dict(level=level, divine_lights={key:min(10, level // 5) for key in IDS}), False
+    return dict(level=level, divine_lights={key:trained_rank(owner,"lights",key,level) for key in IDS}), False
 
 
 def profile(owner, *, player=False):

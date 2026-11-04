@@ -39,5 +39,5 @@ def mask_unrevealed(public, perception):
         public['cultivation_ranks'] = {
             'cultivation': {'name': perception['realm_name']},
             'body': {'name': '未探明'}, 'sense': {'name': '未探明'}}
-        for key in ('body_training', 'immortal_body_level', 'divine_sense_rank'):
+        for key in ('body_training', 'immortal_body_level', 'divine_sense_rank', 'body_attainments'):
             public[key] = None

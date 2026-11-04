@@ -224,7 +224,7 @@ def settle_puppet_person(game, puppet, *, outcome, reason=''):
     if npc is None or puppet.get('type') != 'living':
         return
     if outcome == 'released' and npc.alive and npc.roster_state == 'held':
-        for key in ('realm_index', 'layer', 'body_training', 'immortal_body_level', 'divine_sense_rank', 'main_technique_id', 'lifespan'):
+        for key in ('realm_index', 'layer', 'body_training', 'immortal_body_level', 'divine_sense_rank', 'main_technique_id', 'main_technique_level', 'lifespan'):
             if key in puppet:
                 setattr(npc, key, copy.deepcopy(puppet[key]))
         release_person(game, npc.id)

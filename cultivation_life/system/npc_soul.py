@@ -12,6 +12,7 @@ def escape_body(owner, now):
         deadline=now+WORLD_SYSTEMS['time_units'][str(rank)],
         address=dict(world=read(owner,'world'),location=read(owner,'location_id'),instance=None)))
     _write(owner,'body_training',0)
+    _write(owner,'body_attainments',{})
     return True
 
 

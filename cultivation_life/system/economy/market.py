@@ -219,6 +219,8 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
     game.market_location_id = location_id
     game.market_age = player.age
     game.market_offers = offers
+    from ...npc_development_content import shelf
+    game.market_offers.extend(shelf(game))
     local_trade.sync_shelf(game)
     return True
 

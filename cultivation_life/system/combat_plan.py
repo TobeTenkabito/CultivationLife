@@ -2,12 +2,12 @@
 from .combat.contracts import number
 
 DEFAULTS = dict(manual=False, stance='press', investment=0.0, burst='auto',
-                mp_reserve=.28, transformations=True, support_guard=True)
+                mp_reserve=.28, transformations=True, support_guard=True, puppet_supply=True)
 
 
 def effective_plan(player):
     saved = {**DEFAULTS, **player.combat_plan}
-    return saved if saved['manual'] else dict(DEFAULTS)
+    return saved if saved['manual'] else dict(DEFAULTS,puppet_supply=saved['puppet_supply'])
 
 
 def public_plan(player):
@@ -24,7 +24,7 @@ def validate_plan(payload):
         raise ValueError('未知邻域姿态')
     if 'burst' in data and data['burst'] not in {'auto', 'early', 'never'}:
         raise ValueError('未知爆发策略')
-    for key in ('transformations', 'support_guard'):
+    for key in ('transformations', 'support_guard', 'puppet_supply'):
         if key in data and type(data[key]) is not bool:
             raise ValueError('预案开关必须为布尔值')
     for key, maximum in (('investment', 1000000), ('mp_reserve', 1)):

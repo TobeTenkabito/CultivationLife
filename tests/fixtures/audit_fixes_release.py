@@ -22,8 +22,8 @@ def prepare_audit_fixes(engine, identity, case):
         npc=SectNpc('release-trained','培养俘虏','',5,REALMS[5].layers,1000,1001,world='spirit',spirit_root='supreme_metal')
         game.notable_npcs[npc.id]=npc
         game.player.prisoners.append(game.detain_person(dict(id=npc.id,combat_power=100)))
-        from cultivation_life.system.owned_training import quote
-        game.player.opportunity=quote(game.player,game.player.prisoners[-1],'cultivation',1)['opportunity']+10
+        from cultivation_life.system.npc_development.service import quote
+        game.player.opportunity=quote(game,'prisoner',npc.id,'cultivation')['opportunity']+10
     else:
         game.player.location_id=definition(game)['location']
         state=account(game,create=True)

@@ -3,6 +3,7 @@
 
 # Inclusive starts: mortal 0–3; qi 4–16; seven 12-rank realms through 100.
 STARTS = (0, 4, 17, 29, 41, 53, 65, 77, 89, 101, 128, 155, 182)
+END_RANK = 209
 
 
 NAMES = ('凡人', '炼气', '筑基', '结丹', '元婴', '化神', '炼虚', '合体', '大乘', '真仙', '金仙', '太乙', '大罗')
@@ -10,7 +11,7 @@ NAMES = ('凡人', '炼气', '筑基', '结丹', '元婴', '化神', '炼虚', '
 
 def rank_for(realm, layer=1):
     realm = max(0, min(12, realm))
-    width = (STARTS[realm + 1] if realm < 12 else 209) - STARTS[realm]
+    width = (STARTS[realm + 1] if realm < 12 else END_RANK) - STARTS[realm]
     layers = 1 if realm == 0 else 13 if realm == 1 else 9
     return STARTS[realm] + min(width - 1, max(0, layer - 1) * width // layers)
 
@@ -18,7 +19,7 @@ def rank_for(realm, layer=1):
 def describe(rank):
     rank = max(0, int(rank))
     realm = max(i for i, start in enumerate(STARTS) if rank >= start)
-    width = (STARTS[realm + 1] if realm < 12 else 209) - STARTS[realm]
+    width = (STARTS[realm + 1] if realm < 12 else END_RANK) - STARTS[realm]
     fraction = min(width - 1, rank - STARTS[realm])
     stage = min(2, fraction * 3 // width)
     return {'rank': rank, 'realm_index': realm, 'name': NAMES[realm] + (('初期', '中期', '后期')[stage] if realm else '')}

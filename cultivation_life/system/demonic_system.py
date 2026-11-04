@@ -66,7 +66,7 @@ def craft_mechanical_puppet(deps: DemonicActionsDependencies, game_id, form='', 
     puppet = {k:v for k,v in result.items() if k not in {'can_craft','reason'}}
     puppet.update(id=f"puppet_{uuid.uuid4().hex[:12]}", type='mechanical',type_name='机关傀儡',
                   main_technique_id=None,control=100.,cultivation_progress=0.,breakthrough_bonus=0.,
-                  created_age=player.age,alive=True,durability=100.,path=player.path)
+                  created_age=player.age,alive=True,durability=100.,path=player.path,operating_energy=100.,energy_source_id=energy)
     player.puppets.append(puppet)
     deps._grant_art_experience(player, 'refining', 20)
     deps._grant_art_experience(player, 'formation', 8)
@@ -82,33 +82,10 @@ def craft_mechanical_puppet(deps: DemonicActionsDependencies, game_id, form='', 
 
 
 def train_owned(deps: DemonicActionsDependencies, game_id: str, target_id: str, kind: str, axis: str, batches: int = 1):
-    from .owned_training import quote
-    game = deps._load(game_id)
-    p = game.player
-    if (not p.alive or game.pending_event or p.imprisonment or p.sealed_cultivation
-            or p.ghost_captor or p.cultivation_suppression or game.active_trial
-            or (game.guixu_state.get('player_session') or {}).get('trapped')):
-        raise ValueError("当前状态无法培养")
-    if kind not in {"prisoner", "puppet"}:
-        raise ValueError("培养对象类型无效")
-    entries = p.prisoners if kind == "prisoner" else p.puppets
-    target = next((x for x in entries if str(x.get("id")) == target_id and x.get("alive", True)), None)
-    if not target:
-        raise ValueError("培养对象不存在")
-    if kind == 'puppet' and not usable_puppet(target, game):
-        raise ValueError('该傀儡已经毁坏，无法培养')
-    plan = quote(p, training_facts(game, target) if kind == 'puppet' else target, axis, batches)
-    if not plan['can_train']:
-        raise ValueError(plan['reason'])
-    p.opportunity -= plan['opportunity']
-    p.mp -= plan['mp']
-    target.update(plan['result'])
-    summary = (f"为{target['name']}{plan['label']} {plan['rounds']}轮：{plan['before']} → {plan['after']}；"
-               f"机缘 -{plan['opportunity']:g}，法力 -{plan['mp']:g}。")
-    game.history.append(HistoryRecord('SYS_OWNED_TRAINING', 1, p.age, '培养', axis, 'trained',
-                                     summary, {'target_id': target_id, 'rounds': plan['rounds']},
-                                     ['system', 'training', kind]))
-    game.updated_at = now_iso()
+    from .npc_development.service import apply
+    game = copy.deepcopy(deps._load(game_id))
+    apply(game,kind,target_id,axis,'infuse',batches)
+    game.updated_at=now_iso()
     deps.store.save(game)
     return deps.present(game)
 
@@ -129,12 +106,8 @@ def puppet_action(
         raise ValueError('该傀儡已经毁坏，只能解除控制')
     rng = decode_rng(game.seed, game.rng_state)
     if action == "pill":
-        item = ITEM_CATALOG.get(content_id)
-        if not item or "pill" not in item.tags or not remove_item(player, content_id):
-            raise ValueError("需要选择并持有一枚丹药")
-        gain = float(deps._demonic_rules()["pill_breakthrough_bonus"])
-        puppet["breakthrough_bonus"] = min(0.35, float(puppet.get("breakthrough_bonus", 0)) + gain)
-        result, summary = "pill_fed", f"你赐予{puppet['name']}{item.name}，其下次批量培养机缘费用减免 +{gain:.0%}（最多35%）。"
+        from .npc_development.service import feed_pill
+        result,summary='pill_fed',feed_pill(game,puppet_id,content_id)
     elif action == "technique":
         if puppet.get("type") != "living":
             raise ValueError("只有活傀能够更换功法")
@@ -143,17 +116,9 @@ def puppet_action(
             raise ValueError("需要选择已掌握的修仙功法")
         if puppet.get("main_technique_id") == technique.id:
             raise ValueError("该活傀已经修习此功法")
-        # Preserve the saved body's strength; replace its technique share.
-        # A trained body keeps the same scale when switching back and forth.
-        if 'technique_power_base' not in puppet:
-            previous = deps._puppet_technique(puppet.get('main_technique_id'))
-            previous_bonus = previous.combat_bonus * .10 if previous else 0.0
-            puppet['technique_power_base'] = max(1.0, float(puppet['combat_power']) - previous_bonus)
-            puppet['technique_power_scale'] = 1.0
-        puppet["main_technique_id"] = technique.id
-        puppet["combat_power"] = round(puppet['technique_power_base'] +
-            technique.combat_bonus * .10 * puppet['technique_power_scale'], 1)
-        result, summary = "technique_changed", f"你令{puppet['name']}改修《{technique.name}》，战力按新功法重新核算。"
+        from .npc_development.service import teach
+        summary=teach(game,'puppet',puppet_id,content_id,slot='main')
+        result='technique_changed'
     elif action == "reinforce_control":
         if player.path != "demonic" or puppet.get("type") != "living":
             raise ValueError("只有魔修能够加固活傀印记")
@@ -285,9 +250,14 @@ def _complete_soul_refinement(deps: DemonicGrowthDependencies, player: Player, s
 
 
 def _public_demonic_system(deps: DemonicViewDependencies, player: Player, game=None) -> dict[str, Any]:
+    from .puppet_energy import current as energy_current, can_deploy
     from .demonic.soul_risk import refinement_risk
     from .owned_training import public as training_public
+    from .npc_development.presentation import legacy_quotes
     from .puppet_crafting import public as crafting_public
+    from .npc_development.targets import candidates
+    from .npc_development.portraits import portrait
+    pictures={(t.kind,t.identity):portrait(t,t.facts(game)) for t in candidates(game)} if game else {}
     pill_ids = [item.id for item in player.inventory if "pill" in item.tags and item.quantity > 0]
     techniques = [
         {"id": entry.id, "name": entry.name}
@@ -307,12 +277,14 @@ def _public_demonic_system(deps: DemonicViewDependencies, player: Player, game=N
             max(0.0, min(1.0, float(entry.get("corpse_integrity", 100.0)) / 100.0))
             if kind == "corpse" else 1.0
         )
-        if not available:
+        if not available or not can_deploy(player,entry):
             condition = 0.0
         contribution_mode = "队伍战力" if entry.get("type") == "living" else "本体战力"
         puppets.append(copy.deepcopy(entry) | {
             "usable": available,
-            "training": training_public(player, entry if available else dict(entry, alive=False)),
+            "operating_energy": energy_current(entry),
+            "portrait": pictures.get(('puppet',str(entry['id']))),
+            "training": legacy_quotes(game,"puppet",str(entry["id"])) if game else training_public(player, entry if available else dict(entry, alive=False)),
             "type_name": PUPPET_NAMES.get(str(entry.get("type")), str(entry.get("type"))),
             "realm_name": deps._npc_realm_name(SectNpc(
                 "", "", "", int(entry.get("realm_index", 0)), int(entry.get("layer", 1)), 0, 1,
@@ -341,7 +313,8 @@ def _public_demonic_system(deps: DemonicViewDependencies, player: Player, game=N
         allowed, reason = can_possess(player, entry)
         gender = str(entry.get("gender") or deps._stable_gender(str(entry.get("id", ""))))
         prisoners.append(copy.deepcopy(entry) | {
-            "training": training_public(player, entry),
+            "portrait": pictures.get(('prisoner',str(entry['id']))),
+            "training": legacy_quotes(game,"prisoner",str(entry["id"])) if game else training_public(player, entry),
             "gender": gender, "gender_name": "女" if gender == "female" else "男",
             "can_possess": allowed, "possession_reason": reason,
             "can_recruit_concubine": gender == "female",
@@ -364,17 +337,18 @@ def _public_demonic_system(deps: DemonicViewDependencies, player: Player, game=N
             "satisfied": ascension_current >= ascension_required,
             "available": ascension_available,
         },
-        "time_behavior": "年度机缘、控制衰减与反噬按行动年数逐年结算；培养按资源即时投入，无每年次数限制；每轮修为提升1—3层、普通炼体10层（高阶肉身2层）、神识8阶，最高不超过玩家对应能力。可选1/5/10轮，到上限自动停止且只收实际轮数费用。闭关炼化会实际推进年月。",
+        "time_behavior": "培养与充能统一在培养窗口即时结算；机缘培养不超过玩家对应能力，专材培养按所在界面限制，上境修为每轮一层。可选1/5/10轮，到上限停止且只收实际轮数。傀儡同阶能源出手耗5耐久，低一／二阶耗20／60、低三阶无法驱动，高一／二／更多阶耗2／1／0.5；九阶起为仙级，凡阶傀儡无法承载仙级能源；高阶仙阶攻击须仙级能源，不足时仅在供能开启后由玩家垫付元力，凡阶可垫付5 MP。每次只扣一个来源；无法供能则降阶或停手。年度机缘、控制衰减与反噬仍按实际年数结算。",
     }
 
 
 def _puppet_intrinsic_contribution(deps: DemonicPuppetRulesDependencies, player: Player) -> float:
     """机关与炼尸直接强化玩家本体，因而可以参与剧情的个人战力判定。"""
     weights = deps._demonic_rules()["puppet_combat_contribution"]
+    from .puppet_energy import can_deploy
     total = 0.0
     for entry in player.puppets:
         kind = str(entry.get("type"))
-        if not entry.get("alive", True) or kind not in {"mechanical", "corpse"}:
+        if not entry.get("alive", True) or not can_deploy(player,entry) or kind not in {"mechanical", "corpse"}:
             continue
         field = "durability" if kind == "mechanical" else "corpse_integrity"
         integrity = max(0.0, min(1.0, float(entry.get(field, 100.0)) / 100.0))
@@ -383,10 +357,11 @@ def _puppet_intrinsic_contribution(deps: DemonicPuppetRulesDependencies, player:
 
 
 def _living_puppet_party_powers(deps: DemonicPuppetRulesDependencies, player: Player, game=None) -> list[float]:
+    from .puppet_energy import can_deploy
     ratio = float(deps._demonic_rules()["puppet_combat_contribution"]["living"])
     return [
         round(float(entry.get("combat_power", 0)) * ratio, 1)
-        for entry in player.puppets if usable_puppet(entry, game) and entry.get("type") == "living"
+        for entry in player.puppets if usable_puppet(entry, game) and can_deploy(player,entry) and entry.get("type") == "living"
     ]
 
 

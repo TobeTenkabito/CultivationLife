@@ -13,6 +13,10 @@ window.NpcArt = (() => {
       !n.transformation_loadouts?.[n.transformation_technique?.id]?.active?.length;
   }
   function select(n){
+    if(n?.id&&n.name&&n.asset_kind){
+      const key=n.asset_kind==='mechanical'?`mechanical-${n.form||'humanoid'}`:n.asset_kind==='corpse'?`corpse-${n.gender}`:null;
+      if(key&&window.ControlledArtCatalog?.[key])return 'controlled.'+key;
+    }
     if(!validForm(n))return null;
     if(own(pack.fixed,n.id)){
       const key=pack.fixed[n.id],a=pack.actors[key];
@@ -42,11 +46,12 @@ window.NpcArt = (() => {
     const key=active()||roster?select(n):null;if(!key)return null;
     const img=el('img',undefined,`npc-art-${kind}`);img.alt=`${n.name}${kind==='portrait'?'头像':'立绘'}`;
     const extension=key.startsWith('actor.path.');
-    const local=window.NpcExpansionCatalog?.[key];
+    const local=key.startsWith('controlled.')?window.ControlledArtCatalog?.[key.slice(11)]:window.NpcExpansionCatalog?.[key];
     const asset=local?.[kind]||(extension?window.PixelLibrary?.catalog?.assets[key+'.'+kind]:pack.actors[key]?.[kind]);
     if(!asset)return null;
     [img.width,img.height]=asset.size;
     img.dataset.art=key;img.loading='lazy';img.decoding='async';img.style.visibility='hidden';
+    if(n.restraint){img.classList.add('npc-art-restrained');img.title='受禁控制中 · 保留原人物形象';}
     img.onload=()=>{img.style.visibility='visible';};
     img.onerror=()=>{img.hidden=true;img.removeAttribute('src');onFailure?.();};
     img.src=extension||local?asset.file:pack.base+asset.file;return img;

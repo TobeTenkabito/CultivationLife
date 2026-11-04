@@ -1,6 +1,10 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "Player.puppets.*.operating_energy / GameState.history.SYS_PUPPET_CHARGE": "people / history：2026-11-04按用户最新要求，operating_energy为原资产已装能源的有限耐久0至100，自供出手扣5，玩家垫付时不扣。新造机关已支付原能源组件才初始100；缺值不补发。安装行囊原件实扣一份，卸下原件保留剩余值，培养／等待／切界／读档不恢复。与本体耐久、控制和来源人物元力独立，释放不转入人物。结构12，无迁移。",
+    "GameState.active_trial.snapshot.units.*.capabilities.operating_energy / operating_cost / attack_resource_owner / sponsored_attack_cost / states.*.operating_energy / GameState.last_combat_report.rounds.*.voisinage.operating_energy": "session：同场傀儡冻结已装能源耐久、费用与实际同侧供能者ID。自供或玩家MP／元力逐次择一支付，余额不复制给傀儡；暂停保存剩余耐久，读取不得增加。战报只投影，不重演扣费或回复。原玩家资源绑定保留封存余额。",
+    "SectNpc.transcendence.capacity / conversion / current / lifecycle（NPC主动培养）": "personal：用户授权高阶简化培养，仍用原人物元力账本。扩容与转化先按旧容量和速率结清原世界时段，新容量不回满current；新建账本current为0，新rate从本次世界时刻生效。培养不移动人物，不重置周期劫期，无新顶层字段或世界时钟。",
+    "Player.puppets.*.main_technique_level / age / GameState.history.SYS_NPC_DEVELOPMENT / SYS_NPC_TEACHING": "carry / history：NPC培养复用原资产与人物成长字段，活傀明确传授主修时记录真实1级，释放时连同原主修ID回写同一来源人物，不从旧主修等级推造新功法等级；实际培养才承接缺失的原来源年龄。历史仅保存原目标ID、方式和实际轮数，无新人物、资源池、时钟或顶层字段。四道途专材为原Player.inventory物品，第三档限对应上界使用，结构仍12，无迁移、折算或用户存档修改。",
     "GameState.active_trial.snapshot.units.*.capabilities.body_mechanisms.*.effects.incursion / retaliate_control / voisinages.*.authority_reference": "session：2026-11-03数值平衡。色蕴侵夺加成与烈脏控制成功率由同一真实肉身的原培养等级只读投影，随原入战能力冻结；旧会话缺少控制通道保持原显式反应语义，不补造新数值。未显式给定威能基准的新邻域采用max(100,基础强度)，显式基准及原快照保留，不读档重算。随机判定沿原战斗RNG，费用和回复沿原可用元力，不建新人物、资源池、移动例外或时钟。原Player培养记录不改结构，仍只接受12，不迁移或覆盖旧文件。",
     "GameState.heavens_state.runtime.*.upkeep.progress / last_year / escrow / status (terminal paid year)": "scope / session：原托管护持在已实际经过的普通地区年按唯一游标支付该年原预算，再因本人死亡终止并退回未耗款；死亡恰逢末年可记录progress等于duration且status为failed，但不得登记maintained或参悟收益。completed仍必须完成全部工期并取得原效果，active／cancelled／expired不得伪装满工期。重复回调不重扣；普通查询reconcile只结清原已耗进度，不补造年份。字段均已存在，无新增顶层字段、旧档迁移或预算重算。",
     "GameState.heavens_state.runtime.outposts.*.id / source / destination / units / visit (peer-world expansion)": "scope：17组同层双界的34个显式方向；旧结构11人魔outpost:原组织ID原样保留，不映射或覆盖。其他双界按outpost:原组织ID:目的界唯一登记，源／目的须同一已登记普通层级，未知界面、跨层和空间拒绝。各组双向共用一条单人通道，其他组各自占用；原NPC只有一个活动任务，真实归返历史可被后续另一目的界引用，不克隆人物。各目的界文书、军令、实物、府库、当地年和返程预付款分别保留，同一原组织仍受整宗战争占用；本人先结束原往返才开启另一组行程。每档八份、每处三人及原历史限额保持。",
@@ -121,7 +125,12 @@
     "Player.creation_insights / GameState.authored_techniques": "创法点数认领与支出归同一玩家个人；本世作品及仅上一周目作品的冻结定义归本档全局，通行不复制、不刷新点数或市场。NPC technique_levels 与 technique_slots 归原人物，升级持久保存，同一功法不因展示或跨界重置。",
     "intrigue_state.factions.sect:ID.task_board": "scope：原宗门任务、发布境界、招新政策、影响力、逐人薪俸与不满危机记录、行动单位配额及修订号。仅玩家在籍、同界且当前实际年份结算；退宗或任何离界停止，返回不补算。物资和现金不存任务副本；任务绑定原世界、地点、发布人及宗籍时间，完成者只结算一次。",
     "economy_v2.accounts.person:ID": "personal：原NPC的唯一实付薪俸现金，初值0，府库实转发放，购买任务材料与捐献真实扣款；转籍、离宗保留原ID账户，不复制到新宗门。",
-    "wars.*.sect_mobilization / sect_mobilization_round / sect_mobilization_owner": "scope：原活动同界战役的有限一次动员加成，每项2%、累计最多10%；原会战开场领取并绑定原battle编号，下一场失效，不授予移动或远程战斗权限。玩家离界或离宗不启用留存收益；只读查询不消费。"
+    "wars.*.sect_mobilization / sect_mobilization_round / sect_mobilization_owner": "scope：原活动同界战役的有限一次动员加成，每项2%、累计最多10%；原会战开场领取并绑定原battle编号，下一场失效，不授予移动或远程战斗权限。玩家离界或离宗不启用留存收益；只读查询不消费。",
+    "Player.puppets.*.energy_source_id / energy_spares.*.{id,source_id,durability}": "people：原傀儡已装能源目录ID，备用列表为卸下原件唯一ID、来源及未耗耐久；安装或换回只移动原件，禁止回满／复制，不占用其他人物账本。随傀儡原资产转属／移除；不回写活傀来源人物。原装配components仅为未明确登记时的只读来源证据，不据当前境界推断品阶。",
+    "Player.combat_plan.puppet_supply": "session：持久个人战斗偏好布尔值，默认开启，自动／手动预案同样生效；冻结战斗不受后改设置影响，事件与试炼中拒绝更改。",
+    "GameState.active_trial.snapshot.units.*.capabilities.{operating_tier,allow_sponsor,mana_capacity} / states.*.{mana_current,supply_mp_spent}": "session：已装能源品阶、供能授权与玩家实际MP容量冻结投影；mana_current为原MP的单场快照，supply_mp_spent为本场累计真实垫付MP，不是可消费余额。战斗结束沿原玩家结算入口回写，剧情损耗缩放不得免除垫付款；暂停加载校验有限非负及容量，不创建持久第二MP池。",
+    "NPC.transcendence.doctrine.cultivated / mentor / NPC.transcendence.world_voisinages.*.{active,levels}": "people：同一原NPC明确付费所得邻域成长。仙界沿原doctrine并登记cultivated，按原配置境界上限读取，mentor沿原字段停止重复自主修习；其他三界等级归原NPC的transcendence，不复制人物或元力账本。离开对应世界仅停止投影，不删除等级；受禁释放保留同一人物，机关／炼尸／活傀不借来源NPC邻域。主动培养结算实际旧区间，不伪造时间或返还资源。",
+    "GameState.active_trial.snapshot.units.*.capabilities.{operating_compatible,sponsored_mp_cost} / GameState.last_combat_report.rounds.*.voisinage.ordinary_attacks": "session / history：冻结当前能源真实阶差承载及独立垫付MP费用，operating_cost按原能源与傀儡阶位计算；不兼容能源不自供，玩家垫付仍受开关控制。ordinary_attacks只记录该回合实际预付出手者及作用阶位，回放据此筛选动作，不修改原资产、余额或RNG。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",
@@ -471,6 +480,7 @@
     "Player.nascent_state.second.control": "独立个人控制力0–100，初值100；同化恢复20，未同化每期下降2。低于50不能承接本魂，不与战斗完整度混用；跨界与读档不重置。",
     "Player.nascent_state.second.age_year": "原第二元婴生理年龄已结算到的玩家世界年锚点；每段真实时间只回写原NPC.age一次，普通世界、独立空间与跨界共用。结构11旧第二元婴缺少该字段时以载入世界年明确采用，不追造年龄；控制力缺失明确采用100，随后随原账本保存。",
     "SectNpc.age/lifespan (second_nascent)": "沿原俘虏生理年龄与寿命；炼虚以下寿尽消散，炼虚起无寿限。不复制人物、不按玩家生理年龄或同化due重建时钟。承接本魂时剩余寿命换算至玩家世界年，不为寿尽本尊补寿。",
-    "SectNpc.spirit_state": "原NPC的个人身魂状态，不复制名册；第二元婴同化约束替代普通离体期限，不豁免炼虚以下寿元。"
+    "SectNpc.spirit_state": "原NPC的个人身魂状态，不复制名册；第二元婴同化约束替代普通离体期限，不豁免炼虚以下寿元。",
+    "NPC.body_attainments / Player.ghost_host_body.body_attainments": "body：原人物实际肉身的四系分项精修，0至10重；普通NPC／受禁NPC写回唯一原人物，关系仅引用。原肉身毁坏时清空，夺舍仅把既有宿身记录带入原ghost_host_body投影；不赋予原灵魂、第二元婴或傀儡独立人物能力。DLC关闭不删除记录，不激活已关闭体系。跨界随原肉身地址规则保留，不另建人物或资源池。"
   }
 }

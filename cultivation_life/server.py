@@ -211,6 +211,8 @@ class Handler(BaseHTTPRequestHandler):
                 self._json({"games": ENGINE.list_games()})
             elif path == "/api/achievements":
                 self._json(ENGINE.list_achievements())
+            elif path.startswith('/api/games/') and path.endswith('/npc-development'):
+                self._json(ENGINE.npc_development(path.split('/')[3]))
             elif path.startswith("/api/games/"):
                 game_id = path.removeprefix("/api/games/").strip("/")
                 try:
@@ -296,6 +298,13 @@ class Handler(BaseHTTPRequestHandler):
             if len(parts) != 4 or parts[:2] != ["api", "games"]:
                 raise NotFoundError("接口不存在")
             game_id, operation = parts[2], parts[3]
+            training_command = (operation == 'owned-training'
+                or operation == 'puppet-action' and payload.get('action') in {'infuse','pill','technique'}
+                or operation == 'family-action' and payload.get('action') in {'infuse','teach','gift_equipment'}
+                or operation == 'disciple-gift'
+                or operation == 'dao-companion' and payload.get('action') in {'gift_item','teach_technique'})
+            if training_command and payload.get('expected_revision') != ENGINE._load(game_id).updated_at:
+                raise ValueError('培养页面已过期，请刷新后重新操作')
             ENGINE.assert_building_operation_allowed(game_id, operation)
             payload = normalize_content_references(payload)
             if operation in {'tianji-debug-reveal-all', 'merchant-debug-hq'} and not self.headers.get('X-Cultivation-Debug'):
@@ -440,6 +449,8 @@ class Handler(BaseHTTPRequestHandler):
             elif operation == 'character-skin':
                 result = ENGINE.select_character_skin(game_id, payload.get('skin_id', ''))
             elif operation == "settings":
+                if payload.get('setting')=='puppet_supply' and type(payload.get('enabled')) is not bool:
+                    raise ValueError('傀儡供能开关必须为布尔值')
                 result = ENGINE.update_setting(
                     game_id, payload.get("setting", ""), bool(payload.get("enabled", False))
                 )
@@ -598,6 +609,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.begin_relationship_capture(
                     game_id, payload.get("kind", ""), payload.get("target_id", "")
                 )
+            elif operation == 'npc-development':
+                result = ENGINE.npc_development(game_id,payload)
             elif operation == "owned-training":
                 result = ENGINE.train_owned(game_id, payload.get("target_id", ""), payload.get("kind", ""),
                                             payload.get("axis", ""), payload.get("batches", 1))

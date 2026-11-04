@@ -124,6 +124,7 @@ class PlayerCombatSystemTests(unittest.TestCase):
         player_power = combat_power(game.player)
         game.player.puppets = [{
             "id": "guard-corpse", "name": "玄阴尸卫", "type": "corpse",
+            "operating_energy": 100.,
             "realm_index": game.player.realm_index, "combat_power": player_power,
             "corpse_integrity": 100.0, "alive": True,
         }]

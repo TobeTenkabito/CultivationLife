@@ -328,9 +328,35 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 capture("new-recruit-"+families[i]+"-"+gender);tapSelector("#npc-art-dialog button");
             }
             tapSelector("#faction-toggle");
+            python("from cultivation_life import server\nexec("+JSONObject.quote(assetText("npc_development_release.py"))+")\nprepare_npc_development(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");tapSelector("[data-panel-target=npc-development]");
+            waitForJs("!!document.querySelector('[data-target-id=release-student]')","NPC dialog loaded");tapSelector("[data-target-id=release-student]");
+            npcSelect("培养方向","body_art");npcSelect("培养方式","material");npcSelect("培养轮数","1");
+            tapSelector("#npc-development-submit");
+            waitForJs("!busy&&document.querySelector('select[aria-label=肉身神通]')?.textContent.includes('当前3重')","Paid NPC body specialization");
+            npcSelect("培养方向","technique_growth");tapSelector("#npc-development-submit");
+            waitForJs("!busy&&document.querySelector('select[aria-label=研修功法]')?.textContent.includes('2重')","Paid NPC technique growth");
+            npcSelect("培养方向","domain");tapSelector("#npc-development-submit");
+            waitForJs("!busy&&document.querySelector('#npc-domain-activate')?.textContent.includes('已启用')","Paid NPC domain growth");
+            for(String form:new String[]{"bird","deva","dragon","yaksha","flora","serpent","kinnara","corpse-male","corpse-female","prisoner"}) {
+                tapSelector("[data-target-id=release-"+form+"]");
+                waitForJs("document.querySelector('.npc-development-art img')?.naturalWidth>0","Controlled illustration "+form);
+            }
+            tapSelector("[data-target-id=release-bird]");tapSelector("#npc-development-charge");
+            waitForJs("!busy&&document.querySelector('.npc-development-profile').textContent.includes('能源耐久 100')","Actual energy replacement");
+            capture("npc-development-"+families[i]);tapSelector("#npc-development-dialog>header button");
+            tapSelector("#battle-report-open");
+            waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Puppet replay loaded");
+            check(Boolean.TRUE.equals(js("game.last_combat_report.visual.teams.hero.some(n=>n.asset==='mechanical-bird')")),"Actual bird combat form");
+            capture("npc-bird-replay-"+families[i]);tapSelector("#battle-report-toggle");
         }
+        result.putString("npc_development_scope","Four-path body specialization, technique/domain growth, ten portraits, energy replacement and real bird replay; native submit taps");
         result.putString("upper_social_scope","Four upper-world guides and new recruited male/female portraits; actual native taps and unchanged guide state");
         result.putString("body_ui_scope","Two immutable pixel palettes, no retired controls, real paid four-family cultivation, materials and combat report; signed native touches");
+    }
+
+    private void npcSelect(String label,String value) throws Exception {
+        js("(()=>{const s=document.querySelector('select[aria-label="+label+"]');s.value="+JSONObject.quote(value)+";s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
     }
 
     private void python(String code) {

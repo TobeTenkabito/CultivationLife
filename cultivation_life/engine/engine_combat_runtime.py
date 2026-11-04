@@ -5,6 +5,7 @@ from ..race_diplomacy import relations_for
 from ..npc_custody import kill_person, settle_puppet_person
 from ..relationship_records import find_person
 from ..puppet_state import usable as usable_puppet
+from ..system.puppet_energy import can_deploy as puppet_can_deploy
 
 from ..system.semantic_events import emit, relationship_roles
 
@@ -50,7 +51,7 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
         units.append(second)
     for puppet in player.puppets:
         kind = str(puppet.get("type", "mechanical"))
-        if not usable_puppet(puppet, game) or kind not in {"mechanical", "corpse"}:
+        if not usable_puppet(puppet, game) or not puppet_can_deploy(player,puppet) or kind not in {"mechanical", "corpse"}:
             continue
         field = "durability" if kind == "mechanical" else "corpse_integrity"
         integrity = max(0.0, min(1.0, float(puppet.get(field, 100.0)) / 100.0))
@@ -71,7 +72,7 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
             str(relation.get("path", "dao")),
         ))
     for puppet in player.puppets:
-        if not usable_puppet(puppet, game) or puppet.get("type") != "living":
+        if not usable_puppet(puppet, game) or not puppet_can_deploy(player,puppet) or puppet.get("type") != "living":
             continue
         effective = max(0.0, float(puppet.get("combat_power", 0)))
         control = max(0.2, min(1.0, float(puppet.get("control", 100)) / 100.0))
@@ -311,6 +312,12 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     loss_scale = max(0.0, float(target.get("loss_scale", 1.0)))
     hp_loss = hp_max * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
     mp_loss = mp_max * resolution.mp_loss_ratio * float(target.get("mp_loss_scale", loss_scale))
+    supply=next((u for u in resolution.capability_updates if u['id']=='player' and u.get('supply_mp_spent',0)>0),None)
+    if supply and supply['resource_link']!='legacy_mp':
+        # Ordinary story discounts never waive actual puppet supply. Use the
+        # exact battle MP balance rather than the rounded report ratio.
+        spent=supply['supply_mp_spent'];net=max(0.,player.mp-supply['mana_current'])
+        mp_loss=max(0.,(net-spent)*float(target.get('mp_loss_scale',loss_scale))+spent)
     player.hp = max(0.0 if lethal else 1.0, player.hp - hp_loss)
     if resolution.hp_restore_ratio > 0:
         player.hp = min(hp_max, player.hp + hp_max * resolution.hp_restore_ratio)

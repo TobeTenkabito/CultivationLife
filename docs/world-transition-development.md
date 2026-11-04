@@ -69,6 +69,10 @@ NPC 必须使用 `system/combat/npc_lifecycle.move_world` 结算旧环境资源�
 
 ## 5. 有限例外
 
+2026-11-04 NPC邻域培养差异：用户要求继续简化高阶培养。责任入口`system/npc_development/domains.py`按原配置等级与修为门槛确定性提升，不经过玩家随机参悟或另付传承工期；原仙界NPC已过修习区间先结算，`cultivated`明确主动培养资格，不再套用随机NPC稀有度上限。不得免费回满元力、移动人物或覆盖专属传承；界面、身份及拘禁规则不豁免。测试`test_npc_development_stage3.py`、`browser_npc_development.py`，详见[第三阶段](npc-development-stage3.md)。
+
+2026-11-04 NPC成长差异登记：用户明确要求高阶简化培养。责任入口`system/npc_development/service.py`与`upper.py`允许已在对应第三级普通界面的八境圆满NPC升九境，九至十二境一轮一层、高阶肉身从零培养；不走玩家开脉和大劫，不改地址、世界时钟或已有周期劫期。低界迁界关口、封印、任务与身魂限制不豁免。扩容前结旧资源区间，不回满余额。傀儡为原资产，按后续同日用户要求优先使用实际装备能源，品阶／耐久不足且供能开启时才由同场玩家垫付MP或原元力；每次只扣一个来源，详见[傀儡能源](puppet-energy.md)。测试为`tests/test_npc_development_upper.py`及`tests/browser_npc_development.py`，规则见[NPC高阶培养](npc-development-upper.md)。此授权不新增跨界移动方式。
+
 仅下列行为不是正式玩家通行：新游戏首次建立地址；纯数据结构迁移；隔离 Debug 快照编辑／恢复。它们不得触发正常通行收益，也不得直接写用户其他存档。未知内容或未知界面必须拒绝并保留文件，不能通过“纠正”传送到人界。
 
 已登记的剧情护送仍使用正式提交入口，只豁免该剧情明确承担的费用。通常不得新增例外。确需新增时，在本节注明理由、最小范围、调用者、失效条件、正反向测试和防滥用证据，不能只留下 `special_case=True`。

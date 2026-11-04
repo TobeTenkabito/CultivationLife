@@ -1,0 +1,23 @@
+.npc-development-dialog{width:min(780px,calc(100vw - 28px));max-width:calc(100vw - 16px);max-height:calc(100dvh - 28px);box-sizing:border-box;padding:18px;color:var(--ink);background:var(--paper);border:1px solid var(--line);overflow:auto;}
+.npc-development-dialog::backdrop{background:#0008;}
+.npc-development-dialog>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;position:sticky;top:-18px;z-index:2;background:var(--paper);padding:8px 0;}
+.npc-development-dialog h2,.npc-development-dialog h3{margin:0;}
+.npc-development-dialog button,.npc-development-dialog select{min-height:36px;max-width:100%;white-space:normal;}
+.npc-development-layout{display:grid;grid-template-columns:160px minmax(0,1fr);gap:16px;}
+.npc-development-list{display:flex;flex-direction:column;gap:6px;max-height:440px;overflow:auto;}
+.npc-development-person{display:flex;align-items:center;text-align:left;gap:6px;padding:6px;}
+.npc-development-person img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;}
+.npc-development-person small{display:block;font-size:11px;}
+.npc-development-person[aria-pressed=true]{outline:2px solid var(--gold);outline-offset:-2px;}
+.npc-development-detail{min-width:0;overflow-wrap:anywhere;}
+.npc-development-profile{display:grid;grid-template-columns:128px minmax(0,1fr);align-items:center;gap:12px;}
+.npc-development-art button{background:transparent;border:0;padding:0;width:100%;}
+.npc-development-art img{width:100%;height:192px;object-fit:contain;image-rendering:pixelated;}
+.npc-development-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
+.npc-development-controls label{display:flex;flex:1;min-width:100px;flex-direction:column;gap:4px;}
+.npc-development-reason{color:var(--tone-red);}
+.npc-development-quote{padding:8px;background:color-mix(in srgb,var(--gold) 9%,transparent);margin-bottom:10px;}
+@media(max-width:600px){.npc-development-layout{grid-template-columns:1fr;}.npc-development-list{flex-direction:row;max-height:95px;}.npc-development-person{flex:0 0 145px;}.npc-development-profile{grid-template-columns:100px minmax(0,1fr);}.npc-development-art img{height:150px;}.npc-development-dialog{padding:12px;}.npc-development-dialog>header{top:-12px;}}
+@media(max-height:520px){.npc-development-art img{height:120px;}.npc-development-profile{grid-template-columns:85px minmax(0,1fr);}.npc-development-list{max-height:250px;}}
+
+.npc-art-restrained{outline:1px solid var(--tone-red);outline-offset:2px;box-shadow:0 0 7px color-mix(in srgb,var(--tone-red) 28%,transparent);}

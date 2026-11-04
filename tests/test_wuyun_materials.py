@@ -86,11 +86,15 @@ def test_actual_black_market_search_and_purchase_deliver_real_materials(ready):
     e.search_black_market(g.id,'五蕴');g=e.store.load(g.id)
     ids={key for row in definitions() for key in row['recipe']}
     results=g.auction_state['black_market_results']
-    assert {r['content_id'] for r in results}==ids
-    target=results[0];before=sum(i.quantity for i in g.player.inventory if i.id=='spirit_stone')
+    npc_material='npc_training_demonic_body_art_3'
+    assert {r['content_id'] for r in results}==ids|{npc_material}
+    target=next(r for r in results if r['content_id'] in ids);before=sum(i.quantity for i in g.player.inventory if i.id=='spirit_stone')
     e.buy_black_market_item(g.id,target['id'],quantity=4);after=e.store.load(g.id)
     assert has_item(after.player,target['content_id'],4)
     assert sum(i.quantity for i in after.player.inventory if i.id=='spirit_stone')<before
+    npc_offer=next(r for r in results if r['content_id']==npc_material)
+    e.buy_black_market_item(g.id,npc_offer['id'],quantity=1)
+    assert has_item(e.store.load(g.id).player,npc_material,1)
 
 
 def test_forged_other_world_black_market_offer_cannot_produce_material(ready):

@@ -101,7 +101,7 @@ def body_facts(actor):
         ensure_npc(row)
     row.update(species_identity(row, WORLD_SYSTEMS.get('monster_species', {})))
     return {key: row.get(key) for key in ('id', 'name', 'path', 'race', 'realm_index', 'layer',
-        'body_training', 'immortal_body_level', 'divine_sense_rank', 'monster_species_id',
+        'body_training', 'immortal_body_level', 'body_attainments', 'divine_sense_rank', 'monster_species_id',
         'monster_evolution_id', 'true_spirit_kind', 'type', 'form')}
 
 

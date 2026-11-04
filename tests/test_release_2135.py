@@ -85,11 +85,13 @@ def test_captive_training_to_immortal_rank_keeps_life_after_release(api):
     game.notable_npcs[npc.id] = npc
     prisoner = game.detain_person(dict(id=npc.id, combat_power=100))
     game.player.prisoners.append(prisoner)
-    plan = quote(game.player, prisoner, 'cultivation', 1)
+    from cultivation_life.system.npc_development.service import quote as unified_quote
+    plan = unified_quote(game,'prisoner',npc.id,'cultivation')
     game.player.opportunity = plan['opportunity'] + 10
     game.player.hp, game.player.mp = max_hp(game.player), max_mp(game.player)
     engine.store.save(game)
-    act(game.id, 'owned-training', target_id=npc.id, kind='prisoner', axis='cultivation', batches=1)
+    revision=engine.get_game(game.id)['updated_at']
+    act(game.id, 'owned-training', target_id=npc.id, kind='prisoner', axis='cultivation', batches=1,expected_revision=revision)
     trained = engine._load(game.id).player.prisoners[0]
     assert trained['realm_index'] == 6 and REALMS[6].lifespan is None
     assert trained['lifespan'] is None

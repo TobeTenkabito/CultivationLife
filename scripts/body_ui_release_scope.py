@@ -1,5 +1,8 @@
-"""3.5.1 declared changed domains/upstreams; no full-repository claim."""
+"""3.5.2 declared changed domains/upstreams; no full-repository claim."""
 TESTS=[
+ 'test_npc_development','test_npc_development_upper','test_npc_development_stage3','test_npc_development_352',
+ 'test_puppet_energy_supply','test_owned_training','test_family_expansion','test_pending_audit_fixes',
+ 'test_release_2135','test_visual_selection',
  'test_upper_social_351','test_npc_social_assets','test_npc_contacts','test_authored_techniques',
  'test_ui_preferences','test_visual_release','test_pixel_assets','test_tutorial','test_tutorial_walkthrough',
  'test_divine_lights','test_body_round_wuyun','test_ghost_body','test_ghost_body_events','test_ghost_body_materials',
@@ -15,6 +18,6 @@ TESTS=[
  'test_windows_release_evidence','test_android_release_checks','test_extension_system','test_body_ui_release',
 ]
 TESTS=['tests/'+name+'.py' for name in TESTS]
-BROWSERS=['browser_upper_social_351','browser_body_ui_release','browser_eightfold','browser_divine_lights','browser_wuyun',
+BROWSERS=['browser_npc_development','browser_npc_high_352','browser_combat_replay','browser_release_2135','browser_upper_social_351','browser_body_ui_release','browser_eightfold','browser_divine_lights','browser_wuyun',
  'browser_monster_body','browser_ghost_body','browser_desktop_navigation','browser_events_212','browser_pixel_only']
-SCOPE='3.5.1 upper-world guide, NPC portraits and authored DLC naming plus four high-body families, eightfold mechanics, pixel-only two-palette UI, source/persistence/combat and release upstreams; not full repository regression'
+SCOPE='3.5.2 unified NPC development, four high-body specializations, techniques/domains, ranked puppet energy and seven complete animated forms; upper-world guide, NPC portraits and authored DLC naming plus four high-body families, eightfold mechanics, pixel-only two-palette UI, source/persistence/combat and release upstreams; not full repository regression'

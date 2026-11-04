@@ -189,6 +189,12 @@
   let planSeal;
   function effects(s,m,state){
     SpellEffects.draw(s,m,state,{context,projectClip,image:path=>cache.get(path),natal:planSeal?cache.get(planSeal):null});
+    if(state.round?.forceTier>=2&&m.attacker){
+      const c=context(s.front),v=m.attacker;
+      c.save();c.globalAlpha=.4;
+      ring(c,v.x,v.y-75*s.scale,24*s.scale,38*s.scale,'#e3c982',state.time*2,state.time*2+Math.PI*1.5);
+      c.restore();
+    }
   }
   async function prepare(plan){
     planSeal=plan.natalIcon;

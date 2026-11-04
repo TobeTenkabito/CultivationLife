@@ -429,6 +429,13 @@ document.querySelectorAll('#history-filters input').forEach(input => input.addEv
 
 async function mutate(path, payload) {
   if (busy) return;
+  const trainingOperation=path.split('/').pop();
+  if (trainingOperation==='owned-training' || trainingOperation==='disciple-gift' ||
+      trainingOperation==='puppet-action' && ['infuse','pill','technique'].includes(payload?.action) ||
+      trainingOperation==='family-action' && ['infuse','teach','gift_equipment'].includes(payload?.action) ||
+      trainingOperation==='dao-companion' && ['gift_item','teach_technique'].includes(payload?.action)) {
+    payload={...payload,expected_revision:game?.updated_at};
+  }
   const sourceGameId = game?.id;
   const eventScene=path.endsWith('/choice')&&payload?.event_id===game?.pending_event?.id?window.EventScenes?.capture(game):null;
   if(path==='/api/games')payload={...payload,tutorial_enabled:window.TutorialGuide?.enabledForNewGame()||false};
@@ -449,6 +456,7 @@ async function mutate(path, payload) {
 }
 
 function showStart() {
+  window.NpcDevelopment?.reset();
   window.UtilityPanels?.reset();
   window.AuthoredTechniques?.lineages();
   window.UtilityPanels?.close('authored');
@@ -474,6 +482,7 @@ function render(data) {
   window.UtilityPanels?.begin(data.id);
   game = data;
   window.NpcArt?.context(data);
+  window.NpcDevelopment?.context(data,{api,mutate,busy:()=>busy});
   window.TrialSitePanel?.update(data, mutate, () => busy);
   window.HeavensPanel?.render(data,{api,toast,confirm:openGameConfirm,busy:()=>busy,
     refresh:async()=>render(await api(`/api/games/${game.id}`)),command:async(id,payload)=>{
@@ -3425,7 +3434,7 @@ function renderDemonicSystem(system) {
       button.onclick = () => mutate(`/api/games/${game.id}/${action === 'concubine' ? 'concubine-action' : 'captive-action'}`, {target_id:person.id, action:action === 'concubine' ? 'recruit' : action}); tools.appendChild(button);
     });
     tools.appendChild(violenceButton("captive", person, "处死"));
-    row.appendChild(tools); appendTraining(row, person, 'prisoner'); captiveList.appendChild(row);
+    row.appendChild(tools); appendTraining(row, person, 'prisoner'); if(person.portrait)window.NpcArt?.avatar(row,person.portrait,true); captiveList.appendChild(row);
   });
   if (!captiveList.children.length) captiveList.innerHTML = '<p class="empty">尚未生擒任何修士。</p>';
 
@@ -3434,7 +3443,7 @@ function renderDemonicSystem(system) {
     const row = document.createElement('div'); row.className = 'puppet-row';
     const available = puppet.usable !== false;
     const control = puppet.type === 'living' ? ` · 控制度 ${number(puppet.control)}%` : '';
-    row.innerHTML = htmlText`<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}） · 主修《${puppet.main_technique_name}》${control}</small><small>下次培养机缘减免 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
+    row.innerHTML = htmlText`<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}） · 主修《${puppet.main_technique_name}》${control}</small><small>能源耐久 ${number(puppet.operating_energy || 0)}/100 · 在培养窗口更换能源；能源阶差决定消耗，仙阶能源不能用于凡阶傀儡；玩家垫付受战斗设置控制。</small><small>下次培养机缘减免 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
     const tools = document.createElement('div'); tools.className = 'puppet-tools';
 
     if (!available) { const status=document.createElement('small');status.textContent='已毁坏或陨落 · 可解除';row.appendChild(status); }
@@ -3448,7 +3457,7 @@ function renderDemonicSystem(system) {
     if (available && system.is_demonic && puppet.type !== 'mechanical') tools.appendChild(puppetButton('吞噬', puppet.id, 'devour'));
     tools.appendChild(puppetButton('解除', puppet.id, 'dismiss'));
     const dimensions=document.createElement('small');dimensions.textContent=`${puppet.form_name ? puppet.form_name+' · ' : ''}普通炼体 ${puppet.body_training||0}/100层 · 高阶肉身 ${puppet.immortal_body_level||0}层 · 神识 ${puppet.divine_sense_rank||0}阶`;row.append(dimensions);
-    row.appendChild(tools); if (available) appendTraining(row, puppet, 'puppet'); puppetList.appendChild(row);
+    row.appendChild(tools); if (available) appendTraining(row, puppet, 'puppet'); if(puppet.portrait)window.NpcArt?.avatar(row,puppet.portrait,true); puppetList.appendChild(row);
   });
   if (!puppetList.children.length) puppetList.innerHTML = '<p class="empty">尚无受控傀儡。</p>';
 
@@ -3491,23 +3500,7 @@ function renderDemonicSystem(system) {
   secludedRefine.onclick = () => mutate(`/api/games/${game.id}/secluded-refine-souls`, {});
 
   function appendTraining(parent, target, kind) {
-    const box=document.createElement('details');box.className='owned-training';
-    const heading=document.createElement('summary');heading.textContent='培养 · 修为 / 炼体 / 神识';box.append(heading);
-    const controls=document.createElement('div');controls.className='owned-training-controls';
-    const axis=document.createElement('select');axis.setAttribute('aria-label','培养方向');
-    for(const [value,label] of [['cultivation','培养修为'],['body','培养炼体'],['sense','培养神识']]) { const o=new Option(label,value);axis.add(o); }
-    const batch=document.createElement('select');batch.setAttribute('aria-label','培养轮数');
-    for(const n of [1,5,10])batch.add(new Option(`${n} 轮`,n));
-    const preview=document.createElement('p');const button=document.createElement('button');button.type='button';button.className='owned-training-action';
-    const refresh=()=>{const q=target.training?.[axis.value]?.find(q=>q.batches===Number(batch.value));
-      button.dataset.available=q?.can_train?'1':'0';
-      if(!q){button.disabled=true;return;}
-      preview.textContent=`${q.before} → ${q.after}。实际 ${q.rounds} 轮，消耗 ${number(q.opportunity)} 机缘 / ${number(q.mp)} 法力；自身战力 ${number(q.power_before)} → ${number(q.power_after)}。${q.reason||'即时培养，不推进年月。'}`;
-      button.textContent=`${q.label} · ${q.rounds}轮`;button.disabled=busy||!q.can_train||!game.player.alive||!!game.pending_event||!!game.trial?.active||!!game.imprisonment||!!game.player.sealed_cultivation;
-    };
-    axis.onchange=batch.onchange=refresh;
-    button.onclick=()=>mutate(`/api/games/${game.id}/owned-training`,{target_id:target.id,kind,axis:axis.value,batches:Number(batch.value)});
-    controls.append(axis,batch,button);box.append(controls,preview);parent.append(box);refresh();
+    window.NpcDevelopment?.link(parent, target.id, kind);
   }
 
   function optionSelect(options) {
@@ -3731,6 +3724,7 @@ function renderSettings(settings) {
   $("#setting-silent-events").checked=!!settings.silent_events;
   $('#setting-court-election').checked=settings.court_election_popup===false;
   $('#setting-manual-combat-plan').value=settings.manual_combat_plan?'manual':'auto';
+  $('#setting-puppet-supply').checked=settings.puppet_supply!==false;
   const popup = $('#setting-combat-popup');
   const achievementPopup = $('#setting-achievement-popup');
   const guixuPopup = $('#setting-guixu-popup');
@@ -3824,6 +3818,7 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
     const techniqueSelect = optionSelect(availableTechniques, art => art.id, art => art.name, '无新法可传');
     const techniqueButton = interactionButton('传功', person.can_interact ? techniqueSelect.dataset.available : '0', () => mutate(`/api/games/${game.id}/disciple-gift`, {disciple_id:person.id, kind:'technique', content_id:techniqueSelect.value}));
     tools.append(itemSelect, itemButton, techniqueSelect, techniqueButton);
+    window.NpcDevelopment?.link(tools,person.id);
     if (game.player.path === 'demonic') {
       tools.append(
         interactionButton('炼为尸傀', '1', () => mutate(`/api/games/${game.id}/captive-action`, {target_id:person.id, action:'corpse'}), 'danger'),
@@ -3905,7 +3900,8 @@ function renderDaoCompanion(companion, inventory, techniques, conceptionBonus = 
     const techniqueSelect = companionSelect(techniques, art => art.id, art => art.name, '无功法可传');
     const teach = companionButton('替换其主修', techniqueSelect.dataset.available, null);
     teach.onclick = () => mutate(`/api/games/${game.id}/dao-companion`, {action:'teach_technique', content_id:techniqueSelect.value});
-    actions.append(giftSelect, gift, techniqueSelect, teach); row.appendChild(actions);
+    actions.append(giftSelect, gift, techniqueSelect, teach);
+    window.NpcDevelopment?.link(actions,companion.id); row.appendChild(actions);
   }
   list.appendChild(row);
 
@@ -4439,6 +4435,7 @@ $('#setting-combat-popup').onchange = event => mutate(`/api/games/${game.id}/set
 });
 $('#setting-court-election').onchange=event=>mutate(`/api/games/${game.id}/settings`,{setting:'court_election_popup',enabled:!event.target.checked});
 $('#setting-manual-combat-plan').onchange=event=>mutate(`/api/games/${game.id}/settings`,{setting:'manual_combat_plan',enabled:event.target.value==='manual'});
+$('#setting-puppet-supply').onchange=event=>mutate(`/api/games/${game.id}/settings`,{setting:'puppet_supply',enabled:event.target.checked});
 $('#setting-achievement-popup').onchange = event => mutate(`/api/games/${game.id}/settings`, {
   setting:'achievement_popup', enabled:!event.target.checked,
 });

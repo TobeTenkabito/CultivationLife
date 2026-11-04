@@ -163,6 +163,7 @@ class CapabilitySource:
     field_discipline: FieldDiscipline | None = None
 
 
+
 def resolve_source(state, definitions, source: CapabilitySource | None = None, **kwargs):
     if source and source.voisinages:
         state = dict(state or {})
@@ -217,7 +218,29 @@ class CombatCapabilities:
     body_mechanisms: tuple[BodyMechanism, ...] = ()
     field_discipline: FieldDiscipline | None = None
 
+    # Separate consumable operating charge; it is not immortal energy.
+    operating_energy: float | None = None
+    operating_cost: float = 0.0
+    attack_resource_owner: str | None = None
+    sponsored_attack_cost: float = 0.0
+    operating_tier: int = 1
+    allow_sponsor: bool = True
+    mana_capacity: float = 0.0
+    operating_compatible: bool = True
+    sponsored_mp_cost: float = 5.0
+
     def __post_init__(self) -> None:
+        if self.operating_energy is not None:
+            number(self.operating_energy, 'operating_energy')
+        number(self.operating_cost, 'operating_cost')
+        number(self.sponsored_attack_cost, 'sponsored_attack_cost')
+        number(self.mana_capacity,'mana_capacity')
+        number(self.sponsored_mp_cost,'sponsored_mp_cost')
+        if type(self.operating_compatible) is not bool:raise ValueError('Invalid operating compatibility')
+        if type(self.operating_tier) is not int or self.operating_tier not in (1,2) or type(self.allow_sponsor) is not bool:
+            raise ValueError('Invalid operating supply policy')
+        if self.attack_resource_owner is not None and (not isinstance(self.attack_resource_owner, str) or not self.attack_resource_owner):
+            raise ValueError('Invalid attack resource owner')
         object.__setattr__(self,'field_discipline',discipline(self.field_discipline))
         object.__setattr__(self,'body_mechanisms',validate_mechanisms(self.body_mechanisms))
         allowed={'kun','kun_resist','zhen','zhen_heal','kan','li','qian'}

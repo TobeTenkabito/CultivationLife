@@ -105,12 +105,13 @@ def _family_infusion(deps: FamilySocietyDependencies, game, npc):
     cap = 1 + tier + int(heavenly)
     rank = (npc.realm_index, npc.layer)
     target = (npc.realm_index, npc.layer + 1) if npc.layer < REALMS[npc.realm_index].layers else (npc.realm_index + 1, 1)
-    cost = max(30, int((npc.realm_index + 1) ** 3 * 25 * (1 + npc.layer / 3)))
-    allowed = (is_free(npc) and not deps._intrigue_is_imprisoned(game, npc.id)
-               and npc.age >= 16 and npc.spirit_root != 'none' and npc.world == game.player.world
-               and rank < deps._actual_player_realm(game.player) and target <= (cap, REALMS[cap].layers)
-               and game.player.opportunity >= cost)
-    return {'cap_realm':cap, 'cap_name':f'{REALMS[cap].name}后期', 'cost':cost, 'allowed':bool(allowed), 'target':target}
+    from .npc_development.service import quote
+    try:
+        q=quote(game,'npc',npc.id,'cultivation','family',1)
+        cost,allowed,reason=q['opportunity'],q['can_train'],q['reason']
+    except ValueError as e:
+        cost,allowed,reason=0,False,str(e)
+    return {'cap_realm':cap, 'cap_name':f'{REALMS[cap].name}后期', 'cost':cost, 'allowed':bool(allowed), 'target':target,'reason':reason}
 
 
 def _family_decision_member(deps: FamilySocietyDependencies, game, npc, sect):
@@ -177,33 +178,15 @@ def family_action(deps: FamilyActionsDependencies, game_id, action, payload):
         raise ValueError('须身在家族所在界面，并拥有家族决策权')
 
     if action == 'teach':
-        technique = next((t for t in player.known_techniques if t.id == payload.get('technique_id')), None)
-        if not technique:
-            raise ValueError('只能传授自己已掌握的功法')
-        learned = npc.family_traits.setdefault('techniques', {})
-        bonus = max(0.0, float(technique.combat_bonus))
-        previous = float(learned.get(technique.id, 0))
-        if bonus <= previous:
-            raise ValueError('该功法的当前威能已传授，不能重复叠加')
-        npc.family_combat_bonus += bonus - previous
-        learned[technique.id] = bonus
-        summary = f'你向{npc.name}传授{technique.name}，战力增加{bonus - previous:,.0f}。'
+        from .npc_development.service import teach
+        summary=teach(game,'npc',npc.id,payload.get('technique_id'),family=True)
+        if child and not authority:
+            npc=deps._family_child_npc(child)
     elif action == 'gift_equipment':
-        item = next((i for i in player.inventory if i.id == payload.get('item_id') and i.quantity > 0), None)
-        equipment = deps._family_equipment(player, item) if item else None
-        if not equipment:
-            raise ValueError('请选择行囊中可转移的装备；本命法宝及天机神兵不能直接赠与')
-        if game.natal_artifact and item.id == game.natal_artifact.get('item_id'):
-            raise ValueError('本命法宝不能赠与')
-        bonus, artifact = equipment
-        if artifact:
-            remove_crafted_artifact(player, artifact)
-        else:
-            remove_item(player, item.id)
-        npc.family_traits.setdefault('equipment', []).append({'id':item.id,'name':item.name,'power':bonus,
-                                                              'artifact':copy.deepcopy(artifact)})
-        npc.family_combat_bonus += bonus
-        summary = f'你赠予{npc.name}{item.name}，其战力增加{bonus:,.0f}。'
+        from .npc_development.service import equip
+        summary=equip(game,npc.id,payload.get('item_id'),deps._family_equipment)
+        if child and not authority:
+            npc=deps._family_child_npc(child)
     elif action == 'invite':
         if any(m.get('id') == npc.id for m in player.party):
             raise ValueError('该后代已在同行队伍中')
@@ -212,14 +195,10 @@ def family_action(deps: FamilyActionsDependencies, game_id, action, payload):
         player.party.append({'id':npc.id})
         summary = f'{npc.name}加入你的同行队伍。'
     elif action == 'infuse':
-        infusion = deps._family_infusion(game, npc)
-        if not infusion['allowed']:
-            raise ValueError(f"灌顶须修为严格高于后代、机缘不少于{infusion['cost']}，上限为{infusion['cap_name']}")
-        player.opportunity -= infusion['cost']
-        npc.realm_index, npc.layer = infusion['target']
-        npc.cultivation_progress = 0
-        npc.lifespan = max(npc.lifespan or 0, npc.age + 1, int(REALMS[npc.realm_index].lifespan[0]))
-        summary = f'你消耗{infusion["cost"]}机缘，为{npc.name}灌顶至{deps._npc_realm_name(npc)}。'
+        from .npc_development.service import apply
+        summary=apply(game,'npc',npc.id,'cultivation','family',1)
+        if child and not authority:
+            npc=deps._family_child_npc(child)
     elif action == 'reproduction':
         if not isinstance(payload.get('enabled'), bool):
             raise ValueError('请选择开启或停止繁衍')

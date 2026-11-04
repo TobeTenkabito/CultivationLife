@@ -964,6 +964,10 @@ class EngineTests(unittest.TestCase):
 
         item_result = self.engine.request_from_master(created["id"], "item")
         self.assertEqual(item_result["history"][0]["result"], "master_gave_item")
+        # Cultivation gifts now require a real meeting address, not just a world.
+        meeting=self.engine.store.load(created['id'])
+        meeting.player.disciples[0].person.location_id=meeting.player.location_id
+        self.engine.store.save(meeting)
         after_item = self.engine.gift_disciple(created["id"], "disciple-x", "item", "blood_ginseng")
         blood_count = next(item["quantity"] for item in after_item["player"]["inventory"] if item["id"] == "blood_ginseng")
         self.assertEqual(blood_count, 1)

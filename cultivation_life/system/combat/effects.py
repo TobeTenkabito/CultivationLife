@@ -29,6 +29,8 @@ class EffectIntent:
 class VoisinageEffects:
     def attack_tier(self, state, *, pay=False):
         c = state.unit.capabilities
+        if c.attack_resource_owner is not None:
+            return self.pay_operating_attack(state) if pay else self.operating_attack(state)[0]
         tier = max(1, c.artifact_tier if 'artifact' not in state.restrictions else 1,
                    c.technique_tier if 'technique' not in state.restrictions else 1)
         if (c.resource_tier >= 2 and state.current > 0 and state.current >= c.attack_cost

@@ -16,10 +16,10 @@
     for(const [key,title,max,step,value] of [['investment','每轮追加仙力',1000000,1,p.investment],['mp_reserve','爆发法力保留线（%）',100,1,Math.round(p.mp_reserve*100)]]){
       const n=el('input');n.type='number';n.min=0;n.max=max;n.step=step;n.value=value;add(key,title,n);
     }
-    for(const [key,title] of [['transformations','使用已配置变身'],['support_guard','由护主单位承担普通攻击']]){const n=el('input');n.type='checkbox';n.checked=p[key];add(key,title,n);}
+    for(const [key,title] of [['transformations','使用已配置变身'],['support_guard','由护主单位承担普通攻击'],['puppet_supply','开启傀儡供能']]){const n=el('input');n.type='checkbox';n.checked=p[key];add(key,title,n);}
     form.append(el('p',`当前可追加仙力为邻域基础投入上限的 ${p.investment_multiplier} 倍，超出按上限处理；须留足展开和维持消耗。`));
     const submit=el('button','保存战斗预案');submit.type='submit';submit.disabled=!!data.pending_event||!data.player.alive||!!data.active_trial;form.append(submit);
-    form.onsubmit=event=>{event.preventDefault();save({stance:controls.stance.value,burst:controls.burst.value,investment:Number(controls.investment.value),mp_reserve:Number(controls.mp_reserve.value)/100,transformations:controls.transformations.checked,support_guard:controls.support_guard.checked});};root.append(form);
+    form.onsubmit=event=>{event.preventDefault();save({stance:controls.stance.value,burst:controls.burst.value,investment:Number(controls.investment.value),mp_reserve:Number(controls.mp_reserve.value)/100,transformations:controls.transformations.checked,support_guard:controls.support_guard.checked,puppet_supply:controls.puppet_supply.checked});};root.append(form);
   }
   window.CombatPlanPanel={render};
 })();

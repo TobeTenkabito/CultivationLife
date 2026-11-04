@@ -51,6 +51,19 @@ def load_battle(snapshot):
         raise ValueError('Invalid nonlethal unit snapshot')
     battle._death_exempt=frozenset(exempt)
     for key, values in snapshot['states'].items():
+        for field in ('mana_current','supply_mp_spent'):
+            value=values.get(field,0.)
+            if isinstance(value,bool) or not isinstance(value,(int,float)) or not isfinite(value) or value<0:
+                raise ValueError('Invalid battle mana snapshot')
+        if values.get('mana_current',0)>battle.units[key].unit.capabilities.mana_capacity:
+            raise ValueError('Battle mana exceeds capacity')
+        charge=values.get('operating_energy')
+        initial=battle.units[key].unit.capabilities.operating_energy
+        if charge is not None and (isinstance(charge,bool) or not isinstance(charge,(int,float)) or not isfinite(charge)
+                                   or initial is None or not 0<=charge<=initial):
+            raise ValueError('Invalid operating energy snapshot')
+        if initial is not None and charge is None:
+            raise ValueError('Missing operating energy snapshot')
         validate_memory(values.get('field_memory',{}),battle.units)
         validate_leases(values.get('timed_controls',{}),values.get('field_debts',{}),battle.units)
         recovery=values.get('release_recovery_round',0)

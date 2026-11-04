@@ -78,7 +78,9 @@ def _team_visuals(game, target, hero, player_units=None):
                 if gender == 'shared':
                     gender = None
             elif kind == 'mechanical':
-                pool = ['mechanical-puppet']
+                from .puppet_content import FORMS
+                form=facts.get('form','humanoid')
+                pool = ['mechanical-'+form if form in FORMS and form!='humanoid' else 'mechanical-puppet']
                 gender = None
             elif kind == 'corpse':
                 pool = [f'corpse-{gender}']

@@ -5,6 +5,7 @@ import pytest
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import max_mp
 from cultivation_life.system.owned_training import quote, public
+from cultivation_life.system.npc_development.service import quote as unified_quote
 from cultivation_life.system import asura
 
 @pytest.fixture
@@ -27,9 +28,11 @@ def test_all_owned_types_train_three_independent_axes_without_dlc(ready, kind, a
                   immortal_body_level=0, divine_sense_rank=17, combat_power=100, type=kind, alive=True)
     collection = g.player.prisoners if kind == 'prisoner' else g.player.puppets
     collection.append(target)
-    q = quote(g.player, target, axis, 5)
     age, opp, mp = g.player.age, g.player.opportunity, g.player.mp
     engine.store.save(g)
+    # Legacy command now quotes through the same guarded, lower-cost service.
+    g=engine.store.load(g.id)
+    q=unified_quote(g,'prisoner' if kind=='prisoner' else 'puppet','t',axis,'infuse',5)
     with patch.object(asura, 'enabled', return_value=False):
         engine.train_owned(g.id, 't', 'prisoner' if kind == 'prisoner' else 'puppet', axis, 5)
     loaded = engine.store.load(g.id)

@@ -305,15 +305,8 @@ def gift_disciple(deps: RelationshipActionDependencies, game_id: str, disciple_i
     if not is_free(disciple):
         raise ValueError("弟子已经陨落，无法接受赠予")
     if kind == "item":
-        if content_id not in ITEM_CATALOG or not remove_item(player, content_id):
-            raise ValueError("物品栏中没有这件物品")
-        gifts = disciple.setdefault("items", {})
-        gifts[content_id] = int(gifts.get(content_id, 0)) + 1
-        if "pill" in ITEM_CATALOG[content_id].tags:
-            disciple["breakthrough_bonus"] = min(
-                0.35, float(disciple.get("breakthrough_bonus", 0))
-                + float(WORLD_SYSTEMS["demonic_cultivation"]["pill_breakthrough_bonus"]),
-            )
+        from ...system.npc_development.service import gift
+        gift(game,'npc',disciple_id,content_id,disciple)
         result = "disciple_gifted_item"
         summary = f"你将{ITEM_CATALOG[content_id].name}赠予弟子{disciple['name']}。" + (
             f" 其突破率提高至额外 +{float(disciple.get('breakthrough_bonus', 0)):.0%}。"
@@ -326,9 +319,9 @@ def gift_disciple(deps: RelationshipActionDependencies, game_id: str, disciple_i
         taught = disciple.setdefault("techniques", [])
         if content_id in taught:
             raise ValueError("这名弟子已经受过此法")
+        from ...system.npc_development.service import teach
+        teach(game,'npc',disciple_id,content_id)
         taught.append(content_id)
-        from ...system.npc_techniques import learn
-        learn(disciple,technique)
         result = "disciple_taught_technique"
         summary = f"你为弟子{disciple['name']}拓印并讲授《{technique.name}》；你自身的功法不会失去。"
     else:
@@ -448,10 +441,8 @@ def manage_dao_companion(
                     summary = f"{companion['name']}与你分享《{TECHNIQUE_CATALOG[selected].name}》。"
                 result = f"companion_gave_{request_kind}"
         elif action == "gift_item":
-            if content_id not in ITEM_CATALOG or not remove_item(player, content_id):
-                raise ValueError("物品栏中没有这件物品")
-            items = companion.setdefault("items", {})
-            items[content_id] = int(items.get(content_id, 0)) + 1
+            from ...system.npc_development.service import gift
+            gift(game,'npc',str(companion['id']),content_id,companion)
             companion["affinity"] = float(companion.get("affinity", 20)) + deps._sage_affinity_gain(player, 3)
             result, summary = "companion_gifted", f"你将{ITEM_CATALOG[content_id].name}赠予{companion['name']}，情意更深。"
         elif action == "teach_technique":
@@ -460,9 +451,9 @@ def manage_dao_companion(
                 raise ValueError("你尚未掌握这部功法")
             if not can_practice_technique(str(companion.get("spirit_root", "none")), technique):
                 raise ValueError("道侣的灵根无法修习这部功法")
-            from ...system.npc_techniques import learn
+            from ...system.npc_development.service import teach
             slot='main' if technique.category=='spiritual' else {'body':'body','divine_sense':'sense','transformation':'transformation'}.get(technique.category)
-            learn(companion,technique,slot=slot)
+            teach(game,'npc',str(companion['id']),content_id,slot=slot)
             taught = companion.setdefault("techniques", [])
             if technique.id not in taught:
                 taught.append(technique.id)

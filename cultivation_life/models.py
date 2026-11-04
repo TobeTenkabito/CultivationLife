@@ -255,6 +255,7 @@ class SectNpc:
     family_combat_bonus: float = 0.0
     body_training: int | None = None
     immortal_body_level: int = 0
+    body_attainments: dict[str, dict[str, int]] = field(default_factory=dict)
     divine_sense_rank: int | None = None
     monster_species_id: str | None = None
     asura_route: str | None = None
@@ -308,6 +309,8 @@ class SectNpc:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> SectNpc:
+        from .npc_body_schema import validate
+        validate(value.get("body_attainments", {}))
         return cls(**value)
 
 

@@ -17,6 +17,7 @@ from .body_events import BodyEvents
 from .field_powers import FieldPowers
 from .field_events import FieldEvents
 from .field_economy import FieldEconomy
+from .puppet_supply import PuppetSupply
 from .contracts import Combatant, VoisinageDefinition, PhaseRound, ResourceSupply, VoisinageSeal, number
 
 
@@ -44,6 +45,9 @@ class UnitState:
     release_recovery_round: int = 0
     field_memory: dict = field(default_factory=dict)
     timed_controls: dict = field(default_factory=dict)
+    operating_energy: float | None = None
+    mana_current: float = 0.0
+    supply_mp_spent: float = 0.0
     field_debts: dict = field(default_factory=dict)
 
     @property
@@ -52,7 +56,9 @@ class UnitState:
 
     @property
     def fighting(self) -> bool:
-        threshold = 0.0 if self.unit.id == "player" else 0.12
+        # Owned assets use the same 5% destruction threshold as support damage;
+        # ordinary people retain their existing 12% withdrawal threshold.
+        threshold = 0.0 if self.unit.id == "player" else 0.05 if self.unit.capabilities.operating_energy is not None else 0.12
         return self.vitality > threshold and self.body>0 and not self.suppressed and not self.escaped
 
 
@@ -67,7 +73,7 @@ class Field:
     authority: float | None = None
 
 
-class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvents, FieldPowers, FieldEvents, FieldEconomy):
+class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvents, FieldPowers, FieldEvents, FieldEconomy, PuppetSupply):
     """One battle's upper layer. Ordinary combat remains the damage provider."""
 
     def __init__(self, units: list[Combatant], *, contest_ratio: float = 1.25,
@@ -78,6 +84,11 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         if any(u.side not in {"player", "enemy"} for u in units):
             raise ValueError("Unknown combatant side")
         self.units = {u.id: UnitState(u, u.capabilities.current, u.integrity, body=u.body_integrity) for u in units}
+        for state in self.units.values():
+            state.operating_energy = state.unit.capabilities.operating_energy
+            sponsor = state.unit.capabilities.attack_resource_owner
+            if sponsor is not None and (sponsor not in self.units or sponsor == state.unit.id or self.units[sponsor].unit.side != state.unit.side):
+                raise ValueError('Attack resource owner must be a distinct allied participant')
         self._responders = tuple(sorted(u.id for u in units if u.capabilities.interventions))
         for supply in supplies:
             if supply.owner not in self.units or (supply.source_id is not None and supply.source_id not in self.units):
@@ -93,6 +104,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self.animation = None
         self.frame = PhaseRound(0)
         self._ordinary_acted: set[str] = set()
+        self._ordinary_attacks = {}
         self._dominated: dict[str, str] = {}
         self._blocked_pairs: set[tuple[str, str]] = set()
         self._released: set[str] = set()
@@ -119,7 +131,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
 
     @property
     def enabled(self) -> bool:
-        return self.semantics is not None or any(s.unit.capabilities.body_mechanisms or s.unit.capabilities.divine_lights or s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
+        return self.semantics is not None or any(s.operating_energy is not None or s.unit.capabilities.body_mechanisms or s.unit.capabilities.divine_lights or s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
                    or s.unit.capabilities.ward_tier > 1 or s.unit.capabilities.technique_tier > 1
                    or s.unit.capabilities.artifact_tier > 1 for s in self.units.values())
 
@@ -219,10 +231,12 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self.animation = {'version': 1, 'opening': [max(0., 1 - self.ordinary_loss(side))
                           for side in ('player', 'enemy')], 'effects': [], 'interventions': []}
         self._ordinary_acted.clear()
+        self._ordinary_attacks.clear()
         self._released.clear()
         self._disrupted.clear()
         self._responded.clear()
         for state in self.units.values():
+            state.mana_current=state.unit.capabilities.mana_capacity*(player_mp if state.unit.side=='player' else enemy_mp)
             if state.unit.capabilities.resource_link=='legacy_mp':
                 ratio=player_mp if state.unit.side=='player' else enemy_mp
                 state.current=min(state.current,max(0.,ratio)*state.unit.capabilities.capacity)
@@ -370,6 +384,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
 
     def _available(self, key: str) -> bool:
         return (self.units[key].fighting and not self._action_paused(key) and key not in self._dominated and key not in self._ordinary_acted
+                and (self.units[key].operating_energy is None or self.operating_attack(self.units[key])[0]>0)
                 and "ordinary" not in self.units[key].restrictions)
 
     def _has_ordinary(self, side: str) -> bool:
@@ -410,12 +425,15 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         # Reserve both sides' attack resources before resolving either side's wards.
         tiers: dict[str, int] = {}
         ordinary_sides = {side: self._has_ordinary(side) for side in ("player", "enemy")}
-        attempted={key for key,s in self.units.items() if self._available(key) and ordinary_sides[s.unit.side]}
+        attempted=set()
         for key in self._unit_order():
             state=self.units[key]
             if not self._available(key) or not ordinary_sides[state.unit.side]:
                 continue
-            tiers[key] = self.attack_tier(state, pay=True)
+            tier=self.attack_tier(state, pay=True)
+            if not tier:continue
+            tiers[key]=tier;attempted.add(key)
+            self._ordinary_attacks[key]=tier
         # Golden light belongs to the body; an empty energy pool cannot remove it.
         ward_tiers = {key: self.ward_tier(key) for key in self.units}
         for side, damage in (("player", dealt), ("enemy", received)):
@@ -501,12 +519,15 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         primary='player' if side=='player' else 'enemy-0'
         linked = next((self.units[key] for key in sorted(self.units,key=lambda k:(k!=primary,k)) if self.units[key].unit.side == side
                        and self.units[key].unit.capabilities.resource_link == "legacy_mp"), None)
-        return linked.current / max(1.0, linked.unit.capabilities.capacity) if linked else fallback
+        if linked:return linked.current / max(1.0, linked.unit.capabilities.capacity)
+        own=self.units.get(primary)
+        return own.mana_current/own.unit.capabilities.mana_capacity if own and own.unit.capabilities.mana_capacity>0 else fallback
 
     def sync_resources(self, *, player_mp: float, enemy_mp: float) -> None:
         self._semantic_mp = {'player': player_mp, 'enemy': enemy_mp}
         for key in self._unit_order():
             state=self.units[key]
+            state.mana_current=max(0.,player_mp if state.unit.side=='player' else enemy_mp)*state.unit.capabilities.mana_capacity
             if state.unit.capabilities.resource_link == "legacy_mp":
                 ratio = player_mp if state.unit.side == "player" else enemy_mp
                 self._energy(state.unit.id,min(state.current,max(0.0,ratio)*state.unit.capabilities.capacity))
@@ -616,13 +637,17 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                         "strength": round(f.strength, 4), "protects": list(f.protects),
                         "targets": list(f.targets)} for f in self.fields],
             "resources": {key: round(s.current, 6) for key, s in self.units.items()},
+            "operating_energy": {key: s.operating_energy for key, s in self.units.items() if s.operating_energy is not None},
             "seal_progress": {key: round(s.seal_progress, 4) for key, s in self.units.items() if s.seal_progress > 0},
             "participants": {key: {"name": s.unit.name, "side": s.unit.side} for key, s in self.units.items()},
             "ordinary": {"player": self.frame.ordinary_player, "enemy": self.frame.ordinary_enemy},
+            "ordinary_attacks": dict(self._ordinary_attacks),
         }
 
     def updates(self) -> list[dict[str, Any]]:
         return [{"id": key, "side": s.unit.side, "current": max(0.0, s.current), "vitality": s.vitality,
+                 **({'operating_energy': s.operating_energy} if s.operating_energy is not None else {}),
+                 **({'mana_current':s.mana_current,'supply_mp_spent':s.supply_mp_spent} if s.unit.capabilities.mana_capacity else {}),
                  "suppressed": s.suppressed, "escape_locked": s.escape_locked,
                  "escaped": s.escaped, "body": s.body,
                  "resource_link": s.unit.capabilities.resource_link}

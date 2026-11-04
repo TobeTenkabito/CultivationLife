@@ -309,6 +309,10 @@ class ContentRegistry:
 
         from .puppet_content import item_definitions
         items_doc["items"].extend(item_definitions())
+        from .npc_development_content import build as npc_development_definitions
+        npc_items, npc_goods = npc_development_definitions()
+        items_doc['items'].extend(npc_items)
+        market_doc['goods'].extend(npc_goods)
         from .talisman_content import item_definitions as talisman_items
         items_doc["items"].extend(talisman_items())
         from .economy_content import build as economic_definitions

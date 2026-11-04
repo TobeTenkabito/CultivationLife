@@ -18,7 +18,7 @@ from cultivation_life.content_registry import ACTIONS
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item
 from cultivation_life.combat_visuals import combat_identity
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator,set_theme
 from fixtures.visual_release import prepare_visual_release
 
 
@@ -54,10 +54,7 @@ def main():
                         return identity
 
                     def pixel(value):
-                        page.locator('#theme-open').click()
-                        page.locator('#theme-dialog [data-pixel-setting]').set_checked(value)
-                        page.evaluate('GameThemes.saved')
-                        page.locator('[data-close-dialog=theme-dialog]').click()
+                        set_theme(page,'light' if value else 'dark')
 
                     def check_defeat(side, actor):
                         info=page.evaluate('CombatReplay.diagnostics()')
@@ -315,11 +312,13 @@ def main():
                     page.wait_for_function('CombatReplay.diagnostics().onscreen')
                     page.wait_for_function('t=>CombatReplay.diagnostics().time>t',arg=t)
                     page.keyboard.press('Escape')
-                    # Turning off the optional view unloads the entire combat scene.
+                    # Only the two pixel themes remain. Closing disposes the scene;
+                    # switching palette must keep the next replay available.
+                    assert page.evaluate('CombatReplay.diagnostics().cache===0')
                     pixel(False)
                     navigation_locator(page,'#battle-report-open').click()
-                    assert page.locator('#battle-animation').is_hidden()
-                    assert page.evaluate('CombatReplay.diagnostics().cache===0')
+                    page.wait_for_function('CombatReplay.diagnostics().active')
+                    assert page.locator('#battle-animation').is_visible()
                     page.keyboard.press('Escape')
                     # Real previously bound private natal survives disabling its DLC,
                     # but neither the catalog nor replay may request the private PNG.

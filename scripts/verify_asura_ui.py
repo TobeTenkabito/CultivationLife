@@ -56,12 +56,15 @@ def main():
                 page.evaluate("UtilityPanels.open('captive')")
                 click_control(page.locator('#captive-card').get_by_role('button', name='提纯为精魂', exact=True, include_hidden=True))
                 page.wait_for_function('game.asura.souls === 10090')
-                training=page.locator('.owned-training').first
-                click_control(training.locator('summary'))
+                click_control(page.locator('.npc-development-open').first)
+                page.wait_for_selector('#npc-development-submit')
+                training=page.locator('#npc-development-dialog')
+                training.get_by_label('培养方式',exact=True).select_option('infuse')
                 training.get_by_label('培养方向').select_option('body')
                 training.get_by_label('培养轮数').select_option('5')
-                training.get_by_role('button',name='培养炼体 · 5轮',exact=True).click()
+                training.get_by_role('button',name='执行培养',exact=True).click()
                 page.wait_for_function('game.demonic_system.puppets[0].body_training === 60')
+                training.locator('header button').click()
                 page.evaluate("UtilityPanels.open('asura-veins')")
                 assert page.locator('.asura-vein-node').count()==27
                 page.get_by_role('button',name='尝试开辟下一条魔脉',exact=True).click()
@@ -104,8 +107,10 @@ def main():
                         assert '仙痕' not in page.locator('#hud-power').inner_text()
                         assert page.locator('#hud-mp').get_attribute('data-energy-kind')=='asura'
                         page.evaluate("UtilityPanels.open('captive')")
-                        click_control(page.locator('.owned-training summary').first)
-                        assert page.locator('.owned-training').first.evaluate('e=>e.scrollWidth <= e.clientWidth + 1')
+                        click_control(page.locator('.npc-development-open').first)
+                        page.wait_for_selector('.npc-development-profile')
+                        assert page.locator('#npc-development-dialog').evaluate('e=>e.scrollWidth <= e.clientWidth + 1')
+                        page.locator('#npc-development-dialog>header button').click()
                         if width==1440:
                             page.evaluate("UtilityPanels.open('asura-veins')")
                             assert page.locator('.asura-meridian-figure .atlas-anatomy image').count()==1

@@ -498,6 +498,7 @@
             <div class="settings-version"><span><b>游戏本体</b><small id="settings-base-version">版本读取中……</small></span><strong>BASE GAME</strong></div>
             <label class="settings-row"><span><b>关闭天庭选举提示</b><small>不再参与新选举，由天庭自行选任；已有职位保留至任满。开启时也可继续修行，视为放弃当前选举。</small></span><input id="setting-court-election" type="checkbox"></label>
             <label class="settings-row"><span><b>战斗预案</b><small>自动沿用既有策略；手动在左侧显示配置入口。</small></span><select id="setting-manual-combat-plan" aria-label="战斗预案模式"><option value="auto">自动</option><option value="manual">手动</option></select></label>
+            <label class="settings-row"><span><b>傀儡供能</b><small>优先消耗傀儡能源。开启后，能源不足或品阶不足时可垫付MP／元力；关闭后绝不垫付。自动战斗同样生效。</small></span><input id="setting-puppet-supply" aria-label="开启傀儡供能" type="checkbox"></label>
             <label class="settings-row"><span><b>事件静默</b><small>不触发时间推进中的随机遭遇、邀约与自动通知，不替你选择或领取事件收益。主动交互、修行必经节点、天劫与雷劫照常；当前已弹出的事件需先处理。</small></span><input id="setting-silent-events" type="checkbox"></label>
             <label class="settings-row"><span><b>关闭战斗弹窗</b><small>战斗触发后不再自动弹出战报；仍可从左侧“斗”查看。</small></span><input id="setting-combat-popup" type="checkbox"></label>
             <label class="settings-row"><span><b>关闭成就提示</b><small>成就仍会正常解锁并记录，只是不再弹出提示。</small></span><input id="setting-achievement-popup" type="checkbox"></label>
@@ -574,6 +575,7 @@
         <button type="button" data-panel-target="world-npc" title="人物"><span>人</span><small>人物</small></button>
         <button type="button" data-panel-target="ranking" title="天榜"><span>榜</span><small>天榜</small></button>
         <button type="button" data-panel-target="tianji" data-dlc="tianji" title="天工神机榜" class="hidden tianji-dock-button"><span>机</span><small>神机</small></button>
+        <button type="button" data-panel-target="npc-development" title="NPC培养"><span>育</span><small>培养</small></button>
         <button type="button" data-panel-target="family" title="家族"><span>家</span><small>家族</small></button>
         <button type="button" data-panel-target="race" title="族群外交"><span>族</span><small>外交</small></button>
         <button type="button" data-panel-target="world-route" title="诸界道途"><span>界</span><small>道途</small></button>
@@ -681,6 +683,8 @@
   <link rel="stylesheet" href="/npc-art.css?v=1">
   <script src="/assets/pixel/social/catalog.js?v=1"></script>
   <script src="/assets/pixel/social-351/catalog.js?v=351"></script>
+  <script src="/assets/pixel/controlled-351/catalog.js?v=351"></script>
+  <script src="/assets/pixel/controlled-352/catalog.js?v=352"></script>
   <script src="/npc-art.js?v=351"></script>
   <link rel="stylesheet" href="/home-scenes.css?v=alpha6">
   <script src="/npc-contacts.js?v=1.51.1"></script>
@@ -733,6 +737,8 @@
   <script src="/event-scenes.js?v=fx3"></script>
   <script src="/combat-beasts.js?v=beasts1-monster-418"></script>
   <script src="/combat-replay.js?v=divine1"></script>
+  <link rel="stylesheet" href="/npc-development.css?v=1">
+  <script src="/npc-development.js?v=352"></script>
   <script src="/app.js?v=ghost-body1"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>

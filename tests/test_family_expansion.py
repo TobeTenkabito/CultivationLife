@@ -22,8 +22,9 @@ def family_game(engine,world='human',root='supreme_wood'):
     shown=engine.create_game('家族验收','supreme_metal','dao',1400,preset_id='core')
     g=engine.store.load(shown['id']);g.player.world=world;g.player.realm_index=5;g.player.layer=3
     g.player.opportunity=100000;g.player.lifespan=10000;g.pending_event=None
+    g.player.location_id=engine.maps.default_location(world)
     child={'id':'family_heir','name':'沈宁','realm_index':1,'layer':1,'age':20,'lifespan':110,'world':world,
-        'alive':True,'spirit_root':root,'path':'dao','gender':'male','cultivation_started':True}
+        'alive':True,'spirit_root':root,'path':'dao','gender':'male','cultivation_started':True,'location_id':g.player.location_id}
     g.player.offspring=[child];add_item(g.player,'spirit_stone',100000)
     g.family=SectState('test_family','沈氏',world,[engine._family_child_npc(child)],founded_by_player=True,founder_player_id=g.id,kind='family')
     engine.store.save(g);return g
@@ -67,7 +68,7 @@ def test_teaching_adds_exact_power_and_cannot_duplicate(engine):
     before=engine._npc_power(g.family.npcs[0])
     engine.family_action(g.id,'teach',{'npc_id':'family_heir','technique_id':tech.id})
     g=engine.store.load(g.id);assert engine._npc_power(g.family.npcs[0])==pytest.approx(before+tech.combat_bonus)
-    with pytest.raises(ValueError,match='重复'):engine.family_action(g.id,'teach',{'npc_id':'family_heir','technique_id':tech.id})
+    with pytest.raises(ValueError,match='已掌握'):engine.family_action(g.id,'teach',{'npc_id':'family_heir','technique_id':tech.id})
 
 def test_gift_transfers_equipment_and_party_survives_reload(engine):
     g=family_game(engine);before=engine._npc_power(g.family.npcs[0]);quantity=sum(i.quantity for i in g.player.inventory if i.id=='spirit_sword')

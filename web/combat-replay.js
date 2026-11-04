@@ -69,9 +69,12 @@
         if(exchange.actors?.[side==='hero'?'player':'enemy']===false)continue;
         const target=side==='hero'?'npc':'hero',index=target==='hero'?0:1;
         const loss=Math.max(0,exchange.before[index]-exchange.after[index]);
-        const totalWeight=teams[side].reduce((n,member)=>n+member.weight,0);
+        const attacks=row.voisinage?.ordinary_attacks;
+        const acting=teams[side].filter(member=>!attacks||attacks[member.id]>0);
+        const totalWeight=acting.reduce((n,member)=>n+member.weight,0);
         let assigned=0;
         for(const [actorIndex,member] of teams[side].entries()){
+          if(!acting.includes(member))continue;
           const actor=A.actors[member.asset],targetIndex=(row.round-1+actorIndex)%teams[target].length;
           const defender=A.actors[teams[target][targetIndex].asset];
           const action=actor.attack_action ?? (actor.role!=='hero'?actor.faction:choose(actor.faction==='dao'
@@ -80,7 +83,8 @@
           const spec=A.actions[action];if(!spec)return null;
           const contacts=spec.contacts.map(t=>start+t);
           const r={index:rounds.length,number:row.round,side,actorIndex,targetIndex,guard:loss===0,action,name:spec.name,start,contacts,
-            end:start+Math.max(spec.duration,tail(spec.contacts)+2.15),duration:spec.duration};
+            end:start+Math.max(spec.duration,tail(spec.contacts)+2.15),duration:spec.duration,forceTier:attacks?.[member.id]??1};
+          if(r.forceTier>=2)r.name='仙阶 · '+r.name;
           rounds.push(r);
           contacts.forEach((t,i)=>events.push({t,round:r.index,side,guard:r.guard,name:r.name,
             value:mix(exchange.before[index],exchange.after[index],(assigned+member.weight*(i+1)/contacts.length)/totalWeight),target}));
@@ -103,7 +107,8 @@
     if(lastRow.ordinary_exchange&&['victory','defeat'].includes(outcome)&&!(outcome==='victory'&&report.objective==='survive')){
       const side=outcome==='victory'?'npc':'hero',id=side==='hero'?hero:npc;
       const clip=A.actors[id].animations.defeat;
-      const winner=side==='hero'?'npc':'hero',source=[...rounds].reverse().find(r=>r.side===winner);
+      const winner=side==='hero'?'npc':'hero',paid=lastRow.voisinage?.ordinary_attacks;
+      const source=[...rounds].reverse().find(r=>r.side===winner&&(!paid||paid[teams[winner][r.actorIndex].id]>0));
       if(clip&&source){
         let contactRound=lastRound;
         if(lastRound.side!==winner){
@@ -313,6 +318,7 @@
       decodedBytes:context?.renderer.decodedBytes()??0,time:clock,duration:context?.plan.duration??0,
       domain:context?sample(context.plan,clock).domain:null,domainStages:context?.plan.domains.map(({start,end,phase,number})=>({start,end,phase,number}))??[],
       rounds:context?.plan.rounds.length??0,defeat:context?.plan.defeat??null,
+      actions:context?.plan.rounds.map(({side,actorIndex,start,end,forceTier})=>({side,actorIndex,start,end,forceTier}))??[],
       actors:context?sample(context.plan,clock).actors:null,teams:context?sample(context.plan,clock).teams:null,bounds:bodyBounds(),participants:participantBounds(),
       battlefield:context?.plan.battlefield??null,conditions:context?.plan.conditions??[],
       viewport:context?[context.scene.width,context.scene.height]:null,renderMs:context?[...context.samples]:[]}),

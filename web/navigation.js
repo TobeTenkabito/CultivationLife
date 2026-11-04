@@ -5,7 +5,7 @@
     practice: {name:'修行', mark:'修', panels:['nascent','authored','immortal-artifacts','doctrine','immortal-conversion','immortal-veins','combat-plan','immortal-aperture','spirit-voisinage','asura-conversion','asura-body','asura-veins','asura-route','asura-domain','asura-powers','monster-body','ghost-body','upper-voisinage','golden-light','immortal-body','voisinage','buddhist-wish','secret-art','transformation','bloodline','ghost-soul','sage-inner-outer']},
     craft: {name:'百艺', mark:'艺', panels:['inventory','spirit-field','puppet-workshop','captive','crafting','formation','talisman','natal-artifact','tianji']},
     economy: {name:'经营', mark:'营', panels:['personal-economy','market','merchant','auction','exchange','faction','intrigue','upper-institution','heavenly-court','war']},
-    people: {name:'同道', mark:'缘', panels:['relationship','world-npc','ranking','family','race','buddhist','sage','ghost-attachment','ghost-parade','yaochi','daomen']},
+    people: {name:'同道', mark:'缘', panels:['npc-development','relationship','world-npc','ranking','family','race','buddhist','sage','ghost-attachment','ghost-parade','yaochi','daomen']},
     worlds: {name:'诸界', mark:'界', panels:['map','heavens','civilizations','guixu','trial-site','world-route']},
   };
   const defaults=['inventory','map','market','relationship','faction','personal-economy'];

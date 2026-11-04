@@ -48,6 +48,9 @@ from ..dependencies import InventoryDependencies
 
 
 def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[str, Any]:
+    from ...npc_development_content import definitions
+    if item_id in definitions():
+        raise ValueError('这是NPC培养专材，请在独立培养窗口选择对象后使用')
     item_id = canonical_content_id(item_id)
     game = deps._load(game_id)
     if not game.player.alive:
@@ -305,6 +308,9 @@ def buy_market_offer(deps: InventoryDependencies, game_id: str, offer_id: str) -
         raise ValueError("该功法不在坊市直售范围，请通过其他途径获取")
     if offer.get("world", "human") != game.player.world:
         raise ValueError("此物不属于当前世界的坊市货池")
+    from ...npc_development_content import definitions as training_materials, allowed as training_material_allowed
+    if offer['content_id'] in training_materials() and not training_material_allowed(offer['content_id'],game.player.world):
+        raise ValueError('该NPC专材未在当前界面开放投放')
     from ...system.economy.local_market import pay_shelf, shelf_price, require_access
     require_access(game)
     if offer.get('location_id') != game.player.location_id:

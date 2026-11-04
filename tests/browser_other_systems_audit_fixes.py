@@ -134,7 +134,7 @@ def main():
                             page.on('dialog',lambda dialog:dialog.accept())
                             page.goto(f'http://127.0.0.1:{http.server_port}')
                             page.wait_for_function('configData && !busy')
-                            page.locator('[data-theme-picker=start] [data-theme-choice=a]').click()
+                            page.locator('[data-theme-picker=start] [data-pixel-theme-choice=light]').click()
                             verify(page,engine,width)
                             assert not errors,errors
                         finally: browser.close()

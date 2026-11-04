@@ -47,7 +47,9 @@ def verify(with_dlc):
                 verify_body_ui(base,with_dlc,folder)
                 from scripts.verify_upper_social_exe import verify_upper_social
                 verify_upper_social(base,with_dlc,folder)
-                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,body_ui_verified=True,upper_social_verified=True)
+                from scripts.verify_npc_development_exe import verify_npc_development
+                verify_npc_development(base,with_dlc,folder)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,body_ui_verified=True,upper_social_verified=True,npc_development_verified=True)
             if '--immortal' in sys.argv:
                 from scripts.verify_immortal_exe import verify_immortal
                 verify_immortal(base,with_dlc,folder)
@@ -437,6 +439,9 @@ def verify(with_dlc):
             raw['pending_event']=None
             forge_path.write_text(json.dumps(raw,ensure_ascii=False),encoding='utf-8')
             def post_forge(operation,payload):
+                if operation=='owned-training':
+                    with urllib.request.urlopen(base+f"/api/games/{immortal['id']}",timeout=30) as response:
+                        payload={**payload,'expected_revision':json.load(response)['updated_at']}
                 req=urllib.request.Request(base+f"/api/games/{immortal['id']}/"+operation,method='POST',
                     data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
                 try:

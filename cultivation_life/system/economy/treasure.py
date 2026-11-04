@@ -26,10 +26,12 @@ def reward_pool_for_scene(deps: TreasureDependencies, world: str, location_id: s
     for row in sorted(sources, key=lambda row: row.get('world', 'human') != world):
         unique.setdefault((row['kind'], row['content_id']), dict(row, world=world))
     world_goods = list(unique.values())
+    from ...npc_development_content import definitions, allowed
+    world_goods = [row for row in world_goods if row['content_id'] not in definitions() or allowed(row['content_id'], world)]
     if category == "technique":
         eligible = [row for row in world_goods if row["kind"] == "technique"]
     elif category == "pill":
-        eligible = [row for row in world_goods if row["kind"] == "item" and "pill" in ITEM_CATALOG[row["content_id"]].tags]
+        eligible = [row for row in world_goods if row["kind"] == "item" and set(ITEM_CATALOG[row["content_id"]].tags) & {'pill','npc_training_material'}]
     elif category == "artifact":
         eligible = [
             row for row in world_goods if row["kind"] == "item"

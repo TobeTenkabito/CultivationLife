@@ -706,10 +706,11 @@ class GameEngine:
 
     def update_setting(self, game_id: str, setting: str, enabled: bool) -> dict[str, Any]:
         game = self._load(game_id)
-        if setting == 'manual_combat_plan':
+        if setting in {'manual_combat_plan','puppet_supply'}:
+            if type(enabled) is not bool:raise ValueError('战斗设置开关必须为布尔值')
             if game.pending_event or game.active_trial:
                 raise ValueError('请先结束当前事件或试炼，再切换战斗预案')
-            game.player.combat_plan['manual'] = bool(enabled)
+            game.player.combat_plan['manual' if setting=='manual_combat_plan' else 'puppet_supply'] = enabled
             game.updated_at = now_iso()
             self.store.save(game)
             return self.present(game)
@@ -3723,6 +3724,33 @@ class GameEngine:
 
     def train_owned(self, game_id: str, target_id: str, kind: str, axis: str, batches: int=1):
         return character_demonic.train_owned(self._dependencies.character.demonic_actions, game_id, target_id, kind, axis, batches)
+
+    def npc_development(self, game_id: str, payload=None):
+        from ..system.npc_development import service, presentation
+        import copy
+        game = copy.deepcopy(self._load(game_id))
+        if payload is None:
+            return presentation.public(game,power=self._npc_power)
+        if not isinstance(payload,dict) or payload.get('revision') != game.updated_at:
+            raise ValueError('培养页面已过期，请刷新后重新选择')
+        kind=payload.get('kind');identity=payload.get('target_id')
+        if payload.get('action')=='teach':
+            summary=service.teach(game,kind,identity,payload.get('content_id'),slot=payload.get('slot'))
+            game.history.append(HistoryRecord('SYS_NPC_TEACHING',1,game.player.age,'NPC传法',None,'taught',summary,{},['system','training']))
+        elif payload.get('action')=='train':
+            service.apply(game,kind,identity,payload.get('axis'),payload.get('method'),payload.get('batches',1))
+        elif payload.get('action')=='activate_domain':
+            from ..system.npc_development.domains import activate
+            from ..system.npc_development.targets import resolve
+            summary=activate(game,resolve(game,kind,identity),payload.get('axis'))
+            game.history.append(HistoryRecord('SYS_NPC_DOMAIN',1,game.player.age,'NPC邻域配置',None,'configured',summary,{},['system','training']))
+        elif payload.get('action')=='charge':
+            service.charge(game,kind,identity,payload.get('source'))
+        else:
+            raise ValueError('未知培养操作')
+        game.updated_at=now_iso()
+        self.store.save(game)
+        return self.present(game)
 
     def puppet_action(self, game_id: str, puppet_id: str, action: str, content_id: str='') -> dict[str, Any]:
         return character_demonic.puppet_action(self._dependencies.character.demonic_actions, game_id, puppet_id, action, content_id)

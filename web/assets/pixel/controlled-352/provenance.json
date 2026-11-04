@@ -1,0 +1,462 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "reference": "design/controlled-351/mechanical-humanoid.png",
+  "sources": [
+    {
+      "id": "mechanical-deva",
+      "file": "design/controlled-352/deva.png",
+      "sha256": "0d50a6f8d19a503d4f5b281536cb75a44d5dc2ed85d240054aec1061206564ce",
+      "prompt": "Create a production character animation sprite sheet, transparent background, no text, no labels, no grids, no shadows, no glowing background. Reference is STYLE ONLY: delicate fine linework and restrained watercolor-like shading, elegant Chinese fantasy craft detail, same adult proportions, NOT chibi, NOT cartoon thick outlines, no photorealism. Exactly NINE separate full-body depictions of ONE identical character, strict equal 3 columns x 3 rows, generous transparent gutters and outer margins, every figure completely inside its cell, no cropped anatomy. All facing three-quarter RIGHT. Row 1: neutral standing idle (also usable as full-body illustration), gathering force, forward attacking strike. Row 2: guarding, bracing impact, recoiling from hit. Row 3: staggering, kneeling/crouching in defeat, lying fallen on side (whole body fits cell). Maintain anatomy, head size and costume across poses; long body/wing/tail shapes fold naturally to fit.  Character: 天人像. Graceful adult androgynous jade automaton, Chinese heavenly crown, ivory jade face, pale celadon and antique gold robes. Exactly two complete arms with hands and two complete legs with separate feet.",
+      "source_rects": [
+        [
+          115,
+          12,
+          281,
+          437
+        ],
+        [
+          420,
+          32,
+          707,
+          433
+        ],
+        [
+          798,
+          62,
+          1168,
+          431
+        ],
+        [
+          54,
+          458,
+          329,
+          855
+        ],
+        [
+          431,
+          502,
+          753,
+          855
+        ],
+        [
+          847,
+          464,
+          1138,
+          858
+        ],
+        [
+          49,
+          900,
+          326,
+          1286
+        ],
+        [
+          385,
+          969,
+          683,
+          1257
+        ],
+        [
+          752,
+          1119,
+          1182,
+          1247
+        ]
+      ],
+      "scale": 0.41411764705882353,
+      "output": "mechanical-deva-352.png",
+      "output_sha256": "f1b5e238f72566789b5dd805d2e67745dc851462f64c250c0e7c620a9b8edf66"
+    },
+    {
+      "id": "mechanical-dragon",
+      "file": "design/controlled-352/dragon.png",
+      "sha256": "f9600dbcce3d377524734f8bed128385b24e42075795e90015230b2143079f19",
+      "prompt": "Create a production character animation sprite sheet, transparent background, no text, no labels, no grids, no shadows, no glowing background. Reference is STYLE ONLY: delicate fine linework and restrained watercolor-like shading, elegant Chinese fantasy craft detail, same adult proportions, NOT chibi, NOT cartoon thick outlines, no photorealism. Exactly NINE separate full-body depictions of ONE identical character, strict equal 3 columns x 3 rows, generous transparent gutters and outer margins, every figure completely inside its cell, no cropped anatomy. All facing three-quarter RIGHT. Row 1: neutral standing idle (also usable as full-body illustration), gathering force, forward attacking strike. Row 2: guarding, bracing impact, recoiling from hit. Row 3: staggering, kneeling/crouching in defeat, lying fallen on side (whole body fits cell). Maintain anatomy, head size and costume across poses; long body/wing/tail shapes fold naturally to fit.  This is a NEW DESIGN, do not copy the reference humanoid shape or clothing. Character: 龙形. Chinese mechanical dragon, muted bronze and jade overlapping scales, one head, two horns, FOUR distinct articulated legs each ending in claws, one long continuous tail, NO wings.",
+      "source_rects": [
+        [
+          17,
+          9,
+          311,
+          369
+        ],
+        [
+          377,
+          47,
+          716,
+          364
+        ],
+        [
+          777,
+          73,
+          1172,
+          364
+        ],
+        [
+          15,
+          453,
+          340,
+          793
+        ],
+        [
+          381,
+          544,
+          755,
+          794
+        ],
+        [
+          783,
+          465,
+          1155,
+          794
+        ],
+        [
+          15,
+          930,
+          341,
+          1207
+        ],
+        [
+          382,
+          993,
+          701,
+          1206
+        ],
+        [
+          747,
+          1075,
+          1192,
+          1209
+        ]
+      ],
+      "scale": 0.4888888888888889,
+      "output": "mechanical-dragon-352.png",
+      "output_sha256": "57d447f8465b42852c62a0ddc76e7095381c486339d85ddaffc17d7877fc355a"
+    },
+    {
+      "id": "mechanical-yaksha",
+      "file": "design/controlled-352/yaksha.png",
+      "sha256": "1c8daf4fd96efaca6c12277c9834431ffcf08349fa90e4bc9d624353e22e285a",
+      "prompt": "Create a production character animation sprite sheet, transparent background, no text, no labels, no grids, no shadows, no glowing background. Reference is STYLE ONLY: delicate fine linework and restrained watercolor-like shading, elegant Chinese fantasy craft detail, same adult proportions, NOT chibi, NOT cartoon thick outlines, no photorealism. Exactly NINE separate full-body depictions of ONE identical character, strict equal 3 columns x 3 rows, generous transparent gutters and outer margins, every figure completely inside its cell, no cropped anatomy. All facing three-quarter RIGHT. Row 1: neutral standing idle (also usable as full-body illustration), gathering force, forward attacking strike. Row 2: guarding, bracing impact, recoiling from hit. Row 3: staggering, kneeling/crouching in defeat, lying fallen on side (whole body fits cell). Maintain anatomy, head size and costume across poses; long body/wing/tail shapes fold naturally to fit.  This is a NEW DESIGN, do not copy the reference humanoid shape or clothing. Character: 夜叉形. Fierce broad-shouldered adult guardian automaton, dark bronze mask and small horns, crimson dark metal lamellar Chinese armor; exactly two complete muscular articulated arms and hands and two separate legs and feet.",
+      "source_rects": [
+        [
+          97,
+          12,
+          283,
+          417
+        ],
+        [
+          428,
+          23,
+          695,
+          416
+        ],
+        [
+          793,
+          63,
+          1170,
+          409
+        ],
+        [
+          56,
+          457,
+          331,
+          831
+        ],
+        [
+          433,
+          467,
+          731,
+          830
+        ],
+        [
+          815,
+          453,
+          1148,
+          831
+        ],
+        [
+          50,
+          890,
+          320,
+          1247
+        ],
+        [
+          408,
+          945,
+          707,
+          1229
+        ],
+        [
+          772,
+          1070,
+          1183,
+          1202
+        ]
+      ],
+      "scale": 0.4345679012345679,
+      "output": "mechanical-yaksha-352.png",
+      "output_sha256": "4ccb10ecbc9d2c3cb4a838c99d671f84567262ed103296f0a100710f01e3e6bf"
+    },
+    {
+      "id": "mechanical-flora",
+      "file": "design/controlled-352/flora.png",
+      "sha256": "9d1bef1abe3a4c383fd3f94a123165f00b3f3939f1acce2fd739bd43ca6c4902",
+      "prompt": "Create a production character animation sprite sheet, transparent background, no text, no labels, no grids, no shadows, no glowing background. Reference is STYLE ONLY: delicate fine linework and restrained watercolor-like shading, elegant Chinese fantasy craft detail, same adult proportions, NOT chibi, NOT cartoon thick outlines, no photorealism. Exactly NINE separate full-body depictions of ONE identical character, strict equal 3 columns x 3 rows, generous transparent gutters and outer margins, every figure completely inside its cell, no cropped anatomy. All facing three-quarter RIGHT. Row 1: neutral standing idle (also usable as full-body illustration), gathering force, forward attacking strike. Row 2: guarding, bracing impact, recoiling from hit. Row 3: staggering, kneeling/crouching in defeat, lying fallen on side (whole body fits cell). Maintain anatomy, head size and costume across poses; long body/wing/tail shapes fold naturally to fit.  This is a NEW DESIGN, do not copy the reference humanoid shape or clothing. Character: 灵木形. Ancient carved spirit-wood guardian automaton, restrained moss green robe-like bark plates, branch crown, two articulated wooden arms with hands, two distinct root-like legs and feet; no disconnected branches.",
+      "source_rects": [
+        [
+          61,
+          13,
+          242,
+          482
+        ],
+        [
+          346,
+          31,
+          595,
+          477
+        ],
+        [
+          642,
+          60,
+          1007,
+          474
+        ],
+        [
+          51,
+          527,
+          265,
+          989
+        ],
+        [
+          324,
+          555,
+          642,
+          982
+        ],
+        [
+          688,
+          557,
+          998,
+          981
+        ],
+        [
+          45,
+          1060,
+          267,
+          1482
+        ],
+        [
+          322,
+          1135,
+          590,
+          1435
+        ],
+        [
+          613,
+          1289,
+          1015,
+          1422
+        ]
+      ],
+      "scale": 0.3752665245202559,
+      "output": "mechanical-flora-352.png",
+      "output_sha256": "327383c68bc42dd9a26764cd370034290cfcb36c8dd42a1ac707bc2f7763289e"
+    },
+    {
+      "id": "mechanical-serpent",
+      "file": "design/controlled-352/serpent.png",
+      "sha256": "f52cfbef52b610ec9a22b78abfe7994f5a733516b0e83084571ddb530adc7192",
+      "prompt": "Create a production character animation sprite sheet, transparent background, no text, no labels, no grids, no shadows, no glowing background. Reference is STYLE ONLY: delicate fine linework and restrained watercolor-like shading, elegant Chinese fantasy craft detail, same adult proportions, NOT chibi, NOT cartoon thick outlines, no photorealism. Exactly NINE separate full-body depictions of ONE identical character, strict equal 3 columns x 3 rows, generous transparent gutters and outer margins, every figure completely inside its cell, no cropped anatomy. All facing three-quarter RIGHT. Row 1: neutral standing idle (also usable as full-body illustration), gathering force, forward attacking strike. Row 2: guarding, bracing impact, recoiling from hit. Row 3: staggering, kneeling/crouching in defeat, lying fallen on side (whole body fits cell). Maintain anatomy, head size and costume across poses; long body/wing/tail shapes fold naturally to fit.  This is a NEW DESIGN, do not copy the reference humanoid shape or clothing. Character: 蛇形. Elegant mechanical snake, muted dark jade and antique bronze ring scales, one head, one smoothly connected coiling body and one tapered tail. Naturally legless, no arms, no wings.",
+      "source_rects": [
+        [
+          50,
+          27,
+          339,
+          410
+        ],
+        [
+          430,
+          69,
+          698,
+          410
+        ],
+        [
+          762,
+          108,
+          1182,
+          414
+        ],
+        [
+          64,
+          465,
+          342,
+          812
+        ],
+        [
+          421,
+          520,
+          741,
+          810
+        ],
+        [
+          807,
+          486,
+          1138,
+          807
+        ],
+        [
+          33,
+          885,
+          341,
+          1250
+        ],
+        [
+          392,
+          980,
+          701,
+          1236
+        ],
+        [
+          758,
+          1072,
+          1178,
+          1227
+        ]
+      ],
+      "scale": 0.4595300261096606,
+      "output": "mechanical-serpent-352.png",
+      "output_sha256": "a5b41594a61b98b0fb571f88ab0ae4397735be814d1305ca53f6385387837be8"
+    },
+    {
+      "id": "mechanical-kinnara",
+      "file": "design/controlled-352/kinnara.png",
+      "sha256": "5765cbdba6505b6520ff5190c319238f6ece423cca7b0f14134e37da1ebcc845",
+      "prompt": "Create a production character animation sprite sheet, transparent background, no text, no labels, no grids, no shadows, no glowing background. Reference is STYLE ONLY: delicate fine linework and restrained watercolor-like shading, elegant Chinese fantasy craft detail, same adult proportions, NOT chibi, NOT cartoon thick outlines, no photorealism. Exactly NINE separate full-body depictions of ONE identical character, strict equal 3 columns x 3 rows, generous transparent gutters and outer margins, every figure completely inside its cell, no cropped anatomy. All facing three-quarter RIGHT. Row 1: neutral standing idle (also usable as full-body illustration), gathering force, forward attacking strike. Row 2: guarding, bracing impact, recoiling from hit. Row 3: staggering, kneeling/crouching in defeat, lying fallen on side (whole body fits cell). Maintain anatomy, head size and costume across poses; long body/wing/tail shapes fold naturally to fit.  This is a NEW DESIGN, do not copy the reference humanoid shape or clothing. Character: 乐伎形. Elegant adult feminine Chinese musical automaton, small carved gold face, flowing desaturated teal and plum layered Chinese dancing robe, tiny carved bell ornaments; two complete arms/hands, two legs/separate feet. No held instrument obscuring limbs.",
+      "source_rects": [
+        [
+          76,
+          5,
+          271,
+          421
+        ],
+        [
+          424,
+          11,
+          701,
+          418
+        ],
+        [
+          802,
+          45,
+          1168,
+          415
+        ],
+        [
+          34,
+          454,
+          328,
+          841
+        ],
+        [
+          421,
+          479,
+          744,
+          839
+        ],
+        [
+          809,
+          473,
+          1160,
+          841
+        ],
+        [
+          32,
+          893,
+          317,
+          1281
+        ],
+        [
+          377,
+          978,
+          735,
+          1250
+        ],
+        [
+          766,
+          1095,
+          1179,
+          1238
+        ]
+      ],
+      "scale": 0.4230769230769231,
+      "output": "mechanical-kinnara-352.png",
+      "output_sha256": "8cbcd44f69b556274d1ee825a425a9aa311141d9b50caa3ac1228b7acf5a55bf"
+    },
+    {
+      "id": "mechanical-bird",
+      "file": "design/controlled-352/bird.png",
+      "sha256": "5fec54694fb94e38f547b42f068a8156b8c4e0d1b578905ed860b5a641969f47",
+      "prompt": "Create a production character animation sprite sheet, transparent background, no text, no labels, no grids, no shadows, no glowing background. Reference is STYLE ONLY: delicate fine linework and restrained watercolor-like shading, elegant Chinese fantasy craft detail, same adult proportions, NOT chibi, NOT cartoon thick outlines, no photorealism. Exactly NINE separate full-body depictions of ONE identical character, strict equal 3 columns x 3 rows, generous transparent gutters and outer margins, every figure completely inside its cell, no cropped anatomy. All facing three-quarter RIGHT. Row 1: neutral standing idle (also usable as full-body illustration), gathering force, forward attacking strike. Row 2: guarding, bracing impact, recoiling from hit. Row 3: staggering, kneeling/crouching in defeat, lying fallen on side (whole body fits cell). Maintain anatomy, head size and costume across poses; long body/wing/tail shapes fold naturally to fit.  This is a NEW DESIGN, do not copy the reference humanoid shape or clothing. Character: 鸟形. Chinese cloud-wing mechanical bird, muted bronze, ivory and dark teal layered metal feather panels, one head and beak, exactly two articulated feathered wings, two complete bird legs with talons and a single elegant fan tail.",
+      "source_rects": [
+        [
+          22,
+          9,
+          290,
+          409
+        ],
+        [
+          413,
+          22,
+          707,
+          407
+        ],
+        [
+          775,
+          8,
+          1174,
+          408
+        ],
+        [
+          14,
+          448,
+          335,
+          831
+        ],
+        [
+          393,
+          495,
+          771,
+          831
+        ],
+        [
+          837,
+          467,
+          1184,
+          829
+        ],
+        [
+          27,
+          907,
+          329,
+          1271
+        ],
+        [
+          379,
+          958,
+          730,
+          1225
+        ],
+        [
+          763,
+          1052,
+          1183,
+          1206
+        ]
+      ],
+      "scale": 0.44,
+      "output": "mechanical-bird-352.png",
+      "output_sha256": "5986c6b35f101306fb028c37e64402387c817c87c3ad63d3319ad7337d7be280"
+    }
+  ],
+  "review": "逐形态检查九姿态：人形双手双足、龙四爪、鸟双翼双足、蛇单体单尾；等比裁切与48色导出，不程序补绘解剖。"
+}

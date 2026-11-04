@@ -29,7 +29,11 @@ def verify_bugfix(base,folder):
         world,realm=('nether',9) if case=='work' else ('spirit',8)
         game=post('games',dict(name='成品修复验收',spirit_root='supreme_metal',path='dao',seed=8712,custom_start=dict(world=world,realm_index=realm,layer=1)),201)
         identity=game['id'];fixture.prepare_audit_fixes(isolated,identity,case)
-        def act(operation,**payload):return post(f'games/{identity}/{operation}',payload)
+        def act(operation,**payload):
+            if operation=='owned-training':
+                with urlopen(base+f'/api/games/{identity}',timeout=120) as response:
+                    payload['expected_revision']=json.load(response)['updated_at']
+            return post(f'games/{identity}/{operation}',payload)
         if case=='return':
             act('secret-art',art='suppress',action='activate',realm_index=1,layer=1)
             act('cross-world',destination='human')

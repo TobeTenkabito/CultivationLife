@@ -185,7 +185,7 @@ def test_known_npc_visual_identity_uses_real_gender_and_path(engine):
 def test_runtime_atlases_are_local_reviewed_bounded_and_hash_verified():
     root = ROOT / 'web/assets/pixel/combat'
     data = json.loads((root/'manifest.json').read_text(encoding='utf-8'))
-    assert len(data['actors']) == 24 and data['requires'] == []
+    assert len(data['actors']) == 31 and data['requires'] == []
     assert not any(path.suffix.lower() == '.gif' for path in root.iterdir())
     groups = {}
     for identity, actor in data['actors'].items():
@@ -348,9 +348,14 @@ def test_all_painted_defeat_poses_use_explicit_body_scale_not_canvas_fit():
     path = ROOT/'scripts/combat_asset_scale.json'
     recipe = json.loads(path.read_text(encoding='utf-8'))
     assert data['scale_contract']['sha256'] == hashlib.sha256(path.read_bytes()).hexdigest()
-    assert set(data['actors']) == set(recipe['actors'])
+    new={f'mechanical-{k}' for k in ('deva','dragon','yaksha','flora','serpent','kinnara','bird')}
+    assert set(data['actors']) == set(recipe['actors'])|new
     for identity, actor in data['actors'].items():
         ref = actor['scale_reference']
+        if identity in new:
+            assert ref['kind']=='common-pose-sheet' and ref['pose_scales']==[ref['common_scale']]*9
+            assert ref['source_sha256']==hashlib.sha256((ROOT/'design/controlled-352'/f'{identity[11:]}.png').read_bytes()).hexdigest()
+            continue
         assert ref['standing_height'] == (None if actor.get('creature') else 176)
         if not actor.get('creature') and not identity.startswith(('companion-', 'corpse-', 'mechanical-')):
             # Existing normal standing figures are already calibrated. Do not

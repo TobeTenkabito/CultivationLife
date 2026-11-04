@@ -1,0 +1,29 @@
+{
+  "generator": "built-in image_gen",
+  "generation_prompts": {
+    "mechanical-humanoid": "Use case: stylized-concept. Create a NEW paired character asset for this Chinese cultivation game, using the supplied image only as a strict style and layout reference. A single ancient Chinese humanoid cultivation automaton, bronze and dark jade articulated armor, calm carved mask, tiny jade energy core, clothed segmented humanlike shape, both mechanical hands with clear fingers and both legs and boots visible. Not a modern robot. Match the reference fine linework, restrained earthy palette, gently shaded detailed illustrated robes and realistic elegant proportions. One character design shown twice: complete standing figure in the LEFT 45 percent, matching shoulder portrait on RIGHT 45 percent. Entire figure from hair to soles within canvas with generous clear transparent margins; TWO arms, TWO hands, TWO legs and TWO distinct feet, continuous plausible anatomy, no missing or extra limbs, hands separated from torso and readable. Keep tall slim body scale similar to reference, no chunky cartoon, no chibi, no thick outlines, no modern props, no text, no background or glow. True transparent alpha. Landscape 3:2 paired layout.",
+    "corpse-male": "Use case: stylized-concept. Create a NEW paired character asset for this Chinese cultivation game, using the supplied image only as a strict style and layout reference. A single adult male refined corpse guardian, pale gray complexion, closed calm lips, long black hair and restrained dark indigo funerary cultivation robes, subtle small yellow Taoist talisman on forehead, fully intact dignified body, no wounds or gore, both hands and both feet clearly visible. Match the reference fine linework, restrained earthy palette, gently shaded detailed illustrated robes and realistic elegant proportions. One character design shown twice: complete standing figure in the LEFT 45 percent, matching shoulder portrait on RIGHT 45 percent. Entire figure from hair to soles within canvas with generous clear transparent margins; TWO arms, TWO hands, TWO legs and TWO distinct feet, continuous plausible anatomy, no missing or extra limbs, hands separated from torso and readable. Keep tall slim body scale similar to reference, no chunky cartoon, no chibi, no thick outlines, no modern props, no text, no background or glow. True transparent alpha. Landscape 3:2 paired layout.",
+    "corpse-female": "Use case: stylized-concept. Create a NEW paired character asset for this Chinese cultivation game, using the supplied image only as a strict style and layout reference. A single adult female refined corpse guardian, pale gray complexion, long pinned black hair, restrained dark teal and plum funerary cultivation robes, subtle small yellow Taoist talisman on forehead, fully intact dignified body, no wounds or gore, both hands and both feet clearly visible. Match the reference fine linework, restrained earthy palette, gently shaded detailed illustrated robes and realistic elegant proportions. One character design shown twice: complete standing figure in the LEFT 45 percent, matching shoulder portrait on RIGHT 45 percent. Entire figure from hair to soles within canvas with generous clear transparent margins; TWO arms, TWO hands, TWO legs and TWO distinct feet, continuous plausible anatomy, no missing or extra limbs, hands separated from torso and readable. Keep tall slim body scale similar to reference, no chunky cartoon, no chibi, no thick outlines, no modern props, no text, no background or glow. True transparent alpha. Landscape 3:2 paired layout."
+  },
+  "reference": "design/npc-expansion-351/source/demonic-male-351.png",
+  "actors": [
+    {
+      "id": "mechanical-humanoid",
+      "file": "mechanical-humanoid.png",
+      "sha256": "c59fe022ac4974644032eae59b465f3d256f9bf1872b43a808c4e1fdbaa38fad",
+      "review": "完整双臂、双手、分开的双足；沿原细线衣饰风格，未用程序补绘人体。"
+    },
+    {
+      "id": "corpse-male",
+      "file": "corpse-male.png",
+      "sha256": "aec105c9333b0798a314bf2efbe69ca004622d7d75e972429dd72dd100cd1dfa",
+      "review": "完整双臂、双手、分开的双足；沿原细线衣饰风格，未用程序补绘人体。"
+    },
+    {
+      "id": "corpse-female",
+      "file": "corpse-female.png",
+      "sha256": "28e5d6bdbc93699457b18599f244603fa1a2e2a1987d1d838b8f2e37fa062cec",
+      "review": "完整双臂、双手、分开的双足；沿原细线衣饰风格，未用程序补绘人体。"
+    }
+  ]
+}

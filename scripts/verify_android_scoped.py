@@ -81,7 +81,7 @@ def main():
             require((ROOT/name).stat().st_mtime >= (ROOT/'android/app/build/outputs/apk/release/app-release.apk').stat().st_mtime,'Heavens native log predates the final APK')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if immortal:require('immortal_artifacts_scope' in text,f'Missing native immortal cultivation: {name}')
-        if body_ui:require('body_ui_scope' in text and 'upper_social_scope' in text,f'Missing native body/UI or upper/social coverage: {name}')
+        if body_ui:require('body_ui_scope' in text and 'upper_social_scope' in text and 'npc_development_scope' in text,f'Missing native body/UI or upper/social coverage: {name}')
         if heavens:require('heavens_outposts_scope' in text,f'Missing native heavens/war/return acceptance: {name}')
         if '--handbook' in sys.argv:require('handbook_revision_scope' in text,f'Missing native handbook and current catalog: {name}')
         if tutorial and 'tutorial-ui' in name:require('tutorial_interface_scope' in text and 'tutorial_practice_scope' in text,f'Missing actual native interface and practice course: {name}')
@@ -145,7 +145,7 @@ def main():
                   scope='Annual finance, original organizational guards, trust and real production; six native orientation phases' if economy else 'Legacy soul and upper scope')
     if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
     if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
-    if body_ui:receipt['scope']='3.5.1 upper-world guides and new sect portraits, two pixel palettes, paid four-family cultivation and real combat reports; signed Android 12 portrait/landscape'
+    if body_ui:receipt['scope']='3.5.2 NPC body/technique/domain cultivation, controlled portraits, energy replacement and bird replay, plus upper-world guides and two pixel palettes; signed Android 12 portrait/landscape'
     if immortal:receipt['scope']='Independent immortal page, reference-matched art, exact paid promotion/four grades, stale recovery and grade-one reload; legacy and pixel themes, signed Android 12 portrait/landscape'
     if natal:receipt['scope']='Naming compatibility and eleven-world natal materials, native socket/return, bounded catalog and qualification; four themes and four orientation phases'
     if teachings:receipt['scope']='Four upper worlds, Buddhist wish/blessings and Confucian doctrine/classics/outer opportunity, direct advancement disabled; native clicks, four themes and portrait/landscape'

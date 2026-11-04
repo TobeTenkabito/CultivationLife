@@ -59,12 +59,15 @@ def main():
                 page.wait_for_function('game.demonic_system.puppets.length === 1')
                 assert engine.store.load(game.id).player.puppets[0]['form']=='dragon'
                 page.evaluate("UtilityPanels.open('captive')")
-                training=page.locator('.owned-training').first
-                click_control(training.locator('summary'))
+                click_control(page.locator('.npc-development-open').first)
+                page.wait_for_selector('#npc-development-submit')
+                training=page.locator('#npc-development-dialog')
+                training.get_by_label('培养方式',exact=True).select_option('infuse')
                 training.get_by_label('培养方向').select_option('body')
                 training.get_by_label('培养轮数').select_option('5')
-                training.get_by_role('button',name='培养炼体 · 5轮',exact=True).click()
+                training.get_by_role('button',name='执行培养',exact=True).click()
                 page.wait_for_function('game.demonic_system.puppets[0].immortal_body_level === 15')
+                training.locator('header button').click()
                 for theme in 'abdf':
                     page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()',theme)
                     for width,height in [(1440,1000),(412,915),(932,430)]:

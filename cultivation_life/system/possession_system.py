@@ -172,6 +172,7 @@ def enter_host_body(player: Player, target: dict[str, Any], *, technique=None) -
         "path": target_path, "path_name": PATH_NAMES.get(target_path, target_path),
         "realm_index": realm_index, "layer": layer,
         "immortal_body_level": max(0, int(target.get('immortal_body_level', 0))),
+        "body_attainments": copy.deepcopy(target.get("body_attainments", {})),
         "body_training": max(0, int(coordinates['body_training'])),
     }
     player.name = f"{target_name}（{original_name}）"

@@ -290,6 +290,8 @@ def test_living_puppet_keeps_paid_lifespan_when_released(engine, legacy, lifespa
         puppet.pop('lifespan', None)
     engine.store.save(game)
     before = game.player.opportunity
+    from cultivation_life.system.npc_development.service import quote
+    cost=quote(game,'puppet',puppet['id'],'cultivation','infuse',5)['opportunity']
     engine.train_owned(game.id, puppet['id'], 'puppet', 'cultivation', 5)
     trained = engine.store.load(game.id).player.puppets[0]
     assert trained['age'] == 30
@@ -300,7 +302,7 @@ def test_living_puppet_keeps_paid_lifespan_when_released(engine, legacy, lifespa
     assert (person.realm_index, person.layer) == (2, 3)
     assert person.lifespan == trained['lifespan']
     assert person.alive and person.roster_state == 'active'
-    assert before - game.player.opportunity == 5
+    assert before - game.player.opportunity == pytest.approx(cost)
 
 
 @pytest.mark.parametrize('kind', ['living', 'corpse'])
@@ -309,6 +311,11 @@ def test_real_battle_destroyed_puppet_cannot_be_consumed_or_sold(engine, kind):
     captive(game, 'battle-target', realm=2, power=100)
     game = convert(engine, game, 'battle-target', kind)
     puppet = game.player.puppets[0]
+    # Refining a body does not create operating charge; pay before deploying it.
+    from cultivation_life.rules import add_item
+    from cultivation_life.system.npc_development.service import charge
+    add_item(game.player,'npc_training_puppet_energy_rank_2',1)
+    charge(game,'puppet',puppet['id'])
     puppet['control' if kind == 'living' else 'corpse_integrity'] = 10.
     own = engine._player_battle_power(game)
     engine._combat(game, dict(target_name='强敌', target_power=own*1.5,

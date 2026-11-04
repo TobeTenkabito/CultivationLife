@@ -30,6 +30,9 @@ def npc_voisinage_limit(npc):
     """Only rare late true immortals have a field. Stable identity, no rerolls."""
     from .combat.actor_state import read
     realm = read(npc, 'realm_index', 0)
+    if ((read(npc,'transcendence') or {}).get('doctrine') or {}).get('cultivated'):
+        from ..content_registry import CONTENT_DOCUMENTS
+        return max((i+1 for i,r in enumerate(CONTENT_DOCUMENTS['doctrines.json']['level_realms']) if r<=realm),default=3)
     if realm > 9:
         return 9
     if realm < 9 or read(npc, 'layer', 1) < 7:
