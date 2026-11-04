@@ -307,7 +307,29 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             if(!Boolean.TRUE.equals(js("document.querySelector('.battle-round-details').open")))tapSelector(".battle-round-details>summary");
             check(Boolean.TRUE.equals(js("document.querySelector('#battle-round-list').innerText.length>0")),"Body combat text");
             tapSelector("#battle-report-toggle");
+            String guideBefore=(String)js("JSON.stringify(game)");
+            tapSelector("#action-card [data-tutorial-open]");tapSelector("#tutorial-upper-start");
+            waitForJs("document.querySelector('.tutorial-tour').dataset.mode==='upper'&&!document.querySelector('.tutorial-tour').hidden","Upper guide begins");
+            int guideCount=((Number)js("TutorialUpper.build(configData,game,game.player.world).length")).intValue();
+            for(int step=0;step<guideCount;step++) {
+                check(Boolean.TRUE.equals(js("document.querySelector('.tutorial-tour').dataset.step.endsWith('_"+step+"')")),"Native upper step "+step);
+                check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('.tutorial-coach').getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&r.bottom<=innerHeight+1})()")),"Native guide stays inside viewport");
+                if(step==1)capture("upper-guide-"+families[i]);
+                tapSelector("#guide-next");
+            }
+            check(guideBefore.equals(js("JSON.stringify(game)")),"Guide is read-only");
+            js("document.querySelectorAll('.utility-panel.panel-open').forEach(n=>UtilityPanels.close(n.id.replace(/-card$/,'')))");
+            python("from cultivation_life import server\nexec("+JSONObject.quote(assetText("body_ui_release.py"))+")\nprepare_npc_roster(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");tapSelector("[data-panel-target=faction]");
+            for(String gender:new String[]{"male","female"}) {
+                String portrait=".roster-identity img[data-art='actor.path.npc-novice-"+gender+"-351']";
+                revealSubpage(portrait);tapSelector(portrait);
+                waitForJs("document.querySelector('#npc-art-dialog img')?.naturalWidth===128","New sect member full figure loaded");
+                capture("new-recruit-"+families[i]+"-"+gender);tapSelector("#npc-art-dialog button");
+            }
+            tapSelector("#faction-toggle");
         }
+        result.putString("upper_social_scope","Four upper-world guides and new recruited male/female portraits; actual native taps and unchanged guide state");
         result.putString("body_ui_scope","Two immutable pixel palettes, no retired controls, real paid four-family cultivation, materials and combat report; signed native touches");
     }
 

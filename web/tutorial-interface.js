@@ -34,7 +34,7 @@
       ui_heavens_info:{target:'#heavens-card h2',context:'heavens',title:'见闻、行程与跨界开拓',text:'诸天窗口按栏目整理情报与玩法；“诸界”栏目中可查看跨界开拓。看见入口不代表已有通行资格，正式行动仍检查当前身份、地点、经费和路线。',read:true},
       ui_close_heavens:close('heavens'),
       ui_settings:panel('settings','设置与帮助都在这里',mobile?'请从“常用”目录打开“设置”。主题、存档和教程都能在这里找到。':'请点设置入口。主题、存档和教程都能在这里找到。'),
-      ui_appearance:{target:'#settings-card .settings-appearance h3',context:'settings',title:'新版配色与侧栏名称',text:'界面主题、新版界面开关、浅暗配色和侧栏名称显示都在这一带。导览不会替你改偏好，之后可以按自己的习惯调整。',read:true},
+      ui_appearance:{target:'#settings-card .settings-appearance h3',context:'settings',title:'新版配色与侧栏名称',text:'山海图志与沧海夜色两种配色、侧栏名称显示都在这一带。导览不会替你改偏好，之后可以按自己的习惯调整。',read:true},
       ui_save:{target:'.settings-save-transfer h3',context:'settings',title:'自动保存，也可以随身带走',text:'进度会自动保存。这里可导出当前存档，或导入另一份存档；导出码用于备份与跨设备续玩。本次无需导入或覆盖任何存档。',read:true},
       ui_handbook:{target:'#tutorial-handbook summary',title:'忘记规则时查百科',text:'请展开一篇修行指南。上方还可按关键词和分类检索；内容会结合当前已加载的玩法显示。',context:'settings',click:true,complete:hit=>hit.parentNode.open},
       ui_finish:{target:'#setting-tutorial-open',context:'settings',title:'现在知道去哪里找了',text:'以后仍可从“新手教程 → 新版界面导览”重新认识入口。想亲手试一遍修炼、探宝、拜师与入门，再选择“修行实践引导”。',read:true},

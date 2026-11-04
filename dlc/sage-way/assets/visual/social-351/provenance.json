@@ -1,0 +1,118 @@
+{
+  "generator": "built-in image_gen",
+  "export": "alpha 128; shared 48 colors; nearest; no anatomy edits",
+  "actors": [
+    {
+      "id": "confucian-male-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW male supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: confucian cultivator, male, apparent age 25–35. ivory and pale ink blue scholarly long robes with fine woven edging, refined scholar hair ornament. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-male-01.png",
+      "source_sha256": "e39aa736aa4d6acc44e43ea943640cd59cc02e1b71101fd985e8fb026457445d",
+      "subject_bounds": [
+        [
+          4,
+          4,
+          371,
+          1013
+        ],
+        [
+          3,
+          3,
+          714,
+          767
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/extension-assets/official.sage-way/visual/social-351/confucian-male-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "c100369f204195bf506e44f90e98bc4217d92e7bf2c9dc1d4764fb8454a351d3",
+          "requires": [
+            "official.sage-way"
+          ],
+          "npc_forms": [
+            {
+              "path": "confucian",
+              "race": "human",
+              "gender": "male",
+              "role": "npc",
+              "static": "actor.path.npc-confucian-male-351",
+              "min_age": 18,
+              "max_age": null
+            }
+          ]
+        },
+        "portrait": {
+          "file": "/extension-assets/official.sage-way/visual/social-351/confucian-male-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "b4732d7b9eb8981f4483055aa4838275a11bd0ca1101f62bd36fafe19b50075b",
+          "requires": [
+            "official.sage-way"
+          ]
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    },
+    {
+      "id": "confucian-female-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW female supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: confucian cultivator, female, apparent age 25–35. ivory and pale ink blue scholarly long robes with fine woven edging, refined scholar hair ornament. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-female-01.png",
+      "source_sha256": "1e73e9a260c687983c1c29a0bdbf32d5c14d12f020b7c0dc8e5d8511b2e56b77",
+      "subject_bounds": [
+        [
+          4,
+          2,
+          405,
+          998
+        ],
+        [
+          3,
+          4,
+          602,
+          784
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/extension-assets/official.sage-way/visual/social-351/confucian-female-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "d34fb23223badcf5efad1c3c804f19ca33379aa32d9f7e8e1dd2f6c8c47be274",
+          "requires": [
+            "official.sage-way"
+          ],
+          "npc_forms": [
+            {
+              "path": "confucian",
+              "race": "human",
+              "gender": "female",
+              "role": "npc",
+              "static": "actor.path.npc-confucian-female-351",
+              "min_age": 18,
+              "max_age": null
+            }
+          ]
+        },
+        "portrait": {
+          "file": "/extension-assets/official.sage-way/visual/social-351/confucian-female-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "bfe33010f13bfe6ff4cfbe2d36f25c52a6c251a3ee11b14aa6210721f0d0369c",
+          "requires": [
+            "official.sage-way"
+          ]
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    }
+  ]
+}

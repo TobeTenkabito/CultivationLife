@@ -263,13 +263,13 @@ def main():
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
     if scoped.get('profile')=='body-ui':
         from scripts.body_ui_release_scope import TESTS as BODY_TESTS,BROWSERS as BODY_BROWSERS
-        require(all(c.get('body_ui_verified') for c in evidence['cases']),'Final EXE body/UI acceptance required with and without DLC')
-        require({name for shard in scoped['tests'] for name in shard}==set(BODY_TESTS),'3.5.0 declared body/UI selection incomplete')
+        require(all(c.get('body_ui_verified') and c.get('upper_social_verified') for c in evidence['cases']),'Final EXE body/UI acceptance required with and without DLC')
+        require({name for shard in scoped['tests'] for name in shard}==set(BODY_TESTS),'Current declared body/UI selection incomplete')
         require(set(BODY_BROWSERS)<={r['name'] for r in scoped['runs']},'Body/UI real browsers incomplete')
         required={f'build/android-body-ui-{o}-{tag}.log' for o in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Body/UI native scope incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test APK changed')
-        require(all('body_ui_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in required),'Native body/UI marker missing')
+        require(all('body_ui_scope' in (ROOT/name).read_text(encoding='utf-8-sig') and 'upper_social_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in required),'Native body/UI marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
@@ -506,12 +506,12 @@ def main():
             with zipfile.ZipFile(destination) as z:
                 require(z.testzip() is None,'DLC archive damaged')
     if scoped.get('profile')=='body-ui':
-        for package,label in [('asura-manifestation','修罗显圣'),('monster-bloodlines','万妖归宗'),('ghost-reincarnation','百鬼夜行')]:
+        for package,label in [('authored-techniques','著经立道'),('monster-bloodlines','万妖归宗'),('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')]:
             version=json.loads((ROOT/'dlc'/package/'manifest.json').read_text(encoding='utf8'))['version']
             with zipfile.ZipFile(ROOT/f'dist/{label}-v{version}-更新包.zip','w',zipfile.ZIP_DEFLATED) as z:
                 for path in (ROOT/'dlc'/package).rglob('*'):
                     if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
-                z.write(ROOT/'docs/release-350.md','更新说明.md')
+                z.write(ROOT/'docs/release-351.md','更新说明.md')
                 z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅支持结构12。覆盖对应dlc目录后重启；Android请安装同版签名APK。')
     print(json.dumps(dict(version=VERSION,tests=tests,windows=str(output),android=str(target)),ensure_ascii=False))
 

@@ -238,6 +238,72 @@
           "owner": "official.buddhist-dharma"
         }
       ]
+    },
+    "actor.path.npc-buddhist-male-351.figure": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/social-351/buddhist-male-351-figure.png",
+      "size": [
+        128,
+        192
+      ],
+      "sha256": "3a0618a881e807447964766b4472973c1b1d2205df1e0abfda06b9474454bc44",
+      "requires": [
+        "official.buddhist-dharma"
+      ],
+      "npc_forms": [
+        {
+          "path": "buddhist",
+          "race": "human",
+          "gender": "male",
+          "role": "npc",
+          "static": "actor.path.npc-buddhist-male-351",
+          "min_age": 18,
+          "max_age": null
+        }
+      ]
+    },
+    "actor.path.npc-buddhist-male-351.portrait": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/social-351/buddhist-male-351-portrait.png",
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "3759c5c395ba64a22f2c2c72732a1ba4c43a61e18cbecd8478d6accd156b0a1b",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
+    },
+    "actor.path.npc-buddhist-female-351.figure": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/social-351/buddhist-female-351-figure.png",
+      "size": [
+        128,
+        192
+      ],
+      "sha256": "97b2adadf7735437e90c106cdc56580604f31662b5c2129e938fdb5e33c287e3",
+      "requires": [
+        "official.buddhist-dharma"
+      ],
+      "npc_forms": [
+        {
+          "path": "buddhist",
+          "race": "human",
+          "gender": "female",
+          "role": "npc",
+          "static": "actor.path.npc-buddhist-female-351",
+          "min_age": 18,
+          "max_age": null
+        }
+      ]
+    },
+    "actor.path.npc-buddhist-female-351.portrait": {
+      "file": "/extension-assets/official.buddhist-dharma/visual/social-351/buddhist-female-351-portrait.png",
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "b64fcea8f3896bf634cb981191c9ab019a7d006dcffc516ea29fb06a5e446a1e",
+      "requires": [
+        "official.buddhist-dharma"
+      ]
     }
   }
 }

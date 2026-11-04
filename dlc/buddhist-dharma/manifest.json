@@ -3,7 +3,7 @@
   "api_version": 1,
   "id": "official.buddhist-dharma",
   "name": "诸法无我：众生为镜",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "kind": "dlc",
   "enabled": true,
   "load_order": 150,

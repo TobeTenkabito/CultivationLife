@@ -465,6 +465,72 @@
       "requires": [
         "official.ghost-reincarnation"
       ]
+    },
+    "actor.path.npc-ghost-male-351.figure": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/social-351/ghost-male-351-figure.png",
+      "size": [
+        128,
+        192
+      ],
+      "sha256": "e8dc0b6ef213f2e641a8b3e026d38bd55e5333781757b0450cb09695f631e16f",
+      "requires": [
+        "official.ghost-reincarnation"
+      ],
+      "npc_forms": [
+        {
+          "path": "ghost",
+          "race": "human",
+          "gender": "male",
+          "role": "npc",
+          "static": "actor.path.npc-ghost-male-351",
+          "min_age": 18,
+          "max_age": null
+        }
+      ]
+    },
+    "actor.path.npc-ghost-male-351.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/social-351/ghost-male-351-portrait.png",
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "c0f2c10ed8cfde38496790274bca2d8720e126a8f033dd0096d0aaf372332d23",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
+    },
+    "actor.path.npc-ghost-female-351.figure": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/social-351/ghost-female-351-figure.png",
+      "size": [
+        128,
+        192
+      ],
+      "sha256": "3c7d3b0f7f184a43d2f93a15cb66c13d8684995ad88de257c226b990b5877f37",
+      "requires": [
+        "official.ghost-reincarnation"
+      ],
+      "npc_forms": [
+        {
+          "path": "ghost",
+          "race": "human",
+          "gender": "female",
+          "role": "npc",
+          "static": "actor.path.npc-ghost-female-351",
+          "min_age": 18,
+          "max_age": null
+        }
+      ]
+    },
+    "actor.path.npc-ghost-female-351.portrait": {
+      "file": "/extension-assets/official.ghost-reincarnation/visual/social-351/ghost-female-351-portrait.png",
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "20c41c1b0b952971476b3ae808c75da6baf974b1480a27060e881076aa631d5a",
+      "requires": [
+        "official.ghost-reincarnation"
+      ]
     }
   }
 }

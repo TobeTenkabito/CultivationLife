@@ -1,0 +1,136 @@
+{
+  "base_version": "3.5.1",
+  "save_schema": 12,
+  "compatible_save_schemas": [
+    12
+  ],
+  "incompatible_save_schemas": "1–11; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.4.0",
+    "authored-techniques": "1.0.1",
+    "buddhist-dharma": "1.2.1",
+    "ghost-reincarnation": "3.11.1",
+    "guixu-tide": "2.7.3",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.20.1",
+    "monster-civilizations": "1.0.1",
+    "sage-way": "1.6.1",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "3.5.1 upper-world guide, NPC portraits and authored DLC naming plus four high-body families, eightfold mechanics, pixel-only two-palette UI, source/persistence/combat and release upstreams; not full repository regression",
+  "tests": 1482,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build/related-tests-0-351.log",
+      "log_sha256": "e66599deddd2fcda300f03e75112409494e7529dbb192d5cfe36c72ae0797d1b",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build/related-tests-1-351.log",
+      "log_sha256": "6185f29751602c7a4af5f64ba0abd5ccadbdfb9fa67f5c4b5ce271e66cd06eb2",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build/check_world_transition_contract-351.log",
+      "log_sha256": "15e158705915f3bc9717198851166fee99400a3adcf813465889170b71c62afb",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build/check_module_dependencies-351.log",
+      "log_sha256": "46f65820ac80d40079deffbbb46e92d22e7b095f99cdf97409b8c9940b564588",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build/check_documentation-351.log",
+      "log_sha256": "f91e8074769bda20d547ad95df71c649d33e52b3c5b5c6d6d84f6249e923d15f",
+      "status": "passed"
+    },
+    {
+      "name": "browser_upper_social_351",
+      "log": "build/browser_upper_social_351-351.log",
+      "log_sha256": "d25a082e1ab9e3c02a35d9b2c8903d074e51618ca3c0659450f5d45d913a1037",
+      "status": "passed"
+    },
+    {
+      "name": "browser_body_ui_release",
+      "log": "build/browser_body_ui_release-351.log",
+      "log_sha256": "49ccb580e6c50d26d509a4d7160a9a0df8dad5548d89145b813ff19b6aaf4aa0",
+      "status": "passed"
+    },
+    {
+      "name": "browser_eightfold",
+      "log": "build/browser_eightfold-351.log",
+      "log_sha256": "6edefdd67aa9e4a4d4f4ae783a4c22b93aea0a9ba0bc71f9f9d1e73a47d87a18",
+      "status": "passed"
+    },
+    {
+      "name": "browser_divine_lights",
+      "log": "build/browser_divine_lights-351.log",
+      "log_sha256": "5481f12c30772389ac583720b102fc3f445e468be0ffbd8fc06a7c957ee7b2ad",
+      "status": "passed"
+    },
+    {
+      "name": "browser_wuyun",
+      "log": "build/browser_wuyun-351.log",
+      "log_sha256": "63c723957f08770760417ef691820e1f7b9fe5f1452748482bf1f76b7b4a4a11",
+      "status": "passed"
+    },
+    {
+      "name": "browser_monster_body",
+      "log": "build/browser_monster_body-351.log",
+      "log_sha256": "a068c415b30785335901141c6f643ab78114d8addbb16b8ae3d478fbc26fdef2",
+      "status": "passed"
+    },
+    {
+      "name": "browser_ghost_body",
+      "log": "build/browser_ghost_body-351.log",
+      "log_sha256": "516b273537b39d9589eae8d78d12031ec7629f2abb71ccae7bd2338db8b081a0",
+      "status": "passed"
+    },
+    {
+      "name": "browser_desktop_navigation",
+      "log": "build/browser_desktop_navigation-351.log",
+      "log_sha256": "792d8650b5400b64fb0e4e24c5674f05af55c368eac09e67ce3554be7a5933d0",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build/browser_events_212-351.log",
+      "log_sha256": "f3fbc3e8363c410974fce864244e34ce1ab043f87dc3fcbe7778101bff70f6bf",
+      "status": "passed"
+    },
+    {
+      "name": "browser_pixel_only",
+      "log": "build/browser_pixel_only-351.log",
+      "log_sha256": "a6e5ebeb0a09b0ecd22766630abb1795b048c7754100b11e21ce61eb877f9577",
+      "status": "passed"
+    },
+    {
+      "name": "save-transfer",
+      "log": "build/save-transfer-351.log",
+      "log_sha256": "3be6bc7b0be7b7817806db4fcc31d42e25799d3afeee4de22cbff30db151cada",
+      "status": "passed"
+    }
+  ],
+  "regression": {
+    "collected": 1482,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 1482
+  },
+  "save_transfer_smoke_tests": 21,
+  "save_transfer_smoke_in_regression": true,
+  "save_transfer_log": "build/save-transfer-351.log",
+  "inputs_sha256": "5dec6d493ce654589be6d4b9bd8e5458d0dd1b40e67a168101aef1def94ffe56",
+  "platform": "Windows",
+  "exe_sha256": "a4d44cfe8b2a7de4e0682c70ee638337d843775bbfb250f750dfa7fbc245505a",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}

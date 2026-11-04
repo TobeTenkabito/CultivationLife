@@ -76,7 +76,7 @@
     return {active:true,index:interfaceGuide.index,total:interfaceGuide.keys.length,step:interfaceGuide.keys[interfaceGuide.index],
       blocked:!data?.player.alive?'此生已结束，可在另一个角色中体验界面导览。':data?.tutorial.guide.blocked||(data?.pending_event||!$('#prison-card').classList.contains('hidden')?'请先暂停导览，处理眼前的事件或困境，再从新手教程继续。':''),admissions:[]};
   }
-  const definition=g=>interfaceGuide?window.TutorialInterface.resolve(g.step):steps[g.step];
+  const definition=g=>interfaceGuide?.kind==='upper'?window.TutorialUpper.resolve(interfaceGuide.rows[g.index]):interfaceGuide?window.TutorialInterface.resolve(g.step):steps[g.step];
   function clearViews(){
     window.GameNavigation?.close({restoreFocus:false});
     document.querySelectorAll('dialog[open]').forEach(d=>d.close());
@@ -85,10 +85,20 @@
   function startInterface(){
     if(!data||working)return;
     stop();
-    if(!interfaceGuide)interfaceGuide={id:data.id,index:0,keys:window.TutorialInterface.keys(),active:true};
+    if(!interfaceGuide||interfaceGuide.kind==='upper')interfaceGuide={id:data.id,index:0,keys:window.TutorialInterface.keys(),active:true};
     interfaceGuide.active=true;
     clearViews();
     draw();
+  }
+  function startUpper(){
+    if(!data||working)return;
+    stop();
+    const world=$('#tutorial-upper-world').value;
+    if(interfaceGuide?.kind!=='upper'||interfaceGuide.world!==world){
+      const rows=window.TutorialUpper.build(handbookConfig,data,world);
+      interfaceGuide={id:data.id,kind:'upper',world,rows,index:0,keys:rows.map((_,i)=>`upper_${world}_${i}`),active:true};
+    }
+    interfaceGuide.active=true;clearViews();draw();
   }
   function visible(selector){return [...document.querySelectorAll(selector)].filter(n=>{const r=n.getBoundingClientRect();return r.width>0&&r.height>0&&!n.closest('.hidden');});}
   function stop(){root.hidden=true;focus=null;currentKey='';observer.disconnect();}
@@ -163,6 +173,8 @@
     $('#tutorial-progress').textContent=data?`操作引导 · ${data.tutorial.guide.index+1}/${data.tutorial.guide.total}`:'跟着箭头，亲手问道';
     $('#tutorial-heading').textContent='新手操作教程';
     $('#tutorial-interface-start').disabled=!data||working;
+    $('#tutorial-upper-start').disabled=!data||working;
+    $('#tutorial-upper-start').textContent=interfaceGuide?.kind==='upper'?'继续上界修行引导':'开始上界修行引导';
     $('#tutorial-interface-start').textContent=interfaceGuide?'继续新版界面导览':'新版界面导览';
     $('#tutorial-start').textContent=data?.tutorial.guide.completed?'修行实践已完成':'开始／继续修行实践';
     $('#tutorial-status').textContent=!data?'进入一段人生后，即可开启新版界面导览。':interfaceGuide&&!interfaceGuide.active?'界面导览已暂停，点击上方入口可续接；刷新页面后可从头重看。':'';
@@ -185,9 +197,9 @@
     const dialogs=[...document.querySelectorAll('dialog[open]')];
     const parent=focus?.closest('dialog[open]')||dialogs[dialogs.length-1]||document.body;
     if(root.parentNode!==parent)parent.append(root);
-    root.hidden=false;currentKey=key;root.dataset.step=g.step;root.dataset.mode=interfaceGuide?'interface':'practice';
+    root.hidden=false;currentKey=key;root.dataset.step=g.step;root.dataset.mode=interfaceGuide?.kind==='upper'?'upper':interfaceGuide?'interface':'practice';
     interfaceShortcut.hidden=!!interfaceGuide||g.step!=='welcome';
-    $('#guide-progress').textContent=`${g.index+1} / ${g.total} · ${interfaceGuide?'新版界面导览':'操作引导'}`;$('#guide-title').textContent=step.title;
+    $('#guide-progress').textContent=`${g.index+1} / ${g.total} · ${interfaceGuide?.kind==='upper'?'上界修行引导':interfaceGuide?'新版界面导览':'操作引导'}`;$('#guide-title').textContent=step.title;
     $('#guide-copy').textContent=g.blocked||(typeof step.text==='function'?step.text(g,data):step.text);
     const canNext=step.read||skippable(g);$('#guide-next').hidden=!canNext||!!g.blocked;$('#guide-next').disabled=working;
     $('#guide-next').textContent=g.step==='ui_finish'?'完成界面导览':g.step==='finish'?'完成引导，开始问道':'明白了，继续';$('#guide-pause').disabled=working;
@@ -200,6 +212,7 @@
   function open(){stop();if(!dialog.open)dialog.showModal();draw();}
   $('#tutorial-close').onclick=()=>{dialog.close();draw();};
   $('#tutorial-interface-start').onclick=startInterface;interfaceShortcut.onclick=startInterface;
+  $('#tutorial-upper-start').onclick=startUpper;
   $('#tutorial-enabled').onchange=e=>{if(data){interfaceGuide=null;act(e.target.checked?'enable':'disable');}else{startEnabled=e.target.checked;try{localStorage.setItem('wendao-tutorial-next-life',String(startEnabled));}catch(_){}draw();}};
   $('#tutorial-start').onclick=async()=>{interfaceGuide=null;currentKey='';if(!data){startEnabled=true;try{localStorage.setItem('wendao-tutorial-next-life','true');}catch(_){}dialog.close();draw();return;}clearViews();if(!data.tutorial.enabled)await act('enable');draw();};
   $('#tutorial-handbook-open').onclick=async()=>{interfaceGuide=null;if(data?.tutorial.enabled)await act('disable');dialog.close();UtilityPanels.open('settings');$('#tutorial-handbook').scrollIntoView({block:'start'});draw();};
@@ -236,7 +249,7 @@
   function reflow(){if(guideInfo()?.active&&!dialog.open){currentKey='';draw();}else schedule();}
   addEventListener('resize',()=>requestAnimationFrame(reflow));addEventListener('game:theme-change',()=>requestAnimationFrame(reflow));addEventListener('scroll',event=>{if(event.target!==coach)schedule();},true);
   window.TutorialGuide={enabledForNewGame:()=>startEnabled,reset(){interfaceGuide=null;data=null;send=null;stop();dialog.close();renderHandbook(handbookConfig);draw();},
-    configure:renderHandbook,render(value,callback){if(data?.id!==value.id)interfaceGuide=null;data=value;send=callback;if(currentHandbookScope()!==handbookScope)renderHandbook(handbookConfig);draw();},open,isGuiding:()=>!root.hidden,pause:()=>act('disable'),
+    configure:renderHandbook,render(value,callback){if(data?.id!==value.id||data?.player?.world!==value.player.world){interfaceGuide=null;if(Object.prototype.hasOwnProperty.call(window.TutorialUpper.worlds,value.player.world))$('#tutorial-upper-world').value=value.player.world;}data=value;send=callback;if(currentHandbookScope()!==handbookScope)renderHandbook(handbookConfig);draw();},open,isGuiding:()=>!root.hidden,pause:()=>act('disable'),
     showChapter(id){resetHandbookFilter();UtilityPanels.open('settings');const row=handbookRows.find(r=>r.chapter.id===id);if(row){row.element.open=true;row.expanded=true;row.element.scrollIntoView({block:'start'});}}
   };
   draw();

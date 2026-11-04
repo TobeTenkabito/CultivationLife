@@ -1,0 +1,118 @@
+{
+  "generator": "built-in image_gen",
+  "export": "alpha 128; shared 48 colors; nearest; no anatomy edits",
+  "actors": [
+    {
+      "id": "monster-male-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW male supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: monster cultivator, male, apparent age 25–35. sage jade and mist grey elegant long robes with small leaf motifs, HUMAN ORIGIN cultivator with ordinary human ears and face, no animal parts. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-male-01.png",
+      "source_sha256": "a3dc260e3ccb6adf7a8d29102ec6c6c3c60797b1f975cb13268d1e422f388585",
+      "subject_bounds": [
+        [
+          4,
+          4,
+          391,
+          1014
+        ],
+        [
+          4,
+          4,
+          725,
+          775
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/extension-assets/official.monster-bloodlines/visual/social-351/monster-male-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "ded2f84117aee9582c23a25a73bd1bb91514f6efd7f2629d402086dcb7021ddd",
+          "requires": [
+            "official.monster-bloodlines"
+          ],
+          "npc_forms": [
+            {
+              "path": "monster",
+              "race": "human",
+              "gender": "male",
+              "role": "npc",
+              "static": "actor.path.npc-monster-male-351",
+              "min_age": 18,
+              "max_age": null
+            }
+          ]
+        },
+        "portrait": {
+          "file": "/extension-assets/official.monster-bloodlines/visual/social-351/monster-male-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "b57d1f4e63ab8ef6f7ce211ee5fa6934809462a66423e4903db0864757b2b095",
+          "requires": [
+            "official.monster-bloodlines"
+          ]
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    },
+    {
+      "id": "monster-female-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW female supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: monster cultivator, female, apparent age 25–35. sage jade and mist grey elegant long robes with small leaf motifs, HUMAN ORIGIN cultivator with ordinary human ears and face, no animal parts. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-female-01.png",
+      "source_sha256": "e3ae8d333813ea89c6daf617bd0a445c1bcbf9480cd9abeb44b800dbc5cd1934",
+      "subject_bounds": [
+        [
+          4,
+          4,
+          422,
+          1013
+        ],
+        [
+          0,
+          4,
+          589,
+          749
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/extension-assets/official.monster-bloodlines/visual/social-351/monster-female-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "51c38971a51dc9137df7eae946c1666a9fb090a60e0a17be81f6f58df46bcab8",
+          "requires": [
+            "official.monster-bloodlines"
+          ],
+          "npc_forms": [
+            {
+              "path": "monster",
+              "race": "human",
+              "gender": "female",
+              "role": "npc",
+              "static": "actor.path.npc-monster-female-351",
+              "min_age": 18,
+              "max_age": null
+            }
+          ]
+        },
+        "portrait": {
+          "file": "/extension-assets/official.monster-bloodlines/visual/social-351/monster-female-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "af7c6e98c73525857a4c11b0359740c4aaffccedcc2607d9d98a8a9f934ced31",
+          "requires": [
+            "official.monster-bloodlines"
+          ]
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    }
+  ]
+}

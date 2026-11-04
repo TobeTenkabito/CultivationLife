@@ -12,7 +12,7 @@
     ['guixu','official.guixu-tide','归墟之潮：九死一生','增加周期副本、独占宝物、夺宝与临时队伍风险。','本体地图与寻幽探宝仍在，归墟副本及独占宝物不可获取。'],
     ['buddhist','official.buddhist-dharma','诸法无我：众生为镜','佛修增加弘法、业力、愿力与按四气经验分流的飞升。','佛修默认人界→灵界→仙界，没有愿力、涅槃和弘法加持。'],
     ['asura','official.asura-manifestation','修罗显圣：无法无天','开放五重煞元转化、精魂凝身、八部本命、魔域神通与心魔劫。','修罗界仍按本体规则成长，保留已炼化元神名录，不开放精魂与八部修持。'],
-    ['authored','official.authored-techniques','著经立道：自创功法与一代传承','以创法点编撰功法、刻录玉简，并为下一世留下作品。','作品保留，暂停编撰、专属流通及额外效果，不擦除已学基础数值。'],
+    ['authored','official.authored-techniques','著经立道：薪火相传','以创法点编撰功法、刻录玉简，并为下一世留下作品。','作品保留，暂停编撰、专属流通及额外效果，不擦除已学基础数值。'],
   ];
   function build(config = {}, game = null) {
     const loaded = new Set((config.extensions || []).filter(e => e.status === 'loaded').map(e => e.id));

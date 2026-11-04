@@ -1,0 +1,118 @@
+{
+  "generator": "built-in image_gen",
+  "export": "alpha 128; shared 48 colors; nearest; no anatomy edits",
+  "actors": [
+    {
+      "id": "ghost-male-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW male supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: ghost cultivator, male, apparent age 25–35. mist grey, desaturated blue and silver layered flowing ghost scholar robes, pale complexion, long dark hair, no floating limbs. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-male-01.png",
+      "source_sha256": "dbc388a2d429c7761c6627aedecc211e7d71e15951753cdbe07c4d630168d548",
+      "subject_bounds": [
+        [
+          4,
+          4,
+          423,
+          1008
+        ],
+        [
+          3,
+          4,
+          733,
+          774
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/extension-assets/official.ghost-reincarnation/visual/social-351/ghost-male-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "e8dc0b6ef213f2e641a8b3e026d38bd55e5333781757b0450cb09695f631e16f",
+          "requires": [
+            "official.ghost-reincarnation"
+          ],
+          "npc_forms": [
+            {
+              "path": "ghost",
+              "race": "human",
+              "gender": "male",
+              "role": "npc",
+              "static": "actor.path.npc-ghost-male-351",
+              "min_age": 18,
+              "max_age": null
+            }
+          ]
+        },
+        "portrait": {
+          "file": "/extension-assets/official.ghost-reincarnation/visual/social-351/ghost-male-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "c0f2c10ed8cfde38496790274bca2d8720e126a8f033dd0096d0aaf372332d23",
+          "requires": [
+            "official.ghost-reincarnation"
+          ]
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    },
+    {
+      "id": "ghost-female-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW female supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: ghost cultivator, female, apparent age 25–35. mist grey, desaturated blue and silver layered flowing ghost scholar robes, pale complexion, long dark hair, no floating limbs. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-female-01.png",
+      "source_sha256": "a684731fc8870c2126ae75d404a6a3823345873af0aa77db25fed040890d6872",
+      "subject_bounds": [
+        [
+          4,
+          4,
+          430,
+          1010
+        ],
+        [
+          2,
+          4,
+          689,
+          773
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/extension-assets/official.ghost-reincarnation/visual/social-351/ghost-female-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "3c7d3b0f7f184a43d2f93a15cb66c13d8684995ad88de257c226b990b5877f37",
+          "requires": [
+            "official.ghost-reincarnation"
+          ],
+          "npc_forms": [
+            {
+              "path": "ghost",
+              "race": "human",
+              "gender": "female",
+              "role": "npc",
+              "static": "actor.path.npc-ghost-female-351",
+              "min_age": 18,
+              "max_age": null
+            }
+          ]
+        },
+        "portrait": {
+          "file": "/extension-assets/official.ghost-reincarnation/visual/social-351/ghost-female-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "20c41c1b0b952971476b3ae808c75da6baf974b1480a27060e881076aa631d5a",
+          "requires": [
+            "official.ghost-reincarnation"
+          ]
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    }
+  ]
+}

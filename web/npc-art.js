@@ -19,12 +19,14 @@ window.NpcArt = (() => {
       return n.race===a.race&&n.path===a.path&&n.gender===a.gender?key:null;
     }
     // A pending named redesign must never silently acquire a generic face.
-    if(reserved.has(n.id)||n.race!=='human'||!['male','female'].includes(n.gender)||!(n.age>=18))return null;
-    const extra=Object.values(window.PixelLibrary?.catalog?.assets||{}).flatMap(row=>row.character_forms||[])
-      .find(form=>form.role==='npc'&&form.path===n.path&&form.race===n.race&&form.gender===n.gender);
-    if(extra)return extra.static;
-    if(!['dao','demonic'].includes(n.path))return null;
-    const pool=pack.pools[`human.${n.path}.${n.gender}`];if(!pool?.length)return null;
+    if(reserved.has(n.id)||n.race!=='human'||!['male','female'].includes(n.gender)||!(n.age>=16))return null;
+    const extras=Object.values(window.NpcExpansionCatalog||{}).map(row=>row.form);
+    const forms=[...extras,...Object.values(window.PixelLibrary?.catalog?.assets||{}).flatMap(row=>[...(row.character_forms||[]),...(row.npc_forms||[])])];
+    const pool=forms.filter(form=>form.role==='npc'&&form.race===n.race&&form.gender===n.gender&&
+      (n.age<18?form.path==='novice':form.path===n.path)&&n.age>=(form.min_age??18)&&
+      (form.max_age==null||n.age<=form.max_age)&&n.realm_index>=(form.min_realm_index??0)).map(form=>form.static);
+    if(n.age>=18)pool.push(...(pack.pools[`human.${n.path}.${n.gender}`]||[]));
+    if(!pool.length)return null;
     // Stable identity hash, independent of ordering, world, page and game RNG.
     let hash=2166136261;for(const c of String(n.id)){hash=Math.imul(hash^c.codePointAt(0),16777619)>>>0;}
     return pool[hash%pool.length];
@@ -40,13 +42,14 @@ window.NpcArt = (() => {
     const key=active()||roster?select(n):null;if(!key)return null;
     const img=el('img',undefined,`npc-art-${kind}`);img.alt=`${n.name}${kind==='portrait'?'头像':'立绘'}`;
     const extension=key.startsWith('actor.path.');
-    const asset=extension?window.PixelLibrary?.catalog?.assets[key+'.'+kind]:pack.actors[key][kind];
+    const local=window.NpcExpansionCatalog?.[key];
+    const asset=local?.[kind]||(extension?window.PixelLibrary?.catalog?.assets[key+'.'+kind]:pack.actors[key]?.[kind]);
     if(!asset)return null;
     [img.width,img.height]=asset.size;
     img.dataset.art=key;img.loading='lazy';img.decoding='async';img.style.visibility='hidden';
     img.onload=()=>{img.style.visibility='visible';};
     img.onerror=()=>{img.hidden=true;img.removeAttribute('src');onFailure?.();};
-    img.src=extension?asset.file:pack.base+asset.file;return img;
+    img.src=extension||local?asset.file:pack.base+asset.file;return img;
   }
   function context(value){
     data=value;people=new Map();if(dialog?.open)dialog.close();
@@ -76,8 +79,8 @@ window.NpcArt = (() => {
   }
   function avatar(row,person,roster=false){
     const n=roster?person:resolve(person);if(!active()&&!roster)return;
-    if(roster&&!window.PixelLibrary?.catalog){
-      window.PixelLibrary?.ensure(true).then(catalog=>{if(catalog&&row.isConnected&&!row.querySelector('.npc-art-avatar'))avatar(row,person,true);});
+    if(!window.PixelLibrary?.catalog&&!select(n)){
+      window.PixelLibrary?.ensure(true).then(catalog=>{if(catalog&&row.isConnected&&!row.querySelector('.npc-art-avatar'))avatar(row,person,roster);});
       return;
     }
     if(!select(n))return;

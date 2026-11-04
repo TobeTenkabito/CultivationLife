@@ -31,3 +31,22 @@ def prepare_body_ui(engine,identity):
     p.hp=max_hp(p);p.mp=max_mp(p);p.immortal_aperture['current']=6000
     engine.store.save(g)
     return g
+
+
+def prepare_npc_roster(engine,identity):
+    """New arrivals in an existing local sect, in disposable acceptance saves only."""
+    import random
+    g=engine.store.load(identity)
+    sect=next(s for s in g.sects.values() if s.world==g.player.world and s.kind=='sect' and not s.extinct)
+    g.player.faction_id=sect.id;g.pending_event=None
+    # Exercise the production recruitment constructor, then bound the visual fixture's age.
+    for gender in ('male','female'):
+        npc=None
+        for seed in range(30):
+            npc=engine._recruit_sect_npc(sect,g.player.age,random.Random(351+seed))
+            if npc:break
+        assert npc is not None
+        npc.name='新入门'+('少年' if gender=='male' else '少女')
+        npc.gender=gender;npc.race='human';npc.path='dao';npc.age=16
+    engine.store.save(g)
+    return g

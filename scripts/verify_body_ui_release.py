@@ -1,4 +1,4 @@
-"""Run the exact declared 3.5.0 selection, binding all evidence to final source."""
+"""Run the exact declared 3.5.1 selection, binding all evidence to final source."""
 import argparse,json,os,subprocess,sys,xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -28,7 +28,7 @@ def main():
     combined=ET.Element('testsuites')
     for i in range(a.workers):
         for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'):combined.append(suite)
-    ET.ElementTree(combined).write(ROOT/f'build/scoped-{tag}.xml',encoding='utf8',xml_declaration=True)
+    ET.ElementTree(combined).write(ROOT/f'build/scoped-{tag}.xml',encoding='utf-8',xml_declaration=True)
     doc=dict(version=BASE_GAME_VERSION,inputs_sha256=before,profile='body-ui',scope=SCOPE,tests=shards,runs=runs)
     (ROOT/f'build/scoped-{tag}.json').write_text(json.dumps(doc,ensure_ascii=False,indent=2),encoding='utf8')
 if __name__=='__main__':main()

@@ -6711,6 +6711,72 @@
       "requires": [
         "official.monster-bloodlines"
       ]
+    },
+    "actor.path.npc-monster-male-351.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/social-351/monster-male-351-figure.png",
+      "size": [
+        128,
+        192
+      ],
+      "sha256": "ded2f84117aee9582c23a25a73bd1bb91514f6efd7f2629d402086dcb7021ddd",
+      "requires": [
+        "official.monster-bloodlines"
+      ],
+      "npc_forms": [
+        {
+          "path": "monster",
+          "race": "human",
+          "gender": "male",
+          "role": "npc",
+          "static": "actor.path.npc-monster-male-351",
+          "min_age": 18,
+          "max_age": null
+        }
+      ]
+    },
+    "actor.path.npc-monster-male-351.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/social-351/monster-male-351-portrait.png",
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "b57d1f4e63ab8ef6f7ce211ee5fa6934809462a66423e4903db0864757b2b095",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
+    },
+    "actor.path.npc-monster-female-351.figure": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/social-351/monster-female-351-figure.png",
+      "size": [
+        128,
+        192
+      ],
+      "sha256": "51c38971a51dc9137df7eae946c1666a9fb090a60e0a17be81f6f58df46bcab8",
+      "requires": [
+        "official.monster-bloodlines"
+      ],
+      "npc_forms": [
+        {
+          "path": "monster",
+          "race": "human",
+          "gender": "female",
+          "role": "npc",
+          "static": "actor.path.npc-monster-female-351",
+          "min_age": 18,
+          "max_age": null
+        }
+      ]
+    },
+    "actor.path.npc-monster-female-351.portrait": {
+      "file": "/extension-assets/official.monster-bloodlines/visual/social-351/monster-female-351-portrait.png",
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "af7c6e98c73525857a4c11b0359740c4aaffccedcc2607d9d98a8a9f934ced31",
+      "requires": [
+        "official.monster-bloodlines"
+      ]
     }
   }
 }

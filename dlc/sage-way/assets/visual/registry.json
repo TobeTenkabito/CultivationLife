@@ -238,6 +238,72 @@
           "owner": "official.sage-way"
         }
       ]
+    },
+    "actor.path.npc-confucian-male-351.figure": {
+      "file": "/extension-assets/official.sage-way/visual/social-351/confucian-male-351-figure.png",
+      "size": [
+        128,
+        192
+      ],
+      "sha256": "c100369f204195bf506e44f90e98bc4217d92e7bf2c9dc1d4764fb8454a351d3",
+      "requires": [
+        "official.sage-way"
+      ],
+      "npc_forms": [
+        {
+          "path": "confucian",
+          "race": "human",
+          "gender": "male",
+          "role": "npc",
+          "static": "actor.path.npc-confucian-male-351",
+          "min_age": 18,
+          "max_age": null
+        }
+      ]
+    },
+    "actor.path.npc-confucian-male-351.portrait": {
+      "file": "/extension-assets/official.sage-way/visual/social-351/confucian-male-351-portrait.png",
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "b4732d7b9eb8981f4483055aa4838275a11bd0ca1101f62bd36fafe19b50075b",
+      "requires": [
+        "official.sage-way"
+      ]
+    },
+    "actor.path.npc-confucian-female-351.figure": {
+      "file": "/extension-assets/official.sage-way/visual/social-351/confucian-female-351-figure.png",
+      "size": [
+        128,
+        192
+      ],
+      "sha256": "d34fb23223badcf5efad1c3c804f19ca33379aa32d9f7e8e1dd2f6c8c47be274",
+      "requires": [
+        "official.sage-way"
+      ],
+      "npc_forms": [
+        {
+          "path": "confucian",
+          "race": "human",
+          "gender": "female",
+          "role": "npc",
+          "static": "actor.path.npc-confucian-female-351",
+          "min_age": 18,
+          "max_age": null
+        }
+      ]
+    },
+    "actor.path.npc-confucian-female-351.portrait": {
+      "file": "/extension-assets/official.sage-way/visual/social-351/confucian-female-351-portrait.png",
+      "size": [
+        96,
+        96
+      ],
+      "sha256": "bfe33010f13bfe6ff4cfbe2d36f25c52a6c251a3ee11b14aa6210721f0d0369c",
+      "requires": [
+        "official.sage-way"
+      ]
     }
   }
 }

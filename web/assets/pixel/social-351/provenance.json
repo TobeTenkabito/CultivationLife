@@ -1,0 +1,240 @@
+{
+  "generator": "built-in image_gen",
+  "export": "alpha 128; shared 48 colors; nearest; no anatomy edits",
+  "actors": [
+    {
+      "id": "dao-male-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW male supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: dao cultivator, male, apparent age 25–35. dusty turquoise and ivory traditional Daoist robe with subtle orchid trim, dark tied hair. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-male-01.png",
+      "source_sha256": "f6e5b30ae660b8dc2a6a00ec47343b58e89f08803cb1ae87de83b7be6503cdb4",
+      "subject_bounds": [
+        [
+          4,
+          4,
+          374,
+          1012
+        ],
+        [
+          4,
+          3,
+          746,
+          782
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/assets/pixel/social-351/dao-male-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "f6e1f47a8584521cce8b91d75af729ec50c11720f0aecf4407c1159c138398c1"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-351/dao-male-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "8ff9807c5f01dcb5f8d3ced3b8044c240857a22a09d5f8dda8017700629dabc9"
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    },
+    {
+      "id": "dao-female-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW female supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: dao cultivator, female, apparent age 25–35. dusty turquoise and ivory traditional Daoist robe with subtle orchid trim, dark tied hair. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-female-01.png",
+      "source_sha256": "f781e59f930bcdedfe1556f9601025f49dfb9f1bad1b72d6c3ea2f1e06b9d2c7",
+      "subject_bounds": [
+        [
+          3,
+          4,
+          373,
+          1006
+        ],
+        [
+          2,
+          4,
+          626,
+          742
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/assets/pixel/social-351/dao-female-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "3df722234643406a6643680b5c6fcb6f1615ee488e9ba50d2c7b840ae3e0a019"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-351/dao-female-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "c6871a8c2a56676321f7c6857707bfbac1691176a6e2fc453b9ed174c97c9728"
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    },
+    {
+      "id": "demonic-male-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW male supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: demonic cultivator, male, apparent age 25–35. muted dark plum and ink-black elegant long robes with restrained burgundy trim, calm sharp expression. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-male-01.png",
+      "source_sha256": "af271451b82497638c56f4bbc35cf8ee41cf41951ddc63aad56cc8974526a98e",
+      "subject_bounds": [
+        [
+          3,
+          4,
+          370,
+          1010
+        ],
+        [
+          3,
+          4,
+          721,
+          785
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/assets/pixel/social-351/demonic-male-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "6e6ac014a1a751b337f356c3c38e3759194057d5771bab2f5ba80df489949f0b"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-351/demonic-male-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "53748a8dd92679a3a30c48080df04264e55e08b2d05488eacac99fdc9306ee11"
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    },
+    {
+      "id": "demonic-female-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW female supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: demonic cultivator, female, apparent age 25–35. muted dark plum and ink-black elegant long robes with restrained burgundy trim, calm sharp expression. Make a distinct new face, hairstyle, pose and clothing design rather than copying reference identity. Keep FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-female-01.png",
+      "source_sha256": "6e1e8624eedd34f9fc73942ed5f8da3dc7da4a42f1c64322c7c7ba23c9ed27de",
+      "subject_bounds": [
+        [
+          3,
+          3,
+          402,
+          1002
+        ],
+        [
+          3,
+          3,
+          632,
+          739
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/assets/pixel/social-351/demonic-female-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "1b1e6cd0703ab7914f0661e9d7d514d465bf63561f865335bd78ba86095c5f2e"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-351/demonic-female-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "ba7270860482f2e33bd92714c4a1d5780b127f783cae6279c7ab5753044f953d"
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    },
+    {
+      "id": "novice-male-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW male supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: boy age 16–17, an ordinary new sect apprentice, youthful facial features, modest simple grey-blue and ivory long training robes, plain cloth belt and cloth shoes, no jewellery, no facial hair, no weapon. New distinct face and simple tied hair. Same fine restrained original art style and paired full-body/bust composition. Both arms, hands and BOTH shoes fully visible. FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-male-01.png",
+      "source_sha256": "04db8b1cc58d6be14737b55177fac662e3f2a5487602d12299729bce83aa99c4",
+      "subject_bounds": [
+        [
+          4,
+          2,
+          342,
+          996
+        ],
+        [
+          3,
+          2,
+          654,
+          744
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/assets/pixel/social-351/novice-male-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "15dc99f9555c113559da1ab0bd18ae6fed0bbb6326d32e7c05cf4a42e77c9412"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-351/novice-male-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "219b61f51de604852df86334eef9953f01898243251472d9d8d3d043fde4a759"
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    },
+    {
+      "id": "novice-female-351",
+      "prompt": "Use case: stylized-concept. The attached image is ONLY the authoritative STYLE reference from this game's existing adopted NPC artwork. Create a NEW female supporting NPC in EXACTLY that original style: elegant slender Chinese xianxia proportions, delicate narrow face, small head, fine dark pixel contours (never thick comic outlines), refined fabric folds, muted layered shading and restrained tiny square pixel clusters. Match reference body proportions and visual detail closely. NOT a broad cartoon, NOT chibi, NOT cel shaded comic.\nLandscape paired sheet like the reference: LEFT half ONE complete full body from crown to TWO shoes, RIGHT half a matching enlarged head-and-shoulders portrait of the SAME new person. Empty transparent gutter. Both arms anatomically attached and both hands visible; TWO complete legs implied anatomically under robe with TWO separated shoes fully visible. Do not cut feet. Relaxed three-quarter standing pose, long elegant layered traditional robes, not baggy martial trousers. True transparent background, no aura, no ground, no shadow, no text, no third figure.\nNew identity: girl age 16–17, an ordinary new sect apprentice, youthful facial features, modest simple grey-blue and ivory long training robes, plain cloth belt and cloth shoes, no jewellery, no facial hair, no weapon. New distinct face and simple tied hair. Same fine restrained original art style and paired full-body/bust composition. Both arms, hands and BOTH shoes fully visible. FOUR LIMBS intact.",
+      "reference": "F:/CultivationLife/design/npc-social-portraits-20261022/source/dao-female-01.png",
+      "source_sha256": "eef38f825549183799335b7fcb3b969b0fd55324a084c6523f91bc140474bcf8",
+      "subject_bounds": [
+        [
+          4,
+          3,
+          355,
+          995
+        ],
+        [
+          4,
+          4,
+          543,
+          719
+        ]
+      ],
+      "assets": {
+        "figure": {
+          "file": "/assets/pixel/social-351/novice-female-351-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "sha256": "5d7b4be3d229059ea9df72d52f127da10fc60ccca0a3807c9b0ab452e9add6ef"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-351/novice-female-351-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "sha256": "d5198535963065c8306ed02002db363981a8e5a86ddc542c116a1997862b00f9"
+        }
+      },
+      "review": "Both arms/hands and two separated feet visible; complete standing body; matches adopted fine-line robe style."
+    }
+  ]
+}

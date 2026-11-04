@@ -14,7 +14,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_shipped_reviewed_assets_are_self_contained():
     from cultivation_life.content_registry import EXTENSION_REPORT
     source=dict(catalog(ROOT), assets=public_catalog(ROOT,EXTENSION_REPORT)['assets'])
-    assert len(source['assets'])==1679 and len(source['maps'])==11
+    assert len(source['assets'])==1695 and len(source['maps'])==11
     assert len(source['items'])==1184
     packages={json.loads(p.read_text(encoding='utf-8'))['id']:p.parent for p in (ROOT/'dlc').glob('*/manifest.json')}
     for identity,row in source['assets'].items():
@@ -41,7 +41,11 @@ def test_shipped_reviewed_assets_are_self_contained():
             continue
         with Image.open(path) as image:
             assert list(image.size)==row['size']
-            if identity.startswith('material.'):
+            if '/social-351/' in row['file']:
+                assert identity.startswith('actor.path.npc-')
+                assert image.mode=='RGBA' and image.size=={'portrait':(96,96),'figure':(128,192)}[identity.rsplit('.',1)[1]]
+                assert set(image.getchannel('A').getdata())=={0,255}
+            elif identity.startswith('material.'):
                 from cultivation_life.system.immortal_artifacts import MATERIALS
                 from cultivation_life.system.wuyun import definitions
                 from cultivation_life.system.monster_body import config
