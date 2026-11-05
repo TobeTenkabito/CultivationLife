@@ -364,6 +364,17 @@ class Runtime:
             engine.assert_buddhist_operation_allowed(game_id, operation)
 
     def preview(self, session, operation, payload):
+        if operation == 'view':
+            with self.staged(session['current']) as (engine, _store), request_scope(engine):
+                view = engine.get_game(session['current']['game']['id'])
+                pointer = payload.get('pointer')
+                return {'view': read_pointer(view, pointer) if pointer else {'sections': sorted(view)},
+                        'pointer': pointer, 'prepared': False}
+        # The ordinary NPC GET is read-only. Preparation stays in this disposable
+        # store; unlike writes it may show the reason a dungeon blocks training.
+        if operation == 'npc-development' and not payload:
+            with self.staged(session['current']) as (engine, _store), request_scope(engine):
+                return engine.npc_development(session['current']['game']['id'])
         capability = BY_OPERATION.get(operation)
         if capability is None or not capability.preview:
             raise RuntimeError('Unregistered preview capability.')

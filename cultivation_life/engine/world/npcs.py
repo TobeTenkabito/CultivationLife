@@ -726,6 +726,9 @@ def _recruit_sect_npc(deps: NpcDependencies, sect: SectState, world_age: int, rn
     from ...system.faction_geography import can_enter_faction
     if not can_enter_faction(sect, npc):
         return None
+    # Admission is at the authoritative faction site, not the player's location.
+    npc.faction_id = sect.id
+    npc.location_id = sect.location_id
     sect.npcs.append(npc)
     initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}), now=world_age)
     return npc

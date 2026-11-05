@@ -96,3 +96,7 @@ v2.16.1 冻结补算的有限例外：用户明确要求异界任务也全部延
 责任入口为 `engine/orchestration/session.create_game` 与 `custom_start`；仅首次保存前可设定出生普通界面、任意目录行囊、本命和独立神识等级，等级可低于该修为自然基准。`story_flags` 中的 `custom_start` 只阻止加载修复覆盖明确选择的神识值；后续真正突破仍执行正常成长。已有家族原对象交接至 `game.family`，原 NPC 编号不变。新生随机神机真体从原生成目录交接归属，不留 NPC 镜像持有者。领域仅设置相应体系的真实传承／等级／温养，不能用于运行中跨界或重抽。
 
 验证入口：`tests/test_release_240.py` 的非法创建原子拒绝、各道途能力、神机唯一归属、家族去重及读档；`tests/browser_release_240.py` 的真实创建／组织操作；Android `custom-start` 原生阶段和 Windows 成品 HTTP 自定义创建。
+
+## 师徒第二批受控化身（2026-11-05）
+
+化身原人物使用 external_avatar 拘管类型，沿现有受控人物迁移入口临时往返；永久飞升按既有永久离界结束控制。此类型只增加 NPC 培养的明确授权：system/npc_development/targets.py 核对唯一化身ID、持有人、存活、原界面、承载与忙碌状态后允许操作原NPC，禁止按普通自由人物接口接触。无空间实例主动培养或跨界远程战斗例外。战斗使用同一原人物资源绑定，不占普通队友槽；tests/test_mentorship_advanced.py 覆盖原ID、资源、承载、封印和永久离界。

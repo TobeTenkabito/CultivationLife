@@ -59,7 +59,9 @@ def _end_sanctioned_relationship(
                 game, str(relation.get("id", "")),
                 float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)),
             )
-        player.master = None
+        if relation:
+            from ..mentorship import end_person_relations
+            end_person_relations(game, relation['id'], 'expelled')
         return "expelled", f"{name}将你逐出门墙；师徒关系就此解除，双方好感重置为中立。"
     relation = player.dao_companion
     if relation:

@@ -43,6 +43,7 @@
     if(figure){const b=el('button');b.type='button';b.setAttribute('aria-label',`查看${n.name}完整立绘`);b.append(figure);b.onclick=()=>window.NpcArt.open(n.portrait,true);art.append(b);}
     else art.append(el('p','暂无适用形象','muted'));
     info.append(el('h3',n.name),el('p',[n.realm_name,n.path_name].filter(Boolean).join(' · ')),el('p',n.relations.join(' / ')));
+    if(n.mentorship)info.append(el('p',`${n.mentorship.rank_name} · 忠诚 ${n.mentorship.loyalty}/100`));
     if(n.facts)info.append(el('p',`普通炼体 ${n.facts.body_training??'未明'} · 高阶肉身 ${n.facts.immortal_body_level} · 神识 ${n.facts.divine_sense_rank??'未明'}`));
     if(n.combat_power!=null)info.append(el('p',`自身战力 ${n.combat_power.toLocaleString('zh-CN')}`));
     if(n.energy){
@@ -86,7 +87,10 @@
       const b=el('button','传授所选功法');b.type='button';b.disabled=!n.techniques.length||env.busy();
       b.onclick=()=>submit(n,{action:'teach',content_id:pick.value});detail.append(pick,b,el('p','须满足目标的灵根、肉身与功法条件。已掌握的功法不会重复授予。'));return;
     }
-    controls.append(choose('培养方式',[['material','NPC专材'],['infuse','机缘培养']],method,v=>{method=v;paint();}),
+    const methods=[['material','NPC专材'],['infuse','机缘培养']];
+    if(n.precision_remaining)methods.push(['inherit_material',`传承精修·专材（余${n.precision_remaining}次）`],['inherit_infuse',`传承精修·机缘减半（余${n.precision_remaining}次）`]);
+    if(!methods.some(([key])=>key===method))method='material';
+    controls.append(choose('培养方式',methods,method,v=>{method=v;paint();}),
       choose('培养轮数',[[1,'1轮'],[5,'5轮'],[10,'10轮']],String(batches),v=>{batches=Number(v);paint();}));
     const q=n.quotes.find(q=>q.axis===quoteAxis&&q.method===method&&q.batches===batches);
     const note=el('div',null,'npc-development-quote');note.setAttribute('aria-live','polite');detail.append(note);

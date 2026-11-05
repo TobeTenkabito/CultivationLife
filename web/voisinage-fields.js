@@ -26,7 +26,8 @@
     }
   }
   async function refresh(identity=''){
-    const response=await fetch('/api/domain-styles'+(identity?'?id='+encodeURIComponent(identity):''));
+    const path='/api/domain-styles'+(identity?'?id='+encodeURIComponent(identity):'');
+    const response=await fetch(path,{headers:window.DebugConsole?.headers(path)||{}});
     if(!response.ok)throw Error('邻域样式读取失败');
     const data=await response.json();register(data.catalog);DomainControlEffects.register(data.controls);
     await DomainMotifs.prepare(data.catalog);return data;

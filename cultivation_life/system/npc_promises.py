@@ -3,20 +3,7 @@ from ..content_registry import WORLD_SYSTEMS
 from ..npc_custody import is_free, kill_person
 from ..person_assignments import research_assignment
 from ..spatial_people import accessible
-
-
-def site(game, npc):
-    if npc.location_id:
-        return npc.location_id
-    if npc.world in {'lost', 'rift'}:
-        return None
-    groups = [*game.sects.values(), *([game.family] if game.family else [])]
-    group = next((g for g in groups if not g.extinct and g.world == npc.world
-                  and (g.id == npc.faction_id or any(n.id == npc.id for n in g.npcs))), None)
-    if group:
-        from .faction_geography import faction_site
-        return faction_site(group, persist=False)['id']
-    return None
+from .faction_geography import person_site as site
 
 
 def participant_reason(game, npc):

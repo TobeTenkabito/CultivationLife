@@ -111,9 +111,16 @@ def _cache_encounter_target(deps: EncounterDependencies, game: GameState, target
             npc_id, name, str(target.get("target_name", "偶遇修士")) if index == 0 else "同行修士",
             realm_index, layer, age, lifespan,
             spirit_root=deps._random_npc_root(realm_index, rng), path=rng.choice(list(PATH_NAMES)),
-            race=race_id, world=game.player.world, affinity=rng.uniform(-18, 12),
+            race=race_id, world=game.player.world, location_id=game.player.location_id, affinity=rng.uniform(-18, 12),
             transcendence=deepcopy(member.get("transcendence")),
         )
+        if npc.world in {'lost', 'rift'}:
+            scene = game.spatial_state.get('instances', {}).get(game.spatial_state.get('current'))
+            if not scene or scene.get('kind') != npc.world:
+                raise ValueError('当前遭遇缺少有效空间实例')
+            npc.location_id = scene.get('location_id') or game.player.location_id
+            if npc.id not in scene.setdefault('npc_ids', []):
+                scene['npc_ids'].append(npc.id)
         initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}), now=game.player.age)
         if index == 0 and target.get("npc_concealed_realm_index") is not None:
             npc.concealed_realm_index = int(target["npc_concealed_realm_index"])
@@ -132,7 +139,11 @@ def _cache_encounter_target(deps: EncounterDependencies, game: GameState, target
             "seen_count": 1, "first_seen_age": game.player.age, "last_seen_age": game.player.age,
         }
         push_fifo_cache(game.encounter_npc_cache, entry, cache_limit)
-        if deps._would_enter_spirit_ranking(game, npc, float(member["power"])):
+        if npc.world in {'lost', 'rift'}:
+            # Instance membership must refer to a persistent person, never an
+            # evictable encounter-cache entry.
+            deps._promote_cached_npc(game, npc_id, "空间遭遇")
+        elif deps._would_enter_spirit_ranking(game, npc, float(member["power"])):
             deps._promote_cached_npc(game, npc_id, "天榜战力")
     if target.get("members"):
         primary = target["members"][0]

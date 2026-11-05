@@ -76,8 +76,9 @@ def _prepare_permanent_world_transition(
     player.concubines = []
     player.concubine_status = None
     player.concubine_rejection_aftermath = []
-    player.master = None
-    player.disciples = []
+    from ...system.mentorship import end_person_relations
+    if player.master: end_person_relations(game, player.master['id'])
+    for row in list(player.disciples): end_person_relations(game, row['id'])
     player.disciple_requests = []
     player.relationship_attempts = []
     player.dao_friends = [

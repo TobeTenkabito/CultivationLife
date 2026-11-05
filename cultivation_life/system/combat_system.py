@@ -232,6 +232,8 @@ class PlayerCombatSystem:
             if stat in player_stats:
                 player_stats[stat] *= 1 + bonus
         enemy_stats = cls._aggregate_stats(enemy_units, terrain_tags=tags)
+        if target.get('mentorship_master_betrayed'):
+            enemy_stats = {key:value * .6 for key, value in enemy_stats.items()}
         soul_effects = ghost_soul_effects(player)
         soul_traits = active_soul_traits(player)
         generated_soul_traits = active_generated_soul_traits(player)
@@ -450,13 +452,22 @@ class PlayerCombatSystem:
         devouring_soul_stacks = 0
         counterforce_ready = False
         burst_used = False
-        phases = phases if phases is not None and phases.enabled else None
+        # Original school actors need per-person wounds/resources even when no
+        # one has unlocked upper-tier abilities. Use the existing settlement.
+        school_actors = (target.get('mentorship_contest') or target.get('mentorship_betrayal')
+                         or target.get('mentorship_master_betrayed')
+                         or any(unit.kind == 'external_avatar' for unit in player_units))
+        phases = phases if phases is not None and (phases.enabled or school_actors) else None
         if phases is not None:
             phases.semantic_environment(natural, artificial)
             player_hp = max(0.0, 1.0 - phases.ordinary_loss("player"))
             enemy_hp = max(0.0, 1.0 - phases.ordinary_loss("enemy"))
             initial_hp = player_hp
-        quick = phases is None and (ratio >= 3.0 or ratio <= cls.OVERWHELMING_RETREAT_RATIO)
+        # School betrayal changes combat attributes, not the persistent power
+        # rating. The power-only shortcut must not bypass that battle debuff.
+        quick = (phases is None and not target.get('mentorship_betrayal')
+                 and not target.get('mentorship_master_betrayed')
+                 and (ratio >= 3.0 or ratio <= cls.OVERWHELMING_RETREAT_RATIO))
         max_rounds = 1 if quick else max(1, min(8, int(target.get("max_rounds", 5))))
         generated_bloodline_traits = prepare_rules(
             generated_bloodline_traits, max_rounds=max_rounds, rng=rng,
@@ -1485,7 +1496,7 @@ class PlayerCombatSystem:
             outcome=outcome,
             result_grade=grade,
             objective=objective,
-            mode=("手动预案·" if plan['manual'] else '') + ("邻域战斗" if phases is not None else "快速结算" if quick else "标准自动战斗"),
+            mode=("手动预案·" if plan['manual'] else '') + ("邻域战斗" if phases is not None and phases.enabled else "快速结算" if quick else "标准自动战斗"),
             rounds=rounds,
             key_events=key_events[:4],
             hp_loss_ratio=round(cls._clamp(0.0, 0.68, body_damage_ratio - body_restored_ratio), 4),

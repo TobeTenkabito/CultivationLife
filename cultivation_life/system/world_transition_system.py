@@ -217,7 +217,8 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
     if plan.mode in {TransitionMode.PROGRESSION, TransitionMode.EXPULSION}:
         keep_companion, keep_ids = False, set()
         if entourage:
-            keep_companion, keep_ids = entourage.commit(game, plan.destination, move_npc=ports.move_npc)
+            keep_companion, keep_ids = entourage.commit(game, plan.destination,
+                move_npc=ports.move_npc, arrival_location=plan.arrival_location)
         ports.permanent_departure(game, keep_companion=keep_companion, keep_friend_ids=keep_ids)
     seal = normalized_seal(player)
     if plan.seal_action in {"seal", "visit"}:
@@ -269,6 +270,9 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
                     ports.move_npc(npc, plan.destination, player.age)
                 else:
                     npc.world = plan.destination
+                if (npc.custody or {}).get('kind') != 'second_nascent':
+                    scene = game.spatial_state.get('instances', {}).get(plan.destination_instance)
+                    npc.location_id = scene['location_id'] if scene else plan.arrival_location
                 sync_offspring(game, npc)
         player.party = []
         player.awaiting_major_breakthrough = False
@@ -310,7 +314,7 @@ class EntourageManifest:
         yield list(self.survivor_names)
         yield list(self.fallen_names)
 
-    def commit(self, game, destination, *, move_npc=None):
+    def commit(self, game, destination, *, move_npc=None, arrival_location=None):
         player = game.player
         records = [*player.dao_friends, *([player.dao_companion] if player.dao_companion else [])]
         settled = set()
@@ -328,6 +332,8 @@ class EntourageManifest:
                         move_npc(row, destination, player.age)
                     else:
                         row["world"] = destination
+                    if arrival_location is not None:
+                        row['location_id'] = arrival_location
                 else:
                     row.update(alive=False, death_reason=reason)
             npc = find_person(game, npc_id, include_inactive=True)
@@ -337,7 +343,10 @@ class EntourageManifest:
                         move_npc(npc, destination, player.age)
                     else:
                         npc.world = destination
+                    if arrival_location is not None:
+                        npc.location_id = arrival_location
                     npc.departed_age, npc.departure_reason = npc.age, reason
                 else:
                     npc.alive, npc.death_reason = False, reason
+                sync_offspring(game, npc)
         return self.companion_kept, set(self.survivor_ids)

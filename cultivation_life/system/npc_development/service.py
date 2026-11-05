@@ -11,6 +11,12 @@ from .growth import quote as owned_quote, facts as normalize_facts
 from .upper import require_upper, grow_ledger, conversion_plan
 
 def quote(game,kind,identity,axis,method='infuse',batches=1,*,_target=None):
+    inherited = method in ('inherit_infuse', 'inherit_material')
+    requested_method = method
+    if inherited:
+        from ..mentorship_advanced import precision
+        if kind != 'npc' or not precision(game, identity): raise ValueError('传承精修只对有本周期额度的亲传、嫡传开放')
+        method = method.removeprefix('inherit_')
     target=_target if _target is not None else resolve(game,kind,identity)
     require(game,target,axis)
     specialized=isinstance(axis,str) and axis.startswith('body_art:')
@@ -131,6 +137,15 @@ def quote(game,kind,identity,axis,method='infuse',batches=1,*,_target=None):
         plan.update(material_name=ITEM_CATALOG[material].name,material_owned=stock)
         if stock<plan['material_count']:plan.update(can_train=False,reason='NPC专材不足，可从坊市、交易或探宝取得')
     elif p.opportunity<cost:plan.update(can_train=False,reason='机缘不足')
+    if inherited:
+        import math
+        plan.update(method=requested_method, inheritance=True, can_train=True, reason='')
+        if plan['material_id']:
+            plan['material_count'] = math.ceil(plan['material_count'] / 2)
+            if plan['material_owned'] < plan['material_count']: plan.update(can_train=False, reason='NPC专材不足')
+        else:
+            plan['opportunity'] = round(plan['opportunity'] * .5, 2)
+            if p.opportunity < plan['opportunity']: plan.update(can_train=False, reason='机缘不足')
     return plan
 
 def apply(game,kind,identity,axis,method='infuse',batches=1):
@@ -141,6 +156,11 @@ def apply(game,kind,identity,axis,method='infuse',batches=1):
         if not remove_item(game.player,plan['material_id'],plan['material_count']):raise ValueError('NPC专材不足')
     game.player.opportunity-=plan['opportunity']
     write(target,plan['result'])
+    if plan.get('inheritance'):
+        from ..mentorship_advanced import spend_precision
+        spend_precision(game, identity)
+    from ..mentorship import benefit
+    benefit(game, identity, 'train:' + axis, min(6, plan['rounds'] * 2))
     if target.person and kind!='puppet':sync_offspring(game,target.person)
     summary=f"为{read(target.owner,'name','人物')}{plan['label']}：{plan['before']} → {plan['after']}。"
     summary+=(f"消耗{plan['material_name']}×{plan['material_count']}；未消耗玩家机缘。" if plan['material_id'] else f"机缘 -{plan['opportunity']:g}。")
@@ -175,11 +195,12 @@ def teach(game,kind,identity,book_id,*,slot=None,family=False):
     root=facts.get('spirit_root')
     if root not in ROOT_DEFINITIONS or not can_practice_technique(root,book):raise ValueError('目标灵根未确认或无法修习此功法')
     if book.required_body_training>int(facts.get('body_training') or 0):raise ValueError('目标炼体尚未达到功法要求')
-    if book.requires_immortal_power and not (facts.get('transcendence') or {}).get('conversion'):
+    if book.requires_immortal_power and (facts.get('transcendence') or {}).get('conversion', 0) < 1:
         raise ValueError('目标尚未完成仙灵力转化')
     from ..npc_techniques import learn,levels
     owner=target.person if kind=='prisoner' else target.owner
     if book_id in levels(owner) and (slot is None or (slot=='main' and read(owner,'main_technique_id')==book_id) or read(owner,'technique_slots',{}).get(slot)==book_id):raise ValueError('该人物已掌握并配置此功法')
+    newly_learned = book_id not in levels(owner)
     expected={'spiritual':'main','body':'body','divine_sense':'sense','transformation':'transformation','combat':'combat','support':'support'}.get(book.category)
     if slot is not None and slot!=expected:raise ValueError('功法类别与配置栏目不符')
     if kind=='puppet':
@@ -200,6 +221,9 @@ def teach(game,kind,identity,book_id,*,slot=None,family=False):
             _write(owner,'family_combat_bonus',read(owner,'family_combat_bonus',0)+max(0.,bonus-previous));learned[book.id]=max(previous,bonus)
             _write(owner,'family_traits',traits)
         if target.person:sync_offspring(game,target.person)
+    if newly_learned:
+        from ..mentorship import benefit
+        benefit(game, identity, 'teach:' + book_id, 4)
     return f"向{facts['name']}传授《{book.name}》。"
 
 def gift(game,kind,identity,item_id,relation=None):
@@ -213,6 +237,8 @@ def gift(game,kind,identity,item_id,relation=None):
     if '弟子' in target.relations and 'pill' in item.tags:
         recipient['breakthrough_bonus']=min(.35,float(recipient.get('breakthrough_bonus',0))+
             float(WORLD_SYSTEMS['demonic_cultivation']['pill_breakthrough_bonus']))
+    from ..mentorship import benefit
+    benefit(game, identity, 'gift:' + item_id, 2)
     return item
 
 

@@ -24,7 +24,8 @@ def held_game(tmp_path, monkeypatch):
     engine = GameEngine(ROOT, tmp_path)
     npc = SectNpc('target', '故人', '弟子', 1, 1, 30, 200, affinity=35,
                   gender='female', faction_id='old', body_training=20)
-    player = Player('主角', 'supreme_fire', path='demonic', realm_index=4)
+    player = Player('主角', 'supreme_fire', path='demonic', realm_index=4,
+                    location_id=engine.maps.default_location('human'))
     game = GameState('custody', 17, player, '', '',
                      sects={'old': SectState('old', '旧宗', npcs=[npc])})
     player.dao_companion = game.link_relationship(dict(id=npc.id, last_interactions={}))

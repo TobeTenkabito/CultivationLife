@@ -430,7 +430,7 @@ document.querySelectorAll('#history-filters input').forEach(input => input.addEv
 async function mutate(path, payload) {
   if (busy) return;
   const trainingOperation=path.split('/').pop();
-  if (trainingOperation==='owned-training' || trainingOperation==='disciple-gift' ||
+  if (trainingOperation==='owned-training' || trainingOperation==='disciple-gift' || trainingOperation==='mentorship-action' ||
       trainingOperation==='puppet-action' && ['infuse','pill','technique'].includes(payload?.action) ||
       trainingOperation==='family-action' && ['infuse','teach','gift_equipment'].includes(payload?.action) ||
       trainingOperation==='dao-companion' && ['gift_item','teach_technique'].includes(payload?.action)) {
@@ -3782,19 +3782,25 @@ function renderRelationships(master, disciples, requests, inventory, techniques)
   requests.forEach(person => {
     const row = document.createElement('div'); row.className = 'relationship-row pending-request';
     const name = document.createElement('b'); name.textContent = `待决拜师帖 · ${person.name}`;
-    const detail = document.createElement('small'); detail.textContent = `${person.realm_name} · ${person.spirit_root_name || '灵根未明'} · ${person.age} 岁 / 寿元 ${person.lifespan}`;
+    const detail = document.createElement('small'); detail.textContent = `${person.realm_name} · ${person.spirit_root_name || '灵根未明'} · ${person.age} 岁 / 寿元 ${person.lifespan}${person.accept_reason ? ` · ${person.accept_reason}` : ''}`;
     const actions = document.createElement('div'); actions.className = 'relationship-tools';
     actions.append(
-      interactionButton('收入门下', person.can_interact ? '1' : '0', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:true})),
+      interactionButton('收入门下', person.can_accept ? '1' : '0', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:true})),
       interactionButton('婉拒', '1', () => mutate(`/api/games/${game.id}/disciple-request`, {request_id:person.id, accept:false})),
     );
     row.append(name, detail, actions); window.NpcArt?.avatar(row,person); list.appendChild(row);
   });
   if (!master && !disciples.length && !requests.length) list.innerHTML = '<p class="empty">尚无师徒缘分；可通过事件或宗门名单结缘。</p>';
+  window.Mentorship?.render(list,game,mutate);
 
   function masterActions(person) {
     const actions = document.createElement('div'); actions.className = 'relationship-tools';
     const requested = person.last_requests || {};
+    const school = game.mentorship?.master;
+    if (school && (school.rank === 'registered' || school.reason || school.support_remaining <= 0)) {
+      person = {...person, can_interact:false};
+      const note=document.createElement('small');note.textContent=school.reason || (school.rank==='registered'?'记名弟子无师门福利，请先申请晋位。':'本周期师门指导额度已用尽。');actions.append(note);
+    }
     actions.append(
       interactionButton('请教修行', !person.can_interact || requested.consult === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'consult'})),
       interactionButton('索要物品', !person.can_interact || requested.item === worldClock() ? '0' : '1', () => mutate(`/api/games/${game.id}/master-request`, {kind:'item'})),
@@ -4416,6 +4422,11 @@ function renderButtons() {
   });
   if (game?.trial_site?.active) {
     document.querySelectorAll('[data-immortal-refine], .map-travel, .map-teleport, .market-buy, .market-lock, .relationship-action, .contact-action, .party-action, .companion-action, .friend-action, .relationship-exit, .technique-upgrade, .technique-merge, .bloodline-evolve, #body-train-action, #sense-train-action, #breakthrough-action, #body-breakthrough-action, #sense-breakthrough-action, #spirit-crossing-action, #cross-world-action, #cross-world-secondary-action').forEach(button => { button.disabled = true; });
+  }
+  // Both dungeon sessions reject these legacy personal commands on the server.
+  // Keep the read-only NPC development shortcut available for its explanation.
+  if (guixuSession || game?.trial_site?.active) {
+    document.querySelectorAll('.relationship-interaction, .companion-action, [data-family], .captive-tools button, .puppet-tools button, .concubine-owner-action, .owned-training-action').forEach(button => { button.disabled = true; });
   }
 }
 

@@ -617,6 +617,8 @@ def _generated_relationship(deps: RelationshipDependencies, player: Player, role
         main_technique_id=player.technique.id if role == "companion" and player.technique else None,
         affinity=28.0 if role == "companion" else 20.0,
     )
+    # A newly encountered person starts at the encounter, not an unknown address.
+    relation['location_id'] = player.location_id
     initialize_native(relation, WORLD_SYSTEMS.get("transcendent_combat", {}), now=player.age)
     return relation
 
@@ -645,6 +647,11 @@ def _sync_relationship_records(deps: RelationshipDependencies, game: GameState) 
 
 
 def _annual_relationship_update(deps: RelationshipDependencies, game: GameState, rng: random.Random | None = None) -> None:
+    from ...system.mentorship import advance
+    advance(game)
+    from ...system.mentorship_advanced import tick_avatar, maybe_rebellion
+    tick_avatar(game, rng or random.Random(f'avatar:{game.seed}:{game.player.age}'), deps._resolve_npc_periodic_tribulation)
+    maybe_rebellion(deps, game, rng or random.Random(f'mentorship:{game.seed}:{game.player.age}'))
     deps._sync_relationship_records(game)
     player = game.player
     rng = rng or random.Random(f"relationships:{game.seed}:{player.age}")

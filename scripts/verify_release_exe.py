@@ -49,7 +49,9 @@ def verify(with_dlc):
                 verify_upper_social(base,with_dlc,folder)
                 from scripts.verify_npc_development_exe import verify_npc_development
                 verify_npc_development(base,with_dlc,folder)
-                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,body_ui_verified=True,upper_social_verified=True,npc_development_verified=True)
+                from scripts.verify_mentorship_exe import verify_mentorship
+                verify_mentorship(base,with_dlc,folder)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,body_ui_verified=True,upper_social_verified=True,npc_development_verified=True,mentorship_verified=True)
             if '--immortal' in sys.argv:
                 from scripts.verify_immortal_exe import verify_immortal
                 verify_immortal(base,with_dlc,folder)

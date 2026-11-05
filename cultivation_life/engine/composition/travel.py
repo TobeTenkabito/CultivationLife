@@ -36,6 +36,7 @@ def bind_world_year(host) -> WorldYearDependencies:
     from ...system.economy.organizations import advance_organizations
     from ...system.war.stationing import advance as advance_stationing
     return WorldYearDependencies(
+        _resolve_npc_periodic_tribulation=lambda *args, **kwargs: host._resolve_npc_periodic_tribulation(*args, **kwargs),
         advance_regions=lambda game, news: regions.advance(host._dependencies.regions, game, news),
         advance_player_society=lambda game, rng: factions.annual_player_faction(host._dependencies.world_factions, game, rng),
         advance_civilizations=advance_year,

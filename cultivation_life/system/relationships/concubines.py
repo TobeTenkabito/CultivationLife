@@ -60,12 +60,11 @@ def manage_concubine(
             if source == "captive":
                 player.prisoners = [row for row in player.prisoners if row is not target]
             player.party = [row for row in player.party if str(row.get("id")) != target_id]
-            if player.master and str(player.master.get("id")) == target_id:
-                player.master = None
+            from ..mentorship import end_person_relations
+            end_person_relations(game, target_id)
             if player.dao_companion and str(player.dao_companion.get("id")) == target_id:
                 player.dao_companion = None
             player.dao_friends = [row for row in player.dao_friends if str(row.get("id")) != target_id]
-            player.disciples = [row for row in player.disciples if str(row.get("id")) != target_id]
             result = "joined"
             summary = f"{normalized['name']}进入侍妾名册（同意率 {chance:.0%}）；侍妾数量没有上限。"
     else:
@@ -112,7 +111,7 @@ def manage_concubine(
             player.concubines = [row for row in player.concubines if row is not existing]
             npc = find_person(game, str(existing.get("npc_id", target_id)))
             if npc and npc.alive and existing.get("source") == "captive":
-                release_person(game, npc.id)
+                release_person(game, npc.id, at_player=True)
             deps._set_person_affinity(
                 game, str(existing.get("npc_id", target_id)),
                 float(WORLD_SYSTEMS["relationship"].get("relationship_release_affinity", 0)),

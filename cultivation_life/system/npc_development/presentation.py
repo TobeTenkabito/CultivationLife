@@ -2,9 +2,10 @@
 from ...content_registry import PATH_NAMES
 from ...spatial_people import accessible
 from ...npc_development_content import definitions
-from .targets import candidates, require, unrevealed
+from .targets import candidates, require, unrevealed, location
 from .service import quote
 from ..combat.actor_state import read
+from ..spatial_capabilities import site_key
 from .growth import facts as normalize_facts, realm_name
 import copy
 
@@ -12,13 +13,21 @@ def public(game,power=None):
     rows=[]
     for target in candidates(game):
         n=target.person if target.person is not None else target.owner
-        local=(target.kind in {'puppet','prisoner'} or (accessible(game,n) and read(n,'location_id')==game.player.location_id and bool(read(n,'location_id'))))
+        address=location(game,target) if target.kind=='npc' else None
+        local=(target.kind in {'puppet','prisoner'} or '身外化身' in target.relations or (accessible(game,n) and bool(address) and address==site_key(game)))
         row=dict(id=target.identity,kind=target.kind,relations=list(target.relations),name='暂不可接触的人物',
                  reason='当前无法确认或接触',portrait=None,quotes=[],techniques=[])
         if not local:
             rows.append(row);continue
         facts=normalize_facts(target.facts(game))
         row['name']=facts.get('name','培养对象')
+        if '弟子' in target.relations:
+            from ..mentorship import record, rank_of, LABELS
+            rank = rank_of(game, 'player', target.identity)
+            entry = record(game, 'player', target.identity)
+            if rank: row['mentorship'] = dict(rank_name=LABELS[rank], loyalty=entry['loyalty'] if entry else 60)
+            from ..mentorship_advanced import precision
+            row['precision_remaining'] = precision(game, target.identity)
         try:require(game,target);row['reason']=''
         except ValueError as e:row['reason']=str(e)
         # Concealed or non-public forms cannot leak true realm through art or quotes.
@@ -61,7 +70,7 @@ def public(game,power=None):
             row['learned_techniques']=technique_options(game,facts) if target.kind!='puppet' else []
             axes=['cultivation','body','sense','conversion','domain']+[r['axis'] for r in row['specializations']+row['domains']+row['learned_techniques']]
             for axis in axes:
-                for method in ('material','infuse'):
+                for method in (('material','infuse','inherit_material','inherit_infuse') if row.get('precision_remaining') else ('material','infuse')):
                     for batches in (1,5,10):
                         try:
                             q=quote(game,target.kind,target.identity,axis,method,batches,_target=target)
@@ -73,7 +82,8 @@ def public(game,power=None):
             row['techniques']=[dict(id=t.id,name=t.name,category=t.category) for t in game.player.known_techniques if t.id not in known]
         rows.append(row)
     return dict(revision=game.updated_at,targets=rows,materials=[dict(r,quantity=sum(i.quantity for i in game.player.inventory if i.id==r['id'])) for r in definitions().values()],
-                note='高阶修为每轮一层，转化每轮一重；不代替迁界，不补满资源。邻域每轮一阶，受修为与界面限制。')
+                note=('独立空间内可查看人物、当面传法；主动升阶、专材培养与能源更换暂不开放。' if game.player.world in {'lost','rift'} else
+                      '高阶修为每轮一层，转化每轮一重；不代替迁界，不补满资源。邻域每轮一阶，受修为与界面限制。'))
 
 def legacy_quotes(game,kind,identity):
     result={}

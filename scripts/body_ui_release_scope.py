@@ -1,5 +1,9 @@
-"""3.5.2 declared changed domains/upstreams; no full-repository claim."""
+"""3.5.3 school/Debug and existing NPC development release upstreams."""
 TESTS=[
+ 'test_mentorship','test_mentorship_advanced','test_mentorship_adversarial','test_mentorship_peers',
+ 'test_npc_development_contacts','test_npc_development_special_areas','test_npc_recruitment_adversarial',
+ 'test_npc_transition_training','test_npc_race_assets','test_npc_custody','test_relationship_possession_audit_fixes',
+ 'test_debug_npc_development','test_debug_systems','test_debug_capabilities','test_three_group_dependencies',
  'test_npc_development','test_npc_development_upper','test_npc_development_stage3','test_npc_development_352',
  'test_puppet_energy_supply','test_owned_training','test_family_expansion','test_pending_audit_fixes',
  'test_release_2135','test_visual_selection',
@@ -18,6 +22,7 @@ TESTS=[
  'test_windows_release_evidence','test_android_release_checks','test_extension_system','test_body_ui_release',
 ]
 TESTS=['tests/'+name+'.py' for name in TESTS]
-BROWSERS=['browser_npc_development','browser_npc_high_352','browser_combat_replay','browser_release_2135','browser_upper_social_351','browser_body_ui_release','browser_eightfold','browser_divine_lights','browser_wuyun',
+BROWSERS=['browser_mentorship','browser_mentorship_advanced','browser_mentorship_adversarial','browser_mentorship_peers','browser_debug_npc_development','browser_debug_systems','browser_npc_recruitment_adversarial','browser_npc_transition_training','browser_npc_special_areas','browser_npc_development_contacts',
+ 'browser_npc_development','browser_npc_high_352','browser_combat_replay','browser_release_2135','browser_upper_social_351','browser_body_ui_release','browser_eightfold','browser_divine_lights','browser_wuyun',
  'browser_monster_body','browser_ghost_body','browser_desktop_navigation','browser_events_212','browser_pixel_only']
-SCOPE='3.5.2 unified NPC development, four high-body specializations, techniques/domains, ranked puppet energy and seven complete animated forms; upper-world guide, NPC portraits and authored DLC naming plus four high-body families, eightfold mechanics, pixel-only two-palette UI, source/persistence/combat and release upstreams; not full repository regression'
+SCOPE='3.5.3 personal schools, peer interactions, school UI, inheritance/avatar/rebellion, recruitment and cross-world contact fixes, NPC and systems Debug; existing NPC development, high-body, energy, pixel-only UI, combat, persistence and release upstreams; not full repository regression'

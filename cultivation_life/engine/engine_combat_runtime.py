@@ -45,6 +45,16 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
         "player", player.name, "player", max(1.0, combat_power(player)),
         player.realm_index, player.path,
     )]
+    if (target or {}).get('mentorship_contest'):
+        return units
+    from ..system.mentorship_advanced import avatar_unit
+    avatar = avatar_unit(game, deps._npc_power)
+    if avatar and avatar.id not in (target or {}).get('exclude_allied_ids', []):
+        units.append(avatar)
+    for identity in (target or {}).get('mentorship_allies', []):
+        npc = find_person(game, identity)
+        if npc and npc.alive and identity not in {u.id for u in units}:
+            units.append(BattleUnit(npc.id, npc.name, 'companion', deps._npc_power(npc), npc.realm_index, npc.path))
     from ..system.second_nascent import unit
     second = unit(game)
     if second:
@@ -63,7 +73,7 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
         ))
 
     for relation in deps._public_party(game):
-        if str(relation.get("id")) in (target or {}).get("exclude_allied_ids", []):
+        if str(relation.get("id")) in (target or {}).get("exclude_allied_ids", []) or str(relation.get('id')) in {u.id for u in units}:
             continue
         power = max(0.0, float(relation.get("combat_power", 0)))
         units.append(BattleUnit(
@@ -85,6 +95,8 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
     target_power = max(1.0, float(target.get("target_power", 1.0)))
     selected_choice = str(target.get("story_choice_id", ""))
     for index, ally in enumerate(target.get("player_allies", [])):
+        if ally.get('npc_id') in {u.id for u in units}:
+            continue
         if selected_choice in ally.get("exclude_choices", []):
             continue
         effective_power = target_power * float(ally["power_ratio"])
@@ -259,7 +271,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
         current_hp_ratio=player.hp / max(1.0, hp_max),
         current_mp_ratio=player.mp / max(1.0, mp_max),
         battlefield_tags=deps._combat_battlefield_tags(game, target),
-        player_stat_multiplier=modifier(game, "combat_stats"),
+        player_stat_multiplier=modifier(game, "combat_stats") * (.6 if target.get('mentorship_betrayal') else 1.),
         phases=capabilities.battle,
         mana_cost_multiplier=combat_root_mana_cost_multiplier(
             player, opponent_realm, opponent_layer,

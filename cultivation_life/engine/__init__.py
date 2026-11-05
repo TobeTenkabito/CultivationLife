@@ -1252,6 +1252,10 @@ class GameEngine:
     def request_from_master(self, game_id: str, kind: str) -> dict[str, Any]:
         return relationship_actions.request_from_master(self._dependencies.relationship_actions, game_id, kind)
 
+    def mentorship_action(self, game_id, action, npc_id='', rank='', rival_id=''):
+        from .actions.mentorship import act
+        return act(self, game_id, action, npc_id, rank, rival_id)
+
     def gift_disciple(self, game_id: str, disciple_id: str, kind: str, content_id: str) -> dict[str, Any]:
         return relationship_actions.gift_disciple(self._dependencies.relationship_actions, game_id, disciple_id, kind, content_id)
 

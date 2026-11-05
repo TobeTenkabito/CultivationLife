@@ -26,6 +26,18 @@ def faction_site(faction, *, persist=True):
     return pool[index]
 
 
+def person_site(game, npc):
+    """Read an explicit address or the original ordinary faction's home site."""
+    if npc.location_id:
+        return npc.location_id
+    if npc.world in {'lost', 'rift'}:
+        return None
+    groups = [*game.sects.values(), *([game.family] if game.family else [])]
+    group = next((g for g in groups if not g.extinct and g.world == npc.world
+                  and (g.id == npc.faction_id or any(n.id == npc.id for n in g.npcs))), None)
+    return faction_site(group, persist=False)['id'] if group else None
+
+
 def can_enter_faction(faction, npc):
     site = faction_site(faction)
     rank = int(npc.get("realm_index", 0)) if isinstance(npc, dict) else npc.realm_index

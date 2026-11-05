@@ -3,7 +3,7 @@
   'use strict';
   let sessionId = sessionStorage.getItem('cultivation-debug-session') || '';
   let catalog = [], history = [], cursor = 0, hooks, enabled = false, initialized = false;
-  let panel, output, input, badge, entry, importInput, heavens;
+  let panel, output, input, badge, entry, importInput, heavens, npcDevelopment, systems;
   let nativeImportParts = [];
   const node = (tag, text, id) => {
     const element = document.createElement(tag);
@@ -27,6 +27,8 @@
   }
   function setSession(value) {
     heavens?.invalidate();
+    npcDevelopment?.invalidate();
+    systems?.invalidate();
     sessionId = value || '';
     if (sessionId) sessionStorage.setItem('cultivation-debug-session', sessionId);
     else sessionStorage.removeItem('cultivation-debug-session');
@@ -45,7 +47,9 @@
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Debug request failed.');
-      if (result.changed || ['session', 'simulation', 'mutation', 'snapshot'].includes(result.type)) heavens?.invalidate();
+      if (result.changed || ['session', 'simulation', 'mutation', 'snapshot'].includes(result.type)) {
+        heavens?.invalidate();npcDevelopment?.invalidate();systems?.invalidate();
+      }
       catalog = result.catalog || catalog;
       const data = result.data;
       if (data && Object.prototype.hasOwnProperty.call(data, 'session_id') && result.type === 'session') {
@@ -109,12 +113,14 @@
   }
   function open() {
     if (!enabled && !sessionId) return;
+    npcDevelopment?.invalidate();
+    systems?.invalidate();
     panel.showModal(); input.focus();
     if (!catalog.length && enabled) execute('help');
   }
   function initialize() {
     initialized = true;
-    const css = node('link'); css.rel = 'stylesheet'; css.href = '/debug-console.css'; document.head.append(css);
+    const css = node('link'); css.rel = 'stylesheet'; css.href = '/debug-console.css?v=systems1'; document.head.append(css);
     entry = node('button', '开发者控制台', 'debug-console-open'); entry.type = 'button'; entry.onclick = open;
     badge = node('button', '', 'debug-session-banner'); badge.type = 'button'; badge.onclick = open;
     panel = node('dialog', '', 'debug-console'); panel.setAttribute('aria-labelledby', 'debug-console-title');
@@ -171,7 +177,15 @@
       execute: (command, bundle, request, quiet) => execute(command, bundle, request, quiet, false),
       hasSession: () => Boolean(sessionId),
     });
-    panel.append(heading, description, actions, heavens.element, output, form);
+    npcDevelopment = window.DebugNpcDevelopment.create({
+      execute: (command,bundle,request,quiet) => execute(command,bundle,request,quiet,false),
+      getSession: () => sessionId, getCatalog: () => catalog,
+    });
+    systems = window.DebugSystems.create({
+      execute: (command,bundle,request,quiet) => execute(command,bundle,request,quiet,false),
+      getSession: () => sessionId, getCatalog: () => catalog,
+    });
+    panel.append(heading, description, actions, heavens.element, npcDevelopment.element, systems.element, output, form);
     const tools = node('div', '', 'debug-tools'); tools.append(badge, entry);
     const brand = document.querySelector('.brand');
     if (brand) brand.after(tools); else document.body.prepend(tools);
@@ -194,7 +208,7 @@
       if (!initialized) initialize(); updateBadge();
     },
     headers(path) {
-      return sessionId && /^\/api\/(games|achievements|save-transfer|extensions)(\/|$)/.test(path)
+      return sessionId && /^\/api\/(games|achievements|save-transfer|extensions|fleet-goods|visual-assets|authored-lineages|domain-styles)(\/|\?|$)/.test(path)
         ? {'X-Cultivation-Debug': sessionId} : {};
     },
     active: () => !!sessionId,

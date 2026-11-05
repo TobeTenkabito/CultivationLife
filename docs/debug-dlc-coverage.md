@@ -1,6 +1,10 @@
 # Debug DLC 指令与验证范围
 
-维护基线：本体 **2.12.0**，仅支持存档结构 **10**。当前命令、角色入口及 DLC 门禁以 `help`、`capability list` 的注册表输出为准。这里的“覆盖”指可调用入口，不能等同于穷举所有玩法分支。
+维护基线：本体 **3.5.2源码**，仅支持存档结构 **12**；不迁移旧结构。当前命令、角色入口及 DLC 门禁以 `help`、`capability list` 的注册表输出为准。这里的“覆盖”指可调用入口，不能等同于穷举所有玩法分支。
+
+NPC统一培养与四大道途高阶能力通过 `npc development inspect`、`npc development` 接入；原功法、邻域及肉身DLC资格继续由正式培养入口校验。培养命令不自动启用道途DLC，不替代迁界或改变人物身份。控制台提供“NPC培养调试 · 成长与能源”工作台。
+
+2026-11-05增补：`upper voisinage`含妖躯五蜕、鬼躯五法、本相／魂相及传承动作，带可选 `expected_level`；`asura action`含 `inherit` 与 `set_field_plan`；`aperture action inherit`沿原承接流程。`trial site choose`须带当前 `floor_id`、`revision`、`event_id`与 `choice_id`；原 `event choose`继续有效。工作台“功能调试 · 全部系统”加载全部登记命令，DLC关闭时不开放对应声明能力；混合本体／DLC入口仍在原分支核验实际内容，不自动启用DLC。
 
 ## 调用约定
 

@@ -4,6 +4,8 @@ from ..system.economy.spirit_fields import field_operation_available, field_is_l
 from ..system.economy.caravans import public_caravans
 from ..system.economy.personal import public_personal
 from ..system.economy.network_actions import public_network
+from ..system.mentorship import public as public_mentorship
+from ..system.mentorship_advanced import public as public_inheritance
 from ..system.economy.enterprise_view import public_estates
 
 from ..system.path_modifiers import modifier, pursuit_immunity, projected_resource
@@ -145,6 +147,12 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
                 relation["gender"] == "female" and deps._rank(relation) <= deps._rank(game.player)
                 and not any(str(row.get("id")) == str(relation.get("id")) for row in game.player.concubines)
             )
+    from ..system.npc_contacts import availability
+    from ..relationship_records import find_person
+    for request in player_data.get('disciple_requests', []):
+        npc = find_person(game, request.get('npc_id') or request['id'], include_inactive=True)
+        reason = availability(game, npc, accepting_request=True)['disciple'] if npc else '人物身份已失效'
+        request.update(can_accept=not reason, accept_reason=reason)
     sealed = game.player.sealed_cultivation
     player_data["cultivation_suppressed"] = bool(sealed or game.player.cultivation_suppression)
     from ..system.doctrine.voisinage_training import dao_ancestor
@@ -272,6 +280,8 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
         "merchant_system": deps._public_merchant(game),
         "personal_economy": public_personal(game),
         "fleet_network": public_network(game, deps.maps),
+        "mentorship": public_mentorship(game),
+        "mentorship_advanced": public_inheritance(game),
         "spirit_field": deps._public_spirit_field(game.player) | {
             'operation_available': field_operation_available(game),
             'local_available': field_is_local(game),

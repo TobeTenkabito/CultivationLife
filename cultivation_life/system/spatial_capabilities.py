@@ -1,6 +1,6 @@
 """Explicit personal capabilities inside isolated spaces; geography stays local."""
 PERSONAL_COMMANDS = frozenset({
-    'train_secret_art',
+    'train_secret_art', 'npc_development', 'mentorship_action',
     'contact_action', 'manage_dao_companion', 'manage_dao_friend',
     'manage_party', 'leave_relationship', 'request_from_master', 'gift_disciple',
     'respond_disciple_request', 'relationship_violence', 'begin_relationship_capture',
@@ -21,7 +21,7 @@ PERSONAL_PANELS = frozenset({
     'trial-site',  # Read-only unavailable view; the domain rejects spatial entry.
     'heavens',
     'map', 'inventory', 'talisman', 'settings', 'secret-art', 'formation', 'combat-plan',
-    'bloodline', 'relationship', 'world-npc', 'transformation', 'ghost-soul', 'ghost-attachment',
+    'bloodline', 'relationship', 'npc-development', 'world-npc', 'transformation', 'ghost-soul', 'ghost-attachment',
     'captive', 'puppet-workshop', 'crafting', 'spirit-field', 'natal-artifact',
     'sage-inner-outer', 'buddhist-wish', 'extension',
 })

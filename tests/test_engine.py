@@ -967,6 +967,7 @@ class EngineTests(unittest.TestCase):
         # Cultivation gifts now require a real meeting address, not just a world.
         meeting=self.engine.store.load(created['id'])
         meeting.player.disciples[0].person.location_id=meeting.player.location_id
+        meeting.player.disciples[0].person.spirit_root='supreme_metal'
         self.engine.store.save(meeting)
         after_item = self.engine.gift_disciple(created["id"], "disciple-x", "item", "blood_ginseng")
         blood_count = next(item["quantity"] for item in after_item["player"]["inventory"] if item["id"] == "blood_ginseng")

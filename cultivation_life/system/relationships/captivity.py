@@ -191,7 +191,8 @@ def _break_capture_relationship(
     target_id = str(relation.get("id", ""))
     player.party = [entry for entry in player.party if str(entry.get("id")) != target_id]
     if kind == "master":
-        player.master = None
+        from ..mentorship import end_person_relations
+        end_person_relations(game, target_id)
     elif kind == "friend":
         player.dao_friends = [row for row in player.dao_friends if str(row.get("id")) != target_id]
     else:
@@ -281,7 +282,7 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
 
 def _restore_captive_npc(deps: CaptivityDependencies, game: GameState, target: dict[str, Any], affinity_gain: float) -> None:
     release_person(game, target.get("npc_id") or target["id"],
-                   affinity=float(target.get("affinity", 0)) + affinity_gain)
+                   affinity=float(target.get("affinity", 0)) + affinity_gain, at_player=True)
 
 
 def _convert_to_puppet(
@@ -303,6 +304,9 @@ def _convert_to_puppet(
         if kind == "corpse":
             kill_person(game, target.get("npc_id") or target["id"],
                         f"被{player.name}炼尸失败，形神俱灭")
+            if disciple:
+                from ..mentorship import end_person_relations
+                end_person_relations(game, target['id'])
             deps._remove_conversion_target(player, target, disciple)
             return "destroyed", f"你炼制{target['name']}失败，其形神俱灭（成功率 {chance:.0%}）。"
         return "resisted", f"{target['name']}挣脱了活傀标记，好感 -15（成功率 {chance:.0%}）。"
@@ -342,6 +346,9 @@ def _convert_to_puppet(
     else:
         kill_person(game, target.get("npc_id") or target["id"],
                     f"被{player.name}炼为{PUPPET_NAMES[kind]}")
+    if disciple:
+        from ..mentorship import end_person_relations
+        end_person_relations(game, target['id'])
     deps._remove_conversion_target(player, target, disciple)
     return "created", f"{target['name']}已被炼成{PUPPET_NAMES[kind]}，继承 {inherited:.0%} 战力（成功率 {chance:.0%}）。"
 

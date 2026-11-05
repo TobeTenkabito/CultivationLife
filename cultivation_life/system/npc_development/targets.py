@@ -7,12 +7,20 @@ from ...puppet_state import usable, training_facts
 from ..combat.actor_state import read, _write
 from ..cultivation_guard import cultivation_blocked
 from ...cultivation_coordinates import rank_for
+from ..spatial_capabilities import site_key
 
 
 def unrevealed(game,target):
     person=target.person if target.person is not None else target.owner
     return bool(target.kind=='npc' and read(person,'concealed_realm_index') is not None
                 and game.player.divine_sense_rank<rank_for(read(person,'realm_index',0),read(person,'layer',1)))
+
+def location(game,target):
+    """Use the existing contact address without writing or relocating the person."""
+    if target.person is None:
+        return read(target.owner,'location_id')
+    from ..faction_geography import person_site
+    return person_site(game,target.person)
 
 @dataclass
 class Target:
@@ -21,6 +29,7 @@ class Target:
     owner: object
     person: object
     relations: tuple
+    bonus_owner: object = None
 
     def facts(self,game):
         if self.kind=='puppet':
@@ -31,7 +40,10 @@ class Target:
             return row
         if self.kind=='prisoner':
             return {**dict(self.owner),**self.person.to_dict()}
-        return self.owner.to_dict() if hasattr(self.owner,'to_dict') else dict(self.owner)
+        facts = self.owner.to_dict() if hasattr(self.owner,'to_dict') else dict(self.owner)
+        if self.bonus_owner is not None:
+            facts['breakthrough_bonus'] = self.bonus_owner.get('breakthrough_bonus', 0)
+        return facts
 
 def candidates(game):
     p=game.player;rows={}
@@ -43,7 +55,8 @@ def candidates(game):
             if person:
                 key=('npc',identity)
                 labels=rows[key].relations+(label,) if key in rows else (label,)
-                rows[key]=Target('npc',identity,person,person,labels)
+                bonus = row if label == '弟子' else rows[key].bonus_owner if key in rows else None
+                rows[key]=Target('npc',identity,person,person,labels,bonus)
             elif label=='后代':
                 rows[('npc',identity)]=Target('npc',identity,row,None,(label,))
     if game.family:
@@ -63,6 +76,10 @@ def candidates(game):
         if person:
             rows.pop(('npc',person.id),None);rows.pop(('prisoner',person.id),None)
         rows[('puppet',identity)]=Target('puppet',identity,row,person,('御傀',))
+    from ..mentorship_avatar import avatar_person
+    avatar = avatar_person(game)
+    if avatar:
+        rows[('npc',avatar.id)] = Target('npc',avatar.id,avatar,avatar,('身外化身',))
     return list(rows.values())
 
 def resolve(game,kind,identity):
@@ -74,6 +91,9 @@ def resolve(game,kind,identity):
 
 def require(game,target,axis=None):
     p=game.player;n=target.person;o=target.owner
+    from ...npc_development_content import TIERS
+    if p.world not in TIERS and p.world not in {'lost', 'rift'}:
+        raise ValueError('未知界面不能进行人物培养')
     if not target.identity:raise ValueError('该对象缺少有效身份编号')
     if cultivation_blocked(game) or p.sealed_cultivation or p.cultivation_suppression:
         raise ValueError('当前状态无法培养，请先处理事件、劫战或身体限制')
@@ -95,10 +115,16 @@ def require(game,target,axis=None):
         if not read(person,'alive',True):raise ValueError('人物已不可用')
         if read(person,'age',0)<16:raise ValueError('须满16岁才能接受培养')
         if target.kind=='npc':
-            if read(person,'roster_state','active')!='active' or read(person,'custody'):raise ValueError('受控或离册人物不能接受自由培养')
-            if not accessible(game,person):raise ValueError('当前无法接触该人物')
-            if not read(person,'location_id') or read(person,'location_id')!=p.location_id:
-                raise ValueError('须确认人物与你在同一实际地点')
+            if '身外化身' in target.relations:
+                from ..mentorship_avatar import avatar_person, avatar_reason
+                reason = avatar_reason(game, command=True)
+                if avatar_person(game) is not n or reason: raise ValueError(reason or '化身控制关系失效')
+            else:
+                if read(person,'roster_state','active')!='active' or read(person,'custody'):raise ValueError('受控或离册人物不能接受自由培养')
+                if not accessible(game,person):raise ValueError('当前无法接触该人物')
+                address=location(game,target)
+                if not address or address!=site_key(game):
+                    raise ValueError('须确认人物与你在同一实际地点')
         elif not n.custody or n.custody.get('kind')!='prisoner' or n.custody.get('holder_id')!=game.id:
             raise ValueError('俘虏控制关系已失效')
     identity=n.id if n else target.identity
@@ -117,6 +143,9 @@ def write(target,result):
     fields=('realm_index','layer','cultivation_progress','body_training','immortal_body_level',
             'divine_sense_rank','lifespan','breakthrough_bonus','transcendence','body_attainments','technique_levels','main_technique_level','family_traits','family_combat_bonus')
     for key in fields:
+        if key == 'breakthrough_bonus' and target.bonus_owner is not None:
+            if key in result: target.bonus_owner[key] = result[key]
+            continue
         owner=target.person if target.kind=='prisoner' and key!='breakthrough_bonus' else target.owner
         if key in result and (isinstance(owner,dict) or hasattr(owner,key)):
             _write(owner,key,result[key])

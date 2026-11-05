@@ -14,6 +14,10 @@ from ...time_flow import TRAVEL_TIME, completed_action_units, settle_elapsed_tim
 def advance_spatial_year(deps: WorldYearDependencies, game, rng):
     """Isolated year: same personal breakthrough, thunder and lifespan order."""
     p = game.player
+    from ...system.mentorship import advance as advance_mentorship
+    advance_mentorship(game)
+    from ...system.mentorship_advanced import tick_avatar
+    tick_avatar(game, rng, deps._resolve_npc_periodic_tribulation)
     from ...system.soul_lifecycle import tick
     if not tick(game, rng, deps._die):
         return False

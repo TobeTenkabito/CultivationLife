@@ -57,6 +57,8 @@ def mentor_action(engine, game, action):
             world=p.world, affinity=35, encountered_player=True)
         from .cultivation_ranks import ensure_npc
         from .npc_social import instantiate_social
+        from .spatial_capabilities import site_key
+        npc.location_id = site_key(game)
         ensure_npc(npc)
         game.notable_npcs[key] = npc
         instantiate_social(game, npc)
@@ -70,10 +72,12 @@ def mentor_action(engine, game, action):
         if action == 'accept_mentor':
             if not info['can_accept']:
                 raise ValueError(info['blocked_reason'])
-            p.master = engine._relationship_snapshot(npc.id, npc.name, npc.realm_index, npc.layer,
+            relation = engine._relationship_snapshot(npc.id, npc.name, npc.realm_index, npc.layer,
                 'world', npc.age, npc.lifespan, spirit_root=npc.spirit_root,
                 path=npc.path, race=npc.race, world=npc.world, affinity=35, gender=npc.gender)
-            p.master = game.link_relationship(p.master)
+            from .mentorship import admit, replace_master
+            replace_master(game, game.link_relationship(relation))
+            admit(game, npc.id, "player")
             result = 'accepted'
             summary = '你执弟子礼，沈照尘欣然收徒。自此可在关系窗口查看师承、请益修行；师父也有自己的修行与际遇。'
         else:

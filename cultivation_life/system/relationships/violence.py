@@ -80,13 +80,14 @@ def relationship_violence(deps: RelationshipViolenceDependencies, game_id, kind,
         if result != "killed":
             person["affinity"] = -100
             identities = {str(target_id), npc_id}
-            player.disciples = [row for row in player.disciples if str(row.get("id")) not in identities]
+            from ..mentorship import end_person_relations
+            for identity in identities: end_person_relations(game, identity)
             player.dao_friends = [row for row in player.dao_friends if str(row.get("id")) not in identities]
-            if player.master and str(player.master.get("id")) in identities:
-                player.master = None
             if player.dao_companion and str(player.dao_companion.get("id")) in identities:
                 player.dao_companion = None
     if result == "killed":
+        from ..mentorship import end_person_relations
+        end_person_relations(game, npc_id)
         person["alive"] = False
         person["death_reason"] = f"被{player.name}处死" if kind != "party" else f"遭{player.name}背叛击杀"
         if npc:

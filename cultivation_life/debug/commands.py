@@ -14,6 +14,7 @@ from .state import digest, differences, npc_rows, validate, read_pointer
 from .capabilities import CAPABILITIES, EXCLUDED_OPERATIONS, register as register_capabilities
 from .dlc import available
 from .heavens import register as register_heavens
+from .npc_development import register as register_npc_development
 
 
 # Exact authoritative field names. Values are (type, minimum, maximum).
@@ -294,6 +295,10 @@ def build_registry():
         'Omit pointer to list sections. This may settle state or consume RNG; use state get for pure saved data.',
         lambda ctx, pointer=None: ctx.services.simulate(ctx.session, 'view', {'pointer': pointer}),
         (Argument('pointer', required=False),))
+    add('game inspect', 'preview', 'Inspect any public system section in disposable storage. '
+        'Preparation, RNG and achievements are discarded; use game view before acting on newly generated IDs.',
+        lambda ctx, pointer=None: ctx.services.preview(ctx.session, 'view', {'pointer': pointer}),
+        (Argument('pointer', required=False),))
     add('scenario list', 'query', 'List real quick-start presets, spirit roots, paths and allowed starting worlds.',
         lambda ctx: {'presets': copy.deepcopy(WORLD_SYSTEMS.get('quick_start_presets', [])),
                      'spirit_roots': ROOT_NAMES, 'paths': PATH_NAMES,
@@ -315,4 +320,5 @@ def build_registry():
                      'excluded': EXCLUDED_OPERATIONS}, requires_session=False)
     register_capabilities(registry)
     register_heavens(registry)
+    register_npc_development(registry)
     return registry

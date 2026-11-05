@@ -15,11 +15,11 @@ def relation_kind(player, npc_id):
     return 'npc'
 
 
-def availability(game, npc):
+def availability(game, npc, *, accepting_request=False):
     from ..spatial_people import accessible
     from ..npc_custody import is_free
     p = game.player
-    blocked = ('此人不在当前界面或空间，或不在自由名册' if not is_free(npc) or not accessible(game, npc) else
+    blocked = ('此人不在当前界面或空间，或不在自由名册' if not is_free(npc) or npc.custody or npc.id in game.intrigue_state.get('npc_prisons', {}) or not accessible(game, npc) else
                '请先结束当前事件、战斗或拘禁' if not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
                or (game.guixu_state.get('player_session') or {}).get('trapped') else '')
     actions = dict.fromkeys(['party','companion','friend','master','disciple','concubine','slay','improve','worsen','capture','promise'], blocked)
@@ -36,7 +36,8 @@ def availability(game, npc):
     if has_living_master(p): actions['master'] = '已有师承'
     if (npc.realm_index, npc.layer) <= (p.realm_index, p.layer): actions['master'] = '对方修为须高于你'
     if (npc.realm_index, npc.layer) >= (p.realm_index, p.layer): actions['disciple'] = '对方修为须低于你'
-    if len(p.disciples) + len(p.disciple_requests) >= rules['max_disciples']: actions['disciple'] = '弟子名额已满'
+    if not accepting_request and any(r.get('id') == npc.id for r in p.disciple_requests):
+        actions['disciple'] = '此人已有拜师帖，请先处理原帖'
     for a in ['master','disciple']:
         if f'{a}:{npc.id}' in p.relationship_attempts: actions[a] = '已向此人提出过同类请求'
     if p.dao_companion and p.dao_companion.get('alive', True): actions['companion'] = '已有道侣'
@@ -54,6 +55,15 @@ def availability(game, npc):
     if research_assignment(game, npc.id):
         for action in ('party', 'companion', 'friend', 'master', 'disciple', 'concubine'):
             actions[action] = '此人已有访学行程，返乡前不能另行安排职责'
+    from .mentorship import admission_reason, school_restriction, school_contact_reason
+    for action, teacher, student in [('master', npc.id, 'player'), ('disciple', 'player', npc.id)]:
+        actions[action] = actions[action] or admission_reason(game, teacher, student)
+    restriction = school_restriction(game, npc.id)
+    if restriction:
+        for action in ('party', 'friend', 'improve', 'promise', 'companion'): actions[action] = restriction
+    contact = school_contact_reason(game, npc.id)
+    if contact:
+        for action in ('party', 'friend', 'improve', 'worsen', 'promise', 'companion'): actions[action] = actions[action] or contact
     return actions
 
 
@@ -101,6 +111,9 @@ def act(deps: NpcContactDependencies, game_id, npc_id, action, target_id='', exp
     affinity = deps._adjust_person_affinity(game, npc_id, raw_delta)
     game.governance_actions[f'party_interaction:{npc_id}'] = p.age
     summary = f"你与{npc.name}{'畅谈修行，增进了解' if action == 'improve' else '言语相争，渐生嫌隙'}，好感 {delta:+g}，当前为 {affinity:g}。"
+    if action == 'worsen':
+        from .mentorship import displease
+        summary += displease(game, npc.id)
     game.history.append(HistoryRecord('SYS_NPC_CONTACT',1,p.age,'故人交往',npc_id,action,summary,{'affinity':delta},['system','relationship']))
     game.updated_at = now_iso()
     game.rng_state = encode_rng(rng)

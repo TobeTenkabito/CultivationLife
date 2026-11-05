@@ -58,7 +58,7 @@ def equipped(game,npc):
         book=resolve(game,identity)
         if not book or not can_practice_technique(read(npc,'spirit_root',''),book):continue
         if book.required_body_training>int(read(npc,'body_training',0) or 0):continue
-        if book.requires_immortal_power and not (read(npc,'transcendence',{}) or {}).get('conversion',0):continue
+        if book.requires_immortal_power and (read(npc,'transcendence',{}) or {}).get('conversion',0)<1:continue
         book.level=facts[identity];result.append((slot,book))
     return result
 

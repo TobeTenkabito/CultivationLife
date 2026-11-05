@@ -23,7 +23,11 @@ window.NpcArt = (() => {
       return n.race===a.race&&n.path===a.path&&n.gender===a.gender?key:null;
     }
     // A pending named redesign must never silently acquire a generic face.
-    if(reserved.has(n.id)||n.race!=='human'||!['male','female'].includes(n.gender)||!(n.age>=16))return null;
+    if(reserved.has(n.id)||!['male','female'].includes(n.gender)||!(n.age>=16))return null;
+    if(n.race!=='human'){
+      const key=`${n.race}.${n.gender}`,art=window.NpcRaceCatalog?.[key];
+      return art&&n.age>=art.min_age&&art.paths.includes(n.path)?'race.'+key:null;
+    }
     const extras=Object.values(window.NpcExpansionCatalog||{}).map(row=>row.form);
     const forms=[...extras,...Object.values(window.PixelLibrary?.catalog?.assets||{}).flatMap(row=>[...(row.character_forms||[]),...(row.npc_forms||[])])];
     const pool=forms.filter(form=>form.role==='npc'&&form.race===n.race&&form.gender===n.gender&&
@@ -46,7 +50,7 @@ window.NpcArt = (() => {
     const key=active()||roster?select(n):null;if(!key)return null;
     const img=el('img',undefined,`npc-art-${kind}`);img.alt=`${n.name}${kind==='portrait'?'头像':'立绘'}`;
     const extension=key.startsWith('actor.path.');
-    const local=key.startsWith('controlled.')?window.ControlledArtCatalog?.[key.slice(11)]:window.NpcExpansionCatalog?.[key];
+    const local=key.startsWith('race.')?window.NpcRaceCatalog?.[key.slice(5)]:key.startsWith('controlled.')?window.ControlledArtCatalog?.[key.slice(11)]:window.NpcExpansionCatalog?.[key];
     const asset=local?.[kind]||(extension?window.PixelLibrary?.catalog?.assets[key+'.'+kind]:pack.actors[key]?.[kind]);
     if(!asset)return null;
     [img.width,img.height]=asset.size;

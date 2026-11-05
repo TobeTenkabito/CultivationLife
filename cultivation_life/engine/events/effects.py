@@ -39,9 +39,28 @@ from ..engine_constants import OPS
 from ..dependencies import EffectDependencies
 
 
+def _link_encounter_person(game, relation):
+    """Register a newly generated encounter, including its actual instance."""
+    scene = None
+    if game.player.world in {'lost', 'rift'}:
+        scene = game.spatial_state.get('instances', {}).get(game.spatial_state.get('current'))
+        if not scene or scene.get('kind') != game.player.world:
+            raise ValueError('当前遭遇缺少有效空间实例')
+        relation['location_id'] = scene.get('location_id') or game.player.location_id
+    linked = game.link_relationship(relation)
+    if scene is not None:
+        ids = scene.setdefault('npc_ids', [])
+        if linked['id'] not in ids:
+            ids.append(linked['id'])
+    return linked
+
+
 def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, pending: dict[str, Any], rng: random.Random) -> tuple[str | None, str]:
     player = game.player
     kind = effect["type"]
+    if kind == 'mentorship_rebellion':
+        from ...system.mentorship_advanced import resolve_rebellion
+        return resolve_rebellion(deps, game, pending, effect.get('method'), rng)
     value = effect.get("value", 0)
     if "range" in effect:
         value = rng.randint(*effect["range"])
@@ -470,20 +489,22 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         relation = deps._generated_relationship(player, "master", rng)
         if rng.random() >= float(effect.get("accept_chance", 0.55)):
             return "rejected", f"{relation['name']}认为缘分未至，婉拒了你的拜师请求。"
-        player.master = game.link_relationship(relation)
+        from ...system.mentorship import admit, replace_master
+        replace_master(game, _link_encounter_person(game, relation))
+        admit(game, player.master["id"], "player")
         return "master_accepted", f"{relation['name']}收你为徒，你自此有了师承。"
     if kind == "gain_generated_companion":
         if player.dao_companion and player.dao_companion.get("alive", True):
             return "already_has_companion", "你已有道侣，没有另结新缘。"
         relation = deps._generated_relationship(player, "companion", rng)
-        player.dao_companion = game.link_relationship(relation)
+        player.dao_companion = _link_encounter_person(game, relation)
         return "companion_joined", f"你与{relation['name']}立下同道誓约，自此结为道侣。"
     if kind == "gain_generated_disciple":
         max_disciples = int(WORLD_SYSTEMS["relationship"]["max_disciples"])
-        if len(player.disciples) + len(player.disciple_requests) >= max_disciples:
+        if len(player.disciple_requests) >= max_disciples:
             return "disciple_limit", "你暂时无意再扩大师门。"
         relation = deps._generated_relationship(player, "disciple", rng)
-        player.disciple_requests.append(game.link_relationship(relation))
+        player.disciple_requests.append(_link_encounter_person(game, relation))
         return "disciple_requested", f"{relation['name']}呈上拜师帖；是否收入门下，仍须由你亲自决定。"
     if kind == "body_training":
         if player.body_technique is None:

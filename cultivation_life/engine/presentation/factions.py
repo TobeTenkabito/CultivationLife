@@ -218,14 +218,13 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
             and not any(str(row.get("id")) == npc.id for row in player.concubines)
         )
         entry["can_intercept"] = True
-        entry["can_request_master"] = (
+        entry["can_request_master"] = not entry['contact_actions']['master'] and (
             unrelated and entry["id"] not in concubine_ids
             and not has_living_master(player) and npc_rank > player_rank
             and f"master:{entry['id']}" not in player.relationship_attempts
         )
-        entry["can_accept_disciple"] = (
+        entry["can_accept_disciple"] = not entry['contact_actions']['disciple'] and (
             unrelated and entry["id"] not in concubine_ids
-            and len(player.disciples) + len(player.disciple_requests) < int(WORLD_SYSTEMS["relationship"]["max_disciples"])
             and npc_rank < player_rank
             and f"disciple:{entry['id']}" not in player.relationship_attempts
         )

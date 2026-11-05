@@ -1018,6 +1018,7 @@ class GameState:
     # unique-body ownership and sparse NPC holders are frozen together here.
     tianji_state: dict[str, Any] = field(default_factory=dict)
     doctrine_state: dict[str, Any] = field(default_factory=dict)
+    mentorship_state: dict[str, Any] = field(default_factory=dict)
     authored_techniques: dict[str, Any] = field(default_factory=dict)
     yaochi_state: dict[str, Any] = field(default_factory=dict)
     monster_civilization_state: dict[str, Any] = field(default_factory=dict)
@@ -1038,6 +1039,8 @@ class GameState:
 
     def __post_init__(self):
         self.building_state = decode_building_state(self.building_state)
+        from .mentorship_schema import validate as validate_mentorship
+        validate_mentorship(self.mentorship_state)
         validate_heavens_state(self.heavens_state)
         from .strategic_war_schema import validate_state as validate_strategic_war
         validate_strategic_war(self.strategic_war_state, self.wars)
@@ -1060,6 +1063,8 @@ class GameState:
 
     def to_dict(self) -> dict[str, Any]:
         validate_heavens_state(self.heavens_state)
+        from .mentorship_schema import validate as validate_mentorship
+        validate_mentorship(self.mentorship_state)
         decode_building_state(self.building_state)
         from .strategic_war_schema import validate_state as validate_strategic_war
         validate_strategic_war(self.strategic_war_state, self.wars)
@@ -1125,6 +1130,7 @@ class GameState:
             "yaochi_state": self.yaochi_state,
             "monster_civilization_state": copy.deepcopy(self.monster_civilization_state),
             "doctrine_state": self.doctrine_state,
+            "mentorship_state": self.mentorship_state,
             "authored_techniques": self.authored_techniques,
             "settings": self.settings,
             "map_war_last_encounter_unit": self.map_war_last_encounter_unit,
@@ -1226,6 +1232,7 @@ class GameState:
             monster_civilization_state=copy_plain_data(value.get('monster_civilization_state', {})),
             doctrine_state=copy_plain_data(value.get("doctrine_state", {}))
             if isinstance(value.get("doctrine_state", {}), dict) else {},
+            mentorship_state=copy_plain_data(value.get("mentorship_state", {})),
             settings={
                 "combat_popup": bool(value.get("settings", {}).get("combat_popup", True)),
                 "achievement_popup": bool(value.get("settings", {}).get("achievement_popup", True)),

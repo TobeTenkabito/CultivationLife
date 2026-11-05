@@ -66,6 +66,12 @@ def instantiate_social(game: GameState, npc: SectNpc) -> None:
         race=npc.race, world=npc.world, gender="female" if npc.gender == "male" else "male",
         social_profile={"companion_id": npc.id, "companion_name": npc.name, "concubine_count": 0},
     )
+    from .faction_geography import person_site
+    from ..spatial_people import instance_of
+    partner.location_id = person_site(game, npc)
+    instance = instance_of(game, npc.id)
+    if instance is not None:
+        game.spatial_state['instances'][instance].setdefault('npc_ids', []).append(partner.id)
     game.notable_npcs[partner_id] = partner
     initialize_native(partner, WORLD_SYSTEMS.get("transcendent_combat", {}), now=game.player.age)
 

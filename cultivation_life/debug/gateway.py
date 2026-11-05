@@ -1,7 +1,7 @@
 """HTTP composition boundary; no gameplay module imports this adapter."""
 from contextlib import contextmanager
 import json
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 from .registry import CommandError
 from .runtime import Runtime
@@ -25,11 +25,22 @@ def request_engine(handler, source_engine, project_root, persistence_root):
     with manager.lock:
         session = manager.load(session_id)
         game_path = '/api/games/' + session['current']['game']['id']
-        allowed = (handler.command == 'GET' and path in {game_path, '/api/games', '/api/achievements', '/api/config'}
+        npc_preview = handler.command == 'GET' and path == game_path + '/npc-development'
+        catalog_preview = handler.command == 'GET' and path in {
+            '/api/fleet-goods', '/api/visual-assets', '/api/authored-lineages', '/api/domain-styles'}
+        if catalog_preview and path == '/api/domain-styles':
+            identities = parse_qs(urlparse(handler.path).query).get('id', [])
+            if identities and identities != [session['current']['game']['id']]:
+                raise CommandError('Only the current isolated character can select domain styles.')
+        allowed = (npc_preview or catalog_preview or handler.command == 'GET' and path in {game_path, '/api/games', '/api/achievements', '/api/config'}
                    or handler.command == 'POST' and path.startswith(game_path + '/')
                    and len(path.removeprefix(game_path + '/').split('/')) == 1)
         if not allowed:
             raise CommandError('This operation is unavailable in the isolated debug session. Use debug stop first.')
+        if npc_preview or catalog_preview:
+            with manager.staged(session['current']) as (engine, _store):
+                yield engine
+            return
         operation = {'method': handler.command, 'path': path,
                      'payload': getattr(handler, '_request_payload', None)}
         with manager.gameplay(session_id, operation, handler.request_id) as (engine, outcome):

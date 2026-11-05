@@ -210,6 +210,7 @@ def _path(deps: EventDependencies, path: str, game: GameState) -> Any:
         ),
         "player.disciple_count": len(game.player.disciples),
         "player.disciple_total": len(game.player.disciples) + len(game.player.disciple_requests),
+        "player.disciple_pending": len(game.player.disciple_requests),
         "player.living_disciple_count": sum(
             is_free(entry) and entry.get("world", game.player.world) == game.player.world
             for entry in game.player.disciples

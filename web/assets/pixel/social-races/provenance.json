@@ -1,0 +1,194 @@
+{
+  "generator": "built-in image_gen",
+  "export": "Original RGBA PNG copied byte-for-byte; browser renders existing display dimensions.",
+  "actors": [
+    {
+      "id": "magnetfolk-male",
+      "race": "magnetfolk",
+      "gender": "male",
+      "figure_prompt": "Use case: stylized-concept. Production character art for the Chinese xianxia game 浮生问道. The attached image is STYLE REFERENCE ONLY (not a character to copy): match its delicate thin dark outlines, restrained desaturated mineral pigments, graceful traditional robes, detailed small face, calm standing pose and finely dithered pixel-art texture. Create ONE new adult NPC full-body sprite, alone, centered on a genuinely transparent background, vertical composition. Show complete head ornament, both arms attached to shoulders, two clearly distinct natural hands (five fingers each), intact torso and two separated feet fully visible below robe. Leave transparent padding around every edge. No scenery, no ground shadow, no aura cloud obscuring anatomy, no border, no labels, no text, no second figure or portrait panel. Crisp small-game sprite aesthetic, 128x192-pixel design enlarged cleanly without blur, readable at miniature scale. Maintain modest traditional clothing and believable anatomy. Character: adult male 金磁族 (magnetfolk), a humanoid mineral spirit sensing magnetic metal veins. Subtle desaturated bronze-gray skin, dull gold fine mineral seams on forehead and backs of hands, pale amber eyes, charcoal black hair tied in a scholarly topknot, charcoal-teal and dull bronze layered traditional robes, angular magnetite hair clasp and belt plaque. Two arms and two legs, not a robot, no extra limbs, calm mature cultivation disciple. Neutral attire for multiple cultivation paths.",
+      "portrait_prompt": "Use case: identity-preserve. Create a square transparent-background head-and-shoulders portrait of exactly the character in the attached full-body sprite for the same game's NPC avatar. Preserve face identity, species-specific skin color and facial markings, hairstyle and ornament, clothes, gender, muted mineral palette and very fine pixel-textured line style exactly. Head, entire hair ornament, neck and both shoulders visible with transparent padding; crop cleanly below chest. One character portrait only, no full body, no frame, no background, no halo or shadow, no text. Crisp readable 96x96-pixel avatar design shown enlarged, not photorealistic.",
+      "figure_reference": "design/npc-expansion-351/source/dao-male-351.png",
+      "portrait_reference": "design/npc-races-353/source/magnetfolk-male-figure.png",
+      "assets": {
+        "race": "magnetfolk",
+        "gender": "male",
+        "min_age": 18,
+        "paths": [
+          "dao",
+          "demonic",
+          "monster",
+          "ghost",
+          "confucian",
+          "buddhist"
+        ],
+        "figure": {
+          "file": "/assets/pixel/social-races/magnetfolk-male-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "native_size": [
+            1024,
+            1536
+          ],
+          "sha256": "3e85bb1f096c10ad1120bb2335e8ee65ac6f7f2236d8ee01781f7a77cfda5221"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-races/magnetfolk-male-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "native_size": [
+            1254,
+            1254
+          ],
+          "sha256": "f521234ed6441378e3faf358eafa0fc0a81f797017b6dcef05f0c399973efe45"
+        }
+      },
+      "review": "Fine-line subdued style; both arms and hands, two complete feet visible; portrait identity matches full figure."
+    },
+    {
+      "id": "magnetfolk-female",
+      "race": "magnetfolk",
+      "gender": "female",
+      "figure_prompt": "Use case: stylized-concept. Production character art for the Chinese xianxia game 浮生问道. The attached image is STYLE REFERENCE ONLY (not a character to copy): match its delicate thin dark outlines, restrained desaturated mineral pigments, graceful traditional robes, detailed small face, calm standing pose and finely dithered pixel-art texture. Create ONE new adult NPC full-body sprite, alone, centered on a genuinely transparent background, vertical composition. Show complete head ornament, both arms attached to shoulders, two clearly distinct natural hands (five fingers each), intact torso and two separated feet fully visible below robe. Leave transparent padding around every edge. No scenery, no ground shadow, no aura cloud obscuring anatomy, no border, no labels, no text, no second figure or portrait panel. Crisp small-game sprite aesthetic, 128x192-pixel design enlarged cleanly without blur, readable at miniature scale. Maintain modest traditional clothing and believable anatomy. Character: adult female 金磁族 (magnetfolk), a humanoid mineral spirit able to sense magnetic metal veins, NOT an ordinary human. Subtle desaturated warm bronze-gray skin, fine dull-gold mineral vein markings on forehead and backs of hands, pale amber eyes, charcoal black hair in an elegant bun, modest slate-teal and muted bronze layered robes, small angular magnetite hair ornament and waist clasp. Humanlike two arms and two legs, no wings or extra limbs, calm scholarly cultivation disciple. Neutral cultivation attire compatible with multiple cultivation paths.",
+      "portrait_prompt": "Use case: identity-preserve. Create a square transparent-background head-and-shoulders portrait of exactly the character in the attached full-body sprite for the same game's NPC avatar. Preserve face identity, species-specific skin color and facial markings, hairstyle and ornament, clothes, gender, muted mineral palette and very fine pixel-textured line style exactly. Head, entire hair ornament, neck and both shoulders visible with transparent padding; crop cleanly below chest. One character portrait only, no full body, no frame, no background, no halo or shadow, no text. Crisp readable 96x96-pixel avatar design shown enlarged, not photorealistic.",
+      "figure_reference": "design/npc-expansion-351/source/dao-female-351.png",
+      "portrait_reference": "design/npc-races-353/source/magnetfolk-female-figure.png",
+      "assets": {
+        "race": "magnetfolk",
+        "gender": "female",
+        "min_age": 18,
+        "paths": [
+          "dao",
+          "demonic",
+          "monster",
+          "ghost",
+          "confucian",
+          "buddhist"
+        ],
+        "figure": {
+          "file": "/assets/pixel/social-races/magnetfolk-female-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "native_size": [
+            1024,
+            1536
+          ],
+          "sha256": "cb0a2bc1d3075e809240417455a2f0aaffff637016cb154d617d0238dd730315"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-races/magnetfolk-female-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "native_size": [
+            1254,
+            1254
+          ],
+          "sha256": "d4abdf477af6e86df86ed0a1d284028fe88a701f2aaff1c262e1350687b483d7"
+        }
+      },
+      "review": "Fine-line subdued style; both arms and hands, two complete feet visible; portrait identity matches full figure."
+    },
+    {
+      "id": "frostfolk-male",
+      "race": "frostfolk",
+      "gender": "male",
+      "figure_prompt": "Use case: stylized-concept. Production character art for the Chinese xianxia game 浮生问道. The attached image is STYLE REFERENCE ONLY (not a character to copy): match its delicate thin dark outlines, restrained desaturated mineral pigments, graceful traditional robes, detailed small face, calm standing pose and finely dithered pixel-art texture. Create ONE new adult NPC full-body sprite, alone, centered on a genuinely transparent background, vertical composition. Show complete head ornament, both arms attached to shoulders, two clearly distinct natural hands (five fingers each), intact torso and two separated feet fully visible below robe. Leave transparent padding around every edge. No scenery, no ground shadow, no aura cloud obscuring anatomy, no border, no labels, no text, no second figure or portrait panel. Crisp small-game sprite aesthetic, 128x192-pixel design enlarged cleanly without blur, readable at miniature scale. Maintain modest traditional clothing and believable anatomy. Character: adult male 霜华族 (frostfolk), condensed from extremely cold spiritual mist. Clearly nonhuman pearl-blue skin, subtle icy crystalline markings on temples and backs of hands, silver-white hair tied back, clear ice-blue eyes. Muted fog-blue and ivory layered Chinese robes with delicate hoarfrost embroidery, a small frosted crystal hair ornament. Fully materialized humanoid body with two intact arms and two complete visible hands and two separated fully visible shoes. No cloud replacing legs, no smoky lower body. Calm cultivated adult, neutral attire for multiple cultivation paths.",
+      "portrait_prompt": "Use case: identity-preserve. Create a square transparent-background head-and-shoulders portrait of exactly the character in the attached full-body sprite for the same game's NPC avatar. Preserve face identity, species-specific skin color and facial markings, hairstyle and ornament, clothes, gender, muted mineral palette and very fine pixel-textured line style exactly. Head, entire hair ornament, neck and both shoulders visible with transparent padding; crop cleanly below chest. One character portrait only, no full body, no frame, no background, no halo or shadow, no text. Crisp readable 96x96-pixel avatar design shown enlarged, not photorealistic.",
+      "figure_reference": "design/npc-expansion-351/source/dao-male-351.png",
+      "portrait_reference": "design/npc-races-353/source/frostfolk-male-figure.png",
+      "assets": {
+        "race": "frostfolk",
+        "gender": "male",
+        "min_age": 18,
+        "paths": [
+          "dao",
+          "demonic",
+          "monster",
+          "ghost",
+          "confucian",
+          "buddhist"
+        ],
+        "figure": {
+          "file": "/assets/pixel/social-races/frostfolk-male-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "native_size": [
+            1024,
+            1536
+          ],
+          "sha256": "45ed065b8f32b70fc85fcedf9af33544d8ff4a59b31547d9be397756ef05727a"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-races/frostfolk-male-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "native_size": [
+            1254,
+            1254
+          ],
+          "sha256": "3b6e4ff09606be723c46f0b874c7427fc772105a8949687424bbbcd8158b5470"
+        }
+      },
+      "review": "Fine-line subdued style; both arms and hands, two complete feet visible; portrait identity matches full figure."
+    },
+    {
+      "id": "frostfolk-female",
+      "race": "frostfolk",
+      "gender": "female",
+      "figure_prompt": "Use case: stylized-concept. Production character art for the Chinese xianxia game 浮生问道. The attached image is STYLE REFERENCE ONLY (not a character to copy): match its delicate thin dark outlines, restrained desaturated mineral pigments, graceful traditional robes, detailed small face, calm standing pose and finely dithered pixel-art texture. Create ONE new adult NPC full-body sprite, alone, centered on a genuinely transparent background, vertical composition. Show complete head ornament, both arms attached to shoulders, two clearly distinct natural hands (five fingers each), intact torso and two separated feet fully visible below robe. Leave transparent padding around every edge. No scenery, no ground shadow, no aura cloud obscuring anatomy, no border, no labels, no text, no second figure or portrait panel. Crisp small-game sprite aesthetic, 128x192-pixel design enlarged cleanly without blur, readable at miniature scale. Maintain modest traditional clothing and believable anatomy. Character: adult female 霜华族 (frostfolk), condensed from extremely cold spiritual mist. Clearly nonhuman pearl-blue skin, subtle icy crystalline markings on temples and hands, silver-white hair in an elegant traditional bun, pale ice-blue eyes. Muted fog-blue and ivory flowing Chinese robes with delicate hoarfrost embroidery, a small frosted crystal hairpin. Fully materialized humanoid body with two intact arms and two complete visible hands and two separated fully visible shoes. No cloud replacing legs, no smoky lower body. Calm cultivated adult, neutral attire for multiple cultivation paths.",
+      "portrait_prompt": "Use case: identity-preserve. Create a square transparent-background head-and-shoulders portrait of exactly the character in the attached full-body sprite for the same game's NPC avatar. Preserve face identity, species-specific skin color and facial markings, hairstyle and ornament, clothes, gender, muted mineral palette and very fine pixel-textured line style exactly. Head, entire hair ornament, neck and both shoulders visible with transparent padding; crop cleanly below chest. One character portrait only, no full body, no frame, no background, no halo or shadow, no text. Crisp readable 96x96-pixel avatar design shown enlarged, not photorealistic.",
+      "figure_reference": "design/npc-expansion-351/source/dao-female-351.png",
+      "portrait_reference": "design/npc-races-353/source/frostfolk-female-figure.png",
+      "assets": {
+        "race": "frostfolk",
+        "gender": "female",
+        "min_age": 18,
+        "paths": [
+          "dao",
+          "demonic",
+          "monster",
+          "ghost",
+          "confucian",
+          "buddhist"
+        ],
+        "figure": {
+          "file": "/assets/pixel/social-races/frostfolk-female-figure.png",
+          "size": [
+            128,
+            192
+          ],
+          "native_size": [
+            1024,
+            1536
+          ],
+          "sha256": "f62a805ff2dfc0aeaa314e75485b2d597483dc908ac9735aae09a41908c974ce"
+        },
+        "portrait": {
+          "file": "/assets/pixel/social-races/frostfolk-female-portrait.png",
+          "size": [
+            96,
+            96
+          ],
+          "native_size": [
+            1254,
+            1254
+          ],
+          "sha256": "4b5cbf3604d75aad4c3c78d30232df85402df061154b58e8cd26abbedc300b21"
+        }
+      },
+      "review": "Fine-line subdued style; both arms and hands, two complete feet visible; portrait identity matches full figure."
+    }
+  ]
+}

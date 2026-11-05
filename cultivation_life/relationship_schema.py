@@ -6,7 +6,7 @@ import copy
 SINGLE_RELATIONS = ('master', 'dao_companion')
 LIST_RELATIONS = ('disciples', 'dao_friends', 'disciple_requests', 'concubines', 'prisoners')
 PERSON_FIELDS = frozenset('''name realm_index layer age lifespan spirit_root cultivation_progress
-path race world alive death_reason affinity gender main_technique_id main_technique_level technique_levels technique_slots
+path race world location_id alive death_reason affinity gender main_technique_id main_technique_level technique_levels technique_slots
 combat_artifact_id combat_factor next_tribulation_age tribulation_count tribulation_power
 concealed_realm_index concealed_layer transcendence body_training immortal_body_level body_attainments
 divine_sense_rank monster_species_id asura_route faction_id departed_age departure_reason

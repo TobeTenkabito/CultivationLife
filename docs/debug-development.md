@@ -1,8 +1,56 @@
 # Debug 系统开发规范与控制台使用
 
+### 2026-11-05 全系统入口与参数补齐
+
+控制台新增“功能调试 · 全部系统”，从同一Registry加载全部正式玩法命令、参数类型和DLC状态。创建调试副本后点击“准备副本并读取功能”（调用会提交整理的 `game view`），筛选命令、填写参数，再在副本执行。枚举、布尔、数值与JSON按声明生成输入控件；可选项留空不提交，不能把 `false` 或 `0` 当成缺省。复杂JSON可展开参数结构。人物／商品／组织ID与报价、修订号使用当前系统数据；按钮不会代填资格或跳过费用。
+
+新增 `game inspect [pointer]`：通过一次性存储读取任何公开系统面板，省略pointer返回面板目录。包括读档准备、RNG和成就在内的变化均不提交，失败也丢弃；`state get`仍读取原始保存文档。只读检查中临时生成的对象ID不代表已保存，操作前先用 `game view` 准备。工作台每次提交携带读到的会话修订和唯一请求键；写入、恢复快照、切换角色或重开控制台后须重新准备，不自动重发失败操作。
+
+本次补齐的不只是路由：妖躯五蜕、鬼躯五法、本相／魂相定性与培养、灵域／上界／八部传承、八部权能预案、失落界面宗门与家族活动均补上动作枚举；组织建阵补 `owner_id`，议案补 `years`／`reason`，家族改名补 `name`，商盟已发布委托补 `order_id`，战斗预案补 `puppet_supply`，试境选项补 `choose`／`event_id`／`choice_id`。八部与妖躯／鬼躯保留原等级校验。
+
+`fleet action` 补齐正式商队订单、产业、府库、市场治理、组织传承、通道和跨界汇款参数；只保留action必填，其他参数按对应行为提供。订单限价、产业真实产权与库存、地点、界面、通道、报价和修订均交原结算验证。不能在异界远程办理本地事务，不能新建镜像账户或货物。参数完整性测试检查正式HTTP取参和下游业务取参，防止旧的“仅路由已登记”检查漏掉新增字段。
+
+Debug网关允许精确的货物目录、视觉资源、著作来源和邻域样式GET，全部走一次性存储；带人物ID的样式读取只接受当前副本人物，外部角色、重复ID及多余子路径拒绝。邻域样式前端读取携带当前Debug身份，生成的调试角色也可正确获取道途样式。机器级主题偏好、正式存档导入删除和扩展开关不作为副本玩法命令。
+
+示例：`game inspect /upper_voisinages`、`game inspect /fleet_network`（面板名以无参数输出为准）；`upper voisinage monster_body_train null 9`、`asura action set_field_plan mode:auto null null 9`。经济命令参数较多，优先使用工作台或Agent具名结构化调用；所有命令沿用现有快照、回滚、DLC守卫与原存档隔离。回归入口为 `tests/test_debug_systems.py` 和 `tests/browser_debug_systems.py`，并运行既有Debug、跨界和事件验收。本轮保持3.5.2／结构12，未生成发行包。
+
+此轮最终验收：154个角色操作入口无排除项；新专项34项、控制台／Agent／能力／诸天／DLC／NPC调试回归299项、跨界／空间／2.1.1／2.1.2回归119项，共452项通过。统一工作台和原NPC工作台均通过桌面1440／手机390真实点击；事件页面按既有低内存模式通过桌面／手机的提交、过期恢复、后续奖励、忙碌解除与禁用选项检查。三项工程检查和JS语法检查通过。证据为本地 `build/debug-systems-focused.txt`、`build/debug-systems-regression.txt`、`build/debug-systems-boundaries.txt`、`build/debug-systems-browser.txt`、`build/debug-systems-npc-browser.txt`、`build/debug-systems-events-browser.txt`，截图为 `build/debug-systems-1440.png` 与 `build/debug-systems-390.png`。
+
+### 2026-11-05 个人师门第一批（3.5.2源码／结构12）
+
+同日扩展师兄／师姐交流：新增动作 `peer_consult`、`peer_spar`、`peer_item`、`peer_technique`，`npc_id` 为当前师门原同门ID。工作台通过能力枚举收录；实际同地点、记名、好感、周期及原宝物／功法限制与普通界面完全一致。`tests/test_mentorship_peers.py` 验证隔离副本真实请教与原存档不变。
+
+新增 `mentorship action <action> [npc_id] [rank] [rival_id]`，支持登记、任命、晋位比试、履约、自愿呈交心得、实际贡物与出师。普通接口为 `mentorship-action`，统一工作台自动收录；`game inspect /mentorship` 检查只读投影。该入口不授予额外师承、名额或材料，不绕过真实地点、实例、忙碌状态、好感、资历及周期限制。参见[师门第一批](mentorship-stage1.md)。
+
+### 2026-11-05 NPC培养调试（3.5.2源码／结构12）
+
+控制台新增折叠区“NPC培养调试 · 成长与能源”。先创建调试副本，再“读取培养对象”，从原培养投影选择弟子、家族成员、道侣、受禁人物或傀儡，查看立绘、报价、受限原因、能源耐久与替换选项。支持修为、肉身、神识、元力转化、功法研修、肉身精修、邻域培养／启用、传法、更换能源和玩家供能开关。选择依据当前投影，按钮不授予额外资格；正式提交仍复核境界、DLC、实例、地点、会话、控制权、材料与费用。
+
+- `npc development inspect`：`preview`，通过一次性临时引擎调用正式培养GET；包括读档准备在内的写入和RNG全部丢弃。命令不改变调试副本、原角色或成就。
+- `npc development <action> <kind> <target_id> [axis] [method] [batches] [content_id] [slot] [source] [revision]`：`simulation`，只调用正式 `npc_development`。动作是 `train`、`teach`、`activate_domain`、`charge`；对象类型是 `npc`、`prisoner`、`puppet`；方法限 `infuse`／`material`，轮数限1／5／10。复杂方向使用投影给出的真实axis，不猜测功法或传承ID。邻域展示称voisinage，底层 `domain:`／`activate_domain` 保持正式协议名称。
+- `setting set puppet_supply false`／`true`：复用既有设置入口；仅控制玩家是否为傀儡垫付能源，不重填耐久或元力。
+
+省略最后的游戏 `revision` 时，在同一次正式请求中读取当前培养修订后执行；显式提供时仍拒绝过期值。结构化写入必须提供调试会话 `expected_revision` 和唯一 `request_key`，不能用自动读取游戏修订替代会话冲突检查。工作台读取时保存会话修订，执行时携带；快照恢复、切换会话、重新打开控制台后作废旧选择。重试使用同一请求键与原参数，不重复扣费。
+
+```text
+debug start
+snapshot create before_npc
+npc development inspect
+npc development train npc <实际人物ID> body infuse 1
+npc development train npc <实际人物ID> conversion material 1
+setting set puppet_supply false
+snapshot restore before_npc
+```
+
+传法、能源及高阶操作推荐使用工作台或具名结构化参数，例如 `{"command":"npc development","arguments":{"action":"charge","kind":"puppet","target_id":"<实际傀儡ID>","source":"<投影中的bag:或spare:键>"},"session_id":"<独立会话>","expected_revision":1,"request_key":"replace-energy-1"}`。工具发现自动提供 `cultivation_npc_development` 与 `cultivation_npc_development_inspect`，CLI、MCP与浏览器共用Registry元数据。
+
+隔离网关仅新增当前会话角色的精确 `GET /api/games/<id>/npc-development`；采用一次性存储读取，错误与准备都不写回。普通独立培养窗口因此也可在Debug副本中使用，仍不能读取其他角色、任意子路径或回落到正式存档。归墟中只读提示、裂缝内传法与升阶限制、万象试境会话守卫沿用正式规则。验证入口：`tests/test_debug_npc_development.py`、`tests/browser_debug_npc_development.py`，以及既有控制台、Agent、能力覆盖与跨界回归。
+
+本轮验证：NPC调试专项22项、控制台／Agent／能力覆盖／诸天回归245项、跨界／空间符箓／2.1.1回归73项，共340项通过。浏览器实测桌面1440与手机390宽度，覆盖读取无写入、培养、能源替换、供能开关、快照恢复、Debug副本内普通培养窗口及原存档隔离；三项工程检查通过。日志保存在本地 `build/debug-npc-tests.txt`、`build/debug-npc-core-regression.txt`、`build/debug-npc-cross-world-tests.txt`、`build/debug-npc-browser.txt`。本轮未生成发行包。
+
 v3.3.3发行补齐：`sect task`、`soul action`、`authored action`与`skin select`以明确类型、有限动作和闭合的嵌套创法Schema调用原引擎入口。修订号、道途、成就、DLC、费用和拘禁条件不豁免，所有写入只作用于独立Debug副本。保留所有普通路由均有类型化能力且无排除项的原审计要求。
 
-适用基线：本体 **2.12.0**、存档结构 **10**。不支持结构 1–9。控制台始终可用，外部 Agent 接口仍按 Debug 配置开放。发布包与源码共用下面的隔离与调用契约。
+当前源码基线：本体 **3.5.2**、存档结构 **12**。结构1–11拒绝加载，不迁移、不覆盖。以下隔离与调用契约自2.12.0建立；控制台始终可用，外部 Agent 接口仍按 Debug 配置开放。
 
 `organization action <action> <kind> <owner_id> <location_id> [policy] [rival_id] [goal]` 调用地图地方事务与组织迁址的正式入口。调试副本仍须满足原组织决策权、同界地点、连续边界、多数表决、府库与实物要求；迁址不移动玩家。地方经营要求合纵连横开启，本体迁址可独立使用。
 

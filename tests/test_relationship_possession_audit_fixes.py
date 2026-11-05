@@ -122,7 +122,7 @@ def relationship_game(engine, world='human'):
     game.player.next_tribulation_age = None
     game.settings['silent_events'] = True
     for identity, realm, layer in [('disciple', 1, 1), ('master', 8, REALMS[8].layers), ('request', 1, 1)]:
-        npc = SectNpc(identity, identity, '', realm, layer, 30, 9000, world=world, path='dao', spirit_root='supreme_metal')
+        npc = SectNpc(identity, identity, '', realm, layer, 30, 9000, world=world, path='dao', spirit_root='supreme_metal', location_id=game.player.location_id)
         game.notable_npcs[identity] = npc
     game.player.disciples.append(game.link_relationship(dict(id='disciple')))
     game.player.master = game.link_relationship(dict(id='master'))
@@ -141,7 +141,7 @@ def relationship_game(engine, world='human'):
     ('disciple-request', dict(request_id='request', accept=True)),
     ('disciple-gift', dict(disciple_id='disciple', kind='item', content_id='healing_pill')),
 ])
-def test_user_deferred_relationship_mortality_checks_preserve_prior_behavior(api, operation, payload):
+def test_completed_life_cannot_recruit_or_train_but_dispatch_is_unchanged(api, operation, payload):
     engine, act = api
     game = relationship_game(engine)
     game.player.lifespan = game.player.age
@@ -150,15 +150,15 @@ def test_user_deferred_relationship_mortality_checks_preserve_prior_behavior(api
     dead = engine._load(game.id)
     assert not dead.player.alive and dead.pending_event is None
     before = dead.player.faction_contribution
-    act(game.id, operation, **payload)
+    frozen = snapshot(engine, game.id)
+    if operation == 'disciple-gift': payload = dict(payload, expected_revision=dead.updated_at)
+    act(game.id, operation, status=200 if operation == 'faction-dispatch' else 400, **payload)
     saved = engine._load(game.id)
     assert not saved.player.alive
     if operation == 'faction-dispatch':
         assert saved.player.faction_contribution < before
-    elif operation == 'disciple-request':
-        assert any(row['id'] == 'request' for row in saved.player.disciples)
     else:
-        assert saved.player.disciples[0]['items']['healing_pill'] == 1
+        assert engine.store._path(game.id).read_bytes() == frozen
 
 
 @pytest.mark.parametrize('operation,payload', [
@@ -178,6 +178,7 @@ def test_real_descent_blocks_remote_delivery_without_changing_relations(api, ope
     assert not shown['player']['disciples'][0]['can_interact']
     assert not shown['player']['disciple_requests'][0]['can_interact']
     frozen = snapshot(engine, game.id)
+    if operation == 'disciple-gift': payload = dict(payload, expected_revision=engine._load(game.id).updated_at)
     result = act(game.id, operation, status=400, **payload)
     assert '当前界面' in result['error']
     assert engine.store._path(game.id).read_bytes() == frozen
@@ -188,7 +189,7 @@ def test_real_reversible_crossing_restores_local_actions_on_return(api):
     game = relationship_game(engine, 'monster_realm')
     act(game.id, 'cross-world', destination='phantom_underworld')
     frozen = snapshot(engine, game.id)
-    act(game.id, 'disciple-gift', status=400, disciple_id='disciple', kind='item', content_id='healing_pill')
+    act(game.id, 'disciple-gift', status=400, disciple_id='disciple', kind='item', content_id='healing_pill', expected_revision=engine._load(game.id).updated_at)
     assert engine.store._path(game.id).read_bytes() == frozen
     act(game.id, 'cross-world', destination='monster_realm')
     returned = engine.get_game(game.id)
@@ -197,7 +198,7 @@ def test_real_reversible_crossing_restores_local_actions_on_return(api):
     assert returned['player']['disciples'][0]['can_interact']
     assert returned['player']['disciple_requests'][0]['can_interact']
     # Real local inventory transfer remains exact and usable after returning.
-    act(game.id, 'disciple-gift', disciple_id='disciple', kind='item', content_id='healing_pill')
+    act(game.id, 'disciple-gift', disciple_id='disciple', kind='item', content_id='healing_pill', expected_revision=engine._load(game.id).updated_at)
     saved = engine._load(game.id)
     assert saved.player.disciples[0]['items']['healing_pill'] == 1
     act(game.id, 'disciple-request', request_id='request', accept=True)

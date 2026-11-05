@@ -84,6 +84,8 @@ def dispatch_disciple(deps: RelationshipActionDependencies, game_id: str, target
 
 
 def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: str, npc_id: str, role: str, *, known_target=False) -> dict[str, Any]:
+    if not isinstance(npc_id, str) or not npc_id or not isinstance(role, str):
+        raise ValueError('师徒人物或关系类型无效')
     game = deps._load(game_id)
     from ...person_assignments import require_unassigned
     require_unassigned(game, npc_id)
@@ -105,20 +107,21 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
         npc = deps._find_npc(game, npc_id) or deps._promote_cached_npc(game, npc_id, "师徒之请")
     if not npc or not npc.alive or npc.world != player.world:
         raise ValueError("该宗门人物不存在或已经陨落")
+    from ...system.npc_contacts import availability
+    reason = availability(game, npc)[role]
+    if reason:
+        raise ValueError(reason)
     attempt_key = f"{role}:{npc_id}"
     if attempt_key in player.relationship_attempts:
         raise ValueError("你已经向此人提出过同类请求")
     player_rank = (player.realm_index, player.layer)
     npc_rank = (npc.realm_index, npc.layer)
-    max_disciples = int(WORLD_SYSTEMS["relationship"]["max_disciples"])
     if role == "master":
         if has_living_master(player):
             raise ValueError("你已经拜有师承")
         if npc_rank <= player_rank:
             raise ValueError("只能拜修为严格高于自己的修士为师")
     else:
-        if len(player.disciples) + len(player.disciple_requests) >= max_disciples:
-            raise ValueError(f"当前师徒系统最多记录{max_disciples}名弟子或待决拜师帖")
         if npc_rank >= player_rank:
             raise ValueError("只能收修为严格低于自己的修士为徒")
         if any(entry["id"] == npc_id for entry in player.disciples):
@@ -137,11 +140,15 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
         path=npc.path, race=npc.race, world=npc.world,
     )
     if accepted and role == "master":
-        player.master = game.link_relationship(relation)
+        from ...system.mentorship import admit, replace_master
+        replace_master(game, game.link_relationship(relation))
+        admit(game, npc.id, "player")
         summary = f"{npc.name}认可了你的心性与根基，正式收你为徒。"
         result = "master_accepted"
     elif accepted:
         player.disciples.append(game.link_relationship(relation))
+        from ...system.mentorship import admit
+        admit(game, "player", npc.id)
         emit(game, "disciple.recruited", target_id=relation["id"])
         summary = f"{npc.name}愿执弟子礼，正式拜入你的门下。"
         result = "disciple_accepted"
@@ -160,6 +167,8 @@ def manage_faction_relationship(deps: RelationshipActionDependencies, game_id: s
 
 
 def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str, request_id: str, accept: bool) -> dict[str, Any]:
+    if type(accept) is not bool or not isinstance(request_id, str) or not request_id:
+        raise ValueError('拜师帖决断必须为接受或拒绝')
     game = deps._load(game_id)
     player = game.player
     if game.pending_event:
@@ -169,14 +178,21 @@ def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str,
         raise ValueError("这份拜师帖已经不存在")
     if accept:
         require_access(game, request)
+        from ...relationship_records import find_person
+        from ...system.npc_contacts import availability
+        npc = find_person(game, request.get('npc_id') or request['id'], include_inactive=True)
+        if npc is None:
+            raise ValueError('拜师帖人物身份已失效')
+        reason = availability(game, npc, accepting_request=True)['disciple']
+        if reason:
+            raise ValueError(reason)
     if accept and not is_free(request):
         raise ValueError("求道者已经陨落，无法再收入门下")
-    max_disciples = int(WORLD_SYSTEMS["relationship"]["max_disciples"])
-    if accept and len(player.disciples) >= max_disciples:
-        raise ValueError(f"当前最多记录{max_disciples}名弟子")
     player.disciple_requests.remove(request)
     if accept:
         player.disciples.append(game.link_relationship(request))
+        from ...system.mentorship import admit
+        admit(game, "player", request["id"])
         emit(game, "disciple.recruited", target_id=request["id"])
         result = "disciple_accepted"
         summary = f"你亲自收下{request['name']}的拜师帖，正式将其收入门下。"
@@ -193,102 +209,11 @@ def respond_disciple_request(deps: RelationshipActionDependencies, game_id: str,
 
 
 def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind: str) -> dict[str, Any]:
+    from ...system.mentorship import request_support, log
     game = deps._load(game_id)
-    player = game.player
-    if game.pending_event:
-        raise ValueError("请先处理当前事件")
-    master = player.master
-    require_access(game, master)
-    if not master:
-        raise ValueError("你尚无师承")
-    if not is_free(master):
-        raise ValueError("师父已经陨落，无法回应请求")
-    if kind not in {"item", "technique", "consult"}:
-        raise ValueError("未知索取类型")
-    last_requests = master.setdefault("last_requests", {})
-    if last_requests.get(kind) == player.age:
-        raise ValueError("本年度已经向师父提出过这类请求")
-
-    if kind == "consult":
-        if not player.alive or player.imprisonment or master.get("world", player.world) != player.world:
-            raise ValueError("当前无法当面向师父请教")
-        rng = decode_rng(game.seed, game.rng_state)
-        npc = deps._persist_relationship_npc(game, master, "师承请教")
-        instantiate_social(game, npc)
-        gain = deps._add_opportunity(player, max(1.0, opportunity_required(player) * .04))
-        deps._adjust_person_affinity(game, npc.id, 3.0)
-        last_requests[kind] = player.age
-        summary = f"你向{master['name']}请益修行，获得机缘 {gain:.1f}，师徒情谊更深。"
-        summary += deps._tianji_npc_conversation_clue(game, npc.id, rng)
-        emit(game, "master.consulted", npc_id=npc.id, opportunity=gain)
-        game.history.append(HistoryRecord("SYS_MASTER_CONSULT", 1, player.age, "师门请益", kind,
-            "consulted", summary, {"opportunity": gain, "npc_id": npc.id}, ["system", "relationship", "master"]))
-        game.rng_state = encode_rng(rng)
-        game.updated_at = now_iso()
-        deps.store.save(game)
-        return deps.present(game)
-
-    master_realm = int(master["realm_index"])
-    from ...system.spatial import current
-    from ...models import Item, Technique
-    scene = current(game)
-    items = {r['id']: Item(**r) for r in scene['materials']} if scene else ITEM_CATALOG
-    techniques = {r['id']: Technique(**r) for r in scene['techniques']} if scene else TECHNIQUE_CATALOG
-    if kind == "item":
-        candidates = list(dict.fromkeys(
-            entry["content_id"] for entry in MARKET_GOODS
-            if entry["kind"] == "item" and int(entry["tier"]) <= max(1, master_realm)
-            and entry.get("world", "human") == master.get("world", player.world)
-        ))
-    else:
-        candidates = list(dict.fromkeys(
-            entry["content_id"] for entry in MARKET_GOODS
-            if entry["kind"] == "technique" and int(entry["tier"]) <= max(1, master_realm)
-            and entry.get("world", "human") == master.get("world", player.world)
-            and can_player_practice_technique(player, TECHNIQUE_CATALOG[entry["content_id"]])
-            and all(known.id != entry["content_id"] for known in player.known_techniques)
-        ))
-    if scene:
-        candidates = list(items) if kind == 'item' else [
-            key for key, art in techniques.items()
-            if can_player_practice_technique(player, art)
-            and all(known.id != key for known in player.known_techniques)
-        ]
-    if not candidates:
-        raise ValueError("师父手中已无适合你的新物品或功法")
-
-    rng = decode_rng(game.seed, game.rng_state)
-    last_requests[kind] = player.age
-    chance = float(WORLD_SYSTEMS["relationship"]["master_request_acceptance"][kind])
-    accepted = rng.random() < chance
-    content_id: str | None = None
-    if not accepted:
-        result = "master_refused"
-        summary = f"{master['name']}认为你不该过度依赖师门，拒绝了这次{'赐物' if kind == 'item' else '传功'}请求。"
-    elif kind == "item":
-        content_id = rng.choice(candidates)
-        if scene:
-            owned = next((row for row in player.inventory if row.id == content_id), None)
-            if owned:
-                owned.quantity += 1
-            else:
-                player.inventory.append(items[content_id])
-        else:
-            add_item(player, content_id)
-        result = "master_gave_item"
-        summary = f"{master['name']}应允所求，赐下{items[content_id].name}一件。"
-    else:
-        content_id = rng.choice(candidates)
-        learn_technique(player, techniques[content_id])
-        result = "master_taught_technique"
-        summary = f"{master['name']}为你讲授《{techniques[content_id].name}》，功法已收入已悟列表。"
-    game.history.append(HistoryRecord(
-        "SYS_MASTER_REQUEST", 1, player.age, "求取师门恩赐", kind, result, summary,
-        {"kind": kind, "accept_chance": chance, "content_id": content_id},
-        ["system", "relationship", "master"],
-    ))
+    summary = request_support(game, kind)
+    log(game, 'support_' + kind, summary)
     game.updated_at = now_iso()
-    game.rng_state = encode_rng(rng)
     deps.store.save(game)
     return deps.present(game)
 
@@ -480,6 +405,9 @@ def manage_dao_companion(
 
 def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id: str, action: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    from ...system.mentorship import school_restriction, school_contact_reason
+    restriction = school_restriction(game, npc_id) or school_contact_reason(game, npc_id)
+    if action in {'befriend', 'discuss', 'spar'} and restriction: raise ValueError(restriction)
     player = game.player
     if game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法与道友互动")
@@ -548,6 +476,9 @@ def manage_dao_friend(deps: RelationshipActionDependencies, game_id: str, npc_id
 
 def invite_relationship_to_faction(deps: RelationshipActionDependencies, game_id: str, npc_id: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    from ...system.mentorship import school_restriction, school_contact_reason
+    restriction = school_restriction(game, npc_id) or school_contact_reason(game, npc_id)
+    if restriction: raise ValueError(restriction)
     player = game.player
     sect = game.sects.get(player.faction_id or "")
     if game.pending_event or player.imprisonment:
@@ -606,7 +537,8 @@ def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind:
             raise ValueError("你当前没有师父")
         npc = deps._persist_relationship_npc(game, relation, "脱离师门")
         npc.affinity = float(rules.get("relationship_release_affinity", 0))
-        player.master = None
+        from ...system.mentorship import end
+        end(game, relation["id"], "player", "departed")
         summary = f"你脱离{relation['name']}门下，双方好感重置为中立，不会因这次离门立即遭到寻仇。"
         tags = ["system","relationship","master","negative"]
     elif kind == "friend":
@@ -623,7 +555,8 @@ def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind:
             raise ValueError("此人并非你的弟子")
         npc = deps._persist_relationship_npc(game, relation, "逐出师门")
         npc.affinity = float(rules.get("relationship_release_affinity", 0))
-        player.disciples.remove(relation)
+        from ...system.mentorship import end
+        end(game, "player", relation["id"], "expelled")
         summary = f"你将{relation['name']}逐出门下，双方好感重置为中立。"
         tags = ["system","relationship","disciple","negative"]
     else:
@@ -640,6 +573,9 @@ def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind:
 
 def manage_party(deps: RelationshipActionDependencies, game_id: str, npc_id: str, action: str) -> dict[str, Any]:
     game = deps._load(game_id)
+    from ...system.mentorship import school_restriction, school_contact_reason
+    restriction = school_restriction(game, npc_id) or school_contact_reason(game, npc_id)
+    if action not in {'leave', 'crossing_remove'} and restriction: raise ValueError(restriction)
     if action == 'invite':
         from ...person_assignments import require_unassigned
         require_unassigned(game, npc_id)

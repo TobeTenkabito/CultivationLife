@@ -85,12 +85,11 @@ def _guixu_relationship_role(deps: GuixuEncountersDependencies, game: GameState,
 def _break_guixu_relationship(deps: GuixuEncountersDependencies, game: GameState, npc_id: str, *, player_defending: bool = False) -> None:
     player = game.player
     player.party = [row for row in player.party if str(row.get("id")) != npc_id]
-    if player.master and str(player.master.get("id")) == npc_id:
-        player.master = None
+    from ..mentorship import end_person_relations
+    end_person_relations(game, npc_id)
     if player.dao_companion and str(player.dao_companion.get("id")) == npc_id:
         player.dao_companion = None
     player.dao_friends = [row for row in player.dao_friends if str(row.get("id")) != npc_id]
-    player.disciples = [row for row in player.disciples if str(row.get("id")) != npc_id]
     player.concubines = [row for row in player.concubines if str(row.get("id")) != npc_id]
     if not player_defending:
         player.karma += 60

@@ -25,6 +25,7 @@ def bind_immortal_trials(engine: GameEngine) -> ImmortalTrialDependencies:
 
 def bind_combat_runtime(engine: GameEngine) -> CombatDependencies:
     return CombatDependencies(
+        _npc_power=lambda *args, **kwargs: engine._npc_power(*args, **kwargs),
         _apply_cultivator_kill=lambda *args, **kwargs: engine._apply_cultivator_kill(*args, **kwargs),
         _apply_support_damage=lambda *args, **kwargs: engine._apply_support_damage(*args, **kwargs),
         _capture_cultivator=lambda *args, **kwargs: engine._capture_cultivator(*args, **kwargs),

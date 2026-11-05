@@ -263,13 +263,14 @@ def main():
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
     if scoped.get('profile')=='body-ui':
         from scripts.body_ui_release_scope import TESTS as BODY_TESTS,BROWSERS as BODY_BROWSERS
-        require(all(c.get('body_ui_verified') and c.get('upper_social_verified') and c.get('npc_development_verified') for c in evidence['cases']),'Final EXE body/UI acceptance required with and without DLC')
+        require(all(c.get('body_ui_verified') and c.get('upper_social_verified') and c.get('npc_development_verified') and c.get('mentorship_verified') for c in evidence['cases']),'Final EXE body/UI and mentorship acceptance required with and without DLC')
         require({name for shard in scoped['tests'] for name in shard}==set(BODY_TESTS),'Current declared body/UI selection incomplete')
         require(set(BODY_BROWSERS)<={r['name'] for r in scoped['runs']},'Body/UI real browsers incomplete')
         required={f'build/android-body-ui-{o}-{tag}.log' for o in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Body/UI native scope incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native test APK changed')
         require(all('body_ui_scope' in (ROOT/name).read_text(encoding='utf-8-sig') and 'upper_social_scope' in (ROOT/name).read_text(encoding='utf-8-sig') and 'npc_development_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in required),'Native body/UI marker missing')
+        require(all('mentorship_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in required),'Native mentorship acceptance missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')

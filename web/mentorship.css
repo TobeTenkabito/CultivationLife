@@ -1,0 +1,31 @@
+#mentorship-panel{margin-bottom:20px;color:var(--ink);line-height:1.65;min-width:0}
+#mentorship-panel>summary{font-size:18px;letter-spacing:.04em;padding:8px 0;border-bottom:2px solid var(--pine);cursor:pointer;font-weight:bold}
+#mentorship-panel .mentorship-intro{color:var(--muted);font-size:12px;margin:10px 0 16px}
+.mentorship-row{padding:16px;margin:0;border:1px solid var(--line);border-top:3px solid color-mix(in srgb,var(--pine) 45%,var(--line));border-radius:5px;background:var(--paper);min-width:0;overflow-wrap:anywhere}
+.mentorship-master{background:linear-gradient(120deg,color-mix(in srgb,var(--pine) 7%,var(--paper)),var(--paper));border-top-color:var(--pine)}
+.mentorship-row[data-rank=heir]{border-top-color:var(--gold)}
+.mentorship-person{display:flex;align-items:center;gap:12px;margin-bottom:12px;min-width:0}
+.mentorship-person>div{min-width:0;flex:1}.mentorship-person b{display:block;font-size:17px;line-height:1.45}
+#mentorship-panel .mentorship-person .npc-art-avatar{position:static;float:none;flex:0 0 56px;width:56px;height:64px;margin:0;padding:3px;border-color:var(--line);border-radius:3px;background:color-mix(in srgb,var(--pine) 5%,var(--paper))}
+#mentorship-panel .mentorship-person .npc-art-avatar img{width:48px;height:56px;object-fit:contain;image-rendering:pixelated}
+.mentorship-badge{display:inline-block;font-size:11px;letter-spacing:.03em;color:var(--pine);background:color-mix(in srgb,var(--pine) 8%,var(--paper));border:1px solid color-mix(in srgb,var(--pine) 20%,var(--line));padding:2px 7px;border-radius:3px;margin-top:5px}
+.mentorship-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.mentorship-master>.mentorship-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.mentorship-stats>div{padding:8px 10px;border:1px solid var(--line);border-radius:3px;background:color-mix(in srgb,var(--paper) 92%,var(--pine))}
+.mentorship-stats dt{font-size:11px;color:var(--muted)}.mentorship-stats dd{margin:2px 0 0;font-size:17px;font-variant-numeric:tabular-nums}
+.mentorship-section-title{display:flex;align-items:center;gap:12px;font-size:15px;letter-spacing:.08em;margin:22px 0 10px}.mentorship-section-title:after{content:'';height:1px;background:var(--line);flex:1}
+.mentorship-roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px;align-items:start}
+#mentorship-panel small{display:block;font-size:12px;color:var(--muted);margin:7px 0}
+#mentorship-panel .relationship-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:start;margin-top:10px}
+#mentorship-panel select{max-width:100%;min-width:0;flex:1 1 150px;height:auto;min-height:40px;font-size:13px;border-radius:3px}
+#mentorship-panel button:not(.npc-art-avatar){min-height:40px;max-width:100%;padding:8px 12px;font-size:13px;white-space:normal;border-radius:3px}
+#mentorship-panel button:focus-visible,#mentorship-panel select:focus-visible,#mentorship-panel summary:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
+.mentorship-actions{border-top:1px solid var(--line);margin-top:12px;padding-top:10px;min-width:0}
+.mentorship-actions>summary{cursor:pointer;font-size:13px;font-weight:bold;color:var(--pine);min-height:30px}
+.mentorship-actions>select{margin:8px 5px 8px 0}.mentorship-duties>.mentorship-actions{flex-basis:100%}
+#mentorship-panel .mentorship-feedback{padding:9px 11px;background:color-mix(in srgb,var(--pine) 6%,var(--paper));border-left:2px solid var(--pine);color:var(--ink)}
+#mentorship-panel .mentorship-feedback[data-blocked=true]{border-left-color:var(--gold);color:var(--muted);background:color-mix(in srgb,var(--gold) 6%,var(--paper))}
+.mentorship-danger>summary{color:var(--vermillion,var(--ink))}
+@media(max-width:700px){.mentorship-roster{grid-template-columns:minmax(0,1fr)}.mentorship-master>.mentorship-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.mentorship-row{padding:12px}.mentorship-person b{font-size:16px}#mentorship-panel>.mentorship-intro{font-size:12px}}
+@media(max-width:420px){#mentorship-panel .relationship-tools>select{flex-basis:100%;width:100%}#mentorship-panel .relationship-tools>button{flex-grow:1}.mentorship-stats>div{padding:6px 8px}}
+@media(max-width:540px){#relationship-card>.section-title{gap:8px;align-items:center}#relationship-card>.section-title h2{font-size:24px;white-space:nowrap}#relationship-card>.section-title .panel-heading>span{display:none}#relationship-toggle{white-space:nowrap;min-width:50px}}

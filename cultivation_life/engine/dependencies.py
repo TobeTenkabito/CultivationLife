@@ -83,6 +83,7 @@ class EventDependencies:
 
 @dataclass(frozen=True, slots=True)
 class CombatDependencies:
+    _npc_power: Callable[..., float]
     _apply_cultivator_kill: Callable[..., None]
     _apply_support_damage: Callable[..., None]
     _capture_cultivator: Callable[..., tuple[str, str]]

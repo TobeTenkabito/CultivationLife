@@ -96,7 +96,7 @@ def test_optional_boolean_array_object_and_union_arguments():
     assert registry.parse('tutorial guide_next welcome')[1] == ['guide_next', 'welcome', None]
     assert registry.parse('tutorial navigate 1')[1] == ['navigate', 1, None]
     assert registry.parse('formation save \'[null,"material-a"]\' "My Array"')[1][:2] == [[None, 'material-a'], 'My Array']
-    assert registry.structured('combat plan', {'stance': 'guard', 'mp_reserve': 0.5})[1] == ['guard', None, None, 0.5, None, None]
+    assert registry.structured('combat plan', {'stance': 'guard', 'mp_reserve': 0.5})[1] == ['guard', None, None, 0.5, None, None, None]
     for name, args in [('combat plan', {'mp_reserve': True}), ('combat plan', {'neighborhood': 'off'}),
                        ('formation save', {'slots': ['x']*10}), ('formation save', {'slots': [True]}),
                        ('alchemy refine', {'target_item_id': 'healing_pill', 'materials': [{'item_id': 'x', 'quantity': False}]}),

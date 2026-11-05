@@ -103,7 +103,7 @@ def transfer_free_person(game, npc, faction=None):
 
 
 def detain_person(game, seed, npc_type, *, kind='prisoner'):
-    if kind not in {'prisoner', 'concubine', 'living_puppet', 'second_nascent'}:
+    if kind not in {'prisoner', 'concubine', 'living_puppet', 'second_nascent', 'external_avatar'}:
         raise ValueError('未知人物拘禁状态')
     identity = str(seed.get('npc_id') or seed.get('id') or '')
     npc = find_person(game, identity, include_inactive=True)
@@ -131,12 +131,23 @@ def detain_person(game, seed, npc_type, *, kind='prisoner'):
     return bind_relationship(game, dict(seed, id=npc.id, npc_id=npc.id), npc_type)
 
 
-def release_person(game, identity, *, affinity=None):
+def release_person(game, identity, *, affinity=None, at_player=False):
     npc = find_person(game, str(identity), include_inactive=True)
     if npc is None or npc.roster_state != 'held' or (npc.custody or {}).get('holder_id') != game.id:
         raise ValueError('此人不在你的拘禁名册中')
     if not npc.alive:
         raise ValueError('已经陨落的人物不能释放为活人')
+    # Personal releases happen where the carrier is now. Remote campaign
+    # releases retain their own address and must not teleport to the player.
+    if at_player:
+        if npc.world != game.player.world:
+            raise ValueError('受控人物不在当前界面，无法当面释放')
+        release_scene = game.spatial_state.get('instances', {}).get(game.spatial_state.get('current'))
+        address = release_scene.get('location_id') if release_scene and npc.world in {'lost', 'rift'} else game.player.location_id
+        if not address or (npc.world in {'lost', 'rift'} and
+                (not release_scene or (release_scene.get('kind') == 'lost') != (npc.world == 'lost'))):
+            raise ValueError('当前缺少有效释放地点')
+        npc.location_id = address
     npc.roster_origin.extend(_detach_spatial(game, npc))
     scene = game.spatial_state.get('instances', {}).get(game.spatial_state.get('current'))
     in_scene = scene is not None and npc.world == game.player.world and npc.world in {'lost', 'rift'}
@@ -227,7 +238,7 @@ def settle_puppet_person(game, puppet, *, outcome, reason=''):
         for key in ('realm_index', 'layer', 'body_training', 'immortal_body_level', 'divine_sense_rank', 'main_technique_id', 'main_technique_level', 'lifespan'):
             if key in puppet:
                 setattr(npc, key, copy.deepcopy(puppet[key]))
-        release_person(game, npc.id)
+        release_person(game, npc.id, at_player=True)
     elif outcome == 'dead':
         kill_person(game, npc.id, reason)
 

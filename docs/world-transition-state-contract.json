@@ -1,6 +1,9 @@
 {
   "version": 1,
   "economy_ownership_notes": {
+    "GameState.mentorship_state.schools.*.students.*.former_relation": "global：出师或离门时原关系附属托管的唯一存放处，仅原ID、实际已赠物品、突破药效和交互凭据，禁止人物事实快照；当前关系移除后保存，再录入时消费此记录并移回原人物的关系。旧拘管、决裂、问罪、转关系、已故换师及永久离界共用师承结束入口归档并撤销契约。无赠物复制、返还奖励或周期重置。学校周期与争执凭据也在独立空间实际年推进，地区历史回放不处罚玩家。",
+    "GameState.mentorship_state.schools": "global：原师父及弟子ID、位次、忠诚、不满、履约资历、固定周期和一次性同门初始化记录。joined是入门年，惰性初始化的既有同门取玩家原入门年表达先后，不取晚登记年；不改周期或补发资源。无人物、地点、战力或库存副本；暂时跨界保留师承，面授须同界同实例同地点；隔离暂停义务、不回补福利。晋位及读档不重置周期，永久离门解除活动名额保留历史。",
+    "GameState.mentorship_state.schools.*.students.*.peer_requests": "global：玩家在籍记录下的原同门ID到请教、切磋、索物、求法最近使用周期的映射；每人每项每固定周期一次，换位、暂时跨界、读档、重入师门不刷新。仅结算成功后写入，不存人物或物资副本；每次复核同师承、入门时间、位次、实际世界／实例／地点、自由与任务状态。",
     "Player.puppets.*.operating_energy / GameState.history.SYS_PUPPET_CHARGE": "people / history：2026-11-04按用户最新要求，operating_energy为原资产已装能源的有限耐久0至100，自供出手扣5，玩家垫付时不扣。新造机关已支付原能源组件才初始100；缺值不补发。安装行囊原件实扣一份，卸下原件保留剩余值，培养／等待／切界／读档不恢复。与本体耐久、控制和来源人物元力独立，释放不转入人物。结构12，无迁移。",
     "GameState.active_trial.snapshot.units.*.capabilities.operating_energy / operating_cost / attack_resource_owner / sponsored_attack_cost / states.*.operating_energy / GameState.last_combat_report.rounds.*.voisinage.operating_energy": "session：同场傀儡冻结已装能源耐久、费用与实际同侧供能者ID。自供或玩家MP／元力逐次择一支付，余额不复制给傀儡；暂停保存剩余耐久，读取不得增加。战报只投影，不重演扣费或回复。原玩家资源绑定保留封存余额。",
     "SectNpc.transcendence.capacity / conversion / current / lifecycle（NPC主动培养）": "personal：用户授权高阶简化培养，仍用原人物元力账本。扩容与转化先按旧容量和速率结清原世界时段，新容量不回满current；新建账本current为0，新rate从本次世界时刻生效。培养不移动人物，不重置周期劫期，无新顶层字段或世界时钟。",
@@ -130,7 +133,10 @@
     "Player.combat_plan.puppet_supply": "session：持久个人战斗偏好布尔值，默认开启，自动／手动预案同样生效；冻结战斗不受后改设置影响，事件与试炼中拒绝更改。",
     "GameState.active_trial.snapshot.units.*.capabilities.{operating_tier,allow_sponsor,mana_capacity} / states.*.{mana_current,supply_mp_spent}": "session：已装能源品阶、供能授权与玩家实际MP容量冻结投影；mana_current为原MP的单场快照，supply_mp_spent为本场累计真实垫付MP，不是可消费余额。战斗结束沿原玩家结算入口回写，剧情损耗缩放不得免除垫付款；暂停加载校验有限非负及容量，不创建持久第二MP池。",
     "NPC.transcendence.doctrine.cultivated / mentor / NPC.transcendence.world_voisinages.*.{active,levels}": "people：同一原NPC明确付费所得邻域成长。仙界沿原doctrine并登记cultivated，按原配置境界上限读取，mentor沿原字段停止重复自主修习；其他三界等级归原NPC的transcendence，不复制人物或元力账本。离开对应世界仅停止投影，不删除等级；受禁释放保留同一人物，机关／炼尸／活傀不借来源NPC邻域。主动培养结算实际旧区间，不伪造时间或返还资源。",
-    "GameState.active_trial.snapshot.units.*.capabilities.{operating_compatible,sponsored_mp_cost} / GameState.last_combat_report.rounds.*.voisinage.ordinary_attacks": "session / history：冻结当前能源真实阶差承载及独立垫付MP费用，operating_cost按原能源与傀儡阶位计算；不兼容能源不自供，玩家垫付仍受开关控制。ordinary_attacks只记录该回合实际预付出手者及作用阶位，回放据此筛选动作，不修改原资产、余额或RNG。"
+    "GameState.active_trial.snapshot.units.*.capabilities.{operating_compatible,sponsored_mp_cost} / GameState.last_combat_report.rounds.*.voisinage.ordinary_attacks": "session / history：冻结当前能源真实阶差承载及独立垫付MP费用，operating_cost按原能源与傀儡阶位计算；不兼容能源不自供，玩家垫付仍受开关控制。ordinary_attacks只记录该回合实际预付出手者及作用阶位，回放据此筛选动作，不修改原资产、余额或RNG。",
+    "GameState.mentorship_state.schools.*.students.*.advanced": "global：原师承下的可撤销契约、一次性周期凭据、精修已用额度与同盟意向；不存人物/资源副本，不因升降位或读档刷新。实际履约重新核对身份、原地点、实力、魂魄规则。",
+    "GameState.mentorship_state.avatar": "global：唯一化身原NPC ID、自愿标志、出战开关和受控时钟；人物事实仍属inactive_npcs。原拘管迁移入口处理临时跨界，永久飞升退场；封印、空间实例和亲自副本禁止出战与主动培养，无随身飞升例外。",
+    "GameState.mentorship_state.rebellion": "global：预警原ID列表、预警实际年和冷却截止年；事件提交重新核对实际地址和身份。地区历史回放、跨界远端不得触发。"
   },
   "categories": {
     "personal": "随同一玩家保留；只允许实际费用、战斗或成长结算改变，不因普通通行奖励或重置",
@@ -408,7 +414,8 @@
     "strategic_war_state": "global",
     "world_simulation": "global",
     "map_journey": "session",
-    "authored_techniques": "global"
+    "authored_techniques": "global",
+    "mentorship_state": "global"
   },
   "spirit_inheritance_ownership_notes": {
     "Player.immortal_aperture": "本人唯一元力账本；current 为保留的上界总储量，imitation_current 为下界仿元力。仙界与显圣修罗分别按本界转化阶段限制可用快照，未开放余量不随战斗回写丢失。战斗绑定原账本和池名，余量仅在临时绑定内保存，不新增持久池或补发储量。",

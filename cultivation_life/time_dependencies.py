@@ -38,6 +38,7 @@ class TravelSettlementPort(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class WorldYearDependencies:
+    _resolve_npc_periodic_tribulation: Callable[..., str | None]
     _advance_buddhist_year: Callable[[GameState], list[str]]
     _advance_ghost_phase_two_year: Callable[[GameState, Random], None]
     _advance_guixu_calendar: Callable[[GameState, Random, list[str]], bool]

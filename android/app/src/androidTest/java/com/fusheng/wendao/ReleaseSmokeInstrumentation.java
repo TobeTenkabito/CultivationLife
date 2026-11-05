@@ -353,6 +353,26 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("npc_development_scope","Four-path body specialization, technique/domain growth, ten portraits, energy replacement and real bird replay; native submit taps");
         result.putString("upper_social_scope","Four upper-world guides and new recruited male/female portraits; actual native taps and unchanged guide state");
         result.putString("body_ui_scope","Two immutable pixel palettes, no retired controls, real paid four-family cultivation, materials and combat report; signed native touches");
+        runMentorship(result);
+    }
+
+    private void runMentorship(Bundle result) throws Exception {
+        String id=(String)async("(async()=>{const g=await api('/api/games',{method:'POST',body:JSON.stringify({name:'原生师门验收',spirit_root:'supreme_metal',path:'dao',seed:353,custom_start:{world:'human',realm_index:3,layer:5,sect:'new'}})});return g.id})()");
+        python("from cultivation_life import server\nexec("+JSONObject.quote(assetText("mentorship_release.py"))+")\nprepare_mentorship(server.ENGINE,"+JSONObject.quote(id)+")");
+        async("loadGame("+JSONObject.quote(id)+")");tapSelector("[data-panel-target=relationship]");
+        String details="[data-school-section='peer:school:release-mentor:0']";
+        revealSubpage(details);tapSelector(details+">summary");
+        for(String action:new String[]{"peer_consult","peer_item","peer_technique","peer_spar"}) {
+            npcSelect("云岫同门交流",action);
+            tapSelector(details+" .relationship-tools button");
+            waitForJs("!busy&&game.mentorship.master.peer_requests?.['school:release-mentor:0']?.["+JSONObject.quote(action)+"]===game.mentorship.master.cycle","Actual peer command "+action);
+            check(Boolean.TRUE.equals(js("document.querySelector("+JSONObject.quote(details)+").open&&document.querySelector("+JSONObject.quote(details+" select")+").value==="+JSONObject.quote(action)+"&&document.querySelector("+JSONObject.quote(details+" button")+").disabled")),"Selection and cooldown retained");
+        }
+        check(Boolean.TRUE.equals(js("game.player.opportunity>0&&game.last_combat_report.visual.teams.npc[0].id==='school:release-mentor:0'")),"Real peer insight and battle actor");
+        capture("mentorship");tapSelector("#relationship-toggle");tapSelector("#battle-report-open");
+        waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Peer combat animation");
+        capture("mentorship-replay");tapSelector("#battle-report-toggle");
+        result.putString("mentorship_scope","Native four peer commands, original treasure/art, cooldown, preserved menu and two-actor spar replay");
     }
 
     private void npcSelect(String label,String value) throws Exception {
