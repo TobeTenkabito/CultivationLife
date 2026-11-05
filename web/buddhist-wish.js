@@ -1,5 +1,5 @@
 (() => {
-  const node = (tag, text, cls) => { const n = document.createElement(tag); if (text != null) n.textContent = text; if (cls) n.className = cls; return n; };
+  const node = window.GameUi.element;
   const fmt = n => Number(n || 0).toLocaleString('zh-CN', {maximumFractionDigits: 2});
   window.BuddhistWish = {render(system, game, mutate) {
     const panel = document.getElementById('buddhist-wish-card');

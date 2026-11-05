@@ -145,7 +145,7 @@ def main():
                   scope='Annual finance, original organizational guards, trust and real production; six native orientation phases' if economy else 'Legacy soul and upper scope')
     if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
     if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
-    if body_ui:receipt['scope']='3.5.3 native school peer commands/cooldown/menu/replay plus NPC body/technique/domain cultivation, controlled portraits, energy and upper-world guides, two pixel palettes; signed Android 12 portrait/landscape'
+    if body_ui:receipt['scope']=f'{BASE_GAME_VERSION} native school peer commands/cooldown/menu/replay plus NPC body/technique/domain cultivation, controlled portraits, energy and upper-world guides, two pixel palettes; signed Android 12 portrait/landscape'
     if immortal:receipt['scope']='Independent immortal page, reference-matched art, exact paid promotion/four grades, stale recovery and grade-one reload; legacy and pixel themes, signed Android 12 portrait/landscape'
     if natal:receipt['scope']='Naming compatibility and eleven-world natal materials, native socket/return, bounded catalog and qualification; four themes and four orientation phases'
     if teachings:receipt['scope']='Four upper worlds, Buddhist wish/blessings and Confucian doctrine/classics/outer opportunity, direct advancement disabled; native clicks, four themes and portrait/landscape'

@@ -1,5 +1,5 @@
 (() => {
-  const el = (tag, text, cls) => { const node = document.createElement(tag); if (text != null) node.textContent = text; if (cls) node.className = cls; return node; };
+  const el = window.GameUi.element;
   const fmt = value => Number(value || 0).toLocaleString('zh-CN', {maximumFractionDigits: 1});
   const effects = {strike: '仙域杀伤', suppress: '镇压', seal: '封锁退路、传讯与支援', restrict: '禁制力量', isolate: '隔离器物', restore_body: '修复肉身', restore_spirit: '稳定心神', restore_field: '修复邻域稳固'};
   const effectNames = d => (d.effects?.length ? d.effects.map(e => effects[typeof e === 'string' ? e : e.kind]) : [effects[d.effect]]).join('、');

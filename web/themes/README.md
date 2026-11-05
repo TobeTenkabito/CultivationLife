@@ -1,15 +1,15 @@
-# 四主题维护
+# 双像素主题维护
 
-另有可选的 C「山海图志」像素主界面，由 `pixel-home.js`、`pixel-home.css` 与统一素材清单维护。它保留四套文字主题的原偏好及原玩法节点，不作为第五个 `theme` ID；`pixel_art` 为独立机器级外观偏好。范围及限制见[像素素材与主界面](../../docs/visual-assets.md)。主界面绘景不叠放人物，地图人物显示待后续看图确认。
+当前仅支持「山海图志」浅色与「沧海夜色」暗色，共用像素布局。内部布局标识固定为 `theme=a`、`pixel_art=true`，只允许通过 `pixel_theme` 选择浅暗配色；旧文字主题及关闭像素界面的请求继续拒绝，旧偏好不能恢复退役布局。规则见[3.5.0发行说明](../../docs/release-350.md)。
 
-当前保留松烟书院、月下观星、丹砂金阙、竹简纪年四套主题，共享玩法并各自维护布局。新增公共交互应验证四主题及窄屏；各主题应保留自身构图。六套主界面的原始设计来源是本机 `design/main-ui-concepts-20260927-r3`；该目录被 Git 忽略，干净检出不保证带有原稿，对照脚本需要自行具备该资源。`common.css` 定义共享控件、侧栏与对话框，`composition.css` 定义六套原稿共用的文字层级和操作语义，`theme-composition.js` 为各主题独立排列已有节点；`a.css`、`b.css`、`d.css`、`f.css` 各自维护配色、主布局、装饰和动效。字母仅为稳定内部标识，不在主题名称中显示。青玉留白与江山行卷已移除，其旧偏好分别映射至松烟书院、竹简纪年；动态偏好保留。
+`common.css`、`composition.css` 和 `pixel-base.css` 维护共用控件及布局；`theme-manager.js` 与 `theme-composition.js` 呈现玩家数据、排列原有节点；`pixel-home.js`、`pixel-home.css` 与 `pixel-dark.css` 维护像素绘景及浅暗配色。素材来源与限制见[像素素材与主界面](../../docs/visual-assets.md)。
 
-新增功能窗口应使用 `--surface`、`--ink`、`--muted`、`--line`、`--pine`、`--on-accent` 等语义颜色；风险使用 `--cinnabar`，法力使用 `--info`。不要直接写白底、黑字或假定所有主题的强调色均为深色。DLC 侧栏使用 `data-dlc` 对应色相并保留标识。
+新增功能窗口使用 `--surface`、`--ink`、`--muted`、`--line`、`--pine`、`--on-accent` 等语义颜色；风险使用 `--cinnabar`，法力使用 `--info`。DLC 侧栏使用 `data-dlc` 对应色相并保留标识。验证两套配色及桌面、手机横竖屏，不再添加旧主题 b–f 的选择器。
 
-`theme-manager.js` 只移动已有操作节点和呈现玩家数据，不复制游戏行为或修改存档。完整人物卡保留原 ID 并放入原生对话框。新增人物关键资源时同步考虑 HUD、精确数值提示和窄窗口布局。
+人物详情沿现有 `.hud-identity` 及资源入口打开。教程定位现有可见控件，不创建备用旧布局按钮。主题组件不复制游戏行为、不修改角色存档；布局调整必须保留操作节点、键盘导航和禁用状态。
 
-主题偏好通过 `/api/ui-preferences` 独立存储；浏览器缓存仅用于首次绘制。主题切换不得调用推进时间、消耗资源或重建游戏表单的接口。新动效必须服从系统和游戏内减弱动态设置。
+主题偏好通过 `/api/ui-preferences` 独立存储；浏览器缓存仅用于首次绘制。切换不得调用推进时间、消耗资源或重建游戏表单的接口。动效服从系统和游戏内减弱动态设置。
 
-恢复验收：`python tests/browser_composition_1391.py`，输出主界面截图与原 SVG 对照页。
+2026-11-05清理：移除六份面板样式中31处退役主题选择器、未挂入页面的旧侧栏容器和详情按钮及其备用教程定位；保留存档悬停等共用规则、固定布局标识和两套像素配色。没有玩家移动、持久字段、结算或存档格式改动。
 
-验收：`python tests/browser_themes_139.py`，以及相关功能浏览器回归。完整回归使用 `python -m pytest tests -q`。打包验收使用 `python scripts/verify_release_exe.py`。
+当前验收入口为 `python tests/browser_pixel_only.py`、`python tests/browser_tutorial_interface.py` 和 `python -m pytest tests/test_ui_preferences.py tests/test_tutorial.py tests/test_tutorial_walkthrough.py -q`。旧四主题浏览器脚本仅保留作历史记录，不作为当前验收依据。正式发行仍需完成发行脚本要求的双端验收。

@@ -1,5 +1,5 @@
 (() => {
-  const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
+  const el = window.GameUi.element;
   const pct=n=>`${Math.round(100*n)}%`;
   function render(game,act){
     const data=game.upper_voisinages?.ghost_body;

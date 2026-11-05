@@ -1,7 +1,7 @@
-/* Compositions transcribed from the approved R3 SVGs, with live game content. */
+/* Shared pixel layout with live game content. */
 (() => {
   'use strict';
-  const $=s=>document.querySelector(s), root=document.documentElement;
+  const $=s=>document.querySelector(s);
   const stage=$('.theme-play-area'), action=$('#action-card'), core=$('#cultivation-core');
   const hud=$('#player-hud'), identity=$('.hud-identity'), resources=$('.hud-resources');
   resources.addEventListener('click',e=>{if(e.target.closest('button')){e.stopPropagation();if(!$('#player-details-dialog').open)$('#player-details-dialog').showModal();}});
@@ -18,9 +18,7 @@
   [...folds.children].forEach((d,i)=>{d.id=i?'combat-actions':'living-actions';d.open=true;d.setAttribute('role','tabpanel');d.setAttribute('aria-labelledby',i?'tab-combat':'tab-living');});
   const extras=document.createElement('div');extras.className='special-actions actions';primary.after(extras);
   for(const id of ['sense-breakthrough-action','spirit-crossing-action','cross-world-action','cross-world-secondary-action'])extras.append($('#'+id));
-  const dock=document.createElement('div');dock.className='secondary-actions';
   const rest=primary.querySelector('[data-action=rest]'), neighbors=primary.querySelector('[data-action=befriend_neighbors]');
-  const details=document.createElement('button');details.type='button';details.className='composition-details';details.textContent='人物详情 ›';details.onclick=()=>$('#player-details-dialog').showModal();
   const historyArea=document.createElement('div');historyArea.className='journal-area';history.before(historyArea);historyArea.append(history);
   const letter=document.createElement('aside');letter.className='journal-letter';
   letter.innerHTML='<i class="letter-seal" aria-hidden="true">信</i><div class="letter-copy"><p class="letter-eyebrow">坊市见闻</p><h3></h3><p class="letter-summary"></p></div><button type="button">阅读已收录纪事 ›</button>';
@@ -44,11 +42,10 @@
     const time=document.createElement('small');time.className='action-duration';node.append(time);
     const cta=document.createElement('em');cta.className='action-cta';node.append(cta);
   }
-  // The E scenery is detached while another theme is active; keep its original reference via the manager on reflow.
   function selectTab(tab){selected=tab;action.dataset.selectedCategory=tab;
     nav.querySelectorAll('[role=tab]').forEach(b=>{const on=b.dataset.actionTab===tab;b.setAttribute('aria-selected',String(on));b.tabIndex=on?0:-1;});
     primary.hidden=tab!=='daily';folds.hidden=tab==='daily';[...folds.children].forEach(d=>d.hidden=d.id!==tab+'-actions');
-    dock.hidden=tab!=='daily';arrange(root.dataset.theme);
+    arrange();
   }
   nav.querySelectorAll('[role=tab]').forEach(b=>b.onclick=()=>selectTab(b.dataset.actionTab));
   nav.querySelector('.action-tabs').onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const keys=['daily','living','combat'];let i=keys.indexOf(selected);i=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowRight'?1:2))%3;selectTab(keys[i]);nav.querySelector(`[data-action-tab=${keys[i]}]`).focus();};
@@ -61,10 +58,9 @@
   nav.querySelectorAll('[data-unit-step]').forEach(b=>b.onclick=()=>{units=Math.max(1,Math.min(10,units+Number(b.dataset.unitStep)));updateTimes();});
   function arrange(){
     hud.prepend(identity);hud.append(resources);resources.prepend($('#hud-opportunity'));
-    primary.prepend(core);primary.append(rest,neighbors);dock.remove();details.remove();
+    primary.prepend(core);primary.append(rest,neighbors);
     action.insertBefore(nav,primary);action.insertBefore(resources,primary);hud.append(resources);
     action.prepend(hud);
-    core.classList.remove('core-summary');
     const landscape=$('#main-scenery');
     if(landscape&&!landscape.dataset.originalArt){landscape.dataset.originalArt='true';landscape.innerHTML='<img class="original-landscape" src="/themes/landscape.svg" alt=""><p class="landscape-eyebrow">山中无历日</p><div class="landscape-title-mask"><div class="landscape-title-track"><span>一程山水，一程修行。</span><span aria-hidden="true">一程山水，一程修行。</span></div></div><p class="landscape-place"></p><small class="landscape-date"></small>';}
     $('#cultivate-action .action-cta').textContent='入定修炼 →';
@@ -77,7 +73,7 @@
   function updateWorld(){const p=current.player;world.querySelector('b').textContent=`${p.world_name} / ${p.location_name}`;world.querySelector('small').textContent=`第 ${p.world_age??p.age} 年 · ${p.realm_name}`;
     const power=$('#hud-power'),base=power.textContent.split(' · ')[0];
     const upperResource=p.world==='asura'&&current.asura?.available?`精魂 ${Number(current.asura.souls||0).toLocaleString('zh-CN')}`:p.world==='celestial'?`仙痕 ${Number(p.immortal_traces||0).toLocaleString('zh-CN')}`:'';
-    power.textContent=([...(['a','b'].includes(root.dataset.theme)?[base,p.spirit_root_display||p.spirit_root_name,p.path_name]:[base]),upperResource]).filter(Boolean).join(' · ');
+    power.textContent=([base,p.spirit_root_display||p.spirit_root_name,p.path_name,upperResource]).filter(Boolean).join(' · ');
     $('#hud-age').textContent=`${p.age} 岁 · ${p.lifespan==null?'寿元无尽':`寿元 ${p.lifespan} 年`}`;
     const place=$('.landscape-place'),date=$('.landscape-date');if(place)place.textContent=`${p.location_name}外，远山依旧，万事徐来。`;if(date)date.textContent=world.querySelector('small').textContent;
   }

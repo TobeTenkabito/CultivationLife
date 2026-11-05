@@ -1,7 +1,7 @@
 (() => {
   const ui = {selected:'conceal', page:0, search:'', filter:'all', mode:'known', system:null, mutate:null, soulArts:[], soulDetail:null};
   const $ = id => document.getElementById(id);
-  const node = (tag, text, cls) => { const n=document.createElement(tag); if(text!==undefined)n.textContent=text; if(cls)n.className=cls; return n; };
+  const node = window.GameUi.textElement;
   function rows() {
     const s=ui.system || {};
     return [

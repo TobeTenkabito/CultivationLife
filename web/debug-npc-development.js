@@ -2,7 +2,7 @@
 window.DebugNpcDevelopment = (() => {
   'use strict';
   function create({execute, getSession, getCatalog}) {
-    const el=(tag,text,id)=>{const n=document.createElement(tag);if(text)n.textContent=text;if(id)n.id=id;return n;};
+    const el = window.GameUi.identifiedElement;
     const root=el('details',null,'debug-npc-development');root.append(el('summary','NPC培养调试 · 成长与能源'));
     root.append(el('p','在独立副本中检查人物、培养报价及受限原因。正式资格与费用照常生效；可用控制台快照恢复现场。'));
     const fields=el('div',null,'debug-npc-fields'),controls={};

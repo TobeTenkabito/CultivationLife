@@ -33,7 +33,7 @@
   $('#player-details-content').append($('.character-card'));
   function openDialog(id) { const d=$(`#${id}`); if(!d.open)d.showModal(); }
   hud.addEventListener('click', e=>{if(e.target.closest('button'))openDialog('player-details-dialog');});
-  // Opportunity moves into the lunar core in B, so bind its action independently.
+  // Keep the resource shortcut independent of its current layout container.
   const opportunity = hud.querySelector('#hud-opportunity');
   opportunity.addEventListener('click',e=>{e.stopPropagation();openDialog('player-details-dialog');});
   $('#theme-open').onclick=()=>openDialog('theme-dialog');

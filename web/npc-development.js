@@ -1,6 +1,6 @@
 /* Independent dialog: no parent-panel hydration, no mutation during selection. */
 (() => {
-  const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
+  const el = window.GameUi.element;
   let game=null,env=null,dialog=null,data=null,selected='',generation=0,axis='cultivation',specialization='',domain='',method='material',batches=1;
   function reset(){generation++;dialog?.close();data=null;selected='';game=null;}
   function context(value,ports){if(game&&game.id!==value.id)reset();game=value;env=ports;if(dialog?.open)refresh();}

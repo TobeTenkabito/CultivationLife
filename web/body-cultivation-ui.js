@@ -1,5 +1,5 @@
 (() => {
-  const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
+  const el = window.GameUi.element;
   const fmt=n=>Number(n||0).toLocaleString('zh-CN');
   const families={
     immortal:{sigil:'仙',eyebrow:'仙躯 · 五炁归元',step:'神光'},

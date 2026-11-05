@@ -1,4 +1,4 @@
-"""Run the exact declared 3.5.2 selection, binding all evidence to final source."""
+"""Run the exact declared release selection, binding all evidence to final source."""
 import argparse,json,os,subprocess,sys,xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path

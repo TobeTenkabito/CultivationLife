@@ -1,4 +1,4 @@
-"""Real tutorial clicks across pixel/text layouts, with byte-for-byte save guards."""
+"""Real tutorial clicks across both pixel palettes, with byte-for-byte save guards."""
 import json
 import random
 import sys
@@ -79,21 +79,18 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser=pw.chromium.launch()
-                    scenarios=[(True,palette,w,h) for palette in ('light','dark') for w,h in [(1440,960),(412,915),(915,412),(754,365)]]
-                    scenarios += [(False,theme,412,915) for theme in 'abdf']
-                    if '--short-only' in sys.argv:scenarios=[row for row in scenarios if row[3]==365]
-                    for pixel,palette,width,height in scenarios:
-                        label=f'{"pixel" if pixel else "text"}-{palette}-{width}'
+                    scenarios=[(palette,w,h) for palette in ('light','dark') for w,h in [(1440,960),(412,915),(915,412),(754,365)]]
+                    if '--short-only' in sys.argv:scenarios=[row for row in scenarios if row[2]==365]
+                    for palette,width,height in scenarios:
+                        label=f'pixel-{palette}-{width}'
                         page=browser.new_page(viewport=dict(width=width,height=height),has_touch=height<520)
                         errors=[];requests=[]
                         page.on('pageerror',lambda e:errors.append(str(e)))
                         page.goto(f'http://127.0.0.1:{http.server_port}')
                         page.wait_for_function('!!configData && !busy')
                         page.locator('#theme-open').click()
-                        toggle=page.locator('#theme-dialog [data-pixel-setting]')
-                        toggle.set_checked(pixel)
-                        if pixel:page.locator(f'[data-theme-picker=dialog] [data-pixel-theme-choice={palette}]').click()
-                        else:page.locator(f'[data-theme-picker=dialog] [data-theme-choice={palette}]').click()
+                        assert page.locator('[data-pixel-setting],[data-theme-choice]').count()==0
+                        page.locator(f'[data-theme-picker=dialog] [data-pixel-theme-choice={palette}]').click()
                         page.locator('[data-close-dialog=theme-dialog]').click()
                         page.evaluate('GameThemes.saved')
                         page.evaluate('async id=>{await loadGame(id);await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));}',identity)
@@ -184,7 +181,7 @@ def main():
             finally:http.shutdown();http.server_close()
     assert inputs_digest(ROOT)==source,'Production sources changed during browser acceptance'
     checks=['actual clicks','two pixel palettes','pause/resume/replay','responsive relocation','course handoff','no game POST','identical save bytes']
-    checks+=['754x365 touch landscape'] if '--short-only' in sys.argv else ['four text themes','desktop/portrait/landscape','754x365 touch landscape']
+    checks+=['754x365 touch landscape'] if '--short-only' in sys.argv else ['desktop/portrait/landscape','754x365 touch landscape']
     report_name='report-short.json' if '--short-only' in sys.argv else 'report.json'
     (output/report_name).write_text(json.dumps(dict(status='passed',inputs_sha256=source,scenarios=rows,checks=checks),ensure_ascii=False,indent=2),encoding='utf-8')
     print(f'Interface tutorial passed: {len(rows)} scenarios, real clicks, responsive handoff and unchanged saves')

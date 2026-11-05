@@ -1,7 +1,7 @@
 /* A compact authoring desk; every price and effect is validated by the server. */
 window.AuthoredTechniques = (() => {
   let game, send, preview, draft, quote, pending=false, generation=0, timer;
-  const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
+  const el = window.GameUi.textElement;
   const root=()=>document.querySelector('#authored-content');
   const categories={main:'主修 · 悟道',support:'辅修 · 调息',combat:'杀伐 · 斗法',body:'炼体',divine_sense:'神识',transformation:'变化'};
   function label(text,input){const n=el('label');n.append(el('span',text),input);return n;}

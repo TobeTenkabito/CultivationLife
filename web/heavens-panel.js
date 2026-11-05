@@ -1,7 +1,7 @@
 (() => {
   let current, ctx, pending, selectionRequest=0, loadingKey=null, loadError=null;
   let ui={page:'home',target:null,section:null,chamber:0,historyPage:0}, renderedKey='';
-  const node = (tag, text, cls) => {const el=document.createElement(tag);if(text!=null)el.textContent=text;if(cls)el.className=cls;return el;};
+  const node = window.GameUi.element;
   function button(label, action, disabled=false) {const b=node('button',label);b.type='button';b.disabled=disabled;b.onclick=action;return b;}
   async function selectSite(target_id) {
     const id=current.id, request=++selectionRequest, key=`${id}:${current.heavens.revision}:${target_id}`;

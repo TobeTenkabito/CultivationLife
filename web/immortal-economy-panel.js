@@ -1,5 +1,5 @@
 (() => {
-  const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
+  const el = window.GameUi.element;
   const fmt=n=>Number(n||0).toLocaleString('zh-CN');
   function render(game,trade,temper) {
     const golden=game.golden_light||{}, pool=game.yaochi||{};

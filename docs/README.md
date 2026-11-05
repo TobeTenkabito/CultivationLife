@@ -215,4 +215,5 @@
 
 - [师徒系统对抗审计](mentorship-bug-audit.md)
 
+- [3.5.4 组件精简与发行](release-354.md)
 - [3.5.3 师门薪火与发行](release-353.md)

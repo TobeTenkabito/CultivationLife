@@ -48,6 +48,5 @@
 .building-overview .building-detail{grid-template-columns:80px minmax(0,1fr);gap:12px;padding-left:8px}
 .building-overview .building-art{width:80px}
 .atlas-building-marker{pointer-events:none}.atlas-building-marker rect{fill:var(--paper);stroke:var(--pine);stroke-width:1.2}.atlas-building-marker text{fill:var(--pine);font-size:12px;font-weight:700;stroke:none;letter-spacing:0}
-:root[data-theme=b] .building-command>img,:root[data-theme=d] .building-command>img,:root[data-theme=b] .building-entry-heading>img,:root[data-theme=d] .building-entry-heading>img,:root[data-theme=b] .building-overview>summary>img,:root[data-theme=d] .building-overview>summary>img{filter:invert(1)}
 @media(max-width:600px){.building-entry-heading{gap:8px;padding-left:8px}.building-title strong{font-size:14px}.building-row-actions{gap:5px}.building-row .building-command{padding:5px 7px;min-height:32px}.building-detail{grid-template-columns:80px minmax(0,1fr);gap:12px}.building-art{width:80px}.building-workshop-title{padding-top:7px}.building-workshop .building-command{padding:5px 4px;gap:4px}}
 @media(prefers-reduced-motion:reduce){.building-row,.building-overview>summary>img,.building-entry-heading>img{transition:none}}

@@ -31,6 +31,64 @@ from .dependencies import (
 _OMITTED = object()
 
 
+
+def _bind_add_opportunity(host):
+    def forward_add_opportunity(player, amount, regional_efficiencies=_OMITTED, *, apply_efficiency=_OMITTED):
+        keywords = {}
+        if apply_efficiency is not _OMITTED:
+            keywords["apply_efficiency"] = apply_efficiency
+        if regional_efficiencies is _OMITTED:
+            return host._add_opportunity(player, amount, **keywords)
+        if regional_efficiencies is not _OMITTED:
+            return host._add_opportunity(player, amount, regional_efficiencies, **keywords)
+    return forward_add_opportunity
+
+
+def _bind_natal_refine_cost(host):
+    def forward_natal_refine_cost(level, game=_OMITTED):
+        if game is _OMITTED:
+            return host._natal_refine_cost(level)
+        if game is not _OMITTED:
+            return host._natal_refine_cost(level, game)
+    return forward_natal_refine_cost
+
+
+def _bind_player_doctrine(host):
+    def forward_player_doctrine(game, world=_OMITTED):
+        if world is _OMITTED:
+            return host._player_doctrine(game)
+        if world is not _OMITTED:
+            return host._player_doctrine(game, world)
+    return forward_player_doctrine
+
+
+def _bind_sage_world(host):
+    def forward_sage_world(game, world=_OMITTED):
+        if world is _OMITTED:
+            return host._sage_world(game)
+        if world is not _OMITTED:
+            return host._sage_world(game, world)
+    return forward_sage_world
+
+
+def _bind_stable_gender(host):
+    def forward_stable_gender(identity, name=_OMITTED):
+        if name is _OMITTED:
+            return host._stable_gender(identity)
+        if name is not _OMITTED:
+            return host._stable_gender(identity, name)
+    return forward_stable_gender
+
+
+def _bind_family_log(host):
+    def forward_family_log(game, action, text, changes=_OMITTED):
+        if changes is _OMITTED:
+            return host._family_log(game, action, text)
+        if changes is not _OMITTED:
+            return host._family_log(game, action, text, changes)
+    return forward_family_log
+
+
 def bind_asura_court(host) -> AsuraCourtDependencies:
     return AsuraCourtDependencies(
         _npc_power=lambda npc: host._npc_power(npc),
@@ -124,11 +182,7 @@ def bind_concubine_queries(host) -> ConcubineQueriesDependencies:
     def forward_sect_members(game, sect):
         return host._sect_members(game, sect)
 
-    def forward_stable_gender(identity, name=_OMITTED):
-        if name is _OMITTED:
-            return host._stable_gender(identity)
-        if name is not _OMITTED:
-            return host._stable_gender(identity, name)
+    forward_stable_gender = _bind_stable_gender(host)
 
     return ConcubineQueriesDependencies(
         _ensure_intrigue_personality=forward_ensure_intrigue_personality,
@@ -219,14 +273,7 @@ def bind_demonic_combat(host) -> DemonicCombatDependencies:
 
 
 def bind_demonic_growth(host) -> DemonicGrowthDependencies:
-    def forward_add_opportunity(player, amount, regional_efficiencies=_OMITTED, *, apply_efficiency=_OMITTED):
-        keywords = {}
-        if apply_efficiency is not _OMITTED:
-            keywords["apply_efficiency"] = apply_efficiency
-        if regional_efficiencies is _OMITTED:
-            return host._add_opportunity(player, amount, **keywords)
-        if regional_efficiencies is not _OMITTED:
-            return host._add_opportunity(player, amount, regional_efficiencies, **keywords)
+    forward_add_opportunity = _bind_add_opportunity(host)
 
     def forward_demonic_rules():
         return host._demonic_rules()
@@ -263,11 +310,7 @@ def bind_demonic_view(host) -> DemonicViewDependencies:
     def forward_secluded_refining_years(player):
         return host._secluded_refining_years(player)
 
-    def forward_stable_gender(identity, name=_OMITTED):
-        if name is _OMITTED:
-            return host._stable_gender(identity)
-        if name is not _OMITTED:
-            return host._stable_gender(identity, name)
+    forward_stable_gender = _bind_stable_gender(host)
 
     return DemonicViewDependencies(
         _demonic_rules=forward_demonic_rules,
@@ -300,11 +343,7 @@ def bind_family_actions(host) -> FamilyActionsDependencies:
     def forward_family_is_kin(game, npc):
         return host._family_is_kin(game, npc)
 
-    def forward_family_log(game, action, text, changes=_OMITTED):
-        if changes is _OMITTED:
-            return host._family_log(game, action, text)
-        if changes is not _OMITTED:
-            return host._family_log(game, action, text, changes)
+    forward_family_log = _bind_family_log(host)
 
     def forward_family_register_children(game):
         return host._family_register_children(game)
@@ -404,11 +443,7 @@ def bind_family_society(host) -> FamilySocietyDependencies:
     def forward_family_is_kin(game, npc):
         return host._family_is_kin(game, npc)
 
-    def forward_family_log(game, action, text, changes=_OMITTED):
-        if changes is _OMITTED:
-            return host._family_log(game, action, text)
-        if changes is not _OMITTED:
-            return host._family_log(game, action, text, changes)
+    forward_family_log = _bind_family_log(host)
 
     def forward_family_relation(game, other):
         return host._family_relation(game, other)
@@ -656,11 +691,7 @@ def bind_natal_actions(host) -> NatalActionsDependencies:
     def forward_natal_refine_all_plan(game):
         return host._natal_refine_all_plan(game)
 
-    def forward_natal_refine_cost(level, game=_OMITTED):
-        if game is _OMITTED:
-            return host._natal_refine_cost(level)
-        if game is not _OMITTED:
-            return host._natal_refine_cost(level, game)
+    forward_natal_refine_cost = _bind_natal_refine_cost(host)
 
     def forward_natal_slots_for_level(level):
         return host._natal_slots_for_level(level)
@@ -717,11 +748,7 @@ def bind_natal_state(host) -> NatalStateDependencies:
     def forward_natal_level_scale(level):
         return host._natal_level_scale(level)
 
-    def forward_natal_refine_cost(level, game=_OMITTED):
-        if game is _OMITTED:
-            return host._natal_refine_cost(level)
-        if game is not _OMITTED:
-            return host._natal_refine_cost(level, game)
+    forward_natal_refine_cost = _bind_natal_refine_cost(host)
 
     def forward_natal_slots_for_level(level):
         return host._natal_slots_for_level(level)
@@ -772,11 +799,7 @@ def bind_natal_view(host) -> NatalViewDependencies:
     def forward_natal_refine_all_plan(game):
         return host._natal_refine_all_plan(game)
 
-    def forward_natal_refine_cost(level, game=_OMITTED):
-        if game is _OMITTED:
-            return host._natal_refine_cost(level)
-        if game is not _OMITTED:
-            return host._natal_refine_cost(level, game)
+    forward_natal_refine_cost = _bind_natal_refine_cost(host)
 
     def forward_natal_slots_for_level(level):
         return host._natal_slots_for_level(level)
@@ -797,14 +820,7 @@ def bind_natal_view(host) -> NatalViewDependencies:
 
 
 def bind_sage_actions(host) -> SageActionsDependencies:
-    def forward_add_opportunity(player, amount, regional_efficiencies=_OMITTED, *, apply_efficiency=_OMITTED):
-        keywords = {}
-        if apply_efficiency is not _OMITTED:
-            keywords["apply_efficiency"] = apply_efficiency
-        if regional_efficiencies is _OMITTED:
-            return host._add_opportunity(player, amount, **keywords)
-        if regional_efficiencies is not _OMITTED:
-            return host._add_opportunity(player, amount, regional_efficiencies, **keywords)
+    forward_add_opportunity = _bind_add_opportunity(host)
 
     def forward_combat(game, target, lethal, rng):
         return host._combat(game, target, lethal, rng)
@@ -836,11 +852,7 @@ def bind_sage_actions(host) -> SageActionsDependencies:
     def forward_outer_target(player):
         return host._outer_target(player)
 
-    def forward_player_doctrine(game, world=_OMITTED):
-        if world is _OMITTED:
-            return host._player_doctrine(game)
-        if world is not _OMITTED:
-            return host._player_doctrine(game, world)
+    forward_player_doctrine = _bind_player_doctrine(host)
 
     def forward_rank_members(doctrine):
         return host._rank_members(doctrine)
@@ -848,11 +860,7 @@ def bind_sage_actions(host) -> SageActionsDependencies:
     def forward_refresh_sage_effects(game):
         return host._refresh_sage_effects(game)
 
-    def forward_sage_world(game, world=_OMITTED):
-        if world is _OMITTED:
-            return host._sage_world(game)
-        if world is not _OMITTED:
-            return host._sage_world(game, world)
+    forward_sage_world = _bind_sage_world(host)
 
     def forward_start_breakthrough_trial(game, kind, source, target, old_label, *, major, rng):
         return host._start_breakthrough_trial(game, kind, source, target, old_label, major=major, rng=rng)
@@ -883,14 +891,7 @@ def bind_sage_actions(host) -> SageActionsDependencies:
 
 
 def bind_sage_society(host) -> SageSocietyDependencies:
-    def forward_add_opportunity(player, amount, regional_efficiencies=_OMITTED, *, apply_efficiency=_OMITTED):
-        keywords = {}
-        if apply_efficiency is not _OMITTED:
-            keywords["apply_efficiency"] = apply_efficiency
-        if regional_efficiencies is _OMITTED:
-            return host._add_opportunity(player, amount, **keywords)
-        if regional_efficiencies is not _OMITTED:
-            return host._add_opportunity(player, amount, regional_efficiencies, **keywords)
+    forward_add_opportunity = _bind_add_opportunity(host)
 
     def forward_advance_sage_society_year(game, rng):
         return host._advance_sage_society_year(game, rng)
@@ -904,20 +905,12 @@ def bind_sage_society(host) -> SageSocietyDependencies:
     def forward_normalize_sage_member(member):
         return host._normalize_sage_member(member)
 
-    def forward_player_doctrine(game, world=_OMITTED):
-        if world is _OMITTED:
-            return host._player_doctrine(game)
-        if world is not _OMITTED:
-            return host._player_doctrine(game, world)
+    forward_player_doctrine = _bind_player_doctrine(host)
 
     def forward_refresh_sage_effects(game):
         return host._refresh_sage_effects(game)
 
-    def forward_sage_world(game, world=_OMITTED):
-        if world is _OMITTED:
-            return host._sage_world(game)
-        if world is not _OMITTED:
-            return host._sage_world(game, world)
+    forward_sage_world = _bind_sage_world(host)
 
     return SageSocietyDependencies(
         _add_opportunity=forward_add_opportunity,
@@ -947,11 +940,7 @@ def bind_sage_view(host) -> SageViewDependencies:
     def forward_outer_target(player):
         return host._outer_target(player)
 
-    def forward_player_doctrine(game, world=_OMITTED):
-        if world is _OMITTED:
-            return host._player_doctrine(game)
-        if world is not _OMITTED:
-            return host._player_doctrine(game, world)
+    forward_player_doctrine = _bind_player_doctrine(host)
 
     def forward_public_inner_outer(game):
         return host._public_inner_outer(game)
@@ -959,11 +948,7 @@ def bind_sage_view(host) -> SageViewDependencies:
     def forward_rank_members(doctrine):
         return host._rank_members(doctrine)
 
-    def forward_sage_world(game, world=_OMITTED):
-        if world is _OMITTED:
-            return host._sage_world(game)
-        if world is not _OMITTED:
-            return host._sage_world(game, world)
+    forward_sage_world = _bind_sage_world(host)
 
     return SageViewDependencies(
         _ensure_sage_state=forward_ensure_sage_state,

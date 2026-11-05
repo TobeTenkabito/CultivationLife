@@ -70,6 +70,7 @@ class DemonicSystemTests(unittest.TestCase):
         }
         result, _ = self.engine._capture_cultivator(game, target, 10000, random.Random(1))
         self.assertEqual(result, "captured")
+        self.assertEqual(game.player.prisoners[0]['body_attainments'], {})
         # Exercise the successful conversion branch independently of how many
         # random draws the changing NPC/item catalog needs during new-game setup.
         game.rng_state = encode_rng(random.Random(1))
@@ -142,9 +143,9 @@ class DemonicSystemTests(unittest.TestCase):
     def test_fixed_puppets_add_to_body_while_living_puppet_joins_party(self):
         _, game = self.demonic_game()
         game.player.puppets = [
-            {"type":"mechanical", "combat_power":100, "alive":True},
-            {"type":"corpse", "combat_power":100, "alive":True},
-            {"type":"living", "combat_power":100, "alive":True},
+            {"id":"mechanical", "type":"mechanical", "combat_power":100, "alive":True},
+            {"id":"corpse", "type":"corpse", "combat_power":100, "alive":True},
+            {"id":"living", "type":"living", "combat_power":100, "alive":True},
         ]
         base_power = combat_power(game.player)
         self.assertEqual(self.engine._puppet_intrinsic_contribution(game.player), 100)

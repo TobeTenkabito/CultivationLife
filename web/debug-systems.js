@@ -2,7 +2,7 @@
 window.DebugSystems = (() => {
   'use strict';
   function create({execute, getSession, getCatalog}) {
-    const el = (tag, text, id) => { const n=document.createElement(tag);if(text)n.textContent=text;if(id)n.id=id;return n; };
+    const el = window.GameUi.identifiedElement;
     const root=el('details',null,'debug-systems');root.append(el('summary','功能调试 · 全部系统'));
     root.append(el('p','准备副本后选择功能并填写参数。必填项标有 *；可选项留空使用原默认值。人物、材料和修订号从下方系统数据读取。所有执行仍遵守正式资格与费用。'));
     const search=el('input',null,'debug-system-search');search.type='search';search.placeholder='筛选命令，例如 upper、soul、fleet';search.setAttribute('aria-label','筛选调试功能');

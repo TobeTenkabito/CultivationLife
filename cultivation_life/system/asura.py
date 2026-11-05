@@ -97,6 +97,8 @@ def body_facts(actor):
     from .npc_cultivation import ensure_npc
     from ..ancestry import species_identity
     row = copy.deepcopy(actor if isinstance(actor, dict) else actor.to_dict())
+    # Transient encounter bodies may omit training; never persist None for a dict field.
+    row.setdefault('body_attainments', {})
     if row.get("body_training") is None:
         ensure_npc(row)
     row.update(species_identity(row, WORLD_SYSTEMS.get('monster_species', {})))

@@ -1,7 +1,7 @@
 /* Short coach marks. Long reference text remains in Settings. */
 window.TutorialSteps={
   welcome:{target:'#action-heading',title:'这次，亲手走一遍',text:'跟着箭头操作。教学中的修炼、探宝、拜师和入门都有确定结果，不消耗年月；普通游玩仍按按钮标注的耗时与规则进行。',read:true},
-  identity:{target:'.hud-identity, .composition-details',title:'先看看自己',text:'请点击高亮的人物入口，打开人物详情。',click:true},
+  identity:{target:'.hud-identity',title:'先看看自己',text:'请点击高亮的人物入口，打开人物详情。',click:true},
   roots:{target:'#root-efficiency',context:'details',title:'资质与成长',text:'这里是机缘效率。灵根影响修行积累，功法与天地环境也会影响成长。机缘用来修行，灵石用来交易；气血与法力则是行动的底气。',read:true},
   close_identity:{target:'[data-close-dialog="player-details-dialog"]',context:'details',title:'回到修行主界面',text:'请点“返回主界面”，准备亲自运气。',click:true},
   practice:{target:'#cultivate-action',context:'daily',title:'亲自修炼一次',action:'guide_practice',text:g=>g.practice_gain?'请点击“潜心修炼”。此次试行一周天，固定获得 5 点机缘，不耗岁月、不触发其他事件，也不自动突破。':'请点击“潜心修炼”体验入口。当前角色只观察运气方式，不改变修为或资质。'},
@@ -11,7 +11,7 @@ window.TutorialSteps={
   bag:{target:'[data-panel-target="inventory"]',title:'亲手打开行囊',text:'请点“行囊”，看看刚才找到的资源。电脑从左侧打开；手机可从“常用”或“百艺”找到它。',click:true},
   resources:{target:'#inventory-card h2',context:'inventory',title:'资源有了去处',text:g=>`${g.last_result} 平时可在坊市买卖、完成商盟委托，或用灵田与百艺建立供给。请留意丹药和材料的用途。`,read:true},
   close_bag:{target:'#inventory-toggle',context:'inventory',title:'收好行囊',text:'请关闭行囊，接下来亲自配置功法。',click:true},
-  arts_identity:{target:'.hud-identity, .composition-details',title:'学会之后，还要配置',text:'请再次点人物入口；功法在人物详情里管理。',click:true},
+  arts_identity:{target:'.hud-identity',title:'学会之后，还要配置',text:'请再次点人物入口；功法在人物详情里管理。',click:true},
   library:{target:'.technique-library > summary',context:'details',title:'打开已悟功法',text:'请展开“已悟功法”。功法分主修、辅助、战斗、炼体与神识等用途，品阶和修炼层次也各有意义。',click:true},
   equip:{target:'[data-guide-equip]',context:'details',title:'把功法用起来',action:'guide_equip',text:g=>g.art?`请点《${g.art.name}》旁的“主”，将它配置为主修。不同功法侧重不同，适合眼下的自己比只看品阶更重要。`:'当前没有可合法配置的主修功法。本课保留你的道途与所学，可先继续。'},
   art_result:{target:'#technique',context:'details',title:'确认主修已经改变',text:g=>`${g.last_result} 修为、炼体和神识各自成长；炼体与神识需要相应功法，不能只顾一个战力数字。`,read:true},

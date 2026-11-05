@@ -86,8 +86,7 @@ body:not(.in-game) .pixel-scenery-toggle { display:none; }
 :root[data-visual=pixel] .in-game .hud-identity-copy b::after { content:none; }
 :root[data-visual=pixel] .in-game #hud-age,
 :root[data-visual=pixel] .in-game #hud-power { font:11px var(--sans); margin:0; color:var(--muted); overflow-wrap:anywhere; }
-:root[data-visual=pixel] .in-game .hud-details-label,
-:root[data-visual=pixel] .in-game .composition-details { display:none; }
+:root[data-visual=pixel] .in-game .hud-details-label { display:none; }
 :root[data-visual=pixel] .in-game .hud-resources { grid-column:auto; grid-row:auto; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; padding:0; margin:0; }
 :root[data-visual=pixel] .in-game .hud-resource,
 :root[data-visual=pixel] .in-game #hud-opportunity { position:relative; display:grid; grid-template-columns:1fr; align-items:stretch; width:auto; gap:5px; padding:0; border:0; background:none; }

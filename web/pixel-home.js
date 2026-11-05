@@ -100,8 +100,6 @@
     hud.append($('.hud-resources')); $('.hud-resources').append($('#hud-opportunity'));
     $('.primary-actions').prepend($('#cultivation-core'));
     for (const name of ['rest', 'befriend_neighbors']) $('.primary-actions').append($(`[data-action=${name}]`));
-    $('.secondary-actions')?.remove();
-    $('#cultivation-core').classList.remove('core-summary');
     document.querySelectorAll('.primary-actions .action-cta').forEach(node => node.textContent = '›');
     $('.theme-signature span').textContent = '山海图志';
     if (current) update();

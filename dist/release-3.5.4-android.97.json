@@ -1,5 +1,5 @@
 {
-  "base_version": "3.5.3",
+  "base_version": "3.5.4",
   "save_schema": 12,
   "compatible_save_schemas": [
     12
@@ -18,223 +18,241 @@
     "tianji-artifacts": "2.2.1",
     "trial-sites": "1.1.0"
   },
-  "validation_scope": "3.5.3 personal schools, peer interactions, school UI, inheritance/avatar/rebellion, recruitment and cross-world contact fixes, NPC and systems Debug; existing NPC development, high-body, energy, pixel-only UI, combat, persistence and release upstreams; not full repository regression",
-  "tests": 2205,
+  "validation_scope": "3.5.4 shared adapters and DOM components, retired UI cleanup; personal schools, peer interactions, school UI, inheritance/avatar/rebellion, recruitment and cross-world contact fixes, NPC and systems Debug; existing NPC development, high-body, energy, pixel-only UI, combat, persistence and release upstreams; not full repository regression",
+  "tests": 2602,
   "runs": [
     {
       "name": "related-tests-0",
-      "log": "build/related-tests-0-353.log",
-      "log_sha256": "28db779a81746643bbffe29bdeecba351997cce2dfbd965724095425b47c0ad2",
+      "log": "build/related-tests-0-354.log",
+      "log_sha256": "875af5c0515a8d38c6c7b7056e65d9120f96b9ae261da139cec95ed5e0fadde7",
       "status": "passed"
     },
     {
       "name": "related-tests-1",
-      "log": "build/related-tests-1-353.log",
-      "log_sha256": "9d8915a8190450cd75fcd6f1f69f1fe31b6736435af30e1c9cb5be6b78a0b8b7",
+      "log": "build/related-tests-1-354.log",
+      "log_sha256": "8646b29d1b857517ede47b498707034c0a612ceea4723143ea98b6f337e55ecc",
       "status": "passed"
     },
     {
       "name": "check_world_transition_contract",
-      "log": "build/check_world_transition_contract-353.log",
+      "log": "build/check_world_transition_contract-354.log",
       "log_sha256": "518e156ccba3dfdc800ebc978024ba89a62c6a4f48445815c3819e82655a3f53",
       "status": "passed"
     },
     {
       "name": "check_module_dependencies",
-      "log": "build/check_module_dependencies-353.log",
+      "log": "build/check_module_dependencies-354.log",
       "log_sha256": "bb9a8d9c1e3dace368e40aff8855795752065fb531af43a18131fbb462727b5c",
       "status": "passed"
     },
     {
       "name": "check_documentation",
-      "log": "build/check_documentation-353.log",
-      "log_sha256": "7d1d0ae50bf5ab8e2f1a068b6dffe213441653107bf0ddfabc53fc6ca4c7d8ad",
+      "log": "build/check_documentation-354.log",
+      "log_sha256": "24a7121585ea26d1ffd69fb17aaede9b470e62c9c1fe73352e827a2562b08dec",
+      "status": "passed"
+    },
+    {
+      "name": "browser_ui_components",
+      "log": "build/browser_ui_components-354.log",
+      "log_sha256": "36ce32dc7e211f86ee2213010d44fa273a389a0417d07474edbb521f6801f30f",
+      "status": "passed"
+    },
+    {
+      "name": "browser_tutorial_interface",
+      "log": "build/browser_tutorial_interface-354.log",
+      "log_sha256": "ef99b9551e2397674f863978dcefabbf790e0967e2992ba70a72f76c076bbf1c",
+      "status": "passed"
+    },
+    {
+      "name": "browser_secret_art_training",
+      "log": "build/browser_secret_art_training-354.log",
+      "log_sha256": "8545551c6248b315c24a05b75d17ac527c65da3a4c7c58efd90f60060c6bc81a",
       "status": "passed"
     },
     {
       "name": "browser_mentorship",
-      "log": "build/browser_mentorship-353.log",
+      "log": "build/browser_mentorship-354.log",
       "log_sha256": "be576566f2a75d0215ba52aec2add3d408dc60cad79fba14a78f989880c3c587",
       "status": "passed"
     },
     {
       "name": "browser_mentorship_advanced",
-      "log": "build/browser_mentorship_advanced-353.log",
+      "log": "build/browser_mentorship_advanced-354.log",
       "log_sha256": "96c2fa6e1f59d4c620dcba025343699ecbd3aaf4171eccfdd9956a90a7699d37",
       "status": "passed"
     },
     {
       "name": "browser_mentorship_adversarial",
-      "log": "build/browser_mentorship_adversarial-353.log",
+      "log": "build/browser_mentorship_adversarial-354.log",
       "log_sha256": "243282612c7ee55da72b479049a64a5b90ecf9ca3d9a3176057183ee7c5e138a",
       "status": "passed"
     },
     {
       "name": "browser_mentorship_peers",
-      "log": "build/browser_mentorship_peers-353.log",
+      "log": "build/browser_mentorship_peers-354.log",
       "log_sha256": "16f58f4c963f22391730fc03714f236cecd2e8f384b51fb6109761d9c3f6d4e2",
       "status": "passed"
     },
     {
       "name": "browser_debug_npc_development",
-      "log": "build/browser_debug_npc_development-353.log",
+      "log": "build/browser_debug_npc_development-354.log",
       "log_sha256": "9efa2c110a0ef1bbf1045dec7fe3ee3c1800a596f28f8732fbe9231bf9f17971",
       "status": "passed"
     },
     {
       "name": "browser_debug_systems",
-      "log": "build/browser_debug_systems-353.log",
+      "log": "build/browser_debug_systems-354.log",
       "log_sha256": "a436e485257a48d781694b16bb854e96cc3278019b2dad95d8f1153aad86a2ea",
       "status": "passed"
     },
     {
       "name": "browser_npc_recruitment_adversarial",
-      "log": "build/browser_npc_recruitment_adversarial-353.log",
+      "log": "build/browser_npc_recruitment_adversarial-354.log",
       "log_sha256": "accc40ca1bc2cecc6a0bfaea359090e040294f055db5d4569b48dff822141a80",
       "status": "passed"
     },
     {
       "name": "browser_npc_transition_training",
-      "log": "build/browser_npc_transition_training-353.log",
+      "log": "build/browser_npc_transition_training-354.log",
       "log_sha256": "76fe3a6a707681a21e7dfabee75c67f29e24867d2169503b406a87f0f5912421",
       "status": "passed"
     },
     {
       "name": "browser_npc_special_areas",
-      "log": "build/browser_npc_special_areas-353.log",
+      "log": "build/browser_npc_special_areas-354.log",
       "log_sha256": "42155eabf093e630730c56825baa36384af07d0667465743c154c683b7f33b42",
       "status": "passed"
     },
     {
       "name": "browser_npc_development_contacts",
-      "log": "build/browser_npc_development_contacts-353.log",
+      "log": "build/browser_npc_development_contacts-354.log",
       "log_sha256": "3344187d2df81647db7eb00532fc59b9f6e3fc002eaa979d17cef0cf0d6f6d93",
       "status": "passed"
     },
     {
       "name": "browser_npc_development",
-      "log": "build/browser_npc_development-353.log",
+      "log": "build/browser_npc_development-354.log",
       "log_sha256": "71074b4bba100c32b61d99c5e16f6a288ecefd151beb033dba491b69db65899d",
       "status": "passed"
     },
     {
       "name": "browser_npc_high_352",
-      "log": "build/browser_npc_high_352-353.log",
+      "log": "build/browser_npc_high_352-354.log",
       "log_sha256": "34ce4a3c53cae79b28948d8cf75e075b50ff1496aa754177a85a4e29f0614e62",
       "status": "passed"
     },
     {
       "name": "browser_combat_replay",
-      "log": "build/browser_combat_replay-353.log",
-      "log_sha256": "3abca47022f23bc51fb1fd5b7d255b64e6f1763aa15e7c1a304251b2e597e3aa",
+      "log": "build/browser_combat_replay-354.log",
+      "log_sha256": "2267197e55ae67b4aa04a95041374dceb8ed42249533f5b5d4c42b5e0276bd35",
       "status": "passed"
     },
     {
       "name": "browser_release_2135",
-      "log": "build/browser_release_2135-353.log",
+      "log": "build/browser_release_2135-354.log",
       "log_sha256": "df43b184131c912614ae580af4d9cc435661c4cebd4988c3ab27adabfa0cf4c4",
       "status": "passed"
     },
     {
       "name": "browser_upper_social_351",
-      "log": "build/browser_upper_social_351-353.log",
+      "log": "build/browser_upper_social_351-354.log",
       "log_sha256": "d25a082e1ab9e3c02a35d9b2c8903d074e51618ca3c0659450f5d45d913a1037",
       "status": "passed"
     },
     {
       "name": "browser_body_ui_release",
-      "log": "build/browser_body_ui_release-353.log",
+      "log": "build/browser_body_ui_release-354.log",
       "log_sha256": "49ccb580e6c50d26d509a4d7160a9a0df8dad5548d89145b813ff19b6aaf4aa0",
       "status": "passed"
     },
     {
       "name": "browser_eightfold",
-      "log": "build/browser_eightfold-353.log",
+      "log": "build/browser_eightfold-354.log",
       "log_sha256": "6edefdd67aa9e4a4d4f4ae783a4c22b93aea0a9ba0bc71f9f9d1e73a47d87a18",
       "status": "passed"
     },
     {
       "name": "browser_divine_lights",
-      "log": "build/browser_divine_lights-353.log",
+      "log": "build/browser_divine_lights-354.log",
       "log_sha256": "5481f12c30772389ac583720b102fc3f445e468be0ffbd8fc06a7c957ee7b2ad",
       "status": "passed"
     },
     {
       "name": "browser_wuyun",
-      "log": "build/browser_wuyun-353.log",
+      "log": "build/browser_wuyun-354.log",
       "log_sha256": "63c723957f08770760417ef691820e1f7b9fe5f1452748482bf1f76b7b4a4a11",
       "status": "passed"
     },
     {
       "name": "browser_monster_body",
-      "log": "build/browser_monster_body-353.log",
+      "log": "build/browser_monster_body-354.log",
       "log_sha256": "a068c415b30785335901141c6f643ab78114d8addbb16b8ae3d478fbc26fdef2",
       "status": "passed"
     },
     {
       "name": "browser_ghost_body",
-      "log": "build/browser_ghost_body-353.log",
+      "log": "build/browser_ghost_body-354.log",
       "log_sha256": "516b273537b39d9589eae8d78d12031ec7629f2abb71ccae7bd2338db8b081a0",
       "status": "passed"
     },
     {
       "name": "browser_desktop_navigation",
-      "log": "build/browser_desktop_navigation-353.log",
+      "log": "build/browser_desktop_navigation-354.log",
       "log_sha256": "792d8650b5400b64fb0e4e24c5674f05af55c368eac09e67ce3554be7a5933d0",
       "status": "passed"
     },
     {
       "name": "browser_events_212",
-      "log": "build/browser_events_212-353.log",
+      "log": "build/browser_events_212-354.log",
       "log_sha256": "f3fbc3e8363c410974fce864244e34ce1ab043f87dc3fcbe7778101bff70f6bf",
       "status": "passed"
     },
     {
       "name": "browser_pixel_only",
-      "log": "build/browser_pixel_only-353.log",
+      "log": "build/browser_pixel_only-354.log",
       "log_sha256": "a6e5ebeb0a09b0ecd22766630abb1795b048c7754100b11e21ce61eb877f9577",
       "status": "passed"
     },
     {
       "name": "save-transfer",
-      "log": "build/save-transfer-353.log",
-      "log_sha256": "bdf5b64b1eac57ad84083a34f853493a3222d9ca91387b7e677f2d5bb1ed6d34",
+      "log": "build/save-transfer-354.log",
+      "log_sha256": "e2cf07e3415f9c04452f30a189f8e73c811107ee681d5a390f317d4e2f4a4687",
       "status": "passed"
     }
   ],
   "regression": {
-    "collected": 2205,
+    "collected": 2602,
     "skipped": 0,
     "failures": 0,
     "errors": 0,
-    "passed": 2205
+    "passed": 2602
   },
   "save_transfer_smoke_tests": 21,
   "save_transfer_smoke_in_regression": true,
-  "save_transfer_log": "build/save-transfer-353.log",
-  "inputs_sha256": "129e2aa3ffb0f6d961b79ce0cd30fd1e9f55bf17f40a64e5e2d4f82c41d0fd33",
+  "save_transfer_log": "build/save-transfer-354.log",
+  "inputs_sha256": "bb05533ca1511934db30f1177a37a571a287ffb78cf096939eb9a930417e6d3e",
   "platform": "Android 12",
-  "android_version": "3.5.3-android.96",
-  "version_code": 96,
-  "apk_sha256": "b2944b36ecb35cb1bbce021076348f9b03c93dbee9e76bf4d2c0eed0798d3a02",
+  "android_version": "3.5.4-android.97",
+  "version_code": 97,
+  "apk_sha256": "9fd6b0848a4a75f7d3c1737846bc9bfd258250adb78a10489f453939b1649c61",
   "native": {
-    "version": "3.5.3",
-    "apk_sha256": "b2944b36ecb35cb1bbce021076348f9b03c93dbee9e76bf4d2c0eed0798d3a02",
+    "version": "3.5.4",
+    "apk_sha256": "9fd6b0848a4a75f7d3c1737846bc9bfd258250adb78a10489f453939b1649c61",
     "status": "passed",
     "signed": true,
     "device": "emulator-5580",
     "android": "12",
     "sdk": "31",
     "logs": [
-      "build/android-body-ui-portrait-353.log",
-      "build/android-body-ui-landscape-353.log"
+      "build/android-body-ui-portrait-354.log",
+      "build/android-body-ui-landscape-354.log"
     ],
     "test_apk_sha256": "26ecb89cb064749d0365ab2a9ae1547175cd4a6eb9b420d496dd11c694c3dd0c",
     "log_hashes": {
-      "build/android-body-ui-portrait-353.log": "01d447db91824e1697d8b2e81bcf7fa7055f2dc437c79951e3eaf680795f5be5",
-      "build/android-body-ui-landscape-353.log": "01d447db91824e1697d8b2e81bcf7fa7055f2dc437c79951e3eaf680795f5be5"
+      "build/android-body-ui-portrait-354.log": "01d447db91824e1697d8b2e81bcf7fa7055f2dc437c79951e3eaf680795f5be5",
+      "build/android-body-ui-landscape-354.log": "01d447db91824e1697d8b2e81bcf7fa7055f2dc437c79951e3eaf680795f5be5"
     },
-    "scope": "3.5.3 native school peer commands/cooldown/menu/replay plus NPC body/technique/domain cultivation, controlled portraits, energy and upper-world guides, two pixel palettes; signed Android 12 portrait/landscape"
+    "scope": "3.5.4 native school peer commands/cooldown/menu/replay plus NPC body/technique/domain cultivation, controlled portraits, energy and upper-world guides, two pixel palettes; signed Android 12 portrait/landscape"
   },
   "physical_device_tested": false
 }

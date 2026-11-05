@@ -32,7 +32,7 @@ def main():
                 with sync_playwright() as pw:
                     browser = pw.chromium.launch(args=['--disable-gpu', '--renderer-process-limit=1', '--js-flags=--max-old-space-size=192'])
                     try:
-                        for theme in ('a', 'b', 'd', 'f'):
+                        for theme in ('light', 'dark'):
                             for width, height in layouts:
                                 identity = engine.create_game('秘术验收', 'supreme_metal', 'dao', 2150)['id']
                                 prepare_secret_arts(engine, identity)
@@ -42,7 +42,12 @@ def main():
                                 page.goto(f'http://127.0.0.1:{http.server_port}')
                                 page.wait_for_function('!!configData')
                                 page.evaluate('async id=>loadGame(id)', identity)
-                                page.evaluate('t=>document.documentElement.dataset.theme=t', theme)
+                                page.evaluate('GameThemes.ready')
+                                click_control(page.locator('#theme-open'))
+                                page.locator(f'#theme-dialog [data-pixel-theme-choice={theme}]').click()
+                                page.evaluate('GameThemes.saved')
+                                page.locator('[data-close-dialog=theme-dialog]').click()
+                                assert page.evaluate('document.documentElement.dataset.theme') == 'a'
                                 navigation_locator(page, '[data-panel-target=secret-art]').click()
                                 page.wait_for_function("document.querySelector('#secret-art-card').classList.contains('panel-open')")
                                 # Reset the mobile catalog retained from the prior view, if any.
@@ -107,10 +112,10 @@ def main():
             finally:
                 http.shutdown()
                 http.server_close()
-    (output / 'result.json').write_text(json.dumps(dict(passed=True, themes=4, layouts=3,
+    (output / 'result.json').write_text(json.dumps(dict(passed=True, themes=2, layouts=3,
         checks=['real-study', 'real-cast', 'no-level-gate', 'one-time-material', 'stale-reject-refresh',
                 'event-click', 'busy-cleared', 'disabled-while-event', 'six-entry-pagination', 'no-horizontal-overflow']), indent=2), encoding='utf-8')
-    print('Secret arts browser passed: four themes, desktop/mobile, real study/cast and stale-event recovery')
+    print('Secret arts browser passed: two pixel palettes, desktop/mobile, real study/cast and stale-event recovery')
 
 
 if __name__ == '__main__':

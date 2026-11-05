@@ -11,7 +11,7 @@
     const mobile=compact();
     const steps={
       ui_welcome:{target:'#action-heading',title:'先认路，再问道',text:'这份导览带你认识当前界面的入口。只查看面板、切换栏目和查找功能，不修炼、不旅行，也不领取教学奖励。随时可暂停，之后从新手教程继续。',read:true},
-      ui_identity:{target:'.hud-identity, .composition-details',title:'人物入口在这里',text:'请点人物铭牌。境界、寿元和常用资源集中在这里，详细属性、功法与衣橱在人物详情中。',click:true,complete:()=>$('#player-details-dialog').open},
+      ui_identity:{target:'.hud-identity',title:'人物入口在这里',text:'请点人物铭牌。境界、寿元和常用资源集中在这里，详细属性、功法与衣橱在人物详情中。',click:true,complete:()=>$('#player-details-dialog').open},
       ui_details:{target:'#root-efficiency',context:'details',title:'详情里找功法与成长',text:'这里可以核对资质、功法配置、炼体和神识。学会功法之后还需要配置；人物外观可从立绘旁的衣橱入口调整。',read:true},
       ui_close_identity:{target:'[data-close-dialog="player-details-dialog"]',context:'details',title:'返回主界面',text:'请关闭人物详情。接下来认识主界面的行动分类。',click:true,complete:()=>!$('#player-details-dialog').open},
       ui_actions:{target:'.action-tabs',title:'行动分成三栏',text:'日常修行、历练与生计、斗法与狩猎各有一栏。旁边的行动单位影响实际耗时；普通行动可能推进多年，按下前先看费用、时间和条件。',read:true},

@@ -1,5 +1,5 @@
 (() => {
-  const el = (tag, text, className) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (className) n.className = className; return n; };
+  const el = window.GameUi.textElement;
   const fmt = n => Number(n || 0).toLocaleString('zh-CN', {maximumFractionDigits: 2});
   let selectedTechnique = null;
   let submitting = false;
