@@ -1,0 +1,195 @@
+{
+  "base_version": "3.5.5",
+  "save_schema": 12,
+  "compatible_save_schemas": [
+    12
+  ],
+  "incompatible_save_schemas": "1–11; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.4.0",
+    "authored-techniques": "1.0.1",
+    "buddhist-dharma": "1.2.1",
+    "ghost-reincarnation": "3.11.1",
+    "guixu-tide": "2.7.3",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.20.1",
+    "monster-civilizations": "1.0.1",
+    "sage-way": "1.6.1",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0"
+  },
+  "validation_scope": "User-requested related and upstream tests only; not full repository regression",
+  "tests": 1752,
+  "runs": [
+    {
+      "name": "related-tests-0",
+      "log": "build\\related-tests-0-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-1",
+      "log": "build\\related-tests-1-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-2",
+      "log": "build\\related-tests-2-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-3",
+      "log": "build\\related-tests-3-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-4",
+      "log": "build\\related-tests-4-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "related-tests-5",
+      "log": "build\\related-tests-5-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_world_transition_contract",
+      "log": "build\\check_world_transition_contract-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_module_dependencies",
+      "log": "build\\check_module_dependencies-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "check_documentation",
+      "log": "build\\check_documentation-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_soul_secret_stories",
+      "log": "build\\browser_soul_secret_stories-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_groups",
+      "log": "build\\browser_combat_groups-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_combat_replay",
+      "log": "build\\browser_combat_replay-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_historical_skins",
+      "log": "build\\browser_historical_skins-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_story_achievements",
+      "log": "build\\browser_story_achievements-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_tide_theme",
+      "log": "build\\browser_tide_theme-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_themes_139",
+      "log": "build\\browser_themes_139-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_desktop_navigation",
+      "log": "build\\browser_desktop_navigation-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_secret_art_training",
+      "log": "build\\browser_secret_art_training-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_frontier_skins",
+      "log": "build\\browser_frontier_skins-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_release_301",
+      "log": "build\\browser_release_301-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_soul_lifecycle",
+      "log": "build\\browser_soul_lifecycle-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_swimwear_skins",
+      "log": "build\\browser_swimwear_skins-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_holiday_skins",
+      "log": "build\\browser_holiday_skins-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_sect_tasks",
+      "log": "build\\browser_sect_tasks-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_authored_techniques",
+      "log": "build\\browser_authored_techniques-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_events_212",
+      "log": "build\\browser_events_212-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_market_pages",
+      "log": "build\\browser_market_pages-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_local_market_search",
+      "log": "build\\browser_local_market_search-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_custody_formation_fixes",
+      "log": "build\\browser_custody_formation_fixes-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_npc_development",
+      "log": "build\\browser_npc_development-355.log",
+      "status": "passed"
+    },
+    {
+      "name": "browser_mentorship",
+      "log": "build\\browser_mentorship-355.log",
+      "status": "passed"
+    }
+  ],
+  "regression": {
+    "collected": 1752,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 1752
+  },
+  "save_transfer_smoke_tests": 21,
+  "save_transfer_smoke_in_regression": true,
+  "save_transfer_log": "build/save-transfer-355.log",
+  "inputs_sha256": "f37ad1b25da48ac16febe35b91f8c1bca5039a2f7b1804c530cf9490f6b2b832",
+  "platform": "Windows",
+  "exe_sha256": "31cffc4468be2c8d211ae118d67b3416b577bc226d05e08684b902e8bc2f974b",
+  "with_and_without_dlc_verified": true,
+  "root_launcher_updated": true
+}
