@@ -1,14 +1,17 @@
 """Validated commands; elapsed work runs through the existing time ports."""
 from dataclasses import dataclass
+import hashlib
+import json
 from typing import Callable, Any
 from ..soul_rules import SECRETS, PATH_QI, wandering, body_cap, soul_cap, assimilation_cost
 from ..content_registry import REALMS
 from ..models import Item, SectNpc
-from ..rules import has_item, remove_item, add_item, qi_level, qi_level_threshold, can_practice_technique
+from ..rules import add_item, qi_level, qi_level_threshold, can_practice_technique
 from ..relationship_records import find_person
-from ..npc_custody import detain_person
+from ..npc_custody import detain_person, kill_person
 from . import soul_lifecycle as life
 from . import second_nascent as second
+from .npc_soul import expired as soul_expired
 from .npc_techniques import learn, resolve, levels
 from .possession_system import advance_player_age, is_possessed
 
@@ -23,26 +26,47 @@ class SoulDependencies:
 def blocked(game):
     p = game.player
     return (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
-            or p.cultivation_suppression or p.sealed_cultivation)
+            or p.cultivation_suppression or p.sealed_cultivation
+            or p.world in {'lost', 'rift'} or game.guixu_state.get('player_session')
+            or game.trial_site_state.get('active'))
+
+
+def resistance_blocked(game):
+    # Internal emergency defense neither cultivates nor leaves a prison/instance.
+    return not game.player.alive or game.pending_event or game.active_trial
 
 
 def require(game, revision, *, crisis=False):
-    if blocked(game):
-        raise ValueError('请先处理事件、试炼、拘禁或修为封印')
+    unavailable = resistance_blocked(game) if crisis else blocked(game)
+    if unavailable:
+        raise ValueError('请先离开特殊区域，或处理事件、试炼、拘禁与修为封印')
     if type(revision) is not int or revision != game.player.nascent_state.get('revision', 0):
         raise ValueError('页面已过期，请刷新后再操作')
     if game.player.nascent_state.get('crisis') and not crisis:
         raise ValueError('请先处理神魂夺舍危机')
 
 
+def captive_expiry(npc, now):
+    if npc.lifespan is not None and npc.age >= npc.lifespan:
+        return '寿元耗尽，无法继续炼化'
+    if soul_expired(npc, now):
+        return '神游超时，元婴消散'
+    return None
+
+
 def captive(game, identity):
     if not any(r.get('id') == identity for r in game.player.prisoners):
         raise ValueError('目标不在你的俘虏中')
     npc = find_person(game, identity, include_inactive=True)
-    if not npc or not npc.alive or npc.roster_state != 'held' or (npc.custody or {}).get('holder_id') != game.id:
+    if (not npc or not npc.alive or npc.roster_state != 'held'
+            or (npc.custody or {}).get('holder_id') != game.id
+            or (npc.custody or {}).get('kind') != 'prisoner'):
         raise ValueError('原俘虏已不再可用')
     if npc.world != game.player.world:
         raise ValueError('俘虏不在当前世界，无法隔界炼化')
+    reason = captive_expiry(npc, game.player.age)
+    if reason:
+        raise ValueError(reason)
     return npc
 
 
@@ -61,6 +85,19 @@ def conversion_quote(p, target):
     return dict(qi=PATH_QI[target], cost=cost, available=available, rank=rank, realm_name=REALMS[rank].name, layer=remaining+1)
 
 
+def conversion_token(game, target):
+    """Bind confirmation to the actual source and resources, without storing a ticket."""
+    p = game.player
+    snapshot = dict(game=game.id, target=target, address=life.address(game),
+                    path=p.path, rank=p.realm_index, layer=p.layer, age=p.age,
+                    opportunity=p.opportunity, qi=p.qi_experience.get(PATH_QI[target], 0),
+                    spirit=p.spirit_state, possessed=bool(p.ghost_host_body),
+                    learned='path_' + target in p.nascent_state.get('known', []),
+                    has_book=any(t.path == target for t in p.known_techniques),
+                    revision=p.nascent_state.get('revision', 0))
+    return hashlib.sha256(json.dumps(snapshot, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
 def execute(deps, game, action, payload, rng):
     p = game.player
     require(game, payload.get('revision'), crisis=action == 'resist')
@@ -69,14 +106,8 @@ def execute(deps, game, action, payload, rng):
     if action == 'study':
         if identity not in SECRETS:
             raise ValueError('未知秘法')
-        name, rank, price = SECRETS[identity]
-        if identity in state.get('known', []) or p.realm_index < rank:
-            raise ValueError('已学会秘法，或修为尚不足以研习')
-        if not has_item(p, 'spirit_stone', price):
-            raise ValueError(f'研习{name}需要{price}灵石')
-        remove_item(p, 'spirit_stone', price)
-        state.setdefault('known', []).append(identity)
-        life.record(game, f'耗费{price}灵石研习{name}。')
+        from ..soul_secret_content import acquisition_hint
+        raise ValueError('秘法须通过风景探索剧情获得：' + acquisition_hint(identity))
     elif action == 'leave':
         if p.realm_index < 4 or is_possessed(p):
             raise ValueError('元婴期起可离体；寄身者请先使用原离舍入口')
@@ -103,6 +134,8 @@ def execute(deps, game, action, payload, rng):
         if is_possessed(p):
             raise ValueError('寄身期间须先离舍再转道')
         quote = conversion_quote(p, identity)
+        if payload.get('quote') != conversion_token(game, identity):
+            raise ValueError('转修预览已过期，请重新发动秘法并确认当前代价')
         p.qi_experience[quote['qi']] = qi_level_threshold(max(0, quote['available']-quote['cost']))
         p.realm_index, p.layer, p.path = quote['rank'], quote['layer'], identity
         p.opportunity = 0.
@@ -119,6 +152,8 @@ def execute(deps, game, action, payload, rng):
         else:
             life.record(game, '成功击退夺舍邪魂；神魂仍需调息恢复。')
     elif action == 'refine':
+        if p.realm_index < 4:
+            raise ValueError('本尊须达到元婴期才能炼化第二元婴')
         if 'second_nascent' not in state.get('known', []) or state.get('second'):
             raise ValueError('须习得第二元婴秘法，且当前没有第二元婴')
         npc = captive(game, identity)
@@ -136,14 +171,22 @@ def execute(deps, game, action, payload, rng):
         start = p.age
         origin = life.address(game)
         advance_player_age(p)
-        proceed = advance_elapsed_year(deps.year, game, rng, [], encounters=False)
+        advance_elapsed_year(deps.year, game, rng, [], encounters=False)
         retained = (npc.alive and npc.roster_state == 'held'
                     and (npc.custody or {}).get('holder_id') == game.id
+                    and (npc.custody or {}).get('kind') == 'prisoner'
+                    and npc.world == p.world
                     and any(r.get('id') == identity for r in p.prisoners)
                     and state.get('refining') is row and life.address(game) == origin)
+        if retained and (reason := captive_expiry(npc, p.age)):
+            kill_person(game, npc.id, reason)
+            state.pop('refining', None)
+            retained = False
         if p.alive and not retained:
             state.pop('refining', None)
             life.record(game, '俘虏或施术地点发生变化，炼化中断；本年时间与神魂已经消耗。')
+        elif p.alive and (p.realm_index < 4 or state.get('crisis')):
+            life.record(game, '本尊跌出元婴境界或陷入神魂危机，炼化中断并保留此前进度；本年时间与神魂已经消耗。')
         elif p.alive:
             row['years'] += 1
             if row['years'] >= 3:
@@ -183,11 +226,12 @@ def execute(deps, game, action, payload, rng):
             add_item(p, Item.from_dict(row['equipment'].pop(index)))
         elif action == 'technique':
             book = next((t for t in p.known_techniques if t.id == identity), None)
-            if book is None and identity in levels(npc):
+            if book is None and isinstance(identity, str) and identity in levels(npc):
                 book = resolve(game, identity)
-                book.level = levels(npc)[identity]
+                if book is not None:
+                    book.level = levels(npc)[identity]
             slot = payload.get('slot')
-            if slot not in {'main', 'support', 'combat', 'body', 'sense', 'transformation'} or not book:
+            if not isinstance(slot, str) or slot not in {'main', 'support', 'combat', 'body', 'sense', 'transformation'} or not book:
                 raise ValueError('功法或栏目无效')
             if book.grade > npc.realm_index or not can_practice_technique(npc.spirit_root, book):
                 raise ValueError('第二元婴的修为或灵根不符合功法要求')

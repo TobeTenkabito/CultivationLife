@@ -311,7 +311,10 @@ class Handler(BaseHTTPRequestHandler):
                 raise NotFoundError('请先通过开发者控制台进入独立调试副本')
             # Heavens queries/settings/escrow cleanup remain usable while captive;
             # participation has its own stricter actor checks in the domain.
-            if operation not in {'heavens-view', 'heavens-preview', 'heavens-command', 'civilizations-view'}:
+            # Existing crisis defense is validated by the soul domain; generic
+            # captive/dungeon guards must not block its only recovery command.
+            soul_resistance = operation == 'soul' and payload.get('action') == 'resist'
+            if not soul_resistance and operation not in {'heavens-view', 'heavens-preview', 'heavens-command', 'civilizations-view'}:
                 ENGINE.assert_ghost_operation_allowed(game_id, operation)
                 ENGINE.assert_guixu_operation_allowed(game_id, operation)
                 ENGINE.assert_buddhist_operation_allowed(game_id, operation)

@@ -2,12 +2,12 @@
 import math
 
 SECRETS = {
-    'second_nascent': ('第二元婴', 4, 12000),
-    'path_dao': ('返璞归真', 1, 800),
-    'path_demonic': ('化魔诀', 1, 800),
-    'path_ghost': ('阴魂续命诀', 1, 800),
-    'path_buddhist': ('转轮入禅', 1, 800),
-    'path_confucian': ('养浩归儒', 1, 800),
+    'second_nascent': ('第二元婴', 4),
+    'path_dao': ('返璞归真', 1),
+    'path_demonic': ('化魔诀', 1),
+    'path_ghost': ('阴魂续命诀', 1),
+    'path_buddhist': ('转轮入禅', 1),
+    'path_confucian': ('养浩归儒', 1),
 }
 PATH_QI = {'dao': 'spirit', 'demonic': 'demon', 'ghost': 'yin',
             'buddhist': 'spirit', 'confucian': 'spirit'}

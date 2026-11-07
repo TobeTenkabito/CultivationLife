@@ -162,6 +162,7 @@ function renderSaveList(saves) {
     row.append(button, tools);
     list.appendChild(row);
   });
+  window.PanelPages?.paginate(list,{label:'存档'});
 }
 
 function updateAchievementEntry() {
@@ -2958,7 +2959,7 @@ function renderMarket(market) {
 function paintMarket(market) {
   $('#market-title').textContent = market.name;
   $('#market-wallet').textContent = `灵石 ${market.spirit_stones}`;
-  $('#market-description').textContent = `一般坊市与阵材器料坊市各有六个货位，傀儡材料另设核心、外材、能源货架；每个坊市可锁定一项；推进到下个时间单位时，锁定货物保留原价格与品相，其余货位换货。每件一般货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品。`;
+  $('#market-description').textContent = `一般坊市与阵材器料坊市各有六个货位，培养专材与傀儡能源另设分类，机关核心与外材归傀儡材料；每个坊市可锁定一项；推进到下个时间单位时，锁定货物保留原价格与品相，其余货位换货。每件一般货位有 ${percent(market.next_tier_chance)} 概率出现高一境界珍品。`;
   const renderShelf = (selector, offers) => {
     const list = $(selector); list.innerHTML = '';
     offers.forEach(offer => {
@@ -2972,7 +2973,7 @@ function paintMarket(market) {
     const controls = document.createElement('div'); controls.className = 'market-offer-actions';
     const lock = document.createElement('button'); lock.className = `market-lock${offer.locked ? ' active' : ''}`;
     lock.textContent = offer.locked ? '已锁定' : '锁定';
-    lock.title = offer.locked ? '解除锁定' : `锁定此货位；同一${offer.market_group === 'talisman' ? '符箓材料' : offer.market_group === 'puppet' ? '傀儡材料' : offer.market_group === 'material' ? '材料' : '一般'}坊市只能锁定一项`;
+    lock.title = offer.locked ? '解除锁定' : `锁定此货位；同一${offer.market_group === 'training' ? '培养与能源' : offer.market_group === 'talisman' ? '符箓材料' : offer.market_group === 'puppet' ? '傀儡材料' : offer.market_group === 'material' ? '材料' : '一般'}坊市只能锁定一项`;
     lock.disabled = busy || offer.sold || !!game.pending_event || !game.player.alive;
     lock.onclick = () => mutate(`/api/games/${game.id}/market-lock`, {offer_id:offer.id});
     const buy = document.createElement('button'); buy.textContent = offer.sold ? '已售' : `${offer.price} 灵石`;
@@ -2984,6 +2985,16 @@ function paintMarket(market) {
     if (!list.children.length) list.innerHTML = '<p class="empty">此地暂时没有可交易的货物。</p>';
   };
   renderShelf('#market-offers', market.offers || []);
+  renderShelf('#training-market-offers', market.training_material_offers || []);
+  const supplyFilter=$('#training-supply-filter');
+  if(supplyFilter.dataset.saveId!==game.id){supplyFilter.value='all';supplyFilter.dataset.saveId=game.id;}
+  const filterSupplies=(reset=false)=>{
+    const rows=market.training_material_offers||[];
+    [...$('#training-market-offers').children].forEach((node,i)=>node.classList.toggle('hidden',supplyFilter.value!=='all'&&rows[i]?.training_category!==supplyFilter.value));
+    window.PanelPages?.paginate($('#training-market-offers'),{label:'培养与能源',reset});
+  };
+  supplyFilter.onchange=()=>filterSupplies(true);
+  if(supplyFilter.value!=='all')filterSupplies();
   renderShelf('#puppet-market-offers', market.puppet_material_offers || []);
   renderShelf('#talisman-market-offers', market.talisman_material_offers || []);
   const talismanSales=$('#market-talisman-sellables');talismanSales.replaceChildren();
@@ -4270,7 +4281,7 @@ function renderButtons() {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || game?.faction?.dispatch_used || (game?.faction?.contribution || 0) < (game?.faction?.dispatch_cost || 0);
   });
   document.querySelectorAll('.market-buy').forEach(button => {
-    const offer = [...(game?.market?.offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || []), ...(game?.market?.puppet_material_offers || []), ...(game?.market?.talisman_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
+    const offer = [...(game?.market?.offers || []), ...(game?.market?.training_material_offers || []), ...(game?.market?.crafting_material_offers || []), ...(game?.market?.formation_material_offers || []), ...(game?.market?.puppet_material_offers || []), ...(game?.market?.talisman_material_offers || [])].find(entry => entry.id === button.dataset.offerId);
     button.disabled = busy || !game?.player?.alive || !!game?.pending_event || !offer || offer.sold || offer.economy_unavailable || game.market.spirit_stones < offer.price;
   });
   document.querySelectorAll('.market-lock').forEach(button => {
@@ -4356,9 +4367,11 @@ function renderButtons() {
     if (control.id !== 'natal-artifact-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.natalUnavailable === '1';
   });
   document.querySelectorAll('#crafting-card button, #crafting-card input, #crafting-card select').forEach(control => {
+    if(control.closest('.panel-page-tabs,.list-pagination'))return;
     if (control.id !== 'crafting-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.craftingUnavailable === '1';
   });
   document.querySelectorAll('#formation-card button, #formation-card input, #formation-card select').forEach(control => {
+    if(control.closest('.panel-page-tabs,.list-pagination'))return;
     if (control.id !== 'formation-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || game?.formation_system?.operation_available === false || control.dataset.formationUnavailable === '1';
   });
   document.querySelectorAll('#secret-art-card button, #secret-art-card select').forEach(control => {

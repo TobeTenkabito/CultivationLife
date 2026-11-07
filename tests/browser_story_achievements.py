@@ -74,9 +74,13 @@ def main():
                              '死了，但没完全死', '这不是我最后一条命', '账号找回成功', '衣锦还乡',
                              '田氏代齐', '我养你啊', '铁打的弟子，流水的掌门', '谢谢老板')
                     dlc_names=('我抄我自己','祖宗之法不可变')
-                    for theme in 'abdf':
-                        page.evaluate('t=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice="${t}"]`).click()', theme)
+                    for theme in ('light','dark'):
+                        page.locator('#achievement-close').click()
+                        page.locator('#theme-open').click()
+                        page.locator(f'#theme-dialog [data-pixel-theme-choice="{theme}"]').click()
                         page.evaluate('GameThemes.saved')
+                        page.locator('[data-close-dialog=theme-dialog]').click()
+                        page.locator('#achievement-open').click()
                         for width, height in ((1440, 1000), (412, 915), (915, 412)):
                             page.set_viewport_size({'width': width, 'height': height})
                             for name in (*names,*dlc_names):
@@ -96,7 +100,7 @@ def main():
             finally:
                 httpd.shutdown()
                 httpd.server_close()
-    print('Story achievements UI passed: real join/preview/post, persistent unlock, no repeat, four themes x three viewports')
+    print('Story achievements UI passed: real join/preview/post, persistent unlock, no repeat, two pixel themes x three viewports')
 
 
 if __name__ == '__main__':

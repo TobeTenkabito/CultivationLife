@@ -212,6 +212,11 @@ def request_from_master(deps: RelationshipActionDependencies, game_id: str, kind
     from ...system.mentorship import request_support, log
     game = deps._load(game_id)
     summary = request_support(game, kind)
+    if kind == 'consult':
+        rng = decode_rng(game.seed, game.rng_state)
+        deps._adjust_person_affinity(game, str(game.player.master['id']), 1)
+        summary += deps._tianji_npc_conversation_clue(game, str(game.player.master['id']), rng)
+        game.rng_state = encode_rng(rng)
     log(game, 'support_' + kind, summary)
     game.updated_at = now_iso()
     deps.store.save(game)

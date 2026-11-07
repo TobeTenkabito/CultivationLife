@@ -71,6 +71,8 @@ def test_both_npc_views_show_only_name_and_count(setup):
 def test_master_consult_rewards_cooldown_and_clue_hook(setup):
     engine, game = setup
     npc = game.sects['tianjian'].npcs[0]
+    from cultivation_life.system.faction_geography import person_site
+    game.player.location_id = person_site(game, npc)
     npc.affinity = 20.0
     game.player.master = engine._relationship_snapshot(npc.id, npc.name, npc.realm_index, npc.layer,
         'tianjian', npc.age, npc.lifespan, world=npc.world)
@@ -86,15 +88,19 @@ def test_master_consult_rewards_cooldown_and_clue_hook(setup):
     assert loaded.player.opportunity > before
     assert loaded.player.master['affinity'] > affinity
     assert loaded.player.master['last_requests']['consult'] == loaded.player.age
-    with pytest.raises(ValueError, match='本年度'):
-        engine.request_from_master(game.id, 'consult')
+    with patch.object(engine, '_tianji_npc_conversation_clue') as clue:
+        with pytest.raises(ValueError, match='本年度'):
+            engine.request_from_master(game.id, 'consult')
+        clue.assert_not_called()
     loaded.player.age += 1
     loaded.player.master['world'] = 'spirit'
     # NPC world is authoritative when synchronizing relationships.
     engine._find_npc(loaded, npc.id).world = 'spirit'
     engine.store.save(loaded)
-    with pytest.raises(ValueError):
-        engine.request_from_master(game.id, 'consult')
+    with patch.object(engine, '_tianji_npc_conversation_clue') as clue:
+        with pytest.raises(ValueError):
+            engine.request_from_master(game.id, 'consult')
+        clue.assert_not_called()
 
 
 def test_history_snapshot_remains_independent():

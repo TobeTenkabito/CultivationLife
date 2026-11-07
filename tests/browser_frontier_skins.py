@@ -36,7 +36,7 @@ def main():
                     page.goto(base)
                     page.wait_for_function('!!configData&&!busy')
                     page.locator('#theme-open').click()
-                    page.locator('#theme-dialog [data-pixel-setting]').set_checked(True)
+                    page.locator('#theme-dialog [data-pixel-theme-choice=light]').click()
                     page.evaluate('GameThemes.saved')
                     page.locator('[data-close-dialog=theme-dialog]').click()
                     for style, gender, path in [('frontier', 'female', 'dao'), ('frontier', 'male', 'demonic'),

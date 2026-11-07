@@ -113,6 +113,7 @@ SCENERY_SEEDS = {
 
 def expand(config):
     """Compile deterministic native definitions; no runtime IDs or RNG."""
+    from .soul_secret_content import scenery_seeds
     for world, seeds in CITY_SEEDS.items():
         for identity,name,location,kind,population,flavor,title,body,a,ar,b,br in seeds:
             config['cities'][world].append(dict(id=identity,name=name,location_id=location,subtype=kind,
@@ -126,6 +127,7 @@ def expand(config):
             config['scenery'][world].append(dict(id=identity,name=name,location_id=location,description=description,
                 exploration=dict(title=title,body=body,actions=copy.deepcopy(actions),discoveries=copy.deepcopy(discoveries),
                     finals=copy.deepcopy(finals),endings=copy.deepcopy(endings),relic_id=f'landscape_{identity}' if relic else None)))
+    config['scenery']['human'].extend(scenery_seeds())
     config['city_facilities'] = {
         'exchange':dict(name='市舶会馆',labor_units=6000,materials=[180,90,45],description='汇集已入账的地方经营往来，城主每真实年可办理一次经营结算。'),
         'works':dict(name='百工公所',labor_units=5000,materials=[150,75,40],description='统筹原筑城工料，治理与扩建所需矿材减少两成；工费不变。'),

@@ -4,6 +4,7 @@ def prepare_soul(engine, game_id):
     from cultivation_life.rules import add_item
     game=engine._load(game_id);p=game.player
     game.pending_event=None;game.active_trial=None
+    p.location_id='border_void_watch'
     p.realm_index=4;p.layer=1;p.lifespan=10000;p.divine_sense_rank=20;p.soul_energy=600
     p.body_training=10;p.body_energy=300
     add_item(p,'spirit_stone',100000)

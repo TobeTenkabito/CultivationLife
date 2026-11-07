@@ -118,7 +118,7 @@
           row.append(node('span', entry.seal, 'map-directory-seal'), copy);
            if(entry.campaign)row.append(button('查看战役',()=>window.StrategicWarPanel?.openCampaign(entry.campaign.strategic_war_id,entry.campaign.id)));
           if(entry.kind==='estate'&&place.current)row.append(button('管理产业',()=>{
-            switchMode('economy');const panel=document.querySelector('#local-market-content #enterprise-panel');if(panel){panel.closest('.economy-overview').open=true;panel.open=true;}
+            switchMode('economy');document.querySelector('#local-market-content [data-subpage="产业经营"]')?.click();const panel=document.querySelector('#local-market-content #enterprise-panel');if(panel)panel.open=true;
             const target=[...document.querySelectorAll('[data-estate-id]')].find(n=>n.dataset.estateId===entry.estateId);
             if(target){target.open=true;target.scrollIntoView({block:'start'});}
           }));

@@ -29,12 +29,14 @@
   function paint(){
     dialog.replaceChildren(header());
     const layout=el('div',null,'npc-development-layout'),list=el('nav',null,'npc-development-list'),detail=el('section',null,'npc-development-detail');
-    list.setAttribute('aria-label','培养对象');layout.append(list,detail);dialog.append(layout);
+    const directory=el('div',null,'npc-development-directory');directory.append(list);
+    list.setAttribute('aria-label','培养对象');layout.append(directory,detail);dialog.append(layout);
     for(const n of data.targets){
       const b=el('button',null,'npc-development-person');b.type='button';b.dataset.targetId=n.id;b.setAttribute('aria-pressed',String(selected===`${n.kind}:${n.id}`));
       const img=n.portrait&&window.NpcArt?.image(n.portrait,'portrait',null,true);if(img)b.append(img);
       const text=el('span',n.name);text.append(el('small',n.relations.join(' · ')));b.append(text);b.onclick=()=>{selected=`${n.kind}:${n.id}`;paint();};list.append(b);
     }
+    window.PanelPages?.paginate(list,{key:'npc-development-targets',label:'培养对象',size:()=>innerWidth<=600?2:5,activeIndex:data.targets.findIndex(n=>selected===`${n.kind}:${n.id}`)});
     if(!data.targets.length){detail.append(el('p','暂无可培养对象。已有的后代、弟子、道侣、俘虏或傀儡会出现在这里。'));return;}
     const n=data.targets.find(r=>`${r.kind}:${r.id}`===selected);
     if(!n){detail.append(el('p','此人当前不具备培养关系，或已离开培养名册。'));return;}

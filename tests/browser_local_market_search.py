@@ -25,12 +25,12 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser=pw.chromium.launch()
-                    for theme in 'abdf':
+                    for theme in ('light','dark'):
                         for width,height in [(1440,960),(393,852)]:
                             page=browser.new_page(viewport=dict(width=width,height=height));errors=[]
                             page.on('pageerror',lambda e:errors.append(str(e)))
                             page.goto(f'http://127.0.0.1:{http.server_port}');page.wait_for_function('configData && window.GameThemes')
-                            page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                            page.locator(f'[data-theme-picker=start] [data-pixel-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)',ids['dao'])
                             assert page.locator('[data-panel-target=civilizations]').evaluate('(n)=>n.classList.contains("hidden")')
                             navigation_locator(page,'[data-panel-target=market]').click()
@@ -51,16 +51,18 @@ def main():
                             page.get_by_label('查找本地商品').fill('矿|草')
                             page.wait_for_function('document.querySelector(".economy-search-feedback").textContent.startsWith("找到")')
                             assert before==engine.store._path(ids['dao']).read_bytes()
-                            page.locator('.economy-overview > summary').click()
-                            card=page.locator('.economy-good').filter(has=page.locator('[data-trade=buy]:enabled')).first
+                            page.locator('#local-market-content [data-subpage="市场概况"]').click()
+                            page.locator('#local-market-content [data-subpage="商品交易"]').click()
+                            card=page.locator('.economy-good:visible').filter(has=page.locator('[data-trade=buy]:enabled')).first
                             item=card.get_attribute('data-item-id');revision=page.evaluate('game.map.economy.revision')
                             stock=page.evaluate('id=>game.map.economy.rows.find(r=>r.id===id).stock',item)
                             card.locator('[data-trade=buy]').click()
                             page.wait_for_function('r=>!busy && game.map.economy.revision>r',arg=revision)
                             page.wait_for_function('document.querySelector(".economy-search-feedback").textContent.startsWith("找到")')
                             assert page.evaluate('id=>game.map.economy.rows.find(r=>r.id===id).stock',item)==stock-1
-                            assert page.locator('.economy-overview').get_attribute('open') is not None
-                            page.locator('.economy-overview > summary').click()
+                            assert page.locator('#local-market-content [data-subpage="商品交易"]').get_attribute('aria-selected')=='true'
+                            page.locator('#local-market-content [data-subpage="市场概况"]').click()
+                            page.locator('#local-market-content [data-subpage="商品交易"]').click()
                             navigation_locator(page,'[data-panel-target=map]').click()
                             page.locator('#map-view-tabs').get_by_role('button',name='本地市场',exact=True).click()
                             assert page.locator('#map-economy #local-market-content').is_visible()
@@ -96,5 +98,5 @@ def main():
                     page.close();browser.close()
             finally:http.shutdown();http.server_close()
     (output/'report.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
-    print('8 layouts passed: path visibility, distinct DLC buttons, regex errors/timeouts, actual buy, shared market and read-only navigation')
+    print('4 layouts passed: path visibility, distinct DLC buttons, regex errors/timeouts, actual buy, shared market and read-only navigation')
 if __name__=='__main__':main()

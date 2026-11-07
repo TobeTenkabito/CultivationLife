@@ -5,6 +5,7 @@ from ..models import HistoryRecord
 from .economy.enterprise_rules import capacity
 from .economy.enterprise_state import require_local
 from . import building_exploration as exploration
+from . import soul_secret_stories as secret_stories
 
 
 SCENERY = {
@@ -72,7 +73,7 @@ def choices(row):
     actions=[option('visit:'+key, label) for key,label in labels.get(kind, [])]
     if kind=='scenery' and exploration.content(row):
         actions.insert(0,option('explore:main',exploration.content(row)['title']))
-    return actions
+    return secret_stories.choices(row) + actions
 
 
 def tale(row, activity):
@@ -92,6 +93,7 @@ def claimed(game, row):
 
 
 def project(game, row, node):
+    if node.startswith('secret:'):return secret_stories.project(game,row,node)
     if node.startswith('explore:'):return exploration.project(game,row,node)
     if not node.startswith('visit:') or not category(row): return None
     parts = node.split(':')
@@ -128,6 +130,7 @@ def project(game, row, node):
 
 
 def act(deps, game, row, choice):
+    if choice.startswith('secret:'):return secret_stories.act(game,row,choice)
     if not choice.startswith('visit:resolve:'): return choice
     _,_,activity,raw = choice.split(':')
     entry = tale(row, activity)

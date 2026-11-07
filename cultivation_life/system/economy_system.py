@@ -101,6 +101,9 @@ def _clear_market(game: GameState) -> None:
 
 
 def _market_offer_group(offer: dict[str, Any]) -> str:
+    from ..npc_development_content import is_training_supply
+    if is_training_supply(offer.get('kind'), offer.get('content_id')):
+        return 'training'
     if offer.get("kind") == "talisman_material":
         return "talisman"
     if offer.get("kind") == "puppet_material":

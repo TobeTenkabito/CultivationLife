@@ -242,6 +242,7 @@ def main():
         require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='soul-lifecycle':
         from scripts.verify_scoped_release import SOUL_TESTS
+        require({'browser_soul_secret_stories','browser_market_pages','browser_local_market_search','browser_custody_formation_fixes','browser_npc_development','browser_mentorship'}<={r['name'] for r in scoped['runs']},'Scenery, market, shared pagination and master interaction browser acceptance required')
         require(all(c.get('hunt_verified') for c in evidence['cases']),'Hunt compiled assets required')
         require(all(c.get('soul_verified') for c in evidence['cases']),'Soul compiled acceptance required with and without DLC')
         require(all(c.get('holiday_verified') for c in evidence['cases']),'Holiday compiled acceptance required with and without DLC')
@@ -460,10 +461,14 @@ def main():
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for name in ('docs/immortal-artifacts.md','docs/release-340.md'):
                 z.write(ROOT/name,name)
-        if scoped.get('profile') in {'heavens','tutorial','handbook','performance'}:
+        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
         else:
             z.write(ROOT/'android/README.md','README.md')
+        if scoped.get('profile')=='soul-lifecycle':
+            z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
+            for path in (ROOT/'docs').rglob('*'):
+                if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
         if scoped.get('profile') in {'tutorial','handbook','performance'}:
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for path in (ROOT/'docs').rglob('*'):

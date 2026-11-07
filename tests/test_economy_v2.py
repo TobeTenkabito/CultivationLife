@@ -17,6 +17,15 @@ from cultivation_life.system.economy.pricing import growth, total_price
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.parametrize('funds', [0, -1])
+def test_zero_budget_cannot_accept_rounded_zero_value_sales(funds):
+    from cultivation_life.system.economy.basket_trade import quote, affordable
+    row = dict(reference=1, stock=100, target=100)
+    assert quote(row, 'sell', 1)['gross'] == 0
+    assert affordable(row, 'sell', 1, funds) == 0
+    assert affordable(row, 'sell', 2, 1) == 2
+
+
 @pytest.fixture
 def ready(tmp_path):
     engine = GameEngine(ROOT, tmp_path)

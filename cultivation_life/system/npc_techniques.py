@@ -35,7 +35,7 @@ def learn(npc, book, level=1, slot=None):
     write('technique_levels',facts)
     if slot=='main' or book.id==read(npc,'main_technique_id'):
         write('main_technique_id',book.id);write('main_technique_level',facts[book.id])
-    elif slot:
+    if slot and slot!='main':
         slots=dict(read(npc,'technique_slots',{}));slots[slot]=book.id;write('technique_slots',slots)
     if slot and (book.id.startswith('TECH_AUTHORED_') or read(npc,'family_traits',{}).get('authored_combat_bonuses',{}).get(slot)):
         from ..rules import technique_scale

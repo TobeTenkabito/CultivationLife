@@ -11,7 +11,7 @@ def full_power(game):
     if not npc:
         return 0.
     row = game.player.nascent_state['second']
-    bonus = sum(t.combat_bonus * technique_scale(t) for _, t in equipped(game, npc))
+    bonus = sum(t.combat_bonus * technique_scale(t) for _, t in equipped(game, npc) if t.active_in(npc.world))
     bonus += sum(item.get('combat_bonus', 0) for item in row['equipment'])
     return expected_combat_power(npc.realm_index, npc.layer) * .8 + bonus
 
@@ -45,7 +45,7 @@ def equip(game, identity):
     p = game.player
     row = p.nascent_state['second']
     item = next((i for i in p.inventory if i.id == identity), None)
-    if not item or item.combat_bonus <= 0 or item.crafted_artifact_id:
+    if not item or item.quantity < 1 or item.combat_bonus <= 0 or item.crafted_artifact_id:
         raise ValueError('请选择行囊中的普通战斗法器；本命及组合炼器不可转交')
     if identity == game.natal_artifact.get('item_id') or 'natal' in item.tags:
         raise ValueError('本命法器不可转交')
@@ -53,7 +53,7 @@ def equip(game, identity):
         raise ValueError('第二元婴最多携带三件装备')
     raw = copy.deepcopy(item.to_dict())
     raw['quantity'] = 1
+    from ..rules import remove_item
+    if not remove_item(p, identity):
+        raise ValueError('行囊中的装备已不足，请刷新')
     row['equipment'].append(raw)
-    item.quantity -= 1
-    if not item.quantity:
-        p.inventory.remove(item)

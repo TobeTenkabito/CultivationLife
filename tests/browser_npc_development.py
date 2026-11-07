@@ -10,7 +10,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.models import SectNpc
 from cultivation_life.rules import add_item
 from cultivation_life.content_registry import TECHNIQUE_CATALOG
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, click_control
 
 
 def main():
@@ -131,13 +131,13 @@ def verify_upper(page,engine,base):
     assert max(x['level'] for x in grown.transcendence['doctrine']['progress'].values())==5
     assert grown.transcendence['current']==0
     for identity in ('upper-puppet','corpse-male','corpse-female','art-captive'):
-        page.locator(f'[data-target-id={identity}]').click()
+        click_control(page.locator(f'[data-target-id={identity}]'))
         page.wait_for_function('document.querySelector(".npc-development-art img")?.naturalWidth>0')
         page.locator('.npc-development-art button').click()
         page.wait_for_selector('#npc-art-dialog[open] .npc-art-figure')
         page.keyboard.press('Escape')
         if identity=='art-captive':assert page.locator('.npc-development-art img').get_attribute('class').find('restrained')>=0
-    page.locator('[data-target-id=upper-puppet]').click()
+    click_control(page.locator('[data-target-id=upper-puppet]'))
     page.wait_for_selector('#npc-development-charge')
     revision=page.request.get(base+f'/api/games/{game.id}/npc-development').json()['revision']
     page.locator('#npc-development-charge').click()

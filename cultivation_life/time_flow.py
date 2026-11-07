@@ -44,15 +44,17 @@ def advance_elapsed_year(
     """Complete a year already aged by the caller, even if an event interrupts it.
 
 World interruption does not cancel that year's erosion for a living player.
-World death skips erosion; erosion death stops the next activity year.
+World death skips erosion; fatal erosion stops the next activity year even
+when a second soul saves the player.
 """
     if encounters:
         proceed = deps._advance_world_year(game, rng, news)
     else:
         proceed = deps._advance_world_year(game, rng, news, encounters=False)
+    erosion_ready = True
     if game.player.alive:
-        deps._advance_soul_erosion_time(game, 1)
-    return bool(proceed and game.player.alive)
+        erosion_ready = deps._advance_soul_erosion_time(game, 1)
+    return bool(proceed and erosion_ready is not False and game.player.alive)
 
 
 def completed_action_units(elapsed_years: int, unit_years: int) -> int:

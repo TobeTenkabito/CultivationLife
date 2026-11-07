@@ -69,6 +69,16 @@ def build():
                     tier=(1,5,9)[row['tier']-1],price=row['price']))
     return items,goods
 
+def is_training_supply(kind, identity):
+    """Classify from authoritative catalogs, including workshop energy components."""
+    if kind == 'item':
+        return identity in definitions()
+    if kind == 'puppet_material':
+        from .puppet_content import definitions as components
+        return components().get(identity, {}).get('slot') == 'energy'
+    return False
+
+
 def shelf(game):
     """One finite offer per legal material per existing market refresh."""
     p=game.player

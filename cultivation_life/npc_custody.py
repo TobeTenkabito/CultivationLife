@@ -216,16 +216,24 @@ def bind_custody(game, npc_type):
     """
     for field in ('prisoners', 'concubines'):
         rows = getattr(game.player, field)
+        stale = set()
         for index, row in enumerate(rows):
             if field == 'concubines' and row.get('source') != 'captive':
                 continue
             identity = str(row.get('npc_id') or row.get('id') or '')
             npc = find_person(game, identity, include_inactive=True)
+            kind = 'prisoner' if field == 'prisoners' else 'concubine'
+            if npc is not None and npc.alive and npc.roster_state == 'held' and (
+                    (npc.custody or {}).get('kind') != kind or (npc.custody or {}).get('holder_id') != game.id):
+                # Drop only the invalid action reference; keep the original actor.
+                stale.add(index)
+                continue
             if npc is not None and (not npc.alive or npc.roster_state == 'retired'):
                 rows[index] = bind_relationship(game, row, npc_type)
             else:
-                rows[index] = detain_person(game, row, npc_type,
-                    kind='prisoner' if field == 'prisoners' else 'concubine')
+                rows[index] = detain_person(game, row, npc_type, kind=kind)
+        if stale:
+            rows[:] = [row for index, row in enumerate(rows) if index not in stale]
 
 
 def settle_puppet_person(game, puppet, *, outcome, reason=''):

@@ -225,10 +225,11 @@
           <section id="market-local" class="hidden" aria-label="坊市本地市场"></section>
           <div id="market-content">
             <section id="immortal-market-content" class="immortal-content hidden"></section>
-            <p id="market-description" class="muted"></p>
+            <details class="market-refresh-note"><summary>随时间自然换货 · 查看锁货规则</summary><p id="market-description" class="muted"></p></details>
             <section class="market-stock-section"><div class="market-stock-heading"><div><p class="eyebrow">丹器功法</p><h3>一般坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="market-offers" class="market-offers"></div></section>
             <section class="market-stock-section material-market-section"><div class="market-stock-heading"><div><p class="eyebrow">阵材器料</p><h3>材料坊市</h3></div><small>六个货位 · 可锁定一项</small></div><div id="material-market-offers" class="market-offers"></div></section>
-            <section class="market-stock-section"><div class="market-stock-heading"><div><p class="eyebrow">核心 · 外材 · 能源</p><h3>傀儡材料坊市</h3></div><small>本界当前阶数 · 可锁定一项</small></div><div id="puppet-market-offers" class="market-offers"></div></section>
+            <section class="market-stock-section"><div class="market-stock-heading"><h3>培养与能源</h3><small>本界可产专材 · 可锁定一项</small></div><label class="training-supply-filter">用途 <select id="training-supply-filter" aria-label="培养资材用途"><option value="all">全部资材</option><option value="dao">道修培养</option><option value="demonic">魔修培养</option><option value="monster">妖修培养</option><option value="ghost">鬼修培养</option><option value="puppet">傀儡培养</option><option value="energy">傀儡能源</option></select></label><div id="training-market-offers" class="market-offers"></div></section>
+            <section class="market-stock-section"><div class="market-stock-heading"><div><p class="eyebrow">核心 · 外材</p><h3>傀儡材料坊市</h3></div><small>本界当前阶数 · 可锁定一项</small></div><div id="puppet-market-offers" class="market-offers"></div></section>
             <section id="market-plant-sell-section" class="market-plant-sell"><h3>出售灵植</h3><div id="market-plant-sellables" class="auction-sellables"></div></section>
             <section class="market-stock-section"><div class="market-stock-heading"><h3>符材坊市</h3><small>本界分阶符材 · 可锁定一项</small></div><div id="talisman-market-offers" class="market-offers"></div></section>
             <section><h3>出售符箓</h3><div id="market-talisman-sellables" class="auction-sellables"></div></section>
@@ -421,7 +422,7 @@
           <div id="tianji-ranking" class="tianji-ranking"></div>
         </article>
         <article id="crafting-card" class="paper utility-panel left-panel crafting-panel hidden" role="dialog" aria-modal="false" aria-label="组合炼器">
-          <div class="section-title"><div><p class="eyebrow">ARTIFACT FORGING</p><h2>组合炼器</h2></div><div class="panel-heading"><span id="crafting-heading"></span><button id="crafting-toggle" type="button">关闭</button></div></div>
+          <div class="section-title"><div><p class="eyebrow">炉火成器</p><h2>组合炼器</h2></div><div class="panel-heading"><span id="crafting-heading"></span><button id="crafting-toggle" type="button">关闭</button></div></div>
           <p class="muted">胎模定器类与固定规则，四份真实材料实例决定特性；属性由你分配，炼制不会彻底失败。</p>
           <section class="crafting-workbench">
             <h3>五位成器</h3>
@@ -447,9 +448,9 @@
           <section><h3>炼器图谱</h3><p class="section-note">图谱仅记录材料类型与属性设计，不记录材料品质及成品品质。</p><div id="crafting-blueprint-list" class="crafting-blueprint-list"></div></section>
         </article>
         <article id="formation-card" class="paper utility-panel left-panel formation-panel hidden" role="dialog" aria-modal="false" aria-label="九宫阵法">
-          <div class="section-title"><div><p class="eyebrow">NINE PALACE MATRIX V2</p><h2>九宫阵法</h2></div><div class="panel-heading"><span id="formation-heading"></span><button id="formation-toggle" type="button">关闭</button></div></div>
+          <div class="section-title"><div><p class="eyebrow">九宫阵枢</p><h2>九宫阵法</h2></div><div class="panel-heading"><span id="formation-heading"></span><button id="formation-toggle" type="button">关闭</button></div></div>
           <p class="muted">阵材位置决定有向灵流。绿色为相生，红色为冲克，灰色为弱关系；阵法效果只向敌我两侧各广播一次。</p>
-          <div class="formation-layout">
+          <div id="formation-layout" class="formation-layout">
             <section class="formation-workbench">
               <label class="formation-name">阵名<input id="formation-name" maxlength="20" placeholder="为亲手排出的阵命名"></label>
               <div id="formation-grid-wrap" class="formation-grid-wrap">
@@ -627,8 +628,8 @@
   <script src="/fleet-network-panel.js?v=economy5"></script>
   <script src="/merchant-panel.js?v=economy2"></script>
   <script src="/caravan-map.js?v=1"></script>
-  <script src="/local-economy.js?v=3"></script>
-  <script src="/map-directory.js?v=territory-ui2"></script>
+  <script src="/local-economy.js?v=workbench-finish"></script>
+  <script src="/map-directory.js?v=market-pages"></script>
   <script src="/upper-energy.js?v=1.55.0"></script>
   <script src="/theme-manager.js?v=350"></script>
   <script src="/desktop-labels.js?v=323"></script>
@@ -670,7 +671,7 @@
   <script src="/monster-civilizations.js?v=2100"></script>
   <script src="/authored-techniques.js?v=310"></script>
   <script src="/immortal-artifacts.js?v=2"></script>
-  <script src="/soul.js?v=322b"></script>
+  <script src="/soul.js?v=crisis-audit"></script>
   <script src="/character-skins.js?v=321a"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>
@@ -716,8 +717,8 @@
   <script src="/map-atlas.js?v=3-alpha-1"></script>
   <link rel="stylesheet" href="/trial-site-panel.css?v=2120">
   <script src="/trial-site-panel.js?v=2120"></script>
-  <link rel="stylesheet" href="/panel-pages.css?v=3000">
-  <script src="/panel-pages.js?v=3000"></script>
+  <link rel="stylesheet" href="/panel-pages.css?v=355">
+  <script src="/panel-pages.js?v=355"></script>
   <script src="/strategic-war-panel.js?v=1"></script>
   <link rel="stylesheet" href="/secret-art-panel.css?v=1">
   <script src="/secret-art-panel.js?v=322b"></script>
@@ -741,10 +742,11 @@
   <script src="/combat-beasts.js?v=beasts1-monster-418"></script>
   <script src="/combat-replay.js?v=divine1"></script>
   <link rel="stylesheet" href="/npc-development.css?v=1">
-  <script src="/npc-development.js?v=352"></script>
+  <script src="/npc-development.js?v=market-pages"></script>
   <link rel="stylesheet" href="/mentorship.css?v=1">
   <script src="/mentorship.js?v=1"></script>
-  <script src="/app.js?v=mentorship-stage1"></script>
+  <link rel="stylesheet" href="/workbench-finish.css?v=1">
+  <script src="/app.js?v=market-pages"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

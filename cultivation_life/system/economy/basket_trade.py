@@ -14,6 +14,10 @@ def quote(row, side, quantity):
 
 
 def affordable(row, side, wanted, funds):
+    # A rounded zero-value sale is not a funded order. In particular, an
+    # empty dealer account must not authorize automatic workshop output.
+    if funds <= 0:
+        return 0
     low, high = 0, min(1000000, max(0, int(wanted)))
     if not high:
         return 0

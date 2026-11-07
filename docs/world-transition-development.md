@@ -69,6 +69,8 @@ NPC 必须使用 `system/combat/npc_lifecycle.move_world` 结算旧环境资源�
 
 ## 5. 有限例外
 
+2026-11-07神魂危机解困：副本／拘管／封印中也可能由原神魂枯竭结算引发夺舍危机，原抵御按钮与普通秘法共同禁用会堵住处理入口。`system/soul_actions.py` 的 `resistance_blocked` 为即时本魂抗争单独核验存活、待决事件及活动劫战；只有已存在危机可提交。沿原概率、死亡和第二元婴承接结算，不推进时间，不解除副本、玩家监禁或修为封印，不修改地点／实例，不开放普通秘法。空间命令白名单只放行到该领域复验，UI使用相同资格投影。`tests/test_soul_followup_audit.py` 与 `tests/browser_soul_lifecycle.py` 覆盖真实失落界面、裂缝秘境、归墟进入后的解困，失败死亡／承接、地址不变，以及普通秘法仍拒绝。
+
 2026-11-04 NPC邻域培养差异：用户要求继续简化高阶培养。责任入口`system/npc_development/domains.py`按原配置等级与修为门槛确定性提升，不经过玩家随机参悟或另付传承工期；原仙界NPC已过修习区间先结算，`cultivated`明确主动培养资格，不再套用随机NPC稀有度上限。不得免费回满元力、移动人物或覆盖专属传承；界面、身份及拘禁规则不豁免。测试`test_npc_development_stage3.py`、`browser_npc_development.py`，详见[第三阶段](npc-development-stage3.md)。
 
 2026-11-04 NPC成长差异登记：用户明确要求高阶简化培养。责任入口`system/npc_development/service.py`与`upper.py`允许已在对应第三级普通界面的八境圆满NPC升九境，九至十二境一轮一层、高阶肉身从零培养；不走玩家开脉和大劫，不改地址、世界时钟或已有周期劫期。低界迁界关口、封印、任务与身魂限制不豁免。扩容前结旧资源区间，不回满余额。傀儡为原资产，按后续同日用户要求优先使用实际装备能源，品阶／耐久不足且供能开启时才由同场玩家垫付MP或原元力；每次只扣一个来源，详见[傀儡能源](puppet-energy.md)。测试为`tests/test_npc_development_upper.py`及`tests/browser_npc_development.py`，规则见[NPC高阶培养](npc-development-upper.md)。此授权不新增跨界移动方式。

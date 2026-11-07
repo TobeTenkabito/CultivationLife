@@ -24,6 +24,12 @@ AUTHORED_TESTS = [
     'tests/test_windows_release_evidence.py','tests/test_android_release_checks.py',
 ]
 SOUL_TESTS = list(dict.fromkeys(AUTHORED_TESTS + [
+    'tests/test_market_training_pages.py','tests/test_puppet_crafting.py',
+    'tests/test_npc_development_352.py','tests/test_debug_npc_development.py',
+    'tests/test_mentorship.py','tests/test_mentorship_peers.py','tests/test_tianji_artifacts.py',
+    'tests/test_soul_time_boundary_audit.py','tests/test_time_flow.py',
+    'tests/test_second_nascent_death_audit.py','tests/test_soul_followup_audit.py','tests/test_soul_loadout_recovery_audit.py',
+    'tests/test_soul_secret_adversarial.py','tests/test_soul_secret_stories.py','tests/test_building_visits.py','tests/test_city_management.py',
     'tests/test_hunt_beasts.py','tests/test_historical_skins.py','tests/test_achievement_stories.py',
     'tests/test_humorous_achievements.py','tests/test_strategic_peace.py','tests/test_release_290.py',
     'tests/test_tide_skins.py','tests/test_ui_preferences.py','tests/test_achievements.py','tests/test_secret_art_training.py',
@@ -330,6 +336,7 @@ REGIONAL_TESTS = list(dict.fromkeys(BUGFIX_TESTS + [
 
 
 BUILDING_VISIT_TESTS = [
+    'tests/test_soul_secret_adversarial.py','tests/test_soul_secret_stories.py','tests/test_soul_lifecycle.py',
     'tests/test_city_management.py',
     'tests/test_building_visits.py','tests/test_building_system.py','tests/test_city_buildings.py',
     'tests/test_economy_enterprises.py','tests/test_economy_estate_audit.py','tests/test_economy_network.py',
@@ -455,7 +462,7 @@ def main():
     if profile=='common-techniques':
         browsers=['browser_common_elemental_techniques','browser_events_212']
     if profile=='secret-arts':
-        browsers=['browser_secret_art_training','browser_common_elemental_techniques','browser_merchant_138','browser_events_212']
+        browsers=['browser_soul_secret_stories','browser_secret_art_training','browser_common_elemental_techniques','browser_merchant_138','browser_events_212']
     if profile=='common-goods':
         browsers=['browser_common_goods','browser_secret_art_training','browser_quick_start_1411','browser_events_212']
     if profile=='regional':
@@ -465,15 +472,17 @@ def main():
                   'browser_natal_materials','browser_regional_calendar','browser_regional_rifts',
                   'browser_custody_formation_fixes']
     if profile=='buildings':
-        browsers=['browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212']
+        browsers=['browser_soul_secret_stories','browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212']
     if profile=='building-visits':
-        browsers=['browser_building_visits','browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212']
+        browsers=['browser_soul_secret_stories','browser_building_visits','browser_buildings','browser_city_buildings','browser_economy_enterprises','browser_events_212']
     if profile=='visual':
         browsers=['browser_visual_release','browser_pixel_ui','browser_themes_139','browser_events_212','browser_building_visits','browser_npc_art','browser_voisinage_editor','browser_domain_replay','browser_combat_replay','browser_combat_groups']
     if profile=='combat-alpha':
         browsers=['browser_alpha2_dlc_fixes','browser_combat_replay','browser_combat_groups','browser_events_212']
-    if profile=='soul-lifecycle':browsers=['browser_combat_groups','browser_combat_replay','browser_historical_skins','browser_story_achievements','browser_tide_theme','browser_themes_139','browser_desktop_navigation','browser_secret_art_training','browser_frontier_skins','browser_release_301','browser_soul_lifecycle','browser_swimwear_skins','browser_holiday_skins','browser_sect_tasks','browser_authored_techniques','browser_events_212']
+    if profile=='soul-lifecycle':browsers=['browser_soul_secret_stories','browser_combat_groups','browser_combat_replay','browser_historical_skins','browser_story_achievements','browser_tide_theme','browser_themes_139','browser_desktop_navigation','browser_secret_art_training','browser_frontier_skins','browser_release_301','browser_soul_lifecycle','browser_swimwear_skins','browser_holiday_skins','browser_sect_tasks','browser_authored_techniques','browser_events_212']
     if profile=='authored':browsers=AUTHORED_BROWSERS
+    if profile=='soul-lifecycle':
+        browsers += ['browser_market_pages','browser_local_market_search','browser_custody_formation_fixes','browser_npc_development','browser_mentorship']
     if profile=='heavens':browsers=HEAVENS_BROWSERS
     if profile=='tutorial':browsers=TUTORIAL_BROWSERS
     if profile=='immortal':browsers=IMMORTAL_BROWSERS

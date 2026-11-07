@@ -101,8 +101,9 @@ def test_eleven_world_new_scenery_real_multistage_tales_once(tmp_path,world):
     tier=WORLD_SYSTEMS['world_profiles'][world]['tier']
     game=engine._load(engine.create_game('山河故事','supreme_metal','dao',2172,custom_start=dict(world=world,realm_index={1:3,2:6,3:9}[tier]))['id'])
     specs=config()['scenery'][world]
-    assert len(specs)==3 and len(config()['cities'][world])==4
-    for spec in specs[1:]:
+    assert len(specs)==(7 if world=='human' else 3) and len(config()['cities'][world])==4
+    if world=='human':assert [r['id'] for r in specs[:3]]==['lake_mist','reed_letter','deer_echo']
+    for spec in specs[1:3]:
         game=engine.store.load(game.id);game.pending_event=None;game.player.location_id=spec['location_id'];engine.store.save(game)
         engine.get_game(game.id);game=engine.store.load(game.id)
         before=copy.deepcopy(game.player.to_dict());economy=copy.deepcopy(game.economy_v2);time=stable_time(game)

@@ -43,7 +43,7 @@ def main():
                     page.wait_for_function('!!configData&&!busy')
                     page.evaluate('async id=>loadGame(id)', game.id)
                     page.locator('#theme-open').click()
-                    page.locator('#theme-dialog [data-pixel-setting]').set_checked(True)
+                    page.locator('#theme-dialog [data-pixel-theme-choice=light]').click()
                     page.evaluate('GameThemes.saved')
                     page.locator('[data-close-dialog=theme-dialog]').click()
                     for width in [1440, 390, 320]:
@@ -69,9 +69,9 @@ def main():
                         page.wait_for_function('!busy&&!game.player.character_skins.selected')
                         page.locator('#character-skins-close').click()
                         page.locator('[data-close-dialog=player-details-dialog]').click()
-                    # The entry is also available when artwork is turned off.
+                    # The same wardrobe entry remains available in the dark palette.
                     page.locator('#theme-open').click()
-                    page.locator('#theme-dialog [data-pixel-setting]').set_checked(False)
+                    page.locator('#theme-dialog [data-pixel-theme-choice=dark]').click()
                     page.evaluate('GameThemes.saved')
                     page.locator('[data-close-dialog=theme-dialog]').click()
                     page.locator('.hud-identity').click()
@@ -80,7 +80,7 @@ def main():
                     page.locator('#character-skins-close').click()
                     page.locator('[data-close-dialog=player-details-dialog]').click()
                     page.locator('#theme-open').click()
-                    page.locator('#theme-dialog [data-pixel-setting]').set_checked(True)
+                    page.locator('#theme-dialog [data-pixel-theme-choice=light]').click()
                     page.evaluate('GameThemes.saved')
                     page.locator('[data-close-dialog=theme-dialog]').click()
                     # Invalid real command must leave selection and gameplay untouched.

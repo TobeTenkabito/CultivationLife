@@ -44,13 +44,12 @@
   });
   function build(market, game, submit, enterpriseSubmit) {
     cancelSearch(); const root=content;
-    const overviewOpen=address===`${game.id}:${market?.market_id}` && !!root.querySelector('.economy-overview')?.open;
     root.replaceChildren();
     if (!market?.available) return;
     if (address !== `${game.id}:${market.market_id}`) { address = `${game.id}:${market.market_id}`; search = ''; regexMode=false; }
     const head = el('div', null, 'economy-heading');
     head.append(el('h3', `${market.name} · 本地市场`), el('span', `世界历 ${market.year} 年`));
-    const intro = el('p', '当地作坊供货、居民消费形成库存。市场成交额包含居民、组织与商队交易；本人产业收入请查看下方产业账目。大笔买卖会改变成交均价，坊市货架另为你保留精选商品。', 'muted');
+    const intro = el('p', '当地作坊供货、居民消费形成库存。大笔买卖会改变成交均价；市场概况、商队和本人产业可通过上方分类查看。', 'muted');
     if (market.war_pressure) intro.append(' 当地战事正在压低生产并增加运输风险。');
     const metrics = el('div', null, 'economy-metrics');
     for (const [label, value] of [['全市场累计成交',market.turnover],['居民实付',market.household_spending||0],['实际消费件数',market.terminal_consumed||0],['收购资金',market.liquidity],['运营府库',market.operator_balance],['军需成交',market.war_income||0]]) {
@@ -99,6 +98,7 @@
         card.append(actions);list.append(card);
       });
       if (!rows.length && !searching) list.append(el('p','没有符合条件的商品。','muted'));
+      window.PanelPages?.paginate(list,{key:address+':goods:'+regexMode+':'+search,label:'本地商品',size:()=>innerWidth<=600||innerHeight<550?1:2});
       setBusy(document.body.classList.contains('busy'));
     }
     function filter() {
@@ -121,12 +121,17 @@
     input.oninput=()=>{search=input.value;cancelSearch();if(regexMode){draw([],true);feedback.textContent='正在检索…';debounce=setTimeout(filter,180);}else filter();};
     regex.onchange=()=>{regexMode=regex.value==='pattern';filter();};
     quantity.onchange=()=>{selectedQuantity=quantity.value;filter();};
-    const overview=el('details',null,'economy-overview');
-    overview.open=overviewOpen;
-    overview.append(el('summary','市场概况与经营'),metrics,macro,freight);
+    const overview=el('section',null,'economy-overview');
+    overview.append(metrics,macro);
     renderCompetition(overview,market,enterpriseSubmit);
     window.EnterprisePanel?.render(overview,market.enterprises,enterpriseSubmit);
-    root.append(head,intro,tools,feedback,note,overview,list);filter();
+    const commerce=el('section',null,'economy-trading'),query=el('div',null,'economy-query');
+    query.append(tools,feedback,note);commerce.append(query,list);
+    const governance=overview.querySelector('#market-governance'),enterprise=overview.querySelector('#enterprise-panel');
+    root.append(head,commerce,overview,freight);overview.prepend(intro);
+    if(governance)root.append(governance);if(enterprise)root.append(enterprise);
+    window.PanelPages?.mount('local-market',root,[['商品交易',[commerce]],['市场概况',[overview]],['商队流通',[freight]],['市政商势',[governance]],['产业经营',[enterprise]]]);
+    filter();
   }
   function renderCompetition(root,market,submit) {
     const data=market.competition;if(!data)return;
@@ -157,6 +162,7 @@
     }
     if(!data.rows.length)list.append(el('p','成交后逐步形成商品商势记录。','muted'));
     box.append(list);root.append(box);
+    window.PanelPages?.paginate(list,{key:address+':competition',label:'商品商势'});
   }
   window.LocalEconomy={prepare,attach,setBusy};
 })();

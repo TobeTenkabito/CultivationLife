@@ -307,7 +307,7 @@ def action(deps: BuildingDependencies, game_id, action, building_id='', event_id
             node=cities.act(deps,game,find(game,scene['building_id']),choice_id)
             navigate(game,scene,'main' if node=='back' else node)
             if following:game.pending_event['_followup_event']=following
-        elif choice_id.startswith(('visit:','explore:')):
+        elif choice_id.startswith(('visit:','explore:','secret:')):
             following=game.pending_event.get('_followup_event')
             row=find(game,scene['building_id'])
             node=exploration.act(game,row,choice_id) if choice_id.startswith('explore:') else visits.act(deps,game,row,choice_id)

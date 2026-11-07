@@ -34,7 +34,7 @@ def main():
                     base=f'http://127.0.0.1:{http.server_port}'
                     page.goto(base);page.wait_for_function('!!configData&&!busy')
                     page.locator('#theme-open').click()
-                    page.locator('#theme-dialog [data-pixel-setting]').check()
+                    assert page.locator('#theme-dialog [data-pixel-setting]').count()==0
                     page.evaluate('GameThemes.saved')
                     assert page.locator('#theme-dialog [data-theme-choice]:visible').count()==0
                     assert page.locator('#theme-dialog [data-pixel-theme-choice]:visible').count()==2

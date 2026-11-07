@@ -39,7 +39,7 @@ def main():
                     base = f'http://127.0.0.1:{http.server_port}'
                     page.goto(base); page.wait_for_function('!!configData&&!busy')
                     page.locator('#theme-open').click()
-                    page.locator('#theme-dialog [data-pixel-setting]').check()
+                    page.locator('#theme-dialog [data-pixel-theme-choice=light]').click()
                     page.evaluate('GameThemes.saved')
                     page.locator('[data-close-dialog=theme-dialog]').click()
                     page.evaluate('id=>loadGame(id)', g.id); page.wait_for_function('!busy')

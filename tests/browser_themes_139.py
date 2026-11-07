@@ -1,4 +1,4 @@
-"""Real-browser acceptance for six live layouts, persistence and untouched game state."""
+"""Real-browser acceptance for two pixel palettes and untouched game state."""
 import sys
 import tempfile
 import threading
@@ -34,16 +34,16 @@ def main():
                     page.wait_for_function('window.GameThemes && configData')
                     page.evaluate('GameThemes.ready')
                     assert page.locator('html').get_attribute('data-theme') == 'a'
-                    for theme in 'abdf':
-                        page.locator(f'[data-theme-picker=start] [data-theme-choice={theme}]').click()
+                    for theme in ('light','dark'):
+                        page.locator(f'[data-theme-picker=start] [data-pixel-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
                         page.wait_for_timeout(250)
                         page.screenshot(path=str(ROOT / f'build/theme-139-{theme}-start.png'))
                     page.evaluate('async id=>{await loadGame(id);render(game)}',game_id)
                     before=page.evaluate('JSON.stringify(game)')
-                    for theme in 'abdf':
+                    for theme in ('light','dark'):
                         page.locator('#theme-open').click()
-                        page.locator(f'[data-theme-picker=dialog] [data-theme-choice={theme}]').click()
+                        page.locator(f'[data-theme-picker=dialog] [data-pixel-theme-choice={theme}]').click()
                         page.evaluate('GameThemes.saved')
                         page.locator('[data-close-dialog=theme-dialog]').click()
                         page.wait_for_timeout(250)
@@ -76,11 +76,13 @@ def main():
                     navigation_locator(page,'[data-panel-target=merchant]').click()
                     panel=page.locator('#merchant-card')
                     page.evaluate("window.__merchantNode=document.querySelector('#merchant-card')")
+                    page.locator('#merchant-toggle').click()
                     page.locator('#theme-open').click()
-                    page.locator('[data-theme-picker=dialog] [data-theme-choice=b]').click()
+                    page.locator('[data-theme-picker=dialog] [data-pixel-theme-choice=dark]').click()
                     page.locator('[data-motion-setting]').last.check()
                     page.evaluate('GameThemes.saved')
                     page.keyboard.press('Escape')
+                    navigation_locator(page,'[data-panel-target=merchant]').click()
                     assert page.evaluate("window.__merchantNode===document.querySelector('#merchant-card')")
                     assert panel.is_visible()
                     assert page.locator('html').get_attribute('data-motion') == 'reduced'
@@ -100,13 +102,14 @@ def main():
                     # Fresh browser context has no localStorage; disk preferences remain authoritative.
                     fresh=browser.new_page()
                     fresh.goto(url);fresh.wait_for_function('window.GameThemes');fresh.evaluate('GameThemes.ready')
-                    assert fresh.locator('html').get_attribute('data-theme') == 'b'
+                    assert fresh.locator('html').get_attribute('data-theme') == 'a'
+                    assert fresh.locator('html').get_attribute('data-pixel-theme') == 'dark'
                     assert fresh.locator('html').get_attribute('data-motion') == 'reduced'
                     assert not errors,errors
                     browser.close()
             finally:
                 httpd.shutdown();httpd.server_close()
-    print('Six themes: start/game/mobile, live switching, dialogs, game-state isolation and persistence passed')
+    print('Two pixel palettes: start/game/mobile, live switching, dialogs, game-state isolation and persistence passed')
 
 
 if __name__ == '__main__':

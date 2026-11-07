@@ -57,13 +57,21 @@ def leave_body(game, *, destroyed=False):
            dict(body_destroyed=True, lost_realm=survival_rank(p)) if destroyed else None)
 
 
-def second_person(game):
+def held_second(game):
+    """Resolve custody before touching the original actor, including on cleanup."""
     row = game.player.nascent_state.get('second')
     npc = find_person(game, row['id'], include_inactive=True) if row else None
-    if (npc and npc.alive and npc.roster_state == 'held'
+    if (npc and npc.roster_state == 'held'
             and (npc.custody or {}).get('holder_id') == game.id
-            and (npc.custody or {}).get('kind') == 'second_nascent'
-            and row['integrity'] > 0
+            and (npc.custody or {}).get('kind') == 'second_nascent'):
+        return npc
+    return None
+
+
+def second_person(game):
+    row = game.player.nascent_state.get('second')
+    npc = held_second(game)
+    if (npc and npc.alive and row['integrity'] > 0
             and (second_lifespan(npc) is None or second_age(game, npc) < second_lifespan(npc))):
         return npc
     return None
@@ -86,7 +94,7 @@ def settle_second(game):
     row = game.player.nascent_state.get('second')
     if not row:
         return
-    npc = find_person(game, row['id'], include_inactive=True)
+    npc = held_second(game)
     if npc and npc.alive:
         npc.age = second_age(game, npc)
         row['age_year'] = game.player.age
@@ -102,6 +110,9 @@ def lifespan_exhausted(player):
 
 
 def survival_rank(player):
+    from .possession_system import is_possessed
+    if is_possessed(player):
+        return player.ghost_core_state['realm_index']
     source = player.cultivation_suppression or player.sealed_cultivation or {}
     return source.get('realm_index', player.realm_index)
 
@@ -131,13 +142,15 @@ def try_wandering(game):
 
 
 def consume_second(game, reason):
+    npc = held_second(game)
     row = game.player.nascent_state.pop('second', None)
     if row:
         # Equipment is real escrow, returned once even when its soul perishes.
         from ..rules import add_item
         for raw in row['equipment']:
             add_item(game.player, Item.from_dict(raw))
-        kill_person(game, row['id'], reason)
+        if npc and npc.alive:
+            kill_person(game, npc.id, reason)
 
 
 def death_excluded(game, event_id, cause=None):
@@ -161,7 +174,10 @@ def rescue(game, reason, event_id, cause=None):
         rank, layer = npc.realm_index, npc.layer
         remaining = None if second_lifespan(npc) is None else second_lifespan(npc) - second_age(game, npc)
         consume_second(game, '第二元婴替本尊续命而消散')
-        # Discard a destroyed host; never restore a stale pre-rescue cultivation.
+        # Restore the original soul's identity before assigning inherited rank/life.
+        from .possession_system import is_possessed, leave_host_body
+        if is_possessed(p):
+            leave_host_body(p)
         p.ghost_host_body = p.ghost_core_state = None
         p.ghost_captor = p.ghost_attachment = None
         replace_rank(p, rank, layer)
@@ -169,6 +185,7 @@ def rescue(game, reason, event_id, cause=None):
         p.awaiting_major_breakthrough = p.awaiting_minor_breakthrough = False
         p.active_breakthrough_aids = []
         p.soul_energy = max(1., soul_cap(p) * .5)
+        p.nascent_state.pop('depleted', None)
         p.nascent_state.pop('crisis', None)
         p.ghost_intrinsic_hp_current = p.ghost_intrinsic_hp_reference
         p.ghost_intrinsic_mp_current = p.ghost_intrinsic_mp_reference

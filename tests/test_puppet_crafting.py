@@ -29,7 +29,8 @@ def test_each_world_has_every_stage_component_and_real_market(ready,world):
         p=g.player;p.world=world;p.realm_index=tier;p.layer=1
         p.location_id=e.maps.normalize_location(world,None)
         e._clear_market(g);e._ensure_market(g,random.Random(4))
-        shown=e._public_market(g)['puppet_material_offers']
+        market=e._public_market(g)
+        shown=market['puppet_material_offers']+[r for r in market['training_material_offers'] if r['kind']=='puppet_material']
         assert len(shown)==12
         assert {r['tier'] for r in shown}=={tier}
         assert {r['form'] for r in shown if r['component_slot']=='shell'}==set(FORMS)
@@ -45,7 +46,8 @@ def test_real_purchase_forge_training_and_asura_matching(ready,form):
     e.store.save(g)
     ids=parts(form=form)
     for material in ids:
-        market=e.get_game(g.id)['market']['puppet_material_offers']
+        view=e.get_game(g.id)['market']
+        market=view['puppet_material_offers']+view['training_material_offers']
         offer=next(r for r in market if r['content_id']==material)
         e.buy_market_offer(g.id,offer['id'])
     before=e.store.load(g.id)

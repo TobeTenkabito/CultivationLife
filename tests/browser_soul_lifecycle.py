@@ -1,5 +1,6 @@
 """Real details/secret/nascent clicks, stale responses and mobile layout."""
 import sys
+import random
 import tempfile
 import threading
 from pathlib import Path
@@ -26,10 +27,13 @@ def main():
     with tempfile.TemporaryDirectory() as folder:
         e=GameEngine(ROOT,Path(folder)/'saves')
         g=e._load(e.create_game('身魂界面验收','supreme_metal','dao',320,preset_id='core')['id'])
-        g.pending_event=None;p=g.player;p.realm_index=4;p.layer=1;p.lifespan=10000;p.divine_sense_rank=20;p.soul_energy=600
+        g.pending_event=None;p=g.player;p.location_id='border_void_watch';p.realm_index=4;p.layer=1;p.lifespan=10000;p.divine_sense_rank=20;p.soul_energy=600
         add_item(p,'spirit_stone',100000);add_item(p,Item('test-soul-gear','验收法剑',combat_bonus=100,tags=['artifact']))
         n=SectNpc('nascent-ui','清澜','散修',4,1,30,10000,spirit_root='supreme_metal');g.world_npcs[n.id]=n
-        p.prisoners.append(g.detain_person(n.to_dict()));e.store.save(g)
+        p.prisoners.append(g.detain_person(n.to_dict()))
+        expired=SectNpc('expired-nascent-ui','已尽寿元','散修',4,1,30,30,spirit_root='supreme_metal')
+        g.world_npcs[expired.id]=expired;p.prisoners.append(g.detain_person(expired.to_dict()))
+        e.store.save(g)
         class Quiet(server.Handler):
             def log_message(self,*args):pass
         with patch.object(server,'ENGINE',e),patch.object(server,'PERSISTENCE_ROOT',Path(folder)):
@@ -44,7 +48,7 @@ def main():
                     navigation_locator(page,'[data-panel-target=secret-art]').click()
                     assert page.locator('#soul-details [data-soul-action=leave]').count()==0
                     assert page.locator('#soul-secrets').count()==0
-                    for theme in ['a','b','d','f']:
+                    for theme in ['light','dark']:
                         set_theme(page,theme)
                         for width,height in [(1440,960),(390,844),(844,390),(320,740)]:
                             page.set_viewport_size(dict(width=width,height=height))
@@ -59,20 +63,22 @@ def main():
                                 page.locator('#secret-art-back').click()
                                 assert page.locator('[data-secret-art=soul_leave]').is_visible()
                                 page.locator('[data-secret-art=soul_leave]').click()
-                            if theme=='a':page.screenshot(path=str(output/f'secret-detail-{width}.png'))
-                    page.set_viewport_size(dict(width=1440,height=960));set_theme(page,'a')
+                            if theme=='light':page.screenshot(path=str(output/f'secret-detail-{width}.png'))
+                    page.set_viewport_size(dict(width=1440,height=960));set_theme(page,'light')
                     page.locator('#secret-tab-known').click()
                     page.screenshot(path=str(output/'secret-catalog-1440.png'))
                     select_secret(page,'soul_leave','元婴离体')
                     # A stale leave click refreshes once without spending soul energy.
                     revision=page.evaluate('game.soul.revision')
                     energy=page.evaluate('game.soul.soul.current')
-                    response=page.request.post(base+f'/api/games/{g.id}/soul',data=dict(action='study',id='path_ghost',revision=revision))
+                    response=page.request.post(base+f'/api/games/{g.id}/soul',data=dict(action='leave',revision=revision))
+                    assert response.ok
+                    response=page.request.post(base+f'/api/games/{g.id}/soul',data=dict(action='return',revision=revision+1))
                     assert response.ok
                     page.locator('#secret-root-detail [data-soul-action=leave]').click()
-                    page.wait_for_function('r=>!busy&&game.soul.revision===r',arg=revision+1)
+                    page.wait_for_function('r=>!busy&&game.soul.revision===r',arg=revision+2)
                     assert page.evaluate('game.soul.mode')=='普通'
-                    assert page.evaluate('game.soul.soul.current')==energy
+                    assert page.evaluate('game.soul.soul.current')==energy-10
                     page.locator('#secret-root-detail [data-soul-action=leave]').click();page.wait_for_function('!busy&&game.soul.mode==="神游"')
                     assert page.locator('[data-soul-action=leave]').is_disabled()
                     page.locator('#secret-art-toggle').click()
@@ -81,16 +87,31 @@ def main():
                     page.locator('[data-close-dialog=player-details-dialog]').click()
                     navigation_locator(page,'[data-panel-target=secret-art]').click()
                     select_secret(page,'soul_second_nascent','第二元婴',known=False)
-                    page.locator('#secret-root-detail [data-soul-action=study]').click();page.wait_for_function('!busy&&game.soul.secrets[0].known')
+                    assert page.locator('#secret-root-detail [data-soul-action=study]').count()==0
+                    page.locator('#secret-art-toggle').click()
+                    from browser_building_visits import enter, choice
+                    enter(page,'scenery:human:twin_soul_pavilion')
+                    for option in ('secret:main','secret:read','secret:learn','leave'):choice(page,option)
+                    navigation_locator(page,'[data-panel-target=secret-art]').click()
+                    select_secret(page,'soul_second_nascent','第二元婴')
                     assert page.locator('#secret-tab-known').get_attribute('aria-selected')=='true'
                     assert page.locator('#secret-art-detail-heading h3').inner_text()=='第二元婴'
                     assert page.locator('#secret-root-detail [data-soul-action=study]').count()==0
                     page.locator('#secret-art-toggle').click()
                     navigation_locator(page,'[data-panel-target=nascent]').click()
+                    assert page.locator('#nascent-content select option').evaluate_all('(rows)=>rows.map(r=>r.value)') == [n.id]
                     for count in range(3):
                         page.locator('#nascent-content [data-soul-action=refine]').click()
                         page.wait_for_function('(n)=>!busy&&(game.soul.second||game.soul.refining?.years===n)',arg=count+1)
                     assert page.evaluate('game.soul.second.id')==n.id
+                    # Reusing the main book must update each requested real slot.
+                    book_id=page.evaluate('game.soul.techniques[0].id')
+                    for slot,label in [('main','主修'),('support','辅修'),('combat','杀伐')]:
+                        book_wrap=page.locator('#nascent-content .soul-actions').filter(
+                            has=page.get_by_role('button',name='配置'+label,exact=True))
+                        book_wrap.locator('select').select_option(book_id)
+                        book_wrap.locator('button').click()
+                        page.wait_for_function('([slot,id])=>!busy&&game.soul.second.slots[slot]===id',arg=[slot,book_id])
                     wrap=page.locator('#nascent-content .soul-actions').filter(has=page.locator('[data-soul-action=equip]'))
                     wrap.locator('select').select_option('test-soul-gear');wrap.locator('button').click()
                     page.wait_for_function('!busy&&game.soul.second.equipment.length===1')
@@ -107,7 +128,7 @@ def main():
                     assert '剩余' in page.locator('#nascent-content').inner_text()
                     page.locator('[data-soul-action=assimilate]').click()
                     page.wait_for_function('!busy&&game.soul.second.control===69')
-                    for theme in ['a','b','d','f']:
+                    for theme in ['light','dark']:
                         set_theme(page,theme)
                         for width,height in [(1440,960),(390,844),(844,390),(320,740)]:
                             page.set_viewport_size(dict(width=width,height=height));page.wait_for_timeout(700)
@@ -115,7 +136,7 @@ def main():
                                 page.screenshot(path=str(output/'overflow.png'))
                                 print(page.locator('#nascent-card').evaluate('n=>({w:n.clientWidth,s:n.scrollWidth,bad:[...n.querySelectorAll("*")].filter(x=>x.scrollWidth>x.clientWidth+2).map(x=>[x.tagName,x.className,x.clientWidth,x.scrollWidth]),pseudo:["::before","::after"].map(x=>getComputedStyle(n,x).width)})'),flush=True)
                                 raise AssertionError((theme,width))
-                            if theme=='a':page.screenshot(path=str(output/f'nascent-{width}.png'))
+                            if theme=='light':page.screenshot(path=str(output/f'nascent-{width}.png'))
                     page.locator('#nascent-toggle').click();page.locator('.hud-identity').click()
                     assert page.locator('#soul-details progress').count()==2
                     assert page.locator('#player-details-dialog').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
@@ -149,12 +170,39 @@ def main():
                     navigation_locator(page,'[data-panel-target=secret-art]').click()
                     for art,name,action in [('soul_leave','元婴离体','leave'),('soul_second_nascent','第二元婴','study')]:
                         select_secret(page,art,name,known=False)
-                        assert page.locator(f'#secret-root-detail [data-soul-action={action}]').is_disabled()
+                        if action=='study':assert page.locator(f'#secret-root-detail [data-soul-action={action}]').count()==0
+                        else:assert page.locator(f'#secret-root-detail [data-soul-action={action}]').is_disabled()
                         page.evaluate('renderButtons()')
-                        assert page.locator(f'#secret-root-detail [data-soul-action={action}]').is_disabled()
+                        if action=='study':assert page.locator(f'#secret-root-detail [data-soul-action={action}]').count()==0
+                        else:assert page.locator(f'#secret-root-detail [data-soul-action={action}]').is_disabled()
+                    # A real spatial session must expose internal emergency defense.
+                    from test_npc_development_special_areas import make_game, enter_rift, enter_guixu
+                    from cultivation_life.system import soul_lifecycle as life
+                    for place in ('lost','secluded','guixu'):
+                        crisis=make_game(e)
+                        crisis=enter_guixu(e,crisis) if place=='guixu' else enter_rift(e,crisis,place)
+                        crisis.pending_event=None;crisis.player.soul_energy=0
+                        roll=random.Random(9)
+                        with patch.object(roll,'randrange',return_value=1):life.resolve_energy(crisis,roll,e._die)
+                        e.store.save(crisis);address=life.address(crisis);age=crisis.player.age
+                        page.evaluate('async id=>loadGame(id)',crisis.id)
+                        page.wait_for_function('!busy&&game.soul.crisis==="possession"')
+                        page.locator('.hud-identity').click()
+                        resist=page.locator('#soul-details [data-soul-action=resist]')
+                        assert resist.is_enabled()
+                        page.evaluate('renderButtons()');assert resist.is_enabled()
+                        with patch.object(random.Random,'random',return_value=0):
+                            with page.expect_response(lambda response:response.url.endswith('/soul')) as response:
+                                resist.click()
+                            assert response.value.ok,(place,response.value.status,response.value.text())
+                            page.wait_for_function('!busy&&!game.soul.crisis')
+                        after=e.store.load(crisis.id)
+                        assert after.player.alive and life.address(after)==address and after.player.age==age
+                        assert page.evaluate('game.soul.blocked')
+                        page.locator('[data-close-dialog=player-details-dialog]').click()
                     assert not errors,errors
                     browser.close()
             finally:http.shutdown();http.server_close()
-    print('Soul UI passed: real leave/return/study/refine/equip/stale recovery, four themes and 320/390/844/1440 widths')
+    print('Soul UI passed: real leave/return/scenery/refine/equip/stale recovery and three spatial crisis defenses, two pixel themes and 320/390/844/1440 widths')
 
 if __name__=='__main__':main()

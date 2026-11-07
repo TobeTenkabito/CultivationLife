@@ -10,6 +10,7 @@ from ...rules import QI_SOURCE_NAMES, can_player_practice_technique, combat_requ
 from .dependencies import MarketDependencies
 from ...content_registry import restricted_acquisition, natural_market_acquisition_allowed
 from . import state as economy_state, local_market as local_trade
+from ...npc_development_content import is_training_supply
 
 
 def _ensure_market(deps: MarketDependencies, game: GameState, rng: Any) -> bool:
@@ -99,6 +100,7 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
     market_name = f"{location_name}·{REALMS[tier].name}坊市"
     shelf_goods = (row for row in MARKET_GOODS
                    if row.get('world', 'human') == player.world
+                   and not is_training_supply(row['kind'], row['content_id'])
                    and natural_market_acquisition_allowed(str(row['kind']), str(row['content_id'])))
     world_goods = deps.maps.localize_goods(shelf_goods, player.world, location_id, "market")
     general_locked = [row for row in retained if deps._market_offer_group(row) == "general"]
@@ -213,14 +215,14 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
     from ..talismans import market_offers as talisman_offers
     offers.extend(row for row in talisman_offers(game, tier, market_name, location_id)
                   if row['content_id'] not in retained_content_ids)
-    offers.extend(row for row in retained if deps._market_offer_group(row) in {'puppet', 'talisman'})
+    offers.extend(row for row in retained if deps._market_offer_group(row) in {'puppet', 'talisman', 'training'})
     game.market_realm_index = tier
     game.market_world = player.world
     game.market_location_id = location_id
     game.market_age = player.age
     game.market_offers = offers
     from ...npc_development_content import shelf
-    game.market_offers.extend(shelf(game))
+    game.market_offers.extend(row for row in shelf(game) if row['content_id'] not in retained_content_ids)
     local_trade.sync_shelf(game)
     return True
 
@@ -236,6 +238,7 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
     formation_offers = []
     puppet_offers = []
     talisman_offers = []
+    training_offers = []
     for offer in game.market_offers:
         if offer.get("world", "human") != player.world or offer.get("location_id", location_id) != location_id:
             continue
@@ -258,7 +261,13 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
             offer["kind"] != "technique"
             or can_player_practice_technique(player, TECHNIQUE_CATALOG[offer["content_id"]])
         )
-        if offer.get("kind") == "talisman_material":
+        if shown['market_group'] == 'training':
+            from ...npc_development_content import definitions as training_definitions
+            material = training_definitions().get(offer['content_id'], {})
+            shown['training_category'] = ('energy' if offer['kind'] == 'puppet_material' or material.get('axis') == 'energy'
+                                          else material.get('path', 'puppet'))
+            training_offers.append(shown)
+        elif offer.get("kind") == "talisman_material":
             talisman_offers.append(shown)
         elif offer.get("kind") == "puppet_material":
             puppet_offers.append(shown)
@@ -278,6 +287,7 @@ def _public_market(deps: MarketDependencies, game: GameState) -> dict[str, Any]:
         "formation_material_offers":formation_offers,
         "puppet_material_offers":puppet_offers,
         "talisman_material_offers":talisman_offers,
+        "training_material_offers":training_offers,
         "sellable_talismans":sale_rows(player),
         "material_offers":[*crafting_offers, *formation_offers],
         "general_offer_limit":int(MARKET_SETTINGS["offer_count"]),

@@ -1,0 +1,141 @@
+/* Paper, mineral ink and square fittings shared by the two pixel palettes.
+   Presentation only: keep the established page sizes and short-screen layout. */
+:is(#market-card,#formation-card,#crafting-card,#captive-card,#puppet-workshop-card,#npc-development-dialog) {
+  --bench-wash:color-mix(in srgb,var(--pine) 5%,var(--paper));
+  --bench-edge:color-mix(in srgb,var(--gold) 48%,var(--line));
+  border-color:var(--bench-edge);
+  box-shadow:inset 0 3px 0 var(--gold),0 12px 36px #0002;
+}
+:is(#market-card,#formation-card,#crafting-card,#captive-card,#puppet-workshop-card)>.section-title,
+#npc-development-dialog>header {
+  border-bottom:1px solid var(--bench-edge);
+  background:linear-gradient(90deg,var(--bench-wash),transparent 80%);
+}
+:is(#market-card,#formation-card,#crafting-card,#captive-card,#puppet-workshop-card) .eyebrow {
+  color:var(--pine);letter-spacing:.16em;
+}
+:is(#market-card,#formation-card,#crafting-card,#captive-card,#puppet-workshop-card) h2,
+#npc-development-dialog h2 {letter-spacing:.04em;}
+#market-wallet {color:var(--pine);font-variant-numeric:tabular-nums;}
+
+/* Primary destinations look distinct from the finer category tabs. */
+#market-view-tabs {background:var(--bench-wash);border:1px solid var(--line);gap:3px;}
+#market-view-tabs button {border:0;border-radius:1px;box-shadow:none;}
+#market-view-tabs button[aria-pressed=true] {
+  background:var(--pine);color:var(--on-accent);box-shadow:inset 0 -2px 0 var(--gold);
+}
+.utility-panel .panel-page-tabs {border-bottom-color:var(--gold);gap:4px;}
+.utility-panel .panel-page-tabs button {
+  border:1px solid transparent;border-radius:2px;background:transparent;
+  box-shadow:none;color:var(--muted);
+}
+.utility-panel .panel-page-tabs button[aria-selected=true],
+.utility-panel .panel-page-tabs button[aria-selected=true]:hover {
+  color:var(--ink);background:color-mix(in srgb,var(--pine) 9%,var(--paper));
+  border-color:var(--line);box-shadow:inset 0 -3px 0 var(--gold);font-weight:700;
+}
+.utility-panel .panel-page-tabs button:hover:not(:disabled) {
+  color:var(--ink);border-color:var(--line);background:color-mix(in srgb,var(--pine) 6%,var(--paper));
+}
+.list-pagination {
+  background:color-mix(in srgb,var(--pine) 5%,var(--paper));
+  border-block:1px solid var(--line);border-radius:2px;
+}
+.list-pagination span {color:var(--ink);font-variant-numeric:tabular-nums;}
+.list-pagination button {border-radius:2px;box-shadow:none;background:transparent;border-color:transparent;}
+.list-pagination button:not(:disabled) {color:var(--pine);font-weight:600;}
+.list-pagination button:disabled {opacity:.6;}
+:is(.panel-page-tabs,.list-pagination) button:focus-visible,
+:is(#market-card,#formation-card,#crafting-card,#captive-card,#puppet-workshop-card,#npc-development-dialog) :is(button,select,input):focus-visible {
+  outline:2px solid var(--pine);outline-offset:2px;
+}
+
+/* Shop labels and controls stay on the original offer nodes. */
+#market-card .market-stock-heading {border-bottom-color:var(--bench-edge);}
+#market-card .market-stock-heading h3 {color:var(--ink);letter-spacing:.05em;}
+#market-card .market-stock-heading .eyebrow {display:none;}
+#market-card .market-refresh-note {border-left:2px solid var(--gold);padding-left:8px;}
+#market-card .training-supply-filter {color:var(--muted);font-size:12px;}
+#market-card :is(input,select),#local-market-content :is(input,select) {
+  border-radius:2px;border-color:var(--line);background:var(--paper);color:var(--ink);
+}
+#market-card .market-offer {
+  position:relative;border:1px solid var(--line);border-left:3px solid var(--pine);
+  background:linear-gradient(120deg,var(--bench-wash),var(--paper));border-radius:2px;
+  box-shadow:0 2px 0 color-mix(in srgb,var(--line) 35%,transparent);
+}
+#market-card .market-offer b {color:var(--ink);line-height:1.5;}
+#market-card .market-offer small {color:var(--muted);line-height:1.55;}
+#market-card .market-offer.locked {border-color:var(--gold);border-left-width:3px;background:color-mix(in srgb,var(--gold) 7%,var(--paper));}
+#market-card .market-offer.sold {opacity:1;border-left-color:var(--line);background:var(--paper);box-shadow:none;}
+#market-card .market-offer.sold b {color:var(--muted);}
+#market-card .market-lock {border-color:var(--line);background:transparent;color:var(--muted);box-shadow:none;border-radius:2px;}
+#market-card .market-lock.active {border-color:var(--gold);color:var(--ink);background:color-mix(in srgb,var(--gold) 12%,var(--paper));}
+#market-card .market-buy:not(:disabled),#local-market-content [data-trade=buy]:not(:disabled) {
+  color:var(--on-accent);background:var(--pine);border-color:var(--pine);box-shadow:none;border-radius:2px;font-weight:600;
+}
+#market-card .market-buy:disabled {color:var(--muted);background:var(--bench-wash);border-color:var(--line);box-shadow:none;opacity:1;}
+#local-market-content .economy-good {
+  border-color:var(--line);border-left:3px solid var(--pine);border-radius:2px;
+  background:color-mix(in srgb,var(--pine) 3%,var(--paper));
+}
+#local-market-content .economy-good .supply-badge {border-radius:2px;font-weight:500;}
+#local-market-content [data-trade=sell] {background:var(--paper);color:var(--pine);border-color:var(--line);border-radius:2px;box-shadow:none;}
+#local-market-content .economy-good>progress {border-radius:0;accent-color:var(--pine);appearance:none;border:0;}
+#local-market-content .economy-good>progress::-webkit-progress-bar {background:var(--line);}
+#local-market-content .economy-good>progress::-webkit-progress-value {background:var(--pine);}
+#local-market-content .economy-good>progress::-moz-progress-bar {background:var(--pine);}
+#local-market-content .economy-metrics>div {border-bottom-color:var(--gold);}
+#local-market-content .economy-metrics strong {color:var(--pine);font-variant-numeric:tabular-nums;}
+#local-market-content :is(.competition-card,.market-control,.economy-overview) {border-radius:2px;}
+
+/* Nine palaces and crafting stations share the same fine frame. */
+#formation-card :is(.formation-workbench,.formation-reading),
+#crafting-card .crafting-workbench,#puppet-workshop .puppet-component-grid>label {
+  border-color:var(--line);border-radius:2px;background:var(--bench-wash);
+}
+#formation-card .formation-grid-wrap {
+  border-color:var(--bench-edge);
+  background:linear-gradient(90deg,transparent 49.8%,color-mix(in srgb,var(--gold) 14%,transparent) 50%,transparent 50.2%),
+    linear-gradient(transparent 49.8%,color-mix(in srgb,var(--gold) 14%,transparent) 50%,transparent 50.2%),var(--paper);
+}
+#formation-card .formation-slot {border-color:var(--line);border-radius:2px;background:var(--paper);box-shadow:2px 2px 0 color-mix(in srgb,var(--line) 45%,transparent);}
+#formation-card .formation-slot::before {color:var(--pine);font-weight:700;}
+#formation-card .formation-slot select {border-bottom-color:var(--bench-edge);}
+#formation-card .formation-slot.drag-over {border-color:var(--gold);box-shadow:0 0 0 2px var(--gold);}
+#formation-card .formation-metric {border-left-color:var(--gold);}
+:is(#formation-card,#crafting-card) :is(.formation-material-row,.formation-ground-row,.formation-loadout,.crafting-material-row,.crafting-blueprint) {
+  border-color:var(--line);border-radius:2px;background:var(--bench-wash);
+}
+:is(#formation-save-activate,#crafting-save-blueprint,#craft-puppet,#npc-development-submit):not(:disabled) {
+  color:var(--on-accent);background:var(--pine);border-color:var(--pine);box-shadow:none;
+}
+#puppet-workshop .puppet-component-grid>label {padding:10px;border:1px solid var(--line);border-top:2px solid var(--gold);color:var(--muted);}
+#puppet-workshop .puppet-result {border-left:3px solid var(--gold);background:var(--bench-wash);padding:10px 12px;color:var(--ink);}
+#captive-card :is(.puppet-row,.captive-row) {border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:2px;background:var(--bench-wash);}
+#captive-card :is(.puppet-row,.captive-row)>b {color:var(--ink);}
+#captive-card .npc-development-open {border-color:var(--pine);color:var(--pine);background:var(--paper);}
+
+/* Portraits retain their original art; the frame supplies visual hierarchy. */
+#npc-development-dialog .npc-development-person {border:1px solid var(--line);border-radius:2px;box-shadow:none;}
+#npc-development-dialog .npc-development-person[aria-pressed=true] {outline:0;border-color:var(--gold);background:var(--bench-wash);box-shadow:inset 3px 0 0 var(--gold);}
+#npc-development-dialog .npc-development-art {border:1px solid var(--bench-edge);background:linear-gradient(0deg,var(--bench-wash),var(--paper));}
+#npc-development-dialog .npc-development-quote {border:1px solid var(--line);border-left:3px solid var(--gold);background:var(--bench-wash);}
+#npc-development-dialog .npc-development-controls select {border-radius:2px;background:var(--paper);}
+
+@media(max-width:600px) {
+  #puppet-workshop .puppet-component-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  #puppet-workshop .puppet-component-grid>label {padding:8px;font-size:11px;}
+}
+@media(min-width:901px) and (min-height:551px) {
+  #local-market-content .economy-query>.economy-tools {
+    display:grid;grid-template-columns:minmax(0,1fr) auto minmax(90px,.5fr) minmax(100px,.6fr);gap:8px;
+  }
+  #local-market-content .economy-tools :is(input,select) {min-width:0;}
+}
+@media(max-height:550px) and (min-width:601px) {
+  #market-view-tabs {border:0;}
+  #local-market-content .economy-good {border-left-width:2px;}
+  #local-market-content .economy-good .supply-badge {padding:0 4px;}
+  #local-market-content .economy-trading>.list-pagination {border:0;}
+}

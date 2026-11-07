@@ -59,7 +59,7 @@ def main():
                                 raise AssertionError('Authoring overflow')
                             if theme=='a':page.screenshot(path=str(output/f'author-{width}.png'))
                     page.locator('#authored-toggle').click()
-                    page.locator('#theme-open').click();page.locator('#theme-dialog [data-pixel-setting]').set_checked(True);page.evaluate('GameThemes.saved');page.locator('[data-close-dialog=theme-dialog]').click()
+                    page.locator('#theme-open').click();page.locator('#theme-dialog [data-pixel-theme-choice=light]').click();page.evaluate('GameThemes.saved');page.locator('[data-close-dialog=theme-dialog]').click()
                     navigation_locator(page,'[data-panel-target=relationship]').click()
                     search=page.locator('#npc-contacts input[type=search]');reveal_subpage(page,search);search.fill('顾长庚');page.locator('.contact-person').click()
                     page.locator('.contact-detail .npc-art-figure').wait_for(state='visible')

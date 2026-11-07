@@ -45,7 +45,7 @@
 | --- | --- | --- |
 | `npc development <action> <kind> <target_id> [axis] [method] [batches] [content_id] [slot] [source] [revision]` | `npc-development` | simulation |
 | `skin select [skin_id]` | `character-skin` | simulation |
-| `soul action <action> <revision> [id] [index] [slot]` | `soul` | simulation |
+| `soul action <action> <revision> [id] [index] [slot] [quote]` | `soul` | simulation |
 | `sect task <action> <owner_id> <revision> [amount] [realm] [enabled] [successor] [npc_id] [kind] [item] [quantity] [war_id] [task_id]` | `sect-task` | simulation |
 | `authored action <action> <revision> [id] [level] [design]` | `authored-technique` | simulation |
 | `building action <action> [building_id] [event_id] [choice_id]` | `building-action` | simulation |
@@ -208,3 +208,5 @@
 自动检查对照全部角色操作分支，拒绝漏记的入口；逐项绑定实际引擎方法签名及参数类型。另有真实工作流、失败回滚、纯本体安装、HTTP/Agent 和浏览器检查。入口级覆盖不替代每个 DLC 与所有玩法分支的专项测试。
 
 师徒第二批已扩展原 `mentorship action`：契约、撤约、履约夺舍、炼化/开关化身、同门游说、结盟及挑战师父；`npc development` 的 `inherit_infuse`、`inherit_material` 复用普通精修报价与周期额度。功能调试的全部系统面板自动列出这些子操作，不提供跳过忠诚、地点、资源或魂魄规则的捷径。实际Runtime副本调用见 `tests/test_mentorship_advanced.py`，普通存档字节保持不变。
+
+身魂转道的 `convert` 必须提供当前游戏视图 `soul.conversions` 对应目标的 `quote`，与原 `revision` 一起提交；不自动替用户接受新的代价。其它身魂动作无需 `quote`。

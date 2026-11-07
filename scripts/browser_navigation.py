@@ -17,9 +17,12 @@ def navigation_locator(page, selector):
 
 def reveal_subpage(page, target):
     """Reveal the actual target by clicking its owning parallel-page tab."""
-    for _ in range(8):
-        info=target.evaluate('''node=>{let hidden=null;for(let n=node;n;n=n.parentElement)if(n.hasAttribute('data-page-hidden'))hidden=n;if(!hidden)return null;let host=hidden.parentElement;while(host&&!host.querySelector(':scope>.panel-page-tabs'))host=host.parentElement;if(!host)return null;const tab=[...host.querySelector(':scope>.panel-page-tabs').children].find(b=>b.dataset.subpage===hidden.dataset.pageName);if(!tab)return null;document.querySelectorAll('[data-test-reveal-tab]').forEach(n=>n.removeAttribute('data-test-reveal-tab'));tab.setAttribute('data-test-reveal-tab','1');return true;}''')
+    for _ in range(200):
+        info=target.evaluate('''node=>{let hidden=null;for(let n=node;n;n=n.parentElement)if(n.hasAttribute('data-page-hidden'))hidden=n;if(!hidden){for(let n=node;n;n=n.parentElement)if(n.hasAttribute('data-list-page-hidden'))hidden=n;if(!hidden)return null;const list=hidden.closest('.paginated-list'),nav=list?.querySelector(':scope>.list-pagination')||list?.previousElementSibling;if(!nav?.matches('.list-pagination'))return null;const current=list.querySelector(':scope>[data-list-page]:not([data-list-page-hidden]):not(.hidden)'),delta=Number(hidden.dataset.listPage)>Number(current?.dataset.listPage||0)?1:0;const button=nav.querySelectorAll('button')[delta];if(!button||button.disabled)return 'pending';document.querySelectorAll('[data-test-reveal-tab]').forEach(n=>n.removeAttribute('data-test-reveal-tab'));button.setAttribute('data-test-reveal-tab','1');return true;}let host=hidden.parentElement;while(host&&!host.querySelector(':scope>.panel-page-tabs'))host=host.parentElement;if(!host)return null;const tab=[...host.querySelector(':scope>.panel-page-tabs').children].find(b=>b.dataset.subpage===hidden.dataset.pageName);if(!tab)return null;document.querySelectorAll('[data-test-reveal-tab]').forEach(n=>n.removeAttribute('data-test-reveal-tab'));tab.setAttribute('data-test-reveal-tab','1');return true;}''')
         if not info:return target
+        if info=='pending':
+            page.wait_for_timeout(50)
+            continue
         page.locator('[data-test-reveal-tab]').click()
     raise AssertionError('Subpage nesting did not resolve')
 

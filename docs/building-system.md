@@ -108,3 +108,7 @@ v2.17.1 的概览与地图详情共用文字名录。名称、类型、等级和
 `tests/test_city_buildings.py` 覆盖十一界目录与实际事件提交、有限奖励、真实工料扣除、治理年份、逐级发展、遗址重建、原产业停工及战役损毁。`tests/browser_city_buildings.py` 与原 `browser_buildings.py` 验证四主题桌面／手机、十一界城市、过期页面、禁用状态、后续奖励与忙碌解除；原事件入口另运行 `browser_events_212.py`。发行脚本为 `verify_scoped_release.py --profile buildings`、`verify_release_exe.py`、签名 Android 原生 buildings / economy-enterprises 横竖屏阶段及 `package_scoped_release.py`。只有完整证据匹配最终包与源码后才生成同版清单。
 
 `tools/benchmark_buildings.py` 在隔离档用相同种子、确定性身份生成，比较 0、1、128 条建筑记录及同等数量的已领奖记录各一次真实休息行动，预热一次后取三次中位数，并核对经济结算数据一致。气收益采用地址直接查找，另有禁止名录迭代的断言。性能对照包含保存校验和地图投影，不是更新前后提升证明；数据和源码指纹在 `build/building-performance.json`。
+
+## 风景传承补充（2026-11-06）
+
+人界新增断誓残碑、古渡留魂灯、空山转轮龛、双影参玄台四处无主景观，原33景扩为37景。镜湖烟汀、白鹿听雪坪新增独立传承分支，旧探索、结局及纪念物不变。指定剧情可一次性领悟六门身魂秘法，通用观景仍不授奖；名单、境界与结算边界见[身魂秘法传承](soul-lifecycle.md#风景秘法传承2026-11-06)。沿现有原址会话处理，不产生新空间或建筑产权。

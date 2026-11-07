@@ -34,7 +34,7 @@ def game_state():
 
 
 @pytest.mark.parametrize('encounters', [False, True])
-@pytest.mark.parametrize('outcome', ['continue', 'event', 'world-death', 'erosion-death'])
+@pytest.mark.parametrize('outcome', ['continue', 'event', 'world-death', 'erosion-death', 'erosion-rescue'])
 def test_year_interruption_settles_erosion_only_when_still_alive(encounters, outcome):
     game, rng, news, calls = game_state(), random.Random(1), [], []
     age = game.player.age
@@ -52,6 +52,8 @@ def test_year_interruption_settles_erosion_only_when_still_alive(encounters, out
         calls.append('erosion')
         if outcome == 'erosion-death':
             game.player.alive = False
+        if outcome == 'erosion-rescue':
+            return False
     deps = ElapsedYearDependencies(annual, erosion)
     assert advance_elapsed_year(deps, game, rng, news, encounters=encounters) is (outcome == 'continue')
     assert calls == (['world'] if outcome == 'world-death' else ['world', 'erosion'])

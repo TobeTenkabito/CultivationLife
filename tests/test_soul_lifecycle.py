@@ -29,6 +29,9 @@ def ready(tmp_path):
     return e,g
 
 def act(e,g,action,**kw):
+    if action == 'convert':
+        from cultivation_life.system.soul_actions import conversion_token
+        kw.setdefault('quote', conversion_token(e.store.load(g.id), kw['id']))
     return e.soul_action(g.id,action,dict(revision=e.store.load(g.id).player.nascent_state.get('revision',0),**kw))
 
 

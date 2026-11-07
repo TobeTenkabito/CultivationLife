@@ -25,7 +25,9 @@ def verify_soul(base, with_dlc, folder):
     assert view['soul']['body']['maximum']==300
     act('leave');assert view['soul']['mode']=='神游'
     act('return');assert view['soul']['mode']=='普通'
-    act('study',id='second_nascent')
+    view=request(path+'/building-action',dict(action='enter',building_id='scenery:human:twin_soul_pavilion'))
+    for choice in ('secret:main','secret:read','secret:learn','leave'):
+        view=request(path+'/choice',dict(choice_id=choice,event_id=view['pending_event']['id']))
     for _ in range(3):act('refine',id='release-nascent')
     assert view['soul']['second']['id']=='release-nascent'
     act('equip',id='release-soul-sword')
@@ -33,4 +35,4 @@ def verify_soul(base, with_dlc, folder):
     assert request(path)['soul']['second']==view['soul']['second']
     # Death settlement belongs to the actual packaged command, triggered through a real lethal battle elsewhere in regression.
     act('dismiss');assert view['soul']['second'] is None
-    print(f'EXE soul verified: DLC={with_dlc}; real energy/leave/return/study/refine/equip/reload/dismiss',flush=True)
+    print(f'EXE soul verified: DLC={with_dlc}; real energy/leave/return/scenery/refine/equip/reload/dismiss',flush=True)

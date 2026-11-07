@@ -1,6 +1,7 @@
 """Explicit personal capabilities inside isolated spaces; geography stays local."""
 PERSONAL_COMMANDS = frozenset({
     'train_secret_art', 'npc_development', 'mentorship_action',
+    'soul_action',  # Only emergency resistance passes the domain's spatial guard.
     'contact_action', 'manage_dao_companion', 'manage_dao_friend',
     'manage_party', 'leave_relationship', 'request_from_master', 'gift_disciple',
     'respond_disciple_request', 'relationship_violence', 'begin_relationship_capture',

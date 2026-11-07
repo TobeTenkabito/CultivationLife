@@ -28,7 +28,7 @@ def verify(page, engine, width):
             harness.click_post(page, endpoint, target, status=400)
             assert engine.store._path(identity).read_bytes()==frozen
             assert sum(method=='POST' and url.endswith('/'+endpoint) for method,url in requests)==1
-            assert sum(method=='GET' and url.endswith('/'+identity) for method,url in requests)==1
+            assert sum(method=='GET' and url.split('?',1)[0].endswith('/'+identity) for method,url in requests)==1, requests
         finally:
             page.remove_listener('request', observe)
         page.wait_for_function('!busy && !document.body.classList.contains("busy")')
