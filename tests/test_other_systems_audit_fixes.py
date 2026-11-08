@@ -329,14 +329,19 @@ def test_trapped_batch_stops_when_host_dies_even_if_original_ghost_survives(api)
     game = trapped_game(engine, 4)
     host = dict(id='host', name='宿身', race='human', path='dao', spirit_root='supreme_metal',
                 realm_index=3, layer=1, age=50, lifespan=51)
+    game.player.spirit_state = dict(mode='wandering', body_intact=True, entered=game.player.age,
+        deadline=game.player.age+100, address=dict(world=game.player.world,
+            location_id=game.player.location_id, instance_id=None))
     enter_host_body(game.player, host)
     engine.store.save(game)
     age = game.player.age
     act(game.id, 'advance', action='rest', years=3)
     saved = engine._load(game.id)
     assert saved.player.age == age + 1
-    assert saved.player.alive and saved.player.path=='ghost'
-    assert saved.player.ghost_host_body is None
+    # Soul lifecycle now treats host lifespan exhaustion as terminal, even for
+    # an immortal ghost core. It must still stop the remaining batched years.
+    assert not saved.player.alive
+    assert '寿' in saved.player.death_reason
 
 
 @pytest.mark.parametrize('rows', [[], [[0,True]], [[0,0]], [[1,1]], [[0,1],[100,1]], [[0,1],[0,2]]])

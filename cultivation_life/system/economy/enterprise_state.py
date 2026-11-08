@@ -40,12 +40,15 @@ def owner_allowed(game, kind, identity, world):
 
 def operating_tier(game, row):
     """Recheck player-operated licenses; autonomous owners keep their own work."""
-    return game.player.realm_index + 1 if owner_allowed(
+    from .operating_license import allowed
+    return game.player.realm_index + 1 if allowed(game,row) or owner_allowed(
         game, row['owner_kind'], row['owner_id'], row['world']) else None
 
 
 def payer(row):
+    if row.get('operating_lease'):return row['operating_lease']['wallet']
     kind, identity = row['owner_kind'], row['owner_id']
+    if kind=='yaochi':return 'institution:celestial:yaochi'
     if kind == 'player':
         return f'estate:{row["id"]}'
     if kind == 'alliance':
@@ -92,7 +95,8 @@ def require_local(game, identity):
     p = game.player
     if not row or (row['world'], row['location']) != (p.world, p.location_id):
         raise ValueError('请亲赴该产业所在地办理')
-    if not owner_allowed(game, row['owner_kind'], row['owner_id'], row['world']):
+    from .operating_license import allowed
+    if not allowed(game,row) and not owner_allowed(game, row['owner_kind'], row['owner_id'], row['world']):
         raise ValueError('没有该产业的经营权限')
     return row
 

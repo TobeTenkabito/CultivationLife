@@ -96,7 +96,15 @@ def test_every_new_node_executes_real_evolution_once_and_roundtrips(sandbox,key)
         assert after.player.lifespan is None  # Existing immortal-lifespan rule.
     else:
         assert after.player.lifespan>before.lifespan
-    snapshot=after.to_dict()
+    # Session preparation remembers newly attained cosmetics; the presentation
+    # already exposes them, but their ledger is persisted on the next load.
+    # Establish that documented load boundary before testing rejected commands.
+    prepared=engine._load(g.id)
+    expected=after.to_dict()
+    expected['player']['character_skins']=prepared.player.character_skins
+    assert prepared.to_dict()==expected
+    assert set(after.player.character_skins['unlocked'])<=set(prepared.player.character_skins['unlocked'])
+    snapshot=prepared.to_dict()
     with pytest.raises(ValueError):engine.evolve_monster(g.id,key)
     assert engine.store.load(g.id).to_dict()==snapshot
     restored=engine.get_game(g.id)

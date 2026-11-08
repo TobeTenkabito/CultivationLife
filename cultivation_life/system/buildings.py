@@ -348,6 +348,7 @@ def attach_overview(game, map_data):
         target = dict(world=map_data['world'], instance_id=None, location_id=place['id'])
         place['buildings'] = [dict(id=row['id'], name=display_name(row), type=row['type'],
             subtype=row.get('subtype'), level=row['level'], status=row['status'], description=describe(row),
+            dependency=row.get('dependency'),
             population=row.get('population'), population_name=projects.POPULATIONS.get(row.get('population')),
             use_name=projects.USES.get(row.get('subtype')), owned=projects.owns(game,row),
             can_enter=target == current and may_use(row, 'player', game.id),

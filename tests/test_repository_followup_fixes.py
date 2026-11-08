@@ -149,7 +149,7 @@ def test_host_ward_uses_host_fact_and_original_returns_after_leave(api, original
     engine, act = api
     game, _ = prepared(engine, path='ghost')
     game.player.body_training = 100
-    game.player.immortal_body.update(level=original_level, golden_light_rank=5)
+    game.player.immortal_body.update(level=original_level, ghost_training={'wuxiang': 5})
     original = copy.deepcopy(game.player.immortal_body)
     npc = SectNpc('ward-host-'+game.id, '宿身', '', 9, 1, 100, None, world='celestial',
         path='dao', race='human', spirit_root='supreme_metal', body_training=100 if host_level else 0,
@@ -157,12 +157,15 @@ def test_host_ward_uses_host_fact_and_original_returns_after_leave(api, original
     game.notable_npcs[npc.id] = npc
     game.player.prisoners.append(game.detain_person(dict(id=npc.id, combat_power=1)))
     game.player.immortal_aperture['current'] = 0
+    game.player.spirit_state = dict(mode='wandering', body_intact=True, entered=game.player.age,
+        deadline=game.player.age+100, address=dict(world=game.player.world,
+            location_id=game.player.location_id, instance_id=None))
     game.rng_state = encode_rng(random.Random(1))
     engine.store.save(game)
     act(game.id, 'captive-action', action='possess', target_id=npc.id)
     possessed = engine._load(game.id)
     assert golden_light(possessed.player) == bool(host_level)
-    assert golden_light_rank(possessed.player) == (1 if host_level else 0)
+    assert golden_light_rank(possessed.player) == (2 if host_level else 0)
     assert battle(possessed).battle.units['player'].unit.capabilities.ward_tier == (2 if host_level else 1)
     assert engine.get_game(game.id)['aperture']['suspended']
     frozen = snapshot(engine, game.id)
@@ -171,8 +174,13 @@ def test_host_ward_uses_host_fact_and_original_returns_after_leave(api, original
     act(game.id, 'ghost-leave-host')
     restored = engine._load(game.id)
     assert restored.player.immortal_body == original
-    assert golden_light(restored.player) == bool(original_level)
-    assert golden_light_rank(restored.player) == (5 if original_level else 0)
+    # Leaving destroys the host and returns the original ghost to bodiless
+    # wandering. The cultivation ledger survives, physical wards do not.
+    assert restored.player.path == 'ghost'
+    assert restored.player.spirit_state['mode'] == 'wandering'
+    assert not restored.player.spirit_state['body_intact']
+    assert not golden_light(restored.player)
+    assert golden_light_rank(restored.player) == 0
     assert restored.player.immortal_aperture['current'] == 0
     act(game.id, 'aperture-action', action='refine')
     assert engine._load(game.id).player.immortal_aperture['current'] == 250

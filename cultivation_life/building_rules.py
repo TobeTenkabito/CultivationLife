@@ -28,6 +28,7 @@ def initial_rows(place):
                 owner=dict(kind='background' if kind=='city' else 'none',id=identity if kind=='city' else None),
                 content_id=spec['id'])
             if kind=='city':
+                if spec.get('dependency'):row['dependency']=spec['dependency']
                 row.update(population=spec['population'], development=0,
                     features=['defensive_array','restrictions'] if spec['population']=='cultivator' and row['level']>=2 else [])
             else:

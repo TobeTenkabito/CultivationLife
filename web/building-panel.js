@@ -13,11 +13,12 @@
   }
   function building(row,place) {
     const item=el('details',null,'building-row');item.dataset.buildingId=row.id;item.dataset.status=row.status;
-    const kind=['cave','temple'].includes(row.subtype)?row.subtype:row.type;
+    if(row.dependency?.startsWith('official.')||row.subtype==='land_temple'||/^(antiquity:|purple-east:)/.test(row.id))item.dataset.dlcScope=row.dependency||'yaochi-westward';
+    const kind=['cave','temple','land_temple'].includes(row.subtype)?row.subtype:row.type;
     const summary=el('summary',null,'building-entry-heading');
     const body=el('div',null,'building-copy'),head=el('div',null,'building-title');
     head.append(el('strong',row.name),el('span',row.status==='destroyed'?'遗址待建':row.status==='damaged'?'受损':row.type==='scenery'?'山河旧景':'完好','building-status'));
-    const category={city:'城池',scenery:'景色',industry:'产业',cave:'洞府',temple:'佛寺',other:'建筑'}[kind]||'建筑';
+    const category={city:'城池',scenery:'景色',industry:'产业',cave:'洞府',temple:'佛寺',land_temple:'土地庙',other:'建筑'}[kind]||'建筑';
     const meta=[category,row.type==='scenery'?'自然景观':`${row.level}级`,row.use_name,row.population_name].filter(Boolean);
     body.append(head,el('p',meta.join(' · '),'building-meta'));
     summary.append(body);
@@ -27,7 +28,7 @@
       if(row.type!=='scenery')actions.append(command(row.status==='destroyed'?'重建':'营造',{action:'manage',building_id:row.id}));
     }else actions.append(el('span','需亲赴此地','building-remote'));
     summary.append(actions,icon('chevron-down'));item.append(summary);
-    const detail=el('div',null,'building-detail'),art=el('div',null,'building-art');art.dataset.kind=kind;art.setAttribute('aria-hidden','true');
+    const detail=el('div',null,'building-detail'),art=el('div',null,'building-art');art.dataset.kind=kind==='land_temple'?'temple':kind;art.setAttribute('aria-hidden','true');
     const copy=el('div',null,'building-detail-copy');copy.append(el('p',row.description,'building-description'));
     copy.append(el('small',row.status==='destroyed'?'保留原址与原产权':row.type==='scenery'?'公开游览':row.owned?'自有 · 使用权在手':row.access?'对外开放':'尚无使用许可','building-access'));
     detail.append(art,copy);item.append(detail);return item;

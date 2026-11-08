@@ -223,11 +223,12 @@ def test_json_read_rejects_all_old_schemas_without_rewriting(local):
     path = local.store._path(identity)
     original = path.read_bytes()
     document = json.loads(original)
-    for version in range(1, 11):
+    from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
+    for version in range(1, SAVE_SCHEMA_VERSION):
         document['version'] = version
         obsolete = json.dumps(document, ensure_ascii=False).encode('utf-8')
         path.write_bytes(obsolete)
-        with pytest.raises(ValueError, match='仅支持结构 11'):
+        with pytest.raises(ValueError, match=f'仅支持结构 {SAVE_SCHEMA_VERSION}'):
             local.get_game(identity, as_json=True, defer_order_goods=True)
         assert path.read_bytes() == obsolete
     path.write_bytes(original)

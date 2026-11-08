@@ -5,7 +5,8 @@
   const node=(tag,text,cls='')=>{const e=document.createElement(tag);e.textContent=text;e.className=cls;return e;};
   const status={waiting:'候货',travelling:'在途',selling:'待售',stranded:'受阻',retired:'已解散'};
   function render(root,market,map){
-    const fleets=(market.caravans||[]).filter(f=>f.status!=='retired');if(!fleets.length)return;
+    const fleets=(market.caravans||[]).filter(f=>f.status!=='retired');
+    if(!fleets.length){const empty=node('section','','caravan-atlas');empty.append(node('strong','商路行旅图'),node('p','此地暂无可见的存续商队。可在商盟的商队经营中查看本人商队状态与结算原因；其他地点的商队仍按当地情报显示。','muted'));root.append(empty);return;}
     const places=new Map((map?.locations||[]).map(p=>[p.id,p.name]));
     const current=market.market_id.slice(market.market_id.indexOf(':')+1);
     const ids=new Set([current]);fleets.forEach(f=>{(f.route||[]).forEach(id=>{if(places.has(id))ids.add(id);});if(places.has(f.location_id))ids.add(f.location_id);});

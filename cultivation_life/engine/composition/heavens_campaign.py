@@ -189,7 +189,8 @@ def bind_campaign(engine):
 
     def relief(game, unit):
         npc = person(game, unit['person_id'])
-        npc.wounds = max(0, npc.wounds-1)
+        from ...system.combat.npc_lifecycle import relieve_wounds
+        relieve_wounds(npc)
 
     def release(game, unit):
         release_person(game, unit['person_id'])

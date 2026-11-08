@@ -37,8 +37,10 @@ def travel_map(deps: MapTravelDependencies, game_id: str, destination: str) -> d
     journey = game.map_journey
     if not journey or (journey['world'], journey['origin'], journey['destination'], journey['route']) != (
             player.world, plan.origin, plan.destination, list(plan.route)):
+        from .system.earth_dispute_roads import delay
+        extra = delay(game,plan.route)
         journey = game.map_journey = dict(world=player.world, origin=plan.origin,
-            destination=plan.destination, route=list(plan.route), years=plan.years, completed=0)
+            destination=plan.destination, route=list(plan.route), years=plan.years+extra, completed=0)
     remaining = journey['years'] - journey['completed']
 
     rng = decode_rng(game.seed, game.rng_state)

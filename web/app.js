@@ -1306,7 +1306,8 @@ function paintHeavenlyCourt(court) {
   const legacy=game.player.institution_affiliations?.heavenly_court;
   if(legacy){const note=document.createElement('p');note.className='muted';note.textContent=`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，不占用宗门归属。`;root.append(note);}
   const summary = document.createElement('div'); summary.className = 'court-summary';
-  [['天庭权威',number(court.authority)],['府库灵石',number(court.treasury)],['战备装备',number(court.equipment)],['你的官阶',`${court.player_grade}品`],['功德',`${number(court.player_merit)}${court.next_grade_merit ? ` / ${number(court.next_grade_merit)}` : ''}`],['个人支持度',`${Number(court.player_support).toFixed(1)}%`],['掌握七曜',`${court.player_controls} / 7`],['每年俸禄',`${number(court.stipend)} 灵石`],['本宗影响力',number(court.player_seat_influence)]].forEach(([label,value]) => {
+  const entitlement=game.yaochi?.westward;
+  [['天庭权威',number(court.authority)],['府库灵石',number(court.treasury)],['战备装备',number(court.equipment)],['你的官阶',`${court.player_grade}品`],[entitlement?.adopted?'功德资历':'功德',`${number(court.player_merit)}${court.next_grade_merit ? ` / ${number(court.next_grade_merit)}` : ''}`],...(entitlement?.adopted?[['可用功德',number(entitlement.merit)]]:[]),['个人支持度',`${Number(court.player_support).toFixed(1)}%`],['掌握七曜',`${court.player_controls} / 7`],['每年俸禄',`${number(court.stipend)} 灵石`],['本宗影响力',number(court.player_seat_influence)]].forEach(([label,value]) => {
     const row=document.createElement('div'), small=document.createElement('small'), strong=document.createElement('strong'); small.textContent=label; strong.textContent=value; row.append(small,strong); summary.appendChild(row);
   }); root.appendChild(summary);
   window.renderOrganizationFinance?.(root, court.finance);
@@ -1334,6 +1335,7 @@ function paintHeavenlyCourt(court) {
   (court.laws||[]).forEach(law=>{const row=document.createElement('div'),text=document.createElement('span'),name=document.createElement('b'),detail=document.createElement('small'),button=document.createElement('button');row.className=`court-law ${law.active?'active':''}`;name.textContent=`${law.name} · ${law.active?'施行中':'未施行'}`;detail.textContent=law.description;text.append(name,detail);button.className='court-action';button.textContent=law.active?'提请废除':'提请施行';button.dataset.courtUnavailable=court.player_controls<1||(!law.active&&law.conflicts?.length)?'1':'0';if(!law.active&&law.conflicts?.length){button.textContent='须先废除互斥天条';detail.textContent+=` 与${law.conflicts.map(id=>court.laws.find(x=>x.id===id)?.name||id).join('、')}互斥。`;}button.onclick=()=>mutate(`/api/games/${game.id}/heavenly-court`,{action:`law:${law.id}`,enact:!law.active,influence_spend:Number(influence.value)||0});row.append(text,button);lawSection.appendChild(row);});
   policies.append(decreeSection,lawSection);root.appendChild(policies);
   if(court.pledges?.length){const pledges=document.createElement('p');pledges.className='court-pledges';pledges.textContent=`尚待兑现：${court.pledges.map(row=>`${row.kind==='law'?'天条':'决议'} ${row.id}（第${row.deadline_unit}单位前）`).join('、')}`;root.appendChild(pledges);}
+  window.CourtBureaus?.render(root,court.bureaus,payload=>mutate(`/api/games/${game.id}/yaochi-action`,payload),court.projects);
 }
 
 function renderIntrigue(system) {

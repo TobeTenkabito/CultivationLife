@@ -1,4 +1,4 @@
-"""Real bulk exchanges and responsive shop controls in all four themes."""
+"""Real bulk exchanges through Yaochi tabs in both supported pixel themes."""
 import sys
 import tempfile
 import threading
@@ -12,6 +12,7 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from cultivation_life.system.immortal_system import item_quantity
 from cultivation_life.system.yaochi_system import config
+from scripts.browser_navigation import navigation_locator, set_theme
 
 
 class Quiet(server.Handler):
@@ -48,10 +49,11 @@ def main():
                 row = page.locator(f'[data-offer-id="{offer["id"]}"]')
                 quantity = row.get_by_role('spinbutton')
                 buy = row.get_by_role('button', name='兑换', exact=True)
-                for theme in 'abdf':
-                    page.evaluate('(t)=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice=${t}]`).click()', theme)
-                    page.evaluate('GameThemes.saved')
-                    page.evaluate("UtilityPanels.open('yaochi')")
+                for theme in ('light', 'dark'):
+                    set_theme(page, theme)
+                    if not page.locator('#yaochi-card').evaluate("n=>n.classList.contains('panel-open')"):
+                        navigation_locator(page, '[data-panel-target=yaochi]').click()
+                    page.locator('#yaochi-content [data-subpage="资材"]').click()
                     for width, height in [(1440, 1080), (412, 915), (915, 412)]:
                         page.set_viewport_size(dict(width=width, height=height))
                         for value in ['', '0', '1.5', '1000001']:
@@ -80,7 +82,7 @@ def main():
                 browser.close()
         finally:
             httpd.shutdown()
-    print('Bulk shop UI passed: four themes, three viewports, invalid quantities, totals and persisted purchases')
+    print('Bulk shop UI passed: two pixel themes, three viewports, real tabs, invalid quantities, totals and persisted purchases')
 
 
 if __name__ == '__main__':

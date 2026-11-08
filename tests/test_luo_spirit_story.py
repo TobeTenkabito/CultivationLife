@@ -81,7 +81,13 @@ def test_recommendation_is_independent_from_enemy_power():
 @pytest.mark.parametrize('power,expected', [(55_000_000, 'stalemate'), (105_000_000, 'victory')])
 def test_real_story_runtime_uses_phases(engine_game, power, expected):
     engine, game = engine_game
-    game.player = fixture(power)[0].player
+    # With the current ordinary-body benchmark, body100 alone exceeds the
+    # 55M control. Keep that exact weak rating using an untrained body rather
+    # than inventing a negative combat bonus; the winning profile stays100.
+    game.player = fixture(power, body=0 if power == 55_000_000 else 100)[0].player
+    from cultivation_life.rules import combat_power
+    assert game.player.outer_king_fixed_combat_power >= 0
+    assert combat_power(game.player) == pytest.approx(power)
     event = engine.events_by_id['EVT_MA_LIANG_005']
     effect = next(c for c in event['choices'] if c['id'] == 'attack_bottle')['effects'][0]
     result, _ = engine._resolve_story_combat_check(effect, game,

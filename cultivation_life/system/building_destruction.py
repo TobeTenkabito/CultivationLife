@@ -36,16 +36,16 @@ def destroy(game,row,*,source='player'):
         f"{row['name']}已成遗址。没有返还资材或追加人物伤亡。",dict(building_id=row['id'],source=source),['building']))
 
 
-def rebuild(game,row,temple_action):
+def rebuild(game,row,temple_action, *, payer='player', stock=None):
     if row['address']!=address(game):raise ValueError('必须亲赴建筑所在地')
-    bill=projects.quote(game,'rebuild',row)
+    bill=projects.quote(game,'rebuild',row,payer=payer,stock=stock)
     if bill['reason']:raise ValueError(bill['reason'])
     if row.get('subtype')=='temple':
         previous=game.pending_event;game.pending_event=None
         try:temple_action(game,'temple',{})
         finally:game.pending_event=previous
     else:
-        projects.pay(game,bill,'原址重建'+row['name'])
+        projects.pay(game,bill,'原址重建'+row['name'],payer=payer,stock=stock)
         if row['type']=='industry':
             original=game.economy_v2['estates'][row['source_id']]
             if original['job']:

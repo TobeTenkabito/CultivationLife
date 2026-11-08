@@ -10,7 +10,7 @@ from .targets import resolve, require, write
 from .growth import quote as owned_quote, facts as normalize_facts
 from .upper import require_upper, grow_ledger, conversion_plan
 
-def quote(game,kind,identity,axis,method='infuse',batches=1,*,_target=None):
+def quote(game,kind,identity,axis,method='infuse',batches=1,*,_target=None,stock=None):
     inherited = method in ('inherit_infuse', 'inherit_material')
     requested_method = method
     if inherited:
@@ -133,9 +133,9 @@ def quote(game,kind,identity,axis,method='infuse',batches=1,*,_target=None):
         if not allowed(material,p.world):raise ValueError('当前界面不允许使用该品阶／道途专材')
         plan.update(opportunity=0.,material_id=material,material_count=plan['rounds'])
         plan['result']['breakthrough_bonus']=facts.get('breakthrough_bonus',0)
-        stock=sum(i.quantity for i in p.inventory if i.id==material)
-        plan.update(material_name=ITEM_CATALOG[material].name,material_owned=stock)
-        if stock<plan['material_count']:plan.update(can_train=False,reason='NPC专材不足，可从坊市、交易或探宝取得')
+        held=sum(i.quantity for i in p.inventory if i.id==material) if stock is None else stock.get(material,0)
+        plan.update(material_name=ITEM_CATALOG[material].name,material_owned=held)
+        if held<plan['material_count']:plan.update(can_train=False,reason='NPC专材不足，可从坊市、交易或探宝取得')
     elif p.opportunity<cost:plan.update(can_train=False,reason='机缘不足')
     if inherited:
         import math
@@ -148,12 +148,16 @@ def quote(game,kind,identity,axis,method='infuse',batches=1,*,_target=None):
             if p.opportunity < plan['opportunity']: plan.update(can_train=False, reason='机缘不足')
     return plan
 
-def apply(game,kind,identity,axis,method='infuse',batches=1):
-    plan=quote(game,kind,identity,axis,method,batches)
+def apply(game,kind,identity,axis,method='infuse',batches=1,*,_target=None,stock=None):
+    plan=quote(game,kind,identity,axis,method,batches,_target=_target,stock=stock)
     if not plan['can_train']:raise ValueError(plan['reason'])
-    target=resolve(game,kind,identity)
+    target=_target if _target is not None else resolve(game,kind,identity)
     if plan['material_id']:
-        if not remove_item(game.player,plan['material_id'],plan['material_count']):raise ValueError('NPC专材不足')
+        if stock is None:
+            if not remove_item(game.player,plan['material_id'],plan['material_count']):raise ValueError('NPC专材不足')
+        else:
+            key=plan['material_id'];stock[key]-=plan['material_count']
+            if not stock[key]:stock.pop(key)
     game.player.opportunity-=plan['opportunity']
     write(target,plan['result'])
     if plan.get('inheritance'):

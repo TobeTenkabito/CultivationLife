@@ -257,6 +257,12 @@ def test_study_meeting_and_occupancy(site):
     from cultivation_life.spatial_people import accessible
     assert accessible(game, game.world_npcs[identity])
     engine.contact_action(initial.id, identity, 'improve')
+    saved = load(site)
+    scene_id = saved.heavens_state['runtime']['ruins']['scene_id']
+    assert saved.spatial_state['instances'][scene_id]['npc_ids'] == [identity]
+    assert set(saved.notable_npcs) == set(game.notable_npcs)
+    assert saved.world_npcs[identity].social_profile is None
+    assert saved.world_npcs[identity].affinity > game.world_npcs[identity].affinity
     with pytest.raises(ValueError):
         engine.manage_dao_friend(initial.id, identity, 'befriend')
     scene = game.spatial_state['instances'][game.heavens_state['runtime']['ruins']['scene_id']]

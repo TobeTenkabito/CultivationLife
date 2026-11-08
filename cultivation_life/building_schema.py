@@ -1,6 +1,7 @@
 """Persistent building identities; no people, inventory or economic replicas."""
 import copy
 import json
+from .earth_temple_content import FACILITIES
 
 TYPES = ('city', 'scenery', 'industry', 'artificiality', 'other')
 OWNER_KINDS = {'none', 'player', 'npc', 'sect', 'family', 'alliance', 'background'}
@@ -59,8 +60,23 @@ def decode_state(value):
             raise ValueError('建筑使用权无效')
         if type(row.get('public', False)) is not bool:
             raise ValueError('建筑公开权限无效')
+        if 'civic_disruption_until' in row and (row['type']!='city' or type(row['civic_disruption_until']) is not int or row['civic_disruption_until']<0):
+            raise ValueError('城市异象施工期限无效')
         if row['type'] == 'scenery' and row['status'] != 'intact':
             raise ValueError('自然景观不可摧毁')
+        if row.get('subtype') == 'land_temple':
+            if (row['type'] != 'artificiality' or row['level'] != 1 or place['world'] != 'celestial'
+                    or place.get('instance_id') is not None or not isinstance(row.get('city_id'), str)
+                    or not row['city_id']):
+                raise ValueError('土地庙原城市引用或地址无效')
+            slots = row.get('temple_facilities', [None, None])
+            if (not isinstance(slots, list) or len(slots) != 2
+                    or any(k is not None and (not isinstance(k, str) or k not in FACILITIES) for k in slots)
+                    or len([k for k in slots if k]) != len(set(k for k in slots if k))):
+                raise ValueError('土地庙专项设施须为两个不同的合法设施位')
+            if row.get('parent_temple_id') is not None and (not isinstance(row['parent_temple_id'], str)
+                    or row['parent_temple_id'] == row['id']):
+                raise ValueError('分庙的原上级庙宇引用无效')
         if row.get('subtype') == 'cave':
             if row['type'] != 'artificiality' or row.get('quality') not in {'self', 'professional'}:
                 raise ValueError('洞府开辟品质无效')

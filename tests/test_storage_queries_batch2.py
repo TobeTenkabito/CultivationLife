@@ -121,7 +121,7 @@ def test_normalization_does_not_retain_key_objects_until_cyclic_gc():
             gc.enable()
 
 
-def document(identity='alpha', name='甲', version=11):
+def document(identity='alpha', name='甲', version=12):
     return dict(id=identity, version=version, updated_at='2026-10-31',
         player=dict(name=name, age=90, realm_index=3, layer=2, world='human', path='dao', alive=True),
         authored_techniques={'own': {'one': {}}})
@@ -231,11 +231,12 @@ def test_index_does_not_bypass_reads_or_load_validation(tmp_path):
     # A summary-compatible but invalid game still goes through the real decoder.
     with pytest.raises((KeyError, ValueError, TypeError)):
         store.load('alpha')
-    for version in range(1, 11):
+    from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
+    for version in range(1, SAVE_SCHEMA_VERSION):
         put(path, document(version=version))
         raw = path.read_bytes()
         assert not store.list_games()[0]['compatible']
-        with pytest.raises(ValueError, match='仅支持结构 11'):
+        with pytest.raises(ValueError, match=f'仅支持结构 {SAVE_SCHEMA_VERSION}'):
             store.load('alpha')
         assert path.read_bytes() == raw
 

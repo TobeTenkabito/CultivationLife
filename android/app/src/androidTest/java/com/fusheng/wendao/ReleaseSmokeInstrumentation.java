@@ -617,6 +617,51 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("heavens_outposts_scope","Second/third-tier original people, separate military mandate, stale rejection/recovery, formal crossings, real local expansion and scaled cash, actual battlefield and road return, remote combat disabled, prepaid personal return; four themes, signed native portrait/landscape");
     }
 
+    private void runWestward(Bundle result) throws Exception {
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'西望原生验收',spirit_root:'supreme_metal',path:'dao',seed:360,preset_id:'true_immortal'})}).then(g=>g.id)");
+        python(assetText("westward_release.py")+"\nfrom cultivation_life import server\nprepare_westward(server.ENGINE,"+JSONObject.quote(id)+")");
+        async("loadGame("+JSONObject.quote(id)+")");
+        for(String theme:new String[]{"light","dark"}) {
+            tapSelector("#theme-open");tapSelector("#theme-dialog [data-pixel-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector("[data-panel-target=yaochi]");waitForPanelReady("#yaochi-card");
+            tapSelector("#yaochi-content [data-subpage='专修']");
+            check(Boolean.TRUE.equals(js("(()=>{const colors=['asura','buddhist','ghost','guixu','intrigue','bloodline','civilizations','sage','tianji','authored','trial-sites','yaochi-westward'].map(id=>{const b=document.createElement('button');b.dataset.dlc=id;document.body.append(b);const color=getComputedStyle(b).color;b.remove();return color});return new Set(colors).size===12})()")),"Each DLC keeps a distinct native palette");
+            waitForJs("!!document.querySelector('[data-westward-action=westward_adopt][data-dlc]') || game.yaochi.westward.adopted","DLC controls labeled");
+            check(Boolean.TRUE.equals(js("document.querySelector('[data-service=body] button[data-westward-action=westward_start_merit]').disabled")),"Missing material still disabled");
+            check(Boolean.TRUE.equals(js("!document.querySelector('#yaochi-content [data-subpage=委托]').dataset.dlc && document.querySelector('#yaochi-content [data-subpage=访古]').dataset.dlc==='yaochi-westward'")),"Base and DLC tabs distinct");
+            if(theme.equals("light")) {
+                tapSelector("[data-westward-action=westward_adopt]");waitForJs("!busy&&game.yaochi.westward.adopted","Merit ledger adopted");
+                tapSelector("[data-service=trace] [data-westward-action=westward_start_merit]");waitForJs("!busy&&!!game.yaochi.westward.project","Native paid reservation");
+                check(Boolean.TRUE.equals(js("game.yaochi.merit<2000 && game.yaochi.westward.project.progress===0")),"Actual escrow without free work");
+                async("loadGame("+JSONObject.quote(id)+")");
+                js("UtilityPanels.open('yaochi');true");waitForPanelReady("#yaochi-card");
+                tapSelector(".yaochi-exit summary");tapSelector("[data-westward-action=westward_cancel]");
+                waitForJs("!busy&&!game.yaochi.westward.project&&game.yaochi.merit===2000","Native original refund after reload");
+            }
+            capture("westward-practice-"+theme+"-"+arguments.getString("orientation"));
+            for(String tab:new String[]{"仙籍与功德","紫气东来","仙圃","仙会","访古","地仙庙域","委托"}) {
+                tapSelector("#yaochi-content [data-subpage='"+tab+"']");
+                check(Boolean.TRUE.equals(js("document.querySelector('#yaochi-card').scrollWidth<=document.querySelector('#yaochi-card').clientWidth+2")),"Westward panel fits native screen: "+tab);
+            }
+            tapSelector("#yaochi-toggle");tapSelector("[data-panel-target=heavenly-court]");waitForPanelReady("#heavenly-court-card");
+            tapSelector("#heavenly-court-content [data-subpage='诸司任职']");
+            tapSelector("#heavenly-court-content [data-subpage='项目议政']");
+            check(Boolean.TRUE.equals(js("document.querySelector('#heavenly-court-content [data-subpage=项目议政]').dataset.dlc==='yaochi-westward' && !document.querySelector('#heavenly-court-content [data-subpage=天庭政务]').dataset.dlc")),"Court base/DLC ownership");
+            capture("westward-council-"+theme+"-"+arguments.getString("orientation"));
+            tapSelector("#heavenly-court-toggle");
+        }
+        tapSelector("[data-panel-target=yaochi]");waitForPanelReady("#yaochi-card");tapSelector("#yaochi-content [data-subpage='专修']");
+        tapSelector("[data-service=guidance] [data-westward-action=westward_start_merit]");waitForJs("!busy&&game.yaochi.westward.project?.kind==='guidance'","Actual local teacher reserved");
+        tapSelector(".yaochi-exit summary");tapSelector("[data-westward-action=westward_cancel]");waitForJs("!busy&&!game.yaochi.westward.project","Teacher released and refund settled");
+        tapSelector("#yaochi-content [data-subpage='紫气东来']");tapSelector("[data-finale-action=purple_start]");waitForJs("!busy&&game.yaochi.purple_east.state.phase==='survey'","Unique mainline registered");
+        tapSelector(".westward-finale details summary");tapSelector("[data-finale-action=purple_pause]");waitForJs("!busy&&!!game.yaochi.purple_east.state.paused_work","Mainline paused");
+        async("loadGame("+JSONObject.quote(id)+")");js("UtilityPanels.open('yaochi');true");waitForPanelReady("#yaochi-card");tapSelector("#yaochi-content [data-subpage='紫气东来']");
+        tapSelector("[data-finale-action=purple_resume]");waitForJs("!busy&&!!game.yaochi.purple_east.state.work","Original work restored");
+        tapSelector("[data-finale-action=purple_work]");waitForJs("!busy&&game.yaochi.purple_east.state.work.progress>0","Original annual mainline work");
+        capture("westward-mainline-"+arguments.getString("orientation"));
+        result.putString("westward_scope","Actual signed native reserve/reload/refund, real teacher, identity/repair pages, mainline register/pause/reload/resume/annual work, material-disabled actions, mixed base/DLC tabs, garden/fair/antiquity/temple/court navigation, both pixel palettes and original handlers");
+    }
+
     private void runSoulLifecycle(Bundle result) throws Exception {
         String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'身魂原生验收',spirit_root:'supreme_metal',path:'dao',seed:320,preset_id:'core'})}).then(g=>g.id)");
         python(assetText("soul_release.py")+"\nfrom cultivation_life import server\nprepare_soul(server.ENGINE,"+JSONObject.quote(id)+")");
@@ -1312,7 +1357,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("body-ui")) {
+            if(phase.equals("westward")) {
+                runWestward(result);
+            } else if(phase.equals("body-ui")) {
                 runBodyUi(result);
             } else if(phase.equals("immortal")) {
                 runImmortal(result);

@@ -130,7 +130,11 @@ def test_complete_crafting_formation_and_technique_market(prepared, world, path,
     assert engine._market_tier(game.player)==rank
     engine._clear_market(game)
     engine._ensure_market(game, random.Random(1))
-    assert game.market_offers and all(o['tier'] >= rank for o in game.market_offers)
+    # The separate training shelf follows the world's capacity, including
+    # lower-tier supplies for actual NPCs. Ordinary stock keeps this rank gate.
+    from cultivation_life.npc_development_content import is_training_supply
+    ordinary = [o for o in game.market_offers if not is_training_supply(o['kind'], o['content_id'])]
+    assert ordinary and all(o['tier'] >= rank for o in ordinary)
 
 
 def test_root_books_satisfy_actual_void_gate_without_changing_root_quality(prepared):

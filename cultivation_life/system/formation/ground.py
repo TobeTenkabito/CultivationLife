@@ -210,35 +210,9 @@ def repair_ground_formation(
     game = deps._load(game_id)
     array = deps._require_ground_array_access(game, ground_id)
     definition = deps._formation_maintenance_defs().get(str(supply_id))
-    if not definition or str(definition.get("world")) != str(array.get("world")):
-        raise ValueError("这份修阵资源无法与当前界面的地脉相合")
     quantity = max(1, min(10, int(quantity)))
-    held = int(game.player.formation_repair_supplies.get(str(supply_id), 0))
-    if held < quantity:
-        raise ValueError("持有的修阵资源不足")
-    before = float(array.get("durability", 0.0))
-    if before >= 99.999:
-        raise ValueError("镇地阵完整度已满，无需修复")
-    game.player.formation_repair_supplies[str(supply_id)] = held - quantity
-    if game.player.formation_repair_supplies[str(supply_id)] <= 0:
-        game.player.formation_repair_supplies.pop(str(supply_id), None)
-    array["durability"] = round(
-        min(100.0, before + quantity * float(definition["repair_value"])), 4
-    )
-    array["last_repaired_year"] = game.player.age
-    game.history.append(
-        HistoryRecord(
-            "SYS_FORMATION_GROUND_REPAIR",
-            1,
-            game.player.age,
-            "修补阵基",
-            ground_id,
-            "repaired",
-            f"你消耗{definition['name']} ×{quantity}，令“{array['name']}”完整度由 {before:.1f}% 恢复至 {array['durability']:.1f}%。",
-            {"durability_before": before, "durability_after": array["durability"]},
-            ["system", "formation", "ground_formation", "repair"],
-        )
-    )
+    from .maintenance import repair
+    repair(game, array, str(supply_id), definition, quantity)
     game.updated_at = now_iso()
     deps.store.save(game)
     return deps.present(game)

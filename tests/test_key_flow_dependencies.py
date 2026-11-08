@@ -143,8 +143,9 @@ def test_soul_backlash_records_consequence_before_dispatching_death():
     game.player.realm_index = 1  # Qi condensation has no safe soul slots.
     game.player.hp = 1
     game.player.foreign_souls = [{'id': 's', 'strength': 20, 'refined': False}]
-    def die(actual, reason, event):
+    def die(actual, reason, event, *, survival_stage):
         assert actual is game and event == 'SYS_SOUL_BACKLASH_DEATH'
+        assert survival_stage == 'spirit_failed'
         assert game.player.hp == 0 and game.history[-1].event_id == 'SYS_SOUL_BACKLASH'
         game.player.alive = False
     deps, unexpected = contract(DemonicAnnualDependencies, _demonic_rules=lambda: WORLD_SYSTEMS['demonic_cultivation'],
@@ -272,7 +273,10 @@ def test_dependency_year_releases_unavailable_owner_before_any_drain(state, unit
         assert game.player.opportunity == 100
         find.assert_not_called()
     else:
-        assert drain > 0 and game.player.opportunity == 100 - drain
+        # The current rule records dependency time without draining existing
+        # opportunity each turn (see CHANGELOG's relationship change).
+        assert drain == 0 and game.player.opportunity == 100
+        assert game.player.concubine_status['last_drain'] == 0
         assert game.player.concubine_status['turns'] == 1
     unexpected.assert_not_called()
 

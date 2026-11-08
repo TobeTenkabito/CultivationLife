@@ -58,7 +58,9 @@ class NpcSystemTests(unittest.TestCase):
     def test_explicit_faction_intercept_creates_a_dedicated_combat_record(self):
         created = self.engine.create_game("宗门伏杀", "supreme_fire", "demonic", 516, start_world="demon")
         game = self.engine.store.load(created["id"])
-        game.player.realm_index, game.player.layer = 5, 9
+        # Keep the record test inside the demon realm's actual capacity;
+        # an over-capacity fixture legitimately adds a later expulsion record.
+        game.player.realm_index, game.player.layer = 4, 9
         game.player.hp, game.player.mp = max_hp(game.player), max_mp(game.player)
         game.player.faction_id = "blood_prison"
         target = next(npc for npc in game.sects["blood_prison"].npcs if npc.alive)

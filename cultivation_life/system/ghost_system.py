@@ -375,6 +375,8 @@ def _public_map_with_ghost_parade(deps: GhostStateDependencies, game: GameState,
         WORLD_SYSTEMS["world_names"].get(game.player.world, game.player.world),
         lambda destination: deps._monster_travel_multiplier(game.player, destination),
     )
+    from .earth_dispute_roads import project as project_civic_roads
+    project_civic_roads(game,data)
     journey = game.map_journey
     if journey and (journey['world'], journey['origin']) == (game.player.world, location_id):
         for place in data['locations']:

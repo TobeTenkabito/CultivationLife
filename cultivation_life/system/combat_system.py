@@ -454,7 +454,7 @@ class PlayerCombatSystem:
         burst_used = False
         # Original school actors need per-person wounds/resources even when no
         # one has unlocked upper-tier abilities. Use the existing settlement.
-        school_actors = (target.get('mentorship_contest') or target.get('mentorship_betrayal')
+        school_actors = (target.get('single_combat') or target.get('mentorship_contest') or target.get('mentorship_betrayal')
                          or target.get('mentorship_master_betrayed')
                          or any(unit.kind == 'external_avatar' for unit in player_units))
         phases = phases if phases is not None and (phases.enabled or school_actors) else None

@@ -18,6 +18,7 @@ def main():
     natal = '--natal' in sys.argv[2:]
     immortal = '--immortal' in sys.argv[2:]
     body_ui = '--body-ui' in sys.argv[2:]
+    westward = '--westward' in sys.argv[2:]
     teachings = '--teachings' in sys.argv[2:]
     common = '--common-techniques' in sys.argv[2:]
     secret = '--secret-arts' in sys.argv[2:]
@@ -75,11 +76,13 @@ def main():
         logs += [f'build/android-authored-{o}-{tag}.log' for o in ('portrait','landscape')]
     if immortal:logs=[f'build/android-immortal-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if body_ui:logs=[f'build/android-body-ui-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
+    if westward:logs=[f'build/android-westward-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
-        if heavens or tutorial or immortal or body_ui:
+        if heavens or tutorial or immortal or body_ui or westward:
             require((ROOT/name).stat().st_mtime >= (ROOT/'android/app/build/outputs/apk/release/app-release.apk').stat().st_mtime,'Heavens native log predates the final APK')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
+        if westward:require('westward_scope' in text,f'Missing Westward native coverage: {name}')
         if immortal:require('immortal_artifacts_scope' in text,f'Missing native immortal cultivation: {name}')
         if body_ui:require('body_ui_scope' in text and 'upper_social_scope' in text and 'npc_development_scope' in text and 'mentorship_scope' in text,f'Missing native body/UI or mentorship coverage: {name}')
         if heavens:require('heavens_outposts_scope' in text,f'Missing native heavens/war/return acceptance: {name}')
@@ -146,6 +149,7 @@ def main():
     if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
     if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
     if body_ui:receipt['scope']=f'{BASE_GAME_VERSION} native school peer commands/cooldown/menu/replay plus NPC body/technique/domain cultivation, controlled portraits, energy and upper-world guides, two pixel palettes; signed Android 12 portrait/landscape'
+    if westward:receipt['scope']='Westward 1.0: paid reserve/reload/refund, actual teacher, identity/repair pages, mainline register/pause/reload/resume/annual work, unavailable material buttons, twelve distinct DLC palettes, Yaochi/court pages; signed Android 12 portrait/landscape'
     if immortal:receipt['scope']='Independent immortal page, reference-matched art, exact paid promotion/four grades, stale recovery and grade-one reload; legacy and pixel themes, signed Android 12 portrait/landscape'
     if natal:receipt['scope']='Naming compatibility and eleven-world natal materials, native socket/return, bounded catalog and qualification; four themes and four orientation phases'
     if teachings:receipt['scope']='Four upper worlds, Buddhist wish/blessings and Confucian doctrine/classics/outer opportunity, direct advancement disabled; native clicks, four themes and portrait/landscape'

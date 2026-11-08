@@ -1,0 +1,43 @@
+/* Deeds, years, original people and awards are settled by the server. */
+(() => {
+  const el=(...a)=>window.GameUi.element(...a),fmt=n=>Number(n||0).toLocaleString('zh-CN');
+  const names={duel:'同境论法',guard:'护阵演武',supply:'资材会办'};
+  function shell(root,title,text,id){const s=el('section',null,'yaochi-gathering');s.id=id;s.append(el('small','瑶池西望 · 紫气东来','yaochi-eyebrow'),el('h3',title),el('p',text,'muted'));root.append(s);return s;}
+  function buttons(d,send,blocked){return (label,action,value='',reason='',amount=1,primary=false)=>{const b=el('button',label,primary?'primary':'');b.type='button';b.dataset.gatherAction=action;b.dataset.gatherValue=value;b.disabled=!!(blocked||reason);b.title=reason||label;b.onclick=()=>send({action,target_id:d.token+'|'+value,amount});return b;};}
+  function card(title){const c=el('article',null,'gather-card');c.append(el('h4',title));return c;}
+  function note(s,text){if(text)s.append(el('p',text,'yaochi-notice'));}
+  function stats(s,rows){const d=el('dl',null,'gather-stats');for(const [k,v] of rows){const r=el('div');r.append(el('dt',k),el('dd',v));d.append(r);}s.append(d);}
+  function select(label,rows){const s=el('select');s.setAttribute('aria-label',label);for(const r of rows){const o=el('option',r.name);o.value=r.id;s.append(o);}return s;}
+  function garden(root,game,send,blocked){
+    const d=game.yaochi.garden;if(!d)return null;
+    const s=shell(root,'瑶池仙圃','一纸承办，四时耕耘。种植、交货与市场盈亏各有取舍。','yaochi-garden'),b=buttons(d,send,blocked),r=d.estate,l=d.lease;note(s,d.reason);
+    if(!l){const c=card('承办二百五十年');c.append(el('p','产权归瑶池。缴纳200功勋保证金与5,000灵石租金，再投入实际周转金。正常交接退保证金，租金不退。'),el('p','有效仙会获奖凭据可使用一次：保证金降至100功勋。产物仍受当地生态和原配方限制。','muted'),b('承办仙圃','garden_lease','',d.reason||(d.occupied?'原地块已有其他产权人':''),1,true));s.append(c);return s;}
+    stats(s,[['许可截止',fmt(l.until)+'年'],['经营现金',fmt(r.cash)],['保证功勋',fmt(l.deposit)],['收支结余',fmt(r.income-r.expense)]]);note(s,r.reason||r.steward_reason);
+    if(d.repair){const repair=card('仙圃设施损毁');repair.append(el('p',`自费原址修复需 ${fmt(d.repair.coins)} 灵石。修复保留同一批次、库存及产权。`),b('自费原址修复','garden_rebuild','',d.recovery_reason||d.repair.reason,1,true));s.append(repair);}
+    const grid=el('div',null,'gather-grid'),grow=card('种植与巡圃'),recipe=select('仙圃配方',d.recipes.map(x=>({id:x.id,name:`${x.name} · ${x.years}年 / ${x.quantity}件`}))),batches=el('input');
+    recipe.value=r.recipe;batches.type='number';batches.min='1';batches.max='4';batches.step='1';batches.value=r.batches;batches.setAttribute('aria-label','仙圃批数');
+    const info=el('p','', 'muted'),config=el('div');const draw=()=>{info.textContent='每批原料：'+(d.recipes.find(x=>x.id===recipe.value)?.inputs||'请选择配方');config.replaceChildren(b('采用种植方案','garden_configure',recipe.value,d.reason||r.reason||(!batches.checkValidity()?'批数须为1至4':''),Number(batches.value)));};recipe.onchange=draw;batches.oninput=draw;draw();
+    const label=el('label','生产批数');label.append(batches);grow.append(recipe,label,info,config);
+    if(r.job)grow.append(el('p',`在制 ${fmt(r.job.quantity)} 件 · ${fmt(r.job.finish)}年完工`),b('巡圃至本批完工','garden_work','',d.recovery_reason||(d.repair?'须先修复原仙圃':''),1,true));else grow.append(b('实付原料并开工','garden_start','',d.reason||r.reason,1,true));
+    grow.append(el('p','自动开工检查真实需求、利润与养护储备；手动开工由你承担成本。','muted'),b(r.auto_sell?'切换为留存成品':'切换为市场销售','garden_mode',r.auto_sell?'retain':'market',d.reason||r.reason||(l.order||l.steward?'请先交接订单或协作者':'')));grid.append(grow);
+    const order=card('定向供货');if(l.order){const o=l.order;order.append(el('p',`${o.item_name} ×${fmt(o.quantity)} · 截止 ${fmt(o.deadline)}年`),el('strong',`已备货款 ${fmt(o.total)} 灵石`),b('交付仓库实货','garden_deliver','',d.reason||r.reason),b('撤单 · 扣40保证功勋','garden_cancel_order','',d.recovery_reason));}else order.append(el('p','每五十年可签一份八件供货合同。签约固定货款并备付，从原仓库交货。'),b('签订当前产物供货单','garden_order','',d.reason||r.reason||(l.steward?'请先交接协作者':'')));
+    order.append(el('p','订单期间关闭自动销售；货款不重复计作整份劳务功勋。','muted'));grid.append(order);
+    const store=card('周转金与成品'),money=el('input');money.type='number';money.min='1';money.max='1000000000000';money.step='1';money.value='1000000';money.setAttribute('aria-label','仙圃周转金额');
+    const cash=el('div',null,'gather-actions'),drawCash=()=>cash.replaceChildren(b('投入周转金','garden_fund','',d.recovery_reason||(!money.checkValidity()?'请输入正整数':''),Number(money.value)),b('提取经营现金','garden_cash','',d.recovery_reason||(r.arrears?'请先补欠':'')||(!money.checkValidity()||Number(money.value)>r.cash?'现金不足':''),Number(money.value)));money.oninput=drawCash;drawCash();store.append(money,cash);
+    if(r.arrears)store.append(el('p',`养护欠费 ${fmt(r.arrears)} 灵石`),b('补缴欠费','garden_arrears','',d.recovery_reason));for(const item of r.stock){const row=el('div',null,'gather-stock');row.append(el('span',`${item.name} ×${fmt(item.quantity)}`),b('提货','garden_withdraw',item.id,d.recovery_reason,item.quantity));store.append(row);}if(!r.stock.length)store.append(el('p','仓库暂无成品，已付批次完工后入库。','muted'));grid.append(store);
+    const coop=card('合作承办');if(l.steward)coop.append(el('p',`${l.steward_name} · 已付工钱 ${fmt(l.wages)} 灵石`),b('交接协作者并暂停自动经营','garden_release','',d.recovery_reason));else{coop.append(el('p','请当面的真仙协作者经营，每实际年100灵石。使用原掌柜方案，人物期间不能兼任其他事务。'));const who=select('仙圃协作者',d.people),wrap=el('div'),drawWho=()=>wrap.replaceChildren(b('请其协作经营','garden_steward',who.value,d.reason||r.reason||(l.order?'请先交接供货合同':'')||(!d.people.length?'暂无可用原人物':'')));who.onchange=drawWho;drawWho();coop.append(who,wrap);}grid.append(coop);s.append(grid);
+    const exit=el('details',null,'yaochi-exit');exit.append(el('summary','交还经营许可'),el('p','结清在制、库存、欠费和订单后，退剩余保证功勋及经营现金，租金不退。'),b('结清并交还仙圃','garden_close','',d.recovery_reason||(r.job||r.stock.length||r.arrears||l.order?'尚有待交接事项':'')));s.append(exit);return s;
+  }
+  function fair(root,game,send,blocked){
+    const d=game.yaochi.fair;if(!d)return null;
+    const s=shell(root,'瑶池仙会','以所修论法，以所成赴会。三项赛事各有准备与成败。','yaochi-fair'),b=buttons(d,send,blocked);stats(s,[['本届',`第${fmt(d.cycle+1)}届`],['闭会',fmt(d.ends)+'年'],['报名','每项20功勋'],['奖金','10,000灵石']]);note(s,d.reason);
+    s.append(el('p','筹备五年，报名后五十年内完成且不跨届。体力、法力与阵法真实结算，场间按原方式调息，天庭现行律令照常生效。','muted'));
+    const r=d.active;if(r){const c=card(names[r.kind]+' · 在办');c.dataset.fairActive=r.id;c.append(el('p',`实际筹备 ${r.progress} / ${r.years} 年 · 截止 ${fmt(r.deadline)}年`));const bar=el('progress');bar.max=r.years;bar.value=r.progress;c.append(bar);
+      if(r.progress<r.years)c.append(b('继续筹备','fair_work','',d.work_reason,1,true));else if(r.kind==='duel')c.append(b('入场论法 · 非致命单人比试','fair_fight','',d.work_reason,1,true));else if(r.kind==='guard')c.append(el('p','使用已配置随身阵法。稳守：四轮相持或获胜且阵势≥50%；破敌：六轮内获胜且阵势≥70%。'),b('稳守四轮','fair_fight','hold',d.work_reason,1,true),b('破敌护阵','fair_fight','break',d.work_reason));else{for(const m of d.materials)c.append(el('p',`${m.name} · 行囊 ${fmt(m.held)} / ${fmt(m.quantity)}`));c.append(el('p',`登记货款 ${fmt(r.goods_value)} 灵石，另计获奖奖金。可自产提货或从原市场采购。`),b('交付会办材料','fair_deliver','',d.work_reason||(d.materials.some(m=>m.held<m.quantity)?'材料尚未齐备':''),1,true));}
+      const leave=el('details',null,'yaochi-exit');leave.append(el('summary','退出本项赛事'),el('p','报名功勋与已耗年份不退，同届不能重报。'),b('退赛并交接预算','fair_cancel','',d.recovery_reason));c.append(leave);s.append(c);}
+    const grid=el('div',null,'gather-grid'),copy={duel:['论','按实际境界分组，与当面的原人物单人论法，使用原功法、仙域和神光。'],guard:['阵','选择稳守或破敌方案，实际入场交战，以战报中的阵势完整度与胜负判定。'],supply:['材','在期限内交齐两类真实药材。自产提货或市场采购，交货实扣，不重复出售。']};
+    for(const row of d.contests){const c=card(row.name);c.prepend(el('span',copy[row.id][0],'yaochi-seal'));c.append(el('p',copy[row.id][1]));const who=select(row.name+'对手',d.candidates.map(p=>({id:p.id,name:`${p.name} · ${p.layer}层`}))),wrap=el('div');const draw=()=>wrap.replaceChildren(b(row.used?'本届已报名':'报名 · 五年筹备','fair_join',row.id+(row.id==='supply'?'':'~'+who.value),d.reason||(r?'请先交接当前赛事':'')||(row.used?'同届不可重报':'')||(row.id!=='supply'&&!d.candidates.length?'瑶池暂无可用同境参会人':''),1,true));if(row.id!=='supply'){who.onchange=draw;c.append(who);}draw();c.append(wrap);grid.append(c);}s.append(grid);
+    const past=el('details');past.append(el('summary','本届与往届成绩'));for(const old of d.history.filter(x=>x.status!=='active').reverse()){const c=card(`${names[old.kind]} · ${old.status==='won'?'达标获奖':'已归档'}`);c.append(el('p',old.result));if(old.battle)c.append(el('small',`实际交锋 ${old.battle.rounds} 轮${old.battle.integrity!=null?' · 阵势 '+Math.round(old.battle.integrity*100)+'%':''}`));past.append(c);}s.append(past);return s;
+  }
+  window.YaochiGathering={garden,fair};
+})();

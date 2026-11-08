@@ -45,7 +45,7 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
         "player", player.name, "player", max(1.0, combat_power(player)),
         player.realm_index, player.path,
     )]
-    if (target or {}).get('mentorship_contest'):
+    if (target or {}).get('mentorship_contest') or (target or {}).get('single_combat'):
         return units
     from ..system.mentorship_advanced import avatar_unit
     avatar = avatar_unit(game, deps._npc_power)

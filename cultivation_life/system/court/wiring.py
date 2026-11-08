@@ -8,6 +8,7 @@ from .dependencies import (
 
 def bind_state(host) -> CourtStateDependencies:
     return CourtStateDependencies(
+        maps=getattr(host,'maps',None),
         _court_autonomous_votes=lambda *args, **kwargs: host._court_autonomous_votes(*args, **kwargs),
         _court_config=lambda *args, **kwargs: host._court_config(*args, **kwargs),
         _court_conflicts=lambda *args, **kwargs: host._court_conflicts(*args, **kwargs),
@@ -62,6 +63,9 @@ def bind_lifecycle(host) -> CourtLifecycleDependencies:
 
 def bind_yaochi(host) -> YaochiDependencies:
     return YaochiDependencies(
+        maps=getattr(host,'maps',None),
+        _combat=lambda *args, **kwargs: host._combat(*args, **kwargs),
+        _npc_power=lambda *args, **kwargs: host._npc_power(*args, **kwargs),
         _add_court_merit=lambda *args, **kwargs: host._add_court_merit(*args, **kwargs),
         _load=lambda *args, **kwargs: host._load(*args, **kwargs),
         _sync_player_court_identity=lambda *args, **kwargs: host._sync_player_court_identity(*args, **kwargs),

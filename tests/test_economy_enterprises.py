@@ -231,6 +231,16 @@ def test_warehouse_trade_and_no_free_old_production(economy):
     game, mine = buy(engine, game, 'mine')
     game = estate_act(engine, game, mine, 'fund', amount=10000)
     game = configure(engine, game, mine, enabled=True, batches=4)
+    # This timing test needs profitable demand; the cheapest native ore can
+    # correctly fail the original full-maintenance automatic-profit guard.
+    from cultivation_life.system.economy.state import commodity_catalog, reprice
+    from cultivation_life.system.economy.enterprise_costs import production_cost
+    recipe = recipes(game.player.world, commodity_catalog(game.player.world))[game.economy_v2['estates'][mine]['recipe']]
+    market = game.economy_v2['markets'][market['id']]
+    product = market['commodities'][recipe['output']]
+    product.update(reference=100, stock=0)
+    reprice(game, market, product)
+    assert quote(product, 'sell', 4*recipe['quantity'])['total'] >= production_cost(game.economy_v2['estates'][mine], market, recipe, 4)*1.05
     game.player.age += 100
     advance_estates(game, engine.maps)
     assert game.economy_v2['estates'][mine]['produced']==0

@@ -464,8 +464,9 @@ def _court_vote_law(
     influence_spend = deps._court_spend_influence(game, influence_spend) if actor_id == "player" else 0
     persuasion = min(0.35, influence_spend * 0.02)
     if actor_id == 'player':
-        yes = sum(holder_id == 'player' or rng.random() < .48 + court['player_support']/500 + persuasion for holder_id in holders)
-        abstain = 0
+        from .ballots import player_ballot
+        ballot = player_ballot(court, holders, rng, persuasion)
+        yes, abstain = ballot['yes'], ballot['abstain']
     else:
         yes, abstain = deps._court_autonomous_votes(court, actor_id, law_id, desired, rng)
     total = len(holders)
@@ -505,6 +506,8 @@ def _add_court_merit(deps: CourtStateDependencies, game: GameState, amount: int)
         return "天庭功德只在仙界记档。"
     if not game.heavenly_court:
         raise ValueError("天庭尚未完成初始化")
+    from ..westward_rules import credit_merit
+    credit_merit(game, amount)
     game.heavenly_court["player_merit"] = max(
         0, int(game.heavenly_court["player_merit"]) + int(amount),
     )
@@ -512,6 +515,8 @@ def _add_court_merit(deps: CourtStateDependencies, game: GameState, amount: int)
 
 
 def _public_heavenly_court(deps: CourtStateDependencies, game: GameState) -> dict[str, Any]:
+    from ..court_projects import public as project_public
+    from ..court_bureaus import public as bureau_public
     if game.player.world != "celestial":
         return {"visible": False}
     court = game.heavenly_court
@@ -562,6 +567,8 @@ def _public_heavenly_court(deps: CourtStateDependencies, game: GameState) -> dic
     }
     return {
         "visible": True, "initialized": True, "unit": int(court["unit"]),
+        "bureaus": bureau_public(game, deps.maps),
+        "projects": project_public(game, deps.maps) if deps.maps else None,
         "term_units": config["term_units"], "stipend": config["grade_stipends"][str(court["player_grade"])] / 100,
         "finance": finance.public_finance(game, 'court', 'heavenly'),
         "election_notices": (game.settings.get("court_election_popup", True) and not game.settings.get("silent_events", False)),

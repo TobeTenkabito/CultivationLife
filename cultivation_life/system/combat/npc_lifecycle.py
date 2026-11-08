@@ -21,6 +21,13 @@ from .lifecycle_schema import (
 )
 
 
+def relieve_wounds(owner, levels=1):
+    """Explicit paid/authorized treatment of the original body's injury counter."""
+    before=max(0,int(read(owner,'wounds',0)))
+    _write(owner,'wounds',max(0,before-max(0,int(levels))))
+    return before-int(read(owner,'wounds',0))
+
+
 def commit_condition(owner: Any, update: Mapping[str, Any], *, lethal: bool, now=None) -> bool | None:
     """Physical restoration and control have identical meaning in both callers."""
     if 'body' in update:

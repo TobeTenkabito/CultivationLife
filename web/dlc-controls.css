@@ -1,0 +1,41 @@
+/* Each expansion owns its palette. Only badges, structure and states are shared. */
+:root{--dlc-asura:#a3402e;--dlc-buddhist:#806114;--dlc-ghost:#69558a;--dlc-guixu:#2e668e;--dlc-intrigue:#92556b;--dlc-bloodline:#963d4d;--dlc-civilizations:#5c7034;--dlc-sage:#445b95;--dlc-tianji:#80532d;--dlc-authored:#80537f;--dlc-trials:#59619b;--dlc-westward:#64418a;--dlc-westward-gold:#94702f}
+:root[data-pixel-theme=dark]{--dlc-asura:#f5a088;--dlc-buddhist:#e3c56d;--dlc-ghost:#c2ade6;--dlc-guixu:#87c6ed;--dlc-intrigue:#e4a2b8;--dlc-bloodline:#f29eae;--dlc-civilizations:#c2d68d;--dlc-sage:#a9beff;--dlc-tianji:#dfb48b;--dlc-authored:#ddb1d9;--dlc-trials:#b8bdf1;--dlc-westward:#dfc5f8;--dlc-westward-gold:#dcc081}
+:root[data-visual=pixel] body button[data-dlc]{
+  --dlc-ink:var(--pine);--dlc-wash:color-mix(in srgb,var(--dlc-ink) 9%,var(--paper));
+  --dlc-edge:color-mix(in srgb,var(--dlc-ink) 55%,var(--line));--dlc-stripe:var(--dlc-ink);
+  color:var(--dlc-ink)!important;background:var(--dlc-wash)!important;border:1px solid var(--dlc-edge)!important;
+  border-inline-start:3px solid var(--dlc-stripe)!important;box-shadow:inset 0 1px 0 #ffffff18!important;
+  white-space:normal;overflow-wrap:anywhere;
+}
+:root[data-visual=pixel] body button[data-dlc=asura]{--dlc-ink:var(--dlc-asura)}
+:root[data-visual=pixel] body button[data-dlc=buddhist]{--dlc-ink:var(--dlc-buddhist)}
+:root[data-visual=pixel] body button[data-dlc=ghost]{--dlc-ink:var(--dlc-ghost)}
+:root[data-visual=pixel] body button[data-dlc=guixu]{--dlc-ink:var(--dlc-guixu)}
+:root[data-visual=pixel] body button[data-dlc=intrigue]{--dlc-ink:var(--dlc-intrigue)}
+:root[data-visual=pixel] body button[data-dlc=bloodline]{--dlc-ink:var(--dlc-bloodline)}
+:root[data-visual=pixel] body button[data-dlc=civilizations]{--dlc-ink:var(--dlc-civilizations)}
+:root[data-visual=pixel] body button[data-dlc=sage]{--dlc-ink:var(--dlc-sage)}
+:root[data-visual=pixel] body button[data-dlc=tianji]{--dlc-ink:var(--dlc-tianji)}
+:root[data-visual=pixel] body button[data-dlc=authored]{--dlc-ink:var(--dlc-authored);--dlc-stripe:var(--gold)}
+:root[data-visual=pixel] body button[data-dlc=trial-sites]{--dlc-ink:var(--dlc-trials)}
+:root[data-visual=pixel] body button[data-dlc=yaochi-westward]{--dlc-ink:var(--dlc-westward);--dlc-stripe:var(--dlc-westward-gold)}
+:root[data-visual=pixel] body button[data-dlc]::after{
+  content:'DLC';display:inline-block;vertical-align:middle;margin-inline-start:6px;
+  padding:1px 4px;border:1px solid currentColor;border-radius:3px;
+  font:600 9px/1.3 system-ui,sans-serif;letter-spacing:.05em;opacity:.85;
+  width:auto;height:auto;background:transparent;pointer-events:none;
+}
+:root[data-visual=pixel] body button[data-dlc]:is(:hover,[aria-selected=true],.active):not(:disabled){
+  background:var(--dlc-ink)!important;color:var(--dlc-wash)!important;border-color:var(--dlc-ink)!important;
+}
+:root[data-visual=pixel] body button[data-dlc]:focus-visible{outline:2px solid var(--dlc-ink);outline-offset:3px}
+:root[data-visual=pixel] body button[data-dlc]:disabled{
+  opacity:.55;filter:saturate(.45);border-style:dashed!important;cursor:not-allowed;box-shadow:none!important;
+}
+:root[data-visual=pixel] body :is(.strategy-dock,.navigation-shortcuts) button[data-dlc]{position:relative}
+:root[data-visual=pixel] body :is(.strategy-dock,.navigation-shortcuts) button[data-dlc]::after{
+  position:absolute;inset:2px 3px auto auto;margin:0;font-size:8px;padding:0 2px;
+}
+:root[data-visual=pixel] body .navigation-shortcuts button[data-dlc]{padding-top:15px}
+:root[data-visual=pixel] body button[data-dlc]::before{content:none}

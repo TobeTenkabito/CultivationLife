@@ -1,0 +1,9 @@
+.finale-chapters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:0;list-style:none;margin:20px 0}
+.finale-chapters li{padding:12px;border:1px solid var(--line);border-top:3px solid var(--line);background:var(--paper);opacity:.7;min-width:0}
+.finale-chapters small,.finale-chapters strong{display:block;overflow-wrap:anywhere}
+.finale-chapters small{font-size:.75rem;margin-bottom:4px;color:var(--dlc-ink)}
+.finale-chapters [aria-current=step]{border-color:var(--dlc-edge);background:var(--dlc-wash);opacity:1}
+.finale-chapters .complete{border-top-color:var(--gold);opacity:1}
+.westward-finale .finale-current{border-color:var(--dlc-edge);background:var(--dlc-wash)}
+.westward-finale .gather-actions button{min-height:44px;white-space:normal}
+@media(max-width:600px){.finale-chapters{grid-template-columns:repeat(2,minmax(0,1fr))}.westward-finale .gather-actions button{width:100%}}

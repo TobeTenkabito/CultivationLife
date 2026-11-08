@@ -46,7 +46,7 @@ def test_common_opportunity_award_rolls_once_even_for_large_reward(prepared):
     gain = 10**9 * opportunity_multiplier(game.player)
     with patch('cultivation_life.system.opportunity.grant_trace_chance') as grant:
         engine._add_opportunity(game.player, 10**9)
-        grant.assert_called_once_with(game.player, pytest.approx(gain))
+        grant.assert_called_once_with(game.player, pytest.approx(gain), chance_multiplier=1.)
         engine._add_opportunity(game.player, -100)
         assert grant.call_count == 1
 

@@ -43,7 +43,7 @@ def vein_ready(player):
     return player.immortal_veins.get(str(player.realm_index), 0) >= player.layer * rules()['veins_per_layer']
 
 
-def grant_trace_chance(player, gain):
+def grant_trace_chance(player, gain, *, chance_multiplier=1.):
     """One configured probability trial per positive award. O(1); separate persisted PRNG stream.
 
     SplitMix64 avoids allocating a Random or disturbing event/NPC random streams.
@@ -57,7 +57,7 @@ def grant_trace_chance(player, gain):
     value = ((value ^ (value >> 30)) * 0xBF58476D1CE4E5B9) & mask
     value = ((value ^ (value >> 27)) * 0x94D049BB133111EB) & mask
     value ^= value >> 31
-    success = (value >> 11) / (1 << 53) < rules()['trace_gain_chance']
+    success = (value >> 11) / (1 << 53) < min(1., rules()['trace_gain_chance'] * chance_multiplier)
     player.immortal_traces += int(success)
     return success
 

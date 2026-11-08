@@ -55,6 +55,10 @@ def market_trade(game, row, market, item, number, side):
 
 
 def start_job(game, maps, row, *, automatic=False):
+    from .operating_license import production_reason
+    if blocked:=production_reason(game,row):raise ValueError(blocked)
+    if game.player.age < row.get('public_water_until',0):
+        raise ValueError('地方分水约定尚未到期，暂停新投产；场地维护照常')
     if row.get('building_status')=='destroyed':
         raise ValueError('产业设施已毁坏，请先原址重建')
     if row['job'] or row['kind'] == 'shop':
@@ -165,6 +169,8 @@ def advance_estates(game, maps):
                 continue
         row['last_year'] = game.player.age
         row['revision'] += 1
+        from .operating_license import annual
+        annual(game,row,years)
         if row['owner_kind'] == 'background':
             continue
         destroyed=row.get('building_status')=='destroyed'

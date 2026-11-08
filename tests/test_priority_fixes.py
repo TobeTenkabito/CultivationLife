@@ -109,10 +109,12 @@ def test_response_transport_does_not_hold_save_lock(api_server):
         future = pool.submit(config)
         try:
             assert entered.wait(2)
-            request = Request(base + '/api/ui-preferences', data=b'{"theme":"b"}',
+            request = Request(base + '/api/ui-preferences', data=b'{"pixel_theme":"dark"}',
                               headers={'Content-Type': 'application/json'})
             with urlopen(request, timeout=2) as response:
-                assert json.load(response)['theme'] == 'b'
+                preferences = json.load(response)
+                assert preferences['theme'] == 'a' and preferences['pixel_art'] is True
+                assert preferences['pixel_theme'] == 'dark'
         finally:
             release.set()
         assert future.result(timeout=3) == 200

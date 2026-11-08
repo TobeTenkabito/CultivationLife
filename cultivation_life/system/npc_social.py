@@ -44,6 +44,12 @@ def instantiate_social(game: GameState, npc: SectNpc) -> None:
     """One bounded partner, no recursive family generation and no duplicate actors."""
     if npc.social_profile is not None:
         return
+    from ..spatial_people import instance_of
+    instance = instance_of(game, npc.id)
+    if instance is not None and game.spatial_state['instances'][instance].get('heavens_target'):
+        # Authored scenes admit only their actual participants. Defer ambient
+        # family generation until the same person returns to ordinary society.
+        return
     hint = social_hint(game, npc)
     npc.social_profile = dict(hint)
     if npc.id in FIXED_COUPLE:
@@ -67,9 +73,7 @@ def instantiate_social(game: GameState, npc: SectNpc) -> None:
         social_profile={"companion_id": npc.id, "companion_name": npc.name, "concubine_count": 0},
     )
     from .faction_geography import person_site
-    from ..spatial_people import instance_of
     partner.location_id = person_site(game, npc)
-    instance = instance_of(game, npc.id)
     if instance is not None:
         game.spatial_state['instances'][instance].setdefault('npc_ids', []).append(partner.id)
     game.notable_npcs[partner_id] = partner

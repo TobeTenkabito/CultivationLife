@@ -10,6 +10,7 @@ from cultivation_life.content_registry import FACTION_DEFINITIONS, WORLD_SYSTEMS
 from cultivation_life.system.combat_system import BattleUnit, PlayerCombatSystem
 from cultivation_life.engine import GameEngine, encode_rng
 from cultivation_life.models import HistoryRecord
+from cultivation_life.npc_development_content import is_training_supply
 from cultivation_life.rules import (
     TECHNIQUE_CATALOG, add_item, assign_technique, combat_power, create_technique,
     combat_root_mana_cost_multiplier, max_hp, max_mp, opportunity_multiplier,
@@ -535,7 +536,11 @@ class EngineTests(unittest.TestCase):
             game.player.realm_index = realm_index
             game.player.age += 1
             self.engine._ensure_market(game, random.Random(realm_index))
-            tiers = {offer["tier"] for offer in game.market_offers}
+            # The separate NPC-training shelf follows world carrying capacity;
+            # ordinary goods still obey the player's realm-tier shelf rule.
+            tiers = {offer["tier"] for offer in game.market_offers
+                     if not is_training_supply(offer['kind'], offer['content_id'])}
+            self.assertTrue(tiers)
             self.assertTrue(tiers <= {realm_index, realm_index + 1})
             self.assertNotIn(realm_index - 1, tiers)
             if realm_index == 3:
@@ -962,8 +967,16 @@ class EngineTests(unittest.TestCase):
         game.rng_state = repr(random.Random(1).getstate())
         self.engine.store.save(game)
 
+        meeting = self.engine.store.load(created['id'])
+        meeting.player.master.person.location_id = meeting.player.location_id
+        meeting.player.master.person.treasure_item_id = 'dew_grass_seed'
+        meeting.player.master.person.treasure_looted = False
+        self.engine.store.save(meeting)
         item_result = self.engine.request_from_master(created["id"], "item")
-        self.assertEqual(item_result["history"][0]["result"], "master_gave_item")
+        self.assertEqual(item_result["history"][0]["result"], "support_item")
+        teacher = self.engine.store.load(created['id']).player.master.person
+        self.assertIsNone(teacher.treasure_item_id)
+        self.assertTrue(teacher.treasure_looted)
         # Cultivation gifts now require a real meeting address, not just a world.
         meeting=self.engine.store.load(created['id'])
         meeting.player.disciples[0].person.location_id=meeting.player.location_id
@@ -981,8 +994,13 @@ class EngineTests(unittest.TestCase):
         saved.market_age = saved.player.age
         saved.rng_state = repr(random.Random(2).getstate())
         self.engine.store.save(saved)
-        refused = self.engine.request_from_master(created["id"], "item")
-        self.assertEqual(refused["history"][0]["result"], "master_refused")
+        # Finish the normal load-time calendar preparation for this fixture's
+        # explicit year change before measuring the failed command's writes.
+        self.engine.get_game(created['id'])
+        before = self.engine.store._path(created['id']).read_bytes()
+        with self.assertRaisesRegex(ValueError, '额度|实际随身物品'):
+            self.engine.request_from_master(created["id"], "item")
+        self.assertEqual(self.engine.store._path(created['id']).read_bytes(), before)
 
         saved = self.engine.store.load(created["id"])
         saved.player.disciples[0]["age"] = 107
@@ -1485,7 +1503,11 @@ class EngineTests(unittest.TestCase):
         self.engine._ensure_market(game, random.Random(4))
         self.assertEqual(game.market_world, "spirit")
         self.assertTrue(game.market_offers)
-        self.assertTrue(all(offer["world"] == "spirit" and offer["tier"] in {5, 6} for offer in game.market_offers))
+        self.assertTrue(all(offer["world"] == "spirit" for offer in game.market_offers))
+        ordinary = [offer for offer in game.market_offers
+                    if not is_training_supply(offer['kind'], offer['content_id'])]
+        self.assertTrue(ordinary)
+        self.assertTrue(all(offer['tier'] in {5, 6} for offer in ordinary))
         self.assertEqual(self.engine._public_market(game)["spirit_stones"], 777)
 
     def test_spirit_to_void_requires_five_elements_and_zique_can_fill_them(self):

@@ -64,7 +64,7 @@
     if(mode==='influence'&&!rows.length)rows.push(...(p.factions||[]).map(r=>`${r.name} · 驻地`));
     for(const text of rows)details.append(node('p',text));
     if(mode!=='terrain'&&!rows.length)details.append(node('p','此地暂无已公开的相关记录。','muted'));
-    if(mode==='caravans')details.append(node('small','仅列当地可见商队，进度按已过游戏年份估算。'));
+    if(mode==='caravans')details.append(node('small','仅列当地可见商队，进度按已过游戏年份估算。本人商队的状态与结算原因可在商盟的商队经营中查看。'));
     if(mode==='buildings')for(const b of p.buildings||[]){const src=art(b);if(!src)continue;const img=node('img',null,'home-building-preview');img.src=src;img.alt=`${b.name} · ${b.status==='destroyed'?'遗址':`${b.level}级`}`;img.classList.toggle('damaged',b.status==='damaged');details.append(img);}
     if(!p.current){details.append(node('p',`${(p.route_names||[]).join(' → ')} · ${p.travel_years} 年`,'home-map-route'));if(p.warning)details.append(node('p',p.warning,'home-map-warning'));if(p.travel_progress)details.append(node('small',`已走 ${p.travel_progress.completed}/${p.travel_progress.total} 年；更换目的地会放弃原行程。`));}
     go=node('button',p.current?'已在此地':p.travel_status==='lethal'?'强行前往（必死）':`${p.travel_progress?'继续前往':'前往此地'} · ${p.travel_years} 年`,'home-map-travel');go.type='button';go.dataset.destination=p.id;go.onclick=()=>{if(!go.disabled)travel?.(p.id);};details.append(go);syncBusy();refresh();

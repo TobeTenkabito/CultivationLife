@@ -6,6 +6,7 @@ from ..building_rules import config, ensure_state
 from ..building_schema import address
 from ..content_registry import ITEM_CATALOG, WORLD_SYSTEMS
 from ..economy_content import BASE_PRICES, material_id
+from ..earth_temple_content import FACILITIES
 from ..rules import remove_item, combat_power, expected_combat_power, max_mp
 from .economy.enterprise_state import owner_allowed
 
@@ -24,7 +25,21 @@ def grade(world):
     return config()['city_material_grade'][str(tier)]
 
 
-def quote(game, purpose, row=None):
+def land_temple_cost(world):
+    rank=grade(world)
+    return dict(coins=int(BASE_PRICES[rank-1]*4000), materials={material_id(world,rank,role):n
+                for role,n in [('ore_structure',120),('ore_conduct',60),('ore_store',30)]})
+
+
+def temple_facility_cost(world, kind):
+    rank = grade(world)
+    spec = FACILITIES.get(kind)
+    return dict(coins=int(BASE_PRICES[rank-1] * (spec['labor'] if spec else 100)),
+                materials={material_id(world,rank,role):n for role,n in
+                           zip(('ore_structure','ore_conduct','ore_store'), spec['materials'])} if spec else {})
+
+
+def quote(game, purpose, row=None, *, payer='player', stock=None):
     world=game.player.world
     materials={}
     reason=''
@@ -48,6 +63,14 @@ def quote(game, purpose, row=None):
             if row['level']>=3:reason='城市已达三级'
             elif used.get('govern_year')==game.player.age:reason='本城本年已经办理治理，须在城外度过真实年份'
             elif row.get('development',0)>=config()['city_development'][row['level']-1]:reason='治理进度已足，请先扩建'
+    elif row.get('subtype')=='land_temple':
+        costs=land_temple_cost(world)
+        materials,coins=costs['materials'],costs['coins']
+        for kind in row.get('temple_facilities', []):
+            if kind:
+                extra=temple_facility_cost(world,kind)
+                coins+=extra['coins']
+                for key,n in extra['materials'].items():materials[key]=materials.get(key,0)+n
     elif row.get('subtype')=='cave':
         coins=int(config()['cave_prices'][row['quality']][row['level']-1])*WORLD_SYSTEMS['world_profiles'][world]['tier']
     elif row.get('subtype')=='temple':
@@ -61,16 +84,22 @@ def quote(game, purpose, row=None):
     else:
         coins=1000*row['level']*WORLD_SYSTEMS['world_profiles'][world]['tier']
     if row and purpose in {'develop','govern'} and not owns(game,row):reason='只有城市所有者可以办理'
+    if row and purpose in {'develop','govern'} and game.player.age<row.get('civic_disruption_until',0):
+        reason='紫气异象影响地方施工；须完成原案疏导或等待实际期限结束'
     if row and purpose=='rebuild' and row['status']!='destroyed':reason='建筑并未被摧毁'
-    if row and purpose=='rebuild' and not (owns(game,row) or row['type']=='city' and row.get('public')):
+    from .economy.operating_license import allowed as licensed_operator
+    licensed_repair=bool(row and row['type']=='industry' and licensed_operator(game,game.economy_v2.get('estates',{}).get(row.get('source_id'),{})))
+    if row and purpose=='rebuild' and not (owns(game,row) or licensed_repair or row['type']=='city' and row.get('public')):
         reason='没有重建权限，请先联系所有者'
-    funds=sum(i.quantity for i in game.player.inventory if i.id=='spirit_stone')
-    held={i.id:i.quantity for i in game.player.inventory}
+    from .economy.ledger import balance
+    funds=balance(game,payer)
+    held={i.id:i.quantity for i in game.player.inventory} if stock is None else stock
     missing=[ITEM_CATALOG[key].name for key,n in materials.items() if held.get(key,0)<n]
     if not reason and (funds<coins or missing):reason='灵石或筑城材料不足'
     fingerprint=dict(purpose=purpose,world=world,location=game.player.location_id,coins=coins,materials=materials,
         identity=row['id'] if row else None,owner=row.get('owner') if row else None,
-        level=row.get('level') if row else None,status=row.get('status') if row else None)
+        level=row.get('level') if row else None,status=row.get('status') if row else None,
+        temple_facilities=row.get('temple_facilities') if row else None)
     token=hashlib.sha256(json.dumps(fingerprint,sort_keys=True).encode()).hexdigest()[:20]
     return dict(coins=coins,materials=materials,reason=reason,token=token)
 
@@ -79,8 +108,18 @@ def bill_text(bill):
     return f"灵石 {bill['coins']:,}" + ''.join(f"；{ITEM_CATALOG[key].name} ×{n:,}" for key,n in bill['materials'].items())
 
 
-def pay(game,bill,reason):
+def pay(game,bill,reason, *, payer='player', stock=None):
     if bill['reason']:raise ValueError(bill['reason'])
+    if payer!='player' or stock is not None:
+        from .economy.ledger import balance, transfer_value
+        from .economy.local_market import operator_account
+        if stock is None or balance(game,payer)<bill['coins'] or any(stock.get(k,0)<n for k,n in bill['materials'].items()):
+            raise ValueError('原工程托管款或公物不足')
+        transfer_value(game,payer,operator_account(game),bill['coins'],reason)
+        for key,n in bill['materials'].items():
+            stock[key]-=n
+            if not stock[key]:stock.pop(key)
+        return
     held={i.id:i.quantity for i in game.player.inventory}
     if held.get('spirit_stone',0)<bill['coins'] or any(held.get(k,0)<n for k,n in bill['materials'].items()):
         raise ValueError('灵石或工程材料不足')
@@ -94,6 +133,13 @@ def pay(game,bill,reason):
 def persist(game,row):
     import copy
     return ensure_state(game)['records'].setdefault(row['id'],copy.deepcopy(row))
+
+
+def set_public(game,row,value):
+    if type(value) is not bool or row['address']!=address(game) or not owns(game,row):
+        raise ValueError('须由原建筑所有者在原址调整公开使用权')
+    if row['status']!='intact':raise ValueError('原建筑不可用，须先修复')
+    persist(game,row)['public']=value
 
 
 def defense(row):

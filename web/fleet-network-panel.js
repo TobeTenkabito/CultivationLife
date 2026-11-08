@@ -65,6 +65,7 @@
       tools.append(action(label, 'create', {owner_kind:kind}, kind === 'alliance' ? !system.can_apply : kind === 'independent' && system.fleets.some(f => f.owner_kind === kind && f.player_controlled && f.status !== 'retired')));
     }
     management.append(tools);
+    management.append(node('p', '托管自动贸易先核算货单，再用商队周转金聘请护卫，并预留航程薪饷和三年养护。无利可图时遣散闲置护卫、保留商队候货；手工货单与暂停指令保持原样。', 'muted'));
     management.append(node('p', '组织执掌者可在驻地扩建产业，费用随当地原料价格变化，最高十级。战争会削弱产出，军需采购消耗真实库存与府库。'));
     management.append(action('扩建家族产业', 'industry', {owner_kind:'family'}, !system.can_industry?.family), action('扩建宗门产业', 'industry', {owner_kind:'sect'}, !system.can_industry?.sect));
     for (const a of system.alliances || []) management.append(node('p', `${a.name}：${a.count} / ${a.capacity} 支商队`));

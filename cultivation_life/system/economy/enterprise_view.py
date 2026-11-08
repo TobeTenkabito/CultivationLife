@@ -48,6 +48,8 @@ def public_estates(game, maps):
         record.update(annual_maintenance=annual_maintenance(row,market),operating_reserve=operating_reserve(game,row,market),
                       maintenance=maintenance_breakdown(row, market), turnover=row.get('turnover', 0),
                       turnover_since=row.get('turnover_since'), trust_managed='trust_config' in row)
+        record['water_pause_until']=row.get('public_water_until',0)
+        record['water_paused']=p.age<row.get('public_water_until',0)
         record['resources']=[ITEM_CATALOG[k].name for k in site_profile(p.world,p.location_id,kind)]
         owned.append(record)
     return dict(available=True, can_act=trade_available(game), offers=offers, owned=owned,

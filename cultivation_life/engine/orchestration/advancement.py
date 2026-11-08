@@ -96,6 +96,27 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     deps._begin_doctrine_action(game, action, commit=True)
     time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
     years = units * time_unit
+    if action in {'antiquity_work','council_work','purple_work'}:
+        from ...system import yaochi_antiquity,court_projects,purple_east
+        agenda={'antiquity_work':yaochi_antiquity,'council_work':court_projects,'purple_work':purple_east}[action]
+        years=min(years,agenda.begin(game))
+    if action=='yaochi_garden':
+        from ...system.yaochi_garden import begin as begin_garden
+        years=min(years,begin_garden(game))
+    if action == 'yaochi_fair':
+        from ...system.yaochi_fair import begin as begin_fair
+        years=min(years,begin_fair(game))
+    if action == 'court_service':
+        from ...system.court_bureau_runtime import begin_work as begin_court_work
+        years = min(years, begin_court_work(game))
+    if action == 'yaochi_practice':
+        from ...system.yaochi_westward import begin_practice
+        years = min(years, begin_practice(game))
+    if action == 'earth_service':
+        from ...system.earth_temple import begin_work as begin_earth_work
+        from ...system.earth_temple_rules import state as earth_state
+        years = min(years, begin_earth_work(game))
+        earth_work_id = earth_state(game)['temple_id']
     if remaining_work is not None:
         years = min(years, remaining_work)
     rng = decode_rng(game.seed, game.rng_state)
@@ -110,6 +131,27 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     start_world_age = player.age
     start_age = current_body_age(player)
     for elapsed_index in range(years):
+        if action=='yaochi_practice':
+            from ...system.yaochi_westward import _target_reason
+            from ...system.westward_rules import project as practice_project
+            if reason:=_target_reason(game,practice_project(game)):
+                era_news.append(reason);break
+        if action in {'antiquity_work','council_work','purple_work'} and (reason:=agenda.work_reason(game)):
+            era_news.append(reason);break
+        if action=='yaochi_fair':
+            from ...system.yaochi_fair_rules import work_reason as fair_reason
+            if reason:=fair_reason(game):
+                era_news.append(reason);break
+        if action == 'court_service':
+            from ...system.court_bureau_runtime import work_reason as court_work_reason
+            if reason := court_work_reason(game):
+                era_news.append(reason)
+                break
+        if action == 'earth_service':
+            from ...system.earth_temple import work_reason as earth_reason
+            if (reason := earth_reason(game)) or earth_state(game).get('temple_id') != earth_work_id:
+                era_news.append(reason or '已离开原施工或履约庙址')
+                break
         # Finish the already-paid ordinary unit before a new local blockade
         # stops the next one. Legacy partial units round up their settlement.
         if elapsed_index % time_unit == 0 and (reason := resource_reason(game, action)):
@@ -121,14 +163,23 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         advance_player_age(player)
         low, high = ACTIONS[action]["opportunity"]
         gain = rng.randint(low, high) * opportunity_multiplier(player)
+        from ...system.yaochi_guidance import active as guidance_active,annual_gain as guidance_gain,record_gain
+        guidance=action=='yaochi_practice' and guidance_active(game)
+        if guidance:gain=guidance_gain(game)
         if action == "cultivate" and player.path == "demonic":
             gain *= float(WORLD_SYSTEMS["demonic_cultivation"]["natural_cultivation_multiplier"])
         if player.world == "celestial" and deps._court_law_active(game, "immortal_twofold"):
             gain *= 1.10
-        if deps.heavens_activity_gain:
+        if guidance:
+            gain=deps._add_opportunity(player,gain,apply_efficiency=False,trace_multiplier=0.)
+            record_gain(game,gain)
+        elif deps.heavens_activity_gain:
             gain = deps.heavens_activity_gain(game, gain, action)
         else:
-            gain = deps._add_opportunity(player, gain, apply_efficiency=False)
+            from ...system.earth_temple_rules import activity as earth_activity
+            earth_gain, trace_multiplier = earth_activity(game, gain, action)
+            gain = deps._add_opportunity(player, gain + earth_gain, apply_efficiency=False,
+                                        trace_multiplier=trace_multiplier)
         total_gain += gain
         if action == "sense_train":
             sense_gain = deps._sense_training_step(player)
@@ -185,12 +236,48 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             break
     deps._finish_doctrine_action(game, action, player.age - start_world_age)
     deps._finish_yaochi_action(game, action, player.age - start_world_age)
+    practice_units = None
+    if action in {'antiquity_work','council_work','purple_work'}:
+        practice_units=agenda.finish(game,player.age-start_world_age,time_unit)
+    if action=='yaochi_garden':
+        from ...system.yaochi_garden import finish as finish_garden
+        practice_units=finish_garden(game,player.age-start_world_age,time_unit)
+    if action=='yaochi_fair':
+        from ...system.yaochi_fair import finish as finish_fair
+        practice_units=finish_fair(game,player.age-start_world_age,time_unit)
+    if action == 'court_service':
+        from ...system.court_bureau_runtime import finish_work as finish_court_work
+        practice_units = finish_court_work(game, player.age-start_world_age, time_unit)
+    if action == 'yaochi_practice':
+        from ...system.yaochi_westward import finish_practice
+        practice_units = finish_practice(game, player.age - start_world_age, time_unit)
+    if action == 'earth_service':
+        from ...system.earth_temple import finish_work as finish_earth_work
+        practice_units = finish_earth_work(game, player.age - start_world_age, time_unit, earth_work_id)
     if player.world == institution_world:
         finish_work(game, action, player.age - start_world_age)
         advance_time(game, player.age - start_world_age, time_unit)
     if player.alive:
         action_title = "打熬筋骨" if action == "cultivate" and player.spirit_root == "none" else ACTIONS[action]["name"]
         action_summary = (
+            f"实际办理{ACTIONS[action]['name']} {player.age-start_world_age}年；进度与已付工时保留，请返回原事务页继续。"
+            if action in {'antiquity_work','council_work','purple_work'}
+            else
+            f"在原仙圃巡护 {player.age-start_world_age} 年，生产与养护按原产业账目结算。"
+            if action=='yaochi_garden'
+            else
+            f"在瑶池实际筹备仙会 {player.age-start_world_age} 年；已耗工时保留，可处理事件后继续参赛。"
+            if action=='yaochi_fair'
+            else
+            f"实际办理职司事务 {player.age-start_world_age} 年，原案卷工时已保存；请返回天庭职司核验。"
+            if action == 'court_service'
+            else
+            f"在原庙所在地实际办理地方事务 {player.age - start_world_age} 年；请返回地仙庙域核对进度、选择方案或验收。"
+            if action == 'earth_service'
+            else
+            f"在瑶池实际专修 {player.age - start_world_age} 年；专修进度与所得已记入原项目，可处理事件后继续或结清。"
+            if action == 'yaochi_practice'
+            else
             f"完成一个教化行动单位：外在影响 {game.sage_state.get('action_result', {}).get('external', 0):+.2f}，内在影响 +{game.sage_state.get('action_result', {}).get('inner', 0):.2f}，门人出师 {game.sage_state.get('action_result', {}).get('graduated', 0)} 人。"
             if ACTIONS[action].get("sage_action")
             else
@@ -229,8 +316,9 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             deps._queue_followup_event(game, deps._prepare_generated_event(game))
         settle_elapsed_time(
             deps.settlement, game, rng, era_news, action=action,
-            units=completed_action_units(max(1, player.age - start_world_age), time_unit),
+            units=practice_units if practice_units is not None else completed_action_units(max(1, player.age - start_world_age), time_unit),
             start_age=start_world_age, policy=ACTION_TIME,
+            elapsed_years=player.age - start_world_age,
             after_units=lambda: _finish_action_events(deps, game, action, rng),
         )
 
@@ -302,12 +390,12 @@ def _finish_action_events(deps: AdvancementDependencies, game: GameState, action
 def _add_opportunity(
     deps: AdvancementDependencies, player: Player, amount: float,
     regional_efficiencies: dict[str, float] | None = None,
-    *, apply_efficiency: bool = True,
+    *, apply_efficiency: bool = True, trace_multiplier: float = 1.,
 ) -> float:
     from ...system.opportunity import grant
     return grant(player, amount, regional_efficiencies if regional_efficiencies is not None
                  else deps.maps.qi_gain_efficiencies(player.world, player.location_id),
-                 apply_efficiency=apply_efficiency)
+                 apply_efficiency=apply_efficiency, trace_multiplier=trace_multiplier)
 
 
 def _sense_training_step(

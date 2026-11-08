@@ -44,7 +44,7 @@ def test_old_saves_explicitly_rejected_without_mutation(version):
     with pytest.raises(ValueError,match='不兼容'):
         migrate_document(old)
     assert old==before
-    assert SAVE_SCHEMA_VERSION==10
+    assert SAVE_SCHEMA_VERSION==12
 
 
 def test_old_save_file_survives_load_and_is_visible_as_incompatible(ready):

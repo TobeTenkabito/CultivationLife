@@ -54,12 +54,13 @@ dlc/
 
 ## 当前官方包
 
-十个包的默认启用状态、加载次序和版本以清单为准。
+各包的默认启用状态、加载次序和版本以清单为准；开发中的扩展在包说明中标明实施范围。
 
 本相、魂相和八部魔域的专属成就按相应 DLC 实际加载；三级界面的境界、普通邻域和三套机构成就属于本体。既有跨存档成就记录不因关闭扩展而清除。
 
 | 包 | 版本 | ID |
 | --- | --- | --- |
+| [瑶池西望：紫气东来](yaochi-westward/README.md) | 1.0.0 | `official.yaochi-westward` |
 | [修罗显圣：无法无天](asura-manifestation/README.md) | 1.4.0 | `official.asura-manifestation` |
 | [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.2.1 | `official.buddhist-dharma` |
 | [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.11.1 | `official.ghost-reincarnation` |

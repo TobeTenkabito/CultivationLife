@@ -10,12 +10,24 @@ from cultivation_life.system.economy.economy_trust import prepare, grow, CONFIG
 from cultivation_life.system.economy.enterprise_operations import advance_estates, market_trade
 from cultivation_life.system.economy.enterprise_market import market_at
 from cultivation_life.system.economy.enterprise_rules import recipes
-from cultivation_life.system.economy.state import commodity_catalog
+from cultivation_life.system.economy.state import commodity_catalog, reprice
 from cultivation_life.system.economy.ledger import transfer_value, balance
 from cultivation_life.system.economy.fleet_network import guard_required, guard_cost
 from cultivation_life.system.economy.organization_accounts import caravan_dividend
 from test_economy_network import economy, cash, act
 from test_economy_enterprises import buy, estate_act, own_fleet, fleet
+
+
+def profitable_mining_market(game, engine, row):
+    # These lifecycle cases need a profitable funded batch. Ordinary low-tier
+    # ore may correctly remain idle after full carrying costs are included.
+    market = market_at(game, engine.maps, row)
+    for recipe in recipes('human', commodity_catalog('human')).values():
+        if recipe['kind'] == 'mine':
+            product = market['commodities'][recipe['output']]
+            product.update(stock=0, reference=max(100, product['reference']))
+            reprice(game, market, product)
+    return market
 
 
 def test_annual_finance_uses_real_settlement_period_and_is_readonly(economy):
@@ -87,10 +99,7 @@ def test_setting_persists_and_disable_restores_plan_preserving_paid_job(economy)
     row = game.economy_v2['estates'][key]
     previous = {k:row.get(k,default) for k,default in CONFIG.items()}
     player_cash, total = balance(game, 'player'), cash(game)
-    market = market_at(game, engine.maps, row)
-    for recipe in recipes('human', commodity_catalog('human')).values():
-        if recipe['kind'] == 'mine':
-            market['commodities'][recipe['output']]['stock'] = 0
+    profitable_mining_market(game, engine, row)
     game.player.age += 1
     advance_estates(game, engine.maps)
     assert row.get('trust_config') and row['job']
@@ -140,8 +149,9 @@ def test_trust_guard_is_paid_from_fleet_and_hold_order_is_preserved(economy):
     before_profit, before_cost = f['profit'], f['operating_costs']
     game.player.age += 1
     caravans.advance_caravans(game, engine.maps)
-    assert f['guard_power'] == guard_required('human')
-    assert f['operating_costs'] - before_cost >= guard_cost('human')
+    # No profitable cargo: opting into management must not hire idle guards.
+    assert f['guard_power'] == 0 and f['cargo'] is None
+    assert f['operating_costs'] - before_cost == 2
     assert balance(game, 'player') == player_cash and cash(game) == total
     assert f['profit'] < before_profit
 
@@ -245,9 +255,7 @@ def test_century_jump_replans_once_and_does_not_replay_unstarted_jobs(economy):
     game = estate_act(engine, game, key, 'fund', amount=100000)
     game.settings['economy_trust'] = True
     row = game.economy_v2['estates'][key]
-    market = market_at(game, engine.maps, row)
-    for recipe in recipes('human', commodity_catalog('human')).values():
-        if recipe['kind'] == 'mine': market['commodities'][recipe['output']]['stock'] = 0
+    profitable_mining_market(game, engine, row)
     before = cash(game)
     with patch.object(estate_management, 'plan', wraps=estate_management.plan) as calls:
         game.player.age += 100

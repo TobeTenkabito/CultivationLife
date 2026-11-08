@@ -45,17 +45,22 @@ def command(game, maps, payload):
         acquire(game, maps, p.world, p.location_id, kind, owner_kind, identity, source, p.realm_index, payload.get('cost'))
         return
     row = require_local(game, payload.get('estate_id'))
+    from .operating_license import allowed,production_reason
+    leased=allowed(game,row)
+    if leased:
+        if action in {'upgrade','release','transfer','move_stock','entrust'}:raise ValueError('经营许可不授予产权、扩建或匿名委托权，请在仙圃页交接')
+        if action in {'configure','start','purchase','sell'} and (blocked:=production_reason(game,row)):raise ValueError(blocked)
     if row.get('building_status')=='destroyed' and action in {'configure','entrust','start','upgrade','purchase','sell','transfer','release'}:
         raise ValueError('产业设施已毁坏，请从地图建筑原址重建；原仓储与账户保留')
     if type(payload.get('revision')) is not int or payload['revision'] != row['revision']:
         raise ValueError('产业状态已经变化，请刷新后重新操作')
     key = cash_ready(game, row)
     if action == 'fund':
-        if row['owner_kind'] != 'player':
+        if row['owner_kind'] != 'player' and not leased:
             raise ValueError('组织产业使用原府库，请通过既有组织注资入口办理')
         transfer_value(game, 'player', key, quantity(payload.get('amount'), 10**12), '产业追加周转金')
     elif action == 'withdraw_cash':
-        if row['owner_kind'] != 'player' or row['arrears']:
+        if (row['owner_kind'] != 'player' and not leased) or row['arrears']:
             raise ValueError('只可提取本人产业的无欠费现金')
         transfer_value(game, key, 'player', quantity(payload.get('amount'), 10**12), '在产业所在地提取经营现金')
     elif action == 'pay_arrears':

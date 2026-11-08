@@ -8,7 +8,7 @@ import pytest
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import ITEM_CATALOG, MARKET_GOODS
 from cultivation_life.economy_content import specification
-from cultivation_life.models import Item, Player, SectNpc
+from cultivation_life.models import GameState, Item, Player, SectNpc
 from cultivation_life.system.combat.contracts import Combatant, CombatCapabilities, resolve_source
 from cultivation_life.system.combat.voisinages import VoisinageBattle
 from cultivation_life.system.combat_loadout import project_loadout
@@ -34,12 +34,18 @@ def hit(caps):
     damage,_=battle.ordinary_damage(.2,0)
     return damage
 
+
+def player_loadout(player):
+    # Player projection also reads the authoritative bound-artifact slot.
+    game=GameState('equipment-audit',272,player,'','')
+    return project_loadout(game,player,player=True)
+
 @pytest.mark.parametrize('world,grade,kind',CASES)
 def test_economic_equipment_real_damage_respects_upper_threshold(world,grade,kind):
     item=copy.deepcopy(ITEM_CATALOG[f'econ_{world}_{grade}_{kind}'])
     p=Player('资材边界','none',world=world)
     p.inventory=[item]
-    caps=resolve_source(None,{},project_loadout(None,p,player=True))
+    caps=resolve_source(None,{},player_loadout(p))
     assert hit(caps)==pytest.approx(.2 if grade>=9 else 0)
     assert caps.artifact_tier==(2 if grade>=9 else 1)
     # The bug shipped copied grades into saved items; their stale values must
@@ -47,7 +53,7 @@ def test_economic_equipment_real_damage_respects_upper_threshold(world,grade,kin
     item.force_tier=grade
     saved=Player.from_dict(p.to_dict())
     before=saved.to_dict()
-    caps=resolve_source(None,{},project_loadout(None,saved,player=True))
+    caps=resolve_source(None,{},player_loadout(saved))
     assert hit(caps)==pytest.approx(.2 if grade>=9 else 0)
     assert saved.to_dict()==before
 
@@ -75,14 +81,14 @@ def test_npc_main_artifact_obeys_same_damage_gate(world,grade):
 def test_upper_energy_and_explicit_immortal_artifacts_still_work():
     p=Player('攻击资格','none')
     p.inventory=[copy.deepcopy(ITEM_CATALOG['econ_human_2_artifact_attack'])]
-    source=project_loadout(None,p,player=True)
+    source=player_loadout(p)
     state=dict(conversion=1,capacity=100,current=100,force_tier=2,attack_cost=10)
     assert hit(resolve_source(state,{},source))==pytest.approx(.2)
     assert hit(resolve_source(dict(state,current=0),{},source))==0
     p.inventory=[copy.deepcopy(ITEM_CATALOG['heavenly_river_sword_embryo'])]
-    assert hit(resolve_source(None,{},project_loadout(None,p,player=True)))==pytest.approx(.2)
+    assert hit(resolve_source(None,{},player_loadout(p)))==pytest.approx(.2)
     p.inventory=[Item('local-custom-weapon','显式上界武器',force_tier=2,tags=['equipment'])]
-    assert hit(resolve_source(None,{},project_loadout(None,p,player=True)))==pytest.approx(.2)
+    assert hit(resolve_source(None,{},player_loadout(p)))==pytest.approx(.2)
 
 def test_old_structure_10_inventory_stays_unchanged_during_projection(tmp_path):
     engine=GameEngine(ROOT,tmp_path)

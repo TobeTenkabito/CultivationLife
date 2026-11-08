@@ -52,7 +52,8 @@ def bind_incidents(engine):
     def field_effect(game, identity):
         treated = patients(game, BY_ID[identity])
         for npc in treated:
-            npc.wounds -= 1
+            from ...system.combat.npc_lifecycle import relieve_wounds
+            relieve_wounds(npc)
         return '；'.join(f'{npc.name}减轻一级伤势' for npc in treated) or '到结算时已无在场伤者，未产生救治收益'
 
     def mana(game):

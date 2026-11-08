@@ -140,9 +140,9 @@ def test_system_war_tiers_and_player_exception(local):
     assert system_war_allowed(game,'sect',first.id,second.id)
 
 
-@pytest.mark.parametrize('old,new',[('c','a'),('e','f')])
-def test_retired_theme_migration_preserves_motion(tmp_path,old,new):
+@pytest.mark.parametrize('old', ['c', 'e'])
+def test_retired_theme_migration_preserves_motion(tmp_path,old):
     (tmp_path/'data').mkdir()
     (tmp_path/'data/ui_preferences.json').write_text(json.dumps(dict(theme=old,reduced_motion=True)))
-    assert load_ui_preferences(tmp_path)==dict(theme=new,reduced_motion=True,pixel_art=False,pixel_theme='light',compact_docks=True)
+    assert load_ui_preferences(tmp_path)==dict(theme='a',reduced_motion=True,pixel_art=True,pixel_theme='light',compact_docks=True)
     with pytest.raises(ValueError):write_ui_preferences(tmp_path,dict(theme=old))

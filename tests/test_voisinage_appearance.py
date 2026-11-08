@@ -20,7 +20,7 @@ def test_appearance_roundtrip_preserves_other_preferences_and_saves(tmp_path):
     save = tmp_path/'data/saves/sentinel.json'
     save.parent.mkdir(parents=True)
     save.write_text('{"unchanged":true}')
-    original = write_ui_preferences(tmp_path, {'theme':'f','navigation':{'pins':['map'],'recent':[]}})
+    original = write_ui_preferences(tmp_path, {'pixel_theme':'dark','navigation':{'pins':['map'],'recent':[]}})
     assert write_ui_preferences(tmp_path, {'voisinage_appearance':STYLE}) == original | {'voisinage_appearance':STYLE}
     assert load_ui_preferences(tmp_path)['voisinage_appearance'] == STYLE
     write_ui_preferences(tmp_path, {'pixel_art':True})
@@ -42,20 +42,22 @@ def test_invalid_appearance_is_atomic(tmp_path,bad):
     path=tmp_path/'data/ui_preferences.json'
     before=path.read_bytes()
     with pytest.raises(ValueError):
-        write_ui_preferences(tmp_path, {'theme':'f','voisinage_appearance':bad})
+        write_ui_preferences(tmp_path, {'pixel_theme':'dark','voisinage_appearance':bad})
     assert path.read_bytes() == before
 
 
 def test_corrupt_optional_style_does_not_erase_other_preferences(tmp_path):
     path=tmp_path/'data/ui_preferences.json';path.parent.mkdir()
-    path.write_text(json.dumps({'theme':'d','voisinage_appearance':{'palette':'invalid'}}))
-    assert load_ui_preferences(tmp_path)['theme']=='d'
+    path.write_text(json.dumps({'theme':'d','pixel_theme':'dark','voisinage_appearance':{'palette':'invalid'}}))
+    assert load_ui_preferences(tmp_path)['theme']=='a'
+    assert load_ui_preferences(tmp_path)['pixel_theme']=='dark'
     assert 'voisinage_appearance' not in load_ui_preferences(tmp_path)
 
 
 def test_parallel_partial_preferences_keep_appearance(tmp_path):
-    patches=[{'voisinage_appearance':STYLE},{'theme':'f'},{'pixel_art':True},{'navigation':{'pins':['map'],'recent':[]}}]
+    patches=[{'voisinage_appearance':STYLE},{'pixel_theme':'dark'},{'pixel_art':True},{'navigation':{'pins':['map'],'recent':[]}}]
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(lambda patch:write_ui_preferences(tmp_path,patch),patches))
     final=load_ui_preferences(tmp_path)
-    assert final['voisinage_appearance']==STYLE and final['theme']=='f' and final['pixel_art'] is True
+    assert final['voisinage_appearance']==STYLE and final['pixel_theme']=='dark'
+    assert final['theme']=='a' and final['pixel_art'] is True

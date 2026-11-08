@@ -10,6 +10,11 @@ from .dependencies import YaochiDependencies
 from ..economy import organizations as finance
 
 
+def commission_reason(game):
+    from ..westward_activity import occupied,other_work
+    return '请先结清或交接本人当前事务，再承接瑶池委托' if occupied(game) or other_work(game) else ''
+
+
 def _begin_yaochi_action(deps: YaochiDependencies, game, action):
     if action != 'yaochi_work': return
     require_market(game)
@@ -27,7 +32,41 @@ def _finish_yaochi_action(deps: YaochiDependencies, game, action, elapsed):
 
 def yaochi_action(deps: YaochiDependencies, game_id, action, target_id='', amount=1):
     game = deps._load(game_id)
+    if action.startswith('purple_'):
+        from ..purple_east import command
+        return command(deps,game,action,target_id,amount)
+    if action.startswith('identity_'):
+        from ..immortal_identity import command
+        return command(deps,game,action,target_id,amount)
+    if action.startswith('relief_'):
+        from ..immortal_relief import command
+        return command(deps,game,action,target_id,amount)
+    if action.startswith('antiquity_'):
+        from ..yaochi_antiquity import command
+        return command(deps,game,action,target_id,amount)
+    if action.startswith('council_'):
+        from ..court_projects import command
+        return command(deps,game,action,target_id,amount)
+    if action.startswith('garden_'):
+        from ..yaochi_garden import command
+        return command(deps,game,action,target_id,amount)
+    if action.startswith('fair_'):
+        from ..yaochi_fair import command
+        return command(deps,game,action,target_id,amount)
+    if isinstance(action, str) and action.startswith('bureau_'):
+        from ..court_bureaus import command as bureau_command
+        return bureau_command(deps, game, action, target_id, amount)
+    if isinstance(action, str) and action.startswith('earth_'):
+        from ..earth_temple import action as earth_action
+        return earth_action(deps, game, action, target_id, amount)
+    if isinstance(action, str) and action.startswith('westward_'):
+        from ..yaochi_westward import action as westward_action
+        return westward_action(deps, game, action, target_id, amount)
     require_market(game)
+    if action=='accept':
+        if blocked:=commission_reason(game):raise ValueError(blocked)
+    if action=='accept' and any(r['status']=='active' for r in game.yaochi_state.get('westward',{}).get('fair',{}).get('entries',[])):
+        raise ValueError('请先完成或退出当前仙会赛事')
     p, state, cfg = game.player, account(game), config()
     unit = int(WORLD_SYSTEMS['time_units'][str(p.realm_index)])
     if type(amount) is not int or not 1 <= amount <= 1000000:
@@ -131,6 +170,14 @@ def yaochi_action(deps: YaochiDependencies, game_id, action, target_id='', amoun
 
 
 def _public_yaochi(deps: YaochiDependencies, game):
+    from ..immortal_identity import public as identity_public
+    from ..immortal_relief import public as relief_public
+    from ..purple_east import public as purple_public
+    from ..yaochi_antiquity import public as antiquity_public
+    from ..yaochi_garden import public as garden_public
+    from ..yaochi_fair import public as fair_public
+    from ..yaochi_westward import public as westward_public
+    from ..earth_temple import public as earth_public
     p=game.player;cfg=config();state=account(game)
     if p.world!='celestial' or p.realm_index<9: return {'available':False}
     election=game.heavenly_court.get('open_election')
@@ -146,11 +193,15 @@ def _public_yaochi(deps: YaochiDependencies, game):
     for o in offers(game):
         rows.append({k:v for k,v in o.items() if k!='payload'} | {'owned':o['kind']=='body_manual' and o['id'] in p.immortal_body.get('manuals',[]), 'commission_price':math.ceil(o['price']*(1+cfg['order_fee'])), 'locked':o['id'] in state.get('locked_offers',{}), 'lock_price':lock_price(o), 'can_lock':o['kind']=='doctrine', 'eligible':o['kind']!='doctrine' or o['payload']['grade']<=p.realm_index})
     return dict(available=True, local=p.location_id==cfg['location_id'], location_id=cfg['location_id'],
+                westward=westward_public(game), earth=earth_public(game, deps.maps),garden=garden_public(game),fair=fair_public(game),
+                antiquity=antiquity_public(game,deps.maps) if deps.maps else None,identity=identity_public(game),relief=relief_public(game),
+                purple_east=purple_public(game,deps.maps) if deps.maps else None,
                 finance=finance.public_finance(game, 'yaochi', 'yaochi'),
                 experience=experience(game), commission_catalog=catalog,
                 manual_catalog_counts={'total':total_manuals, 'eligible':sum(o['doctrine'] is not None for o in catalog)},
                 merit=state.get('merit',0), earned=state.get('earned',0), shop=rows, commissions=[dict(j,reward=commission_reward(p,j,game),years=int(WORLD_SYSTEMS['time_units'][str(p.realm_index)])) for j in cfg['commissions']],
                 lock_limit=cfg['lock_limit'], locked_count=len(state.get('locked_offers',{})),
+                commission_reason=commission_reason(game),
                 job=copy.deepcopy(state.get('job')), orders=[dict(id=o['id'],name=o['offer']['name'],ready_age=o['ready_age'],ready=p.age>=o['ready_age']) for o in state.get('orders',[])],
                 exchange={k:cfg[k] for k in ('stones_per_merit','merit_per_court_merit','support_cost','support_gain','vote_cost')},
                 votes=[dict(id=s['id'],name=s['name'],bought=s['id'] in election.get('yaochi_seats',[])) for s in game.heavenly_court['seats']] if election and 'player' in election['candidates'] else [])

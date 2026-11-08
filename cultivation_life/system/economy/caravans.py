@@ -98,15 +98,15 @@ def _history(region, year, fleet, message):
 
 
 def _candidate_items(source, target):
-    """Keep the original price/stock/ID tie order without sorting all goods."""
+    """Rank available goods only; empty shelves cannot consume search slots."""
     goods, other = source['commodities'], target['commodities']
     ranked = ((other[item]['price'] / row['price'],
                row['stock'] / row['target'], item)
-              for item, row in goods.items() if item in other)
+              for item, row in goods.items() if item in other and row['stock'] >= 1)
     return [item for _, _, item in heapq.nlargest(12, ranked)]
 
 
-def _candidate(game, maps, alliance, fleet):
+def _candidate(game, maps, alliance, fleet, *, budget=None):
     if fleet.get('trade_order', {}).get('mode', 'auto') != 'auto':
         from .trade_orders import candidate
         return candidate(game, maps, fleet, route_quote)
@@ -118,7 +118,7 @@ def _candidate(game, maps, alliance, fleet):
     for site in sorted({origin, *sites}):
         ensure_regional_market(game, maps, world, site)
     source = _market(game, world, origin)
-    budget = balance(game, _cash(fleet))
+    budget = balance(game, _cash(fleet)) if budget is None else budget
     required_guard = guard_required(world)
     coverage = fleet.get('guard_power', required_guard) / required_guard
     guard_risk = max(0, 1 - coverage) * .65
@@ -188,10 +188,36 @@ def _candidate(game, maps, alliance, fleet):
 def _dispatch(game, maps, alliance, fleet, region):
     world = fleet['world']
     candidate = _candidate(game, maps, alliance, fleet)
+    if (game.settings.get('economy_trust') and game.player.alive
+            and fleet.get('trade_order', {}).get('mode', 'auto') == 'auto'
+            and managed_by_player(game, fleet)):
+        from .fleet_network import guard_cost, recruit_guard
+        required = guard_required(world)
+        if fleet['guard_power'] < required * .8:
+            # Cargo margin does not price the loss of the crew and remaining
+            # capital. Managed auto trade waits for a funded protected trip.
+            candidate = None
+        if fleet['guard_power'] < required:
+            cost = guard_cost(world)
+            reserve = (max(1, fleet['capacity'] // 12) + guard_wages(dict(guard_power=required), 1)) * 3
+            available = balance(game, _cash(fleet)) - cost - reserve
+            if available > 0:
+                # Read-only staffing quote over the same cash and market. Hire
+                # only for a funded trip that recovers its initial hiring fee.
+                staffed = _candidate(game, maps, alliance, dict(fleet, guard_power=required), budget=available)
+                if staffed and staffed['expected'] - cost > (candidate['expected'] if candidate else 0):
+                    recruit_guard(game, fleet, _cash(fleet))
+                    candidate = staffed
+        if candidate is None and fleet['guard_power']:
+            # Past wages remain paid; no refund or invented replacement crew.
+            fleet['guard_power'] = 0
+            _history(region, game.player.age, fleet, '无可盈利货单，托管已遣散闲置护卫，保留原商队与周转金')
     if candidate is None:
         fleet['idle_years'] += 1
         fleet['next_departure'] = game.player.age + 3
-        fleet['last_result'] = '价差不足以覆盖运输与风险，留驻等候'
+        fleet['last_result'] = '价差不足以覆盖运输与风险，留驻等候；托管自动贸易不维持闲置护卫' if (
+            game.settings.get('economy_trust') and managed_by_player(game, fleet)
+            and fleet.get('trade_order', {}).get('mode', 'auto') == 'auto') else '价差不足以覆盖运输与风险，留驻等候'
         return
     item, quantity = candidate['item'], candidate['quantity']
     plan, purchase = candidate['transport'], candidate['purchase']
@@ -391,12 +417,6 @@ def advance_caravans(game, maps):
             elif game.player.age >= fleet['next_departure']:
                 if fleet.get('trade_order', {}).get('mode') == 'hold':
                     continue
-                if game.settings.get('economy_trust') and game.player.alive and managed_by_player(game, fleet):
-                    from .fleet_network import guard_cost, recruit_guard
-                    cost = guard_cost(world)
-                    reserve = (max(1, fleet['capacity']//12) + max(1, round(guard_required(world)**.5))) * 3
-                    if fleet['guard_power'] < guard_required(world) and balance(game, _cash(fleet)) >= cost + reserve + 20:
-                        recruit_guard(game, fleet, _cash(fleet))
                 try:
                     _dispatch(game, maps, alliance, fleet, region)
                 except ValueError as exc:

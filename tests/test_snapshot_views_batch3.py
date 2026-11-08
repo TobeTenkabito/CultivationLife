@@ -1,10 +1,7 @@
 """Snapshot isolation and unchanged decode/preparation boundaries."""
-import ast
 import copy
 from collections import defaultdict
 import gc
-import hashlib
-import json
 from pathlib import Path
 import random
 from types import MappingProxyType, SimpleNamespace
@@ -17,27 +14,30 @@ from cultivation_life.snapshot_copy import copy_plain_data
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_decode_and_view_algorithms_change_only_the_copy_implementation():
-    fixture = ROOT/'tests/fixtures/snapshot_boundaries_332.json'
-    assert hashlib.sha256(fixture.read_bytes().replace(b'\r\n', b'\n')).hexdigest() == 'f8183fb0638fde5e77cb7d8dea8b13724a2bac95de36e69055e52d2cb6d7faf4'
-    expected = json.loads(fixture.read_text(encoding='utf-8'))
-    actual = {}
-    class OriginalCalls(ast.NodeTransformer):
-        def visit_Call(self, node):
-            self.generic_visit(node)
-            if isinstance(node.func, ast.Name) and node.func.id == 'copy_plain_data':
-                node.func = ast.Attribute(value=ast.Name(id='copy', ctx=ast.Load()), attr='deepcopy', ctx=ast.Load())
-            return node
-    for filename in {key.split(':')[0] for key in expected}:
-        tree = ast.parse((ROOT/filename).read_text(encoding='utf-8'))
-        for node in tree.body:
-            methods = [(node.name+'.'+method.name, method) for method in node.body if isinstance(method, ast.FunctionDef)] if isinstance(node, ast.ClassDef) else [(getattr(node, 'name', ''), node)]
-            for name, method in methods:
-                key = filename+':'+name
-                if key in expected:
-                    method = OriginalCalls().visit(method)
-                    actual[key] = hashlib.sha256(ast.dump(method, include_attributes=False).encode()).hexdigest()
-    assert actual == expected
+def test_decode_and_view_algorithms_change_only_the_copy_implementation(tmp_path, monkeypatch):
+    from cultivation_life import models
+    from cultivation_life.engine import GameEngine, engine_presentation
+    engine = GameEngine(ROOT, tmp_path)
+    shown = engine.create_game('快照行为对照', 'supreme_metal', 'dao', 333, preset_id='core')
+    source = engine.store.load(shown['id']).to_dict()
+    before = copy.deepcopy(source)
+    # Compare current Player/SectState/GameState decoding and the actual view
+    # against stdlib copying; a 3.3.2 whole-function hash also rejected every
+    # later legitimate state field and presentation feature.
+    actual = models.GameState.from_dict(source)
+    actual_view = engine_presentation.prepare_view(engine._dependencies.view_preparation, actual)
+    with monkeypatch.context() as context:
+        context.setattr(models, 'copy_plain_data', copy.deepcopy)
+        context.setattr(engine_presentation, 'copy_plain_data', copy.deepcopy)
+        expected = models.GameState.from_dict(source)
+        expected_view = engine_presentation.prepare_view(engine._dependencies.view_preparation, expected)
+    assert actual_view == expected_view
+    assert actual.to_dict() == expected.to_dict()
+    assert source == before
+    state_before = copy.deepcopy(actual.to_dict())
+    actual_view['player']['inventory'].clear()
+    assert actual.to_dict() == state_before
+    assert source == before
 
 
 def test_plain_snapshots_match_deepcopy_for_random_documents():

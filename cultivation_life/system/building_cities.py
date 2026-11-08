@@ -35,6 +35,7 @@ def story(row):
 
 
 def arena_reason(game,row):
+    if game.player.age<row.get('civic_disruption_until',0):return '紫气异象疏导期间暂停试场；完成原案处置或等待实际期限结束'
     if usage(game,row).get('arena',0)>=config()['city_arena_attempts']:return '此城三次试场机会已经用尽，不因重建刷新'
     if game.player.realm_index==0:return '尚未入道，不能参加修士试法'
     if game.player.hp<max_hp(game.player)*.3 or game.player.mp<max_mp(game.player)*.25:return '请先离城调息，恢复气血与法力'

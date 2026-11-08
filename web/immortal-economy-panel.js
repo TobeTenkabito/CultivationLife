@@ -34,17 +34,27 @@
     }:null);
     window.UtilityPanels.schedule('yaochi',pool.available?()=>{
       const root=document.querySelector('#yaochi-content');root.replaceChildren();if(!pool.available)return;
-      root.append(el('h3',`瑶池功勋 ${fmt(pool.merit)}`),el('p','瑶池是经营功勋往来的机构，天庭是驻于玉京仙都的政务机构；两者均不属于宗门、家族或种族势力。功勋与天庭功德分别记载。','muted'));
-      window.renderOrganizationFinance?.(root, pool.finance);
-      if(pool.experience){const x=pool.experience;const box=el('section',null,'doctrine-entry yaochi-experience');box.append(el('h3',`瑶池等级 Lv${fmt(x.level)}`),el('p',`本级经验 ${fmt(x.progress)} / ${fmt(x.required)} · 委托功勋收益 ×${Number(x.multiplier).toFixed(1)}`),el('p',`每次完成委托获得 ${x.per_job} 经验，等级与收益加成不设上限；已接取委托按约定报酬交付。`,'muted'));root.append(box);}
+      window.YaochiWestward.hero(root,pool);
+      const accounts=el('section',null,'yaochi-accounts');accounts.append(el('h3','功勋账簿'));root.append(accounts);
+      window.renderOrganizationFinance?.(accounts, pool.finance);
+      if(pool.experience){const x=pool.experience;const box=el('section',null,'doctrine-entry yaochi-experience');box.append(el('h3',`瑶池等级 Lv${fmt(x.level)}`),el('p',`本级经验 ${fmt(x.progress)} / ${fmt(x.required)} · 委托功勋收益 ×${Number(x.multiplier).toFixed(1)}`),el('p',`每次完成委托获得 ${x.per_job} 经验，等级与收益加成不设上限；已接取委托按约定报酬交付。`,'muted'));accounts.append(box);}
       const legacy=game.player.institution_affiliations?.yaochi;
-      if(legacy)root.append(el('p',`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，功勋另行记载，不占用宗门归属。`,'muted'));
-      if(!pool.local)root.append(el('p','须亲临「瑶池」办理委托和交易。可在地图查看路线与传送阵。','doctrine-note'),button('查看地图',{},false,()=>window.UtilityPanels.open('map')));
+      if(legacy)accounts.append(el('p',`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，功勋另行记载，不占用宗门归属。`,'muted'));
       const section=title=>{const s=el('section',null,'doctrine-entry');s.append(el('h3',title));root.append(s);return s;};
       const transact=(label,payload,disabled=false)=>button(label,payload,!pool.local||disabled);
+      const practice=window.YaochiWestward.render(root,game,trade);
+      const identity=window.WestwardFinale?.identity(root,game,trade);
+      const story=window.WestwardFinale?.story(root,game,trade);
+      const earth=window.EarthTemple.render(root,game,trade);
+      const garden=window.YaochiGathering?.garden(root,game,trade,blocked);
+      const fair=window.YaochiGathering?.fair(root,game,trade,blocked);
+      const antiquity=window.WestwardVentures?.antiquity(root,game,trade,blocked);
       const jobs=section('接取委托');
       if(pool.job){const j=pool.job;jobs.append(el('p',`${j.name} · 履约 ${fmt(j.progress)} / ${fmt(j.years)} 年 · 报酬 ${fmt(j.reward)} 功勋`));jobs.append(transact(j.progress>=j.years?'交付并领取功勋':'继续履约',{action:j.progress>=j.years?'claim_job':'work'}));}
-      else for(const j of pool.commissions)jobs.append(transact(`${j.name} · ${fmt(j.years)} 年 / ${fmt(j.reward)} 功勋`,{action:'accept',target_id:j.id}));
+      else {
+        if(pool.commission_reason)jobs.append(el('p',pool.commission_reason,'muted'));
+        for(const j of pool.commissions)jobs.append(transact(`${j.name} · ${fmt(j.years)} 年 / ${fmt(j.reward)} 功勋`,{action:'accept',target_id:j.id},!!pool.commission_reason));
+      }
       jobs.append(el('p','接取后须实际履约；游历与等待不计入进度，中途遇事可处理后续做。','muted'));
       const shop=section('功勋商店');
       shop.append(el('p','道统传承、仙躯功法、淬体仙药、金光资材与本境破境丹均以功勋兑换。三种破境丹搭配可增加 40 个百分点，最终成功率最高 98%；用于本境各层冲关，不代替跨境劫战。','muted'));
@@ -95,6 +105,10 @@
       for(const [label,action] of [['兑换灵石','exchange_stones'],['兑换天庭功德','exchange_court_merit']]){const b=transact(label,{action});b.onclick=()=>{if(amount.reportValidity())trade({action,amount:Number(amount.value)});};exchange.append(b);}
       exchange.append(transact(`联络天官 · ${fmt(rate.support_cost)} 功勋 / 支持度 +${rate.support_gain}`,{action:'support'},pool.merit<rate.support_cost));
       if(pool.votes.length){const votes=el('details');votes.append(el('summary',`本次天庭选举 · 每席 ${fmt(rate.vote_cost)} 功勋`),el('p','仅当已取得候选资格时可以议定支持。至多十二席，本次重投有效，选举结束后失效。','muted'));for(const v of pool.votes)votes.append(transact(`${v.name} · ${v.bought?'已议定':'议定一票'}`,{action:'buy_vote',target_id:v.id},v.bought||pool.merit<rate.vote_cost));exchange.append(votes);}
+      if(!pool.local)for(const host of [jobs,shop,exchange]){
+        const note=el('div',null,'yaochi-notice');note.append(el('p','须亲临瑶池办理此处委托和交易。'),button('查看地图',{},false,()=>window.UtilityPanels.open('map')));host.prepend(note);
+      }
+      window.PanelPages?.mount('yaochi',root,[...(practice?[['专修',[practice]]]:[]),...(identity?[['仙籍与功德',[identity]]]:[]),...(story?[['紫气东来',[story]]]:[]),...(garden?[['仙圃',[garden]]]:[]),...(fair?[['仙会',[fair]]]:[]),...(antiquity?[['访古',[antiquity]]]:[]),...(earth?[['地仙庙域',[earth]]]:[]),['委托',[jobs,orders]],['资材',[shop]],['天庭往来',[exchange]],['账簿',[accounts]]]);
     }:null);
   }
   window.ImmortalEconomyPanel={render};

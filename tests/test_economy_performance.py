@@ -39,12 +39,12 @@ def test_top_twelve_preserves_stock_and_identity_ties(count):
     # Original policy: price ratio first, with stable source-stock and ID ties.
     goods = sorted(source['commodities'], key=lambda k: (
         source['commodities'][k]['stock'] / source['commodities'][k]['target'], k), reverse=True)
-    expected = sorted((k for k in goods if k in target['commodities']), key=lambda k: (
+    expected = sorted((k for k in goods if k in target['commodities'] and source['commodities'][k]['stock'] >= 1), key=lambda k: (
         target['commodities'][k]['price'] / source['commodities'][k]['price']), reverse=True)[:12]
     assert caravans._candidate_items(source, target) == expected
     # A different destination price must take effect immediately.
-    if target['commodities']:
-        winner = next(iter(target['commodities']))
+    if expected:
+        winner = expected[-1]
         target['commodities'][winner]['price'] = 10**6
         assert caravans._candidate_items(source, target)[0] == winner
 
@@ -59,6 +59,11 @@ def test_affordability_is_maximal_at_cash_boundaries(side):
         funds = rng.choice([0, 1, 10, 10000, 10**12])
         count = basket_trade.affordable(row, side, wanted, funds)
         assert 0 <= count <= wanted
+        # Zero-budget orders are forbidden even when a tiny sale rounds to zero
+        # (docs/organization-balance-and-market.md, 2026-11-07 review).
+        if funds <= 0:
+            assert count == 0
+            continue
         if count:
             assert basket_trade.quote(row, side, count)['gross'] <= funds
         if count < wanted:

@@ -34,7 +34,13 @@ def test_shipped_assets_and_action_endpoints(path,package):
     out=ROOT/'dlc'/package/'assets/visual/characters'
     data=json.loads((out/'manifest.json').read_text(encoding='utf8'))
     entries=json.loads((out.parent/'registry.json').read_text(encoding='utf8'))['assets']
-    assert len(data['actors'])==4 and len([r for r in entries.values() if not r.get('domain_styles') and not r.get('domain_controls') and not r.get('domain_art')])==17
+    assert set(data['actors']) == {f'{path}-{role}-{gender}' for role in ('hero', 'npc') for gender in ('male', 'female')}
+    expected = {f'actor.path.{actor}.{kind}' for actor in data['actors'] for kind in ('portrait', 'figure', 'thumbnail')}
+    expected.update(f'{actor}.actions' for actor in data['actors'])
+    expected.add(f'{path}.character_manifest')
+    # Social portraits and ghost forms are separate asset families. Require
+    # every original character endpoint, not a frozen whole-package total.
+    assert {key for key, row in entries.items() if '/visual/characters/' in row['file']} == expected
     for row in entries.values():
         target=extension_asset(ROOT,ROOT,registry.EXTENSION_REPORT,row['file'])
         import hashlib

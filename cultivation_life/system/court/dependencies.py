@@ -6,6 +6,7 @@ from ...ports import SavePort
 
 @dataclass(frozen=True, slots=True)
 class CourtStateDependencies:
+    maps: Any
     _court_autonomous_votes: Callable[..., Any]
     _court_config: Callable[..., Any]
     _court_conflicts: Callable[..., Any]
@@ -61,6 +62,9 @@ class CourtLifecycleDependencies:
 
 @dataclass(frozen=True, slots=True)
 class YaochiDependencies:
+    maps: Any
+    _combat: Callable[..., Any]
+    _npc_power: Callable[..., Any]
     _add_court_merit: Callable[..., Any]
     _load: Callable[[str], GameState]
     _sync_player_court_identity: Callable[..., Any]

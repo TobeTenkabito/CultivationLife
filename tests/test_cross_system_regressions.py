@@ -66,16 +66,21 @@ def test_possession_uses_host_gender_and_restores_every_body_progress_field() ->
     from cultivation_life.models import Player
 
     player = Player("孤魂", "mutated_yin", path="ghost")
-    player.realm_index = 1
+    player.realm_index = 4
     player.awaiting_body_breakthrough = True
     player.body_breakthrough_pity = {"body:3": 2}
     player.known_transformations = ["wolf"]
     player.transformation_mastery = {"wolf": {"level": 4}}
     player.transformation_loadouts = {"main": {"forms": ["wolf"]}}
-    enter_host_body(player, {
+    target = {
         "id": "host", "name": "女宿主", "gender": "female", "race": "human",
         "realm_index": 1, "layer": 1, "age": 30, "lifespan": 100,
-    })
+    }
+    with pytest.raises(ValueError, match='神游'):
+        enter_host_body(player, target)
+    player.spirit_state = dict(mode='wandering', body_intact=True, entered=player.age,
+        deadline=player.age+100, address=dict(world=player.world, location_id=player.location_id, instance_id=None))
+    enter_host_body(player, target)
     assert player.gender == "female"
     assert player.awaiting_body_breakthrough is False
     assert player.known_transformations == []

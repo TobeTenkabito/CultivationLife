@@ -1033,8 +1033,8 @@ class GameEngine:
         from .actions.exploration import talisman_action
         return talisman_action(self._exploration_dependencies(), game_id, action, payload or {})
 
-    def _add_opportunity(self, player: Player, amount: float, regional_efficiencies: dict[str, float] | None=None, *, apply_efficiency: bool=True) -> float:
-        return advancement._add_opportunity(self._dependencies.advancement, player, amount, regional_efficiencies, apply_efficiency=apply_efficiency)
+    def _add_opportunity(self, player: Player, amount: float, regional_efficiencies: dict[str, float] | None=None, *, apply_efficiency: bool=True, trace_multiplier: float=1.) -> float:
+        return advancement._add_opportunity(self._dependencies.advancement, player, amount, regional_efficiencies, apply_efficiency=apply_efficiency, trace_multiplier=trace_multiplier)
 
     def _sense_training_step(self, player: Player, regional: dict[str, float] | None=None, concentrations: dict[str, float] | None=None) -> float:
         'Calculate one year of sense training for every training context.'

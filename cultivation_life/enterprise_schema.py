@@ -9,8 +9,20 @@ def validate_estates(value, require, document):
         require(row.get('world') in value['worlds'] and isinstance(row.get('location'), str))
         require(key == row.get('id') == f"{row['world']}:{row['location']}:{row['kind']}")
         require(f"{row['world']}:{row['location']}" in value['markets'])
-        require(row.get('owner_kind') in {'player','alliance','sect','family','background'})
+        require(row.get('owner_kind') in {'player','alliance','sect','family','background','yaochi'})
         require(isinstance(row.get('owner_id'), str) and bool(row['owner_id']))
+        if row['owner_kind']=='yaochi':
+            require(row['owner_id']=='yaochi' and row['world']=='celestial' and row['kind']=='farm')
+            require('institution:celestial:yaochi' in value['accounts'])
+        if 'operating_lease' in row:
+            lease=row['operating_lease'];require(isinstance(lease,dict) and row['owner_kind']=='yaochi')
+            require(isinstance(lease.get('operator'),str) and isinstance(lease.get('wallet'),str) and lease['wallet'] in value['accounts'])
+            if document is not None:require(lease['operator']==document.get('id'))
+            for field in ('started','until','deposit','wages'):require(type(lease.get(field)) is int and lease[field]>=0)
+            require(lease['until']>lease['started'] and (lease.get('steward') is None or isinstance(lease['steward'],str)))
+            if 'order' in lease:
+                order=lease['order'];require(isinstance(order,dict) and isinstance(order.get('item'),str) and order.get('wallet') in value['accounts'])
+                for field in ('quantity','total','deadline'):require(type(order.get(field)) is int and order[field]>0)
         if row['owner_kind'] == 'player':
             require(f'estate:{key}' in value['accounts'])
             if document is not None:
@@ -27,6 +39,7 @@ def validate_estates(value, require, document):
         require(row['buy_limit'] <= 10**12 and row['sell_limit'] <= 10**12)
         require(type(row.get('sale_quota', 1000000)) is int and 0 <= row.get('sale_quota', 1000000) <= 1000000)
         require(type(row.get('entrusted', False)) is bool)
+        require(type(row.get('public_water_until',0)) is int and row.get('public_water_until',0)>=0)
         require(row.get('building_status','intact') in {'intact','destroyed'})
         if row.get('building_status')=='destroyed':
             require(type(row.get('building_destroyed_age')) is int and row['building_destroyed_age']>=0)

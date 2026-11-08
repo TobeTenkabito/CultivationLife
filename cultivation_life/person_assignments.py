@@ -33,7 +33,27 @@ def deployment_assignment(game, identity, *, exclude_war=None):
 
 
 def research_assignment(game, identity, *, exclude_war=None):
+    lesson=game.yaochi_state.get('westward',{}).get('project')
+    if lesson and lesson.get('kind')=='guidance' and lesson.get('teacher')==identity:
+        return dict(id='guidance:'+lesson['id'],phase='guidance')
+    chapter=game.yaochi_state.get('westward',{}).get('purple_east',{}).get('work')
+    if chapter and chapter.get('companion')==identity:return dict(id='purple-east:celestial:cloud-palace',phase='purple_east')
+    visit=game.yaochi_state.get('westward',{}).get('antiquity',{}).get('active')
+    if visit and visit.get('companion')==identity:return dict(id=visit['id'],phase='antiquity')
+    for estate in game.economy_v2.get('estates',{}).values():
+        lease=estate.get('operating_lease',{})
+        if lease.get('steward')==identity:return dict(id=estate['id'],phase='garden')
+    for entry in game.yaochi_state.get('westward',{}).get('fair',{}).get('entries',[]):
+        if entry['status']=='active' and entry.get('opponent')==identity:return dict(id=entry['id'],phase='fair')
     # Compatibility accessor: old consumers must also respect military occupancy.
+    court = next((j for j in game.heavenly_court.get('bureaus',{}).get('jobs',[])
+                  if identity!='player' and j['status']=='active' and (j['person']==identity
+                      or j['offer'].get('operation')=='rescue' and j['offer']['target']==identity)),None)
+    if court:
+        return court
+    inquiry=next((c for c in game.heavenly_court.get('bureaus',{}).get('inquiries',[])
+                  if c['status']=='active' and c.get('reviewer')==identity and c['stage'] in {'review','execute'}),None)
+    if inquiry:return dict(id=inquiry['id'],phase='review')
     deployment = deployment_assignment(game, identity, exclude_war=exclude_war)
     if deployment:
         return deployment

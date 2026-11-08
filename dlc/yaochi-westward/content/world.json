@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "actions": {
+    "antiquity_work": {
+      "name": "仙府访古",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "council_work": {
+      "name": "项目听议与履约",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "yaochi_garden": {
+      "name": "仙圃巡护",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "yaochi_fair": {
+      "name": "仙会筹备",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "court_service": {
+      "name": "职司履约",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "earth_service": {
+      "name": "护民履约",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "yaochi_practice": {
+      "name": "瑶池专修",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    },
+    "purple_work": {
+      "name": "紫气主线履约",
+      "opportunity": [
+        0,
+        0
+      ],
+      "hp": 0,
+      "mp": 0
+    }
+  },
+  "systems": {
+    "yaochi_westward": {
+      "enabled": true,
+      "trace_years": 100,
+      "trace_reward": 45,
+      "trace_price": 400,
+      "body_years": 10,
+      "body_chance_bonus": 0.15,
+      "body_fee_rate": 0.1,
+      "light_years": 100,
+      "light_material_rate": 0.7,
+      "budget_years": 100,
+      "budget_base": 2000000
+    },
+    "building_system": {
+      "cities": {
+        "celestial": [
+          {
+            "id": "yaochi_outer",
+            "name": "瑶池外坊",
+            "location_id": "expanse_celestial_8",
+            "subtype": "economic",
+            "population": "mixed",
+            "level": 1,
+            "dependency": "official.yaochi-westward",
+            "flavor": "瑶池西麓的外坊沿药渠而建。凡人药农、低阶学徒与往来仙家共用道路，生计与修行都落在原药田和市场账目上。",
+            "audience": "外坊值房公开张贴用水和场地约定，修为高低不能免除已接受的工期。",
+            "rumor": "西麓古府近来有紫气沿旧渠升起。药农担心的不是天上异宝，而是田里的下一批收成。",
+            "arena": "外坊试场紧邻公共道路，异象疏导期间暂停演武，避免再扰药渠。",
+            "story": {
+              "title": "同渠不同岸",
+              "body": "药渠两岸有凡人田畦，也有仙家药圃。双方都希望在告示上写明自己的用水时辰。",
+              "choices": [
+                [
+                  "核对旧约，留出凡人用水时段",
+                  "旧约逐项写入告示。药圃照约排班，田畦没有因主人修为低便失去取水机会。"
+                ],
+                [
+                  "请两岸共同核定维护分担",
+                  "众人把修渠出工与用水时辰一起列清。同一条渠不再被画成互不相干的两本账。"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

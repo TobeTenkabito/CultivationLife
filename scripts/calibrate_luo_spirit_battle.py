@@ -40,8 +40,11 @@ def fixture(power, *, body=100, mp_ratio=1):
         captured.update(target)
         return 'victory', ''
 
+    def no_recruited_npc(npc):
+        raise AssertionError('The calibration profile has no recruited NPC or avatar')
+
     deps = SimpleNamespace(_combat=capture, _story_unit_full_power=_story_unit_full_power,
-                           _public_party=lambda game: [])
+                           _public_party=lambda game: [], _npc_power=no_recruited_npc)
     _resolve_story_combat_check(deps, {'checks': [{'stat': 'combat_power', 'value': 55_000_000}]},
                                game, {'id': 'EVT_MA_LIANG_005', '_choice_id': 'attack_bottle'}, random.Random(0))
     units = _player_combat_units(deps, game, captured)

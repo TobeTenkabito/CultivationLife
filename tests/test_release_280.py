@@ -39,9 +39,10 @@ def test_secondary_custom_manual_is_visible_before_and_after_unlock(tmp_path,wor
 def test_navigation_preferences_survive_theme_updates_and_restart(tmp_path):
     choices={'pins':['map','spirit-voisinage'],'recent':['inventory']}
     assert write_ui_preferences(tmp_path,{'navigation':choices})['navigation']==choices
-    write_ui_preferences(tmp_path,{'theme':'b'})
+    write_ui_preferences(tmp_path,{'pixel_theme':'dark'})
     loaded=load_ui_preferences(tmp_path)
-    assert loaded['theme']=='b' and loaded['navigation']==choices
+    assert loaded['theme']=='a' and loaded['pixel_art'] is True
+    assert loaded['pixel_theme']=='dark' and loaded['navigation']==choices
     loaded['navigation']['pins'].clear()
     assert load_ui_preferences(tmp_path)['navigation']==choices
 
@@ -49,7 +50,7 @@ def test_navigation_preferences_survive_theme_updates_and_restart(tmp_path):
     {'pins':['map']*9,'recent':[]},{'pins':['/api/games'],'recent':[]},
     {'pins':[],'recent':['x']*5},{'pins':'map','recent':[]}])
 def test_invalid_navigation_preferences_do_not_overwrite_file(tmp_path,bad):
-    write_ui_preferences(tmp_path,{'theme':'f'})
+    write_ui_preferences(tmp_path,{'pixel_theme':'light'})
     path=tmp_path/'data/ui_preferences.json';before=path.read_bytes()
     with pytest.raises(ValueError):write_ui_preferences(tmp_path,{'navigation':bad})
     assert path.read_bytes()==before

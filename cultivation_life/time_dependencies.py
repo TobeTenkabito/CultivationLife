@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from random import Random
 from typing import Any, Callable, Protocol
 
-from .models import GameState, Player
+from .models import GameState, Player, SectNpc
 from .ports import MapPort, SavePort
 
 
@@ -29,6 +29,11 @@ class DeathPort(Protocol):
     ) -> None: ...
 
 
+class NpcTribulationPort(Protocol):
+    def __call__(self, game: GameState, npc: SectNpc, rng: Random,
+                 affiliation: str = '') -> str | None: ...
+
+
 class TravelSettlementPort(Protocol):
     def __call__(
         self, game: GameState, start_age: int, institution_world: str,
@@ -38,7 +43,7 @@ class TravelSettlementPort(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class WorldYearDependencies:
-    _resolve_npc_periodic_tribulation: Callable[..., str | None]
+    _resolve_npc_periodic_tribulation: NpcTribulationPort
     _advance_buddhist_year: Callable[[GameState], list[str]]
     _advance_ghost_phase_two_year: Callable[[GameState, Random], None]
     _advance_guixu_calendar: Callable[[GameState, Random, list[str]], bool]
