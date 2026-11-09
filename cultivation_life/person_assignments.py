@@ -33,6 +33,12 @@ def deployment_assignment(game, identity, *, exclude_war=None):
 
 
 def research_assignment(game, identity, *, exclude_war=None):
+    agendas=game.economy_v2.get('institution_agendas',{}).get('scopes',{})
+    for row in agendas.values():
+        job=row.get('job')
+        if job and job['person']==identity:return job
+    for key,row in agendas.items():
+        if row.get('delegate')==identity:return dict(id='institution-delegate:'+key,phase='institution')
     lesson=game.yaochi_state.get('westward',{}).get('project')
     if lesson and lesson.get('kind')=='guidance' and lesson.get('teacher')==identity:
         return dict(id='guidance:'+lesson['id'],phase='guidance')

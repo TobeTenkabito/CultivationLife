@@ -18,7 +18,9 @@
     document.querySelector('#building-affairs-card h2').textContent=(row?.name||'瑶池原仙圃')+' · '+({earth:'庙务',garden:'经营',relief:'修缮'}[type]);
     const back=el('button','返回此地建筑','building-return');back.type='button';back.onclick=()=>{window.UtilityPanels.open('map');window.MapDirectory?.openTerritory('influence',game.map.current);};root.append(back);
     if(type==='earth')window.EarthTemple.render(root,game,dispatch);
+    if(type==='earth')window.InstitutionGovernance?.render(root,(pool.management||[]).filter(r=>r.identity===selected||r.id==='temple:'+selected),payload=>dispatch({action:'management',target_id:JSON.stringify(payload)}),true);
     if(type==='garden')window.YaochiGathering.garden(root,game,dispatch,!!game.pending_event||!game.player.alive||!!game.active_trial);
+    if(type==='garden')window.WestwardDevelopment?.contracts(root,pool.contracts,dispatch);
     if(pool.relief?.offers?.some(r=>r.id===selected))window.WestwardFinale.relief(root,game,dispatch,selected);
   }
   function open(id) {

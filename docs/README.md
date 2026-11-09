@@ -237,3 +237,6 @@
 
 - [v3.6.1 仙途与建筑布局](release-361.md)
 - [v3.6.1 寺庙立绘](temple-art-361.md)
+
+- [本体机构经营与瑶池1.1](institution-ai-and-westward-110.md)
+- [v3.7.0发行说明](release-370.md)

@@ -17,10 +17,10 @@
     }
     panel('immortal-practice',!!(pool.identity||pool.westward?.available),'自身 · 仙途','仙籍与职责，师承与精进。办理仍遵循原地点和实际工时。',root=>[
       ['专修',[pool.westward?.available?window.YaochiWestward.render(root,game,dispatch):null]],
-      ['仙籍与功德',[pool.identity?window.WestwardFinale.identity(root,game,dispatch):null]]]);
+      ['仙籍与功德',[pool.identity?window.WestwardFinale.identity(root,game,dispatch):null,window.WestwardDevelopment?.contracts(root,pool.contracts,dispatch,'free')]]]);
     panel('immortal-estate',!!(pool.antiquity?.enabled||pool.antiquity?.active||pool.purple_east),'外界 · 仙府','探访古仙府，参与紫气现世后的调查、公议与营建。',root=>[
       ['访古',[pool.antiquity?window.WestwardVentures.antiquity(root,game,dispatch,blocked):null]],
-      ['紫气东来',[pool.purple_east?window.WestwardFinale.story(root,game,dispatch):null]]]);
+      ['紫气东来',[pool.purple_east?window.WestwardFinale.story(root,game,dispatch):null,window.InstitutionGovernance?.render(root,(pool.management||[]).filter(r=>r.kind==='estate'),payload=>dispatch({action:'management',target_id:JSON.stringify(payload)}),true)]]]);
   }
   window.ImmortalNavigation={render};
 })();

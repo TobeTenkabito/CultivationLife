@@ -76,6 +76,12 @@ def bind_missions(engine, ports):
     def advance(game):
         from ...system.court_bureau_runtime import year_step as advance_bureaus
         advance_bureaus(game,engine.maps)
+        from ...system.westward_management import advance as advance_management
+        advance_management(game,engine.maps)
+        from ...system.court_strategy import advance as advance_strategy
+        advance_strategy(game,engine.maps)
+        from ...system.yaochi_tenders import advance as advance_tenders
+        advance_tenders(game,engine.maps)
         from ...system.heavens.outpost_runtime import year_step as advance_outposts
         advance_outposts(ports(), game)
         from ...regional_context import task_year, region, ordinary_year

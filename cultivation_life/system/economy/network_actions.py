@@ -55,7 +55,10 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None, comba
     from ...regional_context import synchronize
     synchronize(game, [p.world, *([home['world']] if home else [])])
     identity = home.get('network_id', home['id']) if home else None
-    if isinstance(action,str) and action.startswith('heritage_'):
+    if isinstance(action,str) and action.startswith('institution_'):
+        from ..institution_ai import commands,base
+        commands.command(game,deps.maps,payload,base)
+    elif isinstance(action,str) and action.startswith('heritage_'):
         from ..organization_heritage import command as heritage_command
         heritage_command(game,deps.maps,payload)
     elif isinstance(action, str) and action.startswith('depot_'):
@@ -241,6 +244,7 @@ def command(deps: MarketDependencies, game_id, payload, *, committed=None, comba
 
 
 def public_network(game, maps):
+    from ..institution_ai import commands as institution_commands,base as institution_base
     from .caravans import public_caravans
     from .local_market import trade_available
     p = game.player
@@ -274,7 +278,7 @@ def public_network(game, maps):
         path = route_path(game, own, world)
         destinations.append(dict(world=world, name=WORLD_SYSTEMS['world_names'][world], open=bool(path),
             path=[WORLD_SYSTEMS['world_names'][w] for w in path], years=sum(leg_years(a, b) for a, b in zip(path, path[1:]))))
-    return dict(can_act=trade_available(game), can_industry={kind: industry_available(game, kind) for kind in ('sect', 'family')},
+    return dict(institutions=institution_commands.public(game,maps,institution_base),can_act=trade_available(game), can_industry={kind: industry_available(game, kind) for kind in ('sect', 'family')},
         fleets=fleets, owned=own['id'] if own else None,
         order_goods=[dict(id=k, name=v['name']) for k,v in commodity_catalog().items()],
         order_sites=[dict(id=k, name=v['name']) for k,v in maps._locations.get(p.world, {}).items()],

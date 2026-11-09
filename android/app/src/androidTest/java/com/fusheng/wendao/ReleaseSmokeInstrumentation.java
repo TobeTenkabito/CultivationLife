@@ -667,6 +667,14 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         openWestwardPage("专修");
         tapSelector("[data-service=guidance] [data-westward-action=westward_start_merit]");waitForJs("!busy&&game.yaochi.westward.project?.kind==='guidance'","Actual local teacher reserved");
         tapSelector(".yaochi-exit summary");tapSelector("[data-westward-action=westward_cancel]");waitForJs("!busy&&!game.yaochi.westward.project","Teacher released and refund settled");
+        openWestwardPage("仙圃");tapSelector("[data-gather-action=garden_lease]");waitForJs("!busy&&!!game.yaochi.garden.lease","Original farm lease");
+        tapSelector("[data-gather-action=garden_configure]");waitForJs("!busy&&!!game.yaochi.garden.estate.recipe","Original production recipe");
+        tapSelector("[data-contract-action=contract_open]");waitForJs("!busy&&game.yaochi.contracts.active?.funded>0","Three-period original cash reserved");
+        check(Boolean.TRUE.equals(js("document.querySelector('[data-contract-action=contract_deliver]').disabled")),"Early installment remains disabled");
+        async("loadGame("+JSONObject.quote(id)+")");openWestwardPage("仙圃");
+        check(Boolean.TRUE.equals(js("game.yaochi.contracts.active.periods===3")),"Same contract survives reload");
+        capture("westward-installments-"+arguments.getString("orientation"));
+        tapSelector("[data-contract-action=contract_cancel]");waitForJs("!busy&&!game.yaochi.contracts.active","Original unpaid contract refunded once");
         openWestwardPage("紫气东来");tapSelector("[data-finale-action=purple_start]");waitForJs("!busy&&game.yaochi.purple_east.state.phase==='survey'","Unique mainline registered");
         tapSelector(".westward-finale details summary");tapSelector("[data-finale-action=purple_pause]");waitForJs("!busy&&!!game.yaochi.purple_east.state.paused_work","Mainline paused");
         async("loadGame("+JSONObject.quote(id)+")");js("UtilityPanels.open('immortal-practice');true");waitForPanelReady("#immortal-practice-card");openWestwardPage("紫气东来");
@@ -679,8 +687,17 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         python(assetText("westward_release.py")+"\nfrom cultivation_life import server\nfrom cultivation_life.building_rules import config as building_config\nprepare_westward(server.ENGINE,"+JSONObject.quote(templeId)+")\ng=server.ENGINE._load("+JSONObject.quote(templeId)+")\ng.player.location_id=next(c['location_id'] for c in building_config()['cities']['celestial'] if c['population']=='mixed')\nserver.ENGINE.store.save(g)");
         async("loadGame("+JSONObject.quote(templeId)+")");openWestwardPage("地仙庙域");
         check(Boolean.TRUE.equals(js("document.querySelector('#building-affairs-content .earth-temple')!==null && !document.querySelector('[data-panel-target=buildings]')")),"Temple belongs to original local building, without a separate navigation button");
+        js("document.querySelector('#building-affairs-content .temple-portrait img').scrollIntoView({block:'center'});true");
         waitForJs("(()=>{const i=document.querySelector('#building-affairs-content .temple-portrait img');return i?.complete&&i.naturalWidth>0&&i.src.includes('land-temple-intact-361.png')})()","Original temple portrait loaded offline");
         capture("westward-original-building-"+arguments.getString("orientation"));
+        String institutionId=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'本体经营原生验收',spirit_root:'supreme_metal',path:'dao',seed:370,preset_id:'core'})}).then(g=>g.id)");
+        python(assetText("westward_release.py")+"\nfrom cultivation_life import server\nprepare_institution(server.ENGINE,"+JSONObject.quote(institutionId)+")");
+        async("loadGame("+JSONObject.quote(institutionId)+")");tapSelector("[data-panel-target=faction]");waitForPanelReady("#faction-card");
+        tapSelector("[data-institution-scope]>summary");tapSelector("[data-institution-action=institution_start]");waitForJs("!busy&&game.fleet_network.institutions.some(r=>r.job?.funded>0)","Base original institution reserve");
+        if(!Boolean.TRUE.equals(js("document.querySelector('[data-institution-scope]').open")))tapSelector("[data-institution-scope]>summary");
+        capture("base-institution-"+arguments.getString("orientation"));
+        tapSelector("[data-institution-action=institution_cancel]");waitForJs("!busy&&game.fleet_network.institutions.some(r=>{const h=r.history[r.history.length-1];return h&&h.refunded>0&&h.funded===h.spent+h.refunded})","Base original institution refund");
+        result.putString("institution_scope","Base original institution reserve/refund and DLC installment reserve/reload/early-disabled/refund by native touches");
         result.putString("westward_scope","Actual signed native reserve/reload/refund, real teacher, identity pages, mainline register/pause/reload/resume/annual work, material-disabled actions, mixed base/DLC tabs, original garden and local city temple entry, fair/antiquity/court navigation, both pixel palettes and original handlers");
     }
 

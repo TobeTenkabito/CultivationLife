@@ -12,15 +12,17 @@ def teacher_reason(game,n,order=None):
     return ''
 
 def quote(game,blocked):
+    from .westward_fair_benefits import credential
+    prize=credential(game,'duel')
     candidates=[n for n in people(game) if not teacher_reason(game,n)]
     n=min(candidates,key=lambda n:(n.realm_index,n.layer,n.id)) if candidates else None
     fee=commission_reward(game.player,dict(reward=400))
     expected=sum(ACTIONS['cultivate']['opportunity'])/2*opportunity_multiplier(game.player)*100
-    return dict(id='guidance',kind='guidance',name='清修讲席',mark='讲',years=10,price=fee,materials={},
+    return dict(id='guidance',kind='guidance',name='清修讲席',mark='讲',years=8 if prize else 10,price=fee,materials={},fair_credential=prize['id'] if prize else None,
         teacher=n.id if n else None,teacher_name=n.name if n else '当前没有合资格在场讲师',
         realm=game.player.realm_index,layer=game.player.layer,
         reason=blocked or ('' if n else '须有当面、自由、空闲且修为更高的原道修讲师'),
-        description='本人接受十年指导，按每年实际有效功法效率结算机缘；不附送普通仙痕判定。',
+        description=f'本人接受{8 if prize else 10}年指导，按每年实际有效功法效率结算机缘；不附送普通仙痕判定。',
         benefit=f'当前约 {expected:,.1f} 机缘',comparison='不刷新师门次数、香火额度或原专修进度；讲师与本人同时占用')
 
 def target_reason(game,row):
@@ -32,7 +34,9 @@ def target_reason(game,row):
 def active(game):return bool(project(game) and project(game)['kind']=='guidance')
 
 def annual_gain(game):
-    return sum(ACTIONS['cultivate']['opportunity'])/2*opportunity_multiplier(game.player)*10
+    row=project(game)
+    years=row['years'] if row and row['kind']=='guidance' else 10
+    return sum(ACTIONS['cultivate']['opportunity'])/2*opportunity_multiplier(game.player)*100/years
 
 def record_gain(game,gain):
     row=project(game)

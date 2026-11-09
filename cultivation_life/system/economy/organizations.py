@@ -205,6 +205,8 @@ def advance_organizations(game, maps):
     advance_estates(game, maps)
     from .market_governance import advance_governance
     advance_governance(game)
+    from ..institution_ai import runtime,base
+    runtime.advance(game,maps,base)
 
 
 def public_finance(game, kind, identity):

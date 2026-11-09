@@ -32,6 +32,20 @@ def _finish_yaochi_action(deps: YaochiDependencies, game, action, elapsed):
 
 def yaochi_action(deps: YaochiDependencies, game_id, action, target_id='', amount=1):
     game = deps._load(game_id)
+    if action.startswith('contract_'):
+        from ..westward_contracts import command
+        if type(amount) is not int or amount!=1 or not isinstance(target_id,str) or len(target_id)>200:raise ValueError('每次办理一份有效契约')
+        game=copy.deepcopy(game);command(game,action,target_id)
+        game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
+    if action=='management':
+        import json
+        from ..westward_management import command
+        if type(amount) is not int or amount!=1 or not isinstance(target_id,str) or len(target_id)>10000:raise ValueError('经营请求无效')
+        payload=json.loads(target_id)
+        if not isinstance(payload,dict):raise ValueError('经营请求须为对象')
+        game=copy.deepcopy(game)
+        command(game,deps.maps,payload)
+        game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
     if action.startswith('purple_'):
         from ..purple_east import command
         return command(deps,game,action,target_id,amount)
@@ -49,7 +63,7 @@ def yaochi_action(deps: YaochiDependencies, game_id, action, target_id='', amoun
         return command(deps,game,action,target_id,amount)
     if action.startswith('garden_'):
         from ..yaochi_garden import command
-        return command(deps,game,action,target_id,amount)
+        return command(deps,copy.deepcopy(game),action,target_id,amount)
     if action.startswith('fair_'):
         from ..yaochi_fair import command
         return command(deps,game,action,target_id,amount)
@@ -170,6 +184,8 @@ def yaochi_action(deps: YaochiDependencies, game_id, action, target_id='', amoun
 
 
 def _public_yaochi(deps: YaochiDependencies, game):
+    from ..westward_management import public as management_public
+    from ..westward_contracts import public as contracts_public
     from ..immortal_identity import public as identity_public
     from ..immortal_relief import public as relief_public
     from ..purple_east import public as purple_public
@@ -192,7 +208,7 @@ def _public_yaochi(deps: YaochiDependencies, game):
     rows=[]
     for o in offers(game):
         rows.append({k:v for k,v in o.items() if k!='payload'} | {'owned':o['kind']=='body_manual' and o['id'] in p.immortal_body.get('manuals',[]), 'commission_price':math.ceil(o['price']*(1+cfg['order_fee'])), 'locked':o['id'] in state.get('locked_offers',{}), 'lock_price':lock_price(o), 'can_lock':o['kind']=='doctrine', 'eligible':o['kind']!='doctrine' or o['payload']['grade']<=p.realm_index})
-    return dict(available=True, local=p.location_id==cfg['location_id'], location_id=cfg['location_id'],
+    return dict(available=True, local=p.location_id==cfg['location_id'], location_id=cfg['location_id'],management=management_public(game,deps.maps),contracts=contracts_public(game),
                 westward=westward_public(game), earth=earth_public(game, deps.maps),garden=garden_public(game),fair=fair_public(game),
                 antiquity=antiquity_public(game,deps.maps) if deps.maps else None,identity=identity_public(game),relief=relief_public(game),
                 purple_east=purple_public(game,deps.maps) if deps.maps else None,

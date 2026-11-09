@@ -262,6 +262,10 @@ def action(deps, game, command, token, amount):
             if order['kind'] == 'trace':
                 order.update(trace_reward=config()['trace_reward'], delivered=0)
             game.yaochi_state['westward']['project'] = order
+            if quote.get('fair_credential'):
+                from .westward_fair_benefits import consume
+                consume(game,quote['fair_credential'],'精研讲席')
+                order['fair_credential']=quote['fair_credential']
             summary = f"预约{order['name']}，须亲自在瑶池修持{order['years']}年；资材已托管，离开后暂停。"
     elif command in {'westward_work', 'westward_claim', 'westward_cancel'}:
         order = _current_project(game, token)

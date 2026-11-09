@@ -41,6 +41,11 @@ def owner_allowed(game, kind, identity, world):
 def operating_tier(game, row):
     """Recheck player-operated licenses; autonomous owners keep their own work."""
     from .operating_license import allowed
+    lease=row.get('operating_lease',{})
+    if lease.get('operator_kind')=='npc':
+        from ...relationship_records import find_person
+        person=find_person(game,lease['operator'])
+        return person.realm_index+1 if person else 0
     return game.player.realm_index + 1 if allowed(game,row) or owner_allowed(
         game, row['owner_kind'], row['owner_id'], row['world']) else None
 

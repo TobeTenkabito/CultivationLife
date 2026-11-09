@@ -29,6 +29,13 @@ DUTIES = {
 }
 
 
+def settle_service(game,ledger,kind,started):
+    """Single completed-service award for personal work and original resident stewards."""
+    ledger['trust']=min(100,ledger.get('trust',50)+DUTIES[kind]['trust'])
+    ledger.update(allowance=400 if not official(game) and game.player.age<started+500 else 0,
+                  until=started+500,completed=ledger.get('completed',0)+1)
+
+
 def signature(game):
     facts = dict(earth=root(game), age=game.player.age, place=address(game), opportunity=game.player.opportunity,
                  network=[(temple(game,s['temple_id']),city(game,temple(game,s['temple_id']))) for s in ledgers(game)],
@@ -197,9 +204,7 @@ def action(deps, game, command, token, amount):
         duty = s.get('duty')
         if not duty or duty['stage'] != 'service' or duty['progress'] < duty['years']:
             raise ValueError('实际履约工时尚未完成')
-        s['trust'] = min(100, s['trust'] + DUTIES[duty['kind']]['trust'])
-        s.update(allowance=400 if not official(game) and game.player.age < duty['started'] + 500 else 0,
-                 until=duty['started'] + 500, completed=s['completed'] + 1)
+        settle_service(game,s,duty['kind'],duty['started'])
         summary = f"{DUTIES[duty['kind']]['name']}验收完成，信任升至{s['trust']}。本地助修额度{s['allowance']}年，截止世界历{s['until']}年；到期不补发。"
         s.pop('duty')
     elif command == 'earth_cancel':

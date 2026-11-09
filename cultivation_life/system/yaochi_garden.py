@@ -19,10 +19,7 @@ from .economy.ledger import account,balance,transfer_value
 from .economy.state import local_market,commodity_catalog,reprice
 from .economy.local_market import quote
 
-def identity():return f"celestial:{config()['location_id']}:farm"
-def estate(game):return estates(game).get(identity())
-def lease(game):return (estate(game) or {}).get('operating_lease')
-def root(game):return record(game).get('garden',{})
+from .yaochi_garden_state import identity,estate,lease,root,choices
 
 def begin(game):
     if blocked:=reason(game,True):raise ValueError(blocked)
@@ -40,14 +37,10 @@ def reason(game,recovery=False):
     from .yaochi_westward import reason as local_reason
     return local_reason(game,cancelling=recovery)
 
-def choices(game):
-    row=estate(game) or dict(world='celestial',location=config()['location_id'],kind='farm')
-    catalog=commodity_catalog('celestial')
-    return {k:v for k,v in recipes('celestial',catalog).items() if v['kind']=='farm' and permits(row,v) and catalog[v['output']]['tier']<=game.player.realm_index+1}
-
 def token(game):
+    from .yaochi_tenders import bids
     return digest([game.player.age,game.player.world,game.player.location_id,game.player.realm_index,
-        game.yaochi_state.get('merit',0),estate(game),root(game),local_market(game).get('revision') if local_market(game) else None])
+        game.yaochi_state.get('merit',0),estate(game),root(game),bids(game),local_market(game).get('revision') if local_market(game) else None])
 
 def repair_offer(game):
     from .building_assets import local_rows
@@ -71,20 +64,27 @@ def command(deps,game,action,target,amount):
     recovery=action in {'garden_close','garden_cancel_order','garden_release','garden_withdraw','garden_cash','garden_fund','garden_arrears','garden_work','garden_rebuild'}
     if blocked:=reason(game,recovery):raise ValueError(blocked)
     row=estate(game)
-    if action=='garden_lease':
+    if action in {'garden_lease','garden_bid'}:
+        rent=amount if action=='garden_bid' else 5000
+        if rent<5000:raise ValueError('竞租报价不得低于原5000灵石租金')
         if lease(game):raise ValueError('请先结清当前经营许可')
         if row and row['owner_kind'] not in {'background','yaochi'}:raise ValueError('原药田已有其他产权人，瑶池不能征用')
         if row and (row['stock'] or row['job'] or row['arrears'] or row.get('building_status')=='destroyed'):raise ValueError('原地块尚未完成交接或重建')
         priority=record(game).get('fair',{}).get('priority',{})
         discount=priority and not priority['used'] and game.player.age<priority['until']
         deposit=100 if discount else 200
-        if game.yaochi_state.get('merit',0)<deposit or balance(game,'player')<5000:raise ValueError('须备足保证功勋与5000灵石租金')
+        if game.yaochi_state.get('merit',0)<deposit or balance(game,'player')<rent:raise ValueError('须备足保证功勋与本次实际竞租款')
+        from .yaochi_tenders import bids,award
+        ranked=bids(game,rent)
         if not row or row['owner_kind']=='background':
             row=acquire(game,deps.maps,'celestial',config()['location_id'],'farm','yaochi','yaochi',YAOCHI,game.player.realm_index)
+        if award(game,deps.maps,rent,ranked):
+            game.history.append(HistoryRecord('SYS_YAOCHI_TENDER',1,game.player.age,'仙圃竞租',action,'completed','原机构代表竞得本期承办，原机构资金实付。本人未扣功勋或租金。',{},['yaochi']))
+            game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
         s=game.yaochi_state.setdefault('westward',{}).setdefault('garden',{})
         serial=s.get('sequence',0)+1;s['sequence']=serial
         wallet=f'garden:{game.id}:{serial}';account(game,wallet)
-        spend(game,deposit);transfer_value(game,'player',YAOCHI,5000,'仙圃二百五十年实际租金')
+        spend(game,deposit);transfer_value(game,'player',YAOCHI,rent,'仙圃二百五十年实际租金')
         row['operating_lease']=dict(operator=game.id,started=game.player.age,until=game.player.age+250,
             deposit=deposit,wallet=wallet,steward=None,wages=0)
         row.update(enabled=False,auto_buy=False,auto_sell=False,entrusted=False,last_year=game.player.age)
@@ -112,10 +112,13 @@ def command(deps,game,action,target,amount):
         elif action=='garden_start':estate_call(game,deps.maps,row,'start');summary='原料和劳务已实付，按原产业工期生产。'
         elif action=='garden_mode':
             if value not in {'retain','market'}:raise ValueError('请选择留存或市场销售')
+            if record(game).get('contracts',{}).get('active',{}).get('source_kind')=='estate':raise ValueError('请先交接长期供货再修改销售方案')
             if l.get('order') or l.get('steward'):raise ValueError('请先交接定向订单或协作者再修改销售方案')
             row.update(enabled=True,auto_sell=value=='market');summary='已选择留存成品。' if value=='retain' else '成品按原市场报价、收购资金与销售限额出售，实际收入归经营账户。'
         elif action=='garden_withdraw':estate_call(game,deps.maps,row,'withdraw',item=value,quantity=amount);summary='原仓库实物已提入行囊。'
         elif action=='garden_steward':
+            from .westward_contracts import current
+            if current(game) and current(game).get('source_kind')=='estate':raise ValueError('请先交接长期供货合同')
             if l.get('order'):raise ValueError('请先交接定向供货，再安排自由合作经营')
             npc=next((n for n in people(game) if n.id==value and n.realm_index>=9),None)
             if not npc:raise ValueError('须选择当面、自由且未被占用的真仙人物')
@@ -126,6 +129,8 @@ def command(deps,game,action,target,amount):
             l['steward']=None;row.update(entrusted=False,enabled=False,auto_buy=False,auto_sell=False)
             summary='已交接合作经营，原人物解除占用；已付批次保留。'
         elif action=='garden_order':
+            from .westward_contracts import current
+            if current(game) and current(game).get('source_kind')=='estate':raise ValueError('已有长期供货，不能为同一批产能重复签约')
             if l.get('steward'):raise ValueError('请先交接协作者，再亲自承办定向供货')
             if l.get('order'):raise ValueError('已有待交供货合同')
             if root(game).get('order_cycle')==game.player.age//50:raise ValueError('本期供货额度已用，五十年一期')
@@ -149,6 +154,8 @@ def command(deps,game,action,target,amount):
             if not l.get('order'):raise ValueError('没有待交合同')
             l['deposit']=max(0,l['deposit']-40);order_close(game,row);summary='未履约合同交接，扣除最多40保证功勋，未付货款退原府库。'
         elif action=='garden_close':
+            from .westward_contracts import current
+            if current(game) and current(game).get('source_kind')=='estate':raise ValueError('请先结清长期供货合同')
             if row['job'] or row['stock'] or row['arrears'] or l.get('order') or encumbered(game,row['id']):raise ValueError('请先结清在制、库存、欠费及供货合同')
             transfer_value(game,l['wallet'],'player',balance(game,l['wallet']),'仙圃交接提回剩余经营现金')
             game.yaochi_state['merit']+=l['deposit'];root(game)['last_lease']=copy.deepcopy(l)
@@ -160,15 +167,21 @@ def command(deps,game,action,target,amount):
     game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
 
 def public(game):
+    from .yaochi_tenders import bids,state as tender_state
     if game.player.world!='celestial':return None
     local=game.player.location_id==config()['location_id'];r=estate(game) if local else None
     l=copy.deepcopy(r.get('operating_lease')) if r else None
+    if l and l.get('operator_kind')=='npc':
+        person=find_person(game,l['operator'])
+        return dict(enabled=enabled(),local=local,building_id='estate:'+identity(),token=token(game),reason=reason(game),recovery_reason=reason(game,True),
+            operator_is_player=False,lease=dict(operator=l['operator'],until=l['until'],steward_name=person.name if person else '原承办人已失效'),
+            tender=copy.deepcopy(tender_state(game)),bids=[],estate=None,repair=None,recipes=[],people=[],receipts=[],occupied=True)
     if l:
         if l.get('order'):l['order']['item_name']=ITEM_CATALOG[l['order']['item']].name
         steward=find_person(game,l.get('steward')) if l.get('steward') else None
         l['steward_name']=steward.name if steward else '原人物已失效'
-    _,repair=repair_offer(game) if l else (None,None)
-    return dict(enabled=enabled(),local=local,building_id='estate:'+identity() if local else '',token=token(game) if local else '',reason=reason(game),recovery_reason=reason(game,True),
+    _,repair=repair_offer(game) if l and l['operator']==game.id else (None,None)
+    return dict(contract_reason='请先结清长期供货合同' if record(game).get('contracts',{}).get('active',{}).get('source_kind')=='estate' else '',operator_is_player=bool(l and l['operator']==game.id),tender=copy.deepcopy(tender_state(game)) if local else None,bids=[{k:b[k] for k in ('id','name','price','score')} for b in bids(game)] if local else [],enabled=enabled(),local=local,building_id='estate:'+identity() if local else '',token=token(game) if local else '',reason=reason(game),recovery_reason=reason(game,True),
         occupied=bool(r and r['owner_kind'] not in {'background','yaochi'}),lease=copy.deepcopy(l),repair=repair,
         estate=dict(id=r['id'],stock=[dict(id=k,name=ITEM_CATALOG[k].name,quantity=n) for k,n in r['stock'].items()],
             job=copy.deepcopy(r['job']),cash=balance(game,payer(r)),income=r['income'],expense=r['expense'],arrears=r['arrears'],recipe=r['recipe'],batches=r['batches'],auto_sell=r['auto_sell'],

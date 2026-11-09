@@ -99,7 +99,11 @@ def command(deps,game,action,target,amount):
     recovery=action=='council_cancel'
     if blocked:=reason(game,recovery):raise ValueError(blocked)
     r=current(game)
-    if action=='council_propose':
+    if action=='council_strategy':
+        if blocked:=authority(game):raise ValueError(blocked)
+        from .court_strategy import configure
+        summary=configure(game,value)
+    elif action=='council_propose':
         if blocked:=authority(game):raise ValueError(blocked)
         if r:raise ValueError('请先结清当前议案')
         offer=next((o for o in offers(game,deps.maps) if o['token']==value),None)
@@ -109,6 +113,8 @@ def command(deps,game,action,target,amount):
         number=s.get('sequence',0)+1
         r=dict(id='council-'+str(number),offer=copy.deepcopy(offer),status='draft',started=game.player.age,
             deadline=game.player.age+500,pledges={},attempts=[],job=None)
+        suggestion=next((p for p in s.get('npc_proposals',[]) if p['key']==offer['key']),None)
+        if suggestion:r['npc_proposal']=copy.deepcopy(suggestion)
         start_work(game,r,'prepare',game.player.location_id,5)
         s.update(sequence=number,current=r);s.setdefault('used',{})[offer['key']]=r['id']
         summary='已登记具体受益对象与预算，须实际五年听议；通过前不占用工程本金。'
@@ -201,6 +207,7 @@ def command(deps,game,action,target,amount):
     game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
 
 def public(game,maps):
+    from .court_strategy import public as strategy_public
     if game.player.world!='celestial' or game.guixu_state.get('player_session'):return None
     rows=offers(game,maps) if enabled() else []
     for row in rows:
@@ -214,7 +221,7 @@ def public(game,maps):
         try:validate(game,r['job'])
         except ValueError as error:execute_reason=str(error)
     review_reason=reason(game) or ('须回原提案地点复核' if r and game.player.location_id!=r['offer']['origin'] else '')
-    return dict(enabled=enabled(),token=token(game),reason=reason(game),authority=authority(game),recovery_reason=reason(game,True),vote_offer=vote_offer,
+    return dict(strategy=strategy_public(game),enabled=enabled(),token=token(game),reason=reason(game),authority=authority(game),recovery_reason=reason(game,True),vote_offer=vote_offer,
         treasury=balance(game,COURT),current=copy.deepcopy(current(game)),work=copy.deepcopy(work(game)),work_reason=work_reason(game),
         execute_reason=execute_reason,review_reason=review_reason,
         offers=rows,holders=holders(game),history=copy.deepcopy(state(game).get('history',[])[-6:]),last_result=state(game).get('last_result'))

@@ -15,17 +15,26 @@ def lesson(pool):
     g.world_npcs[ident].layer=2;e.store.save(g)
     return e,gid,ident
 
-def test_real_lesson_delivers_expected_opportunity_without_trace(lesson):
+@pytest.mark.parametrize('prize', [False, True])
+def test_real_lesson_delivers_expected_opportunity_without_trace(lesson,prize):
     e,gid,ident=lesson;g=e._load(gid);before=g.player.opportunity;traces=g.player.immortal_traces
+    if prize:
+        fair=g.yaochi_state.setdefault('westward',{}).setdefault('fair',{})
+        fair['entries']=[dict(id='guidance-prize',kind='duel',status='won',cycle=g.player.age//500)]
+        e.store.save(g)
     expected=annual_gain(g)*10;age=g.player.age;start(e,gid,'guidance')
     assert research_assignment(e._load(gid),ident)['phase']=='guidance'
     with patch('cultivation_life.engine.orchestration.advancement._finish_action_events',return_value=None):
         e.yaochi_action(gid,'westward_work',token(e,gid))
     g=e._load(gid)
-    assert g.player.age==age+10 and project(g)['progress']==10
+    years=8 if prize else 10
+    assert g.player.age==age+years and project(g)['progress']==years
     assert g.player.opportunity-before==pytest.approx(expected)
     assert project(g)['opportunity_delivered']==pytest.approx(expected)
     assert g.player.immortal_traces==traces
+    if prize:
+        from cultivation_life.system.westward_fair_benefits import credential
+        assert not credential(g,'duel')
     e.yaochi_action(gid,'westward_claim',token(e,gid))
     assert not project(e._load(gid)) and not research_assignment(e._load(gid),ident)
 

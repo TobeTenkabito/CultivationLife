@@ -33,6 +33,9 @@ def pending(game):
 
 
 def occupied_reason(game):
+    current=state(game).get('temple_id')
+    if game.economy_v2.get('institution_agendas',{}).get('scopes',{}).get('temple:'+str(current),{}).get('job'):
+        return '本庙已有执事筹办，须先交接，不能为同一轮护民重复立项'
     from .westward_activity import occupied
     if occupied(game):return '请先交接访古或项目议政的本人事务'
     if record(game).get('project') or game.yaochi_state.get('job'):

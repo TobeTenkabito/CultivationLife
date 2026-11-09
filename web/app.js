@@ -1837,6 +1837,7 @@ function paintFaction(faction) {
   window.renderOrganizationFinance?.(summary, faction.finance);
   window.SectTasks?.render(summary,faction.task_board,payload=>mutate(`/api/games/${game.id}/sect-task`,payload));
   window.renderOrganizationBusiness?.(summary, 'sect', faction, game, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
+  window.InstitutionGovernance?.render(summary,(game.fleet_network?.institutions||[]).filter(r=>r.kind==='sect'&&r.id==='organization:sect:'+game.player.faction_id),payload=>mutate(`/api/games/${game.id}/fleet-action`,payload));
   window.OrganizationDepot?.render(summary, faction.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   window.OrganizationHeritage?.render(summary, faction.heritage, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   if (faction.can_leave) {
@@ -2207,6 +2208,7 @@ function paintFamily(family, governance) {
 
   window.FamilyPanel?.render(content, family, payload => mutate(`/api/games/${game.id}/family-action`, payload));
   window.renderOrganizationBusiness?.(content, 'family', family, game, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
+  window.InstitutionGovernance?.render(content,(game.fleet_network?.institutions||[]).filter(r=>r.kind==='family'),payload=>mutate(`/api/games/${game.id}/fleet-action`,payload));
   window.OrganizationDepot?.render(content, family?.depot, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   window.OrganizationHeritage?.render(content, family?.heritage, payload => mutate(`/api/games/${game.id}/fleet-action`, payload));
   if ((!family?.exists || family?.extinct) && family?.can_found) {

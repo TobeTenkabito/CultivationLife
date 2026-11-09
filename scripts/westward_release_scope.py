@@ -1,5 +1,6 @@
-"""3.6.1: original building integration, consolidated navigation and temple art."""
+"""3.7.0: base institutions and Westward 1.1 original-state development."""
 TESTS = [
+    'test_institution_ai', 'test_westward_development',
     'test_yaochi_westward', 'test_earth_temple', 'test_earth_network', 'test_earth_disputes',
     'test_court_bureaus', 'test_court_justice', 'test_yaochi_fair', 'test_westward_ventures',
     'test_westward_finale', 'test_yaochi_guidance', 'test_westward_schedule',
@@ -19,8 +20,8 @@ TESTS = [
     'test_ui_preferences', 'test_visual_release', 'test_pixel_assets', 'test_temple_art', 'test_home_scenes',
 ]
 TESTS = ['tests/' + name + '.py' for name in TESTS]
-BROWSERS = ['browser_yaochi_westward', 'browser_earth_temple', 'browser_earth_network',
+BROWSERS = ['browser_institution_development', 'browser_yaochi_westward', 'browser_earth_temple', 'browser_earth_network',
             'browser_earth_disputes', 'browser_court_bureaus', 'browser_court_justice',
             'browser_yaochi_fair', 'browser_westward_ventures', 'browser_westward_finale', 'browser_dlc_controls',
             'browser_events_212', 'browser_desktop_navigation', 'browser_caravan_trust_audit','browser_home_scenes']
-SCOPE = '3.6.1 Westward 1.0: eight gameplay lines, four-chapter mainline and four endings, exclusive identities, merit repair and actual-teacher guidance; DLC ownership styling in both pixel palettes, original court/building/economy/NPC/combat/time/transition/persistence upstreams; real browser submissions, EXE with/without DLC, signed Android 12 portrait/landscape; not full repository regression'
+SCOPE = '3.7.0 Westward 1.1: base proposals/delegation/escrow, temple stewards, court agenda, NPC bidding, installments and fair credentials; eight gameplay lines, four-chapter mainline and four endings, exclusive identities, merit repair and actual-teacher guidance; DLC ownership styling in both pixel palettes, original court/building/economy/NPC/combat/time/transition/persistence upstreams; real browser submissions, EXE with/without DLC, signed Android 12 portrait/landscape; not full repository regression'

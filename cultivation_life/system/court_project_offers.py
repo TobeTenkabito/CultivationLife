@@ -50,12 +50,17 @@ def offers(game,maps):
             name=row['name']+' · 公开护民协议',years=10,materials={},coins=0,reason='',completed=ledger.get('completed',0),
             benefit='原庙公开使用，并新完成一次原护民庙务；产权不转让，庙务工料由庙主原价承担'))
     for r in rows:
+        if r['policy']=='procurement':
+            limit=game.heavenly_court.get('projects',{}).get('batch_limit',20)
+            r['materials']={k:min(n,limit) for k,n in r['materials'].items()}
         r['purchase']=0
         for k,n in r['materials'].items():
             item=market['commodities'].get(k)
             if not item or item['stock']<n:r['reason']='原市场实际工料不足'
             else:r['purchase']+=market_quote(item,'buy',n)['total']
         r['budget']=r['purchase']+r['coins']+(r['years']+5)*1000
+        cap=game.heavenly_court.get('projects',{}).get('project_cap',0)
+        if cap and r['budget']>cap:r['reason']=r['reason'] or '超过当前施政单项预算上限'
         r['key']=digest([r['policy'],r['target'],game.player.age//500])
         r['token']=digest(r)
     return rows

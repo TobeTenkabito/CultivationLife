@@ -74,7 +74,7 @@ def occupied(row):
     return sum(row['stock'].values()) + sum(r['reserved'] for r in row['requests'])
 
 
-def purchase(game, maps, entity, key, quantity, *, finance=None):
+def purchase(game, maps, entity, key, quantity, *, finance=None, project_payer=None):
     row = ensure(game, entity)
     good = catalog(row['world']).get(key)
     if not good or type(quantity) is not int or not 1 <= quantity <= 1000:
@@ -83,7 +83,7 @@ def purchase(game, maps, entity, key, quantity, *, finance=None):
         raise ValueError('府库实物容量已满（10000 件）')
     ensure_regional_market(game, maps, row['world'], row['location'])
     market = game.economy_v2['markets'][f"{row['world']}:{row['location']}"]
-    source = treasury(game, entity)
+    source = project_payer or treasury(game, entity)
     if good['kind'] == 'item':
         product = market['commodities'].get(good['id'])
         if not product or int(product['stock']) < quantity:
@@ -96,7 +96,7 @@ def purchase(game, maps, entity, key, quantity, *, finance=None):
         product['stock'] -= quantity
         product['volume'] += quantity
         from .market_power import record_trade
-        record_trade(game, market, good['id'], source, 'buy', quantity)
+        record_trade(game, market, good['id'], treasury(game, entity), 'buy', quantity)
         reprice(game, market, product)
     else:
         # Ordinary manuals are paid local copying work, with a bounded annual

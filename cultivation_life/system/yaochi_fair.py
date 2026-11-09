@@ -128,12 +128,13 @@ def command(deps,game,action,target,amount):
     game.updated_at=now_iso();deps.store.save(game);return deps.present(game)
 
 def public(game):
+    from .westward_fair_benefits import public as benefits_public
     from .westward_rules import enabled
     if game.player.world!='celestial':return None
     local=game.player.location_id==config()['location_id']
     candidates=people(game) if local else []
     r=copy.deepcopy(active(game));blocked=reason(game)
-    return dict(enabled=enabled(),token=token(game) if local else '',cycle=cycle(game),ends=(cycle(game)+1)*500,
+    return dict(benefits=benefits_public(game),enabled=enabled(),token=token(game) if local else '',cycle=cycle(game),ends=(cycle(game)+1)*500,
         reason=blocked,recovery_reason=reason(game,True),work_reason=work_reason(game),active=r,
         candidates=[dict(id=n.id,name=n.name,realm=n.realm_index,layer=n.layer) for n in candidates if n.realm_index==game.player.realm_index],
         contests=[dict(id=k,name=v,used=any(e['cycle']==cycle(game) and e['kind']==k for e in entries(game))) for k,v in NAMES.items()],

@@ -17,3 +17,18 @@ def prepare_westward(engine, game_id):
     g.world_npcs['westward-release-teacher']=SectNpc('westward-release-teacher','澄明真人','散修',10,1,40,100000,
         spirit_root='supreme_metal',world='celestial',location_id=g.player.location_id)
     engine.store.save(g)
+
+
+def prepare_institution(engine,game_id):
+    from cultivation_life.system.economy import organizations,depot
+    from cultivation_life.system.economy.state import ensure_regional_market
+    from cultivation_life.system.economy.ledger import transfer_value
+    g=engine._load(game_id);g.pending_event=None
+    faction=next(s for s in g.sects.values() if s.world==g.player.world and s.kind=='sect' and not s.extinct)
+    g.player.faction_id=faction.id;g.player.location_id=faction.location_id;faction.founded_by_player=True
+    for n in faction.npcs:n.location_id=faction.location_id
+    row=organizations.register(g,'sect',faction.id,g.player.world);row['expected_upkeep']=0
+    ensure_regional_market(g,engine.maps,g.player.world,faction.location_id)
+    transfer_value(g,'background:'+g.player.world,'organization:sect:'+faction.id,1000000,'隔离验收原款')
+    depot.ensure(g,faction)['stock'].clear()
+    engine.store.save(g)

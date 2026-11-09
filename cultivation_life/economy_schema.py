@@ -12,6 +12,14 @@ def validate_economy(value, merchants=None, document=None):
             raise ValueError('经济存档结构或数值无效，原文件已保留')
     require(isinstance(value, dict) and value.get('schema_version') == 1)
     require(type(value.get('issued',0)) is int and value.get('issued',0)>=0)
+    if 'institution_agendas' in value:
+        from .institution_ai_schema import validate
+        validate(value['institution_agendas'],value.get('accounts',{}))
+    if document is not None:
+        contracts=document.get('yaochi_state',{}).get('westward',{}).get('contracts')
+        if contracts is not None:
+            from .institution_ai_schema import validate_contracts
+            validate_contracts(contracts,value.get('accounts',{}))
     if 'trust_growth_year' in value:
         require(type(value['trust_growth_year']) is int and value['trust_growth_year'] >= value['base_year'])
     aliases=value.get('organization_aliases',{})

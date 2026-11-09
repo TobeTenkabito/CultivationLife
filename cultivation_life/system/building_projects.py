@@ -39,8 +39,12 @@ def temple_facility_cost(world, kind):
                            zip(('ore_structure','ore_conduct','ore_store'), spec['materials'])} if spec else {})
 
 
-def quote(game, purpose, row=None, *, payer='player', stock=None):
-    world=game.player.world
+def quote(game, purpose, row=None, *, payer='player', stock=None, actor=None):
+    if actor is not None:
+        from .institution_ai.buildings import authorized
+        if purpose!='rebuild' or not row or not authorized(game,row,actor) or payer=='player' or stock is None:
+            raise ValueError('原机构现场重建授权无效')
+    world=actor.world if actor else game.player.world
     materials={}
     reason=''
     if purpose in {'city','develop','govern'} or row and row['type']=='city':
@@ -89,14 +93,14 @@ def quote(game, purpose, row=None, *, payer='player', stock=None):
     if row and purpose=='rebuild' and row['status']!='destroyed':reason='建筑并未被摧毁'
     from .economy.operating_license import allowed as licensed_operator
     licensed_repair=bool(row and row['type']=='industry' and licensed_operator(game,game.economy_v2.get('estates',{}).get(row.get('source_id'),{})))
-    if row and purpose=='rebuild' and not (owns(game,row) or licensed_repair or row['type']=='city' and row.get('public')):
+    if row and purpose=='rebuild' and not (actor is not None or owns(game,row) or licensed_repair or row['type']=='city' and row.get('public')):
         reason='没有重建权限，请先联系所有者'
     from .economy.ledger import balance
     funds=balance(game,payer)
     held={i.id:i.quantity for i in game.player.inventory} if stock is None else stock
     missing=[ITEM_CATALOG[key].name for key,n in materials.items() if held.get(key,0)<n]
     if not reason and (funds<coins or missing):reason='灵石或筑城材料不足'
-    fingerprint=dict(purpose=purpose,world=world,location=game.player.location_id,coins=coins,materials=materials,
+    fingerprint=dict(purpose=purpose,world=world,location=actor.location if actor else game.player.location_id,coins=coins,materials=materials,
         identity=row['id'] if row else None,owner=row.get('owner') if row else None,
         level=row.get('level') if row else None,status=row.get('status') if row else None,
         temple_facilities=row.get('temple_facilities') if row else None)
@@ -108,14 +112,15 @@ def bill_text(bill):
     return f"灵石 {bill['coins']:,}" + ''.join(f"；{ITEM_CATALOG[key].name} ×{n:,}" for key,n in bill['materials'].items())
 
 
-def pay(game,bill,reason, *, payer='player', stock=None):
+def pay(game,bill,reason, *, payer='player', stock=None, actor=None):
     if bill['reason']:raise ValueError(bill['reason'])
     if payer!='player' or stock is not None:
         from .economy.ledger import balance, transfer_value
         from .economy.local_market import operator_account
         if stock is None or balance(game,payer)<bill['coins'] or any(stock.get(k,0)<n for k,n in bill['materials'].items()):
             raise ValueError('原工程托管款或公物不足')
-        transfer_value(game,payer,operator_account(game),bill['coins'],reason)
+        destination=f'operator:{actor.world}:{actor.location}' if actor else operator_account(game)
+        transfer_value(game,payer,destination,bill['coins'],reason)
         for key,n in bill['materials'].items():
             stock[key]-=n
             if not stock[key]:stock.pop(key)

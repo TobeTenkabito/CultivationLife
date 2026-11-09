@@ -3,10 +3,10 @@
   "api_version": 1,
   "id": "official.yaochi-westward",
   "name": "瑶池西望：紫气东来",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "kind": "dlc",
   "enabled": true,
   "load_order": 180,
   "requires": [],
-  "description": "高阶道修扩展：三途身份、功德专修与修缮、庙域争议、四司监察巡天、仙圃仙会、访古议政，以及四章紫气主线与四种仙府结局。"
+  "description": "高阶道修扩展：驻庙经营、七曜施政提案、仙圃竞租与长期供货、仙会待遇、散仙契约及仙府后续；基于本体机构决策、原人物、库存与有限预算。"
 }

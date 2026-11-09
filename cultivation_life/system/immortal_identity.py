@@ -8,6 +8,8 @@ from .westward_rules import record,enabled
 from .immortal_identity_rules import offices,official,primary,public_service,join_reason
 
 def handover_reason(game):
+    if any(key.startswith('temple:') and (r.get('job') or r.get('delegate')) for key,r in game.economy_v2.get('institution_agendas',{}).get('scopes',{}).items()):
+        return '须先交接驻庙执事与原在办项目'
     b=game.heavenly_court.get('bureaus',{})
     if pending(game):return '须先逐庙完成或退出已承接的庙务、施工与争议'
     if any(j['status']=='active' for j in b.get('jobs',[])) or b.get('review') or any(c['status']=='active' for c in b.get('inquiries',[])):

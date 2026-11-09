@@ -415,6 +415,7 @@ def main():
               save_transfer_smoke_in_regression=transfer_in_regression,
               save_transfer_log=f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
     if reconciliation is not None:base['regression_reconciliation']=reconciliation
+    if scoped.get('resume_receipt'):base['acceptance_resume']=resumed
     if scoped.get('regression_scope')=='full-repository':
         base['regression_scope']='full-repository'
         base['collection_manifest']=scoped['collection']
@@ -549,7 +550,7 @@ def main():
         with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
             for path in sorted((ROOT/'dlc/yaochi-westward').rglob('*')):
                 if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
-            for name in ('docs/release-361.md','docs/temple-art-361.md','docs/westward-finale.md','docs/yaochi-westward-implementation.md'):
+            for name in ('docs/release-370.md','docs/institution-ai-and-westward-110.md','docs/temple-art-361.md','docs/westward-finale.md','docs/yaochi-westward-implementation.md'):
                 z.write(ROOT/name,name)
             z.writestr('安装说明.txt',f'需配套本体v{VERSION}，仅结构12。解压到游戏目录覆盖dlc/yaochi-westward后重启。Android请使用同版签名APK；存档和用户开关不会被本包覆盖。')
             z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='yaochi-westward',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))

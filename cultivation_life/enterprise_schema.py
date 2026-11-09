@@ -17,7 +17,11 @@ def validate_estates(value, require, document):
         if 'operating_lease' in row:
             lease=row['operating_lease'];require(isinstance(lease,dict) and row['owner_kind']=='yaochi')
             require(isinstance(lease.get('operator'),str) and isinstance(lease.get('wallet'),str) and lease['wallet'] in value['accounts'])
-            if document is not None:require(lease['operator']==document.get('id'))
+            require(lease.get('operator_kind','player') in {'player','npc'})
+            if lease.get('operator_kind')=='npc':
+                require(isinstance(lease.get('source'),str) and lease['source'] in value.get('organizations',{}))
+                require(lease.get('deposit_wallet') in value['accounts'] and lease.get('steward')==lease['operator'])
+            elif document is not None:require(lease['operator']==document.get('id'))
             for field in ('started','until','deposit','wages'):require(type(lease.get(field)) is int and lease[field]>=0)
             require(lease['until']>lease['started'] and (lease.get('steward') is None or isinstance(lease['steward'],str)))
             if 'order' in lease:

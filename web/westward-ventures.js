@@ -46,6 +46,7 @@
   function council(root,d,dispatch){
     if(!d||(!d.enabled&&!d.current))return null;
     const s=shell(root,'七曜项目议政','在任七曜过半表决。每份方案绑定真实对象、工期和原府库预算，结项公开实物与收支回执。');
+    window.WestwardDevelopment?.strategy(s,d,dispatch);
     const b=(label,a,v='',why=d.reason)=>button(d,dispatch,false,label,'council_'+a,v,why);
     s.append(e('p',`原府库 ${f(d.treasury)} 灵石 · 当前在任 ${d.holders.length} 席`,'venture-kicker'));
     if(d.authority)s.append(e('p',d.authority,'bureau-notice'));if(d.last_result)s.append(e('p',d.last_result,'muted'));
