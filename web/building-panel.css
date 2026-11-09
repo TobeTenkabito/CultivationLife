@@ -22,6 +22,14 @@
 .building-detail{display:grid;grid-template-columns:100px minmax(0,1fr);gap:16px;align-items:start;padding:6px 13px 18px 10px}
 .building-art{width:100px;aspect-ratio:1;background-image:url('/assets/building-gazetteer-2171.png');background-size:300% 200%;background-repeat:no-repeat;background-position:100% 100%}
 .building-art[data-kind=city]{background-position:0 0}.building-art[data-kind=scenery]{background-position:50% 0}.building-art[data-kind=industry]{background-position:100% 0}.building-art[data-kind=cave]{background-position:0 100%}.building-art[data-kind=temple]{background-position:50% 100%}
+img.building-art {background:none;object-fit:contain;image-rendering:pixelated;}
+.earth-heading {display:flex;align-items:center;justify-content:space-between;gap:18px;}
+.earth-heading>div {min-width:0;flex:1;}
+.temple-portrait {flex:0 0 180px;width:180px;margin:0;padding:10px;background:radial-gradient(ellipse,color-mix(in srgb,var(--gold) 10%,transparent),transparent 72%);text-align:center;}
+.temple-portrait img {display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain;image-rendering:pixelated;}
+.temple-portrait figcaption {margin-top:5px;font-size:11px;color:var(--muted);letter-spacing:.12em;}
+.temple-portrait[data-status=damaged] img {filter:saturate(.65);}
+@media(max-width:600px){.earth-heading>.temple-portrait{flex-basis:112px;width:112px;padding:4px;}.earth-heading>div{min-width:0;flex:1;}}
 .building-row[data-status=destroyed] .building-art{filter:grayscale(1);opacity:.55}
 .building-detail-copy{min-width:0;overflow-wrap:anywhere}
 .building-detail .building-description{margin:0;font-size:12px;line-height:1.9;color:var(--ink)}

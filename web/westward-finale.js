@@ -15,10 +15,15 @@
     s.append(e('p',d.registration?'神位已登记，原主庙地址保留；不入编，不增设香火税。':'神位登记在玉京办理，须已有本人原主庙。','muted'));
     if(d.retire_reason)s.append(e('p',d.retire_reason,'muted'));
     s.append(e('p','奉建或恢复原庙主持即可转为地仙；在玉京按原资格接受四司任职可转为玄仙。入编前先交接主持，退隐不返工时、不重置期限。','yaochi-notice'));
-    const r=game.yaochi.relief;if(r){
+    return s;
+  }
+  function relief(root,game,dispatch,buildingId){
+    const r=game.yaochi?.relief;if(!r)return null;
+    const s=section(root,'功德修缮','亲赴原址，修复本人受损的建筑与产业；产权、工料和原工程进度沿用现有规则。');
+    {
       s.append(e('h4','功德私人修缮'),e('p',`可用功德 ${f(r.merit)} · 本期原服务承兑余款 ${f(r.budget.remaining)} 灵石。修缮与专修共用此额度。`,'muted'));
       if(!r.offers.length)s.append(e('p',r.reason||'亲赴本人受损城市、洞府、土地庙或产业，可查看原价修缮；工程材料仍由本人提供。','muted'));
-      for(const row of r.offers){const c=card(s,row.name);c.append(e('p',`原工程 ${f(row.coins)} 灵石 · 功德 ${f(row.merit)} 承兑 ${f(row.subsidy)} · 本人补款 ${f(row.personal)}`),e('p',row.recipe.map(x=>`${x.name} ${f(x.held)} / ${f(x.needed)}`).join(' · ')||'无额外实物工程材料','muted'),button('按原报价重建','relief_rebuild',row.token,row.reason||r.reason,dispatch));if(row.reason)c.append(e('small',row.reason));}
+      for(const row of r.offers.filter(row=>!buildingId||row.id===buildingId)){const c=card(s,row.name);c.append(e('p',`原工程 ${f(row.coins)} 灵石 · 功德 ${f(row.merit)} 承兑 ${f(row.subsidy)} · 本人补款 ${f(row.personal)}`),e('p',row.recipe.map(x=>`${x.name} ${f(x.held)} / ${f(x.needed)}`).join(' · ')||'无额外实物工程材料','muted'),button('按原报价重建','relief_rebuild',row.token,row.reason||r.reason,dispatch));if(row.reason)c.append(e('small',row.reason));}
     }
     return s;
   }
@@ -64,5 +69,5 @@
     }
     return s;
   }
-  window.WestwardFinale={identity,story};
+  window.WestwardFinale={identity,story,relief};
 })();

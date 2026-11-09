@@ -13,6 +13,7 @@ from cultivation_life.economy_content import material_id
 from cultivation_life.system import yaochi_antiquity as ancient,court_projects as council
 from test_westward_ventures import seats,training_offer
 from test_earth_network import travel
+from scripts.westward_navigation import open_westward
 from scripts.browser_navigation import navigation_locator,click_control,set_theme
 
 def main():
@@ -35,6 +36,8 @@ def main():
                         page=browser.new_page(viewport=dict(width=width,height=height),reduced_motion='reduce');errors=[];page.on('pageerror',lambda x:errors.append(str(x)))
                         page.goto(base);page.wait_for_function('!!configData && !busy');set_theme(page,theme);page.evaluate('id=>loadGame(id)',g.id)
                         def panel(kind,tab):
+                            if kind=='yaochi':
+                                open_westward(page,tab);return
                             if not page.locator('#'+kind+'-card').is_visible():navigation_locator(page,'[data-panel-target='+kind+']').click()
                             page.locator('#'+kind+'-content [data-subpage="'+tab+'"]').click()
                         def action(name,value=None,status=200):
@@ -56,7 +59,7 @@ def main():
                             return result
                         with patch.object(e,'_advance_world_year',side_effect=stop):work('antiquity')
                         assert ancient.current(e._load(g.id))['progress']==2 and page.locator('[data-venture-action=antiquity_work]').is_disabled()
-                        page.locator('#yaochi-toggle').click();click_control(page.locator('#event-choices button:enabled').first);page.wait_for_function('!busy && game.pending_event?.id!=="EVT_SECT_FIRST_WARNING_001"')
+                        page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click();click_control(page.locator('#event-choices button:enabled').first);page.wait_for_function('!busy && game.pending_event?.id!=="EVT_SECT_FIRST_WARNING_001"')
                         click_control(page.locator('#event-choices button:enabled').first);page.wait_for_function('!busy && !game.pending_event')
                         panel('yaochi','访古');work('antiquity');action('antiquity_open','study');work('antiquity')
                         page.screenshot(path=str(out/f'{theme}-{width}-antiquity.png'),animations='disabled')

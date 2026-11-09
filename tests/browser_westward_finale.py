@@ -8,6 +8,7 @@ from playwright.sync_api import sync_playwright
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from cultivation_life.system import purple_east as story
+from scripts.westward_navigation import open_westward
 from scripts.browser_navigation import navigation_locator,click_control,set_theme
 
 def main():
@@ -28,8 +29,7 @@ def main():
                         page=browser.new_page(viewport=dict(width=width,height=height),reduced_motion='reduce');errors=[];page.on('pageerror',lambda x:errors.append(str(x)))
                         page.goto(base);page.wait_for_function('!!configData && !busy');set_theme(page,theme);page.evaluate('id=>loadGame(id)',gid)
                         def panel(tab):
-                            if not page.locator('#yaochi-card').is_visible():navigation_locator(page,'[data-panel-target=yaochi]').click()
-                            page.locator('#yaochi-content [data-subpage="'+tab+'"]').click()
+                            open_westward(page,tab)
                         def action(name,label=None,status=200):
                             node=page.locator('[data-finale-action="'+name+'"]')
                             if label:node=node.filter(has_text=label)
@@ -53,7 +53,7 @@ def main():
                             return result
                         with patch.object(e,'_advance_world_year',side_effect=stop):work()
                         assert story.work(e._load(gid))['progress']==2 and page.locator('[data-finale-action=purple_work]').is_disabled()
-                        page.locator('#yaochi-toggle').click();click_control(page.locator('#event-choices button:enabled').first);page.wait_for_function('!busy && game.pending_event?.id!=="EVT_SECT_FIRST_WARNING_001"')
+                        page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click();click_control(page.locator('#event-choices button:enabled').first);page.wait_for_function('!busy && game.pending_event?.id!=="EVT_SECT_FIRST_WARNING_001"')
                         click_control(page.locator('#event-choices button:enabled').first);page.wait_for_function('!busy && !game.pending_event')
                         panel('紫气东来');step();action('purple_mitigate','出资');step()
                         assert page.locator('.gather-card').filter(has_text='公共修持').locator('[data-finale-action=purple_plan]').is_disabled()
@@ -61,7 +61,7 @@ def main():
                         action('purple_civic');step();action('purple_plan','提交方案');step();action('purple_build');step()
                         g=e._load(gid);assert story.state(g)['phase']=='complete' and story.original(g)['owner']==dict(kind='player',id=gid) and story.original(g)['public']
                         page.evaluate('id=>loadGame(id)',gid);panel('紫气东来');assert not page.locator('[data-finale-action=purple_start]').count()
-                        assert page.locator('#yaochi-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
+                        assert page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
                         page.screenshot(path=str(out/f'{theme}-{width}-complete.png'),animations='disabled')
                         panel('专修');assert page.locator('.yaochi-service').count()==4
                         with page.expect_response(lambda r:r.url.endswith('/yaochi-action')) as response:click_control(page.locator('[data-service=guidance] [data-westward-action=westward_start_merit]'))
@@ -73,6 +73,23 @@ def main():
                         page.wait_for_function('!busy');assert not e._load(gid).yaochi_state['westward'].get('project')
                         assert page.locator('[data-service=body] [data-westward-action=westward_start_merit]').is_disabled()
                         page.screenshot(path=str(out/f'{theme}-{width}-guidance.png'),animations='disabled')
+                        if theme=='light' and width==1440:
+                            from cultivation_life.rules import add_item
+                            from cultivation_life.system import building_projects
+                            from cultivation_life.system.westward_rules import adopt_merit,credit_merit
+                            from cultivation_life.system.economy.ledger import account
+                            # Damage only this isolated character's actual awarded property.
+                            g=e._load(gid);original=story.original(g);original['status']='destroyed'
+                            add_item(g.player,'spirit_stone',10**11)
+                            for key,n in building_projects.quote(g,'rebuild',original)['materials'].items():add_item(g.player,key,n)
+                            adopt_merit(g);credit_merit(g,50)
+                            account(g,'background:celestial')['balance']+=10**8
+                            e.store.save(g)
+                            page.evaluate('id=>loadGame(id)',gid);open_westward(page,'功德修缮')
+                            assert page.locator('#building-affairs-content [data-finale-action=relief_rebuild]').count()==1
+                            # This small original cave costs less than one 10,000-stone merit unit.
+                            assert page.locator('[data-finale-action=relief_rebuild]').is_disabled()
+                            assert page.evaluate('game.yaochi.relief.offers[0].subsidy')==0
                         assert not errors,errors;page.close();print(f'{theme} {width}x{height}: four chapters, real rights, reload, event followup, stale recovery, guidance and disabled options passed',flush=True)
                     browser.close()
             finally:http.shutdown();http.server_close()

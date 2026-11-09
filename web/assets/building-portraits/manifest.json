@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "generator": "OpenAI built-in image_gen",
+  "processing": "Original generated PNGs copied without pixel editing; transparent alpha preserved",
+  "assets": [
+    {
+      "file": "land-temple-intact-361.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "sha256": "a1850599a173b40e71d31fe653aac1f23ecf8b1c20822962ec69f68f7cf4280b",
+      "prompt": "Use case: stylized-concept. Create ONE production-ready transparent-background building portrait for a Chinese cultivation pixel RPG, a 土地庙 (local earth-god shrine). Isometric three-quarter front view, complete modest rural shrine and compact stone courtyard fully visible, centered on a small freestanding ground footprint, generous transparent margin all around. One main hall with dark teal-gray curved tile roof, muted vermilion timber columns, warm ochre stonework, small plain gold crest, a tiny warm-lit earth-god altar inside the open doorway, simple incense burner and two stone lanterns, a small old tree beside the courtyard. It must be recognizable as an intimate local village land shrine, not a grand Buddhist monastery, no pagoda. Polished hand-placed pixel-art look with crisp stepped silhouettes, limited cohesive jade/stone/vermillion/antique gold palette, clustered hard-edged shading, light from upper left, readable at thumbnail scale; match classic Chinese isometric strategy-game building sprites. No people, no labels, no text, no calligraphy, no watermark, no frame, no background scenery, no ground plane filling the canvas, no soft painted background. The actual outside background must be fully transparent with preserved alpha. Square composition."
+    },
+    {
+      "file": "land-temple-ruin-361.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "mode": "RGBA",
+      "alpha": [
+        0,
+        255
+      ],
+      "sha256": "708bc4cd57842c8c1610387aa7440442b49b3fa76439c4d9d72b09565c1ba117",
+      "prompt": "Use case: precise-object-edit. Edit the provided land-god shrine game portrait into its destroyed, abandoned ruin state. Preserve the same square canvas, isometric viewpoint, original site footprint, scale, muted jade/vermillion/ochre pixel-art style and transparent alpha background. The shrine must visibly be the same building: keep its stone foundation, short courtyard walls and old tree in their original positions. Collapse most of the gray tile roof into the main hall, leave two broken red timber columns and some rear wall, scatter a restrained amount of broken roof tiles and timber within the original courtyard, crack the stone lanterns, extinguish candles and incense. Keep remnants of the original altar, now unlit. No characters, no smoke/fire effects, no text or labels, no watermark, no surrounding landscape. Actual transparent background outside the original footprint. This is an alternate destroyed-state game building asset, not a different site."
+    }
+  ]
+}

@@ -408,6 +408,9 @@
 <article id="monster-body-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="妖躯"><div class="section-title"><h2>妖躯</h2><button id="monster-body-toggle" type="button">关闭</button></div><div id="monster-body-content" class="immortal-content"></div></article>
 <article id="ghost-body-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="鬼躯"><div class="section-title"><h2>鬼躯</h2><button id="ghost-body-toggle" type="button">关闭</button></div><div id="ghost-body-content" class="immortal-content"></div></article>
 <article id="golden-light-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="五色神光"><div class="section-title"><h2>五色神光</h2><button id="golden-light-toggle" type="button">关闭</button></div><div id="golden-light-content" class="immortal-content"></div></article>
+<article id="immortal-practice-card" class="paper utility-panel immortal-panel immortal-directory hidden" role="dialog" aria-label="仙途"><div class="section-title"><h2>仙途</h2><button id="immortal-practice-toggle" type="button">关闭</button></div><div id="immortal-practice-content" class="immortal-content"></div></article>
+<article id="immortal-estate-card" class="paper utility-panel immortal-panel immortal-directory hidden" role="dialog" aria-label="仙府"><div class="section-title"><h2>仙府</h2><button id="immortal-estate-toggle" type="button">关闭</button></div><div id="immortal-estate-content" class="immortal-content"></div></article>
+<article id="building-affairs-card" class="paper utility-panel immortal-panel immortal-directory hidden" role="dialog" aria-label="当地建筑事务"><div class="section-title"><h2>建筑事务</h2><button id="building-affairs-toggle" type="button">关闭</button></div><div id="building-affairs-content" class="immortal-content"></div></article>
 <article id="yaochi-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="瑶池"><div class="section-title"><h2>瑶池 · 功勋司</h2><button id="yaochi-toggle" type="button">关闭</button></div><div id="yaochi-content" class="immortal-content"></div></article>
 <article id="immortal-body-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="真仙之躯"><div class="section-title"><h2>真仙之躯</h2><button id="immortal-body-toggle" type="button">关闭</button></div><div id="immortal-body-content" class="immortal-content"></div></article>
 <article id="voisinage-card" class="paper utility-panel immortal-panel hidden" role="dialog" aria-label="仙域"><div class="section-title"><h2>仙域</h2><button id="voisinage-toggle" type="button">关闭</button></div><div id="voisinage-content" class="immortal-content"></div></article>
@@ -513,6 +516,7 @@
         <article class="paper history-card"><div class="section-title"><div><p class="eyebrow">因果录</p><h2>生平纪事</h2></div><div class="history-tools"><span id="seed-label"></span><button id="world-news-debug" type="button">跨界 Debug：关</button></div></div><div id="history-filters" class="history-filters"><label><input type="checkbox" value="self" checked>自己</label><label><input type="checkbox" value="companion" checked>道侣</label><label><input type="checkbox" value="friend" checked>道友</label><label><input type="checkbox" value="mentor" checked>师徒</label><label><input type="checkbox" value="faction" checked>宗门</label><label><input type="checkbox" value="race" checked>种族</label><label><input type="checkbox" value="other" checked>其他</label></div><div id="history-list" class="timeline"></div></article>
       </section>
       <nav class="strategy-dock left-dock" aria-label="个人修行">
+        <button type="button" data-panel-target="immortal-practice" data-dlc="yaochi-westward" title="仙途" class="hidden"><span>途</span><small>仙途</small></button>
         <button type="button" data-panel-target="doctrine" title="仙界道统" class="hidden"><span>道</span><small>道统</small></button>
         <button type="button" data-panel-target="immortal-conversion" title="仙灵力转化" class="hidden"><span>元</span><small>仙元</small></button>
         <button type="button" data-panel-target="immortal-veins" title="仙脉" class="hidden"><span>脉</span><small>仙脉</small></button>
@@ -554,6 +558,7 @@
         <button type="button" id="battle-report-open" title="最近战报"><span>斗</span><small>战报</small></button>
       </nav>
       <nav id="strategy-dock" class="strategy-dock" aria-label="社会互动">
+        <button type="button" data-panel-target="immortal-estate" data-dlc="yaochi-westward" title="仙府" class="hidden"><span>府</span><small>仙府</small></button>
         <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
         <button type="button" data-panel-target="heavens" title="诸天联系"><span>天</span><small>诸天</small></button>
         <button type="button" data-panel-target="yaochi" title="瑶池" class="hidden"><span>池</span><small>瑶池</small></button>
@@ -762,7 +767,10 @@
   <script src="/dlc-controls.js?v=360"></script>
   <link rel="stylesheet" href="/westward-finale.css?v=1">
   <script src="/westward-finale.js?v=1"></script>
-  <script src="/app.js?v=360"></script>
+  <link rel="stylesheet" href="/immortal-navigation.css?v=361">
+  <script src="/building-affairs.js?v=361"></script>
+  <script src="/immortal-navigation.js?v=361"></script>
+  <script src="/app.js?v=361"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

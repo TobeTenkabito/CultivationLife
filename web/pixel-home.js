@@ -128,10 +128,12 @@
       const entrance=local?window.BuildingPanel?.entrance(row.id):null;
       if(entrance)node.append(entrance);
       else {const title=document.createElement('b');title.textContent=row.name;node.append(title);}
+      const affairs=local?window.BuildingAffairs?.control(row,location):null;if(affairs)node.append(affairs);
       note.textContent=row.status==='destroyed'?'遗址':local?[row.use_name||({city:'城池',scenery:'景色',industry:'产业',artificiality:'建筑'})[row.type],row.type==='scenery'?'':`${row.level}级`].filter(Boolean).join(' · '):'需亲赴此地';
       node.append(note);return node;
     });
     if(!buildings.length){const li=document.createElement('li');li.textContent='此地暂无建筑记录';$('#pixel-buildings').append(li);}
+    if(local){const extra=document.createElement('li');window.BuildingAffairs?.foundation(extra,location);if(extra.childElementCount)$('#pixel-buildings').append(extra);}
     window.HomeMapModes?.describe(current,id);
   }
   async function update() {

@@ -26,7 +26,7 @@
     const text = el('div'); text.append(el('small', '一方水土 · 一庙香火', 'yaochi-eyebrow'),
       el('h3', d.temple ? d.temple.name : '奉建土地庙'),
       el('p', d.temple ? `${d.city_name} · ${d.temple.status === 'intact' ? '庙宇完好' : '原庙待修'} · ${d.active ? '地仙主持' : '暂停主持'}${d.local ? ' · 本人在此' : ' · 异地只读'}` : '依托仙界本地凡人与混居城市，护民之后，香火助修。', 'muted'));
-    head.append(text); section.append(head);
+    head.append(text,window.BuildingPanel.portrait(d.temple||{name:'土地庙',subtype:'land_temple',status:'intact',level:1},!d.temple)); section.append(head);
     if (d.last_result) { const p = el('p', d.last_result, 'yaochi-result'); p.setAttribute('role', 'status'); section.append(p); }
     if (d.reason) section.append(el('p', d.reason, 'yaochi-notice'));
     if (!d.temple) {

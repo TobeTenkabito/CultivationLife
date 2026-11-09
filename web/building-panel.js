@@ -24,11 +24,15 @@
     summary.append(body);
     const actions=el('div',null,'building-row-actions');
     if(place.current){
+      const office=window.BuildingAffairs?.control(row,place);if(office)actions.append(office);
       if(row.status!=='destroyed')actions.append(command(row.type==='scenery'?'观景':'进入',{action:'enter',building_id:row.id},!row.can_enter));
       if(row.type!=='scenery')actions.append(command(row.status==='destroyed'?'重建':'营造',{action:'manage',building_id:row.id}));
     }else actions.append(el('span','需亲赴此地','building-remote'));
     summary.append(actions,icon('chevron-down'));item.append(summary);
-    const detail=el('div',null,'building-detail'),art=el('div',null,'building-art');art.dataset.kind=kind==='land_temple'?'temple':kind;art.setAttribute('aria-hidden','true');
+    const temple=['temple','land_temple'].includes(kind);
+    const detail=el('div',null,'building-detail'),art=el(temple?'img':'div',null,'building-art');art.dataset.kind=kind;
+    if(temple){art.src=window.HomeMapModes.art(row);art.alt=row.name+' · '+(row.status==='destroyed'?'遗址':'建筑立绘');art.loading='lazy';}
+    else art.setAttribute('aria-hidden','true');
     const copy=el('div',null,'building-detail-copy');copy.append(el('p',row.description,'building-description'));
     copy.append(el('small',row.status==='destroyed'?'保留原址与原产权':row.type==='scenery'?'公开游览':row.owned?'自有 · 使用权在手':row.access?'对外开放':'尚无使用许可','building-access'));
     detail.append(art,copy);item.append(detail);return item;
@@ -44,6 +48,7 @@
     controls.append(command(rows.some(r=>r.subtype==='cave'&&r.access)?'整修洞府':'开辟洞府',{action:'construct'},!state.buildings.can_construct));
     controls.append(command('筑城',{action:'city-plan'},!state.buildings.can_build_city));
     if(state.buildings.can_establish_temple)controls.append(command('修建寺庙',{action:'temple-plan'}));
+    window.BuildingAffairs?.foundation(controls,place);
     footer.append(controls);host.append(footer);
     if(state.buildings.blocked_reason)host.append(el('p',state.buildings.blocked_reason,'building-blocked'));
   }
@@ -76,5 +81,11 @@
     if(!row)return null;
     return command(row.name,{action:'enter',building_id:row.id},!row.can_enter||row.status==='destroyed');
   }
-  window.BuildingPanel = {bind:(data, command, lock) => {state=data;send=command;locked=lock;}, region, marker, overview, entrance};
+  function portrait(row,preview=false) {
+    const figure=el('figure',null,'temple-portrait'),img=el('img');img.src=window.HomeMapModes.art(row);
+    img.alt=`${row.name} · ${preview?'奉建示意':row.status==='destroyed'?'原址遗迹':'建筑立绘'}`;img.loading='lazy';
+    figure.dataset.status=row.status;figure.append(img,el('figcaption',preview?'奉建示意':row.status==='destroyed'?'原址待修':row.status==='damaged'?'建筑受损':'原庙庭院'));
+    return figure;
+  }
+  window.BuildingPanel = {bind:(data, command, lock) => {state=data;send=command;locked=lock;}, region, marker, overview, entrance, portrait};
 })();

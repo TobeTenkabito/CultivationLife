@@ -13,6 +13,7 @@ from cultivation_life.system.yaochi_rules import config
 from cultivation_life.system.yaochi_fair_rules import active
 from cultivation_life.system.yaochi_garden import estate
 from test_yaochi_fair import opponent,array,damage
+from scripts.westward_navigation import open_westward
 from scripts.browser_navigation import navigation_locator,click_control,set_theme
 
 def main():
@@ -33,9 +34,8 @@ def main():
                         g.settings.update(silent_events=True,combat_popup=False,court_election_popup=False);add_item(g.player,'spirit_stone',10**8);e.store.save(g);n=opponent(e,g.id)
                         page=browser.new_page(viewport=dict(width=width,height=height),reduced_motion='reduce');errors=[];page.on('pageerror',lambda x:errors.append(str(x)))
                         page.goto(base);page.wait_for_function('!!configData && !busy');set_theme(page,theme);page.evaluate('id=>loadGame(id)',g.id)
-                        def open_pool():
-                            if not page.locator('#yaochi-card').is_visible():navigation_locator(page,'[data-panel-target=yaochi]').click()
-                        def tab(name):page.locator(f'#yaochi-content [data-subpage="{name}"]').click()
+                        def open_pool():pass
+                        def tab(name):open_westward(page,name)
                         def action(name,value=None,status=200):
                             node=page.locator(f'[data-gather-action="{name}"]'+(f'[data-gather-value="{value}"]' if value is not None else '')).first
                             if not node.is_visible():
@@ -50,7 +50,7 @@ def main():
                         action('garden_lease',status=400);assert page.locator('[data-gather-action=garden_fund]').is_visible()
                         action('garden_fund');page.locator('[aria-label="仙圃批数"]').fill('2');action('garden_configure');action('garden_order');action('garden_start');work('garden');action('garden_deliver')
                         assert estate(e._load(g.id))['produced']>=8 and not estate(e._load(g.id))['stock']
-                        assert page.locator('#yaochi-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
+                        assert page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
                         page.screenshot(path=str(out/f'{theme}-{width}-garden.png'),animations='disabled')
                         tab('仙会');action('fair_join','supply');age=e._load(g.id).player.age;annual=e._advance_world_year
                         def stop(game,rng,news,**kw):
@@ -60,7 +60,7 @@ def main():
                             return result
                         with patch.object(e,'_advance_world_year',side_effect=stop):work('fair')
                         assert active(e._load(g.id))['progress']==2 and page.locator('[data-gather-action=fair_work]').is_disabled()
-                        page.locator('#yaochi-toggle').click();click_control(page.locator('#event-choices button'));page.wait_for_function('!busy && game.pending_event?.id!=="EVT_SECT_FIRST_WARNING_001"')
+                        page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click();click_control(page.locator('#event-choices button'));page.wait_for_function('!busy && game.pending_event?.id!=="EVT_SECT_FIRST_WARNING_001"')
                         click_control(page.locator('#event-choices button:enabled').first);page.wait_for_function('!busy && !game.pending_event');open_pool();tab('仙会');work('fair')
                         assert page.locator('[data-gather-action=fair_deliver]').is_disabled()
                         # Seed only owned goods; real page submission transfers that same inventory.

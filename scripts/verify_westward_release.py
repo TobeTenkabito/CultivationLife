@@ -1,5 +1,6 @@
 """Run the exact declared release selection, binding all evidence to final source."""
 import argparse,json,os,subprocess,sys,xml.etree.ElementTree as ET
+from threading import Semaphore
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
@@ -16,10 +17,16 @@ def main():
     jobs += [(name,[f'tools/{name}.py']) for name in ('check_world_transition_contract','check_module_dependencies','check_documentation')]
     jobs += [(name,[f'tests/{name}.py']) for name in BROWSERS]
     jobs.append(('save-transfer',['-m','pytest','tests/test_save_transfer.py','-q']))
+    browser_slots=Semaphore(2)
     def run(job):
         name,args=job;path=ROOT/f'build/{name}-{tag}.log'
-        with path.open('w',encoding='utf8') as f:
-            code=subprocess.call([sys.executable,'-X','utf8',*args],cwd=ROOT,stdout=f,stderr=subprocess.STDOUT,env=os.environ|{'CULTIVATION_BROWSER_LOW_MEMORY':'0'})
+        browser=name in BROWSERS
+        if browser:browser_slots.acquire()
+        try:
+            with path.open('w',encoding='utf8') as f:
+                code=subprocess.call([sys.executable,'-X','utf8',*args],cwd=ROOT,stdout=f,stderr=subprocess.STDOUT,env=os.environ|{'CULTIVATION_BROWSER_LOW_MEMORY':'0'})
+        finally:
+            if browser:browser_slots.release()
         require(code==0,f'{name} failed: {path}')
         require(inputs_digest(ROOT)==before,'Source changed during acceptance')
         print(name+' passed',flush=True)

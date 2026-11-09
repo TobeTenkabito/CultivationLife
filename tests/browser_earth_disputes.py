@@ -22,6 +22,7 @@ from cultivation_life.content_registry import ITEM_CATALOG,restricted_acquisitio
 from test_earth_temple import build
 from test_earth_network import fund,ground,choose
 from test_economy_enterprises import buy
+from scripts.westward_navigation import open_westward
 from scripts.browser_navigation import navigation_locator,click_control,set_theme
 
 
@@ -55,8 +56,8 @@ def main():
                         page=browser.new_page(viewport=dict(width=width,height=height),reduced_motion='reduce');page.set_default_timeout(90000)
                         errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
                         page.goto(base);page.wait_for_function('!!configData && !busy');set_theme(page,theme);page.evaluate('id=>loadGame(id)',g.id)
-                        navigation_locator(page,'[data-panel-target=yaochi]').click()
-                        page.locator('#yaochi-content [data-subpage="地仙庙域"]').click()
+                        open_westward(page,'地仙庙域')
+                        open_westward(page,'地仙庙域')
                         def tab(name):page.locator(f'.earth-temple [data-subpage="{name}"]').click()
                         def action(name,target=None,status=200):
                             locator=page.locator(f'[data-earth-action=earth_{name}]'+(f'[data-earth-target={json.dumps(target,ensure_ascii=False)}]' if target is not None else ''))
@@ -74,8 +75,8 @@ def main():
                         tab('地方争议');snapshot=engine.store._path(g.id).read_bytes();tab('庙务');tab('地方争议')
                         assert engine.store._path(g.id).read_bytes()==snapshot and page.locator('.earth-case-card').count()==6
                         action('case_report')
-                        assert page.locator('#yaochi-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
-                        page.locator('#yaochi-card').evaluate('n=>n.scrollTop=0');page.screenshot(path=str(out/f'{theme}-{width}-reports.png'),animations='disabled')
+                        assert page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
+                        page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollTop=0');page.screenshot(path=str(out/f'{theme}-{width}-reports.png'),animations='disabled')
                         if theme=='dark' and width==1440:
                             assert len(state(engine._load(g.id))['cases']['reports'])==6
                             target=page.locator('[data-case-kind=supply] [data-earth-action=earth_case_decline]').get_attribute('data-earth-target')
@@ -97,10 +98,10 @@ def main():
                         with patch.object(engine,'_advance_world_year',side_effect=interrupt):action('work')
                         assert current(engine._load(g.id))['progress']==2
                         assert page.locator('[data-earth-action=earth_work]').is_disabled()
-                        page.locator('#yaochi-toggle').click();click_control(page.locator('#event-choices button'))
+                        page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click();click_control(page.locator('#event-choices button'))
                         page.wait_for_function('!busy && game.pending_event?.id!=="EVT_SECT_FIRST_WARNING_001"')
                         click_control(page.locator('#event-choices button:enabled').first);page.wait_for_function('!busy && !game.pending_event')
-                        navigation_locator(page,'[data-panel-target=yaochi]').click();work();action('case_prepare')
+                        open_westward(page,'地仙庙域');work();action('case_prepare')
                         page.locator('.earth-case-active').scroll_into_view_if_needed();page.screenshot(path=str(out/f'{theme}-{width}-choices.png'),animations='disabled')
                         select('open');assert not temple(engine._load(g.id))['public'];work();select('open',True)
                         assert temple(engine._load(g.id))['public'] and not current(engine._load(g.id))

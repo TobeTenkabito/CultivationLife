@@ -10,7 +10,7 @@ from scripts.browser_navigation import navigation_locator
 def verify(page,engine,identity,out,with_dlc=True):
     page.set_viewport_size(dict(width=1440,height=960))
     page.evaluate('GameThemes.ready');page.locator('#theme-open').click()
-    page.locator('#theme-dialog [data-pixel-setting]').set_checked(True);page.evaluate('GameThemes.saved');page.locator('[data-close-dialog=theme-dialog]').click()
+    page.locator('#theme-dialog [data-pixel-theme-choice=light]').click();page.evaluate('GameThemes.saved');page.locator('[data-close-dialog=theme-dialog]').click()
     errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.evaluate('id=>loadGame(id)',identity)
     page.wait_for_selector('.pixel-world-view')

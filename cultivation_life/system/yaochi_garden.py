@@ -168,7 +168,7 @@ def public(game):
         steward=find_person(game,l.get('steward')) if l.get('steward') else None
         l['steward_name']=steward.name if steward else '原人物已失效'
     _,repair=repair_offer(game) if l else (None,None)
-    return dict(enabled=enabled(),local=local,token=token(game) if local else '',reason=reason(game),recovery_reason=reason(game,True),
+    return dict(enabled=enabled(),local=local,building_id='estate:'+identity() if local else '',token=token(game) if local else '',reason=reason(game),recovery_reason=reason(game,True),
         occupied=bool(r and r['owner_kind'] not in {'background','yaochi'}),lease=copy.deepcopy(l),repair=repair,
         estate=dict(id=r['id'],stock=[dict(id=k,name=ITEM_CATALOG[k].name,quantity=n) for k,n in r['stock'].items()],
             job=copy.deepcopy(r['job']),cash=balance(game,payer(r)),income=r['income'],expense=r['expense'],arrears=r['arrears'],recipe=r['recipe'],batches=r['batches'],auto_sell=r['auto_sell'],

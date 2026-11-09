@@ -18,6 +18,7 @@ from cultivation_life.models import SectNpc
 from cultivation_life.building_rules import config
 from cultivation_life.system.earth_temple_rules import state, root, slots
 from cultivation_life.system.economy.ledger import balance
+from scripts.westward_navigation import open_westward
 from scripts.browser_navigation import navigation_locator, click_control, set_theme
 from test_earth_network import fund, adjacent, travel, make_city, ground
 from test_earth_temple import build
@@ -56,8 +57,8 @@ def main():
                         errors=[]; page.on('pageerror',lambda error:errors.append(str(error)))
                         page.goto(base); page.wait_for_function('!!configData && !busy')
                         set_theme(page,theme); page.evaluate('id=>loadGame(id)',g.id)
-                        navigation_locator(page,'[data-panel-target=yaochi]').click()
-                        page.locator('#yaochi-content [data-subpage="地仙庙域"]').click()
+                        open_westward(page,'地仙庙域')
+                        open_westward(page,'地仙庙域')
                         def tab(name):
                             page.locator(f'.earth-temple [data-subpage="{name}"]').click()
                         def action(name, target=None, status=200):
@@ -89,12 +90,12 @@ def main():
                         with patch.object(engine,'_advance_world_year',side_effect=interrupt): action('work')
                         assert state(engine._load(g.id))['works']['progress']==3
                         assert page.locator('[data-earth-action=earth_work]').is_disabled()
-                        page.locator('#yaochi-toggle').click()
+                        page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click()
                         click_control(page.locator('#event-choices button'))
                         page.wait_for_function('!busy && game.pending_event?.id!=="EVT_SECT_FIRST_WARNING_001"')
                         click_control(page.locator('#event-choices button:enabled').first)
                         page.wait_for_function('!busy && !game.pending_event')
-                        navigation_locator(page,'[data-panel-target=yaochi]').click()
+                        open_westward(page,'地仙庙域')
                         with patch('cultivation_life.engine.orchestration.advancement._finish_action_events',return_value=None): action('work')
                         assert state(engine._load(g.id))['works']['progress']==20
                         action('complete_works')
@@ -106,13 +107,13 @@ def main():
                         with patch('cultivation_life.engine.orchestration.advancement._finish_action_events',return_value=None): action('work')
                         action('complete_works')
                         assert slots(engine._load(g.id))==['watch','care']
-                        assert page.locator('#yaochi-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
-                        page.locator('#yaochi-card').evaluate('n=>n.scrollTop=0')
+                        assert page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
+                        page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollTop=0')
                         page.screenshot(path=str(output/f'{theme}-{width}-facilities.png'),animations='disabled')
                         if theme=='dark' and width==1440:
                             saved=engine._load(g.id); ledger=copy.deepcopy(state(saved)); identity=state(saved)['temple_id']
                             cash=balance(saved,'player')
-                            page.locator('#yaochi-toggle').click()
+                            page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click()
                             navigation_locator(page,'[data-panel-target=map]').click()
                             page.locator('#map-view-tabs [aria-controls=map-locations]').click()
                             building=page.locator(f'#map-locations [data-building-id="{identity}"]')
@@ -127,7 +128,7 @@ def main():
                             assert balance(saved,'player')==cash-cost['coins'] and slots(saved)==['watch','care']
                             assert state(saved)==ledger
                             if page.locator('#map-card').is_visible(): page.locator('#map-toggle').click()
-                            navigation_locator(page,'[data-panel-target=yaochi]').click(); tab('专项设施')
+                            open_westward(page,'地仙庙域'); tab('专项设施')
                         service=page.locator('[data-facility-service=watch] [data-earth-action=earth_special]')
                         target=service.get_attribute('data-earth-target')
                         before=engine._load(g.id).player.formation_repair_supplies[supply]
@@ -164,7 +165,7 @@ def main():
                             assert saved.player.disciples[-1].person is saved.world_npcs[pupil.id]
                             tab('庙务'); click_control(page.locator('.earth-current .yaochi-exit summary')); action('cancel')
                         # Real map route, followed by branch construction at the original city.
-                        page.locator('#yaochi-toggle').click()
+                        page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click()
                         navigation_locator(page,'[data-panel-target=map]').click()
                         page.locator('#map-view-tabs [aria-controls=map-locations]').click()
                         for _ in range(5):
@@ -173,7 +174,7 @@ def main():
                             if not engine._load(g.id).map_journey: break
                         assert engine._load(g.id).player.location_id==destination
                         page.locator('#map-toggle').click()
-                        navigation_locator(page,'[data-panel-target=yaochi]').click(); tab('庙域名录')
+                        open_westward(page,'地仙庙域'); tab('庙域名录')
                         assert page.locator('[data-earth-action=earth_cultivate]').is_disabled()
                         target=page.locator('[data-earth-action=earth_build]:enabled').first.get_attribute('data-earth-target')
                         action('build',target)
@@ -181,8 +182,8 @@ def main():
                         assert page.evaluate('game.yaochi.earth.local && game.yaochi.earth.allowance===0')
                         assert page.locator('.earth-network-site').count()==2
                         assert page.locator('.earth-network-site.is-local').count()==1
-                        assert page.locator('#yaochi-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
-                        page.locator('#yaochi-card').evaluate('n=>n.scrollTop=0')
+                        assert page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
+                        page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollTop=0')
                         page.screenshot(path=str(output/f'{theme}-{width}-network.png'),animations='disabled')
                         assert not errors,errors
                         page.close()

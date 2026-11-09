@@ -26,6 +26,7 @@ window.GameUi = Object.freeze({
   let saveId = null;
   panelNames.push('civilizations','authored','nascent','immortal-artifacts');
   panelNames.push('trial-site','monster-body','ghost-body');
+  panelNames.push('immortal-practice','immortal-estate','building-affairs');
 
   function reset() {
     pending.clear();

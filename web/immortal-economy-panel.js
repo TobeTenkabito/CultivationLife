@@ -42,13 +42,7 @@
       if(legacy)accounts.append(el('p',`机构往来旧录：旧制贡献 ${legacy.legacy_contribution}，功勋另行记载，不占用宗门归属。`,'muted'));
       const section=title=>{const s=el('section',null,'doctrine-entry');s.append(el('h3',title));root.append(s);return s;};
       const transact=(label,payload,disabled=false)=>button(label,payload,!pool.local||disabled);
-      const practice=window.YaochiWestward.render(root,game,trade);
-      const identity=window.WestwardFinale?.identity(root,game,trade);
-      const story=window.WestwardFinale?.story(root,game,trade);
-      const earth=window.EarthTemple.render(root,game,trade);
-      const garden=window.YaochiGathering?.garden(root,game,trade,blocked);
       const fair=window.YaochiGathering?.fair(root,game,trade,blocked);
-      const antiquity=window.WestwardVentures?.antiquity(root,game,trade,blocked);
       const jobs=section('接取委托');
       if(pool.job){const j=pool.job;jobs.append(el('p',`${j.name} · 履约 ${fmt(j.progress)} / ${fmt(j.years)} 年 · 报酬 ${fmt(j.reward)} 功勋`));jobs.append(transact(j.progress>=j.years?'交付并领取功勋':'继续履约',{action:j.progress>=j.years?'claim_job':'work'}));}
       else {
@@ -108,7 +102,7 @@
       if(!pool.local)for(const host of [jobs,shop,exchange]){
         const note=el('div',null,'yaochi-notice');note.append(el('p','须亲临瑶池办理此处委托和交易。'),button('查看地图',{},false,()=>window.UtilityPanels.open('map')));host.prepend(note);
       }
-      window.PanelPages?.mount('yaochi',root,[...(practice?[['专修',[practice]]]:[]),...(identity?[['仙籍与功德',[identity]]]:[]),...(story?[['紫气东来',[story]]]:[]),...(garden?[['仙圃',[garden]]]:[]),...(fair?[['仙会',[fair]]]:[]),...(antiquity?[['访古',[antiquity]]]:[]),...(earth?[['地仙庙域',[earth]]]:[]),['委托',[jobs,orders]],['资材',[shop]],['天庭往来',[exchange]],['账簿',[accounts]]]);
+      window.PanelPages?.mount('yaochi',root,[['委托',[jobs,orders]],['资材',[shop]],...(fair?[['仙会',[fair]]]:[]),['天庭往来',[exchange]],['账簿',[accounts]]]);
     }:null);
   }
   window.ImmortalEconomyPanel={render};

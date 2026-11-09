@@ -1,0 +1,24 @@
+.immortal-directory-intro {padding:12px 16px;margin:0 0 14px;border-inline-start:3px solid var(--pine);background:var(--paper);border-radius:4px;}
+.immortal-directory-intro p {margin:6px 0 0;line-height:1.7;}
+.immortal-directory .immortal-content {min-width:0;}
+.immortal-directory .panel-page-tabs {position:relative;top:auto;}
+.immortal-directory .building-directory {padding:12px 0;min-width:0;}
+.immortal-directory .building-list {display:grid;gap:10px;}
+.immortal-directory .building-row-actions {flex-wrap:wrap;}
+.immortal-directory .building-title {flex-wrap:wrap;}
+@media(max-width:600px) {.immortal-directory-intro {padding:10px;}.immortal-directory .building-entry-heading {flex-wrap:wrap;}.immortal-directory .building-copy {min-width:0;}}
+
+#building-affairs-content > .building-return {width:auto;justify-self:start;margin-bottom:8px;}
+@media(max-height:550px) and (min-width:601px) {
+  .immortal-directory {padding:8px 14px!important;}
+  .immortal-directory>.section-title {margin:0 0 4px;min-height:28px;}
+  .immortal-directory>.section-title h2 {font-size:19px;margin:0;}
+  .immortal-directory>.section-title button {min-height:28px;padding:3px 12px;}
+  .immortal-directory .immortal-content {gap:8px;}
+  #building-affairs-content>.building-return {margin:0;padding:3px 9px;min-height:28px;font-size:12px;}
+  .immortal-directory .panel-page-tabs {margin:4px 0;padding:4px 0;}
+  .immortal-directory .panel-page-tabs button {margin:0 4px 0 0;min-height:32px;padding:4px 10px;font-size:12px;}
+  .immortal-directory .earth-heading {padding:6px 0;gap:12px;}
+  .immortal-directory .earth-heading h3 {font-size:20px;}
+  .immortal-directory .earth-heading>.temple-portrait {flex-basis:96px;width:96px;padding:0;}
+}

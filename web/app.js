@@ -482,6 +482,7 @@ function showStart() {
 function render(data) {
   window.UtilityPanels?.begin(data.id);
   game = data;
+  window.BuildingAffairs?.bind(data,payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload));
   window.NpcArt?.context(data);
   window.NpcDevelopment?.context(data,{api,mutate,busy:()=>busy});
   window.TrialSitePanel?.update(data, mutate, () => busy);
@@ -731,6 +732,7 @@ function render(data) {
   $('#ending-card').classList.toggle('hidden', p.alive);
   $('#death-reason').textContent = p.death_reason || '';
   bindBuildingControls();
+  window.ImmortalNavigation?.render(data,payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload));
   window.GameThemes?.render(data);
   // First load enters the game in GameThemes; event art must see that state.
   window.EventScenes?.render(data);

@@ -9,7 +9,7 @@ def verify_westward(base, with_dlc, folder):
         req = urllib.request.Request(base + path, data=json.dumps(data).encode() if data is not None else None,
                                      headers={'Content-Type':'application/json'})
         with urllib.request.urlopen(req, timeout=90) as r: return json.load(r)
-    for asset in ('dlc-controls.js','dlc-controls.css','westward-ventures.js','westward-finale.js','westward-finale.css'):
+    for asset in ('assets/building-portraits/land-temple-intact-361.png','assets/building-portraits/land-temple-ruin-361.png','immortal-navigation.js','immortal-navigation.css','building-affairs.js','dlc-controls.js','dlc-controls.css','westward-ventures.js','westward-finale.js','westward-finale.css'):
         with urllib.request.urlopen(base+'/'+asset) as r: assert r.status == 200
     made = request('/api/games',dict(name='西望成品验收',spirit_root='supreme_metal',path='dao',seed=360,preset_id='true_immortal'))
     engine = GameEngine(root, folder/'data/saves')

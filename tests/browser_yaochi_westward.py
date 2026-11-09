@@ -14,6 +14,7 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from cultivation_life.rules import add_item
 from cultivation_life.system.yaochi_rules import config
+from scripts.westward_navigation import open_westward
 from scripts.browser_navigation import navigation_locator, click_control, set_theme
 
 
@@ -49,7 +50,7 @@ def main():
                         page.wait_for_function('!!configData && !busy')
                         set_theme(page, theme)
                         page.evaluate('id=>loadGame(id)', g.id)
-                        navigation_locator(page, '[data-panel-target=yaochi]').click()
+                        open_westward(page,'专修')
                         page.locator('#yaochi-practice').wait_for()
                         assert page.locator('.yaochi-service').count() == 4
                         assert page.locator('[data-service=body] [data-westward-action=westward_start_merit]').is_disabled()
@@ -58,11 +59,11 @@ def main():
                         page.locator('[aria-label="五光坛神光"]').select_option('light_li')
                         assert page.locator('[data-service=light_li] [data-westward-action=westward_start_merit]').is_disabled()
                         page.locator('[aria-label="五光坛神光"]').select_option('light_kun')
-                        page.locator('#yaochi-content [data-subpage="资材"]').click()
+                        open_westward(page,'资材')
                         assert page.locator('.yaochi-purchase').first.is_visible()
-                        page.locator('#yaochi-content [data-subpage="专修"]').click()
+                        open_westward(page,'专修')
                         assert path.read_bytes() == snapshot
-                        assert page.locator('#yaochi-card').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
+                        assert page.locator('.utility-panel.panel-open').evaluate('n=>n.scrollWidth<=n.clientWidth+2')
                         page.screenshot(path=str(output / f'{theme}-{width}-overview.png'), animations='disabled')
                         click_control(page.locator('[data-westward-action=westward_adopt]'))
                         page.wait_for_function('!busy && game.yaochi.westward.adopted')
@@ -79,18 +80,18 @@ def main():
                         page.wait_for_function('!busy && !!game.yaochi.westward.project')
                         assert page.evaluate('game.yaochi.westward.merit') == 41
                         assert page.evaluate('game.yaochi.westward.qualification') == 51
-                        page.locator('#yaochi-content [data-subpage="委托"]').click()
+                        open_westward(page,'委托')
                         commissions = page.locator('#yaochi-content section').filter(has=page.get_by_role('heading', name='接取委托', exact=True))
                         assert commissions.locator('button').count() > 0
                         assert commissions.locator('button:enabled').count() == 0
                         assert '请先结清或交接' in commissions.inner_text()
-                        page.locator('#yaochi-content [data-subpage="专修"]').click()
-                        page.locator('#yaochi-toggle').click()
+                        open_westward(page,'专修')
+                        page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click()
                         navigation_locator(page, '[data-panel-target=heavenly-court]').click()
                         assert '功德资历' in page.locator('.court-summary').inner_text()
                         assert '可用功德' in page.locator('.court-summary').inner_text()
                         page.locator('#heavenly-court-toggle').click()
-                        navigation_locator(page, '[data-panel-target=yaochi]').click()
+                        open_westward(page,'专修')
                         started = engine._load(g.id)
                         age, traces = started.player.age, started.player.immortal_traces
                         original = engine._advance_world_year
@@ -109,12 +110,12 @@ def main():
                         assert saved.yaochi_state['westward']['project']['progress'] == 3
                         assert saved.player.immortal_traces == traces + 1
                         # Original event page must resolve both the interruption and its queued reward.
-                        page.locator('#yaochi-toggle').click()
+                        page.locator('.utility-panel.panel-open .section-title > button[id$="-toggle"]').click()
                         page.locator('#event-choices button').click()
                         page.wait_for_function('!busy && game.pending_event?.id !== "EVT_SECT_FIRST_WARNING_001"')
                         page.locator('#event-choices button').first.click()
                         page.wait_for_function('!busy && !game.pending_event')
-                        navigation_locator(page, '[data-panel-target=yaochi]').click()
+                        open_westward(page,'专修')
                         assert not page.locator('[data-westward-action=westward_work]').is_disabled()
                         assert page.locator('[data-service=trace] [data-westward-action=westward_start_court]').is_disabled()
                         page.screenshot(path=str(output / f'{theme}-{width}-progress.png'), animations='disabled')
@@ -122,11 +123,11 @@ def main():
                         click_control(page.locator('[data-westward-action=westward_cancel]'))
                         page.wait_for_function('!busy && !game.yaochi.westward.project')
                         assert page.evaluate('game.yaochi.westward.merit') == 50  # 9 returned; 1 paid.
-                        page.locator('#yaochi-content [data-subpage="委托"]').click()
+                        open_westward(page,'委托')
                         assert commissions.locator('button:enabled').count() > 0
                         click_control(commissions.locator('button').first)
                         page.wait_for_function('!busy && !!game.yaochi.job')
-                        page.locator('#yaochi-content [data-subpage="专修"]').click()
+                        open_westward(page,'专修')
                         assert page.locator('[data-service=trace] [data-westward-action=westward_start_court]').is_disabled()
                         assert not errors, errors
                         page.close()
