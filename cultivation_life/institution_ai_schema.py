@@ -13,6 +13,10 @@ def validate(value,accounts):
         need(type(row.get('last_tick',-1)) is int and row.get('last_tick',-1)>=-1)
         need(isinstance(row.get('proposals'),list) and len(row['proposals'])<=3 and isinstance(row.get('history'),list) and len(row['history'])<=12)
         if row.get('provider'):need(isinstance(row['provider'],str) and 0<len(row['provider'])<=64)
+        for proposal in row['proposals']:
+            if 'supporters' in proposal:
+                signatures=proposal['supporters']
+                need(isinstance(signatures,list) and len(signatures)<=8 and all(isinstance(p,str) and p for p in signatures) and len(set(signatures))==len(signatures))
         if row.get('delegate'):
             need(isinstance(row['delegate'],str) and row['delegate'] not in delegates);delegates.add(row['delegate'])
         jobs=([row['job']] if row.get('job') else [])+row['history']

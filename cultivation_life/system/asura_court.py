@@ -110,11 +110,15 @@ def reconcile(game, state):
 def change_rank(game, state, rank, *, opponent=None):
     """Exchange adjacent seats; rank zero is an unseated pool of retainers."""
     from .royal_seats import exchange
+    old_king=state['court']['holders'].get(str(KING))
     exchange(state,rank,opponent=opponent)
     court=state['court']
     king_id = court['holders'].get(str(KING))
     from .asura_governorship.management import reconcile_crown
     reconcile_crown(game, king_id)
+    if old_king and king_id and old_king!=king_id:
+        from .asura_governorship.settlement import succession
+        succession(game,old_king,king_id)
     court['offices'] = {key:value for key,value in court['offices'].items() if value != king_id}
     sync_titles(game, state)
 

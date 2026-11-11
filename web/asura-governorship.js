@@ -6,7 +6,26 @@
   const remember=(key,value)=>{viewing.set(key,value);if(viewing.size>128)viewing.delete(viewing.keys().next().value);};
   const keepOpen=(node,key)=>{node.open=viewing.get(key)===true;node.addEventListener('toggle',()=>{if(node.isConnected)remember(key,node.open);});};
   const caseLabels={open:'地方审议',submitted:'王庭待批',resolved:'已履行',rejected:'已驳回',withdrawn:'已撤回',expired:'已逾期',obsolete:'已失效'};
-  function military(host,row,button,choose,fold,locked){
+  function development(host,row,button,fold,locked){
+    const d=row.development;if(!d)return;
+    const panel=fold('地方经营与演武','城市经营、公费营造与实物供货共用原账。待遇只分新增净盈余，拨款与预付款不能分给个人。');
+    panel.classList.add('governor-development');keepOpen(panel,`development:${row.id}`);
+    const metrics=el('div',null,'governor-operating-metrics');
+    for(const [label,value] of [['经营入账',d.income],['经办支出',d.expense],['已付待遇',d.salary]]){const item=el('div');item.append(el('small',label),el('strong',fmt(value)),el('span','灵石'));metrics.append(item);}
+    panel.append(metrics,el('p',`${d.policy} · ${d.facilities.map(k=>({supply:'军需署',training:'演武院'})[k]||k).join(' / ')||'尚无专项设施'}`,'governor-operating-policy'),el('p',d.policy_description,'court-description'));
+    if(d.contract){const c=d.contract;panel.append(el('p',`${({active:'履约中',completed:'已结清',cancelled:'已交接'})[c.status]} · ${c.item_name} · 每期 ${c.quantity} 件 · 已交 ${c.completed}/${c.periods} 期${c.status==='active'?' · 下期 '+c.next+' 年':''}`,'court-note'));}
+    if(d.options.length){
+      const select=el('select');select.setAttribute('aria-label','地方经营事项');
+      const groups=new Map();for(const o of d.options){const label=o.name.split(' · ')[0];if(!groups.has(label)){const group=el('optgroup');group.label=label;groups.set(label,group);select.append(group);}const option=el('option',o.name.split(' · ').slice(1).join(' · '));option.value=o.id;groups.get(label).append(option);}
+      const previous=viewing.get(`development-choice:${row.id}`);select.value=d.options.some(o=>o.id===previous)?previous:(d.options.find(o=>!o.reason)?.id||d.options[0].id);
+      const explanation=el('p',null,'court-description'),cost=el('p',null,'governor-case-amount');
+      const send=button('办理所选事项','development',()=>{const q=d.options.find(o=>o.id===select.value);return {office:row.id,operation:q.id,quote:q.token};});
+      const update=()=>{const q=d.options.find(o=>o.id===select.value);remember(`development-choice:${row.id}`,select.value);send.disabled=locked||!!q.reason;cost.textContent=q.id.startsWith('supply:')?`采购市场预付 ${fmt(q.total)} 灵石，货款按实际交货支付`:`本府实付 ${fmt(q.total)} 灵石${q.receipt?' · 原经营账户实付 '+fmt(q.receipt)+' 灵石':''}`;explanation.textContent=q.reason||q.growth||q.description||(q.id==='deliver'?'交出原行囊实物，分期结款；不能提前领取后续货款。':q.id==='cancel'?'退回尚未履行的预付款，签约周期不重置。':'按当前原址授权与报价办理；不改变原城市、公署和人物归属。');};
+      select.onchange=update;update();panel.append(select,cost,explanation,send);
+    }
+    host.append(panel);
+  }
+  function military(host,row,button,choose,fold,locked,king){
     const m=row.military;if(!m)return;
     const panel=fold('驻军与军令','部众负责守备与据点控制，不能凭人数抵消高阶修士的实力。调防沿实际道路，出兵会减少原址守备。');
     panel.classList.add('governor-military');keepOpen(panel,`military:${row.id}`);
@@ -19,6 +38,7 @@
     if(m.conflict)panel.append(el('p',`举兵争位 · ${labels[m.conflict.status]}。${m.conflict.result||'须实际抵达、突破守备并解决旧王抵抗；占城不自动登位。'}`,'court-note'));
     let allowed=[];
     if(m.mine&&m.local){allowed.push('recall');if(m.enabled){if(row.active)allowed.push('enlist','provision','dispatch','respond','rebel');else if(open)allowed.push('provision','dispatch','rebel');}}
+    if(m.mine&&m.local&&m.enabled&&!open&&!row.active&&row.controller==='player'&&m.units.length&&!king)allowed.push('rebel');
     if(m.central){allowed.push('recall','cancel_order');if(m.enabled)allowed.push('order','press');}
     if(open&&m.mine){allowed.push('standdown');if(m.enabled)allowed.push('assault','claim');}
     if(open&&m.central&&m.enabled)allowed.push('pacify','abdicate');
@@ -71,6 +91,42 @@
     if(d.history.length){const history=fold('案卷与承诺回执');for(const c of [...d.history].reverse())history.append(el('p',`${c.closed}年 · ${caseLabels[c.status]} · ${c.result}${c.pledge?'（具名担保已记入履历）':''}`));panel.append(history);}
     host.append(panel);
   }
+  function protocols(host,row,button,choose,fold,locked){
+    const p=row.protocols;if(!p||!Object.keys(p.operations).length)return;
+    const panel=fold('议政、军权与交接','供养与任将分别授权。调查、盟约与迁署均保留原人、原账和实际道路。');
+    panel.classList.add('governor-protocols');keepOpen(panel,`protocols:${row.id}`);
+    const side=v=>v==='central'?'中央':'地方';
+    panel.append(el('p',`${side(p.mandate.funding)}供养 · ${side(p.mandate.appointments)}任将 · ${p.recognized?'承认现君':'新君尚待地方承认'}`,'governor-operating-policy'));
+    if(p.guard)panel.append(el('p',`原阵位已登记${p.defence!=null?' · 守备估值 '+fmt(Math.round(p.defence)):''}；维护消耗原修阵资源。`,'court-description'));
+    if(p.rotation)panel.append(el('p',`轮调 · ${p.rotation.outgoing_name} → ${p.rotation.incoming_name}：${({awaiting:'接防中，原守将继续留守',relieved:'已经现场交接',cancelled:'本次轮调已收束'})[p.rotation.stage]}`,'court-note'));
+    if(p.relocation)panel.append(el('p',`迁署 · ${p.relocation.city_name}：${({approved:'已批准，须本人抵达新址',completed:'新址已验收，府署须另付营造',cancelled:'许可已撤回'})[p.relocation.stage]} · ${p.relocation.deadline}年前办理`,'court-note'));
+    const names={pressure:'联合呈案',patronage:'派系交涉',audit:'监察追偿',alliance:'地方盟约',integration:'地方归顺'};
+    const caseTitle=c=>`${names[c.kind]||c.kind} · ${c.facts.office?(p.offices.find(o=>o.id===c.facts.office)?.name||'原盟府')+' / ':''}${c.subject_name}`;
+    const stages={open:'待办理',reviewing:'原址调查中',defence:'待本人申辩',proposed:'待王庭裁断',judged:'待履行追偿',active:'协同出兵中'};
+    for(const c of p.cases)panel.append(el('p',`${caseTitle(c)} · ${stages[c.stage]||c.stage} · ${c.kind==='pressure'?'联署':'具名参与'}：${c.participant_names.join('、')}${c.reviewer_name?' · 调查人 '+c.reviewer_name:''}${c.amount?' · 原额 '+fmt(c.amount)+' / 已付 '+fmt(c.paid):''}${c.progress?' · 已查 '+c.progress+' 年':''}${c.facts.suspends_authority?' · 未清原案暂停公款授权':''}`,'governor-protocol-case'));
+    const action=choose('议政军权事项',Object.entries(p.operations).map(([id,name])=>({id,name})));
+    const old=viewing.get(`protocol-choice:${row.id}`);if(p.operations[old])action.value=old;
+    const person=choose('议政原人物',p.people),target=choose('议政原对象',[]),cases=choose('原案凭据',p.cases.map(c=>({id:c.id,name:`${caseTitle(c)} · ${stages[c.stage]||c.stage}`})));
+    const choice=choose('具名方案',[]),destination=choose('迁署新址',p.cities),funds=el('input');funds.type='number';funds.min='0';funds.max='1000000000000000';funds.value='1000000';funds.setAttribute('aria-label','议政实际金额');
+    const note=el('p',null,'court-description');
+    const send=button('办理议政军权事项','protocol',()=>({office:row.id,operation:action.value,person:person.value,target:target.value,case:cases.value,choice:choice.value,destination:destination.value,amount:Number(funds.value)}));
+    function fill(select,rows){select.replaceChildren();for(const r of rows){const o=el('option',r.name);o.value=r.id;select.append(o);}}
+    function update(){
+      const op=action.value;remember(`protocol-choice:${row.id}`,op);
+      person.hidden=!['patronage','investigate','central_enlist','relief'].includes(op);
+      cases.hidden=!['pressure_decide','investigate','defend','judge','restitute','case_cancel','ally_march','ally_break','integrate'].includes(op);
+      funds.hidden=!['pressure','divert','restitute','central_pay','ally','negotiate','integrate'].includes(op);
+      destination.hidden=op!=='move_request';target.hidden=!['relief','guard_bind','guard_repair','ally'].includes(op);
+      fill(target,op==='relief'?p.units:op==='guard_bind'?[{id:'',name:'解除原阵位登记'},...p.arrays]:op==='guard_repair'?p.supplies:p.offices);
+      const choices=op==='charter'?[['central:central','中央供养 / 中央任将'],['central:local','中央供养 / 地方任将'],['local:central','地方供养 / 中央任将'],['local:local','地方供养 / 地方任将']]:op==='patronage'?[['blood_clans','血脉贵胄'],['war_hosts','战功军府'],['free_cities','自由诸城']]:op==='defend'?[['admit','认领原责任'],['contest','提出具名异议']]:op==='pressure_decide'?[['approve','批准实拨'],['reject','驳回原案']]:[];
+      fill(choice,choices.map(([id,name])=>({id,name})));choice.hidden=!choices.length;if(op==='charter')choice.value=`${p.mandate.funding}:${p.mandate.appointments}`;
+      send.disabled=locked||(!person.hidden&&!p.people.length)||(!cases.hidden&&!p.cases.length)||(!target.hidden&&!target.options.length)||(!destination.hidden&&!p.cities.length);
+      note.textContent=(!cases.hidden&&!p.cases.length)?'暂无可办理的原案。已结清事项不能重复领取或退赔。':({divert:'此项会把公款转入本人，并立即留下可调查、撤任和追偿的原始凭据。',charter:'只改变后续授权；原军费剩余部分仍退回实际付款机构。',relief:'须预留一个接防名额；新旧部将实际同地交接后，旧将才沿路撤回。',move_request:'先交接驻军、属员、项目、合同、案卷及公款，再亲赴王庭取得新址许可。',move_complete:'须本人沿地图抵达许可新址；旧建筑留在原地，新府署按原工程重新营造。',ally:'亲赴另一原府与在任总督交涉，个人实付担保；盟军不会复制或自动移至王庭。',integrate:'新君亲赴原府，以实际安置拨款和原人物关系争取承认；不自动恢复被撤职者。',guard_bind:'先在原阵法界面布置镇地阵，再登记到此府；撤去原阵后本府效果同时失效。',guard_repair:'每次使用一份实际持有的修阵资源，完整阵法不会扣费。',negotiate:'与原交战方实际会面；举兵者须付赔款，NPC仍有实力和意愿时可以拒降。'})[op]||'提交时重新核验身份、地点、时限、原案及实际资金；旧页不能重复结算。';
+    }
+    action.onchange=update;update();panel.append(action,person,cases,target,choice,destination,funds,note,send);
+    if(p.history.length){const history=fold('议政与交接回执');for(const c of [...p.history].reverse())history.append(el('p',`${caseTitle(c)} · ${c.result}`));panel.append(history);}
+    host.append(panel);
+  }
   function render(host,game,dispatch,selected=null){
     if(stateOwner!==game.id){viewing.clear();stateOwner=game.id;}
     const d=game.upper_institution?.court?.governorship;if(!d)return;
@@ -116,8 +172,10 @@
         const handover=fold('任职交接','上缴只将未耗公款交回王庭。辞任解除原任职，建筑、公款与历史留在原址；已耗工程与劳务不退款。');
         handover.append(button('上缴未耗公款','return',{office:r.id},!r.local||r.controller!=='player'),button('交接辞任','resign',{office:r.id},!r.local));box.append(handover);
       }
+      if(selected)development(box,r,button,fold,blocked);
       disputes(box,r,button,choose,fold,!!selected&&r.mine,blocked);
-      military(box,r,button,choose,fold,blocked);
+      military(box,r,button,choose,fold,blocked,d.king);
+      protocols(box,r,button,choose,fold,blocked);
       if(r.history?.length){const history=fold('任职与收支记录');for(const h of [...r.history].reverse())history.append(el('p',`${h.year}年 · ${h.text}`));box.append(history);}
       root.append(box);
     }

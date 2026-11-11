@@ -14,6 +14,10 @@ def validate(rows, accounts):
         need(isinstance(row, dict) and row.get('id') == key)
         from .institution_garrison_schema import validate as validate_garrison
         validate_garrison(row,accounts,occupied)
+        from .institution_operations_schema import validate as validate_operations
+        validate_operations(row,accounts)
+        from .institution_protocol_schema import validate as validate_protocols
+        validate_protocols(row,accounts,occupied)
         if 'petitions' in row:
             from .institution_petitions_schema import validate as validate_petitions
             validate_petitions(row['petitions'],key)
@@ -26,7 +30,7 @@ def validate(rows, accounts):
              and isinstance(row['owner'].get('id'), str))
         need(row.get('status') in {'vacant','appointed','active','handover'})
         need(all(integer(row.get(f)) for f in ('expires','appointed','revision','funded','returned')))
-        need(row['returned'] <= row['funded'])
+        need(row['returned'] <= row['funded']+row.get('operations',{}).get('income',0))
         for f in ('holder','nominee','controller'):
             need(row.get(f) is None or isinstance(row[f], str) and bool(row[f]))
         identities = {row[f] for f in ('holder','nominee','controller') if row[f]}

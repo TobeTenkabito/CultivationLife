@@ -664,6 +664,11 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         js("(()=>{const s=document.querySelector('[data-case-kind=remittance] select');s.value='pay';s.dispatchEvent(new Event('change'));return true})()");
         tapSelector("[data-case-kind=remittance] [data-petition-operation=resolve]");
         waitForJs("!busy&&__asuraOffice().disputes.history.some(c=>c.kind==='remittance'&&c.status==='resolved')","Original remittance receipt");
+        if(!Boolean.TRUE.equals(js("document.querySelector('.governor-protocols').open")))tapSelector(".governor-protocols > summary");
+        js("(()=>{const s=document.querySelector('[aria-label=议政军权事项]');s.value='divert';s.dispatchEvent(new Event('change'));document.querySelector('[aria-label=议政实际金额]').value='3000';return true})()");
+        tapSelector(".governor-protocols [data-governor-action=protocol]");waitForJs("!busy&&__asuraOffice().protocols.cases.length===1","Actual misappropriation evidence");
+        js("(()=>{const s=document.querySelector('[aria-label=议政军权事项]');s.value='restitute';s.dispatchEvent(new Event('change'));document.querySelector('[aria-label=议政实际金额]').value='3000';return true})()");
+        tapSelector(".governor-protocols [data-governor-action=protocol]");waitForJs("!busy&&__asuraOffice().protocols.cases.length===0","Original public funds recovered once");
         asuraMilitary("enlist");waitForJs("__asuraOffice().military.units.length===1","Original person enlisted");
         asuraMilitary("provision");waitForJs("__asuraOffice().military.balance===100000000","Real military escrow");
         python(assetText("asura_release.py")+"\nfrom cultivation_life import server\nissue_release_order(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");

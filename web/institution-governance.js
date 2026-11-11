@@ -29,7 +29,7 @@
         }
         if(!r.offers.length)box.append(el('p','当前没有需要办理的有效事项。','muted'));
       }
-      if(r.proposals.length){const proposals=el('div',null,'institution-proposals');proposals.append(el('h4','原人员提议'));for(const p of r.proposals)proposals.append(el('p',`${p.name} · 观察于 ${p.observed} 年 · 预算 ${money(p.budget)}`));box.append(proposals);}
+      if(r.proposals.length){const proposals=el('div',null,'institution-proposals');proposals.append(el('h4','原人员提议'));for(const p of r.proposals)proposals.append(el('p',`${p.name} · 观察于 ${p.observed} 年 · 预算 ${money(p.budget)}${p.supporters?.length?` · ${p.supporters.length}位原人员联署`:``}`));box.append(proposals);}
       const history=el('details');history.append(el('summary','履约与交接记录'));for(const j of [...r.history].reverse())history.append(el('p',`${j.offer.name}：${j.result}（支出 ${money(j.spent)}，退回 ${money(j.refunded)}）`));box.append(history);root.append(box);
     }
     host.append(root);return root;

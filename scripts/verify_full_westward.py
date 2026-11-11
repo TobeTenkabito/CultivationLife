@@ -25,7 +25,7 @@ def main():
     parser.add_argument('--retry-failed', action='store_true',
                         help='Recheck completed failed modules without duplicating running modules')
     args = parser.parse_args()
-    browsers = BROWSERS + (['browser_asura_governorship', 'browser_asura_politics', 'browser_asura_military'] if args.asura else [])
+    browsers = BROWSERS + (['browser_asura_governorship', 'browser_asura_politics', 'browser_asura_military', 'browser_asura_development', 'browser_asura_protocols'] if args.asura else [])
     require(1 <= args.workers <= 8, 'Use 1–8 workers')
     require(not (args.checks_only and args.retry_failed), 'Choose one helper mode')
     require(not args.retry_failed or args.resume, 'Failed-module retry requires an existing run')
@@ -97,7 +97,7 @@ def main():
         futures = []
         for module in modules:
             name = Path(module).stem
-            argv = ['-m', 'pytest', module, '-q', '--tb=short', '--junitxml=' + str(folder / (name + '.xml'))]
+            argv = ['-m', 'pytest', module, '-q', '--tb=short', '--assert=plain', '--junitxml=' + str(folder / (name + '.xml'))]
             futures.append(executor.submit(run, name, argv, module))
         for f in as_completed(futures):
             runs.append(f.result())

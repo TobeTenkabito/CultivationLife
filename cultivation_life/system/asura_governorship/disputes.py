@@ -22,7 +22,9 @@ def completed(game,row):
     paid=sum(c['kind']=='remittance' and c['status']=='resolved' and c['decision'] in {'pay','half'}
              and c['closed']>=since
              for c in petitions.book(row).get('history',[]))
-    return works+paid
+    operating=row.get('operations',{})
+    recent=int(operating.get('last_performance',0)>=max(since,row['appointed']) and operating.get('income',0)>0)
+    return works+paid+recent
 
 
 def offers(game,row):

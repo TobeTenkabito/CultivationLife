@@ -27,7 +27,7 @@ def local_cash(game,row):
     return int(game.economy_v2.get('accounts',{}).get(account_key(row),{}).get('balance',0))
 
 
-def quote(game,row,kind):
+def quote(game,row,kind,*,administration=None,stock=None):
     cfg=config();grade=projects.grade(row['address']['world']);unit=BASE_PRICES[grade-1]
     reason=''
     materials={};receipt=0
@@ -50,12 +50,18 @@ def quote(game,row,kind):
             elif game.building_state.get('city_usage',{}).get(row['id'],{}).get('govern_year')==game.player.age:reason='本年已办理城务'
         else:raise ValueError('未知城务')
         used=usage(game,row)
+        if administration is not None:
+            used=dict(used,last_year=max(used.get('last_year',0),administration['appointed']))
         if 'last_year' not in used or game.player.age<=used['last_year']:reason='须先在城外度过一个真实年份；不补领离城期间的历年收益'
-    if not projects.owns(game,row):reason='只有城主可以经营此城'
+    from .institution_authority import can_operate_city
+    authorized=can_operate_city(game,administration,row) if administration is not None else projects.owns(game,row)
+    if not authorized:reason='没有原城市经营授权' if administration is not None else '只有城主可以经营此城'
     elif row['status']!='intact' or row['address']!=address(game):reason='须亲临完好的原城办理'
-    if not reason and (balance(game,'player')<coins or any(sum(i.quantity for i in game.player.inventory if i.id==key)<n for key,n in materials.items())):reason='灵石或设施工料不足'
+    payer=administration['wallet'] if administration is not None else 'player'
+    held={i.id:i.quantity for i in game.player.inventory} if stock is None else stock
+    if not reason and (balance(game,payer)<coins or any(held.get(key,0)<n for key,n in materials.items())):reason='灵石或设施工料不足'
     snapshot=dict(city=row,kind=kind,coins=coins,materials=materials,receipt=receipt,
-        year=game.player.age,used=usage(game,row),cash=local_cash(game,row))
+        year=game.player.age,used=usage(game,row),cash=local_cash(game,row),payer=payer)
     token=hashlib.sha256(json.dumps(snapshot,sort_keys=True).encode()).hexdigest()[:20]
     return dict(coins=coins,materials=materials,receipt=receipt,reason=reason,token=token)
 
@@ -100,7 +106,13 @@ def act(game,row,choice):
     kind=game.building_state['scene']['node'].split(':')[1]
     bill=quote(game,row,kind)
     if choice!='civic:commit:'+bill['token']:raise ValueError('城务报价已经变化，请重新查看')
-    projects.pay(game,bill,'城市公共设施' if kind in config()['city_facilities'] else '城市当年经营开支')
+    settle(game,row,kind,bill)
+    return 'civic:main'
+
+
+def settle(game,row,kind,bill,*,payer='player',stock=None):
+    """Shared original city receipt; caller validates mandate and current quote."""
+    projects.pay(game,bill,'城市公共设施' if kind in config()['city_facilities'] else '城市当年经营开支',payer=payer,stock=stock)
     original=projects.persist(game,row)
     counter=ensure_state(game).setdefault('city_business',{}).setdefault(row['id'],dict(last_year=game.player.age,expense=0,income=0))
     counter['expense']+=bill['coins']
@@ -108,7 +120,7 @@ def act(game,row,choice):
     else:
         counter['last_year']=game.player.age
         if bill['receipt']:
-            transfer_value(game,account_key(row),'player',bill['receipt'],'城市市集当年经营分成')
+            transfer_value(game,account_key(row),payer,bill['receipt'],'城市市集当年经营分成')
             counter['income']+=bill['receipt']
         else:
             original['development']=original.get('development',0)+1

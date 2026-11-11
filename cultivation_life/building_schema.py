@@ -65,6 +65,18 @@ def decode_state(value):
         if row['type'] == 'scenery' and row['status'] != 'intact':
             raise ValueError('自然景观不可摧毁')
         if row.get('subtype') == 'public_office':
+            facilities=row.get('office_facilities',[])
+            if not isinstance(facilities,list) or len(facilities)>2:
+                raise ValueError('机构府署专项设施位无效')
+            seen=set()
+            for facility in facilities:
+                if (not isinstance(facility,dict) or set(facility)!={'id','coins','materials'}
+                        or not isinstance(facility['id'],str) or not 1<=len(facility['id'])<=128
+                        or facility['id'] in seen or type(facility['coins']) is not int or not 1<=facility['coins']<=10**18
+                        or not isinstance(facility['materials'],dict) or not 1<=len(facility['materials'])<=8
+                        or any(not isinstance(k,str) or type(n) is not int or not 1<=n<=100000 for k,n in facility['materials'].items())):
+                    raise ValueError('机构府署专项设施原工料无效')
+                seen.add(facility['id'])
             spec=row.get('construction',{})
             if (row['type']!='artificiality' or not isinstance(row.get('city_id'),str)
                     or not isinstance(spec,dict) or type(spec.get('labor_units')) is not int

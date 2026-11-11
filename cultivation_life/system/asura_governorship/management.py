@@ -107,6 +107,10 @@ def advance(game,maps):
     if not ordinary_year(game) or (region(game) or game.player.world)!='asura':return
     for row in province.offices(game):
         authority.expire(game,row)
+        from .development import advance as advance_development
+        advance_development(game,row)
+        from .protocols import advance as advance_protocols
+        advance_protocols(game,maps,row)
         if row['controller'] and row['controller']!='player':
             from ...relationship_records import find_person
             controller=find_person(game,row['controller'])
@@ -117,6 +121,9 @@ def advance(game,maps):
                     authority.relinquish(game,row,row['controller'])
                     authority.log(game,row,'原任身故，结束本人职责；府署与未耗公款仍归原机构。')
             elif row['status']=='handover' and not row.get('asura_military',{}).get('order') and not row.get('asura_military',{}).get('conflict') and not rules.person_reason(game,row['controller'],row['world'],row['location']):
+                from .. import institution_garrisons as troops
+                from .settlement import belligerent
+                if troops.active(row) or belligerent(game,row):continue
                 authority.relinquish(game,row,row['controller'])
                 authority.log(game,row,'原任在原址完成交接，未耗公款留在本府供继任核验。')
         if province.enabled() and row['status']=='appointed' and row['nominee']!='player':

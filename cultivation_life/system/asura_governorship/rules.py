@@ -26,6 +26,7 @@ def offices(game):
 
 
 def require_handover(game):
+    if any(authority.held(r,'player') for r in offices(game)):raise ValueError('须先处理原监察责任，不能靠退出机构清除原案')
     if any('player' in (r['holder'],r['nominee'],r['controller']) for r in offices(game)):
         raise ValueError('须先到原总督府交接外任责任，再退出王庭')
 

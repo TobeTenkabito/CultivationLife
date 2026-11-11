@@ -282,7 +282,7 @@ def main():
         asura=scoped.get('profile')=='asura'
         if asura:
             require(scoped.get('regression_scope')=='full-repository','Asura release requires full repository regression')
-            require({'browser_asura_governorship','browser_asura_politics','browser_asura_military'}<={r['name'] for r in scoped['runs']},'Asura browser coverage incomplete')
+            require({'browser_asura_governorship','browser_asura_politics','browser_asura_military','browser_asura_development', 'browser_asura_protocols'}<={r['name'] for r in scoped['runs']},'Asura browser coverage incomplete')
             require(all(c.get('asura_governance_verified') for c in evidence['cases']),'Final EXE Asura with/without DLC required')
             metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
             code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
@@ -571,7 +571,7 @@ def main():
         with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
             for path in sorted((ROOT/'dlc/asura-manifestation').rglob('*')):
                 if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
-            for name in ('docs/release-380.md','docs/asura-governorship-implementation.md','docs/asura-politics-and-disputes.md','docs/asura-military-and-succession.md'):
+            for name in ('docs/release-390.md','docs/asura-local-development.md','docs/asura-protocols.md','docs/asura-governorship-implementation.md','docs/asura-politics-and-disputes.md','docs/asura-military-and-succession.md'):
                 z.write(ROOT/name,name)
             z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅结构12。解压至游戏根目录覆盖dlc/asura-manifestation后重启；Android请安装同版签名APK。不会覆盖存档或用户开关。')
             z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='asura-manifestation',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))

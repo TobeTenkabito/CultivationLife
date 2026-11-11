@@ -31,7 +31,7 @@ def enlist(game,scope,identity,rate,*,capacity=6,commander=False):
     n=find_person(game,identity)
     from .war.occupancy import busy
     org=game.sects.get(n.faction_id)
-    if org and busy(game,org,exclude_garrison=scope['id']):raise ValueError('原组织尚未完全闲置，不能拆分重复出征')
+    if org and busy(game,org,exclude_garrison=scope['id'],individual_service=True):raise ValueError('原组织尚未完全闲置，不能拆分重复出征')
     root=ensure(game,scope)
     root['units']=[u for u in root['units'] if u['phase'] not in {'home','lost'}]
     root['units'].append(dict(person_id=identity,origin=scope['location'],destination=scope['location'],
@@ -39,12 +39,18 @@ def enlist(game,scope,identity,rate,*,capacity=6,commander=False):
         last_year=game.player.age,rate=rate,organization=n.faction_id))
 
 
-def provision(game,scope,amount):
+def provision(game,scope,amount,*,source=None):
     if type(amount) is not int or not 1<=amount<=10**15:raise ValueError('军费须为有效正整数')
     if any(u['phase']!='stationed' or u['destination']!=scope['location'] for u in active(scope)):
         raise ValueError('随军原款须在府署驻地交付，不得远程补给')
     root=ensure(game,scope)
-    transfer_value(game,scope['wallet'],root['wallet'],amount,'原地方公款实拨随军营务经费')
+    source=source or scope['wallet']
+    if source not in {scope['wallet'],scope['source']}:raise ValueError('军费来源不属于原任职授权')
+    if balance(game,source)<amount:raise ValueError('原付款机构余额不足')
+    if source==scope['source'] or 'sources' in root:
+        shares=root.setdefault('sources',{scope['wallet']:balance(game,root['wallet'])})
+        shares[source]=shares.get(source,0)+amount
+    transfer_value(game,source,root['wallet'],amount,'原授权来源实拨随军营务经费')
     root['paid']+=amount
 
 
@@ -91,11 +97,18 @@ def advance(game,maps,scope):
         target='background:'+scope['world'];account(game,target)
         transfer_value(game,root['wallet'],target,paid,'实际驻军年份营务服务，实耗不退款')
         root['spent']+=paid
+        left=paid
+        for source in sorted(root.get('sources',{})):
+            used=min(left,root['sources'][source]);root['sources'][source]-=used;left-=used
     root['shortfall']=root['shortfall']+1 if paid<due else 0
     if root['shortfall']>=3:recall(game,maps,scope)
     if not active(scope):
         remaining=balance(game,root['wallet'])
-        transfer_value(game,root['wallet'],scope['wallet'],remaining,'原驻军归返或失去执行资格，未耗原款退回原公账')
+        if 'sources' in root:
+            for source,value in root['sources'].items():
+                transfer_value(game,root['wallet'],source,value,'驻军未耗营务退回原付款机构')
+            root['sources']={}
+        else:transfer_value(game,root['wallet'],scope['wallet'],remaining,'原驻军归返或失去执行资格，未耗原款退回原公账')
         root['returned']+=remaining
 
 

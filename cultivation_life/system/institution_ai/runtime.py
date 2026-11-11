@@ -82,6 +82,9 @@ def advance(game,maps,adapter):
         row=ensure(game,scope['id']);row['last_observed']=now//25;row['last_tick']=now;row['provider']=scope['provider']
         proposer=row.get('delegate') if row.get('delegate') in eligible else eligible[0]
         row['proposals']=proposals(offers,[proposer]*3,row['policy'],scope['available'],now)
+        from ..institution_deliberation import cosign
+        signatures=cosign(offers,eligible,row['policy'],scope['available'])
+        for proposal in row['proposals']:proposal['supporters']=signatures.get(proposal['key'],[])
         row['revision']+=1
         if row.get('job'):continue
         if scope['controlled']:

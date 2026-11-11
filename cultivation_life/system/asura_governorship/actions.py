@@ -23,7 +23,7 @@ def settle(game,payload,*,maps=None,combat=None):
         raise ValueError('总督府请求字段无效')
     if action=='management' and not isinstance(payload.get('payload'),dict):
         raise ValueError('机构履约请求格式无效')
-    if not rules.enabled() and action not in {'resign','return','management','petition','military'}:
+    if not rules.enabled() and action not in {'resign','return','management','petition','military','development','protocol'}:
         raise ValueError('修罗DLC停用，仅开放交接原责任')
     state=rules.court(game)
     if not state.get('joined'):raise ValueError('须先登记王庭身份')
@@ -60,16 +60,29 @@ def settle(game,payload,*,maps=None,combat=None):
             from ...spatial_people import instance_of
             if research_assignment(game,person) or instance_of(game,person):raise ValueError('此人已有任务或身处独立空间')
         identity='asura-prefecture:'+city['id']
-        row=authority.records(game).get(identity)
+        row=next((r for r in rules.offices(game) if r['city_id']==city['id']),None)
+        if row is None:
+            while identity in authority.records(game):identity+=':new'
         if row is None:
             row=authority.create(game,identity=identity,provider=rules.ID,name=city['name']+'总督府',world='asura',
                 location=city['address']['location_id'],owner=dict(kind='sect',id=COURT),source=rules.SOURCE,
                 building_id='office:'+identity,city_id=city['id'])
         authority.nominate(game,row,person,rules.config()['term_years'])
+        if 'protocols' in row:
+            from ..institution_deliberation import close
+            for case in list(row['protocols']['cases']):
+                if case['kind']=='integration':close(row,case,'cancelled','原任已经交接，新任依原君主的正式任命赴任。')
+            row['protocols']['recognition']=state['court']['holders'].get('5')
         from .politics import appointment
         appointment(game,person,state['court']['holders'].get('5'),'governor',row['id'])
         return '外任已获准，须沿原地图赴任；没有移动人物、发放公款或建立建筑。'
     if not row or row['provider']!=rules.ID:raise ValueError('原总督府不存在')
+    if action=='protocol':
+        from .protocols import command
+        return command(game,maps,row,payload)
+    if action=='development':
+        from .development import command
+        return command(game,row,payload)
     if action=='military':
         from .military import command
         return command(game,maps,row,payload,combat=combat)
@@ -82,6 +95,8 @@ def settle(game,payload,*,maps=None,combat=None):
         return '地方案卷已按原权限办理；裁决、担保与资金回执保留在原府。'
     elif action=='fund':
         if not rules.king(game) or not capital:raise ValueError('须由修罗王在王庭拨付原府库款')
+        from .charters import recognized
+        if not recognized(game,row):raise ValueError('须先完成地方对新君的承认交涉')
         authority.fund(game,row,rules.SOURCE,payload.get('amount'))
     elif action=='revoke':
         if not rules.king(game) or not capital:raise ValueError('须由修罗王在王庭撤任')

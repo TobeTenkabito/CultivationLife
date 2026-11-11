@@ -1,6 +1,6 @@
 # 修罗王庭深化：派系、总督府与地方军权
 
-整理日期：2026-11-11。状态：策划基线；已实现第一批[任职与总督府](asura-governorship-implementation.md)及第二批[派系深化与地方争议](asura-politics-and-disputes.md)。第三批[驻军、军令与举兵争位](asura-military-and-succession.md)已接入源码；具体容量与实施边界见各批记录，不代表全部发行功能。本轮不确定新版本号、不改变存档结构、不打包。
+整理日期：2026-11-11；实施状态更新于2026-11-12。策划基线已经分批落实：[任职与总督府](asura-governorship-implementation.md)、[派系深化与地方争议](asura-politics-and-disputes.md)、[驻军、军令与举兵争位](asura-military-and-succession.md)、[地方经营](asura-local-development.md)和[议政、军权与战后整合](asura-protocols.md)。现行容量、费用与实际边界以实施记录为准；本体3.9.0、修罗DLC1.6.0的最终发行验收见[发行说明](release-390.md)，存档结构仍为12。
 
 设计基于本体 v3.7.0 与修罗显圣 DLC v1.4.0 的现有系统。专属玩法归入「修罗显圣：无法无天」；通用 NPC 决策、授权、军事与机构执行能力按原分层原则归本体。本文将讨论中的方向合并为一套规则；费用、任期、容量及平衡参数仍须实现时验证。
 

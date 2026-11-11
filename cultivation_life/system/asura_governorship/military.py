@@ -29,18 +29,14 @@ def local_office(game,row):
         and any(c['id']==row['city_id'] and rules.legal_city(game,c) for c in rules.cities(game)))
 
 
-def candidates(game,row):
-    result=[]
-    from ..war.occupancy import busy
-    for entry in rules.eligible_people(game,row):
-        npc=find_person(game,entry['id']);org=game.sects.get(npc.faction_id)
-        if authority.responsibilities(game,npc.id) or org and busy(game,org,exclude_garrison=row['id']):continue
-        result.append(dict(entry,rate=config().get('annual_service',1000)*(1+max(0,npc.realm_index-9))))
-    return result
+from .military_people import candidates
 
 
 def issue(game,row,destination):
     if destination not in sites(game) or destination==row['location']:raise ValueError('请选择有效的异地驻防点')
+    from .charters import recognized
+    from .settlement import belligerent
+    if not recognized(game,row) or belligerent(game,row):raise ValueError('须先完成地方归顺或盟军议和')
     root=ensure(row);prior=root['order']
     if prior and prior['status'] in {'issued','delayed','refused','accepted'}:raise ValueError('须先处置当前军令')
     if not authority.effective(game,row,row['holder']) or fighting(row):raise ValueError('没有可受令的合法在任总督')
@@ -72,7 +68,11 @@ def answer(game,maps,row,choice):
         if not reason:raise ValueError('没有可核验的守备、道路或军费缺口')
         if order['extensions']:raise ValueError('本令已缓调一次，须履令或明确拒命')
         order.update(status='delayed',reason=reason,deadline=game.player.age+config()['order_years'],extensions=1)
-    elif choice=='refuse':order.update(status='refused',reason='总督具名拒绝中央军令。')
+    elif choice=='refuse':
+        feasible=len(troops.stationed(game,row,row['location']))>1
+        try:troops.plan(game,maps,row,order['destination'])
+        except ValueError:feasible=False
+        order.update(status='refused',reason='总督具名拒绝中央军令。',refusal_evidence=dict(year=game.player.age,unjustified=feasible))
     else:raise ValueError('未知军令回应')
     authority.log(game,row,order['reason'])
 
@@ -100,14 +100,14 @@ def raise_banner(game,row,claimant):
     if row['status'] in {'active','appointed'}:authority.revoke(game,row)
     if claimant!='player':
         troops.enlist(game,row,claimant,config()['annual_service'],commander=True)
+    from .settlement import begin
+    begin(game,row)
     authority.log(game,row,'公开举兵争夺王位；法定总督授权撤销，原公款、军令与地方责任保留。')
 
 
 def close(game,maps,row,status,text):
-    war=conflict(row)
-    war.update(status=status,result=text,ended=game.player.age)
-    troops.recall(game,maps,row)
-    authority.log(game,row,text+' 原驻军循原路收束，未耗军费归原公账。')
+    from .settlement import end
+    end(game,maps,row,status,text)
 
 
 def command(game,maps,row,payload,*,combat=None):
@@ -139,7 +139,8 @@ def command(game,maps,row,payload,*,combat=None):
         from .military_combat import battle
         return battle(game,maps,row,op,combat,m=sys.modules[__name__])
     if op=='recall' and central:
-        if fighting(row):raise ValueError('抗命部众须先议和或讨伐，不能用中央按钮直接搬回')
+        from .settlement import belligerent
+        if fighting(row) or belligerent(game,row):raise ValueError('抗命部众须先议和或讨伐，不能用中央按钮直接搬回')
         troops.recall(game,maps,row);return '原部众开始循原路归返；未耗军费待收束后退回。'
     if op=='standdown' and controlled and fighting(row):
         close(game,maps,row,'withdrawn','撤回夺位主张；原任职已失效，不恢复官职或退回已耗军费。')
@@ -147,13 +148,17 @@ def command(game,maps,row,payload,*,combat=None):
     if not controlled or not local:raise ValueError('须由原指挥人在总督府原址办理')
     ensure(row)
     if op in {'enlist','provision','dispatch'} and not local_office(game,row):raise ValueError('府署产权、地址或设施失效')
+    from ..institution_deliberation import book
+    mandate=book(row)['mandate']
     if op=='enlist':
+        if mandate['appointments']!='local':raise ValueError('本府任将权归中央')
         if not authority.effective(game,row) or fighting(row):raise ValueError('举兵或撤任后不能以公职强征人员')
         candidate=next((n for n in candidates(game,row) if n['id']==person),None)
         if not candidate:raise ValueError('此人不是当前自由、在场且可征募的原人物')
         troops.enlist(game,row,person,candidate['rate'],capacity=config()['capacity'])
         politics.appointment(game,person,'player','staff',row['id'])
     elif op=='provision':
+        if mandate['funding']!='local':raise ValueError('本府供养权归中央')
         if not (authority.effective(game,row) or fighting(row)):raise ValueError('撤任后只允许归返交接，不再动用公款扩军')
         troops.provision(game,row,payload.get('amount'))
     elif op=='dispatch':
@@ -184,13 +189,19 @@ def advance(game,maps,row):
             and local_office(game,row) and not person_reason(game,row['holder'],row['world'],row['location'])):
         # Content provides the defence need; the shared base chooser enforces
         # the original public budget. One original person per bounded review.
-        if game.player.age%config()['bond_years']==0 and len(troops.active(row))<3:
+        from ..institution_deliberation import book
+        from .charters import recognized
+        mandate=book(row)['mandate'];k=king_id(game)
+        central_ready=recognized(game,row) and k not in {None,'player'} and not person_reason(game,k,'asura',CAPITAL)
+        authorized=all(v=='local' or central_ready for v in mandate.values())
+        source=row['source'] if mandate['funding']=='central' else row['wallet']
+        if authorized and game.player.age%config()['bond_years']==0 and len(troops.active(row))<3:
             offers=[dict(key=n['id'],category='defence',urgency=70,budget=n['rate']*config()['reserve_years'],reason='',rate=n['rate'])
                     for n in candidates(game,row)]
-            selected=choose(offers,'balanced',balance(game,row['wallet'])//10)
+            selected=choose(offers,'balanced',balance(game,source)//10)
             if selected and not any(u['destination']!=row['location'] or u['phase']!='stationed' for u in troops.active(row)):
                 troops.enlist(game,row,selected['key'],selected['rate'])
-                troops.provision(game,row,selected['budget'])
+                troops.provision(game,row,selected['budget'],source=source)
                 politics.appointment(game,selected['key'],row['holder'],'staff',row['id'])
                 root=ensure(row)
                 authority.log(game,row,'总督按原预算征募当地自由修士并支付三十年营务；未生成新兵。')
@@ -228,7 +239,9 @@ def advance(game,maps,row):
                 from .military_combat import npc_claim
                 try:npc_claim(game,maps,row,sys.modules[__name__])
                 except ValueError:pass
+    from .settlement import belligerent
     if (row['status']=='handover' and row['controller'] not in {None,'player'}
+            and not belligerent(game,row)
             and not fighting(row) and not troops.active(row)
             and not person_reason(game,row['controller'],row['world'],row['location'])):
         authority.relinquish(game,row,row['controller'])
@@ -238,7 +251,9 @@ def advance(game,maps,row):
     # guards and this province can spare a real second retainer. No view tick.
     sovereign=king_id(game)
     royal_here=bool(sovereign and sovereign!='player' and not person_reason(game,sovereign,'asura',CAPITAL))
-    if enabled() and royal_here and not fighting(row):
+    from .settlement import belligerent
+    from .charters import recognized
+    if enabled() and royal_here and not fighting(row) and not belligerent(game,row) and recognized(game,row):
         from ..asura_court_finance import people
         guards=len({n.id for n in people(game).values() if n.id!=sovereign and not person_reason(game,n.id,'asura',CAPITAL)}
                    | {u['person_id'] for scope in rules.offices(game) for u in troops.stationed(game,scope,CAPITAL)})

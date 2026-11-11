@@ -9,6 +9,9 @@ def validate(scope,accounts,occupied):
     need(row.get('wallet')=='garrison:'+scope['id'] and row['wallet'] in accounts)
     need(all(integer(row.get(k)) for k in ('paid','spent','returned','last_year','shortfall')))
     need(row['paid']==row['spent']+row['returned']+accounts[row['wallet']]['balance'])
+    if 'sources' in row:
+        need(isinstance(row['sources'],dict) and set(row['sources'])<={scope['wallet'],scope['source']})
+        need(all(integer(v) for v in row['sources'].values()) and sum(row['sources'].values())==accounts[row['wallet']]['balance'])
     units=row.get('units');need(isinstance(units,list) and len(units)<=6)
     seen=set()
     for u in units:

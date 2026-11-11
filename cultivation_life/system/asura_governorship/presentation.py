@@ -24,6 +24,10 @@ def public(game):
         data['disputes']=dispute_public(game,row)
         from .military import public as military_public
         data['military']=military_public(game,row)
+        from .development import public as development_public
+        data['development']=development_public(game,row)
+        from .protocols import public as protocol_public
+        data['protocols']=protocol_public(game,row)
         if king or mine:
             data.update(cash=balance(game,row['wallet']),history=copy.deepcopy(row['history']),people=list(row['people']))
         if local and mine:

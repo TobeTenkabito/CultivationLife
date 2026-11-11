@@ -18,6 +18,9 @@ def validate(scope):
         need(number(order.get('issued')) and number(order.get('deadline')) and order['deadline']>=order['issued'])
         need(type(order.get('extensions')) is int and order['extensions'] in {0,1})
         need(isinstance(order.get('reason'),str) and len(order['reason'])<=2000)
+        if 'refusal_evidence' in order:
+            evidence=order['refusal_evidence'];need(isinstance(evidence,dict) and set(evidence)=={'year','unjustified'})
+            need(number(evidence['year']) and type(evidence['unjustified']) is bool)
     war=root.get('conflict')
     if war is not None:
         need(isinstance(war,dict))

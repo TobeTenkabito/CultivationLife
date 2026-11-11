@@ -12,6 +12,59 @@
       "required_rank": 1,
       "required_merit": 100,
       "required_regard": 20,
+      "development": {
+        "contract_cycle": 50,
+        "contract_interval": 10,
+        "consignment_fee_percent": 10,
+        "training_interval": 20,
+        "reward_interval": 50,
+        "reward_merit": 5,
+        "facilities": {
+          "supply": {
+            "name": "军需署",
+            "labor_units": 150,
+            "materials": [
+              6,
+              3,
+              2
+            ],
+            "description": "将本地缺货委托扩为三期，每期八件；经手实物的公费留在原府。"
+          },
+          "training": {
+            "name": "演武院",
+            "labor_units": 200,
+            "materials": [
+              8,
+              4,
+              2
+            ],
+            "description": "每二十年可公费培养一名原址空闲属员，采购原专材，沿原修为、炼体或神识入口结算。"
+          }
+        },
+        "policies": {
+          "reserve": {
+            "name": "休养地方",
+            "tribute": 0,
+            "salary": 5,
+            "garrison": 0,
+            "description": "新增净盈余的5%支付在任待遇，95%留府，用于修缮与培养。"
+          },
+          "tribute": {
+            "name": "奉贡王庭",
+            "tribute": 50,
+            "salary": 10,
+            "garrison": 0,
+            "description": "新增净盈余的50%实缴王庭，10%支付待遇，40%留府。"
+          },
+          "garrison": {
+            "name": "供养边军",
+            "tribute": 0,
+            "salary": 5,
+            "garrison": 40,
+            "description": "新增净盈余的40%交本府驻守原军、5%支付待遇；驻军在外或无人时军费留府，不远程输送。"
+          }
+        }
+      },
       "construction": {
         "labor_units": 400,
         "materials": [
@@ -109,6 +162,41 @@
           "pacify": "亲征平叛",
           "abdicate": "议定退位交接",
           "standdown": "撤回举兵并归返"
+        }
+      },
+      "completion": {
+        "investigation_years": 10,
+        "investigation_wage": 1000,
+        "political_interval": 100,
+        "peace_payment": 1000000,
+        "integration_grant": 1000000,
+        "operations": {
+          "pressure": "联合议政 · 具名请款",
+          "pressure_decide": "联合议政 · 王庭裁议",
+          "patronage": "派系交涉 · 具名转投",
+          "divert": "监察追责 · 侵吞公款（留下追偿凭据）",
+          "audit_open": "监察追责 · 按原凭据立案",
+          "investigate": "监察追责 · 委派原址调查",
+          "defend": "监察追责 · 当事人申辩",
+          "judge": "监察追责 · 王庭裁断",
+          "restitute": "监察追责 · 实际退赔",
+          "case_cancel": "联合议政 · 撤回原案",
+          "charter": "军权配置 · 供养与任将",
+          "central_enlist": "军权配置 · 中央任将",
+          "central_pay": "军权配置 · 中央供养",
+          "relief": "轮调接防 · 指定接防人",
+          "relief_send": "轮调接防 · 沿路赴防",
+          "relief_finish": "轮调接防 · 现场交接",
+          "relief_cancel": "轮调接防 · 召回接防人",
+          "move_request": "府署迁建 · 王庭批准",
+          "move_complete": "府署迁建 · 新址验收",
+          "guard_bind": "府署阵位 · 登记原镇地阵",
+          "guard_repair": "府署阵位 · 消耗原材料维护",
+          "ally": "地方盟约 · 当面结盟并预存担保",
+          "ally_march": "地方盟约 · 原盟军沿路出发",
+          "ally_break": "地方盟约 · 解约退还未耗担保",
+          "negotiate": "战后处置 · 具名议和归降",
+          "integrate": "战后处置 · 新君赴府整合"
         }
       }
     },

@@ -11,14 +11,17 @@ from ...runtime import decode_rng,encode_rng
 
 
 def defenders(game,row,location,m):
+    from .settlement import allies
+    allied=allies(game,row)
     ids=[]
     for other in rules.offices(game):
-        if other['id']==row['id']:continue
+        if other['id']==row['id'] or other in allied:continue
         ids.extend(u['person_id'] for u in troops.stationed(game,other,location))
     if location==m.CAPITAL:
         ids.extend(n.id for n in people(game).values() if n.id!=m.king_id(game)
                    and not person_reason(game,n.id,'asura',location))
-    attackers={u['person_id'] for u in troops.active(row)}
+    attackers={u['person_id'] for r in [row]+allied for u in troops.active(r)}
+    attackers.update(r['controller'] for r in allied if r['controller'])
     # A single provincial roster is limited to six, not the combined defence.
     # Omitting the seventh person could silently remove the strongest cultivator.
     return [n for i in dict.fromkeys(ids) if i not in attackers
@@ -33,6 +36,8 @@ def enthrone(game,maps,row,*,m):
         if game.player.location_id!=m.CAPITAL or game.player.world!='asura':raise ValueError('须本人实际抵达王庭')
     elif person_reason(game,claimant,'asura',m.CAPITAL,assignment='garrison:'+row['id']):raise ValueError('举兵者本人尚未抵达王庭')
     royal_seats.transfer(rules.court(game),claimant,war['king'])
+    from .settlement import succession
+    succession(game,war['king'],claimant)
     m.close(game,maps,row,'won','王权依原抵抗结果完成唯一交接；地方不自动归顺，债务、公产及人物关系保留。')
     return war['result']
 
@@ -44,7 +49,9 @@ def cooldown(game,row,m):
 
 
 def skirmish(game,maps,row,location,m):
-    units=troops.stationed(game,row,location)
+    from .settlement import allies
+    allied=allies(game,row)
+    units=[u for r in [row]+allied for u in troops.stationed(game,r,location) if not troops.state(r).get('shortfall')]
     if not units:raise ValueError('原部众尚未实际抵达，不能以远方兵力攻占')
     if troops.state(row).get('shortfall'):raise ValueError('当前营务欠付，须先整备或撤回')
     enemies=defenders(game,row,location,m)
@@ -55,10 +62,15 @@ def skirmish(game,maps,row,location,m):
     if enemies:
         cooldown(game,row,m)
         rng=decode_rng(game.seed,game.rng_state)
+        from .. import institution_arrays as arrays
+        guarded=[r for r in rules.offices(game) if r is not row and r not in allied and r.get('location')==location and troops.stationed(game,r,location)]
+        bonus=sum(arrays.defence(game,r) for r in guarded)
+        defence=[(n,power(n)+(bonus if i==0 else 0)) for i,n in enumerate(enemies)]
         engagement=resolve_local_engagement([(find_person(game,u['person_id']),power(find_person(game,u['person_id']))) for u in units],
-            [(n,power(n)) for n in enemies],WORLD_SYSTEMS['transcendent_combat'],rng,now=game.player.age,
+            defence,WORLD_SYSTEMS['transcendent_combat'],rng,now=game.player.age,
             attacker_objective='repel',defender_objective='repel')
         game.rng_state=encode_rng(rng);result=engagement.outcome
+        for guarded_scope in guarded:arrays.wear(game,guarded_scope)
         m.ensure(row)['last_battle']=game.player.age
     if result=='victory':
         for other in rules.offices(game):

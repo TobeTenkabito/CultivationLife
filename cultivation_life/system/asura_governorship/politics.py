@@ -11,6 +11,8 @@ def state(game):return rules.court(game).get('court',{}).get('factions',{}).get(
 
 
 def faction(game, identity):
+    alignment=state(game).get('people',{}).get(identity,{}).get('alignment')
+    if alignment:return alignment['group'],'具名转投与实际履约'
     court=rules.court(game).get('court',{})
     office=next((k for k,v in court.get('offices',{}).items() if v==identity),None)
     if office:return {'treasury':'free_cities','marshal':'war_hosts','ritual':'blood_clans'}[office], '现任中枢官职'

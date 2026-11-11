@@ -36,6 +36,14 @@ def verify_asura(base,with_dlc,folder):
     case=next(c for c in office()['disputes']['active'] if c['kind']=='remittance')
     before=office()['cash'];view=govern('petition',office=identity,operation='resolve',case=case['id'],choice='pay')
     assert office()['cash']==before-case['evidence']['amount']
+    original=office()['cash']
+    view=govern('protocol',office=identity,operation='divert',amount=3000)
+    c=office()['protocols']['cases'][0]
+    assert office()['cash']==original-3000
+    view=govern('protocol',office=identity,operation='restitute',case=c['id'],amount=1000)
+    assert office()['protocols']['cases'][0]['paid']==1000
+    view=govern('protocol',office=identity,operation='restitute',case=c['id'],amount=2000)
+    assert not office()['protocols']['cases'] and office()['cash']==original
     person=office()['military']['candidates'][0]['id']
     view=govern('military',office=identity,operation='enlist',person=person)
     view=govern('military',office=identity,operation='provision',amount=10**8)

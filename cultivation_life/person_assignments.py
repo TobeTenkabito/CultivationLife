@@ -38,6 +38,10 @@ def deployment_assignment(game, identity, *, exclude_war=None):
 
 
 def research_assignment(game, identity, *, exclude_war=None):
+    for scope in game.economy_v2.get('administrations',{}).values():
+        for case in scope.get('protocols',{}).get('cases',[]):
+            if case.get('reviewer')==identity and case['stage']=='reviewing':
+                return dict(id=case['id'],phase='review')
     agendas=game.economy_v2.get('institution_agendas',{}).get('scopes',{})
     for row in agendas.values():
         job=row.get('job')

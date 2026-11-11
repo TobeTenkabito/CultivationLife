@@ -72,6 +72,9 @@ def quote(game, purpose, row=None, *, payer='player', stock=None, actor=None):
         coins=int(BASE_PRICES[rank-1]*spec['labor_units']*row['level'])
         materials={material_id(world,rank,role):n*row['level'] for role,n in
                    zip(('ore_structure','ore_conduct','ore_store'),spec['materials'])}
+        for facility in row.get('office_facilities',[]):
+            coins+=facility['coins']
+            for key,n in facility['materials'].items():materials[key]=materials.get(key,0)+n
     elif row.get('subtype')=='land_temple':
         costs=land_temple_cost(world)
         materials,coins=costs['materials'],costs['coins']
@@ -111,6 +114,7 @@ def quote(game, purpose, row=None, *, payer='player', stock=None, actor=None):
         level=row.get('level') if row else None,status=row.get('status') if row else None,
         temple_facilities=row.get('temple_facilities') if row else None,
         construction=row.get('construction') if row else None)
+    fingerprint['office_facilities']=row.get('office_facilities') if row else None
     token=hashlib.sha256(json.dumps(fingerprint,sort_keys=True).encode()).hexdigest()[:20]
     return dict(coins=coins,materials=materials,reason=reason,token=token)
 

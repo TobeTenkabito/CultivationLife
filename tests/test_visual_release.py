@@ -14,7 +14,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def test_shipped_reviewed_assets_are_self_contained():
     from cultivation_life.content_registry import EXTENSION_REPORT
     source=dict(catalog(ROOT), assets=public_catalog(ROOT,EXTENSION_REPORT)['assets'])
-    assert len(source['assets'])==1695 and len(source['maps'])==11
+    assert len(source['assets'])==1696 and len(source['maps'])==11
     assert len(source['items'])==1184
     packages={json.loads(p.read_text(encoding='utf-8'))['id']:p.parent for p in (ROOT/'dlc').glob('*/manifest.json')}
     for identity,row in source['assets'].items():
@@ -66,6 +66,11 @@ def test_shipped_reviewed_assets_are_self_contained():
                 assert image.mode=='RGBA'
                 assert identity.startswith(('actor.monster.fox-','fox-','actor.monster.serpent-','serpent-',
                                             'actor.monster.avian-','avian-','actor.monster.ape-','ape-','actor.monster.turtle-','turtle-','actor.monster.insect-','insect-','actor.monster.aquatic-','aquatic-','actor.monster.flora-','flora-'))
+            elif identity=='building.asura.governor-office':
+                assert row['requires']==['official.asura-manifestation']
+                assert image.mode=='RGBA' and image.size==(1254,1254)
+                assert image.getchannel('A').getextrema()==(0,255)
+                assert identity not in public_catalog(ROOT,[])['assets']
             elif row['file'].startswith(('/assets/pixel/characters-301/', '/assets/pixel/swimwear/', '/assets/pixel/holiday/', '/assets/pixel/frontier/', '/assets/pixel/tide/', '/assets/pixel/historical/', '/assets/pixel/hunt-beasts/', '/assets/pixel/diaochan/')) or any(p in row.get('requires',[]) for p in ['official.ghost-reincarnation','official.sage-way','official.buddhist-dharma','official.asura-manifestation']):
                 assert image.mode=='RGBA' and image.getextrema()[-1][0]==0
                 if identity.startswith(('actor.path.', 'actor.cosmetic.', 'actor.beast.')):

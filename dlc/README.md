@@ -61,7 +61,7 @@ dlc/
 | 包 | 版本 | ID |
 | --- | --- | --- |
 | [瑶池西望：紫气东来](yaochi-westward/README.md) | 1.1.0 | `official.yaochi-westward` |
-| [修罗显圣：无法无天](asura-manifestation/README.md) | 1.5.0 | `official.asura-manifestation` |
+| [修罗显圣：无法无天](asura-manifestation/README.md) | 1.6.0 | `official.asura-manifestation` |
 | [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.2.1 | `official.buddhist-dharma` |
 | [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.11.1 | `official.ghost-reincarnation` |
 | [归墟之潮：九死一生](guixu-tide/README.md) | 2.7.3 | `official.guixu-tide` |

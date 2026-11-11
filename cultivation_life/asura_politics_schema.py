@@ -7,6 +7,9 @@ def validate(root):
     rows=root.get('people');need(isinstance(rows,dict) and len(rows)<=64)
     for identity,row in rows.items():
         need(word(identity) and isinstance(row,dict))
+        if 'alignment' in row:
+            a=row['alignment'];need(isinstance(a,dict) and set(a)=={'group','patron','since'})
+            need(isinstance(a['group'],str) and a['group'] in {'blood_clans','war_hosts','free_cities'} and word(a['patron']) and type(a['since']) is int and a['since']>=0)
         if 'appointed_period' in row:need(type(row['appointed_period']) is int and row['appointed_period']>=0)
         bonds,career,deeds=row.get('bonds'),row.get('career'),row.get('deeds')
         need(isinstance(bonds,dict) and len(bonds)<=8)
@@ -30,13 +33,14 @@ def validate_cases(scope):
         kind=case['kind'];e=case['evidence']
         need(kind in {'budget','remittance','personnel','performance','access','tenure'})
         need(word(e.get('source')) and word(e.get('description')))
-        if kind=='budget':need(e.get('target')==scope['building_id'] and integer(e.get('amount')) and e['amount']>0 and integer(e.get('total')) and e['total']>=e['amount'])
+        target_valid=e.get('target')==scope['building_id'] or case in root.get('history',[]) and isinstance(e.get('target'),str) and e['target'].startswith('office:'+scope['id'])
+        if kind=='budget':need(target_valid and integer(e.get('amount')) and e['amount']>0 and integer(e.get('total')) and e['total']>=e['amount'])
         if 'paid' in e:need(kind=='budget' and integer(e['paid']) and 0<e['paid']<=e['amount'])
         if kind=='remittance':need(integer(e.get('amount')) and e['amount']>0 and integer(e.get('reserve')))
         if kind=='personnel':
             need(word(e.get('candidate')) and word(e.get('candidate_name')))
             need(e.get('alternative') is None or word(e['alternative']) and word(e.get('alternative_name')) and e['alternative']!=e['candidate'])
         if kind=='performance':need(word(e.get('target')) and integer(e.get('spent')) and integer(e.get('deadline')))
-        if kind=='access':need(e.get('target')==scope['building_id'] and type(e.get('public')) is bool)
+        if kind=='access':need(target_valid and type(e.get('public')) is bool)
         if kind=='tenure':need(integer(e.get('expires')) and integer(e.get('completed')))
         for witness in case['witnesses']:need(witness['faction'] in {'blood_clans','war_hosts','free_cities'})

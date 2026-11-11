@@ -360,6 +360,17 @@
       "requires": [
         "official.asura-manifestation"
       ]
+    },
+    "building.asura.governor-office": {
+      "file": "/extension-assets/official.asura-manifestation/visual/buildings/governor-office.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "sha256": "c7d4ac7bfec7d0269d8e26ee26b999f3fadbfd0ffa5722d88aae03f06628c8cf",
+      "requires": [
+        "official.asura-manifestation"
+      ]
     }
   }
 }
