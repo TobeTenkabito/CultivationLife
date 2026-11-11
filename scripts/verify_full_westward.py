@@ -19,11 +19,13 @@ from cultivation_life.version import BASE_GAME_VERSION
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--workers', type=int, default=3)
+    parser.add_argument('--asura', action='store_true', help='Full regression plus Asura governance acceptance')
     parser.add_argument('--resume', type=Path)
     parser.add_argument('--checks-only', action='store_true')
     parser.add_argument('--retry-failed', action='store_true',
                         help='Recheck completed failed modules without duplicating running modules')
     args = parser.parse_args()
+    browsers = BROWSERS + (['browser_asura_governorship', 'browser_asura_politics', 'browser_asura_military'] if args.asura else [])
     require(1 <= args.workers <= 8, 'Use 1–8 workers')
     require(not (args.checks_only and args.retry_failed), 'Choose one helper mode')
     require(not args.retry_failed or args.resume, 'Failed-module retry requires an existing run')
@@ -77,7 +79,7 @@ def main():
     if args.checks_only:
         checks = [(n, [f'tools/{n}.py'], f'tools/{n}.py') for n in
                   ('check_world_transition_contract', 'check_module_dependencies', 'check_documentation')]
-        checks += [(n, [f'tests/{n}.py'], f'tests/{n}.py') for n in BROWSERS]
+        checks += [(n, [f'tests/{n}.py'], f'tests/{n}.py') for n in browsers]
         checks += [('save-transfer', ['-m', 'pytest', 'tests/test_save_transfer.py', '-q'], 'tests/test_save_transfer.py')]
         for name, argv, source in checks:
             row = run(name, argv, source)
@@ -119,7 +121,7 @@ def main():
     ET.parse(combined_path)  # Validate the declaration even with non-ASCII hostnames.
     checks = [(n, [f'tools/{n}.py'], f'tools/{n}.py') for n in
               ('check_world_transition_contract', 'check_module_dependencies', 'check_documentation')]
-    checks += [(n, [f'tests/{n}.py'], f'tests/{n}.py') for n in BROWSERS]
+    checks += [(n, [f'tests/{n}.py'], f'tests/{n}.py') for n in browsers]
     checks += [('save-transfer', ['-m', 'pytest', 'tests/test_save_transfer.py', '-q'], 'tests/test_save_transfer.py')]
     for name, argv, source in checks:
         row = run(name, argv, source)
@@ -127,9 +129,9 @@ def main():
         require(row['status'] == 'passed', name + ' failed')
     import shutil
     shutil.copyfile(folder / 'save-transfer.log', ROOT / f'build/save-transfer-{tag}.log')
-    doc = dict(version=BASE_GAME_VERSION, inputs_sha256=digest, profile='westward',
+    doc = dict(version=BASE_GAME_VERSION, inputs_sha256=digest, profile='asura' if args.asura else 'westward',
                regression_scope='full-repository', collection=manifest_path.relative_to(ROOT).as_posix(),
-               collection_sha256=file_digest(manifest_path), scope='Full repository pytest discovery; Westward, managed caravans and shared event/navigation browser suites; final EXE and signed Android 12 native verification.',
+               collection_sha256=file_digest(manifest_path), scope='Full repository pytest discovery; original institution, Asura governance, DLC palettes, Westward, managed caravans and shared event/navigation browser suites; final EXE and signed Android 12 native verification.' if args.asura else 'Full repository pytest discovery; Westward, managed caravans and shared event/navigation browser suites; final EXE and signed Android 12 native verification.',
                tests=[manifest['modules']], runs=runs)
     (ROOT / f'build/scoped-{tag}.json').write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding='utf8')
 

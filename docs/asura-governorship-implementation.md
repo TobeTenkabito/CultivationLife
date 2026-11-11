@@ -1,6 +1,6 @@
 # 修罗地方任职与总督府实施记录
 
-2026-11-11，第一批源码实现。依据[完整策划](asura-court-governorship-design.md)第13节，先交付任职与公共建筑基础；未增加版本号，仍仅结构12。派系深化、军区驻防、地方战争、起兵夺位和发行验收尚未完成。
+2026-11-11，第一批源码实现。依据[完整策划](asura-court-governorship-design.md)第13节，先交付任职与公共建筑基础；未增加版本号，仍仅结构12。第二批[派系深化与地方争议](asura-politics-and-disputes.md)已接续实现；第三批[驻军、军令与举兵争位](asura-military-and-succession.md)已接入，尚未进行发行验收。
 
 ## 本体与扩展边界
 

@@ -82,6 +82,8 @@ def revoke(game, row):
 def relinquish(game, row, person):
     if row['controller'] != person and row['nominee'] != person:
         raise ValueError('并非原任或待赴任人')
+    if any(u['phase'] not in {'home','lost'} for u in row.get('garrison',{}).get('units',[])):
+        raise ValueError('原驻军尚未归返，不能提前解除交接责任')
     clear_delegation(game, row)
     row.update(holder=None, nominee=None, controller=None, status='vacant', people=[])
     log(game, row, '交回任职和原址控制，公款留在原机构，不转入个人行囊。')
@@ -104,9 +106,33 @@ def return_funds(game, row):
     return amount
 
 
+def remit(game, row, amount):
+    if type(amount) is not int or not 1<=amount<=balance(game,row['wallet']):
+        raise ValueError('上缴必须在本府实有公款范围内')
+    transfer_value(game,row['wallet'],row['source'],amount,'地方议定公款实缴原上级府库')
+    row['returned']+=amount
+    log(game,row,f'按原案实缴 {amount:,} 灵石；未动用项目托管及私人库存。')
+
+
+def set_staff(game, row, person):
+    if rules.record(game,row['id']).get('job'):
+        raise ValueError('须先交接在办项目，再调整属员')
+    if person:
+        if any(r['id']!=row['id'] or person in (r['holder'],r['nominee'],r['controller'])
+               for r in responsibilities(game,person)):
+            raise ValueError('此人已有其他机构任职责任')
+        if reason:=rules.person_reason(game,person,row['world'],row['location'],assignment='institution-delegate:'+row['id']):
+            raise ValueError(reason)
+    clear_delegation(game,row)
+    row['people']=[person] if person else []
+    log(game,row,'原址属员名册调整，项目实际执行时按预算支付劳务。')
+
+
 def can_repair(game, building):
     return any(effective(game, r) and r['building_id'] == building['id']
-               and r['owner'] == building['owner'] for r in records(game).values())
+               and r['owner'] == building['owner']
+               and building['address']==dict(world=r['world'],location_id=r['location'],instance_id=None)
+               for r in records(game).values())
 
 
 def expire(game, row):

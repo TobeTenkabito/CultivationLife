@@ -20,6 +20,10 @@ def public(game):
         data={k:copy.deepcopy(row[k]) for k in ('id','name','location','city_id','building_id','status','expires','holder','nominee','controller')}
         data.update(local=local,mine=mine,holder_name=name(row['holder'] or row['nominee'] or row['controller']),
                     active=authority.effective(game,row),building_status=(rules.building(game,row) or {}).get('status','unbuilt'))
+        from .disputes import public as dispute_public
+        data['disputes']=dispute_public(game,row)
+        from .military import public as military_public
+        data['military']=military_public(game,row)
         if king or mine:
             data.update(cash=balance(game,row['wallet']),history=copy.deepcopy(row['history']),people=list(row['people']))
         if local and mine:

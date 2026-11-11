@@ -19,8 +19,13 @@ def organization(game, identity):
     return game.family if game.family and game.family.id == identity else game.sects.get(identity)
 
 
-def busy(game, org, *, managed_only=False):
+def busy(game, org, *, managed_only=False, exclude_garrison=None):
     members = {n.id for n in org.npcs}
+    for scope in game.economy_v2.get('administrations',{}).values():
+        if scope['id']==exclude_garrison:continue
+        if any(u['phase'] not in {'home','lost'} and (u['person_id'] in members or u.get('organization')==org.id)
+               for u in scope.get('garrison',{}).get('units',[])):
+            return True
     for war in game.wars:
         if managed_only and not (war.get('strategic_war_id') or war.get('outpost_id')):
             continue

@@ -1,0 +1,3644 @@
+{
+  "base_version": "3.8.0",
+  "save_schema": 12,
+  "compatible_save_schemas": [
+    12
+  ],
+  "incompatible_save_schemas": "1–11; no migration",
+  "dlc_versions": {
+    "asura-manifestation": "1.5.0",
+    "authored-techniques": "1.0.1",
+    "buddhist-dharma": "1.2.1",
+    "ghost-reincarnation": "3.11.1",
+    "guixu-tide": "2.7.3",
+    "intrigue-coalitions": "1.5.0",
+    "monster-bloodlines": "4.20.1",
+    "monster-civilizations": "1.0.1",
+    "sage-way": "1.6.1",
+    "tianji-artifacts": "2.2.1",
+    "trial-sites": "1.1.0",
+    "yaochi-westward": "1.1.0"
+  },
+  "validation_scope": "Full repository pytest discovery; original institution, Asura governance, DLC palettes, Westward, managed caravans and shared event/navigation browser suites; final EXE and signed Android 12 native verification.",
+  "tests": 8380,
+  "runs": [
+    {
+      "name": "test_achievements",
+      "test": "tests/test_achievements.py",
+      "test_sha256": "f0de972a3af8e4d05b910099c33c2dbf12312ee2e031e2e088b674d2c2d5c0a2",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_achievements.log",
+      "log_sha256": "4beb83f203e01da9132fc478120384513ccd78fabf73093ac390af06a54f89fd",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_achievement_stories",
+      "test": "tests/test_achievement_stories.py",
+      "test_sha256": "0bc1c37939875673fcc729abce4fae9891a899021f17728549c1644e04c2bdbf",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_achievement_stories.log",
+      "log_sha256": "4491eb10a62d56651b421e59b3785b58ea35c25ff6538b85b671f5cd8ba68d3b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_alpha2_dlc_fixes",
+      "test": "tests/test_alpha2_dlc_fixes.py",
+      "test_sha256": "94312be91d26968a1ef5fb8fd2998e1dcb039c91bb8376e5f02be938fa09060f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_alpha2_dlc_fixes.log",
+      "log_sha256": "a4726b9ab6fcac72d1c3b83c7eb066380ff2b3e8301a6fed863f5b982a6e943f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_android_release_checks",
+      "test": "tests/test_android_release_checks.py",
+      "test_sha256": "de2eef0e9c129f499fdc332a526e59a69185cbd169c79deba4b549a6033e15c6",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_android_release_checks.log",
+      "log_sha256": "781f0b1a6f4274285addfb950cecab13654b35ee6277d8a88709d5bbd6ea9a26",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_android_packaging",
+      "test": "tests/test_android_packaging.py",
+      "test_sha256": "a1d098432ab46f9196f3e5c0498a99ce1c14d8d246a9392cee0f62283c88a8fb",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_android_packaging.log",
+      "log_sha256": "c59a3d65457b548b9db8e81290cf9d906dafafe3d0d5265c32b4895aea322841",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_action_time_performance",
+      "test": "tests/test_action_time_performance.py",
+      "test_sha256": "58e0b5f12e585df524e0eeadd8e6cec3542adb42d16387768c70bc5122f11bae",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_action_time_performance.log",
+      "log_sha256": "48676d2dd4cc4fb4c52d537d8e0cb874577fc4e2bdcf341af955345cac84910c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_architecture_stage2",
+      "test": "tests/test_architecture_stage2.py",
+      "test_sha256": "def623bbc7bb63e7af9ab845e3b3dc27bdcfbd81466e05dc76e55841beb03732",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_architecture_stage2.log",
+      "log_sha256": "a7504b9c8b4563e1ad14e75f167b0aafd88fb205a46db29fc19bb148b8c1e518",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_architecture_batch1",
+      "test": "tests/test_architecture_batch1.py",
+      "test_sha256": "ba1e8589e144de6cf9fa391ea577cb1e2c0d532f9052ac29ffa3266e0f9233ec",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_architecture_batch1.log",
+      "log_sha256": "e32fe317a0c4590bd2b459c14b0f898b0ce57bda246d47db07c3c1a31d127899",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_api_concurrency_batch4",
+      "test": "tests/test_api_concurrency_batch4.py",
+      "test_sha256": "ce928265159828f010d2df7f6ba1d190bee1e27aa1fe69a5cf530354ab8fe9fa",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_api_concurrency_batch4.log",
+      "log_sha256": "cc53514d9ea0dae2356e5d3c5a6fc3ee91567a62a05aa007fc89b45b91e0f72f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_architecture_stage3",
+      "test": "tests/test_architecture_stage3.py",
+      "test_sha256": "e5172c495f5c809b026c1be6d817e2ddf60d184581f78c879f6602e45f77833e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_architecture_stage3.log",
+      "log_sha256": "e336d3914e41078531e83d6e3c61c1cbe20b155407ea941126c96e1ba171f1c7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_court",
+      "test": "tests/test_asura_court.py",
+      "test_sha256": "1f6bb754cde21a0e445cf0f49576bf9cd5ae80933aaf24ad3362bf9eb90f8397",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_court.log",
+      "log_sha256": "f047db9361c18afb8090be5580b20289c1306fd05f1c18cc1a45356979689e03",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_character_visuals",
+      "test": "tests/test_asura_character_visuals.py",
+      "test_sha256": "29e2a1a768880c6438f7b1518d729d4537d97dd8f54d1b0f461111d62011b2a4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_character_visuals.log",
+      "log_sha256": "bb6ca9f5ea79c1c8bcab878bcaec3509261a92779c95c8760c4a601301c2409e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_dependencies",
+      "test": "tests/test_asura_dependencies.py",
+      "test_sha256": "5f080324c463fa635bec5d9e4c0f9c1c70b354f2de37c63d7d6270bcd187156d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_dependencies.log",
+      "log_sha256": "827a9e5fab337bfedfb24280e345396769ff16d8a18ebd2ba33d97b4134ad6d5",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_military",
+      "test": "tests/test_asura_military.py",
+      "test_sha256": "5874f845c5b95c2a9dbe620d881a2adec32f13aa630203ade5387e71f84b4ca7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_military.log",
+      "log_sha256": "8421a4503f4f3afc815646a44d6fead58a8cee1067f49e4165e257f67a351fcb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_hotfix",
+      "test": "tests/test_asura_hotfix.py",
+      "test_sha256": "60f324e724b9d22d4513f9f2a2d1e30fccbcf7f532558add18ddf695d49e7356",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_hotfix.log",
+      "log_sha256": "02de6f9411ff004944170f8814213a988b676eec326756aea2e1d856f217cd4d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_governorship",
+      "test": "tests/test_asura_governorship.py",
+      "test_sha256": "231bab2c098e0f6d18ea30db4977f369eb82fb80f88af5fe1b7d6afef7bdbe2a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_governorship.log",
+      "log_sha256": "edffd9ed5cbc71035aae0af8336da36ec82323dc7c6b69c13845c4ce9f30498d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_politics",
+      "test": "tests/test_asura_politics.py",
+      "test_sha256": "aacb7f69ff5b78d6b4443c3bba82b6e64725a419c782769ac1d2007d5edc8f50",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_politics.log",
+      "log_sha256": "ea7dc14fbe8a451511b5d778befaf75ec3492fbec6ecb362f95a78b1adb6c670",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_manifestation",
+      "test": "tests/test_asura_manifestation.py",
+      "test_sha256": "f972082d1be23b20efde575f8293c019b11bc3dcb777302bc2f7b9f239f24fc7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_manifestation.log",
+      "log_sha256": "8646ab1208ab8fd08f067fa6b1c59260ea41d4dfef1b00fd6612d13188c62015",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_pressure",
+      "test": "tests/test_asura_pressure.py",
+      "test_sha256": "48baabd9d1bfb3395b0f32020e2ce60a59ccf300ce31824fba96d8733117f11a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_pressure.log",
+      "log_sha256": "35909379025ed386f4e4980229d734a73c3359d7902696f7ea7bfed9191fc829",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_auction_update",
+      "test": "tests/test_auction_update.py",
+      "test_sha256": "53d4d75caae10e937f2494b1b0754c1f2d14a0096e4a0878a607b9047fbc709f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_auction_update.log",
+      "log_sha256": "344865bc22870d6dee9eeb9a15c6cb97dcbbd8bdd1e21881f2d278fb5265ebbb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_audit_round56_fixes",
+      "test": "tests/test_audit_round56_fixes.py",
+      "test_sha256": "28f83abc83d64f9460314fcdb835068d4630e6bcdd6a380941fac4e7f23fc11d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_audit_round56_fixes.log",
+      "log_sha256": "5170e701c46e49ef8bb5e35291a076ade6677c638027dfd0ff438ab3ec09b88b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_audit_regressions",
+      "test": "tests/test_audit_regressions.py",
+      "test_sha256": "bc2062827f1581ee16bba1f299add13d4a0022f79b81e5df6f22f233979b3292",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_audit_regressions.log",
+      "log_sha256": "189d32034b7ef4d76b4dd1ffb49442e8e96c89f79c79b76e32bcea59c08aa1a2",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_asura_system",
+      "test": "tests/test_asura_system.py",
+      "test_sha256": "10f0fe3dde527d7f3fc7c9aff63d7170e6359d0311cab146e3b915af84fa1081",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_asura_system.log",
+      "log_sha256": "ad5e8522620d508c4f4c89c472c48d3eafd668429c00c560367040478980ef33",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_audit_round56_boundaries",
+      "test": "tests/test_audit_round56_boundaries.py",
+      "test_sha256": "9d5f95c22133145a4b7eb7b28102a7062511eb99e08d5b8aca5cd9a692e18206",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_audit_round56_boundaries.log",
+      "log_sha256": "1115d66c043e9efa432f09ab44879c82a8bc23328742f4f5c643dbc935603c9e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_audit_followup_guards",
+      "test": "tests/test_audit_followup_guards.py",
+      "test_sha256": "2f7cc4a782612560e09ea71aa4b3997b5bf51f06da3dc76087e789ac1af280df",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_audit_followup_guards.log",
+      "log_sha256": "c536098a13b9e17d7478f5f6dc55b1dc053f1443f32969b33affbfb5a918be76",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_authored_techniques",
+      "test": "tests/test_authored_techniques.py",
+      "test_sha256": "70629de182a4c37d13e2b0f546dc152600fba43dfc57946c5952bc8b6da769bd",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_authored_techniques.log",
+      "log_sha256": "3b661b00043dde7cb9246d04f31f24d97dfc1a6bb3f4fdb16a53cc5044da63bb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_base_game_version",
+      "test": "tests/test_base_game_version.py",
+      "test_sha256": "52ee7376300944ff14a802191a54fc6def25622642a17fc7756b76fd0f4d7295",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_base_game_version.log",
+      "log_sha256": "8af16a3a2a81f8178d7e9e2b1620bfef9c82979b4db3a5ac3529c15797b32526",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_body_bounty_update",
+      "test": "tests/test_body_bounty_update.py",
+      "test_sha256": "c1380ce83fae1d9ab28d29bf0ae6f7948b30011a5a60906bdcccf6495e5b1e8e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_body_bounty_update.log",
+      "log_sha256": "eefa1527962e39fda72464371edfde7f7bad28d336e41ac975c625b51f946276",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_body_round_wuyun",
+      "test": "tests/test_body_round_wuyun.py",
+      "test_sha256": "d42572b21bd71291e44c9f011c11b0f7e20153d88043a97bdacf7a4e5b75de7a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_body_round_wuyun.log",
+      "log_sha256": "11db87fec679087f4b8377552f20ea3800384387ffb6de5ba38481590f44c1bf",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_body_ui_release",
+      "test": "tests/test_body_ui_release.py",
+      "test_sha256": "6c0ea796b067a6a6c7509665f713e5533e6b82796ab2680275bfaa8ec947dc86",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_body_ui_release.log",
+      "log_sha256": "050be17fecdbb23217571fb122c111962149f03197053d0f6a8c926aaefaefaa",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_buddhist_dharma",
+      "test": "tests/test_buddhist_dharma.py",
+      "test_sha256": "ac473eeed6a4c7e2d8358b6e2ded83abdfebacf780c018e886ad65396f62bf52",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_buddhist_dharma.log",
+      "log_sha256": "02718dd79d6d02c8ef0db79d19b350805d2000b360652e8c36de45c8e2650851",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_building_system",
+      "test": "tests/test_building_system.py",
+      "test_sha256": "48257f97b24f7f96c483f298cfef98b5e2c9bad1fcdc020609e34c33ddc320ba",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_building_system.log",
+      "log_sha256": "b52b2e82c04503b207e6a37e9ae675d57256a7101cec43fbb27f4569bb676a3e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_buddhist_wish",
+      "test": "tests/test_buddhist_wish.py",
+      "test_sha256": "a44dbf12ba5be8cc3dda4e6fd77dd57ae737db4e4e71e197dd66ba540610cfd0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_buddhist_wish.log",
+      "log_sha256": "9cda30dbd539b7eb37c3e7c34b4b1e7fa524690cabfdff5b46625f7183406ef7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_building_visits",
+      "test": "tests/test_building_visits.py",
+      "test_sha256": "e8f36687d88b9ddf5383546e5ca1eed63b40d986045d215ac4f4c165597b9939",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_building_visits.log",
+      "log_sha256": "16e743b925900a934ae4a59bdecee55fd0885c53b495f0192bb3241f90042ad1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_caravan_trust_audit",
+      "test": "tests/test_caravan_trust_audit.py",
+      "test_sha256": "fd41c0c5f7e48bc7cd7815bb9f697a0deab118f3d7b22d51993ab43e1ffc9ac8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_caravan_trust_audit.log",
+      "log_sha256": "630b933d645244e9b3d234ffe5a7db4048a5e8bab9400ca91c001bf975f2ee7b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_caravan_economy",
+      "test": "tests/test_caravan_economy.py",
+      "test_sha256": "948cd6eea63a57b63fe031b402be6fb2b2166731529bdad800d0207b69f78a78",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_caravan_economy.log",
+      "log_sha256": "5d3e13f09d144459a123a4e81acd223f3e0c9761028d58ec25e1206570d2abc0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_celestial_breakthrough_pills",
+      "test": "tests/test_celestial_breakthrough_pills.py",
+      "test_sha256": "066eb15333ad76528cc78b5eceabd10788a71aeab56b821423dccc61e2ed9a04",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_celestial_breakthrough_pills.log",
+      "log_sha256": "8a00d6ff00a576fc2a3be26274f84798534f14f33f4d8a8fcdaff66bd4dfc2cc",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_celestial_system",
+      "test": "tests/test_celestial_system.py",
+      "test_sha256": "5055d820c844a17323e22aae23e0b124878d02388daaa81ca6f5d7009b2c3bbe",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_celestial_system.log",
+      "log_sha256": "7f80efab8de3ab878ae953eb56cec788ba69c8fe9a0f51e7c73136706a870fef",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_combat_calibration_2151",
+      "test": "tests/test_combat_calibration_2151.py",
+      "test_sha256": "5283bad1c2835c2ef74e5002f0ab72d40dc0917bca83c0392a8ee83cd6aff999",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_combat_calibration_2151.log",
+      "log_sha256": "95a734eedbf8f1d6d84bde8b1dee44b4923b40820c6da3f4b65a209550f23b90",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_combat_replay",
+      "test": "tests/test_combat_replay.py",
+      "test_sha256": "7586a564ec2ca8ff2f8b3738d897e8746ac2624e0ba2d483b75bd05e2e35915d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_combat_replay.log",
+      "log_sha256": "ca6fff1701f2fee159cb5c45cb0984808c33a2c171a2c09f409cf7395bd740ec",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_combat_rule_engine",
+      "test": "tests/test_combat_rule_engine.py",
+      "test_sha256": "8709f4298f216567a7045b1204e656cd0acc77d84ae5a29fbd0d1aea0563a643",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_combat_rule_engine.log",
+      "log_sha256": "878b2e6c9b1c80a2262ef1d9523b8812d713ceca353f0f59b82ddc5487505639",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_combat_semantics",
+      "test": "tests/test_combat_semantics.py",
+      "test_sha256": "07a72847106c0cc8967e68ed67333fb487583fb6470832562122ccc6c00f6034",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_combat_semantics.log",
+      "log_sha256": "0d84c12488ccf12908928bf4662d63702366a087f18648ef7bbacefe7d2860ca",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_common_elemental_techniques",
+      "test": "tests/test_common_elemental_techniques.py",
+      "test_sha256": "0de3f5cadd7f0edf5b6d5ea43b6656a677fa9d0af28c164cb56668ee5d6c89e9",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_common_elemental_techniques.log",
+      "log_sha256": "0382d8be98bffbdc35a5a285de5505f660a6ac77628da11f94b4f868fa9c22d2",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_city_management",
+      "test": "tests/test_city_management.py",
+      "test_sha256": "e759d382e6cdb5cfb506b28ac174cb547685f99d1807576b73d7ff57ff26e440",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_city_management.log",
+      "log_sha256": "e968230074c515e630d12819ac0e6541be4a2e6b30c617f4fd88314185a749cb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_content_naming",
+      "test": "tests/test_content_naming.py",
+      "test_sha256": "46bcbcc34c14b7d08fc6a1247de986ca0c1ede17901a8034af83e3b318c076c0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_content_naming.log",
+      "log_sha256": "f5e37d6b9ed63ebf3d276e1041e0b052c4544187f492fae728f112d9799337ee",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_concubine_system",
+      "test": "tests/test_concubine_system.py",
+      "test_sha256": "95376aeb1cc3c435c28c0549add3513bf9cba828f719a9092323cd666943b2a3",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_concubine_system.log",
+      "log_sha256": "a4712ee809a8d1e7b835c5dad41325cb0ce977261cd739a708d6891b19747956",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_common_goods_2151",
+      "test": "tests/test_common_goods_2151.py",
+      "test_sha256": "f151c3f98ec8e5fb449b1428c8838ad13ac2730d91e1a85d7db5bed2c1e5a0a4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_common_goods_2151.log",
+      "log_sha256": "a6d2504b605f7607a97f78857fd48253b9dad8ee3e65c91d0348471fccc5a586",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_content_registry",
+      "test": "tests/test_content_registry.py",
+      "test_sha256": "4b0947b388fbf78dbc888071fa83a91a4c68c8865ea279da43181c1e365b6919",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_content_registry.log",
+      "log_sha256": "0cf54ec1fb4cee36ec5aa13a53aca2f96f87127deee21c8897e09144bcf49ba9",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_core_dependencies",
+      "test": "tests/test_core_dependencies.py",
+      "test_sha256": "67924b1bf4a410a38dd672f98476e4606bd7c299c10475d2a228f07d3faba0b1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_core_dependencies.log",
+      "log_sha256": "49de6db5388db655fabc65e7e594de8840f2b67dbd2669449bb6fd347f582468",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_conversion_opportunity",
+      "test": "tests/test_conversion_opportunity.py",
+      "test_sha256": "19684ce2eb8f5a8a3ab62a9ba54d22f4a9992bf699462acb287a46025319d50c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_conversion_opportunity.log",
+      "log_sha256": "db11cc26f42364cf994abc8509854f2576832f455179252c1ac5eb5744181930",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_court_dependencies",
+      "test": "tests/test_court_dependencies.py",
+      "test_sha256": "70ce9992d25d0a2af826be708e669d15f1e9ece0be08c2975208d7145ec019aa",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_court_dependencies.log",
+      "log_sha256": "6c455f8a9bcda38dbe0cc396ded5deeb747d07d1a649fe39aa1cd93d48dbe6cf",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_crafting_field_audit_fixes",
+      "test": "tests/test_crafting_field_audit_fixes.py",
+      "test_sha256": "988121d618f6bb77691e727fd7694f865fb03236ed0837a64dc15bac9d7c5f98",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_crafting_field_audit_fixes.log",
+      "log_sha256": "6ed4bc9a7b410744324e5a881d5146bd46d24cf2884de0f554d44519312bf6ae",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_cross_system_regressions",
+      "test": "tests/test_cross_system_regressions.py",
+      "test_sha256": "6afbe9c77f0f7155f954a154c1ae89d9efe8b1262fce1ba6d6c0062ce8e91439",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_cross_system_regressions.log",
+      "log_sha256": "0ca643875d56323eb0c9201f3e783ee0c1f542fe7c7239588451b73ffb3661ab",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_crafting_system",
+      "test": "tests/test_crafting_system.py",
+      "test_sha256": "81cedf165e7e922ad5aff39d079df6c65858c75257366bb8ec832250732da15e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_crafting_system.log",
+      "log_sha256": "33f2d0cf13c1373bfda7c35360701d06767904e3662614bbc065e6a6d864ccd4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_custody_formation_fixes",
+      "test": "tests/test_custody_formation_fixes.py",
+      "test_sha256": "a8dbe97a5de156abcc943efc500c6955876c872733145e53be6d73d2f84ded4e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_custody_formation_fixes.log",
+      "log_sha256": "ff1ec2e553e3d5cdd0e6b229d05d66f6136417988fa2427f478b9d645c4fd6e1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_debug_agent",
+      "test": "tests/test_debug_agent.py",
+      "test_sha256": "68e1f6363a9975bbca0125ed685b83798606ce3a4834c2eec7052a91031eb04f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_debug_agent.log",
+      "log_sha256": "0d24da5f20fbf91b6b5bfca6fc82391d803da5d5433a8825f7c7b3fae85482b2",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_debug_capabilities",
+      "test": "tests/test_debug_capabilities.py",
+      "test_sha256": "8aa3cc372e2a26635f5d5d0b879c17d63a9866c89c2202be85c268b1c0d734e0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_debug_capabilities.log",
+      "log_sha256": "2183f50dd6a6ea6dbd887230a487ad199d39a52505690f437f0dd52da5f0967c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_debug_heavens",
+      "test": "tests/test_debug_heavens.py",
+      "test_sha256": "a50e4644a9afef9bd0d98c7247502836ace897dee8da5ada62ffbe4d74ed368f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_debug_heavens.log",
+      "log_sha256": "c1053e148db25b7a2a278408c3c934681b32f0b859cd095a0be862a7564ba1e9",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_deferred_economy",
+      "test": "tests/test_deferred_economy.py",
+      "test_sha256": "6750ddbc43d576f4dcee484ded38a7bcd602b751b284d8713fdfbe3b5da025f9",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_deferred_economy.log",
+      "log_sha256": "c6ba802dfbcadd9837d0e0c8dc98412da66966b5a0573c711982149d891d1fe8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_debug_systems",
+      "test": "tests/test_debug_systems.py",
+      "test_sha256": "ce01826a5b120e87224e834c1753514247dc5c79681ee1335f0f3aecf5df2a33",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_debug_systems.log",
+      "log_sha256": "6d510ec0fee9cd077ac26d228431d9e0602878159b3e0c7cde3ae98da166b07b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_debug_npc_development",
+      "test": "tests/test_debug_npc_development.py",
+      "test_sha256": "45a9062259dd5c3b45b4deeb66495489ad9a2a1cae225f9424b54bfed716c03d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_debug_npc_development.log",
+      "log_sha256": "1127b115caf5fe2c720f6b90429afb126b7fe925115c7ca7c749864056003cd5",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_debug_console",
+      "test": "tests/test_debug_console.py",
+      "test_sha256": "c0bf2a30feb838975616889ec04d030320d42020460e5e0cd86ae1e980b94917",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_debug_console.log",
+      "log_sha256": "620a71e2cfbe3b9c16dd5e9c7a0d1ff85fc10ac30785a94b05e5262f2f9006c7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_demon_world_story_expansion",
+      "test": "tests/test_demon_world_story_expansion.py",
+      "test_sha256": "8d69f3ab504eefabecd001f91ca5bb20ddd01498dfc225e890eb44d64f4b979a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_demon_world_story_expansion.log",
+      "log_sha256": "e121be57588539588d403bfcd2f023f3cf7fe0dacbf52650c07e8ab509a348ab",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_debug_dlc",
+      "test": "tests/test_debug_dlc.py",
+      "test_sha256": "b55ef9e3cd4e3ee800b8322b5d029dc79483c393dbdead8895d4d09ec47289ce",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_debug_dlc.log",
+      "log_sha256": "83e08dca3bbfe2743c0aacfc74105218dd91e4b94692937615221b895674ff86",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_deferred_routing",
+      "test": "tests/test_deferred_routing.py",
+      "test_sha256": "001cfe66c90ee806df2d18b58204164be17c556a6013c0dd0999452ba8bf174b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_deferred_routing.log",
+      "log_sha256": "db51bbbb5b2bc4d6c4568eda923ca3a86166553896fe3cfa8b6c06d942e49490",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_demonic_system",
+      "test": "tests/test_demonic_system.py",
+      "test_sha256": "11923d06fb2299cdf43c7f7bf6d54c8f79ca2694c540f5709db66cf77b4e5f45",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_demonic_system.log",
+      "log_sha256": "8252265d76ba29e6dea87f684185ef48b6232df374fea8053d8d59bd13cbd171",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_divine_light_visuals",
+      "test": "tests/test_divine_light_visuals.py",
+      "test_sha256": "c6b81c0779ab2b78d2d007f19530a27396c3e9c1ed80485f96a32812d7a57af0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_divine_light_visuals.log",
+      "log_sha256": "4865e8d5235d75765ece672b7693df97f306ff7aca62be9a8a251d9ae92498ba",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_doctrine_offensive_generation",
+      "test": "tests/test_doctrine_offensive_generation.py",
+      "test_sha256": "61f8c63540494f6ee89c4b3961721024f636caa20834d7cb562f73397bc70fea",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_doctrine_offensive_generation.log",
+      "log_sha256": "10b20d28753f4214be8b83cba0b3d395715c79908bedd8873f7443f57a145d3f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_diaochan_skin",
+      "test": "tests/test_diaochan_skin.py",
+      "test_sha256": "38f831b90d4895edf72d5d1d54cba5202ab74d1b852b6600eb61280828affad3",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_diaochan_skin.log",
+      "log_sha256": "d81ddd37946eafd53d704dd347cac19dc295c0ea14949096cce4efedb4d47b2d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_divine_lights",
+      "test": "tests/test_divine_lights.py",
+      "test_sha256": "725ea83bf826f20956a007f7499375a49b1065dc10258ec6d9bad68c82322bac",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_divine_lights.log",
+      "log_sha256": "34c3e2eec65dad12c8a7bbd01895a74e38f6be52eb09e7c928a0edb407885838",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_doctrine_fusion",
+      "test": "tests/test_doctrine_fusion.py",
+      "test_sha256": "badc900b3f6c082cebcabd20b45883a6725469414adc7008b8292a85f704cf4b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_doctrine_fusion.log",
+      "log_sha256": "aca1a35fee450e2b64b6507d85b1ffca368082ac7d1082411713c2f562a13a79",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_domain_replay",
+      "test": "tests/test_domain_replay.py",
+      "test_sha256": "05393f3ccb54c49212050eb6ec574d55c67f1e5bf5eb05ea08d08408aaa30d4f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_domain_replay.log",
+      "log_sha256": "827d3890e977ce9d95f3a9454eedd94867c18936cbc1c5babdb3ae245caa023e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_domain_combat",
+      "test": "tests/test_domain_combat.py",
+      "test_sha256": "dbcbd6ab8f8c51c70d03da9c8edd9dda35864daa271aba2244a3969ee7caf1e8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_domain_combat.log",
+      "log_sha256": "cd0f485d4e07608249666695f5fb43fa7d725829d12ffbb04da0b112eb7512fe",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_doctrines",
+      "test": "tests/test_doctrines.py",
+      "test_sha256": "32fa38e4fae5040d75ab32e7dc3d11358fc6fb45696cf2d06cc546e743e108c4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_doctrines.log",
+      "log_sha256": "bdb13ef403f99908c932d2aadbf2c7322f593f22de03cdd8c81def7f04ceadd4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_domain_styles",
+      "test": "tests/test_domain_styles.py",
+      "test_sha256": "7d3f8059c850b19f39227f72458368ad8492d8c2b390b9a3f63ecece6bcecd2b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_domain_styles.log",
+      "log_sha256": "513ad12c65e7511fa930792a32a4906257158af511237430ed63071423a95fa1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_audit_followup",
+      "test": "tests/test_economy_audit_followup.py",
+      "test_sha256": "83871c3decf9da6f12b097532839ac0965f56434390d85fe468402e245a421b4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_audit_followup.log",
+      "log_sha256": "1acfe3b9c5b0ed0263f1d85c8d4c484166fddcfdfff52b4c2c85d16c079d87ef",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_audit_round2",
+      "test": "tests/test_economy_audit_round2.py",
+      "test_sha256": "58392e6e49b54dd87e5eec06e3dd6826571cf63e5f689ba21110817e8cc9bf25",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_audit_round2.log",
+      "log_sha256": "75af7ffdf7c40fcb7f81b9fa8cc61ba4dac8b74588a28899b3d3d0db903a09c1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_audit_round3",
+      "test": "tests/test_economy_audit_round3.py",
+      "test_sha256": "264a29761189331a5a7a74cf46adcb11282238f08aced54d2ab34723b4d1d264",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_audit_round3.log",
+      "log_sha256": "69d997b0d958ed7d853c86fccc7362c7150a462f62b3e61f6ef8ed040a0d2906",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_diversity",
+      "test": "tests/test_economy_diversity.py",
+      "test_sha256": "cb32fe8a79f866f7cf784b8cf26fc90f9d4b35d1a776d75e974ca60de794ee9b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_diversity.log",
+      "log_sha256": "1d9af112ff6f6b36f163cacbb204808efcaa8b32380808c17bca8f59d2dda943",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_estate_audit",
+      "test": "tests/test_economy_estate_audit.py",
+      "test_sha256": "4c25f6ff6d4a8716525d27227942bf44faa83a3a4c43576f97abdc8f70fe71f0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_estate_audit.log",
+      "log_sha256": "2b5d7ac5325bfb212fe75450c4f35cfec49257fa17ab805fdfc1520312139c26",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_court_justice",
+      "test": "tests/test_court_justice.py",
+      "test_sha256": "8d6a73df936f7a7bf93c0940eca7c3f408052ece003f966d5b88ef95dd05cc0b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_court_justice.log",
+      "log_sha256": "811adba946ee4718b2680d35d8d4fed6f0293cf6507a54baf899959fb0612425",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_court_bureaus",
+      "test": "tests/test_court_bureaus.py",
+      "test_sha256": "79742dc9ec1fdb57579d740fe6470745c016fdf83ed7ca06e4fc9cc7154f7d5b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_court_bureaus.log",
+      "log_sha256": "68c5e1503024102ecc997a8e61daf53d6a62367a734f6dced6a4a50bedd6af03",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_governance",
+      "test": "tests/test_economy_governance.py",
+      "test_sha256": "108e43966ad19515aa029c7112a0b9b47be024beaf8cf26620433dce749f8ad7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_governance.log",
+      "log_sha256": "e47f32beb7250ed34b3efa2604d1dac6a750e78fe9e41c28810c655beedef445",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_enterprises",
+      "test": "tests/test_economy_enterprises.py",
+      "test_sha256": "3cf1c05b7f357eab6de9b42bf7a2d63868a4d09404867d0cd1ef66b9c4eeb20d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_enterprises.log",
+      "log_sha256": "1260ebb50dc3e9c6a2965c3f114e3f0508d2daf0e5659f67565216f802671184",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_performance",
+      "test": "tests/test_economy_performance.py",
+      "test_sha256": "94eb05c6d550d02327f695a17cc8d36e36d5b406b58318e7239fc1dbf2126b3c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_performance.log",
+      "log_sha256": "a2dd4d9457388a5882f3e23a4411d3d39cb7463e7bd55dd93b4b158a3f7430e5",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_network",
+      "test": "tests/test_economy_network.py",
+      "test_sha256": "c0cd99ecd900f53af3e0f218d6f243c79a78d0331e39f5b18765efce5e5f2c1f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_network.log",
+      "log_sha256": "0d48d3e6818390052680c1fb5edc8d75b1e1fe40e6d2fc5feecdb6fd2f61805f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_earth_temple",
+      "test": "tests/test_earth_temple.py",
+      "test_sha256": "243a699cc3778f0e4de10ae72318a13f1f506bd5af76303e9c86b3ade184324d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_earth_temple.log",
+      "log_sha256": "5269a7d4a079a0962f81baa0592db72a98b3c87a13067f06d5943851c427f481",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_network_expansion",
+      "test": "tests/test_economy_network_expansion.py",
+      "test_sha256": "b46aae5e487f23b4f2bf5783761567d8323ccedf8087dfb518b49af6c9ea2bad",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_network_expansion.log",
+      "log_sha256": "9a1c3f1f5ee517611c7784738dd3c146d7dd7d29286dcce656c94731b47c5959",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_rebalance",
+      "test": "tests/test_economy_rebalance.py",
+      "test_sha256": "2ed1a744a018c2d47f57146c0b6c2446784ec51cc5e6ae25c10462fd0e71cc64",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_rebalance.log",
+      "log_sha256": "b1e7569d8a49417b06c4c068b5e12403a91f03861f0b9547c43893d93be53936",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_expedition_dependencies",
+      "test": "tests/test_expedition_dependencies.py",
+      "test_sha256": "db1c8b1b3d2b7e71b4fc19fef269053b433ebaba23d5bbf46a1da294a61f60e8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_expedition_dependencies.log",
+      "log_sha256": "8f6218ce35f6a1977ab7f195c4c4f3a065bbc281a10d5af3da2c6f135e625fcb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_engine_dependencies",
+      "test": "tests/test_engine_dependencies.py",
+      "test_sha256": "a5fc7890f6662f833b24cbb0f228a69ec67f9deccc5af8611bd2d9fc0db5c651",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_engine_dependencies.log",
+      "log_sha256": "e213e7bf4aa0423a32b91b2fbdb57bb98eefa028aa97858ad97a3172d882d800",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_trust",
+      "test": "tests/test_economy_trust.py",
+      "test_sha256": "68449eb7134912fe23b7f8b80883af8953ff5b4f3df13b54b82a4e70a33bdd2e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_trust.log",
+      "log_sha256": "1d54529f52ab7d2490a5d474ad896177ed2e4c38d412178cb358cf7e9f2fa61c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_faction_geography_growth",
+      "test": "tests/test_faction_geography_growth.py",
+      "test_sha256": "b0e332d109f8fefe38b99a3a075e6fb92e1cb708286df561e7ec891ce925e719",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_faction_geography_growth.log",
+      "log_sha256": "3f985c7a80a0e1a76b60b8ad5b9fc6c78df8536ea4728020260ff72e623ef0ca",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_extension_system",
+      "test": "tests/test_extension_system.py",
+      "test_sha256": "ff62a16745c17c7f8be18e0c77ba56facbcfd7a4ae6fb2f9a2c22c8b3f18a04d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_extension_system.log",
+      "log_sha256": "66b3be9e303478bed80d156dff762dbbd3e58e774210f369bd1b9aeb3ee2cd51",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_experience_1520",
+      "test": "tests/test_experience_1520.py",
+      "test_sha256": "a0cbeed435f9e45922877b649fbb8bf58497ae16e51316d67cefe0991e6106dd",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_experience_1520.log",
+      "log_sha256": "b0ab5a3e608f8b411d189f6d639563c60d73d7e4d541e16de62f512bdab5cca2",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_economy_v2",
+      "test": "tests/test_economy_v2.py",
+      "test_sha256": "8c75013946e6483131d98c489c2d00260cf085e825732e80d0692f766daa55fd",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_economy_v2.log",
+      "log_sha256": "02c00a42235b806427328890e19d3be083baf7d53199cdcb9a7dcd0bdb8dd907",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_feixue_recovery",
+      "test": "tests/test_feixue_recovery.py",
+      "test_sha256": "108a715f2b97cb78c6173638ca4928c4648d84b438ec1eb681a564210950cfb2",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_feixue_recovery.log",
+      "log_sha256": "096d4429218be2f164b8ebd9d6c78a73a4483568a82eabc263779c48335a323a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_field_disciplines",
+      "test": "tests/test_field_disciplines.py",
+      "test_sha256": "ead116cdbb191bfcf2489f3ba4bf3d3366e3f5255e9451d4e813a94899e759fd",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_field_disciplines.log",
+      "log_sha256": "1e0aab59b86a306f86cd88961a5643571636552cdbac28a29473e3b501ab9d9e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_field_discipline_boundaries",
+      "test": "tests/test_field_discipline_boundaries.py",
+      "test_sha256": "6e300bc3fe54bad604d37e0d2aa3e426137c80cb2c3be1337da66ca93a606ecb",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_field_discipline_boundaries.log",
+      "log_sha256": "30199496a4453fc0feaf109aa42d1856fce8ab2e31e3b7cf46fdb5ccb14a893d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_family_expansion",
+      "test": "tests/test_family_expansion.py",
+      "test_sha256": "7662dc977aea6f012e7a36cb06f3af40f0675bb31b001526d8dfec1f065f3d20",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_family_expansion.log",
+      "log_sha256": "6be676f4670b77a9224e828991ea9353b535324dfbe342069a811c86717c01da",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_frontier_skins",
+      "test": "tests/test_frontier_skins.py",
+      "test_sha256": "cecce1bc6f2ed168c1732faf14a37a8ba0ac2ad789f0c2d0dbfcef761e3d193c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_frontier_skins.log",
+      "log_sha256": "d44f9774b84d2d2e191b2435441eb5d8fba0f929b53da4552918325d3a574b8f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_ghost_body_events",
+      "test": "tests/test_ghost_body_events.py",
+      "test_sha256": "9dbc33c68ca0e1088ea203b85fb21bf5f2f5f941853abf8d08be90512a825a43",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_ghost_body_events.log",
+      "log_sha256": "7aa127e1c4323e7589a812c581f48eca5fbcf5cf1632406b15040213c41a7916",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_ghost_body",
+      "test": "tests/test_ghost_body.py",
+      "test_sha256": "1f6b58be575a3f16f9c466ede8c8e2fe2c75f1de89f57ed1b018d54d485bf2e0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_ghost_body.log",
+      "log_sha256": "98804aa8e3707cf46fe805304132a12ce29b702aa36265be4386726a6b50250d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_engine",
+      "test": "tests/test_engine.py",
+      "test_sha256": "d3f9f1fc7a236bb885e140f917b49762f049c892953b01338eb7bbd487b41da7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_engine.log",
+      "log_sha256": "1710e4cf16d52ce9de65a15e3ad3c1da7dc3b830fa33a7651af5c50716272cad",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_earth_disputes",
+      "test": "tests/test_earth_disputes.py",
+      "test_sha256": "abf1a6fc8e3d511a21e881c0d4e3f631f1a5f9ae71a90cdc6f71d4d0e9ba1cfa",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_earth_disputes.log",
+      "log_sha256": "a87d6e72118a6b5f5e61c741c8628236500446865c64aae9b4d712c5908aeccc",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_ghost_body_materials",
+      "test": "tests/test_ghost_body_materials.py",
+      "test_sha256": "dc5e86d48344461c0307874e6ba454c9600a54a5ef828ca37a207d0e25a69ba9",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_ghost_body_materials.log",
+      "log_sha256": "5bac4621353add762aad64271795ad2f64b3195489e6a90ddbc4e7ffebc809c3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_ghost_phase_two",
+      "test": "tests/test_ghost_phase_two.py",
+      "test_sha256": "89f5f60b994500fc1bc9cbf35a9269979979c60c68f1b8a39fd45d2058ef25b1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_ghost_phase_two.log",
+      "log_sha256": "64a235c14eefeeb95316764b706a14cbb70dcfe5732e4ec1fb2b059386fc7950",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_generated_events",
+      "test": "tests/test_generated_events.py",
+      "test_sha256": "e2ef6c9c303d9ea7aebaea5d677617c5e9b1c48b32f1c1a8bbc9e8b16eb4f376",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_generated_events.log",
+      "log_sha256": "c387b0a07bc2763c2d008ca7fd7bb7818513e6b6544d3688adad2e1ec023cfa0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_ghost_system",
+      "test": "tests/test_ghost_system.py",
+      "test_sha256": "3a236a01558b1bc5e04b8b2e897ea6742a7f3df504813c0274364692ffa08647",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_ghost_system.log",
+      "log_sha256": "2698cfd294b185ebd5596989c51e9de8d12e766e833a75deb3071e025bbde204",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_formation_system",
+      "test": "tests/test_formation_system.py",
+      "test_sha256": "b74cdaa1ee2fee9f4d3abf3a1acfca1e4260c60ecd2e5bcaa07b8b5cee46806a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_formation_system.log",
+      "log_sha256": "b370d9778c814089e5abd2cdb07eda67396c7a0ddc3a32afd808165036bc393b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_ghost_reincarnation_dlc",
+      "test": "tests/test_ghost_reincarnation_dlc.py",
+      "test_sha256": "f5f8e97fe3010456f9d7f6d1cfa09e169e264f581d8ffc516203c81058d49f62",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_ghost_reincarnation_dlc.log",
+      "log_sha256": "2a73d5e8222a2d9c1d372c7e9dd3d712d58fe98ce3430f16c59f1436b9618042",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_guixu_companions",
+      "test": "tests/test_guixu_companions.py",
+      "test_sha256": "0a2631365a61e8b12109248221b2d9c00f1425ce7ac9d46735d8987ec59798ba",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_guixu_companions.log",
+      "log_sha256": "eaf915eb4af974c31823de2fef6ca9e512290ff049c581815aed2ed12aa976ea",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavenly_court_system",
+      "test": "tests/test_heavenly_court_system.py",
+      "test_sha256": "29a1102026ccf3531b8a64f7ba632066abba166f4dc83a9239e78f39ed40dd6f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavenly_court_system.log",
+      "log_sha256": "a49c8ab16ae6b6e7659f4d8e577ac94f7dbb31217f64531e0492f8d7e50dd3c4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens",
+      "test": "tests/test_heavens.py",
+      "test_sha256": "d4d6562fa2516fe4d93f8e29e66e4bfd0882543f5d541c5b58dbbc2c4d06d9fc",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens.log",
+      "log_sha256": "528cb25dec597a0de2aa15d10bb994da985e61f329268379e132cda21888c1f1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_city_buildings",
+      "test": "tests/test_city_buildings.py",
+      "test_sha256": "b3b987e6f286613cf8b7031a038eccc27a8bce787baac351ceeb3ebf4039517a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_city_buildings.log",
+      "log_sha256": "b8a1bc031baade931a88e3e807da4b91819a7280d7388bbb4647505da7f5a82a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_governance_family_update",
+      "test": "tests/test_governance_family_update.py",
+      "test_sha256": "093bc896600f80328bf28721efa9e63135a038cabb65ef34c8246369980da75c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_governance_family_update.log",
+      "log_sha256": "bc8d0bd2e639b47121924fab7be4b8912a0fb80d207c04266f2c225bbb8906b9",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_guixu_tide",
+      "test": "tests/test_guixu_tide.py",
+      "test_sha256": "e69c41669b6b828caad4e6f0122f346acc413b6ae9997da401835eac81e7a50c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_guixu_tide.log",
+      "log_sha256": "0b978effa93c3b97189f858ff328d175d86bc023314053ce1978492237ab6c95",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_guard_workforce_fixes",
+      "test": "tests/test_guard_workforce_fixes.py",
+      "test_sha256": "0713ebd63428e2b10eafe8be774962566947e94becee670a6843f4417873b5ac",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_guard_workforce_fixes.log",
+      "log_sha256": "fb76ac7ec97a65bc0bfb6657a87350426fe7a620ce27d8d39af0c6134feb11ce",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_development",
+      "test": "tests/test_heavens_development.py",
+      "test_sha256": "29fe27746e6e33d0366e21d568bc683d7d4b164a1ce991013b0a89dd3f11a818",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_development.log",
+      "log_sha256": "a163765ab2b81da04e20b10cf2a6826b28c9f4a5bdfad79008b2202ddced5d1a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_autonomy",
+      "test": "tests/test_heavens_autonomy.py",
+      "test_sha256": "6cc94fe709818cb2d2f4630c8ee1bb0d8835212b2eadb43c4dcce2c774e22337",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_autonomy.log",
+      "log_sha256": "070129221ddeacb2160ffa50e7314fc11e23b4048998bba6dd8db321c920030e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_conquest",
+      "test": "tests/test_heavens_conquest.py",
+      "test_sha256": "54771e4151b8bf8faa49a0c705810cea63550c9c65faae016c8eb450cfe6ccf6",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_conquest.log",
+      "log_sha256": "ea8793d0945c42819a56a9397f38d55b478fb8fb328a0e88d7ec1608e6332e5e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_m2_acceptance",
+      "test": "tests/test_heavens_m2_acceptance.py",
+      "test_sha256": "93768d696f74ecf6ed3954e58845d91500ccac118a211b19f458aa8b00b52990",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_m2_acceptance.log",
+      "log_sha256": "c53febd640e94d925a369c790a5f60ec72e99c46a8738327297ed46c094a8a3a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_m1",
+      "test": "tests/test_heavens_m1.py",
+      "test_sha256": "630a5b8f6c6035251c7cfbeaf55e5843b5f11e08ce5fd8f85b15a1bef6709fe0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_m1.log",
+      "log_sha256": "d071643bc719329c296c9205672ed7f607a148f93722e0b9bf22389c30ecfcbb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_earth_network",
+      "test": "tests/test_earth_network.py",
+      "test_sha256": "14eafbf9f690486bf288cc440fc57c2c974358e4d34fa930230a07bcee2799ab",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_earth_network.log",
+      "log_sha256": "c575dea349211715b73108d79cd9d8b2a18824242e62a61b596bff3538d25ad6",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_incidents",
+      "test": "tests/test_heavens_incidents.py",
+      "test_sha256": "1c3b5420c9f002d29caf2f7bd593ec6a5116370e3a1098f4ae1f03c2cc7be31c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_incidents.log",
+      "log_sha256": "4737887dd4bc7e6d38433a81d4f25c9e130cf37711f43d3b0391862acda495a5",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_mirror",
+      "test": "tests/test_heavens_mirror.py",
+      "test_sha256": "eaff7241945eb0974ff98a2464884a18c5c52a6f2d807400c36165b96363ec7a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_mirror.log",
+      "log_sha256": "7fab998d24014a199ff8f09d960ffd7a26f3c83f9bbbede344bb2994751169fe",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_mirror_discovery",
+      "test": "tests/test_heavens_mirror_discovery.py",
+      "test_sha256": "6ece7f81c86c98d2182e1e3be81c1fc1855484bbf0ed1699ca3c6c1ac51bcdbb",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_mirror_discovery.log",
+      "log_sha256": "e329946550c807db579f99749e48ceaef058ce384e4cf4e4559c60a9bb6442bd",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_mirror_pact",
+      "test": "tests/test_heavens_mirror_pact.py",
+      "test_sha256": "da76ebc0cbab101730617a2ca3c504affdb4b9b652a102d26e15b440189678cd",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_mirror_pact.log",
+      "log_sha256": "3a785d9b47d7d8fce225690e806bf7bc2c0bac547689f0fae058fb0f25be4f8a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_migration",
+      "test": "tests/test_heavens_migration.py",
+      "test_sha256": "4283518047afa9b924337dd0e0297dcce76f272316efb7b8ebdd549483d91784",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_migration.log",
+      "log_sha256": "bdbb3c385e4366090a7b1ce027d43ffb7822ad46203d8ad4faea0f15a721db9d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_campaign",
+      "test": "tests/test_heavens_campaign.py",
+      "test_sha256": "4ebaf37dbc6766a3da5183392d68807484ba6fbbb4813a4f86707f1e6aae9d48",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_campaign.log",
+      "log_sha256": "fec0a43dc9bb4da21600cc9786c8748b9f94a1072b7792afe627600c98142854",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_omens",
+      "test": "tests/test_heavens_omens.py",
+      "test_sha256": "01ac3e881376c0fa0103294115f26cae2e0e5bcaa19c1c5c7b3aac40ab35103e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_omens.log",
+      "log_sha256": "96e1fee8b7ebdd75d2d590ee5e44123570df491934e8bd1355c7f569347e8b23",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_mirror_survey",
+      "test": "tests/test_heavens_mirror_survey.py",
+      "test_sha256": "8c0b9d5ef958933e707015e230eb5e9612a69e610c9197a0c744d33582490111",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_mirror_survey.log",
+      "log_sha256": "87c3b4337e5f5868c4333bceb42b924232d5b6d32f8b46f23e519dcf73b8401d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_frontier",
+      "test": "tests/test_heavens_frontier.py",
+      "test_sha256": "ae2131ea3c846e26fb4a37e254aaa267a1e220f08441b1f9953a8f4804c70b29",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_frontier.log",
+      "log_sha256": "6dd2072df1c3b8a17846c9591711daf7bcc4886e52ff805cdedc063c42599665",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_outposts",
+      "test": "tests/test_heavens_outposts.py",
+      "test_sha256": "e9b7d60f57ca25d78a223605ce98ad4275c7eada54af60a27466ad787c8e3d17",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_outposts.log",
+      "log_sha256": "3d34f7696292278c45aac0fbe06b91a96ae67c95f17aceddcf10bf49bfcfbfc1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_ruins",
+      "test": "tests/test_heavens_ruins.py",
+      "test_sha256": "8c2689058b9ec4770c489c3224b1858575d89084e78b9cc243cfa86b0b826d11",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_ruins.log",
+      "log_sha256": "fe0123a08f001d62a91c6a54c39876dafa0dd7ccef85b30476f89dc56fdd67d2",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_freight",
+      "test": "tests/test_heavens_freight.py",
+      "test_sha256": "2fb8c1c527b04b320b41a5d8304d0e0f6362fdcdf68cf461c55526b349bbe6c9",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_freight.log",
+      "log_sha256": "4227ef0b8d9597b9567d3e9b82fbe7191d09fac11367871bcd523accda6e5e3a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_regions",
+      "test": "tests/test_heavens_regions.py",
+      "test_sha256": "4fe36b7ade2d02d8f30fc976493b602b445c92a3b33a81dfa6d552e37f21cd08",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_regions.log",
+      "log_sha256": "a17817b81860f76915b2ee6f118d1be3884a2158abf8f137c70a82ed9c6897be",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_high_body_audit",
+      "test": "tests/test_high_body_audit.py",
+      "test_sha256": "d21c9f51c38111daa9f061ee3f3368c2e778dc43b0efe7b235ee7834787d9143",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_high_body_audit.log",
+      "log_sha256": "c983e4bb7e358d999fa185205afd7a7399980bb53be13e88f06fce079ecd37b7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_missions",
+      "test": "tests/test_heavens_missions.py",
+      "test_sha256": "6b39c5b9ab802c5cea4880bf13e0184de4733197803f194d8383a4d96db08717",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_missions.log",
+      "log_sha256": "458315575e84a3e7b5e3369e1abe4dec592e242f2693b523290a750ae030970e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_upper_worlds",
+      "test": "tests/test_heavens_upper_worlds.py",
+      "test_sha256": "82bb04ec2e21241e41af6ebb44583a090635575a7a9ac656f78861f4ae5233df",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_upper_worlds.log",
+      "log_sha256": "f660f22dcdd3b84f13c3edc741876696a83ff6d2abd6014eba76f5920c244e94",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_visits",
+      "test": "tests/test_heavens_visits.py",
+      "test_sha256": "13836394678feb1ffb6fc6ede22d6b177571c084999581286ac3aed030bcf47b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_visits.log",
+      "log_sha256": "a04512afcdd485dc3d3b9421ca89f30804fa7d2149bc5cb76c100ffd95d1f655",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_survey",
+      "test": "tests/test_heavens_survey.py",
+      "test_sha256": "1ae806970ed03fe288f23345c0d6ad06e00515650a1998a77be521e5dbf6e7d4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_survey.log",
+      "log_sha256": "2f929b3cd7180619f47f1857ae8ee5c4d5f4a58b4f9e1f4cbcc86a57529cc8fa",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_high_body_cultivation_audit",
+      "test": "tests/test_high_body_cultivation_audit.py",
+      "test_sha256": "d97aabd16d63c3d1fb539756cc0e4b9b3161654190298dd3f759ae9498051d52",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_high_body_cultivation_audit.log",
+      "log_sha256": "1b88891a6ebd42f28a7d068eb97bc99dce09cf51fedfc7125539573e7844d888",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_holiday_skins",
+      "test": "tests/test_holiday_skins.py",
+      "test_sha256": "e659a2bfd5eb057daf9c6a8ecc366366f90eed8f7666334f78c3088c18416684",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_holiday_skins.log",
+      "log_sha256": "4c14ad295d0b286a3e1772c128fa60f522030ea8976497e3f6a4e68658bcc1d4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_humorous_achievements",
+      "test": "tests/test_humorous_achievements.py",
+      "test_sha256": "f38534d0a28d8f76b8c50e7e6df89dbc6674a3f3a47e66973330271bbed0bee4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_humorous_achievements.log",
+      "log_sha256": "0888f7cfa08b48b28b6d539425cec578df8c6f6c882632c8289ca96850545431",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_home_scenes",
+      "test": "tests/test_home_scenes.py",
+      "test_sha256": "5db95ca903dc46d16190e5a818300874dd1f0a7c47e407389024848ba4696437",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_home_scenes.log",
+      "log_sha256": "17d73085ce797f77ff1846560814198a8ace36eee857f2fefe46d7628a40f97f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_upkeep",
+      "test": "tests/test_heavens_upkeep.py",
+      "test_sha256": "8d41e2fe2c4d197469aaa49c6ff0e14bf6e9442345c8cf9595c02406c7936859",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_upkeep.log",
+      "log_sha256": "0ed7f091fc1809b1176f9154e8e65c380df7f32180acd536ec1a7601e9db28cf",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_hunt_beasts",
+      "test": "tests/test_hunt_beasts.py",
+      "test_sha256": "2ea7dc93a5a29f420cc561af0831a003619fda81c75a5b55a97c770548651f81",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_hunt_beasts.log",
+      "log_sha256": "1e9c55ec4e2b142ca8df30dc48245f8fe78d4d0a7f1cd47e00890c34b2655e25",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_peer_worlds",
+      "test": "tests/test_heavens_peer_worlds.py",
+      "test_sha256": "734b71d28933c5684f47a3d28a20eaa8b23ab892707be8cc5a8971f802ad4208",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_peer_worlds.log",
+      "log_sha256": "8a34d22f7f9765e7ebf27d4a944f56cdeb7819364485edbc4710601b4dbfa34b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_historical_skins",
+      "test": "tests/test_historical_skins.py",
+      "test_sha256": "763090eb0281b5223b0b17ecf0bad5292e26805a4d53a0b5920cd2b2aee88756",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_historical_skins.log",
+      "log_sha256": "f6eed1b0a59a458830c9832b008efc1784b734866c9df20d42a0729b0d726401",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_high_body_balance",
+      "test": "tests/test_high_body_balance.py",
+      "test_sha256": "285a28efe73efbedfd946e3dc8a142fc7faad46240f9157c8f9f07dd2e402059",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_high_body_balance.log",
+      "log_sha256": "671e825ab1ced6993eccbfdb26cc0af8d2f26b30a014e4232d122643835b06fc",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_heavens_settlement",
+      "test": "tests/test_heavens_settlement.py",
+      "test_sha256": "3bab73a36601d5e8a663d9a78ffe52681358373114d9c2a8547eee58aef6b8e0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_heavens_settlement.log",
+      "log_sha256": "e62923f8b744b82d7fe3b5464032fd766eff531c38e0af88369662ceafb9f951",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_immortal_1470",
+      "test": "tests/test_immortal_1470.py",
+      "test_sha256": "2b6a3b0fd78f8e5fc7ba1da45175a7591704a9f8fafb95ec7b8d10d435dd9392",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_immortal_1470.log",
+      "log_sha256": "00106033d244d9e102fe3e03815efb0524a72704bb875e854cd79bf84b4e58a6",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_immortal_1471",
+      "test": "tests/test_immortal_1471.py",
+      "test_sha256": "2ddd1f0ad13a1b9fbd5e4d1cf5795747a0f21e5f75714e6215394adb629d66f0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_immortal_1471.log",
+      "log_sha256": "5128d17643b185ed6523d4b437a74d435f957a698d4f8715c81284af5e632002",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_immortal_body_and_resources",
+      "test": "tests/test_immortal_body_and_resources.py",
+      "test_sha256": "4356e56db2f724cdd8d80644b5d65f7630a77b5811c9d92335835459c50d70bc",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_immortal_body_and_resources.log",
+      "log_sha256": "aacdb81aaa3f3e75ff897096f535191e4520f66d9715923c8d6e735c07773430",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_immortal_1510",
+      "test": "tests/test_immortal_1510.py",
+      "test_sha256": "67f784862c07a3e53d40cc0fb214a203da8f6735f77faf600e6d6cecc0676a8f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_immortal_1510.log",
+      "log_sha256": "ffd72d34202faaf61c44eda7add8c2999a3c414e330528639294ae7c2c98e41f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_immortal_trials",
+      "test": "tests/test_immortal_trials.py",
+      "test_sha256": "1a8c84eccad6010146465310552185227b8fa20e3abab744c59c2d3c8a663347",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_immortal_trials.log",
+      "log_sha256": "5ffaeaecec19dfdf0973dcf0ad778961527dd10357baa6030a0f29e98cef9f26",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_initial_array_positions",
+      "test": "tests/test_initial_array_positions.py",
+      "test_sha256": "5e5930bee832e37c64813f187a5d70a5e8f49dd6d52b97f8ebc68dd4017adc6b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_initial_array_positions.log",
+      "log_sha256": "e154df76f91131d5556fc8f3f7ba97d40d3263e06c72f5f1d5b14b076340b205",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_institution_authority",
+      "test": "tests/test_institution_authority.py",
+      "test_sha256": "1363c3d776ce8e6830491fd64b6e316835019c09441fc4f2b27f039ddfa682aa",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_institution_authority.log",
+      "log_sha256": "567bd0d3b5f2e8ea6069009c6cd6cedf1c06e02b60d3d60568e16deec9395700",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_institution_ai",
+      "test": "tests/test_institution_ai.py",
+      "test_sha256": "2406807d4fce58bffb44163cd5e64d450c1e1d08e6f28b654da0105a646b599e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_institution_ai.log",
+      "log_sha256": "3c29149710c03cc6ff7bb2242158ada96993be5a9acb09cbef316fdb01f43d1c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_institution_petitions",
+      "test": "tests/test_institution_petitions.py",
+      "test_sha256": "d5bd05155867696f3f0d679dc492915c46c004348de77f5f5aa626f3ddc0298f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_institution_petitions.log",
+      "log_sha256": "239c1ac5be7f511f9f823e79f1e74b21101f8b5cfe8c39ff0a53d6979a84f580",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_institution_factions",
+      "test": "tests/test_institution_factions.py",
+      "test_sha256": "6d45da8b2d8ffcf88fbdeb2faee1178b366bcbcef3e3e68bf2d70469ee610514",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_institution_factions.log",
+      "log_sha256": "850729b1ca33868e960e53721217fbf13a6efc2b6d52d568785ef3b71aea7e31",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_inheritance_audit_fixes",
+      "test": "tests/test_inheritance_audit_fixes.py",
+      "test_sha256": "b6b2acc615c83d9f38129768fbef11321cb22e55dd9b3d88fce9874733c64d49",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_inheritance_audit_fixes.log",
+      "log_sha256": "46b864e190a1b5c9413721cca91e249ec15920440a5f12731d550dd99359499c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_key_flow_dependencies",
+      "test": "tests/test_key_flow_dependencies.py",
+      "test_sha256": "00208ca78781904699c392bb203be788ff16d20e10ee8c89d12da46e6f7b19a8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_key_flow_dependencies.log",
+      "log_sha256": "daff21ce45516187e59b9fe8cd98d3da869f00328e2b4ea9d87c3ce4c3a08680",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_immortal_cultivation",
+      "test": "tests/test_immortal_cultivation.py",
+      "test_sha256": "2bf0758b9d039b509bf79eb08663d9e24b6d8e7764391ea53b17645c72423b95",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_immortal_cultivation.log",
+      "log_sha256": "00af5102886087e24d13c14820be9ac95576c705384bd1fb3018cef985821186",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_maps_2133",
+      "test": "tests/test_maps_2133.py",
+      "test_sha256": "497c31b86ecf96e8245056dcd7e21c95ecc594f724b331d86bd10e232d7f0db8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_maps_2133.log",
+      "log_sha256": "261f9b8327337cfe50a4c42dd508f499fc9fb4335514b28b439ec677eb7ee103",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_luo_spirit_story",
+      "test": "tests/test_luo_spirit_story.py",
+      "test_sha256": "ef639fe5524ee8e06f00f05512deaf833903142c28678233529ecec57de15f48",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_luo_spirit_story.log",
+      "log_sha256": "b793e5a8cb37db141eabdbb20129ee08be40e7c0a7e233086adda0f74564b34f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_maps_2131",
+      "test": "tests/test_maps_2131.py",
+      "test_sha256": "a4ae9d221cc6d81b9d2a5b8b435443cd8715c4ec0575dfb8127cd029b938cc0b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_maps_2131.log",
+      "log_sha256": "65b2fe6e7d5763e7f9ef5e31ba7f34d9710510b7cd40f3bd7078c62b8ec42473",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_immortal_artifacts",
+      "test": "tests/test_immortal_artifacts.py",
+      "test_sha256": "0f0a57e1b13bab95c02716171736d1772906bdbe8fed4b33dc2f9f32fb718101",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_immortal_artifacts.log",
+      "log_sha256": "e4be1925a47c0aef858588c146c264efe2123e403401f854c6a6882032f5228b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_maps_2132",
+      "test": "tests/test_maps_2132.py",
+      "test_sha256": "76d000cdf0b9cbbf2f4c7b2cba57e8f9f7137841181b60d69d4bb8a9acf00043",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_maps_2132.log",
+      "log_sha256": "c58d56fb6df247d1655f071a1f7c518f876f033dc0beb269f7a9973c8c1cf41c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_intrigue_system",
+      "test": "tests/test_intrigue_system.py",
+      "test_sha256": "cb07577c0a8c71a9ef550e77bf26d5ee59780666b2ad9a900fa7de3e1e362105",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_intrigue_system.log",
+      "log_sha256": "3a91379c38b9248c143fefc98da799e88fc18c17a0fe4152e3ae37c82a723a2f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_map_system",
+      "test": "tests/test_map_system.py",
+      "test_sha256": "048375f27c19a500b660f384ea3a1696513980c348e9ddbe7e2703039c5d5a0a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_map_system.log",
+      "log_sha256": "beb379f24e6c08e88bc4fc0e6974c4ae0c710e103f7c1380f994693e20a141eb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_mentorship",
+      "test": "tests/test_mentorship.py",
+      "test_sha256": "fdc57143a4369f01757e382932bb71019d99b83bd3ecafea029be71d2ec5e696",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_mentorship.log",
+      "log_sha256": "012c13ebc7e00f6befb106a3a0a05ab78e9c29f763172aa2dd8007ac5c5188f0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_mentorship_advanced",
+      "test": "tests/test_mentorship_advanced.py",
+      "test_sha256": "27a00af6c136a281e49c5dad9798176deb3c2bece00cd79b7cff64ceb7ef8132",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_mentorship_advanced.log",
+      "log_sha256": "3b95c1f021c992e55280c276ac3a5d96adfb7da6aa4fa1d7c48887cae326a868",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_market_training_pages",
+      "test": "tests/test_market_training_pages.py",
+      "test_sha256": "3d8a7fc514e115e8bf8af22fa50eec42cf73a19f2cb67eb81d171089137d64c9",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_market_training_pages.log",
+      "log_sha256": "4b06d974096865a74cbe77688ebf595aeea3a8d2c142dc1d29d80bfadd184bd4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_mentorship_adversarial",
+      "test": "tests/test_mentorship_adversarial.py",
+      "test_sha256": "8f855f6c21f239b5f86ed8008a144c6b112c5e8da008a4ea0f2417c41735a5de",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_mentorship_adversarial.log",
+      "log_sha256": "3151f74daa9bbc44c0f0bc47953eb24faeac7adc1fbb0792e9e53629ddbbd15d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_merchant_execution",
+      "test": "tests/test_merchant_execution.py",
+      "test_sha256": "f880d2f5db481a6633eb3743953c3edcdf654c9adc46491f8bbe35f14fd05945",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_merchant_execution.log",
+      "log_sha256": "f7f93129eef2d47b9662d99038134db5b48e2b8b175cc4b25e37b58207efae7d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_aquatic_visuals",
+      "test": "tests/test_monster_aquatic_visuals.py",
+      "test_sha256": "e2aee8d5758aa95cf87741c82a91c3fe5e7cce6a1986ce079189eb418e140624",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_aquatic_visuals.log",
+      "log_sha256": "f7dbb038738156599a67c511e4be28560070b8328ccbe076271a1c030d815e8c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_merchant_138",
+      "test": "tests/test_merchant_138.py",
+      "test_sha256": "f453a0591651d215875ce51adc43f7dc384c3e19e2e7dc93245cf75c55e26de4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_merchant_138.log",
+      "log_sha256": "14617838673cecac98a7fcc6ae4fa5ed521238241e92258daf86380c9fab20e5",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_module_dependencies",
+      "test": "tests/test_module_dependencies.py",
+      "test_sha256": "58357c4f916bb7dceefd18084d96405bf10a413093c8116210ae5d631d432b39",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_module_dependencies.log",
+      "log_sha256": "cf1b9da4650d852b35c53eb72c386142d3e9dede954e5d4deed32eeb754b2c9d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_mentorship_peers",
+      "test": "tests/test_mentorship_peers.py",
+      "test_sha256": "6ad2495b457c4a34a1e3ad7f0ed9e227516dd30f1cb28e0111f09d3ff64f0ad0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_mentorship_peers.log",
+      "log_sha256": "301a0fff54a88c617f4f6542786e1c45e3440c423ac2b23422701cc751808e0b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_merchant_commissions",
+      "test": "tests/test_merchant_commissions.py",
+      "test_sha256": "cebe5c6244b5c3acbb9cdf59c8792973d30eec25d86c328a75e5a9109765a75c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_merchant_commissions.log",
+      "log_sha256": "689bc75184e54ac0a343d99b21206f51a25351104b14b1396326cdd7d4023538",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_body",
+      "test": "tests/test_monster_body.py",
+      "test_sha256": "81308bb0e7bedc22fdf687f533ba865332f092fea285d02d6c45a0c7159925bd",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_body.log",
+      "log_sha256": "300bb87372a4adaceec7cecfa1d7de1eabe0b9c130a8fc7c551094e0c5ec374e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_fox_visuals",
+      "test": "tests/test_monster_fox_visuals.py",
+      "test_sha256": "5638cba23af441ddf7a15d5bc57010d0a6c54538de5ce2518f61c11ae60d68a4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_fox_visuals.log",
+      "log_sha256": "c5530b383758cee2a1cd7ca8623c6448bb1f336ff47c652a29f68d211768ff71",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_flora_visuals",
+      "test": "tests/test_monster_flora_visuals.py",
+      "test_sha256": "7956a91302ebbf1af61240f65e9bea1462a3c21a93ff6b47fcf2079da6528318",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_flora_visuals.log",
+      "log_sha256": "a5479d70c9297202b60550d030fc1923f32d166253537fdc6ca027564b7fd4f2",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_insect_visuals",
+      "test": "tests/test_monster_insect_visuals.py",
+      "test_sha256": "2901dd9f80b57b7a263a78cfe85a28fb12d4186e08074878db94b6e8e971523e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_insect_visuals.log",
+      "log_sha256": "50bbd335464efb11e639d10d042039c165415c0d9b2a5f57cf242629a7fbed65",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_merchant_system",
+      "test": "tests/test_merchant_system.py",
+      "test_sha256": "a3f083cfdb4541ecbba2fe2e97bebca48f2cf60549722f94a0d513b2a90335fe",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_merchant_system.log",
+      "log_sha256": "2ee96a86e22fae2c990dd8bbc26de40df90420ba838f2bd0b4a13e6e5b3e0796",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_serpent_visuals",
+      "test": "tests/test_monster_serpent_visuals.py",
+      "test_sha256": "a8f2556429ff3a33675343c478a72f55d58c88ee3e2dc2a60268d683f7e1762a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_serpent_visuals.log",
+      "log_sha256": "e35916fbd1a1f0d1e6a6b0c57a4307575532f893dbf2d3919db8735eaac07d9b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_bloodline_system",
+      "test": "tests/test_monster_bloodline_system.py",
+      "test_sha256": "887cc74d8a64b97432461dc9038ea0c8dd8d4fd5ef44fa5eea127fce64a8856a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_bloodline_system.log",
+      "log_sha256": "08ebfbae670fb7426e96530ca3c979db855a3a32913c7c6229b9a0c5e41c6c99",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_turtle_visuals",
+      "test": "tests/test_monster_turtle_visuals.py",
+      "test_sha256": "7c83a6ef284110ca6b2aa06cb9041610ed090437abd242e908e9f6122df9446a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_turtle_visuals.log",
+      "log_sha256": "9ec3e3ee9e9372e8e1c2233391b830ec0f4eb3e95a3f6478843c44b4dc297fc3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_static_assets",
+      "test": "tests/test_monster_static_assets.py",
+      "test_sha256": "a02763d0cda25a3837aa6be78e822fa727b0ad9cdd5e4cc0218b529e362855c8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_static_assets.log",
+      "log_sha256": "bdf7a36b3c62231722136be637555854237d2def0fb873213c4dac5b3a957d8c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_combat_lifecycle",
+      "test": "tests/test_npc_combat_lifecycle.py",
+      "test_sha256": "33faf5ac405fc9000b2a0ccf0570fe902d8be078566d280cd7343735703906ee",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_combat_lifecycle.log",
+      "log_sha256": "4d952191cb20ff6fdee2ccc0f237d529209c008f5de3c396f5ce36cb49346470",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_custody",
+      "test": "tests/test_npc_custody.py",
+      "test_sha256": "6905089c7a3dbc2d0fb0e91934e4f139048afcd0c0d2e246fc45d32fad5a9792",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_custody.log",
+      "log_sha256": "e1bc0d07b70525dc8917278b74699d902a157aa3b68d14e47eda5bb283e9b5b7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_civilizations",
+      "test": "tests/test_monster_civilizations.py",
+      "test_sha256": "f527d5eba6daa2f8e7ef49f7a00f0264219dd6969e29974018ed0f8eb4e123bc",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_civilizations.log",
+      "log_sha256": "b2b36cdc74befe21f319dad3809b88bb6631a0f9cae282930a602104269a61e5",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_development",
+      "test": "tests/test_npc_development.py",
+      "test_sha256": "8957f0f536ee29eed02c0c9065f8f73d2bf9004904363b0f6c14e32fe6fbb4e8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_development.log",
+      "log_sha256": "0112dd98d7b1b051e476f56b62a86d8cb19f76652dba4bb7ec1703b3c1194502",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_natal_artifact_system",
+      "test": "tests/test_natal_artifact_system.py",
+      "test_sha256": "d4368d345e5926170994ba675b2ece1031ed0045b45611213dba475df7e2f9d2",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_natal_artifact_system.log",
+      "log_sha256": "2a23048ece6540a46cc0a33bbb75d7a62dfbc9577b5b9f636c9de5d0d83bf59f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_development_352",
+      "test": "tests/test_npc_development_352.py",
+      "test_sha256": "e607987df093e41534e5d7df52f437920d3f4b6c1d391e0ee0dc78da13a5995b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_development_352.log",
+      "log_sha256": "626c06616f3d429b34a37a530ec90a2a98af77bafb1cb6a0e6a8d8db70b9383d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_development_stage3",
+      "test": "tests/test_npc_development_stage3.py",
+      "test_sha256": "c9a20888d30907d4525eae40ccb8ce053a2cf878dc284a118ca4e2bde2a2d010",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_development_stage3.log",
+      "log_sha256": "6743b65adad7a375135d90c2316b3e3f3e3aedfc5cbd9438abbea82f7a8825db",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_development_contacts",
+      "test": "tests/test_npc_development_contacts.py",
+      "test_sha256": "e94e575b8a15dd034f8ad5059d3fe9c8f2215f6873356e3e75cdcb6c11d61c54",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_development_contacts.log",
+      "log_sha256": "bfa31227e1daeef2f65d7756c0df87aca02b33efa0fc3fa41a7c32ed75b8b5f7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_contacts",
+      "test": "tests/test_npc_contacts.py",
+      "test_sha256": "76098bd0eea126d00f21a4c9120eb93a476c485a08b410cc84173bcd19fc0d19",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_contacts.log",
+      "log_sha256": "e6f882e931efdb7b5fbfd0ae2ae6debe8d8449b39f266da62dc0e71fda353011",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_race_assets",
+      "test": "tests/test_npc_race_assets.py",
+      "test_sha256": "45f7a99ea66692b5b6cc5366c2361d8fb06216e8fc0a933a8948b94334f386eb",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_race_assets.log",
+      "log_sha256": "03d2d5fbd1b15423e4d6c51e89e0cdd3cb6fe74e0184a3b1582a46a11e91ba93",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_development_upper",
+      "test": "tests/test_npc_development_upper.py",
+      "test_sha256": "986717cb60d6764b2f391dd0c6fd6ec7174cc5e9f5ea15a6f1d3af4247e37ec7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_development_upper.log",
+      "log_sha256": "e8b82a5eaf6dd7db76f65bbaa99e20bd76ffe5c41fb45eeca8fb03e174d68945",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_recruitment_adversarial",
+      "test": "tests/test_npc_recruitment_adversarial.py",
+      "test_sha256": "84e9fe33ebf86d038afa35d17401971119c7725869bb2cde4fcaafaaab4c620d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_recruitment_adversarial.log",
+      "log_sha256": "840bf155b57ec863122699e01a4b2ed2a39e3af3821627ab7deaf21b8e5d2d75",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_social_assets",
+      "test": "tests/test_npc_social_assets.py",
+      "test_sha256": "6638887a64a0f73c5e1ba67039dd3a055fb9be185bea7d20116588074df9bb30",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_social_assets.log",
+      "log_sha256": "1dea813bdcee0140ee6549f7d9a5e821a02e7d3cb906ab3feeba4128a636072f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_founder_races",
+      "test": "tests/test_npc_founder_races.py",
+      "test_sha256": "3f85a498475d4b6fed3d0606a1f92b2e98d51efaf395b7c99b60a21343510817",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_founder_races.log",
+      "log_sha256": "a111693846e0ceaf02e2cc65320339287387e2e8068c5d1cbebb271cc930b4d1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_promises",
+      "test": "tests/test_npc_promises.py",
+      "test_sha256": "50db0f9b7501ceb953518593403ba0333c38b0eb1983b664114772fc95bf5794",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_promises.log",
+      "log_sha256": "821ddaa97cdc8bdd9d169fad35adaa92b12c0a05a3dbf34d0d898da750c8ba75",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_social_update",
+      "test": "tests/test_npc_social_update.py",
+      "test_sha256": "df1a87e8ba4dd2189e2ec46e3642c71b2abe40d0fb3aff6c67c91c8cc88d5bc1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_social_update.log",
+      "log_sha256": "c1242caf7039dd9421e491b0fe16ed9b7570d37bc32f92d848ff388de8ab981f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_original_content_audit",
+      "test": "tests/test_original_content_audit.py",
+      "test_sha256": "6e7b8d0f911df7173f8c874b76af751abc6560190169b405e13f573b15849222",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_original_content_audit.log",
+      "log_sha256": "608ef3b9133e2dc53edc1a1ae4f75d4b7b293b1a73c80faff227c57f0ef3faaf",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_development_special_areas",
+      "test": "tests/test_npc_development_special_areas.py",
+      "test_sha256": "5a7ace94e6ecf4e3f68aca2a2f043ef5591831a07027bd43ea56aaa7ca5c8175",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_development_special_areas.log",
+      "log_sha256": "36c95fb821e5e7687eb5fbab0b2acdeb3639d7b370941a50628e9ba94ca7df96",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_system",
+      "test": "tests/test_npc_system.py",
+      "test_sha256": "e675a17f20b6839cc077fff1593026e64e30325d0cae01a75ec1831cf45e4d0a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_system.log",
+      "log_sha256": "c8eb2424673edabcef33c121935a4c1088fde7c1c74468ce24aa47287a89cd0c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_organization_balance",
+      "test": "tests/test_organization_balance.py",
+      "test_sha256": "04e59626489afea7cd29691ae779901e6fd8c5c0d4cf32196350a67eacf361e4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_organization_balance.log",
+      "log_sha256": "f9fcbf696df7e45e015a433d1d5f179dc4cc8f3bff15c1156fecf8184deab2f4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_organization_economy",
+      "test": "tests/test_organization_economy.py",
+      "test_sha256": "c7081ca72d46ae25c85146576de5f6eb13ed6a52b889465731361f9aad832658",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_organization_economy.log",
+      "log_sha256": "d047e584bf260a227bf1369bddceaf3c8012cd4c128893b1f9288a6ad21a7cac",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_npc_transition_training",
+      "test": "tests/test_npc_transition_training.py",
+      "test_sha256": "a0b62e47527666125936a8d894d48d5bfbb1af11685d3168a880db42cc386485",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_npc_transition_training.log",
+      "log_sha256": "f634203d83fe1a3c64e606b5a0fd31a9cd6e45b33aba97eb4efe0b6ad35f894b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_owned_training",
+      "test": "tests/test_owned_training.py",
+      "test_sha256": "d5e297c906a98122679269e614e9be876cf67aaff85120c054a14243fbb7d4ab",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_owned_training.log",
+      "log_sha256": "9c86cae4da55271621e06154bd85f0931509d42451ddcbfa585b7f1318bafccf",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_pixel_assets",
+      "test": "tests/test_pixel_assets.py",
+      "test_sha256": "a4875deff4451ba9f3ae98fb10b4fe861daa97d574e94f25a7b6383c9290cdee",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_pixel_assets.log",
+      "log_sha256": "08c98aefe9cc1db040bedb3d8b3e927b06f4c1b27997e474e26b4a5d57060e31",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_path_character_visuals",
+      "test": "tests/test_path_character_visuals.py",
+      "test_sha256": "f022a6fc4ef9c7ca1acf5e591b41a224f533251be55d58d88bfca0d36f76c787",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_path_character_visuals.log",
+      "log_sha256": "3bbcc6a256f8640d533bf9aba192878073e48860a3fe8c252df68174b213d7e8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_persistence_pipeline",
+      "test": "tests/test_persistence_pipeline.py",
+      "test_sha256": "cf2aef5736698bb6a22e4c3fc7bbbf2133415ef6a3c0b3a050e234fcbb92713b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_persistence_pipeline.log",
+      "log_sha256": "6f73a0fd40483590ca5192308bf063cefcf9eccc6936594f447eaa7b65ee9f51",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_priority_fixes",
+      "test": "tests/test_priority_fixes.py",
+      "test_sha256": "cf21bdda6b66ae5b54a63f895af01e12543f428df1d461da2015884d74b69aa2",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_priority_fixes.log",
+      "log_sha256": "c25724ac0a4aecb34b0714224e283ba88596b60386ce58e65d5324c532f137fd",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_production_dependencies",
+      "test": "tests/test_production_dependencies.py",
+      "test_sha256": "eee42d8de48d054106ab7d57cd51a097b405f963cba6045c5f1ab6c1822585f1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_production_dependencies.log",
+      "log_sha256": "aef07f0715282a2844ab61b1292b22e66fd959f9f813d7a872bfe1037b3dcea3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_player_combat_system",
+      "test": "tests/test_player_combat_system.py",
+      "test_sha256": "53989f0da62b1a95357bdbffc17ae0e965b003eb9500374f0892979da80e7b23",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_player_combat_system.log",
+      "log_sha256": "09ccbcb1ca60336d79d18fdc286e5a27f642ffa325b1830ea0d0bd41757a9eb0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_realm_appearance",
+      "test": "tests/test_realm_appearance.py",
+      "test_sha256": "892d9ad35f08b7d861cc836dd9ad6fcda493ff1efce711a71b0ff7fb3472be2f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_realm_appearance.log",
+      "log_sha256": "21d406747f5ca52c703c51214b56c23197ff7c6ff663678e277d9922d69738c1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_monster_branch_expansion",
+      "test": "tests/test_monster_branch_expansion.py",
+      "test_sha256": "00bc841c39d60bc6f12217fa9aa140950632c66abda5f8da687cd87c2601ab14",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_monster_branch_expansion.log",
+      "log_sha256": "d6b5be346abe897823a555d5022470882631ae5297d75e707d51adae15283779",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_puppet_energy_supply",
+      "test": "tests/test_puppet_energy_supply.py",
+      "test_sha256": "250674aaf182e15d3bf6f48f617d41d05281bacfc7fd9c2c1e74e271972b2e68",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_puppet_energy_supply.log",
+      "log_sha256": "c8ad5531bee2e4a05f36913d5618a39b84ec00fdd919b168100d16e9a5080567",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_pending_audit_fixes",
+      "test": "tests/test_pending_audit_fixes.py",
+      "test_sha256": "2b5d59d28b0eb4f2b35465105f23f3017e7e21fbc71b0f0cec355813b9a59088",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_pending_audit_fixes.log",
+      "log_sha256": "81c3e284a3bb319452d155d6e8d6bd04a9a9f5b0a1b08e9034fe66779ec5d579",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_other_systems_audit_fixes",
+      "test": "tests/test_other_systems_audit_fixes.py",
+      "test_sha256": "ee11c60b5c32d38bfe9a5174d60124e623ac7ce2a4d0a090cf2e06af1ab60d5c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_other_systems_audit_fixes.log",
+      "log_sha256": "295fd252674b6c63ace1539279c88cd7da2ef695140bfb5ef12fee07393376e0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_reincarnation_world",
+      "test": "tests/test_reincarnation_world.py",
+      "test_sha256": "81bf3d48919442a2f89633959d3546a4c3d9809cbf1125f49d2a4683af331fb2",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_reincarnation_world.log",
+      "log_sha256": "058a8f6ee74dbd6de35f428df440a3948f251fe0b5e7b7f9aa41e204948f60cb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_puppet_crafting",
+      "test": "tests/test_puppet_crafting.py",
+      "test_sha256": "20ab8b0e800e69e97a9c365296b14d21401a981cddf64b9879366e7667cd1acc",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_puppet_crafting.log",
+      "log_sha256": "e821cf8aadd1091f8bb77286674b40f79c4a737973c6a3a28ec4441ba412a6c0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_natal_materials_expansion",
+      "test": "tests/test_natal_materials_expansion.py",
+      "test_sha256": "30efc9f3e50fd367349e7ff09864b67a4482ee8133b06f3f654da3776dc438af",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_natal_materials_expansion.log",
+      "log_sha256": "781987896252f6faa49df93b4b6d1e32f5674fdbf561f77e4e351ab68dd82a8f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_relationship_records",
+      "test": "tests/test_relationship_records.py",
+      "test_sha256": "09b673bc42149edd8042bb1e42c00378e4cf26abaa6c0f7d1df6c7fbe93e4358",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_relationship_records.log",
+      "log_sha256": "8943ac411386e516a5a67e56c040b1a0f97c3243cf97017eeb3cba904d634446",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_regional_audit_fixes",
+      "test": "tests/test_regional_audit_fixes.py",
+      "test_sha256": "5f00619e10e898d5b7e9eebd831a91cf4c4957fa598c29f28e0ccbbe43bbc263",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_regional_audit_fixes.log",
+      "log_sha256": "b91355ce7631cfbfbd7dcbc59f66a3c859aaa0b3784ab0f2f7119f124821713f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_regional_integration",
+      "test": "tests/test_regional_integration.py",
+      "test_sha256": "076bdd88616a481667cfd1153ec53a88ca38cc6778a450962fcc70228add3797",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_regional_integration.log",
+      "log_sha256": "4e44a71babfb618d45958a9641cec5219e2c617b8eb4adc5bec667ea029f6f85",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_regional_calendar",
+      "test": "tests/test_regional_calendar.py",
+      "test_sha256": "cff165841ce13f6d4e706547874a28e9445a1ba54c1284462deefda36b8c2d43",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_regional_calendar.log",
+      "log_sha256": "cd8656402a19d11257505f8aff64645531be7909cbbc9e15cbfa069548f34e5c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_134",
+      "test": "tests/test_release_134.py",
+      "test_sha256": "b31cb724e79bdbe71fcfc69a8713816372b8b1add75e73b86e416f85cec85ddc",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_134.log",
+      "log_sha256": "be07d833b150a6a61d01f9a978e4d5595f8dcb4af5b54e11b0e07b5b840f369b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_relationship_story_update",
+      "test": "tests/test_relationship_story_update.py",
+      "test_sha256": "6b2ae3390c371c369696351ddd7f4fb77cdc39bafdf96b72a15d9d26dac6ab88",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_relationship_story_update.log",
+      "log_sha256": "3fb079a7bc50b7b2dbeefa8ca3d3ffe62424d51efe4bd043e6249043fdfc6c5a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_ownership_prison_fixes",
+      "test": "tests/test_ownership_prison_fixes.py",
+      "test_sha256": "64795be46d3f6f73b5d3907adfe38e2d0c3371a23dbb4554fa3c26ecb1adf620",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_ownership_prison_fixes.log",
+      "log_sha256": "14edeb39c1e2738de4311d940535097062434b336189572b01d39b15b6bf92b8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_211",
+      "test": "tests/test_release_211.py",
+      "test_sha256": "9986dd4ce009c47b8d4ad26c127ba51e748b05cd1db6fa3de2f8457e2efd5155",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_211.log",
+      "log_sha256": "8a063e3a06d15046863b431eab457727aadfef2e86a223f58c9eb24346f0a3aa",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_relationship_possession_audit_fixes",
+      "test": "tests/test_relationship_possession_audit_fixes.py",
+      "test_sha256": "2a60249878cdb8d0135d4ec7388c99d6b0faa9d94ab22deae0577b0d6348d05b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_relationship_possession_audit_fixes.log",
+      "log_sha256": "c8750060f02a765e56438bf2d6aefce4f0a29afaf3c5ee81f2bee1d4341f0e98",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_2130",
+      "test": "tests/test_release_2130.py",
+      "test_sha256": "4987dccce30c6f16419f695ac0a0586e36aff573c3c64e6cf91ab3c8a8dda249",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_2130.log",
+      "log_sha256": "4516d9c140235acdb978b8ee543e8205c1adbde588d713273769b5d7eca746a9",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_212",
+      "test": "tests/test_release_212.py",
+      "test_sha256": "884815acf1fed798ac1c85d16aa4f2795714f0e0300c846c8f7438ce9680b895",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_212.log",
+      "log_sha256": "4e164e0aab497591fdf8b84978f65b8ad0305472591c73b1adaddfe71677ab5d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_240",
+      "test": "tests/test_release_240.py",
+      "test_sha256": "2c3d134e39365f519f6c4f7c5ef3f3c23086b29bf59b17271062dbf5964ae7ae",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_240.log",
+      "log_sha256": "a851473b11490b340c35ed5fdb70501961ddb1f4fc7dd29386b9600a175044db",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_2135",
+      "test": "tests/test_release_2135.py",
+      "test_sha256": "0ce795325a09e941315acdcf9018a91fffbb2937f9b21b7a2288d954808f8fd5",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_2135.log",
+      "log_sha256": "f652d53aaa6f89dc1faccc3e104d819e39e600285a4b02eeb75934634f43e281",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_regional_rifts",
+      "test": "tests/test_regional_rifts.py",
+      "test_sha256": "0d1c2706247160c6f1b7654e72d9762ca5a24e46d6a56d9f066ae6d98ccf760b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_regional_rifts.log",
+      "log_sha256": "cc2f44f104150342b7cf0909b8c4454161d327a6dcdaa46f8a1c0d8fbafeeb02",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_272",
+      "test": "tests/test_release_272.py",
+      "test_sha256": "e84d88bf6cd864dfe0ade494cb98bcc78ed08ee6814cf2af48b88bc80722c7fa",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_272.log",
+      "log_sha256": "3b6ed2dd906d95fe7cdbc2df10665a4b0704901422e633c766dd1ace45149806",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_251",
+      "test": "tests/test_release_251.py",
+      "test_sha256": "852acef4ba6ca51da3c9ede8f301dbb72d3635d3bce0a794d35b7e6ec71a940d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_251.log",
+      "log_sha256": "6eb97605c05ab19c181aacc234d353824b2b707966b940efba2096d0a21e90b4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_270",
+      "test": "tests/test_release_270.py",
+      "test_sha256": "c38f0c59590a66c71cb9d21cbc3b66a97b1b461e05020c8255ca2bcfa5cca19a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_270.log",
+      "log_sha256": "ec888529040ad4b74dcc70d6a7b0e68cd15585b83bc6cc8625dfe028aaf536db",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_280",
+      "test": "tests/test_release_280.py",
+      "test_sha256": "d2270db82c1fdd611f64acd8388921bfc808793a7efa9986414ceb4eb109b381",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_280.log",
+      "log_sha256": "2e12a57740d0d01b028eb69b5eae6e520e39d368e89e03357ca4a70a720ba08c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_301",
+      "test": "tests/test_release_301.py",
+      "test_sha256": "3f32c243069d9e2e9f4730aa80061bb6ecc242320cc3ada8a265c437ae5ab7a8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_301.log",
+      "log_sha256": "b84a99292f0b3b452272208e0e9d4a52e1b1d67f456707565a1b059fca73916e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_restore_threshold",
+      "test": "tests/test_restore_threshold.py",
+      "test_sha256": "43ac2622b66a859235ff660457b291d9739d869146e7db12364d675ea4bbedfc",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_restore_threshold.log",
+      "log_sha256": "d48d23d6efd9d6fb3945793c29b9787a6aaa41070f4fa79ad839093d729c7249",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_runtime_config",
+      "test": "tests/test_runtime_config.py",
+      "test_sha256": "b9a29535e8b8158eed14d7d7a5bdb9e6cd545ecb05ad248e0e46692872799221",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_runtime_config.log",
+      "log_sha256": "31fef25b5757c35132e224eed593d551c017d09a1032d46ab7ba01f763670dc9",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_runtime_paths",
+      "test": "tests/test_runtime_paths.py",
+      "test_sha256": "7280bbc11ca5bc9245d02e6d602faf4b97e747075a7a25dc2a922d1ba8def39a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_runtime_paths.log",
+      "log_sha256": "0aad6c1988e76053b5306e77229b98918ffab665827794d36f574ce280d6066a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_rules",
+      "test": "tests/test_rules.py",
+      "test_sha256": "321deaac8809a49ac30f5a89737be963efb4c98884ee0bcd61efc44a4f2a3663",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_rules.log",
+      "log_sha256": "0012f21b38199d6a4b32a6d07691454db06c727c6054d81d643a3a7ef07c4ead",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_260",
+      "test": "tests/test_release_260.py",
+      "test_sha256": "25d0dccb6040e81ed282b39604e49d82aa07099f52c8483ed6f1e8194d47fc52",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_260.log",
+      "log_sha256": "4a0df7a662e22f559ee6d9fb1841b7e7eb1eaf63b650c9c1565c819c2c28f45a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_250",
+      "test": "tests/test_release_250.py",
+      "test_sha256": "2dad9ace00d4ca3f0381af1d3cfba72b3fbc7b98ff389ae40270a87fcdd8b990",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_250.log",
+      "log_sha256": "071dad40662817477f920b4281254fa90186873941e69d628311f9a1386aabad",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_royal_factions",
+      "test": "tests/test_royal_factions.py",
+      "test_sha256": "36762bff46c310e40c1aa9cd7192724d27ee67fd6de6867ee6450e4a6e2391df",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_royal_factions.log",
+      "log_sha256": "f450e5b1b4965fcba2c2860da718cf03f7a31544e6c8ecd7e436492398d0c997",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_sage_inner_outer",
+      "test": "tests/test_sage_inner_outer.py",
+      "test_sha256": "5671e70a6cab63ed73ba45faee20e87e0331e44fc8e7cda6911a70fee76bb0f7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_sage_inner_outer.log",
+      "log_sha256": "a616f81bebf202530496ea86b1b4a0c11073b76b06aaacde2c50f1a880fc7e3c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_save_deletion",
+      "test": "tests/test_save_deletion.py",
+      "test_sha256": "ba2dcd342e0c7b1c348aece2ca10e5ba50d156a45724246eed0a0abd6ab151c1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_save_deletion.log",
+      "log_sha256": "b4aa8608d4bab97aad06171e2c2958e4d203460d34e02348a564947b1d2497dc",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_271",
+      "test": "tests/test_release_271.py",
+      "test_sha256": "6ab0e5abec997771f879a345cf68a62861d673f952edf35a9b5d6e5baa855f28",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_271.log",
+      "log_sha256": "598a3a736ba072e1741028171079c99d8ec1d9a0e01e86e15b6af005a85b0fee",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_sage_story_chains",
+      "test": "tests/test_sage_story_chains.py",
+      "test_sha256": "87d79436c8b4ae1688b0f0180bb88a17161d7c5b85dcb70345a59088869cc259",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_sage_story_chains.log",
+      "log_sha256": "5f7b2e7cfe9e6598f9326e9797c75dea6a96581e41409cc0f13eb6166642a1f8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_sage_way_dlc",
+      "test": "tests/test_sage_way_dlc.py",
+      "test_sha256": "9ff53218f18a1590f8c52244b79ce319729863f9c9fe3fbdd8e4e04037e65e3a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_sage_way_dlc.log",
+      "log_sha256": "d4fd6a55c932eddd543bd69baa1c5a44a6f54f24e96654bf2062c4e9c5e1a272",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_release_290",
+      "test": "tests/test_release_290.py",
+      "test_sha256": "70d7f79a68e6c22ff67d7d5d97bb6923a068f0d5d63417fe5b416e9ae3d94a0d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_release_290.log",
+      "log_sha256": "b95b24f1cd8d8d9696152f37c015282b9f30df2f599071b67e0e2e1ba81058e4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_second_nascent_death_audit",
+      "test": "tests/test_second_nascent_death_audit.py",
+      "test_sha256": "f9bdd0d2b08f4808145b9eaf8b11ce243a51b8e1af4af8d8678703f2ce11c3f1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_second_nascent_death_audit.log",
+      "log_sha256": "5cd59d4b4b4ed481be8c50ba75ce8fae04c374147b766e6a2a187cbeaaf55b31",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_save_transfer",
+      "test": "tests/test_save_transfer.py",
+      "test_sha256": "62e00e4a042aac0f406e02d7b065430db79b0e48986a88cb57309de56be1ce6f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_save_transfer.log",
+      "log_sha256": "95048cef0ada00790178eafa80c5fe6b32307c488b7cd857abf60dc205fb02c4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_secret_arts",
+      "test": "tests/test_secret_arts.py",
+      "test_sha256": "813354ffc84f7297faf7248bf69cae9c9e177869497009285bdfc5918a4edf1c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_secret_arts.log",
+      "log_sha256": "132d960f8e7af60d69fb13791dc5b0ee5d94d13106fe975bc2427e83831cd846",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_sect_leadership_2130",
+      "test": "tests/test_sect_leadership_2130.py",
+      "test_sha256": "fff646ec1fb6a5ce964bf0c545e5cd63ac3fd516447f57c02bb6bde7093792ca",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_sect_leadership_2130.log",
+      "log_sha256": "bf91b0683d478a8e606eb858bb3aceba6ede23b569cb5170bc6150698ab20ef3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_snapshot_views_batch3",
+      "test": "tests/test_snapshot_views_batch3.py",
+      "test_sha256": "c370bf96cbdf1f2763579452037535c8a413975590ce3d88ea4f42d27f3ab90a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_snapshot_views_batch3.log",
+      "log_sha256": "ded2c3a9cf9a3c0fcc73eb771d1b1c1fc92894175c41b837170dde887fd82d13",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_silent_events",
+      "test": "tests/test_silent_events.py",
+      "test_sha256": "44ac8634800f1ed72669ead5c7a3a1103e13dbf0d9ca4d0a485a50d7d10c33c7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_silent_events.log",
+      "log_sha256": "d396f7d4e4763358e778e7ae6a25666b4ad8249a1388521bcfd2f333d19b8233",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_session_reconciliation",
+      "test": "tests/test_session_reconciliation.py",
+      "test_sha256": "c66357ce00099b6269a672fbbb9e1bcd0d90f4c62ad924490489285d4e5bcf30",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_session_reconciliation.log",
+      "log_sha256": "242b546a981b65c6316c8305869ca04b46d0ddbdd4c87045369e3edca8f72223",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_soul_followup_audit",
+      "test": "tests/test_soul_followup_audit.py",
+      "test_sha256": "ae33bbb2c7b56eadfe52fcb4c3751e1e10fded55c06a1a7d59cf4466fc307b19",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_soul_followup_audit.log",
+      "log_sha256": "e7b6a3b88ca26c04b41d37f022b856453e041c517a2da0a9d3c9113638c3dedf",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_sect_tasks",
+      "test": "tests/test_sect_tasks.py",
+      "test_sha256": "38362433d3d7cf9abea409dc40026532df1fc53ab33ffc74e36d217846eeceb5",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_sect_tasks.log",
+      "log_sha256": "fb617e9423ff580157230a5141bdbf701529059a5d76846457d3903468d4a6d4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_secret_art_training",
+      "test": "tests/test_secret_art_training.py",
+      "test_sha256": "be58a406fc7eda25ecdef03d80dfe65d6b0ef91d0b57dc08e51222ac05ec1a7d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_secret_art_training.log",
+      "log_sha256": "f0f89a6b8ad7958bbf6e55a10cc4448a1175796eb87b4c668dbba7bd61119cb7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_soul_loadout_recovery_audit",
+      "test": "tests/test_soul_loadout_recovery_audit.py",
+      "test_sha256": "e6f86886555f68a3c8736972d1c0ab47225394c5bc8f09a396d9ea8a67b9ea87",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_soul_loadout_recovery_audit.log",
+      "log_sha256": "af21b0f5583729b1ce9d998978441da578346894f7cad636fd7e4f4c2a054984",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_soul_time_boundary_audit",
+      "test": "tests/test_soul_time_boundary_audit.py",
+      "test_sha256": "9201bea343c49187ca28e9b167fc0744c05c79ef411b69406c550d9c3cffa688",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_soul_time_boundary_audit.log",
+      "log_sha256": "aa7a93552b725ae94e2e2709607c8fe0da52a545140ca44a92f71c515471e6d3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_soul_secret_adversarial",
+      "test": "tests/test_soul_secret_adversarial.py",
+      "test_sha256": "7acc99e749afffd9e5755aff3aac44be71bd30c49a0589dd0a7f0ad8442843a2",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_soul_secret_adversarial.log",
+      "log_sha256": "7c0ca93b199e5101721221382b85a3ce6465db33e27456b53b41c2b8d5788520",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_repository_followup_fixes",
+      "test": "tests/test_repository_followup_fixes.py",
+      "test_sha256": "af9aeb58e4a78cd5d00410b9496a32acae086b8d75277b3467fc55d453353406",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_repository_followup_fixes.log",
+      "log_sha256": "68c71380059b2e9d8f4224f762c7aea66afb3fbc40296f4d2189c666851ef5e9",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_spirit_field_update",
+      "test": "tests/test_spirit_field_update.py",
+      "test_sha256": "7c5064dd9a6e1bdd5bb483f6aeca2b42b40bea6f8a3bcf00c60d68ac0d4e8a66",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_spirit_field_update.log",
+      "log_sha256": "f506b3b9637654519be332b86fad0795c25c317bf9a92507447f04880e942803",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_storage_queries_batch2",
+      "test": "tests/test_storage_queries_batch2.py",
+      "test_sha256": "ab7fab30fedfe2c9135d9d7491558f2ee96642659d6d219dc8f4e856d0894482",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_storage_queries_batch2.log",
+      "log_sha256": "fc26feb09cb454c38a33dfb0df63aebbf5241d56737de1f66793ea948b29ea17",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_soul_lifecycle",
+      "test": "tests/test_soul_lifecycle.py",
+      "test_sha256": "d5822f24a67d9b244cb2c36b4a7a67ea14fb8e2655098d53f9ea6aefbd0a6cf8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_soul_lifecycle.log",
+      "log_sha256": "75f18d12dc54e09af6ca81f66fa24f63889149ef88469c3be468cc1bc13aed88",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_spatial_talismans",
+      "test": "tests/test_spatial_talismans.py",
+      "test_sha256": "070567dbf73aec91f7ed10fa28247165d3f892d2eadbc870ad0330f6c10e42b2",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_spatial_talismans.log",
+      "log_sha256": "dfa5ec87ab3e45d3767fedaadad76f7bb2b78fae7db90c4da7f08342fb57787d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_story_achievements",
+      "test": "tests/test_story_achievements.py",
+      "test_sha256": "d8fada7cda3477aec41c7130778d2019e4e83c4c20f1ff89596f89c391550e46",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_story_achievements.log",
+      "log_sha256": "7a507aafaeb53c10fdecd1427daffbdf791381878703c6322805a7b1676ec166",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_strategic_dispatch",
+      "test": "tests/test_strategic_dispatch.py",
+      "test_sha256": "f388273d8fdf4462741fb7825648fca543303224806eae13ae4ea62b7b5c5723",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_strategic_dispatch.log",
+      "log_sha256": "7360e3de221f8a606906900740f748ea15c9ad705d8d65de686795d3dceae237",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_strategic_war_audit",
+      "test": "tests/test_strategic_war_audit.py",
+      "test_sha256": "c0397e654a39d1f037c1d45077ced635fe7f39cd9c90d25949c2d80216b42db8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_strategic_war_audit.log",
+      "log_sha256": "43cce5c376d2fcc52fa82985b7f82289c4a85a155dfa3ff9ea2ff6701d273fc0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_system_composition",
+      "test": "tests/test_system_composition.py",
+      "test_sha256": "6d41ea41c48d3b035897a901f7321be3237f99059e2987a796b43fe5695fceaa",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_system_composition.log",
+      "log_sha256": "266a3c8e8b6ed9165f56312e231f76d133f148f0c9ecd8c9e6c82871a488c8b6",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_survival_settlement",
+      "test": "tests/test_survival_settlement.py",
+      "test_sha256": "91c3987abed68048b536e405b7ca705d17aeef8f955c64eaaddf7dc1f00f914d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_survival_settlement.log",
+      "log_sha256": "764d14bd75b5596aac371390d53ee0938a64c2cfccc51df460c2dec24ac26518",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_strategic_peace",
+      "test": "tests/test_strategic_peace.py",
+      "test_sha256": "a31a38406ecbed65881a9f82a22c24416c5cf423014bfcb49339d310129c179c",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_strategic_peace.log",
+      "log_sha256": "d8d5e9326f12e734b795b2850b3435ed31958b0d0584d4d7029b85d8d602d0e8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_system_layout",
+      "test": "tests/test_system_layout.py",
+      "test_sha256": "41519fbe010458b79541a044a521609b0db508a0c674940cb642f1c09a577c39",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_system_layout.log",
+      "log_sha256": "a73af2b8912424f0e6afd06d87ae12c4548000d53519bbd271bb986d4008e075",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_strategic_war",
+      "test": "tests/test_strategic_war.py",
+      "test_sha256": "c309c2de08f352d77233f0b85d566aaef06f2bdc03b7186909983192a2d16910",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_strategic_war.log",
+      "log_sha256": "d9080a18d456565527fab05424531775a0040a377c45415bbc7f70dae770bdf9",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_temple_art",
+      "test": "tests/test_temple_art.py",
+      "test_sha256": "2424ee5a02961de5536c3e666de69c7cdd91793ed564619698bd4bcfabcd4fdd",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_temple_art.log",
+      "log_sha256": "671faf9b2eddb508e13100b4075878c25c9a00476cc1276b41cf3ca2bdd2f177",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_soul_secret_stories",
+      "test": "tests/test_soul_secret_stories.py",
+      "test_sha256": "182f065ba85dea04118f169afe993de3bff8fef1493eeeaa6338df4a0f32db8b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_soul_secret_stories.log",
+      "log_sha256": "4e315f5fe993cfb1c1f5990f88942654c3de0c129e4d081fb563f4e6a74222d3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_swimwear_skins",
+      "test": "tests/test_swimwear_skins.py",
+      "test_sha256": "18ef17bf87ac2765719faab340bf54c75a5104ddfa357a22031671760067de8a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_swimwear_skins.log",
+      "log_sha256": "0c03f305eb5d987652d1cda7b5d3c50e55abec2133ca5557ac25108b517481d8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_technique_leveling",
+      "test": "tests/test_technique_leveling.py",
+      "test_sha256": "96dfe4c17871556663f82b216b5b538568cb3d5a18b6d64a88b85e987630e7a4",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_technique_leveling.log",
+      "log_sha256": "e245d9f2135c5619121bcfa402549870a5046e2f4ccc286b576c03d93fecaa77",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_technique_names_332",
+      "test": "tests/test_technique_names_332.py",
+      "test_sha256": "4f69a3123758a7d028dab59ba89dd6b6e851939751249774ff1d9924bba3a5b9",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_technique_names_332.log",
+      "log_sha256": "fa00469e688821a2afb259e72c00d2c6ae971e328d4d15452b74d3cc6afc76fa",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_three_group_dependencies",
+      "test": "tests/test_three_group_dependencies.py",
+      "test_sha256": "9648d9a65b7428802a0590de4d48987f99a1d73aa68a7d9e86613333b3036928",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_three_group_dependencies.log",
+      "log_sha256": "169933e33e0c8cc4d62d974949c18a87d0d48ca56a8879f129b924d5c883e142",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_tianji_theme_rules",
+      "test": "tests/test_tianji_theme_rules.py",
+      "test_sha256": "28b5da9e32508b34623206de3e418e45065ac6648e7b0d08728844684e69c5df",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_tianji_theme_rules.log",
+      "log_sha256": "82491c008e34f6936e725b2d005bd200e3883de3a0aeb3bb54122c174514e1ba",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_spirit_inheritance",
+      "test": "tests/test_spirit_inheritance.py",
+      "test_sha256": "8aeac5d229ace2ea393e1c3b13789621a30ad20d74e83ce288b37ee95ef722d6",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_spirit_inheritance.log",
+      "log_sha256": "2c1ff628a10a794bb4b62fd7465469ab3d3350dae0b8721cdd11629d0c51e5f2",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_tianji_artifacts",
+      "test": "tests/test_tianji_artifacts.py",
+      "test_sha256": "3f0f8dc03d74446b21bd1114e56e5061d121d519e4485bbeaeb8d2ea7f62f9eb",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_tianji_artifacts.log",
+      "log_sha256": "e11343be31cbc95c53ad7109b86504cce4970100fd2f06eb4766db5b00fbbef1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_talisman_economy",
+      "test": "tests/test_talisman_economy.py",
+      "test_sha256": "cf340b618725d04b589139fc77030cbe039ad32509bac7ea87fbe6d5a2867f6f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_talisman_economy.log",
+      "log_sha256": "093d6e60f4296b7ae07fe9be0b6dc93570faacae5259f99114c7bded8b88075b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_time_flow",
+      "test": "tests/test_time_flow.py",
+      "test_sha256": "d098900ccf0d380f4a05234b21f4131e52771c4241757c8fc7aac68f8495d890",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_time_flow.log",
+      "log_sha256": "713410a0ffd1adc3b82135f1d7dae98dad1cbd1ff32818ef8fa18f6f35d12fe1",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_travel_relationship_2160",
+      "test": "tests/test_travel_relationship_2160.py",
+      "test_sha256": "3fce75a3a1c4858e63195f20d9834a26fa4eb1d8882c2219f7a6959c76839c62",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_travel_relationship_2160.log",
+      "log_sha256": "c81f46cc33606f6144403dbe1463674570867370221d1877b77180245a958cd0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_trial_pressure",
+      "test": "tests/test_trial_pressure.py",
+      "test_sha256": "9365922d0bdc514082f90bad005b459d87a5e6a7d3de5bda06e1b78c5f88d6c3",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_trial_pressure.log",
+      "log_sha256": "c6683027d7da025abbdf7f69c59022f0b3857e2dd137a32050a8d21e7d44b14e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_ui_preferences",
+      "test": "tests/test_ui_preferences.py",
+      "test_sha256": "412dd12d901f97dec38b979e67d69ab42d9398a0f47504ddee18a272b4e0a329",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_ui_preferences.log",
+      "log_sha256": "0f489d713b6c24ebc8ae6524c988c9d3f5e1b8aead9309e30ed38ac0806a348b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_tide_skins",
+      "test": "tests/test_tide_skins.py",
+      "test_sha256": "f180c5f2437f7534c69c4158c5ed6a2495f609e5c4af16e72026df9dad2a2bf9",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_tide_skins.log",
+      "log_sha256": "0fcf8143097cf2e714d394d547d411b8a4d2a1621ae7553b3c5f5cef2e076855",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_transformation_system",
+      "test": "tests/test_transformation_system.py",
+      "test_sha256": "90ade2d5f031b85da511e9fcf91bbf589667fd4c7027ec67bd1038f535c9dd01",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_transformation_system.log",
+      "log_sha256": "a3dafc5b9210880c000b78011bb1769f9e7e486b3e58d6dcd05454b6d490167a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_upper_social_351",
+      "test": "tests/test_upper_social_351.py",
+      "test_sha256": "61983aa80d0c9d478e1408609c79345326f5d881d4636470c533221d77983750",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_upper_social_351.log",
+      "log_sha256": "811bbee763167b060144e8d9b623fb10ecf33b559c834548ab74fc91cdd018c8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_territory_system",
+      "test": "tests/test_territory_system.py",
+      "test_sha256": "560fc19485380f1b599cf816c34570864f6123484837a8b4fcdd68199d536f21",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_territory_system.log",
+      "log_sha256": "d6cff8dfcae067d8d76681eb4dd443dcaee469680402e1684505c26fcea0956e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_upper_breakthrough_calibration",
+      "test": "tests/test_upper_breakthrough_calibration.py",
+      "test_sha256": "a0ea0ed4499f20d098f024b0a1fbb36486d72fbf7f7d4c83a4c21a723a089b0e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_upper_breakthrough_calibration.log",
+      "log_sha256": "1b09aa31293ee8c1eec054a6fac7c3208a4df3f06414cd920b23bfd10c73ead8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_tutorial",
+      "test": "tests/test_tutorial.py",
+      "test_sha256": "7fc4b571f460bd501f509b2811f212ca7878e07c0561978255e0b0e38b7d8895",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_tutorial.log",
+      "log_sha256": "9c054eb2298e196b8e2d7b58e7bab5d78ad1c2a12f17eea9a58061638ed51409",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_update_1592",
+      "test": "tests/test_update_1592.py",
+      "test_sha256": "2f8ad4ddc7c893bed645a3b7ed9f4f815760cd482d1e0c13dfadc6118a7b05c7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_update_1592.log",
+      "log_sha256": "b09c248a222a9a4e8fe13714e201fed7bdc01a1805ef4790f083568b5237cf1f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_visual_catalog_scope",
+      "test": "tests/test_visual_catalog_scope.py",
+      "test_sha256": "8d5a9a453efdc748a805607443ec1527c73c0e8e965d73ab12b6f183c61d407a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_visual_catalog_scope.log",
+      "log_sha256": "0a3547571d39b6c79396b4872c6864efb8d7d2da2d71fa4d3f91fcfbadbe667c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_visual_selection",
+      "test": "tests/test_visual_selection.py",
+      "test_sha256": "aa0c04b44272a2085e4a10daf4a172493acc9762e2212b42d693bd3fd91d8f80",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_visual_selection.log",
+      "log_sha256": "398f6b87f49b2848247dfd3cdd9ba256daffabd8036df3f0bc502063efea5ed7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_visual_release",
+      "test": "tests/test_visual_release.py",
+      "test_sha256": "00713cb2737670eecd37edba1abba3d38c5fe4809d0bddb0667b4a0d5b8b74e6",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_visual_release.log",
+      "log_sha256": "0d1a5fe9f45cb4a227ab92b6a41e8122b49c17d76d2926cbc3749f6e16536edd",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_voisinage_appearance",
+      "test": "tests/test_voisinage_appearance.py",
+      "test_sha256": "a8a4e4ee8c15394c0d1fdd835044cf723158aa378730afb8a748f1e5dff37cf6",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_voisinage_appearance.log",
+      "log_sha256": "4de7551dcba31f9761a54c5db5c3b77440cc605d389ccd19b54401255b7142c8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_voisinage_effects",
+      "test": "tests/test_voisinage_effects.py",
+      "test_sha256": "d08efea97c93162006024b79edf26cb1303affcc177f846bad3a55dba4b5c131",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_voisinage_effects.log",
+      "log_sha256": "966e4962326b1c0a58a8ae37f7fbec7d1ee429ab69193cde0404d5d7c6f709bb",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_upper_institutions",
+      "test": "tests/test_upper_institutions.py",
+      "test_sha256": "788a6bf72985b87e217538c32cc52f59e67964afcb72a8988cd0ba346b496e36",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_upper_institutions.log",
+      "log_sha256": "d2b7a7aff41fb67b58ad2f4132e989c1bbe45580619ea130b126ba4eae6240c5",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_upper_voisinages",
+      "test": "tests/test_upper_voisinages.py",
+      "test_sha256": "12132b8a2c6d2d39b25f720979a77e1b78d1e217d977f66657cb9be175eec4f8",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_upper_voisinages.log",
+      "log_sha256": "0e5dd5151dba7147917d76b23f72fb6d5202f4b359862ad391a5da82e9019d09",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_war_logistics",
+      "test": "tests/test_war_logistics.py",
+      "test_sha256": "ef99910273a7b63bae4d8dfbf293258f03c39cc9fe8b1935474bb77fe76b4a13",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_war_logistics.log",
+      "log_sha256": "703ba60c5548bed9848b943f021f5ec1501a25933720903f6b5d259b6afa9287",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_war_coalition_fixes",
+      "test": "tests/test_war_coalition_fixes.py",
+      "test_sha256": "8edf38ce401491f9671e410cb6bc27006d76b7b5ee7a34936c36b252881501bf",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_war_coalition_fixes.log",
+      "log_sha256": "2e7ee73f83e3431d426348fcc2cd8410a85a3d34f0bdb84943d96a905906cf86",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_war_negotiation_fixes",
+      "test": "tests/test_war_negotiation_fixes.py",
+      "test_sha256": "5068b373302bcfdd57223856a6b5075c50ebd039c8a33a26da4266d99ca9e37f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_war_negotiation_fixes.log",
+      "log_sha256": "709bec9d0a13fe23780dfedaa38339576f7c913b1692bda375a7d0659a198b57",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_upper_world_progression",
+      "test": "tests/test_upper_world_progression.py",
+      "test_sha256": "034e7184b823fd7400770b160d5488b722d5271cdc4d4e8582c0e1eb652ee404",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_upper_world_progression.log",
+      "log_sha256": "1ac6eee725f819f5834661d06d01b4e4010138c1d1bb18a93662fd7e9ad316cd",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_tutorial_walkthrough",
+      "test": "tests/test_tutorial_walkthrough.py",
+      "test_sha256": "b58c8ea1a96c53b4c8b8f8311a90ec551e746dfa4348ca0c177d5199d3240dcb",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_tutorial_walkthrough.log",
+      "log_sha256": "9cc5856689e67e60f2be40d2f4f5dcc00b71a12616a0d7754377b3d506e61e4f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_war_performance_update",
+      "test": "tests/test_war_performance_update.py",
+      "test_sha256": "ab04ff00b6e122326fbf0e16c1104ddc8382edde36de76a157452c1c6fcdfc04",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_war_performance_update.log",
+      "log_sha256": "3add8d4b405dfaa0440fb1ca8706c9f015faeb0c99d7df90934c34f44dfc856d",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_windows_release_evidence",
+      "test": "tests/test_windows_release_evidence.py",
+      "test_sha256": "46cc18051c0ae21c9a7a19778eea99cf6c27a0b7140b327f2720a6771007c982",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_windows_release_evidence.log",
+      "log_sha256": "bb950a96f9a05a18d7d3100c6f02fc7ac1a2266512c3b681e7ab9f3e61536d7a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_war_presence_fixes",
+      "test": "tests/test_war_presence_fixes.py",
+      "test_sha256": "97afbafc4021e4190a98b5b50600caf15097515677d658352c13bcbe674f39d1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_war_presence_fixes.log",
+      "log_sha256": "f4fb057252262952726cac8d0d1081a24f8f8e839517e27b0b6594c70482df8c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_westward_schedule",
+      "test": "tests/test_westward_schedule.py",
+      "test_sha256": "db7737e033eb36d4f0a5004d552b9e80242b016c51a66d3a98fb3cafe146a984",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_westward_schedule.log",
+      "log_sha256": "a9941745ca627bd3ce842598176c914fed691eb7fc20fa47541a5ba78ed79671",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_world_state_update",
+      "test": "tests/test_world_state_update.py",
+      "test_sha256": "207bb9635ca4e6d86160a51b04e9fd137667afbe7d3d4c2a2a9eb0a7a5da5607",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_world_state_update.log",
+      "log_sha256": "a80e59b76032b5335601003a4a423a559765e73a95bd8e89fed56f0ac5cb86e3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_world_transition_system",
+      "test": "tests/test_world_transition_system.py",
+      "test_sha256": "d57af0550c439ebc5cac50b6020a28c208ebc44bf6a3d7be3c7d237e51304934",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_world_transition_system.log",
+      "log_sha256": "2193e4983843a86dd53df1c56c37d05daaf398089a0ec7bada67457e046f1840",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_westward_development",
+      "test": "tests/test_westward_development.py",
+      "test_sha256": "792a4086e8ca7c1af4db2ccb79f85e6505564df88c65b1faa4d9c2fabaf1c9bb",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_westward_development.log",
+      "log_sha256": "4af6e4ffb2e37971ec1550ed14a761b5a4915305bbfed1f9c34b30b2fcadc503",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_wuyun_materials",
+      "test": "tests/test_wuyun_materials.py",
+      "test_sha256": "9edd42af3e3147d5dd20e8f3045c02a6f9b22642e4ccef9220d66b0dcd9b483d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_wuyun_materials.log",
+      "log_sha256": "ae0032838802e01b8c683f9b66df28ec36bf2591be466957977ee0f00740f1c2",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_yaochi_bulk",
+      "test": "tests/test_yaochi_bulk.py",
+      "test_sha256": "9278fdb33177ce5a2377f522e97d9dbe50fd44f35aff96dce57ed686fa13ef1e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_yaochi_bulk.log",
+      "log_sha256": "215c330ca586466f56932486726d37d4020673385f9daa1c3996e408362aed55",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_yaochi_governance_1511",
+      "test": "tests/test_yaochi_governance_1511.py",
+      "test_sha256": "93361e0a81a444ae0708f2423fcb040eb0d6f103f08157d3e36265292265300f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_yaochi_governance_1511.log",
+      "log_sha256": "6c35013a89522661ec7091f3a094ab4f3208b575d675444b61aa4ef520f7ac43",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_upper_teachings",
+      "test": "tests/test_upper_teachings.py",
+      "test_sha256": "d14bbc4ec33c3f66c2ae993f8011d0158cad2c6901ddac8e013010b404d0d2f6",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_upper_teachings.log",
+      "log_sha256": "8c23a4ee20eae695803589db5873b0ca0c4d9f50e589dc030aa8cb2d156bb025",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_yaochi_guidance",
+      "test": "tests/test_yaochi_guidance.py",
+      "test_sha256": "5c005817d3ea6002a4267f16c2e0bda936699e7fec79d45c9c1b95735e0ab70e",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_yaochi_guidance.log",
+      "log_sha256": "23811799fbfbbf0e541605b6e869a36bece98bc3316b60782ed23a40f759286b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_yaochi_fair",
+      "test": "tests/test_yaochi_fair.py",
+      "test_sha256": "56de2f59cf0e447c8bb606aef0bf882270c0653898438bcf5c6c3464867aa6a6",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_yaochi_fair.log",
+      "log_sha256": "3d028ff72314dd803b730be910c9947405cdee5eb3354d13e3d8c728f8bbaa04",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_yaochi_westward",
+      "test": "tests/test_yaochi_westward.py",
+      "test_sha256": "3d5303f860f1cd0d1d466d705beb0a29e4749bdc662d28742d75d5a7a4f9e936",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_yaochi_westward.log",
+      "log_sha256": "a952454e3f4c5d2750a257739daa6662a2efab81e0d827e804f0047274ed38f3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_westward_finale",
+      "test": "tests/test_westward_finale.py",
+      "test_sha256": "275140fa303becb2ded093f2c5d7c9363f1b12794e68d2b9f2028242e382a5c0",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_westward_finale.log",
+      "log_sha256": "20cd051d9aa87b3555fb832a4b1c0b2dce8240961abd10e0fcad990e1f767068",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_westward_ventures",
+      "test": "tests/test_westward_ventures.py",
+      "test_sha256": "f9a0969cc2fef49454bcbf58bb1ccb7e55ff88c14974cc1c939f2986cdcc908d",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_westward_ventures.log",
+      "log_sha256": "f6f3285ed0d9ea3d5a7a00d12563a394dc3bc016b52e51c869bd3ff23e94b73b",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "test_trial_sites",
+      "test": "tests/test_trial_sites.py",
+      "test_sha256": "2eff9081130a2c69e3d9329557cf1ad84552abbe9c67aaf76981f9bb2d102c23",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/test_trial_sites.log",
+      "log_sha256": "757d6efa97ee406c6f177ea3657a03303bacf5a36dd0681e7dd794c210fa0652",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "check_world_transition_contract",
+      "test": "tools/check_world_transition_contract.py",
+      "test_sha256": "088f4c204d03006b657b804214977b38a6cfb8999a1a85ca7164c6353fe87194",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/check_world_transition_contract.log",
+      "log_sha256": "518e156ccba3dfdc800ebc978024ba89a62c6a4f48445815c3819e82655a3f53",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "check_module_dependencies",
+      "test": "tools/check_module_dependencies.py",
+      "test_sha256": "cb00d39d81a9d61342a7adad510ca231d234a09c2df2ecf91ff785515b6fe792",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/check_module_dependencies.log",
+      "log_sha256": "68f45b1486b3dd95c9bb65e284831dfaa4f225d08d0d7181d0b33cd4a85fcb5e",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "check_documentation",
+      "test": "tools/check_documentation.py",
+      "test_sha256": "1cd45ee265e74869161768554c9f8efd3334c199e3cc0db253bc2c49030de1f1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/check_documentation.log",
+      "log_sha256": "9daa6bac86f1cd5f1d3913873f5d3b64dcf37c43621b4c08a997b1325cdf026a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_institution_development",
+      "test": "tests/browser_institution_development.py",
+      "test_sha256": "e018b0483dd69a43bc41fb7a7c782d6679f7f73eb021a6368aa8f671715a7dca",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_institution_development.log",
+      "log_sha256": "c65f5502b1bf84d4f1ce0d83b4c6612272cc9acafa0bc1a7bc82d7ede935d3d6",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_yaochi_westward",
+      "test": "tests/browser_yaochi_westward.py",
+      "test_sha256": "d75f9a333044284144ebefa06c6237ef59a13308ddfc96036e3f09dfd7b3f001",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_yaochi_westward.log",
+      "log_sha256": "56536a84927cc9ed4a585af8e1dc05317ae76a2a61d6caf5b59d5f428004d9c4",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_earth_temple",
+      "test": "tests/browser_earth_temple.py",
+      "test_sha256": "b747b22c39e3b4bde4c1a269275b2dff213620622841978ee38df322896fef89",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_earth_temple.log",
+      "log_sha256": "ffa6999dc88ca3de670bb7dd6f366363ab97b6f1c14ac4f0da67ee8ca793f1a3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_earth_network",
+      "test": "tests/browser_earth_network.py",
+      "test_sha256": "caa889a7882f264ceb61b5cbd0e659e174fc6f9d2ec3a09c205ce850fe01e01a",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_earth_network.log",
+      "log_sha256": "e18d0dfb978d8e38ac3a16454ba72b0a871a5304d66b7df8757585ca1e72bb36",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_earth_disputes",
+      "test": "tests/browser_earth_disputes.py",
+      "test_sha256": "21cd547ba6718bbc4d3168fefffcdb70196b7ad974080388f56f542976eb6b09",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_earth_disputes.log",
+      "log_sha256": "071a7d3ece4932038c336603d4b1193ecef7972221bafb6fd7342c0535201185",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_court_bureaus",
+      "test": "tests/browser_court_bureaus.py",
+      "test_sha256": "f227aa2d1419e9a49c4e0c6c225e16d9de8a88a7bea832b4ede3bf9297edb634",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_court_bureaus.log",
+      "log_sha256": "c0f96689f3eccab121848ec2d3cf095cf19c66832027b71ec09ba6d4f156fb8c",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_court_justice",
+      "test": "tests/browser_court_justice.py",
+      "test_sha256": "8366848b0b836dec8222ca8b77d9fd8c9ef96bd5a0cecc7e42344d46b20d22e7",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_court_justice.log",
+      "log_sha256": "f3017f37a19188e901ffbf5868d70d51c0987736349065572331daadeda87444",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_yaochi_fair",
+      "test": "tests/browser_yaochi_fair.py",
+      "test_sha256": "abde54c51fb63823725fbd7f16cbd75da0b65e3e52118cbf1db7922c415edef1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_yaochi_fair.log",
+      "log_sha256": "64867c26d0bff164604c41eccff58d1f9394ea96c0697d6908744bd4f6b1e705",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_westward_ventures",
+      "test": "tests/browser_westward_ventures.py",
+      "test_sha256": "b1f89aab8b9330a3b3ceec98f54dbf7779b3831f36de359e01c7f1fe793e2ed1",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_westward_ventures.log",
+      "log_sha256": "18640a2847d253cc34cd2319873f59ce6d01cf9cb63a52cffbdc9784d8192346",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_westward_finale",
+      "test": "tests/browser_westward_finale.py",
+      "test_sha256": "8023ab4644caf136f5462016d96b4826ea5e29f4681048fc3ac36e1a0fec1f59",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_westward_finale.log",
+      "log_sha256": "aef4cd3cdfc409a87990893083427eb1801b5a9c9524669cf4cbcb76db362ca8",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_dlc_controls",
+      "test": "tests/browser_dlc_controls.py",
+      "test_sha256": "e249e21a02d160eeda567bbba76478ac51636c8c29471791054426e520a24baf",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_dlc_controls.log",
+      "log_sha256": "1c2b6076e7d6887bb56fc04c54b9ffe292709a8f0c69c6162044a2c16b57d4f7",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_events_212",
+      "test": "tests/browser_events_212.py",
+      "test_sha256": "ec650b4efd75b94c55b1b44c3df4769d11118a92058e7ce0765f6623399bcbff",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_events_212.log",
+      "log_sha256": "f3fbc3e8363c410974fce864244e34ce1ab043f87dc3fcbe7778101bff70f6bf",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_desktop_navigation",
+      "test": "tests/browser_desktop_navigation.py",
+      "test_sha256": "f1fc997fef26eeecff1b4ad34023c7f212c7b905f45ed74e4c13dfb9e8ca0544",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_desktop_navigation.log",
+      "log_sha256": "792d8650b5400b64fb0e4e24c5674f05af55c368eac09e67ce3554be7a5933d0",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_caravan_trust_audit",
+      "test": "tests/browser_caravan_trust_audit.py",
+      "test_sha256": "73ce5ee8ccf40429e6f91bff92d46ed7a9c1d15662637f885d1cf96633ed3839",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_caravan_trust_audit.log",
+      "log_sha256": "f7832ee971aeadb0b6faf8c6c6a8d760cac872a9f558b93ef52cc8f37559d971",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_home_scenes",
+      "test": "tests/browser_home_scenes.py",
+      "test_sha256": "fcb829de98bd2a343a34f3a824c8720126d9af58c42fc4f1cdda007cabfca8f9",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_home_scenes.log",
+      "log_sha256": "a7a84709e1021c2e5f4ed4a52238cdbab7dd97bb041397f5311ea9249d8e4150",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_asura_governorship",
+      "test": "tests/browser_asura_governorship.py",
+      "test_sha256": "0d9fa1c5b2709da3d66ea6d41c5704c3d9589e5ccf00edf7b971788e94e6f697",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_asura_governorship.log",
+      "log_sha256": "dcc0a63965507df18e4c12c899b90487d8eaa3afb1f19912cf83211e4e6a0dc3",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_asura_politics",
+      "test": "tests/browser_asura_politics.py",
+      "test_sha256": "f21f2e938af60178a4539d2c55770ab6e45f1ac44d03d72c9ddcfb914fccf06b",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_asura_politics.log",
+      "log_sha256": "6739e641a51177ecb6b9c41664da0ffeebea32717f43771af484945587d5344a",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "browser_asura_military",
+      "test": "tests/browser_asura_military.py",
+      "test_sha256": "681e2bd5a07554e93453fcc3a7f579a909a0b3da308bec1343dda828a2d5bb24",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/browser_asura_military.log",
+      "log_sha256": "4dc11b2d92f59d2d833b657d40b675cce3c6f20fe8539492c25c6793f15c397f",
+      "status": "passed",
+      "exit_code": 0
+    },
+    {
+      "name": "save-transfer",
+      "test": "tests/test_save_transfer.py",
+      "test_sha256": "62e00e4a042aac0f406e02d7b065430db79b0e48986a88cb57309de56be1ce6f",
+      "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+      "log": "build/full-westward-20261111-225429/save-transfer.log",
+      "log_sha256": "c3348845ab2f13b5e1983b8f30ca20324186658878084f6cb9e861d49a436652",
+      "status": "passed",
+      "exit_code": 0
+    }
+  ],
+  "regression": {
+    "collected": 8380,
+    "skipped": 0,
+    "failures": 0,
+    "errors": 0,
+    "passed": 8380
+  },
+  "save_transfer_smoke_tests": 21,
+  "save_transfer_smoke_in_regression": true,
+  "save_transfer_log": "build/save-transfer-380.log",
+  "inputs_sha256": "9ba52aee5012b26cc8d004dc9caeef3496995030ff85ee79667702abfa181d85",
+  "regression_scope": "full-repository",
+  "collection_manifest": "build/full-westward-20261111-225429/manifest.json",
+  "collection_sha256": "4d5f676bbf4096c8a736b54f0df29219b5c35e0e11217821450b2a7130dbdf8d",
+  "platform": "Android 12",
+  "android_version": "3.8.0-android.102",
+  "version_code": 102,
+  "apk_sha256": "657a360f88e70490f89c9b874b7fc297eae8f86b38e0359e50ab9d51911b6282",
+  "native": {
+    "version": "3.8.0",
+    "apk_sha256": "657a360f88e70490f89c9b874b7fc297eae8f86b38e0359e50ab9d51911b6282",
+    "status": "passed",
+    "signed": true,
+    "device": "emulator-5580",
+    "android": "12",
+    "sdk": "31",
+    "logs": [
+      "build/android-asura-governance-portrait-380.log",
+      "build/android-asura-governance-landscape-380.log"
+    ],
+    "test_apk_sha256": "500b302c7118d61239e0ae245b302434fe9eeca368c953cb4b0a75432041912b",
+    "log_hashes": {
+      "build/android-asura-governance-portrait-380.log": "c9ab49647b22b27ab84ee620743b1f6b7bbb6f8439ea5cedd0bbea15dd38c4aa",
+      "build/android-asura-governance-landscape-380.log": "c9ab49647b22b27ab84ee620743b1f6b7bbb6f8439ea5cedd0bbea15dd38c4aa"
+    },
+    "scope": "Asura original office, provincial remittance, military escrow, orders, real return, stale recovery and rising/withdrawal; two palettes and twelve DLC colors, signed Android 12 portrait/landscape"
+  },
+  "physical_device_tested": false
+}

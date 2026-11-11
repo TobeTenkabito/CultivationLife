@@ -111,9 +111,12 @@ def advance(game,maps):
             from ...relationship_records import find_person
             controller=find_person(game,row['controller'])
             if controller and not controller.alive:
-                authority.relinquish(game,row,row['controller'])
-                authority.log(game,row,'原任身故，结束本人职责；府署与未耗公款仍归原机构。')
-            elif row['status']=='handover' and not rules.person_reason(game,row['controller'],row['world'],row['location']):
+                from .. import institution_garrisons as troops
+                if troops.active(row):troops.recall(game,maps,row)
+                else:
+                    authority.relinquish(game,row,row['controller'])
+                    authority.log(game,row,'原任身故，结束本人职责；府署与未耗公款仍归原机构。')
+            elif row['status']=='handover' and not row.get('asura_military',{}).get('order') and not row.get('asura_military',{}).get('conflict') and not rules.person_reason(game,row['controller'],row['world'],row['location']):
                 authority.relinquish(game,row,row['controller'])
                 authority.log(game,row,'原任在原址完成交接，未耗公款留在本府供继任核验。')
         if province.enabled() and row['status']=='appointed' and row['nominee']!='player':
@@ -126,3 +129,7 @@ def advance(game,maps):
             if not npc or not is_free(npc) or npc.world!=row['world']:
                 authority.revoke(game,row)
     runtime.advance(game,maps,sys.modules[__name__])
+    from .disputes import advance as advance_disputes
+    for row in province.offices(game):advance_disputes(game,row)
+    from .military import advance as advance_military
+    for row in province.offices(game):advance_military(game,maps,row)

@@ -33,8 +33,8 @@ def person_reason(game,identity,world,location,*,assignment=None):
 def priority(offer,policy):
     return int(offer.get('urgency',0))+ (30 if offer['category']==policy else 0)
 
-def choose(offers,policy,budget):
-    valid=[o for o in offers if not o.get('reason') and 0<o['budget']<=budget]
+def choose(offers,policy,budget,*,allow_zero=False):
+    valid=[o for o in offers if not o.get('reason') and (0<=o['budget'] if allow_zero else 0<o['budget']) and o['budget']<=budget]
     return min(valid,key=lambda o:(-priority(o,policy),o['budget'],o['key'])) if valid else None
 
 

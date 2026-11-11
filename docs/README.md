@@ -1,6 +1,12 @@
 # 项目文档索引
 
-- [修罗总督府实施记录](asura-governorship-implementation.md)：第一批本体授权与DLC府务分层、原建筑、原公款、属员履约及交接；后续派系与军权仍待实现。
+- [3.8.0王庭与地方军政发行说明](release-380.md)：本体3.8.0与修罗1.5.0、全仓回归及双端发行验证。
+
+- [修罗驻军与举兵争位](asura-military-and-succession.md)：原人物驻防、实付营务、道路调防、缓调抗命、实际战斗与唯一王权交接。
+
+- [修罗派系深化与地方争议](asura-politics-and-disputes.md)：真实任职影响、具名支持与担保、六类原账目争议、NPC裁决及本体／DLC分层。
+
+- [修罗总督府实施记录](asura-governorship-implementation.md)：第一批本体授权与DLC府务分层、原建筑、原公款、属员履约及交接；派系与军权见后续实施文档。
 
 - [仙府访古与七曜项目议政](westward-ventures.md)：三条原址遗府、四类具体预算议案、原席位表决与实际履约复核。
 

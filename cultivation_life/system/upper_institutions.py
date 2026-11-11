@@ -159,7 +159,14 @@ def run_action(deps: UpperInstitutionDependencies, game_id, action, target=''):
     from . import asura_court
     if p.world == 'asura':
         asura_court.ensure(game)
+        charter_token=None
+        if action=='governorship':
+            from .asura_governorship.rules import token as charter_revision
+            charter_token=charter_revision(game)
         asura_court.reconcile(game, state)
+        from .asura_governorship import military
+        if action in {'promote','blood_duel','answer_duel','yield_duel','leave'} and any(military.fighting(r) for r in military.rules.offices(game)):
+            raise ValueError('须先收束当前军政争位，不能用普通晋爵或换位战重写王位')
     if action=='work':
         begin_work(game)
         return deps.advance(game_id,'institution_work',1)
@@ -182,7 +189,13 @@ def run_action(deps: UpperInstitutionDependencies, game_id, action, target=''):
             from .asura_governorship.actions import settle
             try:payload=json.loads(target)
             except (ValueError,TypeError):raise ValueError('总督府请求格式无效') from None
-            text=settle(game,payload)
+            # Original combat casualties may remove dead title holders during
+            # this transaction. Accept only the exact pre-reconcile revision,
+            # then validate every operation against the newly reconciled facts.
+            if isinstance(payload,dict) and payload.get('token')==charter_token:
+                payload['token']=charter_revision(game)
+            text=settle(game,payload,maps=deps.maps,combat=deps.court._combat)
+            asura_court.sync_titles(game,state)
         elif p.world == 'asura' and action in ('blood_duel', 'answer_duel', 'yield_duel', 'appoint', 'build', 'decree', 'faction_decree', 'royal_tribute'):
             text = asura_court.settle_action(deps.court, game, state, action, target)
         elif action=='leave':

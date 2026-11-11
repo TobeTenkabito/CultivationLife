@@ -1,5 +1,9 @@
 # 跨界开发规范
 
+2026-11-11修罗军政：本体 `institution_garrisons` 占用原人物，原道路规划复用于 `military_movement`，仅同界原三城与万战城，无跨界军用许可。在途保持原出发地址，按实际年抵达再登记目的地，折返按已走路程耗时；拘禁、离场或实例变化不强制移回。原组织不能同时参加其他战役。起兵是独立争位授权，原址举兵、原人支持、实款、实际到场、原战斗与旧王身份比对均核验，原逐级血战资格不变。军费为服务预付款，非遥取实物。见[军政实施](asura-military-and-succession.md)。
+
+2026-11-11地方议事授权：通用公署在任许可允许原址调整公开使用权，并在公署未公开时进入；责任入口为 `building_projects.set_public`、`buildings.can_enter`，逐次校验原任职、原建筑ID、产权、固定地址与到期。NPC经原BuildingActor验证自由、实际到场及占用。没有添加永久users或转移产权，撤权立即失效。修罗预算／续任只可在王庭裁决，地方案须原址办理；原署损毁仅开放原城市许可下的工程请款、公款和在办项目交接。验证见 `test_asura_politics` 及真实页面 `browser_asura_politics`，详见[实施记录](asura-politics-and-disputes.md)。
+
 2026-11-11总督府授权：本体 `institution_authority.can_repair` 只授予原在任人对登记公署的重建权，产权须仍与原机构一致；原址和费用由建筑入口复验。修罗适配只为配置列出的三座原背景城市授权设府，不从公开访问权推导占地权。停用专属功能保留本体原资产访问及依法自费修复，不开放公款支取；原款只可交接上缴。无新增移动、跨界或空间例外，验证见 `test_institution_authority`、`test_asura_governorship` 与[实施记录](asura-governorship-implementation.md)。
 
 本规范自 v2.1.1 起执行。制定依据是[当前跨界审计](world-transition-audit.md)，不是把现有实现直接视为正确规则。适用于本体、DLC、剧情、诸天、商盟、空间、自动人物行为以及控制台调用。

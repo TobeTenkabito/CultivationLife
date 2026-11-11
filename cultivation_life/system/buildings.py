@@ -50,6 +50,11 @@ def find(game, identity):
     return next((row for row in local_rows(game) if row['id']==identity),None)
 
 
+def can_enter(game,row):
+    from .institution_authority import can_repair
+    return may_use(row,'player',game.id) or row['status']=='intact' and can_repair(game,row)
+
+
 def scene_valid(game):
     scene = game.building_state.get('scene')
     if not scene or scene['address'] != address(game):
@@ -59,7 +64,7 @@ def scene_valid(game):
     except ValueError:
         return False
     row=find(game,scene.get('building_id')) if scene['kind']!='construction' else None
-    return scene['kind']=='construction' or bool(row and (scene['kind']=='management' or may_use(row,'player',game.id)))
+    return scene['kind']=='construction' or bool(row and (scene['kind']=='management' or can_enter(game,row)))
 
 
 def _choice(identity,text,reason=''):
@@ -91,7 +96,7 @@ def management(game,row,node):
         else:
             body+=f"\n此处防御参照战力约{projects.defense(row):,.0f}。" if row['type']!='scenery' else ''
             choices=[_choice('destroy','拆除或强行摧毁',projects.demolition_reason(game,row))]
-        if may_use(row,'player',game.id):choices.append(_choice('back','返回建筑'))
+        if can_enter(game,row):choices.append(_choice('back','返回建筑'))
     elif node=='destroy':
         body+='\n\n确认后建筑立即停止使用，不返还工料、不补发物资、不结算人物死亡。城市保留原名遗址。'
         if not projects.owns(game,row):body+='强行破坏须达到城防战力，并消耗最大法力的四分之一。'
@@ -252,7 +257,7 @@ def action(deps: BuildingDependencies, game_id, action, building_id='', event_id
         if action in {'enter','manage'}:
             row=find(game,building_id)
             if not row:raise ValueError('建筑不在当前位置或依赖未开启')
-            if action=='enter' and not may_use(row,'player',game.id):raise ValueError('没有使用权，请先联系所有者')
+            if action=='enter' and not can_enter(game,row):raise ValueError('没有使用权，请先联系所有者')
             scene=dict(kind='visit' if action=='enter' else 'management',building_id=row['id'],address=address(game))
             if action=='enter' and row.get('subtype')=='cave':state(game)['cultivation'][address_key(address(game))]=row['id']
         else:
@@ -333,7 +338,7 @@ def public(game):
     rows=[]
     for row in local_rows(game):
         rows.append(dict(id=row['id'],name=display_name(row),type=row['type'],subtype=row.get('subtype'),level=row['level'],
-            status=row['status'],owner=copy.deepcopy(row['owner']),can_enter=may_use(row,'player',game.id) and not reason,
+            status=row['status'],owner=copy.deepcopy(row['owner']),can_enter=can_enter(game,row) and not reason,
             description=describe(row),dependency=row.get('dependency')))
     return dict(types=list(TYPES),rows=rows,can_construct=not reason and not game.pending_event,
         can_build_city=not reason and not game.pending_event,
@@ -351,5 +356,5 @@ def attach_overview(game, map_data):
             dependency=row.get('dependency'),
             population=row.get('population'), population_name=projects.POPULATIONS.get(row.get('population')),
             use_name=projects.USES.get(row.get('subtype')), owned=projects.owns(game,row),
-            can_enter=target == current and may_use(row, 'player', game.id),
-            access=may_use(row, 'player', game.id)) for row in rows_at(game, target)]
+            can_enter=target == current and can_enter(game,row),
+            access=can_enter(game,row)) for row in rows_at(game, target)]

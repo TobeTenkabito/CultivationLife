@@ -3,12 +3,114 @@
   "systems": {
     "asura_governorship": {
       "enabled": true,
-      "cities": ["xiuluoguan", "chiren", "qianlei"],
+      "cities": [
+        "xiuluoguan",
+        "chiren",
+        "qianlei"
+      ],
       "term_years": 500,
       "required_rank": 1,
       "required_merit": 100,
       "required_regard": 20,
-      "construction": {"labor_units": 400, "materials": [12, 6, 3]}
+      "construction": {
+        "labor_units": 400,
+        "materials": [
+          12,
+          6,
+          3
+        ]
+      },
+      "politics": {
+        "enabled": true,
+        "period_years": 100,
+        "deadline_years": 200,
+        "renewal_window": 100,
+        "npc_budget_fraction": 0.1,
+        "factions": {
+          "blood_clans": {
+            "name": "血裔诸族",
+            "mark": "族",
+            "interest": "任职延续、举荐与修炼传承"
+          },
+          "war_hosts": {
+            "name": "征伐军府",
+            "mark": "军",
+            "interest": "工程履约、守府秩序与中央供给"
+          },
+          "free_cities": {
+            "name": "万战城盟",
+            "mark": "市",
+            "interest": "公署开放、交易稳定与实款采购"
+          }
+        },
+        "cases": {
+          "budget": "工程拨款",
+          "remittance": "地方上缴",
+          "personnel": "属员举荐",
+          "performance": "履约争议",
+          "access": "公署开放",
+          "tenure": "任期考核"
+        },
+        "preferences": {
+          "budget": {
+            "blood_clans": "approve",
+            "war_hosts": "approve",
+            "free_cities": "approve"
+          },
+          "remittance": {
+            "blood_clans": "half",
+            "war_hosts": "pay",
+            "free_cities": "retain"
+          },
+          "personnel": {
+            "blood_clans": "appoint",
+            "war_hosts": "alternative",
+            "free_cities": "appoint"
+          },
+          "performance": {
+            "blood_clans": "continue",
+            "war_hosts": "continue",
+            "free_cities": "cancel"
+          },
+          "access": {
+            "blood_clans": "open",
+            "war_hosts": "restrict",
+            "free_cities": "open"
+          },
+          "tenure": {
+            "blood_clans": "approve",
+            "war_hosts": "approve",
+            "free_cities": "approve"
+          }
+        }
+      },
+      "military": {
+        "enabled": true,
+        "capacity": 6,
+        "annual_service": 1000,
+        "order_years": 30,
+        "support_required": 12,
+        "reserve_years": 30,
+        "campaign_years": 200,
+        "battle_years": 10,
+        "bond_years": 20,
+        "operations": {
+          "enlist": "征募驻军",
+          "provision": "拨付营务军费",
+          "dispatch": "沿路调防",
+          "recall": "召回原军",
+          "order": "签发调防军令",
+          "respond": "回应中央军令",
+          "cancel_order": "撤销军令",
+          "press": "抗命追责与撤任",
+          "rebel": "公开举兵争位",
+          "assault": "争夺当前据点",
+          "claim": "亲战旧王争位",
+          "pacify": "亲征平叛",
+          "abdicate": "议定退位交接",
+          "standdown": "撤回举兵并归返"
+        }
+      }
     },
     "quick_start_presets": [
       {

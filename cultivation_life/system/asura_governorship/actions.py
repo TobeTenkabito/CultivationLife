@@ -5,30 +5,16 @@ from .. import institution_authority as authority, building_projects
 from ..building_destruction import rebuild
 from ..institution_ai import procurement
 from ..institution_ai.rules import record as agenda
-from ..economy.ledger import balance
+from .finance import bill
 from ..asura_court_finance import COURT
 from ...building_rules import ensure_state
-
-
-def bill(game,row):
-    target=rules.building(game,row) or rules.shell(row)
-    market=game.economy_v2.get('markets',{}).get(row['world']+':'+row['location'])
-    quoted=building_projects.quote(game,'rebuild',target,payer=row['wallet'],stock={})
-    reason=quoted['reason'] if quoted['reason']!='灵石或筑城材料不足' else ''
-    try:
-        purchase=procurement.cost(market,quoted['materials'])
-    except ValueError as error:
-        purchase=0;reason=str(error)
-    total=quoted['coins']+purchase
-    if not reason and balance(game,row['wallet'])<total:reason='本府公款不足，须先拨款或资助'
-    return dict(quoted,purchase=purchase,total=total,reason=reason)
 
 
 def require_place(game,row):
     if not rules.local(game,row):raise ValueError('须亲赴原总督府所在地办理')
 
 
-def settle(game,payload):
+def settle(game,payload,*,maps=None,combat=None):
     if not isinstance(payload,dict) or payload.get('token')!=rules.token(game):
         raise ValueError('任职、地点或公款已变化，请刷新后办理')
     action=payload.get('action')
@@ -37,7 +23,7 @@ def settle(game,payload):
         raise ValueError('总督府请求字段无效')
     if action=='management' and not isinstance(payload.get('payload'),dict):
         raise ValueError('机构履约请求格式无效')
-    if not rules.enabled() and action not in {'resign','return','management'}:
+    if not rules.enabled() and action not in {'resign','return','management','petition','military'}:
         raise ValueError('修罗DLC停用，仅开放交接原责任')
     state=rules.court(game)
     if not state.get('joined'):raise ValueError('须先登记王庭身份')
@@ -80,9 +66,21 @@ def settle(game,payload):
                 location=city['address']['location_id'],owner=dict(kind='sect',id=COURT),source=rules.SOURCE,
                 building_id='office:'+identity,city_id=city['id'])
         authority.nominate(game,row,person,rules.config()['term_years'])
+        from .politics import appointment
+        appointment(game,person,state['court']['holders'].get('5'),'governor',row['id'])
         return '外任已获准，须沿原地图赴任；没有移动人物、发放公款或建立建筑。'
     if not row or row['provider']!=rules.ID:raise ValueError('原总督府不存在')
-    if action=='fund':
+    if action=='military':
+        from .military import command
+        return command(game,maps,row,payload,combat=combat)
+    if action in {'resign','return'}:
+        from ..institution_garrisons import active
+        if active(row):raise ValueError('须先召回驻军并结清军令，再交接公款与任职')
+    if action=='petition':
+        from .disputes import command
+        command(game,row,payload)
+        return '地方案卷已按原权限办理；裁决、担保与资金回执保留在原府。'
+    elif action=='fund':
         if not rules.king(game) or not capital:raise ValueError('须由修罗王在王庭拨付原府库款')
         authority.fund(game,row,rules.SOURCE,payload.get('amount'))
     elif action=='revoke':
@@ -122,9 +120,9 @@ def settle(game,payload):
                 person=payload.get('person')
                 if person and person not in {p['id'] for p in rules.eligible_people(game,row)}:
                     raise ValueError('此人不在原址、已有任务或不具备属员资格')
-                authority.clear_delegation(game,row)
-                row['people']=[person] if person else []
-                authority.log(game,row,'属员名册已调整；实际执行任务才按预算支付劳务。')
+                authority.set_staff(game,row,person)
+                from .politics import appointment
+                appointment(game,person,'player','staff',row['id'])
             elif action=='management':
                 data=payload.get('payload',{})
                 if data.get('scope')!=row['id']:raise ValueError('机构范围已变化')

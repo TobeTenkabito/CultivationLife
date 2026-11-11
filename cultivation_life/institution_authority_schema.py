@@ -9,8 +9,14 @@ def validate(rows, accounts):
         return type(n) is int and 0 <= n <= 10**24
     need(isinstance(rows, dict) and len(rows) <= 64)
     appointments, wallets, buildings = set(), set(), set()
+    occupied=set()
     for key, row in rows.items():
         need(isinstance(row, dict) and row.get('id') == key)
+        from .institution_garrison_schema import validate as validate_garrison
+        validate_garrison(row,accounts,occupied)
+        if 'petitions' in row:
+            from .institution_petitions_schema import validate as validate_petitions
+            validate_petitions(row['petitions'],key)
         for field in ('id','provider','name','world','location','source','wallet','building_id','city_id'):
             need(isinstance(row.get(field), str) and 0 < len(row[field]) <= 512)
         need(row['wallet'] == 'administration:' + key and row['wallet'] in accounts)

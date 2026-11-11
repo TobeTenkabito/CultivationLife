@@ -77,9 +77,8 @@ def is_king(state):
 
 
 def npc_power(npc):
-    root = ROOT_DEFINITIONS.get(npc.spirit_root, {})
-    return npc_combat_power(npc, expected_combat_power, float(root.get('efficiency', 1)),
-                            ITEM_CATALOG.get(npc.treasure_item_id or '')) * max(.1, npc.combat_factor) * max(.35, 1 - npc.wounds * .15) + npc.family_combat_bonus
+    from .npc_strength import power
+    return power(npc)
 
 
 
@@ -110,21 +109,9 @@ def reconcile(game, state):
 
 def change_rank(game, state, rank, *, opponent=None):
     """Exchange adjacent seats; rank zero is an unseated pool of retainers."""
-    court, old = state['court'], state['rank']
-    holder = opponent if opponent is not None else court['holders'].get(str(rank))
-    if opponent is not None and rank:
-        previous = next((key for key, value in court['holders'].items() if value == opponent), None)
-        if previous and previous not in {str(old), str(rank)}:
-            court['holders'][previous] = court['holders'].get(str(rank))
-    if old:
-        court['holders'][str(old)] = holder
-    if rank:
-        court['holders'][str(rank)] = 'player'
-    state['rank'] = rank
-    court['protected_until'] = state['unit'] + 8
-    court['challenge'] = None
-    if rank == KING:
-        state['obligation'] = None
+    from .royal_seats import exchange
+    exchange(state,rank,opponent=opponent)
+    court=state['court']
     king_id = court['holders'].get(str(KING))
     from .asura_governorship.management import reconcile_crown
     reconcile_crown(game, king_id)
@@ -185,6 +172,11 @@ def assessment(game, npc):
 
 
 def tick(game, state):
+    from .asura_governorship import military
+    if any(military.fighting(r) for r in military.rules.offices(game)):
+        # A military succession cannot also manufacture a personal seat duel.
+        reconcile(game,state)
+        return
     from .institution_state import record, policy
     reconcile(game, state)
     court, unit = state['court'], state['unit']
@@ -221,6 +213,8 @@ def tick(game, state):
     npc = max(candidates, key=npc_power)
     scores = assessment(game, npc)
     loyalty = court['loyalty'].get(npc.id, 50)
+    from .asura_governorship.politics import challenge_restraint
+    loyalty = min(100,loyalty+challenge_restraint(game,npc.id))
     # A clear advantage is needed, particularly for trusted appointees.
     if scores['enemy'] < scores['player'] * (1.15 + max(0, loyalty - 50) / 100):
         return
@@ -279,20 +273,8 @@ def settle_action(deps: AsuraCourtDependencies, game, state, action, target):
         # A nonlethal domain duel can stop at the engine's safety floor even
         # after one side has lost all morale. The court recognises surrender,
         # never substitutes a power-ratio roll for the actual battle.
-        report = game.last_combat_report or {}
-        if result == 'stalemate':
-            updates = report.get('capability_updates', [])
-            enemies = [u for u in updates if u.get('side') == 'enemy']
-            own = next((u for u in updates if u.get('id') == 'player'), {})
-            rounds = report.get('rounds', [])
-            morale = rounds[-1].get('voisinage', {}).get('morale', {}) if rounds else {}
-            if own.get('suppressed') or morale.get('player', 100) <= 0:
-                result = 'defeat'
-            elif enemies and all(u.get('suppressed') or morale.get(u['id'], 100) <= 0 for u in enemies):
-                result = 'victory'
-            if result != 'stalemate':
-                report.update(result=result, outcome=result, result_grade='血战胜出' if result == 'victory' else '血战落败')
-                summary = '魔域交锋后，一方被镇压或战意耗尽，王庭裁定认负，停止追击。'
+        from .royal_seats import duel_result
+        result,summary=duel_result(game.last_combat_report or {},result,summary)
         # A stalemate or unusable technique is not a decision on ownership.
         if result in ('stalemate', 'technique_blocked'):
             return '血战未分胜负，爵位与战书保留。' + summary
@@ -340,6 +322,8 @@ def settle_action(deps: AsuraCourtDependencies, game, state, action, target):
             finance.register(game, 'upper', 'asura', 'asura')
             finance.procure(game, finance.key('upper', 'asura'), 'asura', 60000, '王庭任命支出')
             court['offices'][office] = identity
+            from .asura_governorship.politics import appointment
+            appointment(game,identity,'player',office,f'court-office:{office}:{state["unit"]}')
             court['loyalty'][identity] = min(100, court['loyalty'].get(identity, 50) + 10)
             text = f'任命{npc.name}为{OFFICES[office][0]}，才干 {talent(npc, office)}，每年俸禄 300 灵石，以府库实付为限。'
         court['appointment_at'] = state['unit']

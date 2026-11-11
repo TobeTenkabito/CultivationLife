@@ -631,6 +631,70 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         }
     }
 
+
+    private void openAsuraOffice() throws Exception {
+        if(!Boolean.TRUE.equals(js("document.querySelector('#building-affairs-card').classList.contains('panel-open')"))) {
+            if(Boolean.TRUE.equals(js("getComputedStyle(document.querySelector('#pixel-buildings')).display==='none' || document.querySelector('#pixel-buildings').getBoundingClientRect().height===0")))tapSelector("#pixel-scenery-toggle");
+            String building=(String)js("(()=>{const r=__asuraOffice();return r.building_status==='intact'?r.building_id:r.city_id})()");
+            tapSelector("#pixel-buildings [data-building-affairs='"+building+"']");
+        }
+        waitForJs("!!document.querySelector('#building-affairs-content .asura-governorship')","Original governor building affairs");
+    }
+
+    private void asuraMilitary(String operation) throws Exception {
+        openAsuraOffice();
+        if(!Boolean.TRUE.equals(js("document.querySelector('.governor-military').open")))tapSelector(".governor-military > summary");
+        js("(()=>{const s=document.querySelector('.governor-military select[aria-label=军政事务]');s.value="+JSONObject.quote(operation)+";s.dispatchEvent(new Event('change'));return true})()");
+        if(operation.equals("provision"))js("document.querySelector('[aria-label=营务军费金额]').value='100000000';true");
+        tapSelector(".governor-military [data-governor-action=military]");waitForJs("!busy","Native military command settles");
+    }
+
+    private void runAsuraGovernance(Bundle result) throws Exception {
+        String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'军政原生验收',spirit_root:'supreme_metal',path:'demonic',seed:373,preset_id:'asura_upper'})}).then(g=>g.id)");
+        python(assetText("asura_release.py")+"\nfrom cultivation_life import server\nprepare_asura(server.ENGINE,"+JSONObject.quote(id)+")");
+        async("loadGame("+JSONObject.quote(id)+")");
+        js("window.__asuraOffice=()=>game.upper_institution.court.governorship.offices[0];true");
+        openAsuraOffice();tapSelector("[data-governor-action=assume]");waitForJs("!busy&&__asuraOffice().active","Actual local assumption");
+        js("document.querySelector('[data-governor-action=build]').closest('details').setAttribute('data-native-build-fold','1');true");
+        tapSelector("[data-native-build-fold] > summary");
+        tapSelector("[data-governor-action=build]");waitForJs("!busy&&__asuraOffice().building_status==='intact'","Original public construction and costs");
+        if(!Boolean.TRUE.equals(js("document.querySelector('.governor-disputes').open")))tapSelector(".governor-disputes > summary");
+        tapSelector("[data-petition-operation=observe]");waitForJs("!busy&&__asuraOffice().disputes.active.length>0","Actual provincial petitions");
+        tapSelector("[data-case-kind=remittance] > summary");
+        js("(()=>{const s=document.querySelector('[data-case-kind=remittance] select');s.value='pay';s.dispatchEvent(new Event('change'));return true})()");
+        tapSelector("[data-case-kind=remittance] [data-petition-operation=resolve]");
+        waitForJs("!busy&&__asuraOffice().disputes.history.some(c=>c.kind==='remittance'&&c.status==='resolved')","Original remittance receipt");
+        asuraMilitary("enlist");waitForJs("__asuraOffice().military.units.length===1","Original person enlisted");
+        asuraMilitary("provision");waitForJs("__asuraOffice().military.balance===100000000","Real military escrow");
+        python(assetText("asura_release.py")+"\nfrom cultivation_life import server\nissue_release_order(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");
+        openAsuraOffice();
+        if(!Boolean.TRUE.equals(js("document.querySelector('.governor-military').open")))tapSelector(".governor-military > summary");
+        for(String answer:new String[]{"delay","refuse","comply"}) {
+            js("(()=>{const s=document.querySelector('.governor-military [aria-label=军政事务]');s.value='respond';s.dispatchEvent(new Event('change'));document.querySelector('[aria-label=军令回应]').value="+JSONObject.quote(answer)+";return true})()");
+            tapSelector(".governor-military [data-governor-action=military]");waitForJs("!busy","Actual military order response");
+        }
+        check(Boolean.TRUE.equals(js("__asuraOffice().military.units[0].phase==='outbound' && game.player.location_id===__asuraOffice().location")),"Dispatch starts original road without moving player");
+        python(assetText("asura_release.py")+"\nfrom cultivation_life import server\nadvance_release_army(server.ENGINE,"+JSONObject.quote(id)+")");
+        asuraMilitary("recall");check(Boolean.TRUE.equals(js("__asuraOffice().military.units[0].phase==='outbound'")),"Stale command rejected and refreshed");
+        asuraMilitary("recall");waitForJs("__asuraOffice().military.units[0].phase==='returning'","Fresh recall enters return journey");
+        python(assetText("asura_release.py")+"\nfrom cultivation_life import server\nadvance_release_army(server.ENGINE,"+JSONObject.quote(id)+",2)");async("loadGame("+JSONObject.quote(id)+")");
+        check(Boolean.TRUE.equals(js("!__asuraOffice().military.units.length&&__asuraOffice().military.spent>0")),"Service spent retained and original army returns");
+        asuraMilitary("enlist");asuraMilitary("provision");
+        python(assetText("asura_release.py")+"\nfrom cultivation_life import server\nsupport_release_commander(server.ENGINE,"+JSONObject.quote(id)+")");async("loadGame("+JSONObject.quote(id)+")");
+        asuraMilitary("rebel");waitForJs("__asuraOffice().status==='handover'&&__asuraOffice().military.conflict.status==='raised'","Rising removes appointment but retains responsibility");
+        asuraMilitary("claim");check(Boolean.TRUE.equals(js("__asuraOffice().military.conflict.status==='raised'")),"Absent claimant cannot steal crown");
+        asuraMilitary("standdown");waitForJs("__asuraOffice().military.conflict.status==='withdrawn'","Actual withdrawal preserves result");
+        for(String theme:new String[]{"light","dark"}) {
+            if(Boolean.TRUE.equals(js("document.querySelector('#building-affairs-card').classList.contains('panel-open')")))tapSelector("#building-affairs-toggle");
+            tapSelector("#theme-open");tapSelector("#theme-dialog [data-pixel-theme-choice="+theme+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            openAsuraOffice();
+            check(Boolean.TRUE.equals(js("(()=>{const colors=['asura','buddhist','ghost','guixu','intrigue','bloodline','civilizations','sage','tianji','authored','trial-sites','yaochi-westward'].map(id=>{const b=document.createElement('button');b.dataset.dlc=id;document.body.append(b);const c=getComputedStyle(b).color;b.remove();return c});return new Set(colors).size===12})()")),"All twelve DLC palettes remain distinct");
+            check(Boolean.TRUE.equals(js("document.querySelector('[data-governor-action=military]').dataset.dlc==='asura' && document.querySelector('#building-affairs-card').scrollWidth<=document.querySelector('#building-affairs-card').clientWidth+2")),"Asura ownership and native viewport fit");
+            capture("asura-governance-"+theme+"-"+arguments.getString("orientation"));
+        }
+        result.putString("asura_governance_scope","Native original building assumption/construction, provincial remittance, paid original guards, delay/refusal/compliance, stale rejection/recovery, original road return, uprising and withdrawal; two palettes and twelve distinct DLC colors");
+    }
+
     private void runWestward(Bundle result) throws Exception {
         String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'西望原生验收',spirit_root:'supreme_metal',path:'dao',seed:360,preset_id:'true_immortal'})}).then(g=>g.id)");
         python(assetText("westward_release.py")+"\nfrom cultivation_life import server\nprepare_westward(server.ENGINE,"+JSONObject.quote(id)+")");
@@ -1396,7 +1460,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("westward")) {
+            if(phase.equals("asura-governance")) {
+                runAsuraGovernance(result);
+            } else if(phase.equals("westward")) {
                 runWestward(result);
             } else if(phase.equals("body-ui")) {
                 runBodyUi(result);

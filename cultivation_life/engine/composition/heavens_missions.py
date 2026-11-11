@@ -74,6 +74,8 @@ def bind_missions(engine, ports):
         npc.location_id = destination.location_id
 
     def advance(game):
+        from ...system.institution_garrisons import advance_all as advance_garrisons
+        advance_garrisons(game,engine.maps)
         from ...system.asura_governorship.management import advance as advance_governorship
         advance_governorship(game,engine.maps)
         from ...system.court_bureau_runtime import year_step as advance_bureaus

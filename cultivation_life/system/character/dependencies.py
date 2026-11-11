@@ -864,11 +864,16 @@ class AsuraCourtDependencies:
 
 @dataclass(frozen=True, slots=True)
 class UpperInstitutionDependencies:
+    _get_maps: Callable[[], MapPort]
     _load: Callable[[str], GameState]
     advance: Callable[[str, str, int], dict[str, Any]]
     present: Callable[[GameState], dict[str, Any]]
     _get_store: Callable[[], CommitPort]
     court: AsuraCourtDependencies
+
+    @property
+    def maps(self) -> MapPort:
+        return self._get_maps()
 
     @property
     def store(self) -> CommitPort:

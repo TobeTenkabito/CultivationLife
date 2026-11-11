@@ -53,7 +53,7 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
     for npc in sorted(world_people.values(), key=lambda value: (-value.realm_index, -value.layer, value.name)):
         from ...person_assignments import deployment_assignment
         deployment = deployment_assignment(game, npc.id)
-        if deployment and not deployment['observed']:
+        if deployment and not deployment.get('observed',False):
             continue
         same_world = npc.world == game.player.world
         if not same_world and npc.departed_age is None:

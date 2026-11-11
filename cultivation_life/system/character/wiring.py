@@ -98,6 +98,7 @@ def bind_asura_court(host) -> AsuraCourtDependencies:
 
 def bind_upper_institution(host) -> UpperInstitutionDependencies:
     return UpperInstitutionDependencies(
+        _get_maps=lambda: host.maps,
         _load=lambda game_id: host._load(game_id),
         advance=lambda game_id, action, units: host.advance(game_id, action, units),
         present=lambda game: host.present(game),

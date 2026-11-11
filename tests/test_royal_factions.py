@@ -58,7 +58,7 @@ def test_targeted_policy_preserves_pool_and_rejection_is_atomic(throne):
     assert engine.store._path(game.id).read_bytes() == saved
 
 
-def test_imbalance_uses_existing_representative_and_defeat_swaps_seats(throne):
+def test_influence_does_not_force_rebellion_and_existing_challenge_still_swaps_seats(throne):
     _, game, state = throne
     roster = asura_court.people(game)
     npc = next(n for n in roster.values() if asura_court.present(n))
@@ -68,12 +68,9 @@ def test_imbalance_uses_existing_representative_and_defeat_swaps_seats(throne):
     for _ in range(4):
         state["unit"] += 1
         asura_factions.tick(game, state, roster)
-    challenge = state["court"]["challenge"]
-    assert (
-        challenge
-        and challenge["npc_id"] in roster
-        and challenge["faction_id"] == faction
-    )
+    assert state["court"]["challenge"] is None
+    # A previously issued challenge remains subject to the original combat/seat rules.
+    challenge = dict(npc_id=npc.id,faction_id=faction,rank=5)
     representative = roster[challenge["npc_id"]]
     asura_court.change_rank(game, state, 4, opponent=representative.id)
     holders = state["court"]["holders"]

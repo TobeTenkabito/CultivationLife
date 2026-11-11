@@ -42,6 +42,12 @@ def verify(with_dlc):
             else:
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
+            if '--asura-governance' in sys.argv:
+                from scripts.verify_asura_exe import verify_asura
+                verify_asura(base,with_dlc,folder)
+                from scripts.verify_westward_exe import verify_westward
+                verify_westward(base,with_dlc,folder)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,asura_governance_verified=True,westward_verified=True)
             if '--westward' in sys.argv:
                 from scripts.verify_westward_exe import verify_westward
                 verify_westward(base,with_dlc,folder)

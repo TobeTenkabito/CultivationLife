@@ -15,10 +15,18 @@ def validate_economy(value, merchants=None, document=None):
     if 'administrations' in value:
         from .institution_authority_schema import validate as validate_authority
         validate_authority(value['administrations'], value.get('accounts', {}))
+        from .asura_politics_schema import validate_cases
+        for scope in value['administrations'].values():validate_cases(scope)
+        from .asura_military_schema import validate as validate_military
+        for scope in value['administrations'].values():validate_military(scope)
     if 'institution_agendas' in value:
         from .institution_ai_schema import validate
         validate(value['institution_agendas'],value.get('accounts',{}))
     if document is not None:
+        politics=document.get('upper_institutions',{}).get('asura',{}).get('court',{}).get('factions',{}).get('politics')
+        if politics is not None:
+            from .asura_politics_schema import validate as validate_politics
+            validate_politics(politics)
         contracts=document.get('yaochi_state',{}).get('westward',{}).get('contracts')
         if contracts is not None:
             from .institution_ai_schema import validate_contracts

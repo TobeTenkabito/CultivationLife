@@ -147,8 +147,12 @@ def persist(game,row):
     return ensure_state(game)['records'].setdefault(row['id'],copy.deepcopy(row))
 
 
-def set_public(game,row,value):
-    if type(value) is not bool or row['address']!=address(game) or not owns(game,row):
+def set_public(game,row,value,*,actor=None):
+    from .institution_authority import can_repair
+    from .institution_ai.buildings import authorized
+    permitted=(authorized(game,row,actor) if actor is not None else
+               row['address']==address(game) and (owns(game,row) or can_repair(game,row)))
+    if type(value) is not bool or not permitted:
         raise ValueError('须由原建筑所有者在原址调整公开使用权')
     if row['status']!='intact':raise ValueError('原建筑不可用，须先修复')
     persist(game,row)['public']=value

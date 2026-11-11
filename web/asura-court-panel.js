@@ -66,9 +66,11 @@
       }); section.append(cards); if (!policies.length) section.append(note('暂无政令。')); body.append(section);
       });
       if (c.factions) {
-        body.append(note('派系共用百点影响力，单派上限七十。影响力达到四十八或忠诚低于二十持续四单位，会推举代表挑战王位。贡赋会降低派系忠诚。'));
+        body.append(note(c.factions.developed?'派系影响来自原爵位、实际任职和履约支持。势大不等于谋反；忠诚、对具体议案的立场和私人支持分别记录。地方具名呈案在内政办理。':'派系共用百点影响力，单派上限七十。贡赋会降低派系忠诚。'));
         c.factions.rows.forEach(f => {
-          const row = box(f.name, `影响力 ${f.external.toFixed(1)} · 忠诚 ${f.loyalty.toFixed(1)}`);
+          const row = box(`${f.mark||'议'} · ${f.name}`, `影响力 ${f.external.toFixed(1)} · 忠诚 ${f.loyalty.toFixed(1)}`);row.dataset.dlcScope='asura-manifestation';
+          if(f.interest)row.append(node('p',f.interest,'court-description'));
+          if(f.sources){const details=node('details',null,'governor-section');details.append(node('summary','任职来源与私人支持'));for(const person of (c.factions.members||[]).filter(m=>m.faction===f.id)){details.append(node('p',`${person.name} · ${person.basis} · 对你支持 ${person.support}${person.patron?' · 以你为主要支持对象':''}`));}for(const source of f.sources)details.append(node('small',source,'court-description'));row.append(details);}
           c.factions.decrees.forEach(p => row.append(button(`${p.name}（${c.policy_categories.find(x=>x.id===p.category).name}）`, 'faction_decree', `${p.id}:${f.id}`, !c.king || !!c.challenge || d.unit-c.factions.target_at<4 || d.treasury<100000)));
           body.append(row);
         });

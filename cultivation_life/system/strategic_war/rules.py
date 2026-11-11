@@ -61,16 +61,5 @@ def site(org):
 
 
 def routes(deps, game, people, destination, origin):
-    result=[]
-    for n in people:
-        source=n.location_id or origin
-        if source==destination:
-            path,years=[source],0
-        else:
-            plan=deps.maps.travel_plan(n.world,source,destination,n.realm_index)
-            if plan.status!='ok':
-                raise ValueError('实际参战成员没有合法的同界行军道路')
-            path,years=list(plan.route),plan.years
-        result.append(dict(person_id=n.id,origin=source,destination=destination,route=path,
-                           years=years,remaining=years,phase='outbound' if years else 'stationed'))
-    return result
+    from ..military_movement import routes as original_routes
+    return original_routes(deps.maps,people,destination,origin)

@@ -12,6 +12,11 @@ def assignment_person(echo, row):
 
 
 def deployment_assignment(game, identity, *, exclude_war=None):
+    for scope in game.economy_v2.get('administrations',{}).values():
+        for unit in scope.get('garrison',{}).get('units',[]):
+            if unit['person_id']==identity and unit['phase'] not in {'home','lost'}:
+                return {**unit,'id':'garrison:'+scope['id'],'scope':scope['id'],
+                        'observed':unit['phase']=='stationed' and game.player.world==scope['world'] and game.player.location_id==unit['destination']}
     for row in game.heavens_state.get('runtime', {}).get('outposts', {}).values():
         unit = next((u for u in row['units'] if u['person_id'] == identity and u['phase'] not in {'home', 'lost'}), None)
         if unit and (not exclude_war or unit.get('war_id') != exclude_war):

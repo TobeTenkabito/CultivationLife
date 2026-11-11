@@ -93,6 +93,7 @@ def test_callbacks_keep_explicit_arguments_and_resources_resolve_on_use(tmp_path
     with patch.object(engine, 'store', replacement), patch.object(engine, 'maps', object()) as maps:
         assert contract.natal_actions.store is replacement
         assert contract.buddhist_state.maps is maps
+        assert contract.upper_institution.maps is maps
 
 
 def test_optional_argument_omission_and_explicit_values_survive_late_replacement(tmp_path):

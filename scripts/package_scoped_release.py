@@ -264,7 +264,7 @@ def main():
         require(all('tide_theme_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Tide/two-theme native marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
-    if scoped.get('profile')=='westward':
+    if scoped.get('profile') in {'westward','asura'}:
         from scripts.westward_release_scope import TESTS as WESTWARD_TESTS,BROWSERS as WESTWARD_BROWSERS
         selected={name for shard in scoped['tests'] for name in shard}
         if scoped.get('regression_scope')=='full-repository':
@@ -279,10 +279,20 @@ def main():
             require(selected==set(WESTWARD_TESTS),'Westward regression selection incomplete')
         require(set(WESTWARD_BROWSERS)<={r['name'] for r in scoped['runs']},'Westward browser coverage incomplete')
         require(all(c.get('westward_verified') for c in evidence['cases']),'Final EXE Westward with/without DLC required')
-        required={f'build/android-westward-{o}-{tag}.log' for o in ('portrait','landscape')}
+        asura=scoped.get('profile')=='asura'
+        if asura:
+            require(scoped.get('regression_scope')=='full-repository','Asura release requires full repository regression')
+            require({'browser_asura_governorship','browser_asura_politics','browser_asura_military'}<={r['name'] for r in scoped['runs']},'Asura browser coverage incomplete')
+            require(all(c.get('asura_governance_verified') for c in evidence['cases']),'Final EXE Asura with/without DLC required')
+            metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+            code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+            require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata
+                    and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'Asura APK metadata mismatch')
+        phase='asura-governance' if asura else 'westward'
+        required={f'build/android-{phase}-{o}-{tag}.log' for o in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Westward native orientations incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Westward test APK changed')
-        require(all('westward_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Westward native marker missing')
+        require(all(('asura_governance_scope' if asura else 'westward_scope') in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Westward native marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf8'),'Signature required')
     if scoped.get('profile')=='body-ui':
@@ -486,7 +496,7 @@ def main():
     am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(target,target.name);z.write(am,am.name)
-        if scoped.get('profile') in {'body-ui','westward'}:
+        if scoped.get('profile') in {'body-ui','westward','asura'}:
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for path in (ROOT/'docs').rglob('*'):
                 if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
@@ -494,7 +504,7 @@ def main():
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for name in ('docs/immortal-artifacts.md','docs/release-340.md'):
                 z.write(ROOT/name,name)
-        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward'}:
+        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
         else:
             z.write(ROOT/'android/README.md','README.md')
@@ -555,6 +565,17 @@ def main():
             z.writestr('安装说明.txt',f'需配套本体v{VERSION}，仅结构12。解压到游戏目录覆盖dlc/yaochi-westward后重启。Android请使用同版签名APK；存档和用户开关不会被本包覆盖。')
             z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='yaochi-westward',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
         with zipfile.ZipFile(destination) as z:require(z.testzip() is None,'Westward DLC archive damaged')
+    if scoped.get('profile')=='asura':
+        version=dlcs['asura-manifestation']
+        destination=ROOT/f'dist/修罗显圣-无法无天-v{version}.zip'
+        with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
+            for path in sorted((ROOT/'dlc/asura-manifestation').rglob('*')):
+                if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
+            for name in ('docs/release-380.md','docs/asura-governorship-implementation.md','docs/asura-politics-and-disputes.md','docs/asura-military-and-succession.md'):
+                z.write(ROOT/name,name)
+            z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅结构12。解压至游戏根目录覆盖dlc/asura-manifestation后重启；Android请安装同版签名APK。不会覆盖存档或用户开关。')
+            z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='asura-manifestation',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
+        with zipfile.ZipFile(destination) as z:require(z.testzip() is None,'Asura DLC archive damaged')
     if scoped.get('profile')=='body-ui':
         for package,label in [('authored-techniques','著经立道'),('monster-bloodlines','万妖归宗'),('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')]:
             version=json.loads((ROOT/'dlc'/package/'manifest.json').read_text(encoding='utf8'))['version']

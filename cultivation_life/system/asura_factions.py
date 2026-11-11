@@ -91,6 +91,10 @@ def tick(game, state, roster):
     if not asura.enabled():
         return
     ensure(state)
+    from .asura_governorship import politics
+    if politics.enabled():
+        politics.tick(game,state)
+        return
     c, unit = state["court"], state["unit"]
     if c["holders"].get("5") != "player" or not state["joined"]:
         return
@@ -193,6 +197,15 @@ def act(game, state, action, target, roster):
         shift(f["rows"], faction, delta)
         row["loyalty"] = max(0, min(100, row["loyalty"] + loyalty))
         f["target_at"] = unit
+        from .asura_governorship import politics
+        if politics.enabled():
+            from .asura_court_finance import people as court_people
+            known=court_people(game)
+            for npc in roster.values():
+                if npc.id in known and npc.world=='asura' and is_free(npc) and politics.faction(game,npc.id)[0]==faction:
+                    politics.remember(game,npc.id,'player',2 if policy!='restrain' else -2,
+                        '已实付的派系政令',f'royal-decree:{unit}:{faction}')
+            return f"对{row['name']}颁行派系政令，忠诚 {loyalty:+}；实际影响力仍由原任职与履约支持决定。"
         return f"对{row['name']}颁行派系政令，影响力 {delta:+}，忠诚 {loyalty:+}。"
     kind, _, identity = target.partition(":")
     if action != "royal_tribute" or kind not in {"material", "opportunity", "prisoner"}:
@@ -248,6 +261,8 @@ def act(game, state, action, target, roster):
         if not npc or not is_free(npc) or npc.world != "asura":
             raise ValueError("须选择本界在世的自由修士")
         faction = faction_of(identity)
+        from .asura_governorship import politics
+        if politics.enabled():faction=politics.faction(game,identity)[0]
         if kind == "opportunity":
             available = max(0.0, npc.cultivation_progress)
             if available <= 0:
@@ -294,6 +309,15 @@ def public(game, state):
     if not asura.enabled():
         return None
     f = copy.deepcopy(state["court"].get("factions") or fresh())
+    # Raw personal bonds are private; expose only the player's known relationships.
+    f.pop('politics',None)
+    from .asura_governorship import politics
+    if politics.enabled():
+        values,sources,members=politics.summary(game)
+        f.update(developed=True,members=members)
+        for row in f['rows']:
+            row.update(external=values[row['id']],sources=sources[row['id']],
+                       **politics.config()['factions'][row['id']])
     f["materials"] = materials()
     f["decrees"] = [
         dict(id="patronize", name="扶植", category="political"),
