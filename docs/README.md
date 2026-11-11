@@ -1,5 +1,7 @@
 # 项目文档索引
 
+- [修罗总督府实施记录](asura-governorship-implementation.md)：第一批本体授权与DLC府务分层、原建筑、原公款、属员履约及交接；后续派系与军权仍待实现。
+
 - [仙府访古与七曜项目议政](westward-ventures.md)：三条原址遗府、四类具体预算议案、原席位表决与实际履约复核。
 
 - [瑶池西望实施记录](yaochi-westward-implementation.md)：开发包0.1.0，专修、庙域网络、地方争议、四司监察、巡天行动、仙圃经营与仙会赛事；两套像素主题共用原导航。
@@ -170,6 +172,7 @@
 - [三界上境及 DLC 分流](upper-worlds-1500.md)
 - [三界本体邻域与机构](upper-voisinages-1522.md)
 - [修罗王庭](asura-court-1530.md)
+- [修罗王庭深化策划：派系、总督府与地方军权](asura-court-governorship-design.md)：2026-11-11讨论整理，包含建筑接入、外任经营与起兵夺位；尚未实现。
 - [教程入口](tutorial-1480.md)
 - [操作引导](tutorial-1481.md)
 - [百科维护](handbook-1481.md)

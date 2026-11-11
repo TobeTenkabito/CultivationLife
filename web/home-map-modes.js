@@ -8,6 +8,7 @@
   let state=null,mapView=null,mode='terrain',key='',selected=null,toolbar=null,details=null,go=null,travel=null,locked=()=>true;
   function art(row){
     if(row.type==='scenery')return null;
+    if(row.subtype==='public_office')return `/assets/pixel/buildings/city-${row.status==='destroyed'?'ruin':Math.min(3,row.level+1)}.png`;
     if(row.subtype==='land_temple')return `/assets/building-portraits/land-temple-${row.status==='destroyed'?'ruin':'intact'}-361.png`;
     let kind=['cave','temple','farm','mine','hunt','alchemy','forge','shop'].includes(row.subtype)?row.subtype:row.type==='city'?'city':'industry';
     const industry=['farm','mine','hunt','alchemy','forge','shop'].includes(kind);

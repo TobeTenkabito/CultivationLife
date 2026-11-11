@@ -1,0 +1,114 @@
+"""Base institutional appointments and public funds; no DLC-specific rules."""
+from .economy.ledger import account, balance, transfer_value
+from .institution_ai import rules, runtime
+
+
+def records(game):
+    return game.economy_v2.get('administrations', {})
+
+
+def effective(game, row, person='player'):
+    return (row.get('holder') == person and row.get('status') == 'active'
+            and game.player.age < row['expires'])
+
+
+def responsibilities(game, person):
+    """Original roles only; holding an office does not teleport or freeze a person."""
+    return [r for r in records(game).values()
+            if person in (r['holder'], r['nominee'], r['controller']) or person in r['people']]
+
+
+def log(game, row, text):
+    row['revision'] += 1
+    row['history'] = (row['history'] + [dict(year=game.player.age, text=text)])[-20:]
+
+
+def create(game, *, identity, provider, name, world, location, owner, source, building_id, city_id):
+    root = game.economy_v2.setdefault('administrations', {})
+    if identity in root or len(root) >= 64:
+        raise ValueError('原机构已登记或机构容量已满')
+    wallet = 'administration:' + identity
+    account(game, wallet)
+    row = dict(id=identity, provider=provider, name=name, world=world, location=location,
+        owner=dict(owner), source=source, wallet=wallet, building_id=building_id, city_id=city_id,
+        holder=None, nominee=None, controller=None, status='vacant', expires=0,
+        appointed=0, revision=0, people=[], history=[], funded=0, returned=0)
+    root[identity] = row
+    return row
+
+
+def clear_delegation(game, row):
+    agenda = rules.record(game, row['id'])
+    if agenda.get('job'):
+        runtime.close(game, None, agenda, agenda['job'], 'cancelled', '任职授权交接，原项目余款退回机构。')
+    if agenda:
+        agenda.update(delegate=None, automatic=False)
+        agenda['revision'] += 1
+
+
+def nominate(game, row, person, term):
+    if not isinstance(person, str) or not person or type(term) is not int or term <= 0:
+        raise ValueError('任命人选或任期无效')
+    if any(r['id'] != row['id'] or person in r['people'] for r in responsibilities(game, person)):
+        raise ValueError('此人已有其他地方任职或待交接责任')
+    if row['controller']:
+        raise ValueError('须先完成前任交接，再办理继任')
+    if row['nominee'] == person or effective(game, row, person):
+        raise ValueError('已有同一任命，不得重复刷新任期')
+    clear_delegation(game, row)
+    row.update(nominee=person, holder=None, status='appointed', appointed=game.player.age,
+               expires=game.player.age + term)
+    log(game, row, '任命已登记，须在原址验收接任；期限不因赴任延后。')
+
+
+def assume(game, row, person, world, location):
+    if (row['status'] != 'appointed' or row['nominee'] != person
+            or game.player.age >= row['expires']):
+        raise ValueError('任命已失效或并非受任人')
+    if (world, location) != (row['world'], row['location']):
+        raise ValueError('须亲赴原址办理交接')
+    row.update(holder=person, controller=person, nominee=None, status='active')
+    log(game, row, '原址接任完成；原公款、原设施及历史责任继续保留。')
+
+
+def revoke(game, row):
+    if row['status'] not in {'active', 'appointed'}:
+        raise ValueError('没有可撤销的在任授权')
+    clear_delegation(game, row)
+    row.update(holder=None, nominee=None, status='handover' if row['controller'] else 'vacant')
+    log(game, row, '法定授权终止，原控制人须办理公款和设施交接。')
+
+
+def relinquish(game, row, person):
+    if row['controller'] != person and row['nominee'] != person:
+        raise ValueError('并非原任或待赴任人')
+    clear_delegation(game, row)
+    row.update(holder=None, nominee=None, controller=None, status='vacant', people=[])
+    log(game, row, '交回任职和原址控制，公款留在原机构，不转入个人行囊。')
+
+
+def fund(game, row, source, amount):
+    if type(amount) is not int or not 1 <= amount <= 10**15:
+        raise ValueError('拨款须为有效的正整数')
+    transfer_value(game, source, row['wallet'], amount, '原地方机构实款拨付')
+    row['funded'] += amount
+    log(game, row, f'原款拨入 {amount:,} 灵石；此款不构成私人产权。')
+
+
+def return_funds(game, row):
+    clear_delegation(game, row)
+    amount = balance(game, row['wallet'])
+    transfer_value(game, row['wallet'], row['source'], amount, '地方机构未耗公款上缴原府库')
+    row['returned'] += amount
+    log(game, row, f'未耗公款 {amount:,} 灵石交回原上级府库。')
+    return amount
+
+
+def can_repair(game, building):
+    return any(effective(game, r) and r['building_id'] == building['id']
+               and r['owner'] == building['owner'] for r in records(game).values())
+
+
+def expire(game, row):
+    if row['status'] in {'appointed', 'active'} and game.player.age >= row['expires']:
+        revoke(game, row)

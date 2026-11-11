@@ -152,7 +152,8 @@ def spend(state, amount):
 
 def run_action(deps: UpperInstitutionDependencies, game_id, action, target=''):
     game=deps._load(game_id)
-    require_action(game)
+    if action=='governorship':game=copy.deepcopy(game)
+    require_action(game,local=action!='governorship')
     cfg, state, p=definition(game), account(game,create=True),game.player
     finance.register(game, 'upper', p.world, p.world)
     from . import asura_court
@@ -176,9 +177,18 @@ def run_action(deps: UpperInstitutionDependencies, game_id, action, target=''):
     else:
         if not state['joined']:
             raise ValueError('请先登记机构身份')
-        if p.world == 'asura' and action in ('blood_duel', 'answer_duel', 'yield_duel', 'appoint', 'build', 'decree', 'faction_decree', 'royal_tribute'):
+        if p.world == 'asura' and action=='governorship':
+            import json
+            from .asura_governorship.actions import settle
+            try:payload=json.loads(target)
+            except (ValueError,TypeError):raise ValueError('总督府请求格式无效') from None
+            text=settle(game,payload)
+        elif p.world == 'asura' and action in ('blood_duel', 'answer_duel', 'yield_duel', 'appoint', 'build', 'decree', 'faction_decree', 'royal_tribute'):
             text = asura_court.settle_action(deps.court, game, state, action, target)
         elif action=='leave':
+            if p.world=='asura':
+                from .asura_governorship.rules import require_handover
+                require_handover(game)
             if state['job']:
                 raise ValueError('请先交付或放弃委托')
             if p.world == 'asura':

@@ -64,6 +64,13 @@ def decode_state(value):
             raise ValueError('城市异象施工期限无效')
         if row['type'] == 'scenery' and row['status'] != 'intact':
             raise ValueError('自然景观不可摧毁')
+        if row.get('subtype') == 'public_office':
+            spec=row.get('construction',{})
+            if (row['type']!='artificiality' or not isinstance(row.get('city_id'),str)
+                    or not isinstance(spec,dict) or type(spec.get('labor_units')) is not int
+                    or not 1<=spec['labor_units']<=1000000 or not isinstance(spec.get('materials'),list)
+                    or len(spec['materials'])!=3 or any(type(n) is not int or not 1<=n<=100000 for n in spec['materials'])):
+                raise ValueError('机构府署原址或营造规格无效')
         if row.get('subtype') == 'land_temple':
             if (row['type'] != 'artificiality' or row['level'] != 1 or place['world'] != 'celestial'
                     or place.get('instance_id') is not None or not isinstance(row.get('city_id'), str)

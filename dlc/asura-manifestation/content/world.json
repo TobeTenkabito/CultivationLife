@@ -1,6 +1,15 @@
 {
   "schema_version": 1,
   "systems": {
+    "asura_governorship": {
+      "enabled": true,
+      "cities": ["xiuluoguan", "chiren", "qianlei"],
+      "term_years": 500,
+      "required_rank": 1,
+      "required_merit": 100,
+      "required_regard": 20,
+      "construction": {"labor_units": 400, "materials": [12, 6, 3]}
+    },
     "quick_start_presets": [
       {
         "id": "asura_upper",

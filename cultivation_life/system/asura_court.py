@@ -126,6 +126,8 @@ def change_rank(game, state, rank, *, opponent=None):
     if rank == KING:
         state['obligation'] = None
     king_id = court['holders'].get(str(KING))
+    from .asura_governorship.management import reconcile_crown
+    reconcile_crown(game, king_id)
     court['offices'] = {key:value for key,value in court['offices'].items() if value != king_id}
     sync_titles(game, state)
 
@@ -327,6 +329,9 @@ def settle_action(deps: AsuraCourtDependencies, game, state, action, target):
             text = f'免去{OFFICES[office][0]}，停止该职俸禄与加成。'
         else:
             npc = people(game).get(identity)
+            from .institution_authority import responsibilities
+            if responsibilities(game, identity):
+                raise ValueError('此人仍有地方任职或属员责任，须先交接再任中枢官职')
             if not present(npc) or identity in court['offices'].values() or identity == court['holders'].get(str(KING)):
                 raise ValueError('人选须为在世廷臣，同一人不得兼任多个官职')
             if state['treasury'] < 60000:
@@ -381,6 +386,7 @@ def act(engine, game, state, action, target):
 
 
 def public(game, state):
+    from .asura_governorship.presentation import public as governorship_public
     court = copy.deepcopy(state.get('court') or initial(state))
     view_state = dict(state, court=court)
     roster = people(game)
@@ -402,7 +408,7 @@ def public(game, state):
             challenge = None
     return dict(**{k:v for k,v in court.items() if k not in {'challenge', 'factions'}}, challenge=challenge,
         king=is_king(view_state), seats=rows, effects=benefits(game, view_state),
-        factions=asura_factions.public(game, view_state),
+        factions=asura_factions.public(game, view_state),governorship=governorship_public(game),
         policy_categories=[dict(id=k, name=v) for k,v in asura_factions.CATEGORIES.items()],
         policy_categories_by_id=asura_factions.POLICY_CATEGORIES,
         tribute_candidates=[dict(id=n.id, name=n.name) for n in

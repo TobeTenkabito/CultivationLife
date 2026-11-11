@@ -75,6 +75,7 @@
       }
     }
     if (selected === 'domestic') {
+      window.AsuraGovernorship?.render(body,game,act);
       if (!c.king) body.append(note('登上修罗王位后，可以任免廷臣、营建王庭并颁布内政决策。'));
       body.append(note(`现行${d.current_policy.name} · 府库基础收入倍率 ${c.effects.revenue.toFixed(2)} · 每年官俸 ${fmt(c.effects.wages / 100)} · 新委托功勋倍率 ${(c.effects.service * d.current_policy.service).toFixed(2)} · 养域总减免 ${Math.round(d.discount * 100)}%。民心越高，府库收入越高。`));
       const locked = !c.king || !!c.challenge, appointments = box('王庭任命', '爵位与官职分开：一人可持爵并任一官职。任命支出六万灵石，官俸每单位三万；每单位可调整一职。忠诚越高，越不愿发起血战。');

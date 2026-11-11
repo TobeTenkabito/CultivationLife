@@ -482,7 +482,7 @@ function showStart() {
 function render(data) {
   window.UtilityPanels?.begin(data.id);
   game = data;
-  window.BuildingAffairs?.bind(data,payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload));
+  window.BuildingAffairs?.bind(data,payload=>mutate(`/api/games/${data.id}/yaochi-action`,payload),payload=>mutate(`/api/games/${data.id}/upper-institution`,payload));
   window.NpcArt?.context(data);
   window.NpcDevelopment?.context(data,{api,mutate,busy:()=>busy});
   window.TrialSitePanel?.update(data, mutate, () => busy);
@@ -4251,6 +4251,7 @@ function renderButtons() {
   window.HomeMapModes?.syncBusy();
   window.StrategicWarPanel?.syncBusy();
   window.MapAtlas?.syncBusy();
+  window.BuildingPanel?.syncBusy();
   window.TrialSitePanel?.syncBusy();
   document.querySelectorAll('.exploration-action').forEach(b=>b.disabled=busy||!game?.player?.alive||!!game?.pending_event||!!game?.trial?.active||!!game?.imprisonment||b.dataset.unavailable==='1');
   document.querySelectorAll('[data-action]').forEach(button => {

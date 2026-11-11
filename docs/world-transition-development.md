@@ -1,5 +1,7 @@
 # 跨界开发规范
 
+2026-11-11总督府授权：本体 `institution_authority.can_repair` 只授予原在任人对登记公署的重建权，产权须仍与原机构一致；原址和费用由建筑入口复验。修罗适配只为配置列出的三座原背景城市授权设府，不从公开访问权推导占地权。停用专属功能保留本体原资产访问及依法自费修复，不开放公款支取；原款只可交接上缴。无新增移动、跨界或空间例外，验证见 `test_institution_authority`、`test_asura_governorship` 与[实施记录](asura-governorship-implementation.md)。
+
 本规范自 v2.1.1 起执行。制定依据是[当前跨界审计](world-transition-audit.md)，不是把现有实现直接视为正确规则。适用于本体、DLC、剧情、诸天、商盟、空间、自动人物行为以及控制台调用。
 
 ## 1. 先确定行为语义

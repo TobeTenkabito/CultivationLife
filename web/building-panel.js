@@ -14,11 +14,11 @@
   function building(row,place) {
     const item=el('details',null,'building-row');item.dataset.buildingId=row.id;item.dataset.status=row.status;
     if(row.dependency?.startsWith('official.')||row.subtype==='land_temple'||/^(antiquity:|purple-east:)/.test(row.id))item.dataset.dlcScope=row.dependency||'yaochi-westward';
-    const kind=['cave','temple','land_temple'].includes(row.subtype)?row.subtype:row.type;
+    const kind=['cave','temple','land_temple','public_office'].includes(row.subtype)?row.subtype:row.type;
     const summary=el('summary',null,'building-entry-heading');
     const body=el('div',null,'building-copy'),head=el('div',null,'building-title');
     head.append(el('strong',row.name),el('span',row.status==='destroyed'?'遗址待建':row.status==='damaged'?'受损':row.type==='scenery'?'山河旧景':'完好','building-status'));
-    const category={city:'城池',scenery:'景色',industry:'产业',cave:'洞府',temple:'佛寺',land_temple:'土地庙',other:'建筑'}[kind]||'建筑';
+    const category={city:'城池',scenery:'景色',industry:'产业',cave:'洞府',temple:'佛寺',land_temple:'土地庙',public_office:'公署',other:'建筑'}[kind]||'建筑';
     const meta=[category,row.type==='scenery'?'自然景观':`${row.level}级`,row.use_name,row.population_name].filter(Boolean);
     body.append(head,el('p',meta.join(' · '),'building-meta'));
     summary.append(body);
@@ -29,7 +29,7 @@
       if(row.type!=='scenery')actions.append(command(row.status==='destroyed'?'重建':'营造',{action:'manage',building_id:row.id}));
     }else actions.append(el('span','需亲赴此地','building-remote'));
     summary.append(actions,icon('chevron-down'));item.append(summary);
-    const temple=['temple','land_temple'].includes(kind);
+    const temple=['temple','land_temple','public_office'].includes(kind);
     const detail=el('div',null,'building-detail'),art=el(temple?'img':'div',null,'building-art');art.dataset.kind=kind;
     if(temple){art.src=window.HomeMapModes.art(row);art.alt=row.name+' · '+(row.status==='destroyed'?'遗址':'建筑立绘');art.loading='lazy';}
     else art.setAttribute('aria-hidden','true');
@@ -87,5 +87,6 @@
     figure.dataset.status=row.status;figure.append(img,el('figcaption',preview?'奉建示意':row.status==='destroyed'?'原址待修':row.status==='damaged'?'建筑受损':'原庙庭院'));
     return figure;
   }
-  window.BuildingPanel = {bind:(data, command, lock) => {state=data;send=command;locked=lock;}, region, marker, overview, entrance, portrait};
+  function syncBusy(){document.querySelectorAll('[data-building-action][data-atlas-unavailable]').forEach(b=>b.disabled=locked()||b.dataset.atlasUnavailable==='1');}
+  window.BuildingPanel = {bind:(data, command, lock) => {state=data;send=command;locked=lock;}, region, marker, overview, entrance, portrait, syncBusy};
 })();

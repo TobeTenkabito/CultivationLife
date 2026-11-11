@@ -12,6 +12,9 @@ def validate_economy(value, merchants=None, document=None):
             raise ValueError('经济存档结构或数值无效，原文件已保留')
     require(isinstance(value, dict) and value.get('schema_version') == 1)
     require(type(value.get('issued',0)) is int and value.get('issued',0)>=0)
+    if 'administrations' in value:
+        from .institution_authority_schema import validate as validate_authority
+        validate_authority(value['administrations'], value.get('accounts', {}))
     if 'institution_agendas' in value:
         from .institution_ai_schema import validate
         validate(value['institution_agendas'],value.get('accounts',{}))

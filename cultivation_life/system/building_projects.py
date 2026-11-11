@@ -67,6 +67,11 @@ def quote(game, purpose, row=None, *, payer='player', stock=None, actor=None):
             if row['level']>=3:reason='城市已达三级'
             elif used.get('govern_year')==game.player.age:reason='本城本年已经办理治理，须在城外度过真实年份'
             elif row.get('development',0)>=config()['city_development'][row['level']-1]:reason='治理进度已足，请先扩建'
+    elif row.get('subtype')=='public_office':
+        spec=row['construction'];rank=grade(world)
+        coins=int(BASE_PRICES[rank-1]*spec['labor_units']*row['level'])
+        materials={material_id(world,rank,role):n*row['level'] for role,n in
+                   zip(('ore_structure','ore_conduct','ore_store'),spec['materials'])}
     elif row.get('subtype')=='land_temple':
         costs=land_temple_cost(world)
         materials,coins=costs['materials'],costs['coins']
@@ -93,7 +98,8 @@ def quote(game, purpose, row=None, *, payer='player', stock=None, actor=None):
     if row and purpose=='rebuild' and row['status']!='destroyed':reason='建筑并未被摧毁'
     from .economy.operating_license import allowed as licensed_operator
     licensed_repair=bool(row and row['type']=='industry' and licensed_operator(game,game.economy_v2.get('estates',{}).get(row.get('source_id'),{})))
-    if row and purpose=='rebuild' and not (actor is not None or owns(game,row) or licensed_repair or row['type']=='city' and row.get('public')):
+    from .institution_authority import can_repair
+    if row and purpose=='rebuild' and not (actor is not None or owns(game,row) or licensed_repair or can_repair(game,row) or row['type']=='city' and row.get('public')):
         reason='没有重建权限，请先联系所有者'
     from .economy.ledger import balance
     funds=balance(game,payer)
@@ -103,7 +109,8 @@ def quote(game, purpose, row=None, *, payer='player', stock=None, actor=None):
     fingerprint=dict(purpose=purpose,world=world,location=actor.location if actor else game.player.location_id,coins=coins,materials=materials,
         identity=row['id'] if row else None,owner=row.get('owner') if row else None,
         level=row.get('level') if row else None,status=row.get('status') if row else None,
-        temple_facilities=row.get('temple_facilities') if row else None)
+        temple_facilities=row.get('temple_facilities') if row else None,
+        construction=row.get('construction') if row else None)
     token=hashlib.sha256(json.dumps(fingerprint,sort_keys=True).encode()).hexdigest()[:20]
     return dict(coins=coins,materials=materials,reason=reason,token=token)
 

@@ -9,7 +9,7 @@
       const heading=el('summary');heading.append(el('strong',r.name),el('span',r.job?(r.job.blocked?'待请示':'履约中'):'经营安排','institution-badge'));box.append(heading);
       box.append(el('p',`可安排原款 ${money(r.available)} · 基本准备金 ${money(r.reserve)}`,'muted'));
       const send=(action,data={})=>dispatch({action,scope:r.id,token:r.token,...data});
-      const button=(label,action,data={},disabled=false)=>{const b=el('button',label);b.type='button';b.dataset.institutionAction=action;b.disabled=!r.can_act||disabled;b.dataset.institutionUnavailable=b.disabled?'1':'0';if(dlc)b.dataset.dlc='yaochi-westward';b.onclick=()=>send(action,typeof data==='function'?data():data);return b;};
+      const button=(label,action,data={},disabled=false)=>{const b=el('button',label);b.type='button';b.dataset.institutionAction=action;b.disabled=!r.can_act||disabled;b.dataset.institutionUnavailable=b.disabled?'1':'0';if(dlc)b.dataset.dlc=typeof dlc==='string'?dlc:'yaochi-westward';b.onclick=()=>send(action,typeof data==='function'?data():data);return b;};
       if(r.job){
         const j=r.job,progress=el('progress');progress.max=j.years;progress.value=j.progress;
         box.append(el('h4',j.offer.name),progress,el('p',`实际工时 ${j.progress}/${j.years} 年 · 支出 ${money(j.spent)} / 托管 ${money(j.funded)}`),el('p',j.blocked||'原执行人按本地实际年份履约；离场或失去资格会暂停。','muted'));
