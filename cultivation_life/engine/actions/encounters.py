@@ -390,6 +390,8 @@ def _known_npc_encounter_target(
         cached["last_seen_age"] = player.age
         npc = deps._promote_cached_npc(game, npc.id, "再度相逢") or npc
     npc.encountered_player = True
+    from ...system.duel_techniques import ensure_npc
+    ensure_npc(npc, game=game)
     deps._tianji_observe_npc(game, npc.id)
     perception = deps._npc_cultivation_perception(game, npc, True)
     visible = perception["realm_name"] != "无法看清"

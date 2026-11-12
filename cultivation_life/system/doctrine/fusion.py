@@ -24,6 +24,16 @@ def compile_manual(seed, definition, words):
                 growth_preference='balanced')
     for stat in ('combat_bonus', 'hp_bonus', 'mp_bonus', 'opportunity_bonus'):
         book[stat] = round(max(b[stat] for b in books) * (2.2 if stat == 'combat_bonus' else 1.8), 3)
+    from ...technique_effect_generation import concordance_effect
+    from ...technique_effect_schema import describe
+    book.pop('combat_effect', None)
+    primary = next((feature['kind'] for stage in definition['stages']
+                    for feature in (stage.get('voisinage') or {}).get('features', ())), 'frugal')
+    book['combat_effect'] = concordance_effect(books, seed=0 if definition['fixed'] else seed,
+        doctrine_id=definition['id'], feature=primary, theme=definition['theme'])
+    book['description'] = ('融汇本门全套传承的归一真传，保留主修运转法门；效果额度超过普通功法上限20%，'
+                           '费用较本门最低费用降低20%（最低1%容量），冷却缩短一轮（最低零轮）。'
+                           + describe(book['combat_effect']))
     return book
 
 

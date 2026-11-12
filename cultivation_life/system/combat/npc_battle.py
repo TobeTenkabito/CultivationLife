@@ -114,6 +114,9 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
         if frame.ordinary and battle.verdict() is None:
             p_power, e_power = battle.totals["player"], battle.totals["enemy"]
             semantic = battle.semantic_ordinary_start()
+            if battle.techniques:
+                p = max(0., 1 - battle.ordinary_loss('player'))
+                e = max(0., 1 - battle.ordinary_loss('enemy'))
             first = p_power * (semantic['player']['mobility'] + semantic['player']['sense']) >= e_power * (semantic['enemy']['mobility'] + semantic['enemy']['sense'])
             if frame.divine_first is not None:first=frame.divine_first=='player'
             after = battle.semantic_initiative(first)

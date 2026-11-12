@@ -131,7 +131,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
 
     @property
     def enabled(self) -> bool:
-        return self.semantics is not None or any(s.operating_energy is not None or s.unit.capabilities.body_mechanisms or s.unit.capabilities.divine_lights or s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
+        return self.techniques is not None or self.semantics is not None or any(s.operating_energy is not None or s.unit.capabilities.body_mechanisms or s.unit.capabilities.divine_lights or s.unit.capabilities.voisinages or s.unit.capabilities.force_tier > 1
                    or s.unit.capabilities.ward_tier > 1 or s.unit.capabilities.technique_tier > 1
                    or s.unit.capabilities.artifact_tier > 1 for s in self.units.values())
 
@@ -467,6 +467,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                         semantic_caps[target_key] = min(semantic_caps.get(target_key, 1.), incoming.cap('ordinary.received_cap'))
                         self._semantic_commit(outgoing, {'ordinary.dealt'})
                         self._semantic_commit(incoming, {'ordinary.received', 'ordinary.received_cap'})
+                    if self.techniques:
+                        amount = self.techniques.damage(key, target_key, amount)
                     body_amounts[target_key]=body_amounts.get(target_key,0.)+amount
                     body_hit_weights[key,target_key]=amount
                     if tier>=2:amount=self._guard_state(target_key,amount)
@@ -479,8 +481,15 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             target = self.units[key]
             before = target.vitality
             body_before = target.body
-            self._lose(key, min(amount, semantic_caps.get(key, amount)),
-                       body_amount=min(body_amounts[key],semantic_caps.get(key,body_amounts[key])))
+            loss = min(amount, semantic_caps.get(key, amount))
+            body_loss = min(body_amounts[key], semantic_caps.get(key, body_amounts[key]))
+            if self.techniques:
+                # A cap or overkill must not manufacture a refundable shield hit.
+                after_shield = self.techniques.absorb(key, loss)
+                prevented = loss - after_shield
+                body_loss *= max(0., 1 - prevented / max(1e-12, loss))
+                loss -= prevented
+            self._lose(key, loss, body_amount=body_loss)
             actual_losses[key] = before - target.vitality
             actual_body_losses[key] = body_before - target.body
         # Damage is simultaneous. Post-damage facts contain actual, tier-gated
@@ -488,6 +497,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         for source, target, amount in semantic_hits:
             actual = actual_losses[target] * amount / max(1e-12, amounts[target])
             self._semantic_record_loss(source, target, actual, 'ordinary')
+            if self.techniques:
+                self.techniques.observed(source, target, actual)
         for source, target, amount in semantic_hits:
             actual = actual_losses[target] * amount / max(1e-12, amounts[target])
             body_loss = actual_body_losses[target] * amount / max(1e-12, amounts[target])
@@ -617,6 +628,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             **({'divine_lights':dict(events=list(self._light_trace),silenced_by=dict(self._light_muted),first_side=self.frame.divine_first)} if self._light_trace else {}),
             **({'animation': self.animation} if self.animation and self.animation.get('fields') else {}),
             **({'semantics': self.semantic_report()} if self.semantics is not None else {}),
+            **({'technique_effects': self.techniques.report()} if self.techniques is not None else {}),
             "relations": self.frame.relations,
             "release_recovery": {k:s.release_recovery_round for k,s in self.units.items() if self._action_paused(k)},
             "restrictions": {k: list(s.restrictions) for k, s in self.units.items() if s.restrictions},

@@ -12,4 +12,6 @@ def prepare_reconciliation(game: GameState) -> bool:
     changed = adopt_field(game) or changed
     from ...character_skins import remember
     changed = remember(game.player) or changed
+    from ...system.duel_techniques import prepare_visible
+    changed = prepare_visible(game) or changed
     return changed

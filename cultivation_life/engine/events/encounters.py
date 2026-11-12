@@ -134,6 +134,8 @@ def _cache_encounter_target(deps: EncounterDependencies, game: GameState, target
             age=npc.age, lifespan=npc.lifespan, spirit_root=npc.spirit_root,
             gender=npc.gender,
         )
+        from ...system.duel_techniques import ensure_npc
+        ensure_npc(npc, game=game)
         entry = {
             "id": npc_id, "npc": npc.to_dict(), "combat_power": float(member["power"]),
             "seen_count": 1, "first_seen_age": game.player.age, "last_seen_age": game.player.age,

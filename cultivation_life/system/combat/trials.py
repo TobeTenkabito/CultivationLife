@@ -21,6 +21,7 @@ def dump_battle(battle):
             'applied_seals':sorted(battle._applied_seals),
             'death_exempt':sorted(battle._death_exempt),
             **({'semantic_runtime': battle.semantics.dump()} if battle.semantics else {}),
+            **({'technique_runtime': battle.techniques.dump()} if battle.techniques else {}),
             **({'semantic_environment': dict(battle._semantic_environment)} if battle.semantics else {}),
             'states': {key: {k: copy.deepcopy(v) for k, v in vars(s).items() if k != 'unit'}
                        for key, s in battle.units.items()}, 'dominated': dict(battle._dominated),
@@ -91,6 +92,12 @@ def load_battle(snapshot):
         if any(key not in FACTS or not key.startswith('environment.') or type(value) is not FACTS[key][0]
                for key, value in battle._semantic_environment.items()):
             raise ValueError('Invalid semantic environment snapshot')
+    if battle.techniques:
+        if 'technique_runtime' not in snapshot:
+            raise ValueError('Missing paid technique runtime snapshot')
+        battle.techniques.restore(snapshot['technique_runtime'])
+    elif 'technique_runtime' in snapshot:
+        raise ValueError('Technique runtime has no owning capabilities')
     return battle
 
 
@@ -146,6 +153,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
                             frame.events.append(f'你以可用的主战手段彻底斩灭{victim.unit.name}。')
             stats = copy.deepcopy(state['stats'])
             semantic_factors = battle.semantic_ordinary_start()
+            state['mp_ratio'] = battle.mp_ratio('player', state['mp_ratio'])
             for side in ('player', 'enemy'):
                 for stat, factor in frame.stat_factors.get(side, {}).items():
                     stats[side][stat] *= factor

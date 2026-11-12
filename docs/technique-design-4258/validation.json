@@ -1,0 +1,105 @@
+{
+  "status": "passed",
+  "coverage": {
+    "total": 4258,
+    "by_source_group": {
+      "named_fixed": 131,
+      "guixu_fixed": 110,
+      "reincarnation_fixed": 4,
+      "upper_fixed": 48,
+      "heritage_fixed": 77,
+      "open_catalog": 3888
+    },
+    "by_role": {
+      "balanced": 1,
+      "main": 1527,
+      "combat": 1334,
+      "support": 1313,
+      "body": 39,
+      "divine_sense": 33,
+      "transformation": 11
+    },
+    "by_path": {
+      "dao": 1088,
+      "buddhist": 3,
+      "demonic": 1069,
+      "ghost": 1043,
+      "monster": 1044,
+      "confucian": 11
+    },
+    "by_grade": {
+      "1": 339,
+      "2": 347,
+      "3": 357,
+      "4": 352,
+      "5": 365,
+      "6": 365,
+      "7": 363,
+      "8": 398,
+      "9": 340,
+      "10": 344,
+      "11": 348,
+      "12": 340
+    }
+  },
+  "duplicate_rule_groups": [],
+  "duplicate_nonnumeric_behavior_groups": [],
+  "unique_descriptions": 4258,
+  "numeric_envelopes": {
+    "max_single_cast_extra_damage_fraction": 0.1,
+    "max_three_cast_extra_damage_fraction_of_one_frozen_baseline": 0.3,
+    "max_single_cast_recovery_fraction": 0.015,
+    "max_battle_recovery_fraction": 0.045,
+    "max_battle_mana_refund_fraction": 0.02,
+    "minimum_level_9_cost_percent": 1.68,
+    "level_9_strength_multiplier": 1.0,
+    "shared_branch_budget": 1.0
+  },
+  "errors": [],
+  "drafting_corrections": [
+    "吐纳类加入实际防护作用，避免只付费再退少量费用的无效循环",
+    "五式允许五次、每次额度缩至60%，开轮后逐轮实付推进，不被两轮冷却和重复准备截断",
+    "分包驱散只在最终窗口执行一次，前段观察不伪造非零战果",
+    "区分准备期限、叶效果期限与整条效果链期限，避免分期被统一短期限截断",
+    "无方向性准备可绑定已见在场敌人，避免主修追源式永远没有目标"
+  ],
+  "checks": [
+    "原ID/名称/顺序/字段一一保留",
+    "4258条均有描述与战斗作用",
+    "9级逐级费用",
+    "每条机制自身额度、次数与不可递归约束",
+    "排除ID、名称和数值后的行为组合去重",
+    "不存在占位词、乱码与遗漏固定功法"
+  ],
+  "not_proven": [
+    "4258条全部组合的总体平衡",
+    "全部条件在实际战斗驱动器中的可达性",
+    "每部在同境实际对手分布中的使用价值",
+    "语义相近但文字不同的附加条款是否仍应进一步合并或深化"
+  ],
+  "runtime_tests": "未运行新增机制的游戏战斗测试：本交付是设计数据，不是游戏补丁。",
+  "artifact_sha256": {
+    "README.md": "68db5217b959efa4473cc7bc078ca4c5fa100ce0eb7e901fe1f18958bb776eb2",
+    "techniques.md": "70481e3a6bdf20099f6f7bf9c3cc4ff0f4b946be55c99ef733ed1f7876f0b580",
+    "techniques.json": "97569ff7cc76f75249170075e68db78d141bd45b21cf3d2541eabdc0b1baa024",
+    "volumes/0001-0250.md": "ff8c5c0a1891582499913cc25906c9a5f8d3c2ac3c537f92d3847dbbfff4f7e9",
+    "volumes/0251-0500.md": "6b6b7172b4edfff5c0aa932d1003f2cf85e98247476eaa7c44b0458f4df09063",
+    "volumes/0501-0750.md": "d07bc55ca692d14e3339caa5abb49fa149df7f5930e00495afef2657432bfcd2",
+    "volumes/0751-1000.md": "f2bb44510c3c7d0f08bf71864c3e2145bac58e7aa62df95d244f56fbe3c45b92",
+    "volumes/1001-1250.md": "052d88dcaa06ee018a5add02a3a1bb42ba57d80927aae786f58d01cb6d20de8d",
+    "volumes/1251-1500.md": "599074a96ea915f9e095015f24c539befeabc2d5126795ce61ed25ad5c0a7d80",
+    "volumes/1501-1750.md": "f79e2960b45e4a31fd151a6a3733585862a07d1c3a5a3152e55d1b86c9500ad6",
+    "volumes/1751-2000.md": "1abd0f909b480c3eaaf2757718780365914cb8b26d4c8d611cd00d33398435ed",
+    "volumes/2001-2250.md": "6e0416901414b55d17e3cce4cc6820af1bb01fe1caae944d2e506fb47fd15efa",
+    "volumes/2251-2500.md": "6117894cd113b01269751be418a5d0720f4347097a38c94bfe21ea11e9765bc3",
+    "volumes/2501-2750.md": "1b1b5d37a2e3496a90955bcc0f6b2588805c16e11cc53322a3e3b2d9e43fd259",
+    "volumes/2751-3000.md": "c31b89c00486e2672f357490ac555a5730fb05c1db52f64179d9ef07eff2a047",
+    "volumes/3001-3250.md": "b30b797da8102c3787329536d2c3a2d5804f9cc75445f0981446e845ef86928a",
+    "volumes/3251-3500.md": "1f2d58b258ca9697e03fd4a1c54bf4688d15c631acf2060a429a8cc410adc12d",
+    "volumes/3501-3750.md": "e0078038464cfc20415b78934b20705fc5934f4adc0c44f3629343eba433e56b",
+    "volumes/3751-4000.md": "6caaf13bf46d8d1d622353c20664878e6b4630d848411c570affdc03f4c11d0e",
+    "volumes/4001-4250.md": "42abc964b5dc9c27a2a092711c31eb8eb12fb338fe7222d39630ad69e90659e0",
+    "volumes/4251-4258.md": "5b7ec666f966aa8c4319da0d13b2ca82a8110a91f7f662d1c0bd637cb8569cf0",
+    "volumes.md": "5679c8aeeef77f6490f6f83d50ea7280999133cf17af3d656470bae7354f936d"
+  }
+}

@@ -206,7 +206,10 @@ def teach(game,kind,identity,book_id,*,slot=None,family=False):
     if book_id in levels(owner) and (slot is None or (slot=='main' and read(owner,'main_technique_id')==book_id) or read(owner,'technique_slots',{}).get(slot)==book_id):raise ValueError('该人物已掌握并配置此功法')
     newly_learned = book_id not in levels(owner)
     expected={'spiritual':'main','body':'body','divine_sense':'sense','transformation':'transformation','combat':'combat','support':'support'}.get(book.category)
-    if slot is not None and slot!=expected:raise ValueError('功法类别与配置栏目不符')
+    if slot is not None and slot!=expected and not (slot == 'combat' and book.category == 'spiritual'):
+        raise ValueError('功法类别与配置栏目不符')
+    if slot == 'combat' and book.grade > facts['realm_index']:
+        raise ValueError('目标境界不足以配置此斗法功法')
     if kind=='puppet':
         from ...content_registry import TECHNIQUE_CATALOG
         o=target.owner

@@ -5,6 +5,9 @@ from ...combat_semantics import SemanticRuntime, STATS, RESTRICTIONS
 
 class CombatSemantics:
     def _init_semantics(self):
+        from .techniques import TechniqueRuntime
+        self.techniques = (TechniqueRuntime(self) if any(s.unit.capabilities.technique_effects
+                           for s in self.units.values()) else None)
         rules = {key: s.unit.capabilities.semantic_rules for key, s in self.units.items()
                  if s.unit.capabilities.semantic_rules}
         self.semantics = SemanticRuntime(rules) if rules else None
@@ -108,6 +111,8 @@ class CombatSemantics:
         return ev
 
     def _semantic_begin(self, number, player_mp, enemy_mp, player_morale=None, enemy_morale=None):
+        if self.techniques:
+            self.techniques.begin(number)
         if self.semantics is None:
             return
         self.semantics.begin_round(number)
@@ -124,6 +129,8 @@ class CombatSemantics:
     def semantic_ordinary_start(self):
         """Called after field control, before ordinary initiative and stat use."""
         factors = {side: {stat: 1. for stat in STATS} for side in ('player', 'enemy')}
+        if self.techniques:
+            self.techniques.start(factors)
         if self.semantics is None:
             return factors
         plans = [(key, self._semantic_preview(key, 'ordinary_start')) for key in self.units

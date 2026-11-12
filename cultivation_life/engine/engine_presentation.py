@@ -72,6 +72,10 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
     deps._ensure_natal_artifact(game)
     from ..system.monster_identity import identity
     player_data = public_player(game.player)
+    from ..system.duel_techniques import public as public_duel
+    player_data['duel_techniques'] = public_duel(game.player)
+    player_data['duel_techniques']['can_configure'] = bool(game.player.alive and not game.player.imprisonment
+                                                         and not game.pending_event and not game.active_trial)
     player_data.update(identity(game.player))
     player_data.update(raw_fame=game.player.fame, raw_karma=game.player.karma, raw_sha_qi=game.player.sha_qi,
                        fame=effective_fame(game.player), karma=projected_resource(game.player, "karma"), sha_qi=effective_sha_qi(game.player), effective_karma=effective_karma(game.player))

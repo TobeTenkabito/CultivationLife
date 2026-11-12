@@ -1,5 +1,13 @@
 {
   "version": 1,
+  "technique_effect_ownership_notes": {
+    "Player.duel_technique_ids / ghost_core_state.duel_technique_ids / ghost_self_state.duel_technique_ids": "personal：至多七个互异原combat_techniques ID；默认空，只由原equip-technique提交合法选装与移出。跨界保留名单，当前资格失效只暂停投影；夺舍随原肉身功法快照保存/恢复，宿主清空不借用原身书目。事件、战斗试境、囚禁、死亡时不可调整，不复制书或资源。",
+    "SectNpc.duel_technique_ids / encounter_npc_cache.*.npc.duel_technique_ids": "personal：None为尚未确定，列表为原人物固定书目；原technique_levels记录等级。会话原可见人物、原相遇缓存及公共战前准备按人物ID独立流一次配置，真实境界/灵根/世界/肉身/转化资格复验。重遇、自然突破与读档不重抽，培养明确战斗传授可替换至多一个位置；纯投影不生成，未识破修为不公开新增明细。无新人物、位置、资源或跨界例外。",
+    "Technique.combat_effect.version=2.lineage/mastery / active_trial.snapshot.technique_runtime.first_exchanges": "personal / session：lineage固定为32道统主题或三界原48部功法系列，mastery只由原仙界合练生成；不新增跨界或功法使用资格。首次实际普通交锋轮次按本场原人物ID保存，读档不刷新首攻；V1配方保持原规则，旧V1运行态仅补无首攻语义的中性历史锚点，不改任何用户文件或已存效果。触发和返还仍引用原人物态势、作用层级及元力，三界没有新增合练入口。",
+    "Player.*Technique.description / combat_effect / known_techniques / combat_techniques / ghost_self_state": "personal：原功法携带冻结描述和有限效果配方，随原功法及等级保存；不新增背包、物品或资源。旧结构12功法缺失时为空，不重抽；结构1–11仍拒绝。固定4258部设计目录未批量启用。",
+    "GameState.doctrine_state.definitions.*.manuals[].description / combat_effect": "scope：原种子生成道统首次建目录时用独立版本化流生成并冻结，固定道统使用固定种子；不消费名字、基础数值或游戏RNG流。读取、购买、传授、NPC解析与战斗只读取原冻结配方，不补写旧道统、不重抽。合练的新功法沿自己的原ID独立生成。",
+    "CombatCapabilities.technique_effects / trial battle technique_runtime": "battle snapshot：原人物已合法配置功法的只读投影，付款仍扣UnitState.current原可用元力；仅回执、冷却、有限护持、分期包与实际损耗轮次属于本场运行态。原试境/劫战快照随原实例保存，读档续战不重置费用和次数，不生成普通MP或高阶储量。"
+  },
   "economy_ownership_notes": {
     "GameState.economy_v2.administrations.*.operations": "scope/history：本体机构经营账保存income/expense/salary实际收支、settlements/deliveries计次、sequence/last_signed原合同周期、last_training/last_reward/last_performance真实年份、term_baseline本任接任时累计履约基线及policy。余额仍为原administration账户，returned允许实缴原funded与新增income，不复制钱包。contract复用原分期托管，原市场全额备款；supplier为原游戏ID、原item/world/location、三期以内、fee/service_percent为签约时原交易费与内容提供的经办费率，receipts为真实交货凭证，funded=paid+refunded+原托管余额。交付只消费原行囊并入原址市场，货款与公费分开，实绩方可分配待遇；撤任/辞任/全款交接/到期/停用退未交付原款一次，取消不刷新签约周期。独立空间和异地不能办理，原地区年份仅收束合同，不回填历史收益。",
     "GameState.building_state.records.*.office_facilities / city_business delegated operation": "scope/history：府署两个office_facilities位只保存id/coins/materials已付营造规格，不是库存；原市场采购实货、公费营造，损毁停效，沿原public_office重建报价全额包含设施工料，不能免费恢复。原城市city_business仍唯一，有限任职授权可经办背景原城或原机构产权城市，不改owner，收益进原府而非个人；当年经营与原城主入口共用last_year，不补领历史年份。新授权由修罗适配限三城、原署完好及在任原址，本体提供授权/经营/培养/合同结算。",
@@ -227,6 +235,7 @@
     "technique": "personal",
     "support_technique": "personal",
     "combat_techniques": "personal",
+    "duel_technique_ids": "personal",
     "known_techniques": "personal",
     "additional_roots": "personal",
     "secret_art_state": "personal",

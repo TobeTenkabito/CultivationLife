@@ -27,6 +27,9 @@ def resolve(game, identity):
 def learn(npc, book, level=1, slot=None):
     from ..authored_technique_schema import integer
     integer(level,1,9,'人物功法等级')
+    if slot == 'combat' and (book.grade > read(npc, 'realm_index', 0) or book.category != 'spiritual'
+                             or not can_practice_technique(read(npc, 'spirit_root', ''), book)):
+        raise ValueError('人物境界、灵根或功法类别不满足斗法配置')
     facts=levels(npc)
     facts[book.id]=max(facts.get(book.id,1),level)
     def write(key,value):
@@ -36,7 +39,19 @@ def learn(npc, book, level=1, slot=None):
     if slot=='main' or book.id==read(npc,'main_technique_id'):
         write('main_technique_id',book.id);write('main_technique_level',facts[book.id])
     if slot and slot!='main':
-        slots=dict(read(npc,'technique_slots',{}));slots[slot]=book.id;write('technique_slots',slots)
+        slots=dict(read(npc,'technique_slots',{}))
+        previous = slots.get(slot)
+        slots[slot]=book.id;write('technique_slots',slots)
+        selected = read(npc, 'duel_technique_ids')
+        if slot == 'combat' and selected is not None and book.id not in selected:
+            selected = list(selected)
+            if previous in selected:
+                selected[selected.index(previous)] = book.id
+            elif len(selected) < 7:
+                selected.append(book.id)
+            else:
+                selected[-1] = book.id
+            write('duel_technique_ids', selected)
     if slot and (book.id.startswith('TECH_AUTHORED_') or read(npc,'family_traits',{}).get('authored_combat_bonuses',{}).get(slot)):
         from ..rules import technique_scale
         traits=read(npc,'family_traits',{})

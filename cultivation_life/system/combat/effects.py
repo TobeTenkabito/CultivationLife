@@ -393,11 +393,13 @@ class VoisinageEffects:
         if key != intent.field.owner:
             self._semantic_event(key, 'effect_resolved', intent.field.owner, 'recipient', **event)
 
-    def _restore_state(self, key, amount):
+    def _restore_state(self, key, amount, *, maximum_gain=None):
         target = self.units[key]
         if not target.fighting:
             return
         gain = min(self._body_recovery(key,amount), 1 - target.vitality)
+        if maximum_gain is not None:
+            gain = min(gain, max(0., maximum_gain))
         target.vitality += gain
         self._field_healed(key,gain)
         attr = 'player_loss' if target.unit.side == 'player' else 'enemy_loss'

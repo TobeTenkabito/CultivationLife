@@ -3534,6 +3534,7 @@ function renderDemonicSystem(system) {
 }
 
 function renderTechniques(slots) {
+  renderDuelTechniques();
   const list = $('#technique-list'); list.innerHTML = '';
   const transformationAllowed = game?.player?.path !== 'monster';
   const equippedCount = [slots.main, slots.support, slots.body, slots.divine_sense, ...(transformationAllowed ? [slots.transformation] : []), ...(slots.combat || [])].filter(Boolean).length;
@@ -3568,6 +3569,55 @@ function renderTechniques(slots) {
     row.innerHTML = htmlText`<b>${role} · 空</b><small>需要通过事件与机缘获得功法</small>`;
     list.appendChild(row);
   }
+}
+
+function renderDuelTechniques() {
+  const panel = $('#duel-technique-panel'); panel.replaceChildren();
+  const state = game?.player?.duel_techniques || {limit:7, selected:[], candidates:[]};
+  const title = document.createElement('div'); title.className = 'duel-heading';
+  const label = document.createElement('b'); label.textContent = '斗法功法';
+  const count = document.createElement('span'); count.textContent = `${state.selected.length} / ${state.limit}`;
+  title.append(label, count);
+  const hint = document.createElement('small'); hint.textContent = '先在已悟功法中装备为「战斗」，再从中选取斗法功法。仅所选功法参与新效果结算。';
+  const grid = document.createElement('div'); grid.className = 'duel-slots';
+  const disabled = () => busy || state.can_configure === false;
+  state.selected.forEach((id, index) => {
+    const art = state.candidates.find(row => row.id === id);
+    const button = document.createElement('button'); button.className = 'duel-slot duel-control';
+    button.dataset.duelRemove = id; button.dataset.unavailable = '0';
+    button.textContent = `${index + 1} · ${art?.name || '失效功法'} ×`;
+    button.title = `${art?.description || '暂无额外斗法效果'}${art?.reason ? '\n' + art.reason : ''}\n点击移出斗法`;
+    button.setAttribute('aria-label', `移出斗法：${art?.name || id}`);
+    button.disabled = disabled();
+    button.onclick = () => mutate(`/api/games/${game.id}/equip-technique`, {technique_id:id, slot:'duel_remove'});
+    grid.appendChild(button);
+  });
+  for (let index = state.selected.length; index < state.limit; index++) {
+    const empty = document.createElement('span'); empty.className = 'duel-slot duel-empty';
+    empty.textContent = `${index + 1} · 待配置`; grid.appendChild(empty);
+  }
+  const controls = document.createElement('div'); controls.className = 'duel-picker';
+  const select = document.createElement('select'); select.id = 'duel-technique-select'; select.className = 'duel-control';
+  select.setAttribute('aria-label', '从已装备战斗功法选择斗法功法');
+  const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = '选择已装备的战斗功法'; select.appendChild(placeholder);
+  state.candidates.filter(row => !row.selected).forEach(row => {
+    const option = document.createElement('option'); option.value = row.id;
+    option.textContent = `${row.name} Lv.${row.level}${row.reason ? ' · ' + row.reason : ''}`;
+    option.disabled = !row.active; select.appendChild(option);
+  });
+  const full = state.selected.length >= state.limit;
+  select.dataset.unavailable = full ? '1' : '0'; select.disabled = disabled() || full;
+  const add = document.createElement('button'); add.id = 'duel-technique-add'; add.className = 'duel-control';
+  add.textContent = full ? '已满七部' : '选入斗法'; add.dataset.unavailable = '1'; add.disabled = true;
+  const preview = document.createElement('small'); preview.className = 'duel-preview';
+  select.onchange = () => {
+    const art = state.candidates.find(row => row.id === select.value);
+    add.dataset.unavailable = full || !art?.active ? '1' : '0';
+    add.disabled = disabled() || add.dataset.unavailable === '1';
+    preview.textContent = art ? (art.description || '暂无额外斗法效果；既有属性加成保持。') : '';
+  };
+  add.onclick = () => mutate(`/api/games/${game.id}/equip-technique`, {technique_id:select.value, slot:'duel'});
+  controls.append(select, add); panel.append(title, hint, grid, controls, preview);
 }
 
 function renderKnownTechniques(techniques) {
@@ -4309,6 +4359,9 @@ function renderButtons() {
   });
   document.querySelectorAll('.technique-equip').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || button.dataset.compatible !== '1';
+  });
+  document.querySelectorAll('.duel-control').forEach(control => {
+    control.disabled = busy || game?.player?.duel_techniques?.can_configure === false || control.dataset.unavailable === '1';
   });
   document.querySelectorAll('.technique-upgrade, .technique-merge').forEach(button => {
     button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || button.dataset.available !== '1';

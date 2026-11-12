@@ -128,6 +128,8 @@ class Technique:
     combat_interventions: list[dict[str, Any]] = field(default_factory=list)
     authored_buffs: list[dict[str, Any]] = field(default_factory=list)
     required_affinities: list[str] = field(default_factory=list)
+    description: str = ""
+    combat_effect: dict[str, Any] = field(default_factory=dict)
 
     def active_in(self, world: str) -> bool:
         return not self.effective_worlds or world in self.effective_worlds
@@ -135,6 +137,13 @@ class Technique:
     def __post_init__(self) -> None:
         from .authored_technique_schema import validate_buffs
         validate_buffs(self.authored_buffs)
+        if not isinstance(self.description, str) or len(self.description) > 4000:
+            raise ValueError('功法描述文本无效')
+        if not isinstance(self.combat_effect, dict):
+            raise ValueError('功法效果须为固定数据对象')
+        if self.combat_effect:
+            from .technique_effect_schema import validate_effect
+            self.combat_effect = validate_effect(self.combat_effect)
         self.level = max(1, min(9, int(self.level)))
         # 旧存档与未显式标注的内容按道统补齐先天“源”；一旦写入存档，
         # sources 就成为功法自身的固定数据，不随角色所在界面改变。
@@ -235,6 +244,7 @@ class SectNpc:
     main_technique_level: int = 1
     technique_levels: dict[str, int] = field(default_factory=dict)
     technique_slots: dict[str, str] = field(default_factory=dict)
+    duel_technique_ids: list[str] | None = None
     combat_artifact_id: str | None = None
     combat_factor: float = 1.0
     faction_id: str | None = None
@@ -282,6 +292,10 @@ class SectNpc:
         self.spirit_state = validate_spirit(self.spirit_state)
         from .npc_technique_schema import normalize
         self.technique_levels = normalize(self.technique_levels, self.main_technique_id, self.main_technique_level, self.family_traits)
+        from .duel_technique_schema import validate_ids
+        self.duel_technique_ids = validate_ids(self.duel_technique_ids, uninitialized=True)
+        if self.duel_technique_ids and any(key not in self.technique_levels for key in self.duel_technique_ids):
+            raise ValueError('人物斗法功法尚未习得')
         if not isinstance(self.technique_slots, dict) or set(self.technique_slots) - {'support','combat','body','sense','transformation'} or any(k not in self.technique_levels for k in self.technique_slots.values()):
             raise ValueError('人物功法配置无效')
         if (type(self.economic_lifespan_bonus) not in (int, float)
@@ -409,6 +423,7 @@ class Player:
     technique: Technique | None = None
     support_technique: Technique | None = None
     combat_techniques: list[Technique] = field(default_factory=list)
+    duel_technique_ids: list[str] = field(default_factory=list)
     known_techniques: list[Technique] = field(default_factory=list)
     additional_roots: list[str] = field(default_factory=list)
     secret_art_state: dict[str, Any] = field(default_factory=dict)
@@ -628,6 +643,10 @@ class Player:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Player:
         data = dict(normalize_content_references(value))
+        from .duel_technique_schema import validate_ids
+        data['duel_technique_ids'] = validate_ids(data.get('duel_technique_ids', []))
+        if set(data['duel_technique_ids']) - {row['id'] for row in data.get('combat_techniques', [])}:
+            raise ValueError('斗法功法必须先成功装备为战斗功法')
         from .character_skin_schema import validate as validate_skins
         data['character_skins'] = validate_skins(data.get('character_skins', {}))
         from .authored_technique_schema import validate_insights

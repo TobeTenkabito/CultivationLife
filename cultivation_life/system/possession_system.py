@@ -11,7 +11,7 @@ _BODY_FIELDS = (
     "name", "gender", "spirit_root", "additional_roots", "acquired_root", "born_rootless",
     "realm_index", "layer", "lifespan", "opportunity",
     "qi_experience", "path", "race", "hp", "mp", "body_training", "body_progress",
-    "technique", "support_technique", "combat_techniques", "known_techniques",
+    "technique", "support_technique", "combat_techniques", "known_techniques", "duel_technique_ids",
     "body_technique", "divine_sense_technique", "transformation_technique",
     "known_transformations", "transformation_mastery", "transformation_loadouts",
     "divine_sense_rank", "divine_sense_experience", "awaiting_major_breakthrough",
@@ -85,6 +85,9 @@ def _restore_body(player: Player, snapshot: dict[str, Any]) -> None:
             value = Technique(**value) if isinstance(value, dict) else None
         elif field in {"combat_techniques", "known_techniques"}:
             value = [Technique(**row) for row in (value or [])]
+        elif field == 'duel_technique_ids':
+            from ..duel_technique_schema import validate_ids
+            value = validate_ids(value or [])
         setattr(player, field, value)
 
 
@@ -201,6 +204,7 @@ def enter_host_body(player: Player, target: dict[str, Any], *, technique=None) -
     player.technique = target_technique
     player.support_technique = None
     player.combat_techniques = []
+    player.duel_technique_ids = []
     player.known_techniques = [copy.deepcopy(target_technique)] if target_technique else []
     player.body_technique = None
     player.divine_sense_technique = None

@@ -349,16 +349,23 @@ def equip_known_technique(deps: InventoryDependencies, game_id: str, technique_i
     known = next((technique for technique in game.player.known_techniques if technique.id == technique_id), None)
     if not known:
         raise ValueError("你尚未掌握这部功法")
-    assign_technique(game.player, copy.deepcopy(known), slot)
+    if slot in {'duel', 'duel_remove'}:
+        if not game.player.alive or game.player.imprisonment or game.active_trial:
+            raise ValueError('当前状态无法调整斗法功法')
+        from ...system.duel_techniques import select
+        select(game.player, technique_id, remove=slot == 'duel_remove')
+    else:
+        assign_technique(game.player, copy.deepcopy(known), slot)
     slot_name = {
         "main": "主修", "support": "辅修", "combat": "战斗", "body": "炼体",
         "divine_sense": "神识", "transformation": "变身",
+        "duel": "斗法", "duel_remove": "移出斗法",
     }.get(slot)
     if not slot_name:
         raise ValueError("未知功法槽位")
     game.history.append(HistoryRecord(
         "SYS_EQUIP_KNOWN_TECHNIQUE", 1, game.player.age, "重整功法", technique_id, "equipped",
-        f"你将《{known.name}》配置为{slot_name}功法。", {"slot": slot, "technique_id": technique_id},
+        (f"你将《{known.name}》移出斗法功法。" if slot == 'duel_remove' else f"你将《{known.name}》配置为{slot_name}功法。"), {"slot": slot, "technique_id": technique_id},
         ["system", "technique"],
     ))
     game.updated_at = now_iso()

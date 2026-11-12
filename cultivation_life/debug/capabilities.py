@@ -317,7 +317,7 @@ CAPABILITIES = (
         lambda e, g, p: e.teleport_action(g, p.get('action', ''), p.get('destination'), p.get('owner_id'))),
     Capability('map travel', 'map-travel', (S('destination'),),
         lambda e, g, p: e.travel_map(g, p.get('destination', ''))),
-    Capability('technique equip', 'equip-technique', (S('technique_id'), S('slot', choices=('main', 'support', 'combat', 'body', 'divine_sense', 'transformation'))),
+    Capability('technique equip', 'equip-technique', (S('technique_id'), S('slot', choices=('main', 'support', 'combat', 'body', 'divine_sense', 'transformation', 'duel', 'duel_remove'))),
         lambda e, g, p: e.equip_known_technique(g, p.get('technique_id', ''), p.get('slot', ''))),
     Capability('technique upgrade', 'technique-upgrade', (S('technique_id'),),
         lambda e, g, p: e.upgrade_technique(g, p.get('technique_id', ''))),

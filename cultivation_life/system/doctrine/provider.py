@@ -24,6 +24,9 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
     definitions = game.doctrine_state.get("definitions", {})
     results = {}
     for key, owner in owners.items():
+        if key != 'player':
+            from ..duel_techniques import ensure_npc
+            ensure_npc(owner, game=game)
         if key == 'player':
             from ..asura import source as asura_source
             asura_value = asura_source(game.player)
@@ -70,7 +73,7 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
     for key, owner in owners.items():
         value = project_loadout(game, owner, results.get(key), player=key == 'player', tianji_artifacts=held.get(read(owner, 'id'), ()))
         if (value.voisinages or value.technique_tier > 1 or value.artifact_tier > 1
-                or value.passive_ward_tier == 2 or value.interventions or value.semantic_rules):
+                or value.passive_ward_tier == 2 or value.interventions or value.semantic_rules or value.technique_effects):
             results[key] = value
     return results
 

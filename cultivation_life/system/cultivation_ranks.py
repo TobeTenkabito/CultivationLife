@@ -35,6 +35,9 @@ def mask_unrevealed(public, perception):
     from .divine_lights import visual_lights
     # The existing visibility boundary also governs cosmetic body information.
     public['visual_lights'] = visual_lights(public) if perception and perception.get('revealed') else []
+    if not perception or not perception.get('revealed'):
+        public.pop('duel_technique_ids', None)
+        public.pop('technique_levels', None)
     if perception and not perception.get('revealed'):
         public['cultivation_ranks'] = {
             'cultivation': {'name': perception['realm_name']},

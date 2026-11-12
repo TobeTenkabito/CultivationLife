@@ -171,11 +171,14 @@ def technique_manual_item_id(technique_id: str, level: int = 1) -> str:
 
 
 def technique_special_effect(technique: Technique) -> str:
+    effects = []
     if technique.ignore_possession_limit:
-        return '习得后不受成功夺舍次数上限限制；仍须满足原有夺舍资格。'
-    if technique.possession_limit_bonus:
-        return f'习得后成功夺舍次数上限 +{technique.possession_limit_bonus}；同类加成取最高值。'
-    return ''
+        effects.append('习得后不受成功夺舍次数上限限制；仍须满足原有夺舍资格。')
+    elif technique.possession_limit_bonus:
+        effects.append(f'习得后成功夺舍次数上限 +{technique.possession_limit_bonus}；同类加成取最高值。')
+    if technique.description:
+        effects.append(technique.description)
+    return ' '.join(effects)
 
 
 def public_catalog_entry(row: dict[str, Any]) -> dict[str, Any]:

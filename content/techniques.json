@@ -3668,7 +3668,23 @@
           "op": ">=",
           "level": 30
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "frugal",
+        "trigger": "after_hurt",
+        "delivery": "immediate",
+        "strength_bp": 100,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 2000
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：获得最多初始最大战斗态势1%的有限护持；真实减免后返还该次实付资源的20%，不重复返还；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_9_COMBAT",
@@ -3696,7 +3712,23 @@
           "op": ">=",
           "level": 30
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "low_state",
+        "delivery": "immediate",
+        "strength_bp": 600,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人态势不高于开战时一半时，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗6%，不增加攻击次数；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_9_BODY",
@@ -3726,7 +3758,23 @@
         }
       },
       "body_breakthrough_bonus": 0.18,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "after_hurt",
+        "delivery": "immediate",
+        "strength_bp": 100,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：获得最多初始最大战斗态势1%的有限护持，受击逐次扣减余额；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_9_SENSE",
@@ -3755,7 +3803,23 @@
           "level": 30
         }
       },
-      "divine_sense_bonus": 1.5
+      "divine_sense_bonus": 1.5,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "after_hit",
+        "delivery": "immediate",
+        "strength_bp": 600,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际伤及敌人后，支付原可用元力容量的2.5%：一次普通交锋的破法提高6%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_10_MAIN",
@@ -3783,7 +3847,23 @@
           "op": ">=",
           "level": 35
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "frugal",
+        "trigger": "after_hurt",
+        "delivery": "immediate",
+        "strength_bp": 110,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 2000
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：获得最多初始最大战斗态势1.1%的有限护持；真实减免后返还该次实付资源的20%，不重复返还；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_10_COMBAT",
@@ -3811,7 +3891,23 @@
           "op": ">=",
           "level": 35
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "low_state",
+        "delivery": "immediate",
+        "strength_bp": 700,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人态势不高于开战时一半时，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗7%，不增加攻击次数；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_10_BODY",
@@ -3841,7 +3937,23 @@
         }
       },
       "body_breakthrough_bonus": 0.19999999999999998,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "after_hurt",
+        "delivery": "immediate",
+        "strength_bp": 110,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：获得最多初始最大战斗态势1.1%的有限护持，受击逐次扣减余额；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_10_SENSE",
@@ -3870,7 +3982,23 @@
           "level": 35
         }
       },
-      "divine_sense_bonus": 2.0
+      "divine_sense_bonus": 2.0,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "after_hit",
+        "delivery": "immediate",
+        "strength_bp": 700,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际伤及敌人后，支付原可用元力容量的2.5%：一次普通交锋的破法提高7%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_11_MAIN",
@@ -3898,7 +4026,23 @@
           "op": ">=",
           "level": 40
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "frugal",
+        "trigger": "after_hurt",
+        "delivery": "immediate",
+        "strength_bp": 120,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 2000
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：获得最多初始最大战斗态势1.2%的有限护持；真实减免后返还该次实付资源的20%，不重复返还；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_11_COMBAT",
@@ -3926,7 +4070,23 @@
           "op": ">=",
           "level": 40
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "low_state",
+        "delivery": "immediate",
+        "strength_bp": 800,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人态势不高于开战时一半时，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗8%，不增加攻击次数；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_11_BODY",
@@ -3956,7 +4116,23 @@
         }
       },
       "body_breakthrough_bonus": 0.22,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "after_hurt",
+        "delivery": "immediate",
+        "strength_bp": 120,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：获得最多初始最大战斗态势1.2%的有限护持，受击逐次扣减余额；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_11_SENSE",
@@ -3985,7 +4161,23 @@
           "level": 40
         }
       },
-      "divine_sense_bonus": 2.5
+      "divine_sense_bonus": 2.5,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "after_hit",
+        "delivery": "immediate",
+        "strength_bp": 800,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际伤及敌人后，支付原可用元力容量的2.5%：一次普通交锋的破法提高8%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_12_MAIN",
@@ -4013,7 +4205,23 @@
           "op": ">=",
           "level": 45
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "frugal",
+        "trigger": "after_hurt",
+        "delivery": "immediate",
+        "strength_bp": 125,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 2000
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：获得最多初始最大战斗态势1.25%的有限护持；真实减免后返还该次实付资源的20%，不重复返还；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_12_COMBAT",
@@ -4041,7 +4249,23 @@
           "op": ">=",
           "level": 45
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "low_state",
+        "delivery": "immediate",
+        "strength_bp": 900,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人态势不高于开战时一半时，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗9%，不增加攻击次数；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_12_BODY",
@@ -4071,7 +4295,23 @@
         }
       },
       "body_breakthrough_bonus": 0.24,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "after_hurt",
+        "delivery": "immediate",
+        "strength_bp": 125,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：获得最多初始最大战斗态势1.25%的有限护持，受击逐次扣减余额；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_ASURA_12_SENSE",
@@ -4100,7 +4340,23 @@
           "level": 45
         }
       },
-      "divine_sense_bonus": 3.0
+      "divine_sense_bonus": 3.0,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "asura",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "after_hit",
+        "delivery": "immediate",
+        "strength_bp": 900,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "修罗血战：承伤蓄势、危中反攻。本人上轮普通交锋实际伤及敌人后，支付原可用元力容量的2.5%：一次普通交锋的破法提高9%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_9_MAIN",
@@ -4128,7 +4384,23 @@
           "op": ">=",
           "level": 30
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "recover",
+        "trigger": "after_hurt",
+        "delivery": "split",
+        "strength_bp": 100,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：恢复最多初始最大战斗态势1%，不能超过开战状态，不修复肉身或复活；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_9_COMBAT",
@@ -4156,7 +4428,23 @@
           "op": ">=",
           "level": 30
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "after_hit",
+        "delivery": "split",
+        "strength_bp": 600,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。本人上轮普通交锋实际伤及敌人后，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗6%，不增加攻击次数；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_9_BODY",
@@ -4186,7 +4474,23 @@
         }
       },
       "body_breakthrough_bonus": 0.18,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "opening",
+        "delivery": "split",
+        "strength_bp": 100,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。普通交锋可进行时，支付原可用元力容量的2%：获得最多初始最大战斗态势1%的有限护持，受击逐次扣减余额；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_9_SENSE",
@@ -4215,7 +4519,23 @@
           "level": 30
         }
       },
-      "divine_sense_bonus": 1.5
+      "divine_sense_bonus": 1.5,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "target_wounded",
+        "delivery": "immediate",
+        "strength_bp": 600,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。存在可作用且态势不高于开战时一半的敌人时，支付原可用元力容量的2.5%：一次普通交锋的破法提高6%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_10_MAIN",
@@ -4243,7 +4563,23 @@
           "op": ">=",
           "level": 35
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "recover",
+        "trigger": "after_hurt",
+        "delivery": "split",
+        "strength_bp": 110,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：恢复最多初始最大战斗态势1.1%，不能超过开战状态，不修复肉身或复活；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_10_COMBAT",
@@ -4271,7 +4607,23 @@
           "op": ">=",
           "level": 35
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "after_hit",
+        "delivery": "split",
+        "strength_bp": 700,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。本人上轮普通交锋实际伤及敌人后，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗7%，不增加攻击次数；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_10_BODY",
@@ -4301,7 +4653,23 @@
         }
       },
       "body_breakthrough_bonus": 0.19999999999999998,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "opening",
+        "delivery": "split",
+        "strength_bp": 110,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。普通交锋可进行时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.1%的有限护持，受击逐次扣减余额；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_10_SENSE",
@@ -4330,7 +4698,23 @@
           "level": 35
         }
       },
-      "divine_sense_bonus": 2.0
+      "divine_sense_bonus": 2.0,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "target_wounded",
+        "delivery": "immediate",
+        "strength_bp": 700,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。存在可作用且态势不高于开战时一半的敌人时，支付原可用元力容量的2.5%：一次普通交锋的破法提高7%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_11_MAIN",
@@ -4358,7 +4742,23 @@
           "op": ">=",
           "level": 40
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "recover",
+        "trigger": "after_hurt",
+        "delivery": "split",
+        "strength_bp": 120,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：恢复最多初始最大战斗态势1.2%，不能超过开战状态，不修复肉身或复活；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_11_COMBAT",
@@ -4386,7 +4786,23 @@
           "op": ">=",
           "level": 40
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "after_hit",
+        "delivery": "split",
+        "strength_bp": 800,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。本人上轮普通交锋实际伤及敌人后，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗8%，不增加攻击次数；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_11_BODY",
@@ -4416,7 +4832,23 @@
         }
       },
       "body_breakthrough_bonus": 0.22,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "opening",
+        "delivery": "split",
+        "strength_bp": 120,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。普通交锋可进行时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.2%的有限护持，受击逐次扣减余额；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_11_SENSE",
@@ -4445,7 +4877,23 @@
           "level": 40
         }
       },
-      "divine_sense_bonus": 2.5
+      "divine_sense_bonus": 2.5,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "target_wounded",
+        "delivery": "immediate",
+        "strength_bp": 800,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。存在可作用且态势不高于开战时一半的敌人时，支付原可用元力容量的2.5%：一次普通交锋的破法提高8%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_12_MAIN",
@@ -4473,7 +4921,23 @@
           "op": ">=",
           "level": 45
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "recover",
+        "trigger": "after_hurt",
+        "delivery": "split",
+        "strength_bp": 125,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。本人上轮普通交锋实际受敌人伤害后，支付原可用元力容量的2%：恢复最多初始最大战斗态势1.25%，不能超过开战状态，不修复肉身或复活；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_12_COMBAT",
@@ -4501,7 +4965,23 @@
           "op": ">=",
           "level": 45
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "after_hit",
+        "delivery": "split",
+        "strength_bp": 900,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。本人上轮普通交锋实际伤及敌人后，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗9%，不增加攻击次数；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_12_BODY",
@@ -4531,7 +5011,23 @@
         }
       },
       "body_breakthrough_bonus": 0.24,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "opening",
+        "delivery": "split",
+        "strength_bp": 125,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。普通交锋可进行时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.25%的有限护持，受击逐次扣减余额；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_NETHER_12_SENSE",
@@ -4560,7 +5056,23 @@
           "level": 45
         }
       },
-      "divine_sense_bonus": 3.0
+      "divine_sense_bonus": 3.0,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "nether",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "target_wounded",
+        "delivery": "immediate",
+        "strength_bp": 900,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "幽冥妖法：分期复苏、连击追猎。存在可作用且态势不高于开战时一半的敌人时，支付原可用元力容量的2.5%：一次普通交锋的破法提高9%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_9_MAIN",
@@ -4588,7 +5100,23 @@
           "op": ">=",
           "level": 30
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "frugal",
+        "trigger": "even_round",
+        "delivery": "immediate",
+        "strength_bp": 100,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 2000
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。偶数轮普通交锋时，支付原可用元力容量的2%：获得最多初始最大战斗态势1%的有限护持；真实减免后返还该次实付资源的20%，不重复返还；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_9_COMBAT",
@@ -4616,7 +5144,23 @@
           "op": ">=",
           "level": 30
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "even_round",
+        "delivery": "delayed",
+        "strength_bp": 600,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。偶数轮普通交锋时，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗6%，不增加攻击次数；延至下一轮使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_9_BODY",
@@ -4646,7 +5190,23 @@
         }
       },
       "body_breakthrough_bonus": 0.18,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "odd_round",
+        "delivery": "split",
+        "strength_bp": 100,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。奇数轮普通交锋时，支付原可用元力容量的2%：获得最多初始最大战斗态势1%的有限护持，受击逐次扣减余额；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_9_SENSE",
@@ -4675,7 +5235,23 @@
           "level": 30
         }
       },
-      "divine_sense_bonus": 1.5
+      "divine_sense_bonus": 1.5,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "odd_round",
+        "delivery": "immediate",
+        "strength_bp": 600,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。奇数轮普通交锋时，支付原可用元力容量的2.5%：一次普通交锋的破法提高6%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_10_MAIN",
@@ -4703,7 +5279,23 @@
           "op": ">=",
           "level": 35
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "frugal",
+        "trigger": "even_round",
+        "delivery": "immediate",
+        "strength_bp": 110,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 2000
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。偶数轮普通交锋时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.1%的有限护持；真实减免后返还该次实付资源的20%，不重复返还；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_10_COMBAT",
@@ -4731,7 +5323,23 @@
           "op": ">=",
           "level": 35
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "even_round",
+        "delivery": "delayed",
+        "strength_bp": 700,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。偶数轮普通交锋时，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗7%，不增加攻击次数；延至下一轮使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_10_BODY",
@@ -4761,7 +5369,23 @@
         }
       },
       "body_breakthrough_bonus": 0.19999999999999998,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "odd_round",
+        "delivery": "split",
+        "strength_bp": 110,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。奇数轮普通交锋时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.1%的有限护持，受击逐次扣减余额；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_10_SENSE",
@@ -4790,7 +5414,23 @@
           "level": 35
         }
       },
-      "divine_sense_bonus": 2.0
+      "divine_sense_bonus": 2.0,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "odd_round",
+        "delivery": "immediate",
+        "strength_bp": 700,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。奇数轮普通交锋时，支付原可用元力容量的2.5%：一次普通交锋的破法提高7%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_11_MAIN",
@@ -4818,7 +5458,23 @@
           "op": ">=",
           "level": 40
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "frugal",
+        "trigger": "even_round",
+        "delivery": "immediate",
+        "strength_bp": 120,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 2000
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。偶数轮普通交锋时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.2%的有限护持；真实减免后返还该次实付资源的20%，不重复返还；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_11_COMBAT",
@@ -4846,7 +5502,23 @@
           "op": ">=",
           "level": 40
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "even_round",
+        "delivery": "delayed",
+        "strength_bp": 800,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。偶数轮普通交锋时，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗8%，不增加攻击次数；延至下一轮使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_11_BODY",
@@ -4876,7 +5548,23 @@
         }
       },
       "body_breakthrough_bonus": 0.22,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "odd_round",
+        "delivery": "split",
+        "strength_bp": 120,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。奇数轮普通交锋时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.2%的有限护持，受击逐次扣减余额；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_11_SENSE",
@@ -4905,7 +5593,23 @@
           "level": 40
         }
       },
-      "divine_sense_bonus": 2.5
+      "divine_sense_bonus": 2.5,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "odd_round",
+        "delivery": "immediate",
+        "strength_bp": 800,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。奇数轮普通交锋时，支付原可用元力容量的2.5%：一次普通交锋的破法提高8%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_12_MAIN",
@@ -4933,7 +5637,23 @@
           "op": ">=",
           "level": 45
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "frugal",
+        "trigger": "even_round",
+        "delivery": "immediate",
+        "strength_bp": 125,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 2000
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。偶数轮普通交锋时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.25%的有限护持；真实减免后返还该次实付资源的20%，不重复返还；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_12_COMBAT",
@@ -4961,7 +5681,23 @@
           "op": ">=",
           "level": 45
         }
-      }
+      },
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "strike",
+        "trigger": "even_round",
+        "delivery": "delayed",
+        "strength_bp": 900,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。偶数轮普通交锋时，支付原可用元力容量的2.5%：下一次合法普通交锋追加至多该次原始损耗9%，不增加攻击次数；延至下一轮使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_12_BODY",
@@ -4991,7 +5727,23 @@
         }
       },
       "body_breakthrough_bonus": 0.24,
-      "body_bonus_max_layer": 100
+      "body_bonus_max_layer": 100,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "guard",
+        "trigger": "odd_round",
+        "delivery": "split",
+        "strength_bp": 125,
+        "cost_bp": 200,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。奇数轮普通交锋时，支付原可用元力容量的2%：获得最多初始最大战斗态势1.25%的有限护持，受击逐次扣减余额；同一份效果额度分两轮各兑现一半。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_REINCARNATION_12_SENSE",
@@ -5020,7 +5772,23 @@
           "level": 45
         }
       },
-      "divine_sense_bonus": 3.0
+      "divine_sense_bonus": 3.0,
+      "combat_effect": {
+        "version": 2,
+        "generator_version": 2,
+        "lineage": "reincarnation",
+        "mastery": false,
+        "kind": "breach",
+        "trigger": "odd_round",
+        "delivery": "immediate",
+        "strength_bp": 900,
+        "cost_bp": 250,
+        "cooldown": 1,
+        "uses": 3,
+        "duration": 2,
+        "refund_bp": 0
+      },
+      "description": "轮回魂法：奇轮蓄护破法，偶轮回流追击。奇数轮普通交锋时，支付原可用元力容量的2.5%：一次普通交锋的破法提高9%，不提高仙凡作用资格；本轮准备后使用。每战最多3次，冷却1个完整轮，待用效果2轮过期。无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。"
     },
     {
       "id": "TECH_HUMAN_HERITAGE_1",

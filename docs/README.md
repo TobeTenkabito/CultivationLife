@@ -167,6 +167,8 @@
 - [本体种子随机异闻](generated-events.md)：情境生成、真实选择结算、存档与后续副本复用。
 - [万象试境 DLC 实现](trial-sites.md)：十一界 7／14／22 层、独立 DLC 开关、可视化试境与快捷入口、零时间状态及真实守关领奖。
 - [仙界道统与养成](doctrines.md)
+- [功法效果基础层与道统种子生成](technique-effects-foundation.md)：冻结配方、实付资源、有限预算、双方战斗及续战校验。
+- [传承差异与合练](technique-lineages.md)：32种道统机制组合、三界48部上境专属功法、合练强度与费用优势。
 - [四界残解与上界传承承接](spirit-inheritance.md)：获取、分界培养、DLC 专属资格、一次承接与资源边界。
 - [仙窍、灵域与交通](immortal-1470.md)
 - [压制与战斗预案](immortal-1471.md)
@@ -252,3 +254,4 @@
 
 - [本体机构经营与瑶池1.1](institution-ai-and-westward-110.md)
 - [v3.7.0发行说明](release-370.md)
+- [七部斗法功法与人物固定配置](duel-techniques.md)

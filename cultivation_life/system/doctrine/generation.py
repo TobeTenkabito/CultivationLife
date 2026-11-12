@@ -181,6 +181,8 @@ def generate(seed: int, config: Mapping[str, Any], realm_power: Mapping[int, flo
                                 effective_worlds=["celestial"],
                                 sources={"spirit": 1.0}, combat_requirements={"source": {"id": "spirit", "op": ">=", "level": 30}}))
             manual_origins[manuals[-1]["id"]] = names.choice(words["acquisition_places"])
+            from ...technique_effect_generation import attach_effect
+            attach_effect(manuals[-1], local_seed, feature=primary, theme=slot['theme'], theme_name=theme['name'])
         definitions[key] = dict(id=key, name=name, fixed=fixed, theme=theme["name"],
                                 description=theme["description"], stages=stages, manuals=manuals, manual_origins=manual_origins)
     from .effects import enrich_effects, ensure_offensive_doctrine

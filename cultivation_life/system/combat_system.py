@@ -693,7 +693,14 @@ class PlayerCombatSystem:
                 phases.semantic_context(player_mp=player_mp, enemy_mp=enemy_mp,
                                         player_morale=player_morale, enemy_morale=enemy_morale)
                 event_count = len(phase.events)
+                before_manual_p, before_manual_e = phase.player_loss, phase.enemy_loss
                 semantic_factors = phases.semantic_ordinary_start()
+                # Paid manual effects share the original linked resource pool;
+                # refresh before the legacy burst can spend the same balance.
+                player_mp = phases.mp_ratio('player', player_mp)
+                enemy_mp = phases.mp_ratio('enemy', enemy_mp)
+                player_hp = max(0., min(1., player_hp - (phase.player_loss - before_manual_p)))
+                enemy_hp = max(0., min(1., enemy_hp - (phase.enemy_loss - before_manual_e)))
                 enemy_sustain_factor = .90 + .10 * cls._clamp(.50, 1.50, semantic_factors['enemy']['sustain'])
                 events.extend(phase.events[event_count:])
                 for side, stats in (('player', round_player_stats), ('enemy', round_enemy_stats)):
