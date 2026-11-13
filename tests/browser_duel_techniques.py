@@ -1,5 +1,6 @@
 """Real seven-book configuration, stale requests and existing pixel navigation."""
 import random
+import copy
 import sys
 import tempfile
 import threading
@@ -12,7 +13,8 @@ sys.path.insert(0, str(ROOT))
 from playwright.sync_api import sync_playwright
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
-from cultivation_life.rules import learn_technique
+from cultivation_life.rules import learn_technique, QI_SOURCE_NAMES
+from cultivation_life.content_registry import TECHNIQUE_CATALOG
 from test_duel_techniques import books
 from scripts.browser_navigation import reveal_subpage, set_theme
 
@@ -34,6 +36,10 @@ def main():
         engine = GameEngine(ROOT, Path(folder) / 'saves')
         game = engine.store.load(engine.create_game('七部斗法验收', 'supreme_metal', 'dao', 713, preset_id='core')['id'])
         game.pending_event = None
+        game.player.realm_index=8;game.player.body_training=100
+        game.player.qi_experience={k:1e12 for k in QI_SOURCE_NAMES}
+        specialty=copy.deepcopy(next(t for t in TECHNIQUE_CATALOG.values() if t.category=='body' and t.grade<9 and t.element=='neutral'))
+        learn_technique(game.player,specialty)
         for book in books():
             learn_technique(game.player, book)
         engine.store.save(game)
@@ -59,6 +65,36 @@ def main():
                     page.wait_for_function('!!configData && !busy')
                     page.evaluate('id=>loadGame(id)', game.id)
                     reveal(page)
+                    # Use the existing book-card combat button, then the actual
+                    # seven-book selector. A specialty slot alone is not enough.
+                    assert page.locator(f'#duel-technique-select option[value="{specialty.id}"]').count()==0
+                    library=page.locator('details.technique-library > summary')
+                    reveal_subpage(page,library)
+                    if not library.evaluate('n=>n.parentElement.open'):library.click()
+                    card=page.locator('.known-technique').filter(has=page.locator('b',has_text=specialty.name))
+                    reveal_subpage(page,card)
+                    rules=card.locator('.technique-rules')
+                    assert not rules.evaluate('n=>n.open')
+                    rules.locator('summary').click()
+                    assert specialty.description in rules.locator('small').text_content()
+                    rules.locator('summary').click()
+                    card.get_by_role('button',name='战',exact=True).click()
+                    page.wait_for_function('id=>!busy && game.player.duel_techniques.candidates.some(t=>t.id===id)',arg=specialty.id)
+                    reveal(page)
+                    page.locator('#duel-technique-select').select_option(specialty.id)
+                    assert specialty.description == page.locator('#duel-technique-panel .duel-preview').text_content()
+                    for width in (1440,390):
+                        page.set_viewport_size(dict(width=width,height=960))
+                        panel=page.locator('#duel-technique-panel')
+                        assert panel.evaluate('n=>n.scrollWidth<=n.clientWidth+2')
+                        panel.scroll_into_view_if_needed()
+                        page.screenshot(path=str(output/f'fixed-book-{width}.png'))
+                    page.locator('#duel-technique-add').click()
+                    page.wait_for_function('id=>!busy && game.player.duel_techniques.selected.includes(id)',arg=specialty.id)
+                    assert specialty.description in page.locator(f'[data-duel-remove="{specialty.id}"]').get_attribute('title')
+                    page.set_viewport_size(dict(width=1440,height=960))
+                    page.locator(f'[data-duel-remove="{specialty.id}"]').click()
+                    page.wait_for_function('!busy && game.player.duel_techniques.selected.length===0')
                     assert page.locator('#duel-technique-select option[value="duel-test-8"]').count() == 0
                     for i in range(7):
                         page.locator('#duel-technique-select').select_option(f'duel-test-{i}')
@@ -110,7 +146,7 @@ def main():
                     browser.close()
             finally:
                 http.shutdown();http.server_close()
-    print('Duel UI passed: seven actual selections, prerequisite, overflow rejection, removal, stale recovery, reload, event lock, two themes/four widths')
+    print('Duel UI passed: fixed specialty combat card and full effect text, seven actual selections, prerequisite, overflow rejection, removal, stale recovery, reload, event lock, two themes/four widths')
 
 
 if __name__ == '__main__':

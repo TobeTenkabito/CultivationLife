@@ -10,8 +10,8 @@ from .combat.actor_state import read, _write
 
 
 def player_reason(player, book):
-    if book.category != 'spiritual':
-        return '只有已装备的普通战斗功法可选入斗法'
+    if book.category not in {'spiritual', 'body', 'divine_sense', 'transformation'}:
+        return '此类功法不能选入斗法'
     if not book.active_in(player.world):
         return '此功法在当前界面不生效'
     if not can_player_practice_technique(player, book):
@@ -60,7 +60,13 @@ def npc_eligible(npc, book):
         root_allowed = can_practice_technique(read(npc, 'spirit_root', ''), book)
     except KeyError:
         root_allowed = False
-    return (book.category == 'spiritual' and 1 <= book.grade <= read(npc, 'realm_index', read(npc, 'target_realm_index', 0))
+    if book.category=='transformation':
+        from .technique_context import context
+        if not context(npc)['form']:return False
+    if book.category=='body' and (read(npc,'spirit_state',{}) or {}).get('mode')=='wandering':return False
+    return (book.category in {'spiritual', 'body', 'divine_sense', 'transformation'}
+            and (book.category != 'transformation' or read(npc, 'path') != 'monster')
+            and 1 <= book.grade <= read(npc, 'realm_index', read(npc, 'target_realm_index', 0))
             and book.active_in(read(npc, 'world', ''))
             and root_allowed
             and book.required_body_training <= (read(npc, 'body_training', 0) or 0)

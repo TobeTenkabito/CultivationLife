@@ -27,7 +27,8 @@ def resolve(game, identity):
 def learn(npc, book, level=1, slot=None):
     from ..authored_technique_schema import integer
     integer(level,1,9,'人物功法等级')
-    if slot == 'combat' and (book.grade > read(npc, 'realm_index', 0) or book.category != 'spiritual'
+    if slot == 'combat' and (book.grade > read(npc, 'realm_index', 0) or book.category not in {'spiritual','body','divine_sense','transformation'}
+                             or book.category=='transformation' and read(npc,'path')=='monster'
                              or not can_practice_technique(read(npc, 'spirit_root', ''), book)):
         raise ValueError('人物境界、灵根或功法类别不满足斗法配置')
     facts=levels(npc)

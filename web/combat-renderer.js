@@ -32,8 +32,9 @@
   function create(canvas){const s={canvas};for(const k of layers)s[k]=make();return s;}
   function resize(s,available){
     const zoom=available>=960?2:1,w=Math.floor(available/zoom);
-    const scale=s.multi?(w<340?.5:w<440?.625:.75):(w<280?.375:w<340?.5:w<440?.625:.75);
-    const h=s.multi?Math.ceil(515*scale+50):(w<340?220:w<440?258:300);
+    const panorama=s.panoramic&&available>=900;
+    const scale=panorama?(s.multi?.375:.5):(s.multi?(w<340?.5:w<440?.625:.75):(w<280?.375:w<340?.5:w<440?.625:.75));
+    const h=panorama?(s.multi?Math.ceil(515*scale+35):180):(s.multi?Math.ceil(515*scale+50):(w<340?220:w<440?258:300));
     s.width=w;s.height=h;s.zoom=zoom;s.scale=scale;
     s.ground=s.battlefield?.ground_ratio!=null?Math.round(h*s.battlefield.ground_ratio):h-25;
     s.canvas.width=w*zoom;s.canvas.height=h*zoom;s.canvas.style.width=w*zoom+'px';s.canvas.style.height=h*zoom+'px';

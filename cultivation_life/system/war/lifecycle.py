@@ -128,6 +128,12 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
             sources=battle_sources(game, {npc.id: npc for roster in voisinage_rosters.values() for npc in roster}),
         )
         if voisinage_result is not None:
+            for side,roster in voisinage_rosters.items():
+                for npc in roster:
+                    if npc.id in voisinage_result.killed:npc.death_reason='势力征伐中阵亡'
+                    if npc.id in voisinage_result.escaped:
+                        escaped=war.setdefault('escaped',{}).setdefault(side,[])
+                        if npc.id not in escaped:escaped.append(npc.id)
             war["last_voisinage_engagement"] = list(voisinage_result.rounds)
             war["voisinage_suppressed"] = list(dict.fromkeys([*war.get("voisinage_suppressed", []), *voisinage_result.suppressed]))
             war["abstract_rounds"] = int(war.get("abstract_rounds", 0)) + 1
@@ -138,9 +144,10 @@ def _advance_wars_unit(deps: WarLifecycleDependencies, game: GameState, rng: ran
             if voisinage_result.outcome != "stalemate":
                 loser = "defender" if voisinage_result.outcome == "victory" else "attacker"
                 deps._shift_war_morale(war, loser, 12.0, 2.5)
-            deps._append_war_log(game, war, "仙域 AI 战报",
-                                 "仙域交锋" + {"victory": "攻方取胜", "defeat": "守方取胜", "stalemate": "相持"}[voisinage_result.outcome]
-                                 + "；保留实际资源消耗和伤亡。")
+            fields=any(row.get('voisinage',{}).get('fields') for row in voisinage_result.rounds)
+            deps._append_war_log(game, war, "仙域 AI 战报" if fields else "AI 战报",
+                                 ("仙域交锋" if fields else "功法交锋") + {"victory": "攻方取胜", "defeat": "守方取胜", "stalemate": "相持"}[voisinage_result.outcome]
+                                 + "；保留实际资源消耗和伤亡，沿原阵势条件权重结算。"+deps._war_formation_text(contexts))
             if deps._finish_war_by_morale(game, war):
                 winner = str(war["winner"])
                 if managed:

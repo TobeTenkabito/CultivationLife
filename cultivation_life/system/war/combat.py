@@ -94,6 +94,12 @@ def _resolve_field_attack(
         sources=battle_sources(game, {striker.id: striker, target.id: target}),
     )
     if voisinage_result is not None:
+        for npc,side in ((striker,attacking),(target,defending)):
+            if npc.id in voisinage_result.escaped:
+                escaped=war.setdefault('escaped',{}).setdefault(side,[])
+                if npc.id not in escaped:escaped.append(npc.id)
+        for npc in (striker,target):
+            if npc.id in voisinage_result.killed:npc.death_reason='势力征伐中阵亡'
         war["last_voisinage_engagement"] = list(voisinage_result.rounds)
         war["voisinage_suppressed"] = list(dict.fromkeys([*war.get("voisinage_suppressed", []), *voisinage_result.suppressed]))
         if voisinage_result.outcome == "stalemate":

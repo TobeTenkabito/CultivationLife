@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "rewritten": 3888,
+  "fixed_catalog": 4258,
+  "unchanged_fixed": 370,
+  "duplicate_names": 0,
+  "unchanged_open_names": 0,
+  "suffix_only_collisions": 0,
+  "paired_prefix_groups": 0,
+  "adjacent_duplicate_prefixes": 0,
+  "lengths": {
+    "3": 27,
+    "4": 368,
+    "5": 3368,
+    "6": 4,
+    "7": 121
+  },
+  "most_common_two_character_prefix": [
+    [
+      "日月",
+      20
+    ]
+  ]
+}

@@ -4,7 +4,7 @@ from __future__ import annotations
 import copy
 import math
 
-VERSION = 2
+VERSION = 3
 KINDS = frozenset({'guard', 'strike', 'recover', 'breach', 'frugal'})
 TRIGGERS = frozenset({'opening', 'after_hit', 'after_hurt'})
 LINEAGE_TRIGGERS = TRIGGERS | {'first_exchange', 'low_state', 'target_wounded', 'steady', 'odd_round', 'even_round'}
@@ -29,6 +29,9 @@ def validate_effect(value):
     if not isinstance(value, dict):
         raise ValueError('功法效果须为数据对象')
     version = integer(value.get('version'), 1, VERSION, '结构')
+    if version == 3:
+        from .catalog_effect_schema import validate_catalog
+        return validate_catalog(value)
     fields = FIELDS | {'lineage', 'mastery'} if version == 2 else FIELDS
     if set(value) != fields:
         raise ValueError('功法效果字段缺失或包含未知字段')
@@ -66,8 +69,13 @@ def validate_loadout(rows):
         raise ValueError('功法效果战斗快照超过技术容量')
     result, seen = [], set()
     for row in rows:
-        if not isinstance(row, dict) or set(row) != {'id', 'name', 'level', 'effect'}:
+        if not isinstance(row, dict) or set(row) not in ({'id','name','level','effect'}, {'id','name','level','effect','cost_model'}):
             raise ValueError('功法效果战斗快照字段无效')
+        if 'cost_model' in row:
+            terms=row['cost_model']
+            if not isinstance(terms,dict) or set(terms)!={'grade','realm','fixed'}:raise ValueError('功法混合费用字段无效')
+            integer(terms['grade'],1,12,'费用品阶');integer(terms['realm'],0,12,'费用境界')
+            finite(terms['fixed'],.01,10000000.,'固定费用')
         for key in ('id', 'name'):
             if not isinstance(row[key], str) or not 1 <= len(row[key]) <= 160:
                 raise ValueError('功法效果身份无效')
@@ -75,12 +83,25 @@ def validate_loadout(rows):
             raise ValueError('同一功法不能重复进入战斗快照')
         seen.add(row['id'])
         integer(row['level'], 1, 9, '等级')
-        result.append({**row, 'effect': validate_effect(row['effect'])})
+        effect = validate_effect(row['effect'])
+        if effect.get('version') == 3 and effect.get('identity') != row['id']:
+            raise ValueError('固定功法专属配方与原书身份不符')
+        normalized={**row,'effect':effect}
+        if 'cost_model' in row:normalized['cost_model']=copy.deepcopy(row['cost_model'])
+        result.append(normalized)
     return tuple(result)
 
 
 def describe(effect):
     e = validate_effect(effect)
+    if e['version'] == 3:
+        if 'mana_cost' in e:
+            return (f'{e["clause"] or "本书专属运转"}：Lv.1费用低于自身境界时为{e["mana_cost"]:g}点法力，'
+                    f'同阶为开战容量{e["cost_bp"]/100:g}%，越阶为两者之和；每战至多{e["uses"]}次，'
+                    'Lv.1—9最多减费16%。完整触发与兑现见功法描述。')
+        return (f'{e["clause"] or "本书专属运转"}：低阶按品阶标准固定付费，同阶实付开战'
+                f'{"法力" if e["resource"] == "mana" else "元力"}容量的{e["cost_bp"]/100:g}%，越阶为两者之和，'
+                f'每战至多{e["uses"]}次，Lv.1—9最多减费16%。完整触发与兑现见功法描述。')
     p = e['strength_bp'] / 100
     trigger = {'opening': '普通交锋可进行时', 'after_hit': '本人上轮普通交锋实际伤及敌人后',
                'after_hurt': '本人上轮普通交锋实际受敌人伤害后', 'first_exchange': '本人本场首次可进行普通交锋时',
@@ -96,6 +117,6 @@ def describe(effect):
     }[e['kind']]
     timing = {'immediate': '本轮准备后使用', 'delayed': '延至下一轮使用',
               'split': '同一份效果额度分两轮各兑现一半'}[e['delivery']]
-    return (f'{trigger}，支付原可用元力容量的{e["cost_bp"]/100:g}%：{payload}；{timing}。'
+    return (f'{trigger}，同阶支付原可用元力容量的{e["cost_bp"]/100:g}%；低阶支付对应品阶初层元力标准的固定费用，越阶支付两者之和：{payload}；{timing}。'
             f'每战最多{e["uses"]}次，冷却{e["cooldown"]}个完整轮，待用效果{e["duration"]}轮过期。'
             '无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。')

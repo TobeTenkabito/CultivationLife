@@ -62,7 +62,7 @@ _REFERENCE_FIELDS = frozenset({
     'support_technique_id', 'treasure_item_id', 'combat_artifact_id', 'material_id', 'plant_id',
     'target_item_id', 'source_item_id', 'product_id', 'output_item_id', 'manual_id',
     'definition_id', 'reward_definition_id',
-    'active_breakthrough_aids', 'technique_ids', 'material_ids', 'item_ids',
+    'active_breakthrough_aids', 'technique_ids', 'duel_technique_ids', 'material_ids', 'item_ids',
     'main_technique', 'support_technique', 'starting_techniques',
     'materials', 'inputs', 'outputs',
 })
@@ -130,7 +130,8 @@ def _normalize(node, reference_field, canonical_keys):
             if child_type in _SCALAR_TYPES:
                 updated = child
             elif child_type is str:
-                updated = canonical_content_id(child) if key in _REFERENCE_FIELDS else child
+                effect_identity = reference_field == 'combat_effect' and node.get('version') == 3 and key == 'identity'
+                updated = canonical_content_id(child) if key in _REFERENCE_FIELDS or effect_identity else child
             else:
                 updated = _normalize(child, key, canonical_keys)
             if canonical_key != key or updated is not child:

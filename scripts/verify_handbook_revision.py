@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT/'tests')]
-from scripts.browser_navigation import navigation_locator, click_control
+from scripts.browser_navigation import navigation_locator, click_control, reveal_subpage
 from fixtures.technique_names_release import BOOK, inspect_technique_names
 
 TERMS = (
@@ -18,15 +18,22 @@ TERMS = (
 )
 
 
-def verify_revision(page, engine, identity, output, label):
+def verify_revision(page, engine, identity, output, label, extra_names=()):
     """Caller prepares an isolated old-display fixture before loading its page."""
     click_control(page.locator('.hud-identity'))
     if not page.locator('.technique-library').evaluate('e=>e.open'):
         click_control(page.locator('.technique-library > summary'))
     text = page.locator('#known-technique-list').inner_text()
-    assert '抱朴养真经' in text and '晦烛含魄篇' in text
+    assert '坐忘小乘' in text and '旧梦拾遗篇' in text
     assert '长夜抱朴归真经' not in text and '松窗抱朴归真经' not in text
-    row = page.locator('#known-technique-list .known-technique').filter(has_text='抱朴养真经')
+    assert '抱朴养真经' not in text and '晦烛含魄篇' not in text
+    for name in extra_names:
+        card=page.locator('#known-technique-list .known-technique').filter(has_text=name)
+        reveal_subpage(page,card)
+        assert card.is_visible() and name in card.inner_text()
+        assert card.evaluate('e=>e.scrollWidth<=e.clientWidth+2'), name
+    page.screenshot(path=str(output/f'technique-names-{label}.png'))
+    row = page.locator('#known-technique-list .known-technique').filter(has_text='坐忘小乘')
     with page.expect_response(lambda r:r.url.endswith('/technique-upgrade')) as response:
         click_control(row.locator('.technique-upgrade'))
     assert response.value.status == 200

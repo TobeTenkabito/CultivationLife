@@ -261,6 +261,7 @@ class VoisinageEffects:
     def _apply_effect(self, intent, key):
         target = self.units[key]
         effect, field = intent.effect, intent.field
+        if key in intent.terminal and self.techniques:self.techniques.execution(field.owner)
         kind = effect.kind
         if not intent.ordinary and field.owner in self._light_muted:return
         if effect.target=='enemy' and self._body_evade(intent,key):return False

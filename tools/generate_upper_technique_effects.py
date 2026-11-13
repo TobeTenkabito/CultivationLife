@@ -19,6 +19,9 @@ def build(document):
         for grade in range(9, 13):
             for role in ('MAIN', 'COMBAT', 'BODY', 'SENSE'):
                 row = rows[f'TECH_{world.upper()}_{grade}_{role}']
+                if (row.get('combat_effect') or {}).get('version') == 3:
+                    # The reviewed 4258 compiler now owns fixed-book metadata.
+                    continue
                 effect = upper_effect(world, role, grade)
                 description = introduction + describe(effect)
                 changed += row.get('combat_effect') != effect or row.get('description') != description

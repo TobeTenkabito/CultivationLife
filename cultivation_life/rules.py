@@ -178,6 +178,8 @@ def technique_special_effect(technique: Technique) -> str:
         effects.append(f'习得后成功夺舍次数上限 +{technique.possession_limit_bonus}；同类加成取最高值。')
     if technique.description:
         effects.append(technique.description)
+    if technique.combat_effect and technique.combat_effect.get('version') in (1,2):
+        effects.append('当前斗法费用按本书品阶与本人实际境界比较：低阶固定，同阶按原可用元力容量比例，越阶为比例加固定；原注解的容量百分比为同阶费率。升级对总费用减费，不放宽原使用资格。')
     return ' '.join(effects)
 
 
@@ -424,7 +426,7 @@ def assign_technique(player: Player, technique: Technique, slot: str) -> None:
         if technique.category != "transformation":
             raise ValueError("只有变身功法可以放入变身槽位")
         equip_transformation_technique(player, technique)
-    elif technique.category in {"body", "divine_sense", "transformation"}:
+    elif technique.category in {"body", "divine_sense", "transformation"} and slot != "combat":
         raise ValueError("专属功法只能配置在对应专属槽位")
     elif slot == "main":
         player.technique = technique

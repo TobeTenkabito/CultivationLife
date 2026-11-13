@@ -5,7 +5,7 @@ from ...combat_semantics import SemanticRuntime, STATS, RESTRICTIONS
 
 class CombatSemantics:
     def _init_semantics(self):
-        from .techniques import TechniqueRuntime
+        from .technique_dispatch import TechniqueDispatch as TechniqueRuntime
         self.techniques = (TechniqueRuntime(self) if any(s.unit.capabilities.technique_effects
                            for s in self.units.values()) else None)
         rules = {key: s.unit.capabilities.semantic_rules for key, s in self.units.items()
@@ -144,6 +144,8 @@ class CombatSemantics:
 
     def semantic_initiative(self, player_first):
         factors = {side: {stat: 1. for stat in STATS} for side in ('player', 'enemy')}
+        if self.techniques:
+            self.techniques.initiative(player_first)
         if self.semantics is None:
             return factors
         for key, s in self.units.items():

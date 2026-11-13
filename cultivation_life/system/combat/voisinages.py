@@ -48,6 +48,8 @@ class UnitState:
     operating_energy: float | None = None
     mana_current: float = 0.0
     supply_mp_spent: float = 0.0
+    technique_mp_spent: float = 0.0
+    physical_defeat: bool = False
     field_debts: dict = field(default_factory=dict)
 
     @property
@@ -86,6 +88,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self.units = {u.id: UnitState(u, u.capabilities.current, u.integrity, body=u.body_integrity) for u in units}
         for state in self.units.values():
             state.operating_energy = state.unit.capabilities.operating_energy
+            state.mana_current = state.unit.capabilities.mana_initial or 0.
             sponsor = state.unit.capabilities.attack_resource_owner
             if sponsor is not None and (sponsor not in self.units or sponsor == state.unit.id or self.units[sponsor].unit.side != state.unit.side):
                 raise ValueError('Attack resource owner must be a distinct allied participant')
@@ -236,7 +239,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self._disrupted.clear()
         self._responded.clear()
         for state in self.units.values():
-            state.mana_current=state.unit.capabilities.mana_capacity*(player_mp if state.unit.side=='player' else enemy_mp)
+            if state.unit.capabilities.mana_initial is None:
+                state.mana_current=state.unit.capabilities.mana_capacity*(player_mp if state.unit.side=='player' else enemy_mp)
             if state.unit.capabilities.resource_link=='legacy_mp':
                 ratio=player_mp if state.unit.side=='player' else enemy_mp
                 state.current=min(state.current,max(0.,ratio)*state.unit.capabilities.capacity)
@@ -392,11 +396,12 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                 and any(s.fighting and s.unit.side != side and key not in self._dominated
                         for key, s in self.units.items()))
 
-    def _lose(self, key: str, amount: float, *, physical=True,body_amount=None,lethal=True) -> float:
+    def _lose(self, key: str, amount: float, *, physical=True,body_amount=None,lethal=True,body_fatal=None) -> float:
         state = self.units[key]
         before=state.vitality
         actual = min(state.vitality, max(0.0, amount))
         state.vitality -= actual
+        if before>0 and state.vitality<=0:state.physical_defeat=bool(physical if body_fatal is None else body_fatal)
         if physical:
             injury=actual if body_amount is None else min(before,max(0,body_amount))
             state.body = max(0, state.body - injury * .46)
@@ -407,15 +412,17 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             self.frame.player_loss += weighted
         else:
             self.frame.enemy_loss += weighted
-        if lethal:self._body_death(key)
+        opponent='enemy' if state.unit.side=='player' else 'player'
+        if lethal and self.objectives[opponent]=='kill':self._body_death(key)
         return weighted
 
-    def ordinary_damage(self, dealt: float, received: float) -> tuple[float, float]:
+    def ordinary_damage(self, dealt: float, received: float, *, breach_ratios=None) -> tuple[float, float]:
         """Allocate contributions before tier gating; mortal allies never inherit tiers.
 
         Values are fractions of the opposing side's original durability, matching
         the existing six-stat exchange. No new minimum-damage floor is applied.
         """
+        self._ordinary_breach_ratios = dict(breach_ratios or {})
         amounts: dict[str, float] = {}
         primary_body_before=self.units['player'].body if 'player' in self.units else 0.
         body_amounts: dict[str,float] = {}
@@ -425,6 +432,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         # Reserve both sides' attack resources before resolving either side's wards.
         tiers: dict[str, int] = {}
         ordinary_sides = {side: self._has_ordinary(side) for side in ("player", "enemy")}
+        if self.techniques:self.techniques.ordinary_boundary(ordinary_sides)
         attempted=set()
         for key in self._unit_order():
             state=self.units[key]
@@ -485,7 +493,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             body_loss = min(body_amounts[key], semantic_caps.get(key, body_amounts[key]))
             if self.techniques:
                 # A cap or overkill must not manufacture a refundable shield hit.
-                after_shield = self.techniques.absorb(key, loss)
+                after_shield = self.techniques.absorb(key, loss, [(source,part) for source,target,part in semantic_hits if target==key])
                 prevented = loss - after_shield
                 body_loss *= max(0., 1 - prevented / max(1e-12, loss))
                 loss -= prevented
@@ -516,6 +524,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             self._queue_forget(source,attack_targets[source],dict(hits),())
             self._field_ordinary_hits(source,dict(hits),body_hits)
         self._field_attempted_ordinary(attempted)
+        if self.techniques:self.techniques.attempted(attempted)
         self._drain_body_events()
         self._execute_field_actions(dict(self._dominated))
         self.primary_ordinary_body_loss=(primary_body_before-self.units['player'].body if 'player' in self.units else 0.)
@@ -532,13 +541,23 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                        and self.units[key].unit.capabilities.resource_link == "legacy_mp"), None)
         if linked:return linked.current / max(1.0, linked.unit.capabilities.capacity)
         own=self.units.get(primary)
+        if side == 'enemy':
+            independent = [s for s in self.units.values() if s.unit.side == side and s.unit.capabilities.mana_initial is not None]
+            total = sum(s.unit.capabilities.mana_capacity for s in independent)
+            if total:
+                return sum(s.mana_current for s in independent) / total
         return own.mana_current/own.unit.capabilities.mana_capacity if own and own.unit.capabilities.mana_capacity>0 else fallback
 
     def sync_resources(self, *, player_mp: float, enemy_mp: float) -> None:
         self._semantic_mp = {'player': player_mp, 'enemy': enemy_mp}
+        enemy_before = self.mp_ratio('enemy', enemy_mp)
+        enemy_spent = max(0., enemy_before - enemy_mp)
         for key in self._unit_order():
             state=self.units[key]
-            state.mana_current=max(0.,player_mp if state.unit.side=='player' else enemy_mp)*state.unit.capabilities.mana_capacity
+            if state.unit.capabilities.mana_initial is None:
+                state.mana_current=max(0.,player_mp if state.unit.side=='player' else enemy_mp)*state.unit.capabilities.mana_capacity
+            elif state.unit.side == 'enemy':
+                state.mana_current=max(0.,state.mana_current-enemy_spent*state.unit.capabilities.mana_capacity)
             if state.unit.capabilities.resource_link == "legacy_mp":
                 ratio = player_mp if state.unit.side == "player" else enemy_mp
                 self._energy(state.unit.id,min(state.current,max(0.0,ratio)*state.unit.capabilities.capacity))
@@ -550,6 +569,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self.sync_resources(player_mp=player_mp, enemy_mp=enemy_mp)
         self._semantic_mp = {'player': player_mp, 'enemy': enemy_mp}
         self._semantic_end()
+        if self.techniques:
+            self.techniques.finish()
         self._drain_body_events()
         self._execute_field_actions(dict(self._dominated))
         self._finish_field_powers()
@@ -658,8 +679,11 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
 
     def updates(self) -> list[dict[str, Any]]:
         return [{"id": key, "side": s.unit.side, "current": max(0.0, s.current), "vitality": s.vitality,
+                 "lethal": self.objectives['enemy' if s.unit.side=='player' else 'player']=='kill',
+                 "body_destroyed": s.body<=0 or s.vitality<=0 and s.physical_defeat,
                  **({'operating_energy': s.operating_energy} if s.operating_energy is not None else {}),
-                 **({'mana_current':s.mana_current,'supply_mp_spent':s.supply_mp_spent} if s.unit.capabilities.mana_capacity else {}),
+                 **({'mana_current':s.mana_current,'supply_mp_spent':s.supply_mp_spent,
+                     'technique_mp_spent':s.technique_mp_spent} if s.unit.capabilities.mana_capacity else {}),
                  "suppressed": s.suppressed, "escape_locked": s.escape_locked,
                  "escaped": s.escaped, "body": s.body,
                  "resource_link": s.unit.capabilities.resource_link}

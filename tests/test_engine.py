@@ -981,6 +981,11 @@ class EngineTests(unittest.TestCase):
         meeting=self.engine.store.load(created['id'])
         meeting.player.disciples[0].person.location_id=meeting.player.location_id
         meeting.player.disciples[0].person.spirit_root='supreme_metal'
+        # This fixture tests new teaching, independently of the first-sighting
+        # seven-book draw (which can legitimately include the basic manual).
+        student=meeting.player.disciples[0].person
+        student.technique_levels.pop('TECH_BASIC_QI',None)
+        student.duel_technique_ids=[k for k in student.duel_technique_ids or [] if k!='TECH_BASIC_QI']
         self.engine.store.save(meeting)
         after_item = self.engine.gift_disciple(created["id"], "disciple-x", "item", "blood_ginseng")
         blood_count = next(item["quantity"] for item in after_item["player"]["inventory"] if item["id"] == "blood_ginseng")

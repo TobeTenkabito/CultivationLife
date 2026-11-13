@@ -322,13 +322,17 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             enemy_entry["durability"] = round(max(0.0, before - wear), 4)
             enemy_entry["battles"] = int(enemy_entry.get("battles", 0)) + 1
     loss_scale = max(0.0, float(target.get("loss_scale", 1.0)))
-    hp_loss = hp_max * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
+    from ..combat_costs import health_reference
+    from ..content_registry import REALMS
+    body_reference = health_reference(REALMS[player.realm_index].base_power, player.layer, player.body_training)
+    hp_loss = min(hp_max, body_reference) * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
     mp_loss = mp_max * resolution.mp_loss_ratio * float(target.get("mp_loss_scale", loss_scale))
-    supply=next((u for u in resolution.capability_updates if u['id']=='player' and u.get('supply_mp_spent',0)>0),None)
+    supply=next((u for u in resolution.capability_updates if u['id']=='player'
+                 and u.get('supply_mp_spent',0)+u.get('technique_mp_spent',0)>0),None)
     if supply and supply['resource_link']!='legacy_mp':
         # Ordinary story discounts never waive actual puppet supply. Use the
         # exact battle MP balance rather than the rounded report ratio.
-        spent=supply['supply_mp_spent'];net=max(0.,player.mp-supply['mana_current'])
+        spent=supply.get('supply_mp_spent',0)+supply.get('technique_mp_spent',0);net=max(0.,player.mp-supply['mana_current'])
         mp_loss=max(0.,(net-spent)*float(target.get('mp_loss_scale',loss_scale))+spent)
     player.hp = max(0.0 if lethal else 1.0, player.hp - hp_loss)
     if resolution.hp_restore_ratio > 0:
@@ -384,7 +388,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
                 continue
             if update.get("suppressed"):
                 resolved_captures.append(key)
-            elif update.get("vitality", 1) <= 0 and lethal and not update.get('body_escaped'):
+            elif update.get("vitality", 1) <= 0 and lethal and update.get('lethal',True) and not update.get('body_escaped'):
                 resolved_kills.append(member)
         if resolved_kills and target.get("combat_type") != "beast":
             summaries = []

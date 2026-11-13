@@ -17,6 +17,7 @@ from .combat.voisinages import VoisinageBattle
 from .combat.npc_lifecycle import NpcResourceBinding, prepare, commit_condition
 from .combat_system import BattleUnit, PlayerCombatSystem
 from .aperture_resources import ApertureResourceBinding, available, bind_energy
+from .combat.actor_state import read as actor_read
 
 
 def persistent_owner(game: GameState, key: str) -> Any | None:
@@ -76,6 +77,9 @@ class CapabilityBinding:
             owner = self.owners.get(update["id"])
             if owner is None:
                 continue
+            if update['id'] != 'player' and 'mana_current' in update and actor_read(owner, 'ordinary_mana') is not None:
+                from .npc_mana import commit as commit_mana
+                commit_mana(owner, update['mana_current'])
             if 'operating_energy' in update and isinstance(owner, dict):
                 owner['operating_energy'] = update['operating_energy']
                 # Asset damage has its own integrity/control settlement. It
@@ -188,12 +192,18 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                         protect_ids=tuple(u.id for u in player_units if u.id != 'player'))
             else:
                 realm, layer = read(owner, 'realm_index', unit.realm_index), read(owner, 'layer', read(owner, 'target_layer', 1))
+                if owner is not None and unit.id not in puppet_ids and capabilities.technique_effects:
+                    from .npc_mana import prepare as prepare_mana
+                    mana = prepare_mana(owner, game.player.age)
+                    capabilities = replace(capabilities, mana_capacity=mana['capacity'], mana_initial=mana['current'])
                 rank = rank_for(read(owner, 'true_realm_index', realm), layer)
                 multiplier = 1 + .5 * max(0, (realm - 9) * 3 + (layer - 1) // 3)
                 if game.player.world != 'celestial':
                     multiplier = 1
             limit = max((d.max_investment for d in capabilities.voisinages), default=0) * multiplier
-            capabilities = replace(capabilities, investment_limit=limit)
+            from .technique_effect_provider import context as technique_context
+            capabilities = replace(capabilities, investment_limit=limit,
+                                   technique_context=technique_context(owner) if owner is not None else {})
             combatants.append(Combatant(unit.id, unit.name, side, unit.power, capabilities, unit.integrity, rank,
                 min(1, max(0, game.player.hp / max(1, max_hp(game.player))))
                 if unit.id == "player" else min(1, max(.01, 1 - .15 * read(owner, "wounds", 0)))))

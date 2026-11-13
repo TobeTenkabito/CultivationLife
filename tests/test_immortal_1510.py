@@ -222,7 +222,9 @@ def test_tianji_template_tier_and_actual_equipment_ownership(prepared):
     g.tianji_state['holders']={d['id']:{'npc_id':npc.id}}
     assert battle_sources(g,{npc.id:npc})[npc.id].artifact_tier==2
     g.tianji_state['holders']={}
-    assert npc.id not in battle_sources(g,{npc.id:npc})
+    source=battle_sources(g,{npc.id:npc})[npc.id]
+    assert source.artifact_tier==1
+    assert source.technique_effects  # Original learned manuals survive unequipping an artifact.
 
 
 def test_heavenly_court_and_pool_have_physical_locations(prepared):

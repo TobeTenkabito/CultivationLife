@@ -126,7 +126,13 @@
             <div class="combat-stance"><div data-combat-meter="hero"><b>你方态势</b><output></output><progress aria-label="你方战斗态势"></progress></div><div data-combat-meter="npc"><b>敌方态势</b><output></output><progress aria-label="敌方战斗态势"></progress></div></div>
             <canvas role="img" aria-label="双方交锋动画"></canvas>
             <div class="combat-lineup"><div data-combat-lineup="hero"></div><div data-combat-lineup="npc"></div></div>
-            <div class="combat-playback-controls"><span data-combat-status></span><button type="button" data-combat-replay title="重播战报" aria-label="重播战报"></button><button type="button" data-combat-pause title="暂停回放" aria-label="暂停回放" aria-pressed="false"></button><select aria-label="回放速度"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select></div>
+            <div class="combat-playback-controls"><span data-combat-status></span><button type="button" data-combat-replay title="重播战报" aria-label="重播战报"></button><button type="button" data-combat-pause title="暂停回放" aria-label="暂停回放" aria-pressed="false"></button><select aria-label="回放速度"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select><input type="range" data-combat-scrub aria-label="战斗回放进度" min="0" max="1" step="0.01" value="0" disabled></div>
+          </section>
+          <section id="battle-mechanisms" class="combat-mechanisms" hidden aria-label="功法机制时间轴">
+            <div class="mechanism-heading"><div><h3>功法运转 · 机制时间轴</h3><p data-mechanism-phase>轮末记录</p></div><label>查看轮次 <select aria-label="机制记录轮次"></select></label></div>
+            <div class="combat-technique-strip" data-technique-strip aria-label="本场斗法功法"></div>
+            <p class="mechanism-caption" data-mechanism-caption></p>
+            <div id="combat-mechanism-timeline" data-mechanism-timeline></div>
           </section>
           <div id="battle-rosters" class="battle-rosters"></div>
           <div id="battle-round-progress" class="battle-round-progress" aria-label="战斗轮次进度"></div>
@@ -750,12 +756,14 @@
   <link rel="stylesheet" href="/pixel-dark.css?v=323">
   <script src="/holiday-effects.js?v=321"></script>
   <script src="/spell-effects.js?v=christmas1"></script>
-  <script src="/combat-renderer.js?v=divine2"></script>
+  <script src="/combat-renderer.js?v=c1"></script>
   <script src="/actor-variants.js?v=alpha6"></script>
   <script src="/tribulation-effects.js?v=fx3"></script>
   <script src="/event-scenes.js?v=fx3"></script>
   <script src="/combat-beasts.js?v=beasts1-monster-418"></script>
-  <script src="/combat-replay.js?v=divine1"></script>
+  <link rel="stylesheet" href="/combat-mechanisms.css?v=c1">
+  <script src="/combat-mechanisms.js?v=c1"></script>
+  <script src="/combat-replay.js?v=c1"></script>
   <link rel="stylesheet" href="/npc-development.css?v=1">
   <script src="/npc-development.js?v=market-pages"></script>
   <link rel="stylesheet" href="/mentorship.css?v=1">

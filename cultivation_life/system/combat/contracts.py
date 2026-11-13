@@ -229,6 +229,8 @@ class CombatCapabilities:
     operating_tier: int = 1
     allow_sponsor: bool = True
     mana_capacity: float = 0.0
+    mana_initial: float | None = None
+    technique_context: Mapping[str, Any] = field(default_factory=dict)
     operating_compatible: bool = True
     sponsored_mp_cost: float = 5.0
 
@@ -240,6 +242,13 @@ class CombatCapabilities:
         number(self.operating_cost, 'operating_cost')
         number(self.sponsored_attack_cost, 'sponsored_attack_cost')
         number(self.mana_capacity,'mana_capacity')
+        if (not isinstance(self.technique_context,dict) or set(self.technique_context)-{'form','bodiless','corpse'}
+                or any(type(v) is not bool for k,v in self.technique_context.items() if k!='form')
+                or not isinstance(self.technique_context.get('form',''),str)):
+            raise ValueError('Invalid original technique context')
+        if self.mana_initial is not None:
+            if number(self.mana_initial, 'mana_initial') > self.mana_capacity:
+                raise ValueError('Initial ordinary mana exceeds capacity')
         number(self.sponsored_mp_cost,'sponsored_mp_cost')
         if type(self.operating_compatible) is not bool:raise ValueError('Invalid operating compatibility')
         if type(self.operating_tier) is not int or self.operating_tier not in (1,2) or type(self.allow_sponsor) is not bool:
@@ -373,7 +382,7 @@ class CombatPhases(Protocol):
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
                     player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None,
                     rng=None, first_side=None) -> PhaseRound: ...
-    def ordinary_damage(self, dealt: float, received: float) -> tuple[float, float]: ...
+    def ordinary_damage(self, dealt: float, received: float, *, breach_ratios=None) -> tuple[float, float]: ...
     def sync_resources(self, *, player_mp: float, enemy_mp: float) -> None: ...
     def semantic_ordinary_start(self) -> dict[str, dict[str, float]]: ...
     def semantic_initiative(self, player_first: bool) -> dict[str, dict[str, float]]: ...

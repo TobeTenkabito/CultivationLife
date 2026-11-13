@@ -22,7 +22,7 @@ def dump_battle(battle):
             'death_exempt':sorted(battle._death_exempt),
             **({'semantic_runtime': battle.semantics.dump()} if battle.semantics else {}),
             **({'technique_runtime': battle.techniques.dump()} if battle.techniques else {}),
-            **({'semantic_environment': dict(battle._semantic_environment)} if battle.semantics else {}),
+            **({'semantic_environment': dict(battle._semantic_environment)} if battle.semantics or battle.techniques else {}),
             'states': {key: {k: copy.deepcopy(v) for k, v in vars(s).items() if k != 'unit'}
                        for key, s in battle.units.items()}, 'dominated': dict(battle._dominated),
             'escape_forbidden_sides': sorted(battle.escape_forbidden_sides)}
@@ -52,7 +52,9 @@ def load_battle(snapshot):
         raise ValueError('Invalid nonlethal unit snapshot')
     battle._death_exempt=frozenset(exempt)
     for key, values in snapshot['states'].items():
-        for field in ('mana_current','supply_mp_spent'):
+        if type(values.get('physical_defeat',False)) is not bool:
+            raise ValueError('Invalid physical defeat snapshot')
+        for field in ('mana_current','supply_mp_spent','technique_mp_spent'):
             value=values.get(field,0.)
             if isinstance(value,bool) or not isinstance(value,(int,float)) or not isfinite(value) or value<0:
                 raise ValueError('Invalid battle mana snapshot')
@@ -87,7 +89,8 @@ def load_battle(snapshot):
         if battle.semantics is None:
             raise ValueError('Semantic snapshot has no rules')
         battle.semantics.restore(snapshot['semantic_runtime'])
-        battle._semantic_environment = dict(snapshot.get('semantic_environment', {}))
+    if 'semantic_environment' in snapshot:
+        battle._semantic_environment = dict(snapshot['semantic_environment'])
         from ...combat_semantics import FACTS
         if any(key not in FACTS or not key.startswith('environment.') or type(value) is not FACTS[key][0]
                for key, value in battle._semantic_environment.items()):
@@ -146,6 +149,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
                 for key, victim in battle.units.items():
                     if victim.unit.side == 'enemy' and (0 < victim.vitality <= .12 or victim.suppressed):
                         if battle.attack_tier(player) >= battle.ward_tier(key):
+                            if battle.techniques:battle.techniques.execution('player')
                             battle.attack_tier(player, pay=True)
                             battle._lose(key, victim.vitality)
                             battle._drain_body_events()
@@ -185,7 +189,8 @@ def run_batch(battle, state, rng, *, batch_size=24):
             received *= .96 if first else 1.04
             before = [player.unit.power*player.vitality,
                       battle.totals['enemy']*(1-battle.ordinary_loss('enemy'))]
-            dealt, received = battle.ordinary_damage(dealt, received)
+            dealt, received = battle.ordinary_damage(dealt, received,breach_ratios={
+                'player':p['breach']/max(1,e['guard']),'enemy':e['breach']/max(1,p['guard'])})
             state['mp_ratio']=battle.mp_ratio('player',state['mp_ratio'])
             if frame.ordinary:
                 exchange = dict(opening=before, before=before,
@@ -216,6 +221,7 @@ def run_batch(battle, state, rng, *, batch_size=24):
                 if attacker.unit.side != 'enemy' or not attacker.fighting:
                     continue
                 if battle.attack_tier(attacker) >= battle.ward_tier('player'):
+                    if battle.techniques:battle.techniques.execution(key)
                     battle.attack_tier(attacker, pay=True)
                     battle._lose('player', player.vitality)
                     player.body = 0

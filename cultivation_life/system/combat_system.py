@@ -5,10 +5,11 @@ from typing import Any, Iterable
 
 from ..combat_traits import COMBAT_TRAIT_REGISTRY
 from ..combat_rule_engine import BattleRuleRuntime, evaluate_rules, prepare_rules
-from ..content_registry import MONSTER_BLOODLINE_SETTINGS
+from ..content_registry import MONSTER_BLOODLINE_SETTINGS, REALMS
 from .custom_lineage_system import evaluate_custom_lineage_rules
 from ..models import Player, Technique
-from ..rules import can_player_practice_technique
+from ..rules import can_player_practice_technique, max_mp
+from ..combat_costs import mana_reference, exertion, graded_cost
 from .ghost_system import active_generated_soul_traits, active_soul_traits, ghost_soul_effects
 from ..ghost_soul_traits import evaluate_generated_soul_traits
 from ..monster_bloodline_traits import (
@@ -381,6 +382,13 @@ class PlayerCombatSystem:
         body_damage_ratio = 0.0
         body_restored_ratio = 0.0
         core_power = max(1.0, next((unit.power for unit in player_units if unit.kind == "player"), player_power))
+        mana_capacity = max(1., max_mp(player))
+        ordinary_mana_basis = mana_reference(REALMS[player.realm_index].base_power, player.layer, player.body_training)
+
+        def burst_cost(art):
+            rate=max(.07+.008*max(1,art.grade),art.immortal_power_cost if art.requires_immortal_power else 0.)
+            fixed = mana_reference(REALMS[min(len(REALMS)-1, max(0, art.grade))].base_power) * rate
+            return graded_cost(art.grade,player.realm_index,fixed/mana_capacity,rate) * mana_cost_multiplier
         rounds: list[dict[str, Any]] = []
         key_events: list[str] = []
         if mana_cost_multiplier >= 1.10:
@@ -826,11 +834,10 @@ class PlayerCombatSystem:
                 and (phase is None or 'technique' not in phase.blocked_actions.get('player', ()))
                 and (plan['burst'] == 'early' or round_no == 1 and objective == "kill" or enemy_hp <= 0.58 or player_hp <= 0.48)
             )
-            if burst and plan['manual']:
+            if burst:
                 art = max(usable_combat_techniques, key=lambda entry: entry.combat_bonus)
-                planned_cost = max(.07 + .008 * max(1, art.grade),
-                    art.immortal_power_cost if art.requires_immortal_power else 0) * mana_cost_multiplier
-                burst = player_mp - planned_cost >= plan['mp_reserve']
+                planned_cost = burst_cost(art)
+                burst = player_mp - planned_cost >= (plan['mp_reserve'] if plan['manual'] else 0.)
             burst_factor = 1.0
             if burst:
                 burst_used = True
@@ -838,13 +845,12 @@ class PlayerCombatSystem:
                 burst_factor = 1.18
                 cost = min(
                     player_mp,
-                    max(0.07 + 0.008 * max(1, art.grade), art.immortal_power_cost if art.requires_immortal_power else 0)
-                    * mana_cost_multiplier,
+                    burst_cost(art),
                 )
                 player_mp -= cost
                 label = f"《{art.name}》"
                 resource = "仙灵力" if art.requires_immortal_power else "法力"
-                events.append(f"预案自动发动{label}，以 {cost:.0%} 最大{resource}换取本轮爆发。")
+                events.append(f"预案自动发动{label}，消耗 {cost * mana_capacity:.2f} 点{resource}换取本轮爆发。")
 
             player_round_might = 1.0
             enemy_round_might = 1.0
@@ -993,7 +999,7 @@ class PlayerCombatSystem:
                 event_count = len(phase.events)
                 replay_before = [round(player_power_max * (1-phases.ordinary_loss('player')), 1),
                                  round(enemy_power * (1-phases.ordinary_loss('enemy')), 1)]
-                dealt, received = phases.ordinary_damage(dealt, received)
+                dealt, received = phases.ordinary_damage(dealt, received,breach_ratios={'player':p_breach,'enemy':e_breach})
                 replay_after = [round(player_power_max * (1-phases.ordinary_loss('player')), 1),
                                 round(enemy_power * (1-phases.ordinary_loss('enemy')), 1)]
                 events.extend(phase.events[event_count:])
@@ -1024,10 +1030,11 @@ class PlayerCombatSystem:
                 counterforce_ready = True
             base_cost = 0.025 + 0.025 * min(1.6, round_player_stats["might"] / max(1.0, player_power))
             if phase is None or phase.ordinary_player:
-                player_mp = max(0.0, player_mp - min(0.12, base_cost * mana_cost_multiplier))
+                ordinary_cost = base_cost * mana_cost_multiplier * ordinary_mana_basis * exertion(core_power, enemy_power)
+                player_mp = max(0.0, player_mp - ordinary_cost / mana_capacity)
             enemy_cost = 0.025 + 0.025 * min(1.6, round_enemy_stats["might"] / max(1.0, enemy_power))
             if phase is None or phase.ordinary_enemy:
-                enemy_mp = max(0.0, enemy_mp - min(0.12, enemy_cost))
+                enemy_mp = max(0.0, enemy_mp - min(0.12, enemy_cost) * exertion(enemy_power, player_power_max))
             if round_no % 2 == 0 and bloodline_active("even_round_mana_recovery"):
                 restored_mp = min(0.03, 1.0 - player_mp)
                 player_mp += restored_mp
@@ -1506,9 +1513,9 @@ class PlayerCombatSystem:
             mode=("手动预案·" if plan['manual'] else '') + ("邻域战斗" if phases is not None and phases.enabled else "快速结算" if quick else "标准自动战斗"),
             rounds=rounds,
             key_events=key_events[:4],
-            hp_loss_ratio=round(cls._clamp(0.0, 0.68, body_damage_ratio - body_restored_ratio), 4),
+            hp_loss_ratio=cls._clamp(0.0, 0.68, body_damage_ratio - body_restored_ratio),
             hp_restore_ratio=round(cls._clamp(0, max(0, 1 - current_hp_ratio), body_restored_ratio - body_damage_ratio), 4),
-            mp_loss_ratio=round(max(0.0, initial_mp - player_mp), 4),
+            mp_loss_ratio=max(0.0, initial_mp - player_mp),
             player_combat_state=round(player_power_max * player_hp, 1),
             player_combat_state_max=round(player_power_max, 1),
             enemy_combat_state=round(enemy_power * enemy_hp, 1),

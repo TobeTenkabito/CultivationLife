@@ -358,5 +358,7 @@ def test_legacy_scripted_npc_grant_is_not_overwritten_by_doctrine(prepared):
     _, game, _ = prepared
     npc = SectNpc('scripted', '阵主', '', 9, 1, 10000, None, world='celestial',
                   transcendence={'version':1, 'conversion':1, 'domain_ids':['plot-ward']})
-    assert battle_sources(game, {npc.id:npc}) == {}
+    sources=battle_sources(game, {npc.id:npc})
+    assert not sources[npc.id].voisinages
+    assert sources[npc.id].technique_effects
     assert 'doctrine' not in npc.transcendence

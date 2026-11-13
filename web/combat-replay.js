@@ -12,6 +12,7 @@
   const root=document.getElementById('battle-animation');
   const canvas=root.querySelector('canvas'),status=root.querySelector('[data-combat-status]');
   const replay=root.querySelector('[data-combat-replay]'),pause=root.querySelector('[data-combat-pause]');
+  const scrub=root.querySelector('[data-combat-scrub]');
   replay.append(VisualAssets.icon('replay'));pause.append(VisualAssets.icon('pause'));
   let pauseIcon='pause';
   const reduced=()=>document.documentElement.dataset.motion==='reduced'||media.matches;
@@ -37,10 +38,11 @@
     const opening=firstDomain?firstDomain.opening.map((v,i)=>v*maxima[i?'npc':'hero']):ordinary[0]?.ordinary_exchange.opening;
     if(!Array.isArray(opening)||opening.length!==2||!opening.every(Number.isFinite))return null;
     const initial={hero:opening[0],npc:opening[1]};
-    const rounds=[],events=[],checkpoints=[],domains=[];
+    const rounds=[],events=[],checkpoints=[],domains=[],mechanismFrames=[];
     let start=.5,seed=hash(JSON.stringify([visual,report.age,report.rounds]));
     const choose=list=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return list[(seed>>>0)%list.length];};
     for(const [rowIndex,row] of report.rounds.entries()){
+      const mechanismFrame={number:row.round,start};mechanismFrames.push(mechanismFrame);
       const phases=CombatDomains.stages(row,visual,start);
       const release=()=>{
         if(!phases.length)return;
@@ -59,6 +61,7 @@
       if(!exchange||!['player','enemy'].includes(row.initiative)){
         release();
         checkpoints.push({t:start,values:{hero:Number(row.player_combat_state),npc:Number(row.enemy_combat_state)}});
+        mechanismFrame.settled=start;start+=.35;mechanismFrame.end=start;
         continue;
       }
       const ordinaryStart=start;
@@ -97,7 +100,9 @@
         release();
       }
       checkpoints.push({t:start,values:{hero:Number(row.player_combat_state),npc:Number(row.enemy_combat_state)}});
+      mechanismFrame.settled=start;
       start+=.35;
+      mechanismFrame.end=start;
     }
     if(!rounds.length&&!domains.length)return null;
     const lastRow=tail(report.rounds),lastRound=tail(rounds);
@@ -131,12 +136,18 @@
     const final={hero:Number(report.player_combat_state),npc:Number(report.enemy_combat_state)};
     if(!Object.values(final).every(Number.isFinite))return null;
     checkpoints.push({t:defeat?.start??start,values:final});
+    // A presentation-only finisher may put the final checkpoint after the
+    // ordinary exchange. Inspection must reach that checkpoint, within duration.
+    const finalFrame=tail(mechanismFrames);
+    finalFrame.settled=Math.max(finalFrame.settled,defeat?.start??start);
+    const duration=Math.max(start+.4,finalFrame.settled+.35);
+    finalFrame.end=duration;
     const operations=[...events.map(e=>({t:e.t,values:{[e.target]:e.value}})),...checkpoints].sort((a,b)=>a.t-b.t);
     const mode=teams.hero.length>1||teams.npc.length>1?'group':'single';
     const battlefield=A.battlefields?.[mode]?.[report.natural_terrain]??null;
     const conditions=(report.artificial_conditions??[]).filter(name=>['禁空','禁神识','大阵'].includes(name)).slice(0,3);
     return {hero,npc,heroDomainAction:A.actors[hero].domain_action,teams,teamCounts:visual.team_counts??{hero:1,npc:1},battlefield,conditions,rounds,events,operations,initial,maxima,natalIcon,defeat,finisher,
-      domains,domainSettings:visual.domains??{},mixed:report.rounds.some(row=>row.voisinage),duration:start+.4};
+      domains,mechanismFrames,domainSettings:visual.domains??{},mixed:report.rounds.some(row=>row.voisinage),duration};
   }
   function sample(plan,time){
     time=clamp(time,0,plan.duration);
@@ -189,6 +200,9 @@
     if(!context)return;
     const began=performance.now();
     const state=context.renderer.render(context.scene,context.plan,clock,{shake:!reduced()});
+    window.CombatMechanisms?.advance(clock,state,context.plan);
+    scrub.max=Math.ceil(context.plan.duration*100)/100;scrub.value=clock;scrub.disabled=false;
+    scrub.setAttribute('aria-valuetext',`${Math.floor(clock)} / ${Math.ceil(context.plan.duration)} 秒`);
     if(status.textContent!==state.phase)status.textContent=state.phase;
     for(const key of ['hero','npc']){
       const meter=root.querySelector(`[data-combat-meter=${key}]`),max=context.plan.maxima[key],value=state.health[key];
@@ -198,9 +212,15 @@
       if(output.textContent!==text)output.textContent=text;
     }
     const finished=clock>=context.plan.duration;
-    const round=state.domain?.number??state.round?.number??tail(context.plan.rounds.filter(r=>r.start<=clock))?.number??0;
-    const marker=`${round}:${finished}`;
-    if(context.round!==marker){document.querySelectorAll('#battle-round-progress>span').forEach((node,i)=>{node.className=i+1<round||finished?'complete':i+1===round?'active':'future';});context.round=marker;}
+    const frame=context.plan.mechanismFrames.find(f=>clock>=f.start&&clock<f.end)??tail(context.plan.mechanismFrames.filter(f=>f.start<=clock));
+    const round=frame?.number??0,settled=!!frame&&clock>=frame.settled;
+    const marker=`${round}:${settled}:${finished}`;
+    const firstProgress=document.querySelector('#battle-round-progress>span');
+    if(context.round!==marker||context.firstProgress!==firstProgress){document.querySelectorAll('#battle-round-progress>span').forEach(node=>{
+      const number=Number(node.dataset.round),done=finished||number<round||(number===round&&settled),active=number===round&&!done;
+      node.className=done?'complete':active?'active':'future';node.textContent=done?'●':active?'◎':'○';
+      node.title=`第 ${number} 轮 · ${done?'已确认':active?'演绎中':'尚未回放'}`;node.setAttribute('aria-label',node.title);
+    });context.round=marker;context.firstProgress=firstProgress;}
     pause.setAttribute('aria-pressed',String(!playing));pause.title=playing?'暂停回放':'继续回放';pause.setAttribute('aria-label',pause.title);
     const next=playing?'pause':'play';if(next!==pauseIcon){pause.replaceChildren(VisualAssets.icon(next));pauseIcon=next;}
     context.samples.push(performance.now()-began);if(context.samples.length>64)context.samples.shift();
@@ -248,10 +268,10 @@
       const natalIcon=items?.assets[asset]?.file;
       const plan=build(report,A,natalIcon);if(!plan){root.hidden=true;return;}
       const T=timer(A);renderer=window.createDuelRenderer(A,T,window.createCombatBeasts(A,T));
-      scene=renderer.create(canvas);scene.multi=plan.teams.hero.length>1||plan.teams.npc.length>1;scene.battlefield=plan.battlefield;context={renderer,scene,plan,samples:[]};
+      scene=renderer.create(canvas);scene.panoramic=true;scene.multi=plan.teams.hero.length>1||plan.teams.npc.length>1;scene.battlefield=plan.battlefield;context={renderer,scene,plan,samples:[]};
       await renderer.prepare(plan);
       if(token!==revision||!visible()){renderer.dispose(scene);return;}
-      const resize=()=>{if(context?.scene!==scene)return;renderer.resize(scene,Math.min(1000,Math.max(240,root.clientWidth)));paint();};
+      const resize=()=>{if(context?.scene!==scene)return;renderer.resize(scene,Math.min(1280,Math.max(240,root.clientWidth)));paint();};
       resize();observer=new ResizeObserver(resize);observer.observe(root);
       intersection=new IntersectionObserver(entries=>{onscreen=entries[0].isIntersecting&&entries[0].intersectionRatio>.01;stopFrame();resume();},{root:document.getElementById('battle-report-card'),threshold:[0,.01]});
       intersection.observe(canvas);
@@ -268,6 +288,7 @@
     }
   }
   function sync(report,open){
+    window.CombatMechanisms?.sync(report,open);
     if(!open||!PixelLibrary.active()||!report?.visual||!Array.isArray(report.rounds)||report.rounds.length>72||
       !report.rounds.some(row=>(row.ordinary_exchange&&['player','enemy'].includes(row.initiative))||CombatDomains.facts(row,report.visual))){
       current={report,open,key:null};dispose();return false;
@@ -279,6 +300,7 @@
   }
   replay.onclick=()=>{if(!context)return;clock=0;last=0;playing=true;paint();resume();};
   pause.onclick=()=>{if(!context)return;playing=!playing;stopFrame();paint();resume();};
+  scrub.oninput=()=>{if(!context)return;clock=clamp(Number(scrub.value),0,context.plan.duration);playing=false;stopFrame();paint();};
   root.querySelector('select').onchange=e=>{speed=Number(e.target.value);};
   document.addEventListener('visibilitychange',()=>{
     stopFrame();
@@ -313,14 +335,16 @@
   media.addEventListener('change',appearance);
   window.addEventListener('game:theme-change',appearance);
   window.addEventListener('pagehide',()=>{dispose();current=null;});
-  window.CombatReplay=Object.freeze({sync,close(){if(current)current.open=false;dispose();},build,sample,
+  window.CombatReplay=Object.freeze({sync,close(){if(current)current.open=false;window.CombatMechanisms?.sync(null,false);dispose();},build,sample,
     diagnostics:()=>({active:!!context,playing,onscreen,raf:!!raf,cache:context?.renderer.cacheSize()??0,
       decodedBytes:context?.renderer.decodedBytes()??0,time:clock,duration:context?.plan.duration??0,
-      domain:context?sample(context.plan,clock).domain:null,domainStages:context?.plan.domains.map(({start,end,phase,number})=>({start,end,phase,number}))??[],
+      domain:context?sample(context.plan,clock).domain:null,domainStages:context?.plan.domains.map(({start,end,phase,number,label})=>({start,end,phase,number,label}))??[],
+      mechanismFrames:context?.plan.mechanismFrames.map(frame=>({...frame}))??[],
       rounds:context?.plan.rounds.length??0,defeat:context?.plan.defeat??null,
       actions:context?.plan.rounds.map(({side,actorIndex,start,end,forceTier})=>({side,actorIndex,start,end,forceTier}))??[],
       actors:context?sample(context.plan,clock).actors:null,teams:context?sample(context.plan,clock).teams:null,bounds:bodyBounds(),participants:participantBounds(),
       battlefield:context?.plan.battlefield??null,conditions:context?.plan.conditions??[],
       viewport:context?[context.scene.width,context.scene.height]:null,renderMs:context?[...context.samples]:[]}),
+    inspectRound(number){if(context){const frame=context.plan.mechanismFrames.find(f=>f.number===number);if(frame){playing=false;stopFrame();clock=clamp(frame.settled,0,context.plan.duration);paint();return true;}}return false;},
     seek(time){if(context){clock=clamp(time,0,context.plan.duration);paint();}}});
 })();

@@ -245,6 +245,7 @@ class SectNpc:
     technique_levels: dict[str, int] = field(default_factory=dict)
     technique_slots: dict[str, str] = field(default_factory=dict)
     duel_technique_ids: list[str] | None = None
+    ordinary_mana: dict[str, Any] | None = None
     combat_artifact_id: str | None = None
     combat_factor: float = 1.0
     faction_id: str | None = None
@@ -294,6 +295,8 @@ class SectNpc:
         self.technique_levels = normalize(self.technique_levels, self.main_technique_id, self.main_technique_level, self.family_traits)
         from .duel_technique_schema import validate_ids
         self.duel_technique_ids = validate_ids(self.duel_technique_ids, uninitialized=True)
+        from .npc_mana_schema import validate as validate_mana
+        self.ordinary_mana = validate_mana(self.ordinary_mana)
         if self.duel_technique_ids and any(key not in self.technique_levels for key in self.duel_technique_ids):
             raise ValueError('人物斗法功法尚未习得')
         if not isinstance(self.technique_slots, dict) or set(self.technique_slots) - {'support','combat','body','sense','transformation'} or any(k not in self.technique_levels for k in self.technique_slots.values()):

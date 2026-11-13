@@ -766,6 +766,8 @@ README = """# 4258部功法逐条设计稿
 
 日期：2026-11-12。状态：设计交付，未修改游戏运行目录、存档和版本，未接入战斗。
 
+后续实施：2026-11-13已按用户要求将此冻结设计编译为固定目录V3效果，实际结算、太元归墟剑升级特例与验收入口见[固定功法实战接入](../fixed-technique-combat.md)。本目录保留原设计稿，不把后续运行元数据反写成最初设计。
+
 ## 交付范围
 
 固定目录 `content/techniques.json` 的全部4258部，保持原顺序、ID、书名和原定义。3888部通用功法及370部其他固定功法均逐条展开，不是只交一个模板或生成器。运行时自创功法、动态道统书目及此固定目录之外的扩展条目不伪计入4258。
@@ -828,11 +830,19 @@ NPC使用同一书目和单书规则，但不在此稿给NPC免费补功法、�
 def render_files():
     raw = SOURCE.read_bytes()
     original = json.loads(raw)["techniques"]
+    source = dict(path="content/techniques.json", sha256=hashlib.sha256(raw).hexdigest(), entries=len(original))
+    if any((row.get('combat_effect') or {}).get('version')==3 for row in original):
+        frozen=json.loads((OUT/'techniques.json').read_text(encoding='utf-8'))
+        prior=[row['original_definition'] for row in frozen['techniques']]
+        strip=lambda row:{k:v for k,v in row.items() if k not in {'combat_effect','description'}}
+        if [strip(row) for row in original]!=[strip(row) for row in prior]:
+            raise ValueError('固定目录基础定义已变化，须审阅设计，不能用已编译效果反向生成设计')
+        original=prior;source=frozen['source']
     entries = [make_entry(book, index) for index, book in enumerate(original)]
     document = dict(
         schema="cultivation-life-technique-design", schema_version=1, design_version="0.1.0",
         status="design_only_not_game_content", date="2026-11-12", language="zh-CN",
-        source=dict(path="content/techniques.json", sha256=hashlib.sha256(raw).hexdigest(), entries=len(original)),
+        source=source,
         scope="固定目录4258部，全部逐条展开；不含运行时动态生成的书目；生效数量限制留后续",
         units=dict(percent="百分比数值，例如2表示2%；fraction字段为比例，例如0.02表示2%",
                    state="战斗态势，不等于HP或肉身完整度", baseline="排除本稿新增专属机制后的原战斗基线"),

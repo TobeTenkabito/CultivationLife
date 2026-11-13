@@ -24,6 +24,8 @@ class TechniqueRuntime:
         self.events = []
         for owner, state in battle.units.items():
             for book in state.unit.capabilities.technique_effects:
+                if book['effect']['version'] == 3:
+                    continue
                 key = json.dumps([owner, book['id']], ensure_ascii=False, separators=(',', ':'))
                 self.books[key] = (owner, book)
                 self.records[key] = dict(used=0, last_cast=0, paid=0., refunded=0., receipts={}, packets=[])
@@ -85,7 +87,8 @@ class TechniqueRuntime:
             pending = any(p['remaining'] > 0 for p in record['packets'])
             if eligible and not pending and record['used'] < effect['uses'] and cooldown_done:
                 record['packets'] = []
-                cost = capacity * effect['cost_bp'] / 10000 * (1 - .02 * (book['level'] - 1))
+                from ...combat_costs import technique_cost
+                cost = technique_cost(book,capacity)
                 if state.current + 1e-12 >= cost:
                     before = state.current
                     self.battle._energy(owner, state.current - cost)
@@ -113,13 +116,13 @@ class TechniqueRuntime:
                     actual = max(0., state.vitality - before)
                     packet['remaining'] = 0.
                     if actual:
-                        self.note(owner, book, 'restored', amount=actual)
+                        self.note(owner, book, 'restored', amount=actual, receipt=packet['receipt'])
                         self.battle.frame.events.append(f"《{book['name']}》恢复 {actual:.2%} 战斗态势。")
                 elif effect['kind'] == 'breach':
                     gain = packet['remaining']
                     factors[state.unit.side]['breach'] += gain * state.unit.power / self.battle.totals[state.unit.side]
                     packet['remaining'] = 0.
-                    self.note(owner, book, 'breach', amount=gain)
+                    self.note(owner, book, 'breach', amount=gain, receipt=packet['receipt'])
 
     def _trigger(self, owner, trigger):
         state = self.battle.units[owner]
@@ -159,7 +162,7 @@ class TechniqueRuntime:
                     gain = original * packet['remaining']
                     packet['remaining'] = 0.
                     amount += gain  # Every book uses the same original input, never another book's output.
-                    self.note(owner, book, 'strike', target=target, amount=gain)
+                    self.note(owner, book, 'strike', target=target, amount=gain, receipt=packet['receipt'])
         return amount
 
     def absorb(self, target, amount):
@@ -179,7 +182,7 @@ class TechniqueRuntime:
                 actual_prevention = max(0., min(vitality, amount) - min(vitality, amount - prevented))
                 packet['remaining'] -= prevented
                 amount -= prevented
-                self.note(owner, book, 'absorbed', amount=actual_prevention, spent=prevented)
+                self.note(owner, book, 'absorbed', amount=actual_prevention, spent=prevented, receipt=packet['receipt'])
                 if book['effect']['kind'] == 'frugal' and actual_prevention > 0:
                     receipt = record['receipts'][packet['receipt']]
                     allowance = max(0., receipt['paid'] * book['effect']['refund_bp'] / 10000 - receipt['refunded'])
@@ -239,7 +242,8 @@ class TechniqueRuntime:
             integer(r['last_cast'], 0, value['round'], '上次施展')
             if bool(r['used']) != bool(r['last_cast']):
                 raise ValueError('功法效果次数与施展轮次不符')
-            expected_cost = capacity * effect['cost_bp'] / 10000 * (1 - .02 * (book['level'] - 1))
+            from ...combat_costs import technique_cost
+            expected_cost = technique_cost(book,capacity)
             # Subtracting two large legitimate balances loses a few low bits.
             # Scale only the rounding tolerance; never waive a paid receipt.
             tolerance = max(1e-8, expected_cost * 1e-12)

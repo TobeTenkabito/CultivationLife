@@ -8,6 +8,7 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Mapping
+from math import ceil
 
 from .contracts import number
 
@@ -31,13 +32,15 @@ def relieve_wounds(owner, levels=1):
 def commit_condition(owner: Any, update: Mapping[str, Any], *, lethal: bool, now=None) -> bool | None:
     """Physical restoration and control have identical meaning in both callers."""
     if 'body' in update:
-        wounds = min(4, max(0, int((1 - update['body']) / .15 + 1e-8)))
+        wounds = min(4, max(0, ceil((1 - update['body']) / .15 - 1e-8)))
     else:
         wounds = max(read(owner, 'wounds', 0), min(4, int((1 - update['vitality']) * 4)))
     _write(owner, 'wounds', wounds)
-    if lethal and update['vitality'] <= 0 and not update['suppressed'] and not update.get('escaped'):
+    if lethal and update.get('lethal',True) and update['vitality'] <= 0 and not update['suppressed'] and not update.get('escaped'):
         from ..npc_soul import escape_body
-        if update.get('body', 1) <= 0 and escape_body(owner, now):
+        if (update.get('body_destroyed',update.get('body', 1) <= 0)
+                and not update.get('escape_locked',False) and escape_body(owner, now)):
+            _write(owner, 'wounds', 4)
             return True
         _write(owner, 'alive', False)
         _write(owner, 'death_reason', '仙域斗法中陨落')
@@ -138,7 +141,11 @@ def prepare(owner: Any, now: float | None, config: Mapping[str, Any], *, imitati
 
 def move_world(owner: Any, destination: str, now: float, config: Mapping[str, Any]) -> None:
     settle(owner, now, config)
+    from ..npc_mana import prepare as prepare_mana
+    has_mana = read(owner, 'ordinary_mana') is not None
+    if has_mana:prepare_mana(owner, now)
     from ...regional_context import before_departure
     before_departure(destination, owner)
     _write(owner, "world", destination)
     settle(owner, now, config)
+    if has_mana:prepare_mana(owner, now)

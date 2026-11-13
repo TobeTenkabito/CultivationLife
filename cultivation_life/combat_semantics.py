@@ -161,6 +161,12 @@ def _modifier(row, phase=None):
         raise ValueError('Modifier value is outside the finite budget')
 
 
+def dispellable_modifiers(modifiers):
+    allowed={f'ordinary.{stat}' for stat in STATS}|{'ordinary.dealt','ordinary.received'}
+    return bool(modifiers) and all(m['channel'] in allowed and
+        (m['value']>0 if m['channel']=='ordinary.received' else m['value']<0) for m in modifiers)
+
+
 def _parse_rule(raw):
     """Validate completely, returning a detached JSON-safe rule snapshot."""
     _keys(raw, ('schema_version', 'id', 'source_id', 'trigger', 'when', 'scope',
@@ -211,7 +217,7 @@ def _parse_rule(raw):
             _integer(action.get('stacks', 1), 1, MAX_STACKS)
         elif kind == 'status':
             _keys(action, ('op', 'key', 'duration', 'delay', 'stacks', 'max_stacks',
-                          'modifiers', 'consume_on', 'recipient', 'bind_target', 'stacking'),
+                          'modifiers', 'consume_on', 'recipient', 'bind_target', 'stacking', 'dispellable'),
                   ('key', 'duration'))
             _identifier(action['key'])
             _integer(action['duration'], 1, MAX_DURATION)
@@ -231,6 +237,9 @@ def _parse_rule(raw):
                 raise ValueError('Too many status modifiers')
             for modifier in modifiers:
                 _modifier(modifier)
+            if (type(action.get('dispellable',False)) is not bool
+                    or action.get('dispellable') and not dispellable_modifiers(modifiers)):
+                raise ValueError('Only ordinary numerical debuffs can register dispelling')
             if 'consume_on' in action:
                 consume = action['consume_on']
                 if consume not in PHASES or not any(consume in CHANNELS[m['channel']] for m in modifiers):
@@ -523,7 +532,8 @@ class SemanticRuntime:
                         if action.get('bind_target', False) else None,
                         starts=starts, expires=expires,
                         stacks=min(action.get('max_stacks', 1), old.get('stacks', 0) + action.get('stacks', 1)),
-                        modifiers=copy.deepcopy(action.get('modifiers', [])), consume_on=action.get('consume_on'))
+                        modifiers=copy.deepcopy(action.get('modifiers', [])), consume_on=action.get('consume_on'),
+                        dispellable=action.get('dispellable',dispellable_modifiers(action.get('modifiers',[]))))
                 elif op in ('clear_status', 'consume_status'):
                     remaining = action.get('stacks', 1)
                     for status_key, status in sorted(list(self.statuses.items())):
@@ -609,7 +619,7 @@ class SemanticRuntime:
             _integer(value['total'], value['count'], 1000000000000)
         for key, s in clean['statuses'].items():
             _keys(s, ('namespace', 'key', 'owner', 'origin', 'bound_target', 'starts', 'expires',
-                      'stacks', 'modifiers', 'consume_on'),
+                      'stacks', 'modifiers', 'consume_on', 'dispellable'),
                      ('namespace', 'key', 'owner', 'origin', 'bound_target', 'starts', 'expires',
                       'stacks', 'modifiers', 'consume_on'))
             namespace(s['namespace'])
@@ -626,6 +636,9 @@ class SemanticRuntime:
                 raise ValueError('Unbounded status modifiers')
             for m in s['modifiers']:
                 _modifier(m)
+            if (type(s.get('dispellable',False)) is not bool
+                    or s.get('dispellable') and not dispellable_modifiers(s['modifiers'])):
+                raise ValueError('Invalid dispelling registration')
             if s['consume_on'] is not None and (s['consume_on'] not in PHASES
                     or not any(s['consume_on'] in CHANNELS[m['channel']] for m in s['modifiers'])):
                 raise ValueError('Invalid consuming status')

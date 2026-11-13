@@ -107,6 +107,9 @@ def main():
     profiles=json.loads((ROOT/'content/world.json').read_text(encoding='utf-8'))['systems']['world_profiles']
     caps=json.loads((ROOT/'content/techniques.json').read_text(encoding='utf-8'))['combat_purity_caps_by_path']
     techniques,goods=definitions(profiles,caps)
+    from tools.compile_fixed_techniques import compile_all
+    compiled,_=compile_all(json.loads((ROOT/'docs/technique-design-4258/techniques.json').read_text(encoding='utf-8')))
+    for row in techniques:row.update(compiled[row['id']])
     for filename,key,generated in [('techniques.json','techniques',techniques),('market.json','goods',goods)]:
         path=ROOT/'content'/filename;doc=json.loads(path.read_text(encoding='utf-8'))
         existing=[r for r in doc[key] if not str(r.get('id' if key=='techniques' else 'content_id','')).startswith(PREFIX)]

@@ -2,6 +2,7 @@
 import copy
 
 from .combat.npc_lifecycle import read
+from .technique_context import context
 from ..rules import can_player_practice_technique, combat_requirement_met, qi_levels
 
 
@@ -20,10 +21,19 @@ def project(game, owner, *, player=False):
                        or owner.body_training < book.required_body_training
                        or book.requires_immortal_power and not owner.immortal_power_converted):
             continue
-        if book.category == 'transformation':
-            # This batch generates spiritual doctrine books only. Form-dependent
-            # fixed books must wait for their explicit original-form adapter.
-            continue
         seen.add(book.id)
-        result.append(dict(id=book.id, name=book.name, level=book.level, effect=copy.deepcopy(book.combat_effect)))
+        from ..content_registry import REALMS, WORLD_SYSTEMS
+        from ..combat_costs import mana_reference
+        effect=copy.deepcopy(book.combat_effect)
+        grade=book.grade
+        if effect.get('resource')=='mana':
+            fixed=effect.get('mana_cost',mana_reference(REALMS[grade].base_power)*effect['cost_bp']/10000)
+        else:
+            # Use the native energy denomination, including the original
+            # lower-world imitation pool; never charge MP as immortal energy.
+            lower=WORLD_SYSTEMS['world_profiles'].get(read(owner,'world'),{}).get('tier',1)<3
+            reference=60. if lower else 1000.*(1+3*max(0,grade-9))
+            fixed=reference*effect['cost_bp']/10000
+        terms=dict(grade=grade,realm=int(read(owner,'realm_index',0)),fixed=fixed)
+        result.append(dict(id=book.id, name=book.name, level=book.level, effect=effect,cost_model=terms))
     return tuple(result)

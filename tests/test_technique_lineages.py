@@ -97,8 +97,8 @@ def test_three_world_original_catalog_has_frozen_effects_and_preserves_identity(
     for grade in range(9, 13):
         for role in ('MAIN', 'COMBAT', 'BODY', 'SENSE'):
             t = TECHNIQUE_CATALOG[f'TECH_{world.upper()}_{grade}_{role}']
-            assert t.combat_effect == upper_effect(world, role, grade)
-            assert t.combat_effect['lineage'] == world and not t.combat_effect['mastery']
+            assert t.combat_effect['version'] == 3
+            assert t.combat_effect['identity'] == t.id and t.combat_effect['resource'] == 'energy'
             assert t.description and t.grade == grade
             assert not t.requires_immortal_power
             assert not t.effective_worlds  # Retain original portability; no new world gate.

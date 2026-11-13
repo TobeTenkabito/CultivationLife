@@ -3533,6 +3533,14 @@ function renderDemonicSystem(system) {
   }
 }
 
+function appendTechniqueRules(parent, text) {
+  if (!text) return;
+  const details = document.createElement('details'); details.className = 'technique-rules';
+  const summary = document.createElement('summary'); summary.textContent = '功法说明与斗法规则';
+  const body = document.createElement('small'); body.textContent = text;
+  details.append(summary, body); parent.append(details);
+}
+
 function renderTechniques(slots) {
   renderDuelTechniques();
   const list = $('#technique-list'); list.innerHTML = '';
@@ -3546,10 +3554,7 @@ function renderTechniques(slots) {
     const effect = document.createElement('small'); effect.textContent = technique.root_requirement_met === false
       ? `灵根不符 · ${technique.affinity_requirement_display} · 当前失效` : activeText(technique);
     row.append(name, effect); list.appendChild(row);
-    if (technique.special_effect_description) {
-      const specialty = document.createElement('small'); specialty.textContent = technique.special_effect_description;
-      row.appendChild(specialty);
-    }
+    appendTechniqueRules(row, technique.special_effect_description);
   };
   const source = art => `${art.source_display || '灵源'}${art.environment_multiplier == null ? '' : ` · 环境 ×${Number(art.environment_multiplier).toFixed(3)}`}`;
   add('主修', slots.main, art => `${source(art)} · 启用机缘 +${percent(art.opportunity_bonus)}${art.effective_karma_multiplier !== 1 ? `，因果倍率 ×${Number(art.effective_karma_multiplier).toFixed(3)}` : ''}`);
@@ -3636,10 +3641,7 @@ function renderKnownTechniques(techniques) {
         ? `变身容量 ${art.transformation_capacity} · 战斗空间 ${art.transformation_space} · 形态由真灵素材独立解锁`
       : `${sourceText} · 战斗门槛 ${art.combat_requirement_display}${art.required_body_training ? ` · 炼体门槛 ${art.required_body_training} 层${art.body_requirement_met ? '' : '（未满足）'}` : ''}${art.requires_immortal_power ? ` · 仙灵力消耗 ${percent(art.immortal_power_cost)}` : ''} · 机缘 +${percent(art.opportunity_bonus)} · HP +${percent(art.hp_bonus)} · MP +${percent(art.mp_bonus)} · 战力 +${number(art.combat_bonus)}`;
     info.append(name, detail);
-    if (art.special_effect_description) {
-      const specialty = document.createElement('small'); specialty.textContent = art.special_effect_description;
-      info.appendChild(specialty);
-    }
+    appendTechniqueRules(info, art.special_effect_description);
     if (art.next_level_gains) {
       const gains = art.next_level_gains;
       const growth = document.createElement('small'); growth.className = 'technique-growth';
@@ -3651,7 +3653,7 @@ function renderKnownTechniques(techniques) {
     }
     row.appendChild(info);
     const buttons = document.createElement('div'); buttons.className = 'technique-equip-buttons';
-    const slotChoices = art.category === 'body' ? [['body','体']] : art.category === 'divine_sense' ? [['divine_sense','识']] : art.category === 'transformation' ? (game.player.path === 'monster' ? [] : [['transformation','变']]) : [['main','主'],['support','辅'],['combat','战']];
+    const slotChoices = art.category === 'body' ? [['body','体'],['combat','战']] : art.category === 'divine_sense' ? [['divine_sense','识'],['combat','战']] : art.category === 'transformation' ? (game.player.path === 'monster' ? [] : [['transformation','变'],['combat','战']]) : [['main','主'],['support','辅'],['combat','战']];
     slotChoices.forEach(([slot,label]) => {
       const button = document.createElement('button'); button.className = 'technique-equip'; button.textContent = label;
       if (slot === 'main' && art.id === game.tutorial?.guide.art?.id) button.dataset.guideEquip = art.id;
@@ -4166,17 +4168,20 @@ function renderBattleReport(report) {
   if (shouldPlay) battleReportOpen = game?.settings?.combat_popup !== false;
   card.classList.toggle('report-closed', !battleReportOpen);
   const objectiveNames = {kill:'击杀', capture:'生擒', repel:'击退', survive:'存活五轮'};
-  const resultNames = {killed:'目标击杀', captured:'目标生擒', victory:'目标达成', victory_escape:'敌方逃脱', defeat:'未达目标', defeat_survived:'涅槃生还', dead:'身死', ongoing:'交战未歇，继续迎战'};
+  const resultNames = {killed:'目标击杀', captured:'目标生擒', victory:'目标达成', victory_escape:'敌方逃脱', defeat:'未达目标', defeat_survived:'涅槃生还', dead:'身死', ongoing:'交战未歇，继续迎战', stalemate:'僵持', controlled:'受制', defeat_trapped:'受困'};
   $('#battle-report-title').textContent = report.title || '最近战报';
   $('#battle-report-grade').textContent = `${report.result_grade || '结算'} · ${resultNames[report.result] || report.result || ''}`;
   const natural = report.natural_terrain || report.battlefield_tags?.[0] || '开阔';
+  const hasFields = (report.rounds || []).some(row => row.voisinage?.fields?.length || row.voisinage?.animation?.fields?.length);
+  const displayMode = !hasFields && (report.rounds || []).some(row => row.ordinary_exchange)
+    ? (report.mode || '标准自动战斗').replace('邻域战斗', '普通交锋') : (report.mode || '标准自动战斗');
   const artificial = report.artificial_conditions?.length
     ? report.artificial_conditions.join('、') : '无';
   const formationSummary = [
     report.formation_profile?.name ? `你方阵法 ${report.formation_profile.name}（终局完整度 ${percent(report.formation_integrity_end || 0)}）` : '',
     report.enemy_formation_profile?.name ? `敌方阵法 ${report.enemy_formation_profile.name}（终局完整度 ${percent(report.enemy_formation_integrity_end || 0)}）` : '',
   ].filter(Boolean).join(' · ');
-  $('#battle-report-summary').textContent = `${report.mode || '标准自动战斗'} · 目标 ${objectiveNames[report.objective] || report.objective} · 战前判断 ${report.assessment || '未知'} · 共 ${report.total_rounds || report.rounds?.length || 0} 轮 · 自然场地 ${natural} · 人工条件 ${artificial}${formationSummary ? ` · ${formationSummary}` : ''}。${report.total_rounds > report.rounds.length ? '显示最近 72 轮。' : ''}开战后由预案执行。`;
+  $('#battle-report-summary').textContent = `${displayMode} · 目标 ${objectiveNames[report.objective] || report.objective} · 战前判断 ${report.assessment || '未知'} · 共 ${report.total_rounds || report.rounds?.length || 0} 轮 · 自然场地 ${natural} · 人工条件 ${artificial}${formationSummary ? ` · ${formationSummary}` : ''}。${report.total_rounds > report.rounds.length ? '显示最近 72 轮。' : ''}开战后由预案执行。`;
   const rosters = $('#battle-rosters'); rosters.innerHTML = '';
   [
     ['你方参战', report.player_roster || []],
@@ -4243,23 +4248,25 @@ function renderBattleRoundProgress(report, shouldPlay) {
   // often end in one round; placeholder circles made a finished fight look stuck.
   const nodeCount = Math.max(1, Math.min(8, rounds.length));
   const nodes = [];
+  const sampled = Array.from({length:nodeCount},(_,i)=>nodeCount<=1?0:Math.round(i*(rounds.length-1)/(nodeCount-1)));
   for (let index = 0; index < nodeCount; index += 1) {
     if (index) { const line = document.createElement('i'); line.textContent = '—'; container.appendChild(line); }
     const node = document.createElement('span');
+    node.dataset.round = String(rounds[sampled[index]]?.round ?? index+1);
     node.setAttribute('role', 'img'); node.setAttribute('tabindex', '0');
     container.appendChild(node); nodes.push(node);
   }
   const advantage = report.assessment === '碾压' || report.assessment === '优势'
     ? '你方' : report.assessment === '劣势' || report.assessment === '绝境' ? '敌方' : '双方均有机会';
   const paint = current => nodes.forEach((node, index) => {
-    const round = rounds[index];
-    const finished = index < current;
-    const active = index === current && current < rounds.length;
+    const offset=sampled[index],round = rounds[offset],number=round?.round??offset+1;
+    const finished = offset < current;
+    const active = offset === current && current < rounds.length;
     node.className = finished ? 'complete' : active ? 'active' : 'future';
     node.textContent = finished ? '●' : active ? '◎' : '○';
     node.title = finished && round
-      ? `第 ${index + 1} 轮：${round.events?.join(' ') || '该轮已经结束'}${index === rounds.length - 1 ? ' 战斗于本轮结束。' : ''}`
-      : active ? `当前第 ${index + 1} 轮正在发生，预计${advantage}取得优势`
+      ? `第 ${number} 轮：${round.events?.join(' ') || '该轮已经结束'}${offset === rounds.length - 1 ? ' 战斗于本轮结束。' : ''}`
+      : active ? `当前第 ${number} 轮正在发生，预计${advantage}取得优势`
       : '当前阶段尚未发生';
     node.setAttribute('aria-label', node.title);
   });

@@ -1,5 +1,6 @@
 """No user saves: real current-catalog reload, upgrade and handbook searches."""
 import json
+import copy
 import sys
 import tempfile
 import threading
@@ -12,9 +13,11 @@ sys.path[:0]=[str(ROOT),str(ROOT/'tests')]
 from playwright.sync_api import sync_playwright
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
+from cultivation_life.content_registry import TECHNIQUE_CATALOG
 from fixtures.technique_names_release import prepare_technique_names
 from scripts.verify_handbook_revision import verify_revision
 from scripts.release_evidence import inputs_digest
+from scripts.browser_navigation import set_theme
 
 
 def main():
@@ -29,19 +32,20 @@ def main():
             try:
                 with sync_playwright() as pw:
                     browser=pw.chromium.launch()
-                    for theme,pixel,width,height in [('a',False,1440,960),('f',False,412,915),('light',True,412,915),('dark',True,754,365)]:
+                    for theme,width,height in [('light',1440,960),('dark',1440,960),('light',412,915),('dark',390,844)]:
                         page=browser.new_page(viewport=dict(width=width,height=height))
                         errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
                         page.goto(f'http://127.0.0.1:{http.server_port}');page.wait_for_function('!!configData&&!busy')
-                        page.locator('#theme-open').click()
-                        page.locator('#theme-dialog [data-pixel-setting]').set_checked(pixel)
-                        selector=f'[data-pixel-theme-choice={theme}]' if pixel else f'[data-theme-choice={theme}]'
-                        page.locator('#theme-dialog '+selector).click()
-                        page.locator('[data-close-dialog=theme-dialog]').click();page.evaluate('GameThemes.saved')
+                        page.evaluate('GameThemes.ready')
+                        set_theme(page,theme)
                         identity=engine.create_game('旧籍新编','supreme_metal','dao',332)['id']
-                        prepare_technique_names(engine,identity)
+                        prepare_technique_names(engine,identity,('抱朴养真经','晦烛含魄篇'))
+                        game=engine._load(identity)
+                        longest=copy.deepcopy(max((book for book in TECHNIQUE_CATALOG.values() if book.id.startswith('TECH_OPEN_')),key=lambda book:len(book.name)))
+                        game.player.known_techniques.append(longest)
+                        engine.store.save(game)
                         page.evaluate('id=>loadGame(id)',identity)
-                        verify_revision(page,engine,identity,output,f'{theme}-{width}')
+                        verify_revision(page,engine,identity,output,f'{theme}-{width}',extra_names=(longest.name,))
                         assert not errors,errors
                         page.close()
                         print(f'{theme} {width}x{height}: old display reload, actual upgrade and fourteen handbook chapters passed',flush=True)

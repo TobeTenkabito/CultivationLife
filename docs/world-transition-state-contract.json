@@ -1,12 +1,18 @@
 {
   "version": 1,
   "technique_effect_ownership_notes": {
+    "GameState.last_combat_report.rounds.*.voisinage.technique_effects.player_loadout / events.*.name,resource,measure": "session：C版式只读轮末投影，玩家至多七部原冻结功法的身份、等级、报价、原资源类型、实付退款、次数、冷却、待用及余额是否足够；没有新的资源账本、人物或顶层字段。事件仅在报告副本补名称与资源单位，敌方不公开未使用书目或余额。后台NPC战斗不生成player_loadout；读取不准备、不付款、不投骰，跨界沿原战报session清理。旧战报缺失不补造历史，续战仍只读原运行态；结构仍12。",
+    "Technique.combat_effect.mana_cost / CombatCapabilities.technique_effects.*.cost_model": "personal / session：固定目录mana_cost保存本书品阶初层法力标准的固定报价；开战投影cost_model保存原书grade、原人物实际realm、原资源单位fixed报价。低阶固定、同阶比例、越阶相加，等级减费后只沿原法力或元力账本付款。续战冻结同一报价，不读隐藏或封存境界，不新增资源池；下界仿仙灵力沿原60点单位，上界沿对应品阶初层元力标准。既有冻结战斗无此投影时保留原收据合同，场外读档不改价。",
+    "UnitState.physical_defeat / combat updates.body_destroyed / NpcEngagement.escaped": "session：普通攻击及其派生余焰的致命肉身败退来源；续战保持布尔标记，非致命目标不执行死亡或离体，真实禁逃不被绕过。原NPC身魂入口处理离体；12%态势撤退、明确逃脱与离体只回写原战役escaped名册，不移动人物，不新建身体或名册副本。",
+    "SectNpc.ordinary_mana / encounter_npc_cache.*.npc.ordinary_mana / relationship PERSON_FIELDS.ordinary_mana": "personal：原人物普通法力唯一账本，capacity/current/at/world；首次参战建立原境界、层数、炼体对应本征容量，不授予仙灵力、物资或玩家专属加成。后续战前仅按同界已知时段每年20%旧容量有限恢复，未知跨界时段不补算；原npc_lifecycle.move_world在离开前结算已知原界时段、抵达后固定新锚点，仅更新已有账本，不为移动中的未参战人物创建资源。突破只提高上限不灌满。与原NPC身份同存同转，关系仅引用原人；不增移动入口。",
+    "CombatCapabilities.mana_initial / UnitState.mana_current / technique_mp_spent": "session：独立NPC普通法力由原人账本投影、逐人扣付并沿原战斗提交回写；mana_initial区分NPC与原玩家MP镜像，开轮和续战不按全队余额补满。玩家沿原MP及傀儡供给同一账本扣款，新增功法净实付不受剧情战损折扣减免；快照保留剩余余额与已付记录，不另存玩家资源。",
     "Player.duel_technique_ids / ghost_core_state.duel_technique_ids / ghost_self_state.duel_technique_ids": "personal：至多七个互异原combat_techniques ID；默认空，只由原equip-technique提交合法选装与移出。跨界保留名单，当前资格失效只暂停投影；夺舍随原肉身功法快照保存/恢复，宿主清空不借用原身书目。事件、战斗试境、囚禁、死亡时不可调整，不复制书或资源。",
     "SectNpc.duel_technique_ids / encounter_npc_cache.*.npc.duel_technique_ids": "personal：None为尚未确定，列表为原人物固定书目；原technique_levels记录等级。会话原可见人物、原相遇缓存及公共战前准备按人物ID独立流一次配置，真实境界/灵根/世界/肉身/转化资格复验。重遇、自然突破与读档不重抽，培养明确战斗传授可替换至多一个位置；纯投影不生成，未识破修为不公开新增明细。无新人物、位置、资源或跨界例外。",
     "Technique.combat_effect.version=2.lineage/mastery / active_trial.snapshot.technique_runtime.first_exchanges": "personal / session：lineage固定为32道统主题或三界原48部功法系列，mastery只由原仙界合练生成；不新增跨界或功法使用资格。首次实际普通交锋轮次按本场原人物ID保存，读档不刷新首攻；V1配方保持原规则，旧V1运行态仅补无首攻语义的中性历史锚点，不改任何用户文件或已存效果。触发和返还仍引用原人物态势、作用层级及元力，三界没有新增合练入口。",
-    "Player.*Technique.description / combat_effect / known_techniques / combat_techniques / ghost_self_state": "personal：原功法携带冻结描述和有限效果配方，随原功法及等级保存；不新增背包、物品或资源。旧结构12功法缺失时为空，不重抽；结构1–11仍拒绝。固定4258部设计目录未批量启用。",
+    "Player.*Technique.description / combat_effect / known_techniques / combat_techniques / ghost_self_state": "personal：固定4258部原书在本轮用户授权下采用V3配方。会话准备仅按原书ID更新description/combat_effect，包括当前肉身与ghost_core_state对应功法；保留等级、基础属性、装备和七书名单。种子道统、自创功法及已冻结active_trial均不改写。仍仅接受结构12，不迁移旧结构。",
     "GameState.doctrine_state.definitions.*.manuals[].description / combat_effect": "scope：原种子生成道统首次建目录时用独立版本化流生成并冻结，固定道统使用固定种子；不消费名字、基础数值或游戏RNG流。读取、购买、传授、NPC解析与战斗只读取原冻结配方，不补写旧道统、不重抽。合练的新功法沿自己的原ID独立生成。",
-    "CombatCapabilities.technique_effects / trial battle technique_runtime": "battle snapshot：原人物已合法配置功法的只读投影，付款仍扣UnitState.current原可用元力；仅回执、冷却、有限护持、分期包与实际损耗轮次属于本场运行态。原试境/劫战快照随原实例保存，读档续战不重置费用和次数，不生成普通MP或高阶储量。"
+    "CombatCapabilities.technique_effects / trial battle technique_runtime": "session：合法七书冻结配方；V1/V2保留原元力执行，V3按原资源类型支付本人普通法力或高阶元力。有限分包、实付退款、实际受损与可见观招记录只属本场；严格校验来源、数值、次数、期限和总额，读档不刷新。",
+    "CombatCapabilities.technique_context / catalog runtime facts, observations, receipts": "session：只读原身体与已维持形态；无实际形态的变化功法不发动，不授予NPC形态或材料。只观察本场可达敌人实际施展，不读取未见招式；受击与破持取真实结算，不把自损、自然到期或派生追击当新原始交锋。场外不留敌方战斗记忆。"
   },
   "economy_ownership_notes": {
     "GameState.economy_v2.administrations.*.operations": "scope/history：本体机构经营账保存income/expense/salary实际收支、settlements/deliveries计次、sequence/last_signed原合同周期、last_training/last_reward/last_performance真实年份、term_baseline本任接任时累计履约基线及policy。余额仍为原administration账户，returned允许实缴原funded与新增income，不复制钱包。contract复用原分期托管，原市场全额备款；supplier为原游戏ID、原item/world/location、三期以内、fee/service_percent为签约时原交易费与内容提供的经办费率，receipts为真实交货凭证，funded=paid+refunded+原托管余额。交付只消费原行囊并入原址市场，货款与公费分开，实绩方可分配待遇；撤任/辞任/全款交接/到期/停用退未交付原款一次，取消不刷新签约周期。独立空间和异地不能办理，原地区年份仅收束合同，不回填历史收益。",

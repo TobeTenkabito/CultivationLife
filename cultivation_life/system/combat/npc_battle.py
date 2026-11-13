@@ -20,6 +20,7 @@ class NpcEngagement:
     killed: tuple[str, ...]
     suppressed: tuple[str, ...]
     rounds: tuple[dict[str, Any], ...]
+    escaped: tuple[str, ...] = ()
 
 
 def resolve_local_engagement(attackers, defenders, config, rng, *, now=None, sources=None,
@@ -86,6 +87,12 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             imitation = bool(source and any(d.id.startswith('spirit:') for d in source.voisinages))
             resources[npc.id] = prepare(npc, now, config, imitation=imitation)
             capabilities = resolve_source(resources[npc.id].state, definitions, (sources or {}).get(npc.id))
+            if capabilities.technique_effects:
+                from ..npc_mana import prepare as prepare_mana
+                from ..technique_effect_provider import context as technique_context
+                mana = prepare_mana(npc, now)
+                capabilities = replace(capabilities, mana_capacity=mana['capacity'], mana_initial=mana['current'],
+                                       technique_context=technique_context(npc))
             from ..divine_lights import profile
             lights,levels=profile(npc)
             from ..wuyun import profile as aggregate_profile
@@ -136,19 +143,29 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             if battle.semantics:
                 factors['player'] *= ps['sense'] * (1.05 if first else .97)
                 factors['enemy'] *= es['sense'] * (.97 if first else 1.05)
-            battle.ordinary_damage(dealt * factors['player'], received * factors['enemy'])
+            battle.ordinary_damage(dealt * factors['player'], received * factors['enemy'],breach_ratios={
+                'player':p_power*ps['breach']/(e_power*es['guard']),
+                'enemy':e_power*es['breach']/(p_power*ps['guard'])})
         battle.finish_round(player_mp=1, enemy_mp=1)
         reports.append({"round": round_no, "voisinage": battle.report(), "events": list(frame.events)})
         if battle.verdict() is not None:
             break
-    killed, suppressed = [], []
+    killed, suppressed, escaped = [], [], []
     for update in battle.updates():
         npc = owners[update["id"]]
         resources[npc.id].commit(update["current"])
-        commit_condition(npc, update, lethal=True, now=now)
+        if 'mana_current' in update and npc.ordinary_mana is not None:
+            from ..npc_mana import commit as commit_mana
+            commit_mana(npc, update['mana_current'])
+        body_escaped=commit_condition(npc, update, lethal=True, now=now)
+        # UnitState already withdraws ordinary people at 12% vitality. Publish
+        # that actual withdrawal so a campaign cannot redeploy the same person
+        # as a fresh, full-condition defender in its next exchange.
+        withdrew=(0<update['vitality']<=.12 and not update['escape_locked'] and not update['suppressed'])
+        if update['escaped'] or body_escaped or withdrew:escaped.append(npc.id)
         if update["suppressed"]:
             suppressed.append(npc.id)
         elif update["vitality"] <= 0 and not npc.alive:
             killed.append(npc.id)
             npc.alive, npc.death_reason = False, "仙域斗法中陨落"
-    return NpcEngagement(battle.verdict() or "stalemate", tuple(killed), tuple(suppressed), tuple(reports))
+    return NpcEngagement(battle.verdict() or "stalemate", tuple(killed), tuple(suppressed), tuple(reports),tuple(escaped))
