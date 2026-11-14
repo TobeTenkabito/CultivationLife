@@ -1,12 +1,14 @@
 """Publish verified packages as GitHub assets, checking remote digests before cleanup."""
 import argparse
 import base64
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import http.client
 import json
 import os
 from pathlib import Path
 import re
+import socket
 import subprocess
 import sys
 import urllib.parse
@@ -141,14 +143,14 @@ def main():
             'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'CultivationLife-release'}
         proxy=urllib.parse.urlsplit(urllib.request.getproxies().get('https',''))
         if proxy.scheme=='http' and proxy.hostname:
-            connection=http.client.HTTPSConnection(proxy.hostname,proxy.port or 80,timeout=180)
+            connection=http.client.HTTPSConnection(proxy.hostname,proxy.port or 80,timeout=180,blocksize=1024*1024)
             proxy_headers={}
             if proxy.username is not None:
                 pair=urllib.parse.unquote(proxy.username)+':'+urllib.parse.unquote(proxy.password or '')
                 proxy_headers['Proxy-Authorization']='Basic '+base64.b64encode(pair.encode()).decode()
             connection.set_tunnel(host,443,headers=proxy_headers)
         else:
-            connection = http.client.HTTPSConnection(host, timeout=180)
+            connection = http.client.HTTPSConnection(host, timeout=180,blocksize=1024*1024)
         body = json.dumps(data).encode('utf-8') if data is not None else None
         stream = None
         if upload:
@@ -157,6 +159,9 @@ def main():
         elif body is not None:
             headers['Content-Type'] = 'application/json'
         try:
+            if upload:
+                connection.connect()
+                connection.sock.setsockopt(socket.SOL_SOCKET,socket.SO_SNDBUF,4*1024*1024)
             connection.request(method, path, body=body, headers=headers)
             response = connection.getresponse(); raw = response.read()
             if response.status == 404 and allow_missing: return None
@@ -181,8 +186,8 @@ def main():
     if release['target_commitish'] != args.target:
         raise RuntimeError('Existing release targets a different commit')
     existing = {asset['name']: asset for asset in request('GET', prefix + f'/releases/{release["id"]}/assets?per_page=100')}
-    verified = []
-    for name, path in assets.items():
+    def upload_asset(item):
+        name,path=item
         asset = existing.get(name)
         if asset and (asset.get('digest') != 'sha256:' + hashes[name] or asset['size'] != path.stat().st_size):
             if not release['draft']:
@@ -194,7 +199,10 @@ def main():
         checked = request('GET', prefix + f'/releases/assets/{asset["id"]}')
         if checked.get('digest') != 'sha256:' + hashes[name] or checked['size'] != path.stat().st_size or checked['state'] != 'uploaded':
             raise RuntimeError(f'Remote digest or size mismatch: {name}')
-        verified.append(dict(name=name, sha256=hashes[name], size=checked['size'], url=checked['browser_download_url']))
+        print('Verified '+name,flush=True)
+        return dict(name=name, sha256=hashes[name], size=checked['size'], url=checked['browser_download_url'])
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        verified=list(pool.map(upload_asset,assets.items()))
     if release['draft']:
         release = request('PATCH', prefix + f'/releases/{release["id"]}', dict(draft=False, body=notes))
     release=request('GET',prefix+f'/releases/{release["id"]}')
