@@ -1,5 +1,6 @@
 """Publish verified packages as GitHub assets, checking remote digests before cleanup."""
 import argparse
+import base64
 import hashlib
 import http.client
 import json
@@ -9,6 +10,7 @@ import re
 import subprocess
 import sys
 import urllib.parse
+import urllib.request
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -137,7 +139,16 @@ def main():
         host = 'uploads.github.com' if upload else 'api.github.com'
         headers = {'Authorization': f'Bearer {token}', 'Accept': 'application/vnd.github+json',
             'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'CultivationLife-release'}
-        connection = http.client.HTTPSConnection(host, timeout=180)
+        proxy=urllib.parse.urlsplit(urllib.request.getproxies().get('https',''))
+        if proxy.scheme=='http' and proxy.hostname:
+            connection=http.client.HTTPSConnection(proxy.hostname,proxy.port or 80,timeout=180)
+            proxy_headers={}
+            if proxy.username is not None:
+                pair=urllib.parse.unquote(proxy.username)+':'+urllib.parse.unquote(proxy.password or '')
+                proxy_headers['Proxy-Authorization']='Basic '+base64.b64encode(pair.encode()).decode()
+            connection.set_tunnel(host,443,headers=proxy_headers)
+        else:
+            connection = http.client.HTTPSConnection(host, timeout=180)
         body = json.dumps(data).encode('utf-8') if data is not None else None
         stream = None
         if upload:
