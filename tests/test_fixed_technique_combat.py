@@ -113,6 +113,51 @@ def test_derived_damage_does_not_create_a_second_original_exchange():
     assert b.units['enemy'].vitality<.97
 
 
+def test_body_commitment_completes_after_a_fully_shielded_exchange():
+    row=manual('bound_breach',covenant='body_commitment',uses=1)
+    shield=manual('finite_shield',ward_bp=150,uses=1)
+    b=fight([row],[shield])
+    step(b,1,dealt=.001,received=0)
+    runtime=b.techniques.catalog
+    record=runtime.records[runtime.by_owner['player'][0]]
+    assert b.units['enemy'].vitality==1
+    assert not runtime.facts['player'].get('hit_round')
+    assert record['paid']>0 and record['packets']
+    assert all(not p['burden'] and p['starts']==2 for p in record['packets'])
+    b=load_battle(dump_battle(b))
+    step(b,2,dealt=.03,received=0)
+    assert any(e['owner']=='player' and e['event']=='breach' and e['amount']>0
+               for e in b.techniques.catalog.events)
+
+
+def test_receiving_damage_without_ordinary_action_does_not_pay_body_commitment(monkeypatch):
+    row=manual('bound_breach',covenant='body_commitment',uses=1)
+    b=fight([row])
+    b.begin_round(1,player_condition=1,enemy_condition=1,player_mp=1,enemy_mp=1)
+    b.semantic_ordinary_start()
+    b.semantic_initiative(True)
+    # A subsequent control removes the owner's ordinary action at the real
+    # damage boundary; taking an enemy hit cannot substitute for that action.
+    original=b._has_ordinary
+    monkeypatch.setattr(b,'_has_ordinary',lambda side:False if side=='player' else original(side))
+    b.ordinary_damage(.03,.03)
+    b.finish_round(player_mp=b.mp_ratio('player',1),enemy_mp=b.mp_ratio('enemy',1))
+    record=b.techniques.catalog.records[b.techniques.catalog.by_owner['player'][0]]
+    assert record['paid']>0 and record['completed']==0
+    assert not any(e['owner']=='player' and e['event']=='breach' for e in b.techniques.catalog.events)
+
+
+def test_forgoing_an_attack_cannot_complete_another_books_body_commitment():
+    row=manual('bound_breach',covenant='body_commitment',uses=1)
+    forgo=manual('damage_to_shield',clauses=['forgo_attack'],uses=1)
+    b=fight([row,forgo])
+    step(b,1,dealt=.03,received=0)
+    runtime=b.techniques.catalog
+    record=next(runtime.records[k] for k in runtime.by_owner['player'] if runtime.books[k][1]['id']==row['id'])
+    assert b.units['enemy'].vitality==1
+    assert record['paid']>0 and record['packets'] and all(p['burden'] for p in record['packets'])
+
+
 def test_delayed_flame_spends_real_shield_without_new_observation_chain():
     b=fight([manual('budgeted_afterburn',clauses=['delayed_all'])],
             [manual('finite_shield',ward_bp=150)])

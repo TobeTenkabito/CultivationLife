@@ -38,27 +38,13 @@ from .cultivation_costs import (
 )
 
 
-LEGACY_ROOTS = {
-    "metal": "supreme_metal", "wood": "supreme_wood", "water": "supreme_water",
-    "fire": "supreme_fire", "earth": "supreme_earth", "mutated": "mutated_thunder",
-    "heavenly": "heavenly_metal_wood",
-}
+from .technique_affinity import LEGACY_ROOTS
+from .technique_requirements import (
+    QI_SOURCE_NAMES, QI_NAMES, COMBAT_REQUIREMENT_OPERATORS,
+    qi_level_threshold, qi_level, qi_levels, valid_combat_requirement,
+    combat_requirement_met, combat_requirement_display,
+)
 
-QI_SOURCE_NAMES = {
-    "spirit": "灵源",
-    "demon": "魔源",
-    "monster": "妖源",
-    "yin": "阴源",
-}
-QI_NAMES = {source: name.removesuffix("源") + "气" for source, name in QI_SOURCE_NAMES.items()}
-COMBAT_REQUIREMENT_OPERATORS = {
-    ">=": lambda left, right: left >= right,
-    ">": lambda left, right: left > right,
-    "<=": lambda left, right: left <= right,
-    "<": lambda left, right: left < right,
-    "==": lambda left, right: left == right,
-    "!=": lambda left, right: left != right,
-}
 TECHNIQUE_MAX_LEVEL = 9
 TECHNIQUE_MANUAL_PREFIX = "technique_manual::"
 
@@ -719,22 +705,6 @@ def technique_environment_multiplier(
     )
 
 
-def qi_level_threshold(level: int) -> float:
-    """某等级的累计经验下限；平方曲线让高等级逐步放缓。"""
-    level = max(0, int(level))
-    base = float(WORLD_SYSTEMS.get("qi_mastery", {}).get("experience_base", 25))
-    return base * level * level
-
-
-def qi_level(experience: float) -> int:
-    base = float(WORLD_SYSTEMS.get("qi_mastery", {}).get("experience_base", 25))
-    return max(0, int(math.sqrt(max(0.0, float(experience)) / base)))
-
-
-def qi_levels(player: Player) -> dict[str, int]:
-    return {source: qi_level(player.qi_experience.get(source, 0.0)) for source in QI_SOURCE_NAMES}
-
-
 def divine_sense_level_threshold(level: int) -> float:
     level = max(0, int(level))
     base = float(WORLD_SYSTEMS.get("demonic_cultivation", {}).get("divine_sense_experience_base", 20))
@@ -747,7 +717,8 @@ def divine_sense_level(player: Player) -> int:
 
 def divine_sense_breakthrough_cost(player: Player) -> float:
     level = divine_sense_level(player)
-    return divine_sense_level_threshold(level + 1) - divine_sense_level_threshold(level)
+    from .system.technique_secret_rules import bonus as secret_bonus
+    return (divine_sense_level_threshold(level + 1) - divine_sense_level_threshold(level)) * (1-secret_bonus(player,'sense_discount'))
 
 
 def puppet_capacity(player: Player) -> int:
@@ -770,50 +741,10 @@ def grant_qi_experience(
             continue
         for source, weight in technique.sources.items():
             gained = float(opportunity_gain) * weight * max(0.0, float(location_efficiencies.get(source, 0.0))) * cave_multiplier
-            player.qi_experience[source] = player.qi_experience.get(source, 0.0) + gained
+            from .cultivation_experience import grant_qi_mastery
+            grant_qi_mastery(player, source, gained)
             gains[source] += gained
     return gains
-
-
-def valid_combat_requirement(requirement: Any) -> bool:
-    if not isinstance(requirement, dict) or len(requirement) != 1:
-        return False
-    if "all" in requirement or "any" in requirement:
-        key = "all" if "all" in requirement else "any"
-        children = requirement[key]
-        return isinstance(children, list) and bool(children) and all(valid_combat_requirement(child) for child in children)
-    if "not" in requirement:
-        return valid_combat_requirement(requirement["not"])
-    leaf = requirement.get("source")
-    if not isinstance(leaf, dict) or set(leaf) != {"id", "op", "level"}:
-        return False
-    return (
-        leaf["id"] in QI_SOURCE_NAMES
-        and leaf["op"] in COMBAT_REQUIREMENT_OPERATORS
-        and isinstance(leaf["level"], int)
-        and leaf["level"] >= 0
-    )
-
-
-def combat_requirement_met(requirement: dict[str, Any], levels: dict[str, int]) -> bool:
-    if "all" in requirement:
-        return all(combat_requirement_met(child, levels) for child in requirement["all"])
-    if "any" in requirement:
-        return any(combat_requirement_met(child, levels) for child in requirement["any"])
-    if "not" in requirement:
-        return not combat_requirement_met(requirement["not"], levels)
-    leaf = requirement["source"]
-    return COMBAT_REQUIREMENT_OPERATORS[leaf["op"]](int(levels.get(leaf["id"], 0)), leaf["level"])
-
-
-def combat_requirement_display(requirement: dict[str, Any]) -> str:
-    if "all" in requirement or "any" in requirement:
-        key, conjunction = ("all", " 且 ") if "all" in requirement else ("any", " 或 ")
-        return "（" + conjunction.join(combat_requirement_display(child) for child in requirement[key]) + "）"
-    if "not" in requirement:
-        return "非" + combat_requirement_display(requirement["not"])
-    leaf = requirement["source"]
-    return f"{QI_NAMES[leaf['id']]} {leaf['op']} {leaf['level']}级"
 
 
 def opportunity_multiplier(
@@ -850,43 +781,8 @@ def opportunity_multiplier(
     )
 
 
-def root_definition(root_id: str) -> dict[str, Any]:
-    return ROOT_DEFINITIONS[LEGACY_ROOTS.get(root_id, root_id)]
-
-
-def root_elements(root_id: str) -> list[str]:
-    return list(root_definition(root_id)["elements"])
-
-
-def can_practice_technique(root_id: str, technique_element: str | Technique) -> bool:
-    """无属性功法不限灵根；五行功法必须命中灵根的五行属性。"""
-    if (isinstance(technique_element, str) and technique_element in {'neutral', 'sex'}
-            or isinstance(technique_element, Technique) and technique_element.element in {'neutral', 'sex'} and not technique_element.required_affinities):
-        return True
-    return _affinities_allow_technique(set(root_elements(root_id)), technique_element)
-
-
-def player_affinities(player: Player) -> list[str]:
-    return list(dict.fromkeys([*root_elements(player.spirit_root), *player.additional_roots]))
-
-
-def _affinities_allow_technique(affinities: set[str], technique: str | Technique) -> bool:
-    element = technique.element if isinstance(technique, Technique) else technique
-    required = technique.required_affinities if isinstance(technique, Technique) else ()
-    if not set(required) <= affinities:
-        return False
-    if element in {"neutral", "sex"}:
-        return True
-    if element == "five_elements":
-        return {"metal", "wood", "water", "fire", "earth"} <= affinities
-    return element in affinities
-
-
-def can_player_practice_technique(player: Player, technique_element: str | Technique) -> bool:
-    if (isinstance(technique_element, str) and technique_element in {'neutral', 'sex'}
-            or isinstance(technique_element, Technique) and technique_element.element in {'neutral', 'sex'} and not technique_element.required_affinities):
-        return True
-    return _affinities_allow_technique(set(player_affinities(player)), technique_element)
+from .technique_affinity import (root_definition, root_elements, can_practice_technique,
+    player_affinities, _affinities_allow_technique, can_player_practice_technique)
 
 
 def technique_affinity_display(technique: Technique) -> str:

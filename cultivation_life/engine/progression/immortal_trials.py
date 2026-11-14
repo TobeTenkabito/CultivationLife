@@ -144,6 +144,9 @@ def initialize(game, trial):
         # Each corpse inherits 100% of the player's actual ordinary attributes.
         # The shared side-level combat resolver therefore receives three copies.
         stats['enemy'] = {key: value * len(target['members']) for key, value in stats['player'].items()}
+    if trial['kind'] in {'human_decline','heaven_decline','three_corpses'}:
+        from ...system.technique_secret_rules import trial_stats
+        trial_stats(p,stats['player'])
     trial['battle_state'] = dict(mode=trial['kind'], round=0, mp_ratio=min(1, p.mp / max_mp(p)), stats=stats)
     trial['snapshot'] = dump_battle(battle)
     trial['target'] = target

@@ -78,6 +78,8 @@ def start(deps: Dependencies, game, kind, *, evolution=None, lineage=None):
     stats = PlayerCombatSystem._aggregate_stats(units, player=p, terrain_tags=['开阔'])
     state = dict(mode='upper_final' if stage == 2 else 'upper_endurance', round=0,
                  mp_ratio=min(1., p.mp/max_mp(p)), stats={'player':stats, 'enemy':{k:v*sum(ratios) for k,v in stats.items()}})
+    from ...system.technique_secret_rules import trial_stats
+    trial_stats(p,state['stats']['player'])
     p.joint_companion_breakthrough = None
     game.active_trial = dict(kind=kind, major=True, lethal=True, old_label=public_player(p)['realm_name'],
         source_realm=p.realm_index, target_realm=p.realm_index+1, title=TITLES[kind][stage],

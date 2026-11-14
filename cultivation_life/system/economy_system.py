@@ -54,10 +54,8 @@ def _alchemy_targets(player: Player) -> dict[str, dict[str, Any]]:
 
 
 def _art_names() -> dict[str, str]:
-    return {
-        "alchemy":"炼丹", "refining":"炼器", "formation":"阵法",
-        "talisman":"制符", "spirit_control":"御灵",
-    }
+    from ..cultivation_experience import ART_NAMES
+    return dict(ART_NAMES)
 
 
 def _auction_rules() -> dict[str, Any]:

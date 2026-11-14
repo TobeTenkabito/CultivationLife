@@ -238,9 +238,11 @@ def test_imprint_count_is_actual_bounded_and_empty_seals_do_not_add_marks():
     assert b._field_memory('player')['marks']==before
 
 
-def test_blood_field_damage_writes_to_the_original_player_hp_once(ready):
+@pytest.mark.parametrize('extra_hp',[0.,100000.])
+def test_blood_field_damage_writes_to_the_original_player_hp_once(ready,extra_hp):
     from cultivation_life.rules import max_hp,max_mp
     e,g=ready;route(g.player,'asura',level=9,rank=13)
+    g.player.permanent_intrinsic_hp_bonus+=extra_hp
     g.player.asura_cultivation['discipline_plan']={'mode':'blood'}
     g.player.hp=max_hp(g.player);g.player.mp=max_mp(g.player);before=g.player.hp
     e._combat(g,dict(target_name='实血验收',target_power=e._player_battle_power(g),target_realm_index=9,

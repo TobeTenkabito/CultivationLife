@@ -101,6 +101,9 @@ def initialize(game):
         # existing cultivation, and scale every opponent by the declared ratio.
         total_ratio = sum(ratio for _, ratio, _ in specs)
         stats['enemy'] = {k: v * total_ratio for k, v in stats['player'].items()}
+    if not fusion:
+        from ...system.technique_secret_rules import trial_stats
+        trial_stats(p,stats['player'])
     trial['battle_state'] = dict(mode=trial['kind'], round=0, mp_ratio=min(1., p.mp / max_mp(p)), stats=stats)
     trial['snapshot'] = dump_battle(battle)
     trial['target'] = target

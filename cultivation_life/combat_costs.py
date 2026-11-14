@@ -1,4 +1,10 @@
 """Absolute ordinary resource references; no equipment or enlarged pool tax."""
+import math
+
+
+def payment_tolerance(cost, capacity):
+    """Float subtraction is rounded at the balance's magnitude, not the fee's."""
+    return max(1e-8, cost * 1e-10, math.ulp(float(capacity)))
 
 
 def mana_reference(base_power, layer=1, body_training=0):

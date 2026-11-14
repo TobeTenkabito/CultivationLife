@@ -7,6 +7,14 @@ from ...ports import SavePort, MapPort
 
 
 @dataclass(frozen=True, slots=True)
+class FormationCandidateDependencies:
+    ensure_formation_state: Callable[..., Any]
+    _formation_material_defs: Callable[..., Any]
+    formation_shared_definitions: Callable[..., Any]
+    _formation_candidate: Callable[..., Any]
+
+
+@dataclass(frozen=True, slots=True)
 class FormationMarketDependencies:
     _formation_maintenance_defs: Callable[..., Any]
     _formation_material_defs: Callable[..., Any]

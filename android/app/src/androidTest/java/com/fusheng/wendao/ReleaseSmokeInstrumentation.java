@@ -379,6 +379,49 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         js("(()=>{const s=document.querySelector('select[aria-label="+label+"]');s.value="+JSONObject.quote(value)+";s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
     }
 
+    private void runTechniques(Bundle result) throws Exception {
+        for(String palette:new String[]{"light","dark"}) {
+            String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'功法原生验收',spirit_root:'heavenly',path:'dao',seed:713,preset_id:'core'})}).then(g=>g.id)");
+            python(assetText("technique_release.py")+"\nfrom cultivation_life import server\nprepare_technique_release(server.ENGINE,"+JSONObject.quote(id)+",'secret')");
+            async("loadGame("+JSONObject.quote(id)+")");
+            tapSelector("#theme-open");tapSelector("#theme-dialog [data-pixel-theme-choice="+palette+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector("[data-panel-target=secret-art]");tapSelector("#secret-tab-known");
+            js("(()=>{const s=document.querySelector('#secret-art-filter');s.value='linked';s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
+            tapSelector("[data-secret-art=manual_five_color_ice]");
+            check(Boolean.TRUE.equals(js("document.querySelectorAll('#secret-root-detail li').length===5")),"Five real unused materials quoted");
+            js("window.__secretReceipt={art:'manual_five_color_ice',action:'awaken',revision:game.secret_arts.revision,quote:game.secret_arts.library.find(a=>a.id==='manual_five_color_ice').quote};true");
+            tapSelector("#secret-root-detail .secret-art-command");
+            waitForJs("!busy&&game.secret_arts.library.find(a=>a.id==='manual_five_color_ice').activated","Native secret activation persisted");
+            python("from cultivation_life import server\ng=server.ENGINE.store.load("+JSONObject.quote(id)+")\nassert not g.player.formation_materials\nserver._technique_verified_player=g.player.to_dict()");
+            check(Boolean.TRUE.equals(async("fetch('/api/games/'+game.id+'/secret-art',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(__secretReceipt)}).then(r=>r.status===400)")),"Duplicate native secret request rejected");
+            python("from cultivation_life import server\nassert server.ENGINE.store.load("+JSONObject.quote(id)+").player.to_dict()==server._technique_verified_player");
+            check(Boolean.TRUE.equals(js("document.querySelector('#secret-art-card').scrollWidth<=document.querySelector('#secret-art-card').clientWidth+2")),"Secret layout fits viewport");
+            capture("techniques-secret-"+palette+"-"+arguments.getString("orientation"));tapSelector("#secret-art-toggle");
+            python(assetText("technique_release.py")+"\nfrom cultivation_life import server\nprepare_technique_release(server.ENGINE,"+JSONObject.quote(id)+",'battle')");
+            async("loadGame("+JSONObject.quote(id)+")");tapSelector(".hud-identity");
+            if(!Boolean.TRUE.equals(js("document.querySelector('details.techniques').open")))tapSelector("details.techniques>summary");
+            js("(()=>{const s=document.querySelector('#duel-technique-select');s.value=[...s.options].find(o=>o.value).value;s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
+            tapSelector("#duel-technique-add");waitForJs("!busy&&game.player.duel_techniques.selected.length===7","Seventh actual combat manual selected");
+            check(Boolean.TRUE.equals(js("document.querySelector('#duel-technique-add').disabled")),"Seven-book cap remains disabled");
+            tapSelector("[data-close-dialog=player-details-dialog]");
+            async("api('/api/games/'+game.id+'/advance',{method:'POST',body:JSON.stringify({action:'hunt_beast',years:1})})");
+            async("loadGame("+JSONObject.quote(id)+")");tapSelector("#battle-report-open");
+            waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native combat replay assets ready");
+            check(Boolean.TRUE.equals(js("document.querySelectorAll('.combat-technique[data-book]').length===7")),"Seven mechanism books rendered");
+            python("from cultivation_life import server\nserver._technique_battle_bytes=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+            js("CombatReplay.seek(CombatReplay.diagnostics().duration);true");
+            python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._technique_battle_bytes");
+            check(Boolean.TRUE.equals(js("document.querySelector('#battle-mechanisms').scrollWidth<=document.querySelector('#battle-mechanisms').clientWidth+2")),"Mechanism panel fits viewport");
+            capture("techniques-battle-"+palette+"-"+arguments.getString("orientation"));tapSelector("#battle-report-toggle");
+            js("TutorialGuide.showChapter('combat-review');true");
+            check(Boolean.TRUE.equals(js("document.querySelector('#tutorial-handbook [data-chapter=combat-review]').innerText.includes('55.68')")),"Updated mixed-price handbook");
+            js("TutorialGuide.showChapter('secret-arts');true");
+            check(Boolean.TRUE.equals(js("document.querySelector('#tutorial-handbook [data-chapter=secret-arts]').innerText.includes('62门')")),"Updated secret handbook");
+            tapSelector("#settings-toggle");
+        }
+        result.putString("techniques_scope","seven-book-native-input,real-paid-combat,mechanism-replay,secret-payment-replay,handbook,two-palettes");
+    }
+
     private void python(String code) {
         com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",code,
             com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("dict"));
@@ -1465,7 +1508,9 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("asura-governance")) {
+            if(phase.equals("techniques")) {
+                runTechniques(result);
+            } else if(phase.equals("asura-governance")) {
                 runAsuraGovernance(result);
             } else if(phase.equals("westward")) {
                 runWestward(result);

@@ -121,7 +121,9 @@ def ensure_npc(npc, *, game=None):
     for key in candidates:
         if len(chosen) >= count:
             break
-        if key not in chosen:
+        # The cached pool knows stable rank/root facts, not this person's
+        # current body or form. Recheck before consuming a fixed slot.
+        if key not in chosen and npc_eligible(npc, TECHNIQUE_CATALOG[key]):
             chosen.append(key)
     for key in chosen:
         facts.setdefault(key, 1)

@@ -278,8 +278,10 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
         player.joint_companion_breakthrough = None
         failure_type = "major" if major else "minor"
         retained = required * float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_retention"])
+        from ...system.technique_secret_rules import bonus as secret_bonus
+        keep_unspent = player.realm_index >= 9 or secret_bonus(player, 'cost_discount') > 0
         player.opportunity = (max(0, player.opportunity - required + retained)
-                              if player.realm_index >= 9 else retained)
+                              if keep_unspent else retained)
         gain = deps._sage_scaled_gain(
             player, float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_heart_demon"]),
             "heart_demon_gain_reduction",
@@ -346,8 +348,8 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
 
 
 def _body_progress_required(player: Player) -> float:
-    config = WORLD_SYSTEMS["body_cultivation"]
-    return float(config["progress_base"]) + player.body_training * float(config["progress_per_layer"])
+    from ...cultivation_experience import body_progress_required
+    return body_progress_required(player)
 
 
 def _body_pity_key(player: Player) -> str:
@@ -375,9 +377,12 @@ def _body_breakthrough_chance(deps: CultivationActionDependencies, player: Playe
             float(config["pity_max_bonus"]),
             failures * float(config["pity_bonus_per_failure"]),
         )
-    final = min(0.98, base + technique_bonus + pity_bonus)
+    from ...system.technique_secret_rules import bonus as secret_bonus
+    technique_secret_bonus = secret_bonus(player, 'body_bonus')
+    final = min(0.98, base + technique_bonus + pity_bonus + technique_secret_bonus)
     return {
         "base":base, "technique_bonus":technique_bonus, "pity_bonus":pity_bonus,
+        "technique_secret_bonus":technique_secret_bonus,
         "failures":failures, "final":final,
     }
 

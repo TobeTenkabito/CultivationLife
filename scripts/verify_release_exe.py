@@ -42,6 +42,10 @@ def verify(with_dlc):
             else:
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
+            if '--techniques' in sys.argv:
+                from scripts.verify_technique_exe import verify_techniques
+                verify_techniques(base,with_dlc,folder)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,techniques_verified=True)
             if '--asura-governance' in sys.argv:
                 from scripts.verify_asura_exe import verify_asura
                 verify_asura(base,with_dlc,folder)

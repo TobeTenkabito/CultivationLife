@@ -710,6 +710,14 @@ def _formation_material_defs() -> dict[str, dict[str, Any]]:
     return formation_material_definitions()
 
 
+def available_formation_candidates(player):
+    """Read original unbound stores without normalizing or editing the player."""
+    from .formation.dependencies import FormationCandidateDependencies
+    ports = FormationCandidateDependencies(lambda p: None, formation_material_definitions,
+                                            formation_shared_definitions, _formation_candidate)
+    return formation_loadouts._formation_candidates(ports, player, include_active=False, include_ground=False)
+
+
 def _formation_maintenance_defs() -> dict[str, dict[str, Any]]:
     return formation_maintenance_definitions()
 

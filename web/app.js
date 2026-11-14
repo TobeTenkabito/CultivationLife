@@ -641,14 +641,14 @@ function render(data) {
   $('#breakthrough-panel').classList.toggle('hidden', !breakthrough.ready || !!data.monster_bloodline?.awaiting_evolution);
   $('#breakthrough-title').textContent = breakthrough.target_realm ? `冲击${breakthrough.target_realm}` : '境界瓶颈';
   $('#breakthrough-action').textContent = breakthrough.action_label || '突破瓶颈';
-  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.wish_base_bonus ? `，其中愿力 +${percent(breakthrough.chance.wish_base_bonus)}` : ''}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.sage_bonus ? `，学说 ${(breakthrough.chance.sage_bonus > 0 ? '+' : '')}${percent(breakthrough.chance.sage_bonus)}` : ''}${breakthrough.chance.natal_origin_penalty ? `，本源损伤 -${percent(breakthrough.chance.natal_origin_penalty)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
+  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.technique_secret_bonus ? `，其中功法秘术 +${percent(breakthrough.chance.technique_secret_bonus)}` : ''}${breakthrough.chance.wish_base_bonus ? `，其中愿力 +${percent(breakthrough.chance.wish_base_bonus)}` : ''}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.sage_bonus ? `，学说 ${(breakthrough.chance.sage_bonus > 0 ? '+' : '')}${percent(breakthrough.chance.sage_bonus)}` : ''}${breakthrough.chance.natal_origin_penalty ? `，本源损伤 -${percent(breakthrough.chance.natal_origin_penalty)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
   const aidText = breakthrough.active_aids?.length ? ` 已服：${breakthrough.active_aids.map(item => item.name).join('、')}。` : '';
   $('#breakthrough-reason').textContent = breakthrough.met ? `${chanceText}。可继续整备后再冲关。${aidText}` : breakthrough.reason;
   $('#body-breakthrough-panel').classList.toggle('hidden', !bodyCultivation.ready);
   $('#body-breakthrough-title').textContent = bodyCultivation.target_layer ? `冲击炼体${bodyCultivation.target_layer}层` : '炼体已达极限';
   const bodyChance = bodyCultivation.chance;
   $('#body-breakthrough-reason').textContent = bodyChance
-    ? `成功率 ${percent(bodyChance.final)}（基础 ${percent(bodyChance.base)}${bodyChance.technique_bonus ? `，功法 +${percent(bodyChance.technique_bonus)}` : ''}${bodyChance.pity_bonus ? `，累计保底 +${percent(bodyChance.pity_bonus)}` : ''}）；失败保留七成积累。`
+    ? `成功率 ${percent(bodyChance.final)}（基础 ${percent(bodyChance.base)}${bodyChance.technique_bonus ? `，功法 +${percent(bodyChance.technique_bonus)}` : ''}${bodyChance.technique_secret_bonus ? `，功法秘术 +${percent(bodyChance.technique_secret_bonus)}` : ''}${bodyChance.pity_bonus ? `，累计保底 +${percent(bodyChance.pity_bonus)}` : ''}）；失败保留七成积累。`
     : '';
   const bodyTrain = $('#body-train-action');
   bodyTrain.querySelector('span').textContent = !bodyCultivation.technique
@@ -3663,7 +3663,7 @@ function renderKnownTechniques(techniques) {
         ? '尚未完成仙灵力转化'
         : art.required_body_training && !art.body_requirement_met ? `肉身不足：需要炼体${art.required_body_training}层`
         : slot === 'combat' && !art.combat_requirement_met ? `气等级不足：${art.combat_requirement_display}` : '';
-      button.disabled = busy || !eligible || !!game.pending_event || !game.player.alive;
+      button.disabled = busy || !eligible || !!game.pending_event || !!game.trial?.active || !game.player.alive;
       button.onclick = () => mutate(`/api/games/${game.id}/equip-technique`, {technique_id:art.id, slot});
       buttons.appendChild(button);
     });
@@ -4365,7 +4365,7 @@ function renderButtons() {
     if (control.id !== 'spirit-field-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || game?.spirit_field?.operation_available === false || (control.closest('#market-plant-sellables') && game?.crafting_system?.market_available === false) || control.dataset.actionUnavailable === '1';
   });
   document.querySelectorAll('.technique-equip').forEach(button => {
-    button.disabled = busy || !game?.player.alive || !!game?.pending_event || button.dataset.compatible !== '1';
+    button.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.trial?.active || button.dataset.compatible !== '1';
   });
   document.querySelectorAll('.duel-control').forEach(control => {
     control.disabled = busy || game?.player?.duel_techniques?.can_configure === false || control.dataset.unavailable === '1';

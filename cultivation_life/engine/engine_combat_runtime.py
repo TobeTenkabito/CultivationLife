@@ -322,10 +322,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             enemy_entry["durability"] = round(max(0.0, before - wear), 4)
             enemy_entry["battles"] = int(enemy_entry.get("battles", 0)) + 1
     loss_scale = max(0.0, float(target.get("loss_scale", 1.0)))
-    from ..combat_costs import health_reference
-    from ..content_registry import REALMS
-    body_reference = health_reference(REALMS[player.realm_index].base_power, player.layer, player.body_training)
-    hp_loss = min(hp_max, body_reference) * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
+    hp_loss = hp_max * resolution.hp_loss_ratio * float(target.get("hp_loss_scale", loss_scale))
     mp_loss = mp_max * resolution.mp_loss_ratio * float(target.get("mp_loss_scale", loss_scale))
     supply=next((u for u in resolution.capability_updates if u['id']=='player'
                  and u.get('supply_mp_spent',0)+u.get('technique_mp_spent',0)>0),None)

@@ -1,5 +1,6 @@
 """Real combat resources must buy endurance instead of taxing larger pools."""
 import copy
+import math
 import random
 from pathlib import Path
 
@@ -62,6 +63,34 @@ def test_fixed_payment_snapshot_rejects_old_percentage_forgery():
     record=next(iter(snapshot['technique_runtime']['catalog']['records'].values()))
     record['paid']=record['receipts'][0]['paid']=10000*book['effect']['cost_bp']/10000
     with pytest.raises(ValueError):load_battle(snapshot)
+
+
+@pytest.mark.parametrize('capacity',[1e9,1e12])
+@pytest.mark.parametrize('legacy',[False,True])
+def test_large_reserves_and_small_fixed_fees_resume_without_accepting_unpaid_receipts(capacity,legacy):
+    if legacy:
+        from tests.test_technique_effect_foundation import manual,actor
+        book=manual('guard')
+        book['cost_model']=dict(grade=9,realm=12,fixed=1.17)
+        book['level']=9
+        b=VoisinageBattle([actor('player','player',[book],current=capacity,capacity=capacity),actor('enemy','enemy')])
+    else:
+        book=low_book();book['level']=9
+        b=with_capacity(book,capacity)
+    step(b,1)
+    saved=dump_battle(b)
+    def receipt(data):
+        records=data['technique_runtime']['records'] if legacy else data['technique_runtime']['catalog']['records']
+        record=next(iter(records.values()))
+        return record,record['receipts']['1'] if legacy else record['receipts'][0]
+    record,paid=receipt(saved)
+    assert paid['paid']==pytest.approx(technique_cost(book,capacity),abs=math.ulp(capacity))
+    assert load_battle(saved).techniques.dump()==b.techniques.dump()
+    for forged in (0.,paid['paid']+1.):
+        invalid=copy.deepcopy(saved)
+        total,single=receipt(invalid)
+        total['paid']=single['paid']=forged
+        with pytest.raises(ValueError):load_battle(invalid)
 
 
 def test_started_legacy_battle_keeps_its_frozen_payment_contract():

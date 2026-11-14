@@ -1,8 +1,8 @@
 # 浮生问道 · Android
 
-维护基线：本体 **v3.9.0**，Android **3.9.0-android.103**，versionCode **102**。同包名、同签名；仅支持结构12，结构1–11拒绝，不迁移、不覆盖。仅保留山海图志、沧海夜色两个像素主题，取消旧四主题与启用新版开关。
+维护基线：本体 **v3.10.0**，Android **3.10.0-android.104**，versionCode **104**。同包名、同签名；仅支持结构12，结构1–11拒绝，不迁移、不覆盖。仅保留山海图志、沧海夜色两个像素主题，取消旧四主题与启用新版开关。
 
-本轮全仓回归、Windows EXE有／无DLC、签名Android12横竖屏修罗地方军政与 DLC 界面操作的验收范围见[3.9.0说明](../docs/release-380.md)。素材随包离线提供，不声明实体手机验收。
+本轮全仓回归、Windows EXE有／无DLC、签名Android12横竖屏功法、斗法机制、秘术及百科操作的验收范围见[3.10.0说明](../docs/release-3100.md)。素材随包离线提供，不声明实体手机验收。
 
 v2.17.2 使用 building-visits 相关领域配置，不做全仓：公共设施、年度城市经营、专属景色故事与有限遗物，以及原建筑、产业、佛寺和旧事件页面；同版 Windows EXE 有／无 DLC，签名 Android 12 的 building-visits / economy-enterprises 横竖屏四主题原生验收。最终范围以同版清单为准。
 
@@ -14,7 +14,7 @@ v2.16.0 的地区历法、归墟通知与续程采用 regional 相关领域发�
 
 v2.15.1 使用common-goods相关领域发行配置，不运行全仓；通用商品、分级拍卖、事件恢复及双端成品验证见[通用商品与拍卖](../docs/common-goods-2151.md)。
 
-**当前3.9.0仅接受存档结构12，旧结构1–11明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构1–11的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
+**当前3.10.0仅接受存档结构12，旧结构1–11明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构1–11的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
 
 ## 游戏与安装
 
@@ -36,7 +36,7 @@ v2.15.1 使用common-goods相关领域发行配置，不运行全仓；通用商
 | Gradle / AGP / Chaquopy | 8.11.1 / 8.9.3 / 17.0.0 |
 | Python / Java | 3.13 / 17 |
 
-源码没有声明 maxSdkVersion；发布验收使用专用 Android 12 / API 31 x86_64 模拟器。更高系统、16 KB 页设备及实体 ARM 手机需独立验证；当前包的实际验收范围见 `dist/` 发行清单。
+源码没有声明 maxSdkVersion；发布验收使用专用 Android 12 / API 31 x86_64 模拟器。更高系统、16 KB 页设备及实体 ARM 手机需独立验证；当前包的实际验收范围见[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)所附发行清单。从3.10.0起本地`dist`不保留安装包。
 
 本机工具默认位于 `F:\CultivationLife-Android-Tools`，JDK 默认使用 `D:\java\java17`。通过 `CULTIVATION_ANDROID_TOOLS`、`JAVA_HOME` 调整环境；环境脚本将 `CULTIVATION_BUILD_PYTHON` 设为当前 PATH 中的 Python，直接调用 Gradle 时也可显式设置该变量。密钥通过 `CULTIVATION_KEYSTORE`、`CULTIVATION_KEYSTORE_PASSWORD` 或本机专用 signing 目录读取；签名私钥不进入仓库或发行包。
 

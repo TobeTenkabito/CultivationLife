@@ -7,6 +7,10 @@ data/saves/*.json
 !data/saves/.gitkeep
 game_config.txt
 dist/game_config.txt
+dist/*.exe
+dist/*.apk
+dist/*.aab
+dist/*.zip
 data/ui_preferences.json
 data/.ui-preferences-*.tmp
 data/logs/

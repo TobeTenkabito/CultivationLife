@@ -296,7 +296,12 @@ class CatalogRuntime(CatalogPayloads):
         a.setdefault('first_target',target);d.setdefault('first_target',source)
         if actual>.04:d['heavy_round']=self.round
         self.offer(source,'outgoing',target);self.offer(target,'incoming',source)
-        for key in self.by_owner[source]+self.by_owner[target]:
+    def complete_exchange(self, owner):
+        # Ordinary action completion is independent of actual HP/state loss.
+        # A shield may absorb the entire hit; it cannot undo the actor's paid
+        # body commitment. Only the shared ordinary-action boundary calls this.
+        self.facts[owner]['complete_round']=self.round
+        for key in self.by_owner[owner]:
             owner,b=self.books[key]
             for p in self.records[key]['packets']:
                 if p['burden']:

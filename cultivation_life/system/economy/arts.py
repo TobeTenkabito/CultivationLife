@@ -10,12 +10,8 @@ from .dependencies import ArtsDependencies
 
 def _grant_art_experience(deps: ArtsDependencies, player: Player, art_id: str, amount: float) -> None:
     if art_id in deps._art_names() and amount > 0:
-        if art_id in {"alchemy"}:
-            amount *= 1 + max(0.0, float(player.sage_effects.get("field_alchemy_multiplier", 0.0)))
-        if art_id in {"refining", "formation"}:
-            amount *= 1 + max(0.0, float(player.sage_effects.get("crafting_formation_multiplier", 0.0)))
-        amount *= 1 + max(0.0, float(player.sage_effects.get("art_experience_multiplier", 0.0)))
-        player.art_experience[art_id] = float(player.art_experience.get(art_id, 0.0)) + float(amount)
+        from ...cultivation_experience import grant_art_experience
+        grant_art_experience(player, art_id, amount)
 
 
 def _public_art_skills(deps: ArtsDependencies, player: Player) -> list[dict[str, Any]]:

@@ -29,15 +29,15 @@
     if(!ui.system)return;
     const all=rows(), query=ui.search.trim();
     const visible=all.filter(r=>ui.mode==='known' ? r.builtin||r.acquired : !r.builtin&&!r.acquired);
-    const filtered=visible.filter(r=>(!query || (r.name+(r.affinity_name||'')).includes(query)) &&
-      (ui.filter==='all' || ui.filter==='builtin' && r.builtin || ui.filter==='root' && !r.builtin&&!r.soul));
+    const filtered=visible.filter(r=>(!query || (r.name+(r.affinity_name||'')+(r.technique_name||'')).includes(query)) &&
+      (ui.filter==='all' || ui.filter==='builtin' && r.builtin || ui.filter==='linked' && r.linked || ui.filter==='root' && !r.builtin&&!r.soul&&!r.linked));
     const pages=Math.max(1,Math.ceil(filtered.length/6));ui.page=Math.max(0,Math.min(ui.page,pages-1));
     const host=$('secret-art-library');host.replaceChildren();
     filtered.slice(ui.page*6,ui.page*6+6).forEach(row=>{
       const b=node('button',undefined,'secret-art-entry');b.type='button';b.dataset.secretArt=row.id;
       b.classList.toggle('selected',row.id===ui.selected);b.setAttribute('aria-pressed',String(row.id===ui.selected));
-      b.append(node('span',row.seal||row.affinity_name|| (row.id==='conceal'?'隐':'封'),'secret-art-seal'),node('strong',row.name),node('small',row.status),node('span',row.category,'secret-art-kind'));
-      if(row.soul)b.append(node('span',row.hint,'secret-art-mini-progress'));
+      b.append(node('span',row.seal||row.affinity_name|| (row.id==='conceal'?'隐':'封'),'secret-art-seal'),node('strong',row.name),node('small',row.status),node('span',row.linked?'功法':row.category,'secret-art-kind'));
+      if(row.soul||row.linked)b.append(node('span',row.hint,'secret-art-mini-progress'));
       else if(!row.builtin){const text=row.casting?`施术 ${row.casting.years}/${row.casting.required}年`:`修习 ${row.study_progress}/${row.study_required}年`;b.append(node('span',text,'secret-art-mini-progress'));}
       b.onclick=()=>select(row.id);host.append(b);
     });
@@ -49,11 +49,28 @@
     $('secret-tab-potential').setAttribute('aria-selected',String(ui.mode==='potential'));
     if(!row){$('secret-art-detail-heading').replaceChildren(node('p','暂无新的秘法线索','muted'));$('secret-root-detail').replaceChildren();$('secret-conceal-detail').classList.add('hidden');$('secret-suppress-detail').classList.add('hidden');return;}
     ui.selected=row.id;
-    const heading=$('secret-art-detail-heading');heading.replaceChildren(node('small',row.builtin?'天生自带 · 无须获取':`${row.soul?row.category:'补灵'}秘法 · ${row.status}`),node('h3',row.name),node('p',row.description));
+    const heading=$('secret-art-detail-heading');heading.replaceChildren(node('small',row.builtin?'天生自带 · 无须获取':`${row.soul||row.linked?row.category:'补灵秘法'} · ${row.status}`),node('h3',row.name),node('p',row.description));
     $('secret-conceal-detail').classList.toggle('hidden',row.id!=='conceal');
     $('secret-suppress-detail').classList.toggle('hidden',row.id!=='suppress');
     const detail=$('secret-root-detail');detail.replaceChildren();
     if(row.builtin)return;
+    if(row.linked){
+      const facts=node('dl',undefined,'secret-art-facts');
+      for(const [label,value] of [['来源功法',row.technique_name],['指定栏位',row.slot],['运转状态',row.status]]){facts.append(node('dt',label),node('dd',value));}
+      detail.append(facts);
+      if(row.gain_preview)detail.append(node('p',row.gain_preview,'secret-art-objective'));
+      if(row.requirements.length){detail.append(node('h4','修习条件'));const list=node('ul');row.requirements.forEach(t=>list.append(node('li',t)));detail.append(list);}
+      const alreadyDone=row.activated&&row.command_label!=='本境施展';
+      if(!alreadyDone){
+        detail.append(node('h4','本次实际投入'));const list=node('ul');row.costs.forEach(t=>list.append(node('li',t)));detail.append(list);
+        const button=node('button',row.command_label,'secret-art-command');button.dataset.linkedSecret=row.id;
+        button.dataset.available=row.reason?'0':'1';button.disabled=!!row.reason;button.title=row.reason;
+        if(!row.reason)command(button,row,'awaken',{quote:row.quote});detail.append(button);
+      }
+      if(row.reason)detail.append(node('p',row.reason,alreadyDone?'secret-art-complete':'secret-art-reason'));
+      if(row.used_realms.length)detail.append(node('p',`已用大境界：${row.used_realms.join('、')}阶；跨界、卸装和跌境不重置。`,'muted'));
+      return;
+    }
     if(row.soul){ui.soulDetail(detail,row);return;}
     const facts=node('dl',undefined,'secret-art-facts');
     for(const [label,value] of [['修习境界','不限'],['传承玉简',`${row.name}玉简${row.has_manual?' · 已持有':''}`],['首次修习',`${row.study_required} 年 · ${row.study_stones} 灵石 · 玉简一份`],['补灵材料',`${row.material_realm}级及以上${row.affinity_name}属内丹或元神，任选一份`],['施术耗时',`${row.casting?.required||row.casting_years} 个实际年`]]){facts.append(node('dt',label),node('dd',value));}

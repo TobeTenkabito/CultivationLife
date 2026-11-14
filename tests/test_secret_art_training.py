@@ -325,7 +325,9 @@ def test_interrupted_years_preserve_paid_source_and_later_resume(ready, monkeypa
 def test_projection_is_read_only_and_missing_state_keeps_builtin_arts(ready):
     engine, game = ready
     before = game.to_dict()
-    assert len(project(game)['library']) == 9
+    # The root-art catalog stays at nine; correctly equipped manuals may now
+    # contribute separate linked entries to the same read-only directory.
+    assert len([r for r in project(game)['library'] if not r.get('linked')]) == 9
     assert game.to_dict() == before
     document = game.player.to_dict()
     document.pop('secret_art_state')

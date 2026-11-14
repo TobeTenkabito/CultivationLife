@@ -242,11 +242,11 @@ class TechniqueRuntime:
             integer(r['last_cast'], 0, value['round'], '上次施展')
             if bool(r['used']) != bool(r['last_cast']):
                 raise ValueError('功法效果次数与施展轮次不符')
-            from ...combat_costs import technique_cost
+            from ...combat_costs import technique_cost, payment_tolerance
             expected_cost = technique_cost(book,capacity)
             # Subtracting two large legitimate balances loses a few low bits.
             # Scale only the rounding tolerance; never waive a paid receipt.
-            tolerance = max(1e-8, expected_cost * 1e-12)
+            tolerance = payment_tolerance(expected_cost, capacity)
             total_tolerance = tolerance * max(1, r['used'])
             finite(r['paid'], 0, expected_cost * r['used'] + total_tolerance, '已付费用')
             finite(r['refunded'], 0, min(r['paid'] * effect['refund_bp'] / 10000, capacity * .02) + total_tolerance, '返还费用')

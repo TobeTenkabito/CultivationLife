@@ -302,6 +302,11 @@ class ContentRegistry:
         races_doc = copy.deepcopy(documents["races.json"])
         world_npcs_doc = copy.deepcopy(documents["world_npcs.json"])
         story_combat_doc = copy.deepcopy(documents["story_combat_scenarios.json"])
+        # Authored additions live beside their linked arts; the reviewed 4258
+        # manual corpus remains independently reproducible.
+        secret_doc = documents.get('secret_arts.json', {})
+        techniques_doc['techniques'].extend(copy.deepcopy(secret_doc.get('techniques', [])))
+        market_doc['goods'].extend(copy.deepcopy(secret_doc.get('technique_goods', [])))
         from .building_expansion_content import expand as expand_buildings, relic_items
         expand_buildings(world_doc['systems']['building_system'])
         items_doc['items'].extend(relic_items())
@@ -366,6 +371,8 @@ class ContentRegistry:
                     {"all": [source_expression, *caps]} if caps else source_expression
                 )
         techniques = cls._index_models(techniques_doc, "techniques", Technique)
+        from .technique_secret_content import validate as validate_technique_secrets
+        validate_technique_secrets(secret_doc, techniques)
         from .system.combat.contracts import Intervention
         for entry in (*items.values(), *techniques.values()):
             if type(entry.force_tier) is not int or entry.force_tier < 1:

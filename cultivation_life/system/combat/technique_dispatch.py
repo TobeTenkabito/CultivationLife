@@ -76,6 +76,9 @@ class TechniqueDispatch(TechniqueRuntime):
     def attempted(self,actors):
         if not self.catalog:return
         self.catalog.ordinary_sides=None
+        for owner in actors:
+            if self.catalog.usable(owner) and not self.catalog.forfeit_attack(owner):
+                self.catalog.complete_exchange(owner)
         for key,(owner,b) in self.catalog.books.items():
             if owner not in actors or 'next_attack_only' not in b['effect']['clauses']:continue
             for p in self.catalog.records[key]['packets']:

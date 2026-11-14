@@ -2,7 +2,9 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v3.9.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v3.10.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+
+3.10.0加入4258部功法机制、七部斗法配置、混合费用、战斗机制区域与62门功法秘术，百科同步玩法及边界。详见[3.10.0说明](docs/release-3100.md)。
 
 3.9.0 与修罗DLC1.6.0补齐地方经营、联合议政与追偿、四类军权、轮调迁署、守府阵位、诸府盟约与战后整合；复用原府务及王庭入口，各DLC独立配色。详见[3.9.0说明](docs/release-390.md)。
 
@@ -84,11 +86,11 @@ v2.1.1 修复威名／族群敌意串界、即时交互耗时与炼体超额扣�
 
 ### Android 12
 
-当前安卓版本为 3.9.0-android.103，仅携带新版浅暗两种配色与十二个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包及实际验收范围以 `dist/` 内对应发行清单为准。使用与构建说明见 [安卓说明](android/README.md)。
+当前安卓版本为 3.10.0-android.104，仅携带新版浅暗两种配色与十二个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包和验收清单统一发布于 [GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)，`dist/`不保留安装包。使用与构建说明见 [安卓说明](android/README.md)。
 
 ### Windows 启动器
 
-双击项目或发行目录中的 `launcher.exe`，启动器会运行本地服务并打开浏览器。默认在 `127.0.0.1:8000–8010` 中查找已有游戏服务或可用端口；再次启动会打开已运行的游戏页面。
+从[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)下载Windows压缩包，解压后双击其中的 `launcher.exe`，启动器会运行本地服务并打开浏览器。默认在 `127.0.0.1:8000–8010` 中查找已有游戏服务或可用端口；再次启动会打开已运行的游戏页面。
 
 `launcher.exe` 是打包产物，不会自动执行刚修改的 Python 源码。开发、调试或验证源码改动时，请使用下面的源码启动方式；更新发行程序需要重新打包。
 
@@ -193,7 +195,7 @@ Windows ZIP 附带 `scripts/debug_agent.py` 及最小标准库客户端。CLI／
 | `tests/` | 规则、系统、兼容性回归和手动浏览器烟雾测试 |
 | `scripts/`、`tools/` | 发行验收与内容生成、维护脚本 |
 | `docs/` | 当前规则、开发文档、诊断及注明版本的历史校准数据 |
-| `data/`、`dist/` | 本地持久化数据与打包产物 |
+| `data/`、`dist/` | 本地持久化数据与临时验收产物；正式包见GitHub Releases |
 
 ### 引擎与系统边界
 
@@ -254,7 +256,7 @@ python -m PyInstaller --noconfirm build/launcher.spec
 python scripts/verify_release_exe.py
 ```
 
-构建输出为 `dist/launcher.exe`，包含本体 `content/` 和 `web/`。DLC/MOD 保持外置，发行时将所需扩展目录放在可执行文件旁；本地配置也由该目录提供。验收脚本在隔离临时目录中分别验证无 DLC 和带官方 DLC 的启动、接口及关键操作。构建不会自动替换项目根目录的 `launcher.exe`。
+构建输出为 `dist/launcher.exe`，包含本体 `content/` 和 `web/`。DLC/MOD 保持外置，发行时将所需扩展目录放在可执行文件旁；本地配置也由该目录提供。验收脚本在隔离临时目录中分别验证无 DLC 和带官方 DLC 的启动、接口及关键操作。构建不会自动替换项目根目录的 `launcher.exe`。从3.10.0起，验收后将发行包暂存于`build/releases/`，推送代码并发布GitHub Releases，远程哈希核对成功后清理临时安装包；完整步骤见[发行流程](docs/release-workflow.md)。
 
 ## 内容扩展与维护
 

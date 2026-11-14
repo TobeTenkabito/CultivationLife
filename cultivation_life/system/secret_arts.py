@@ -5,14 +5,15 @@ import copy
 from dataclasses import dataclass
 from typing import Callable
 
-from ..content_registry import ContentRegistry, ITEM_CATALOG, WORLD_SYSTEMS
+from ..content_registry import ContentRegistry, WORLD_SYSTEMS
 from ..models import HistoryRecord
 from ..rules import has_item, remove_item, player_affinities
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..secret_art_content import AFFINITIES, definitions
 from ..time_dependencies import ElapsedYearDependencies, TimeSettlementDependencies
 from ..time_flow import advance_elapsed_year, settle_elapsed_time, completed_action_units, ACTION_TIME
-from .possession_system import advance_player_age, is_possessed
+from .possession_system import advance_player_age
+from .secret_art_resources import blocked_reason, materials
 
 
 @dataclass(frozen=True)
@@ -29,39 +30,6 @@ class SecretArtDependencies:
 
 def catalog():
     return definitions(ContentRegistry.loaded_documents['secret_arts.json'])
-
-
-def blocked_reason(game):
-    p = game.player
-    if not p.alive:
-        return '此生已经结束'
-    if game.pending_event or game.active_trial:
-        return '请先处理当前事件或劫数'
-    if p.imprisonment or p.ghost_captor or is_possessed(p):
-        return '拘禁、拘魂或寄身期间不能修习和施展补灵秘法'
-    if game.guixu_state.get('player_session') or game.trial_site_state.get('active'):
-        return '请先离开当前副本，再修习秘法'
-    if p.cultivation_suppression or p.sealed_cultivation:
-        return '请先解除修为压制或循原路返界，再修习补灵秘法'
-    if p.world == 'celestial' and not p.immortal_power_converted:
-        return '请先完成仙灵力转化'
-    return ''
-
-
-def materials(player, art):
-    rows = []
-    for item in player.inventory:
-        definition = ITEM_CATALOG.get(item.id)
-        if not definition or item.quantity < 1:
-            continue
-        tags = set(definition.tags)
-        if not tags.intersection({'secret_art_core', 'secret_art_soul'}) or 'affinity:' + art['affinity'] not in tags:
-            continue
-        rank = next((int(t[6:]) for t in tags if t.startswith('realm:') and t[6:].isdigit()), 0)
-        if rank >= art['material_realm']:
-            kind = 'core' if 'secret_art_core' in tags else 'soul'
-            rows.append(dict(id='item:' + item.id, name=definition.name, kind=kind, realm_index=rank, quantity=item.quantity))
-    return sorted(rows, key=lambda row: (row['realm_index'], row['id']))
 
 
 def project(game):
@@ -98,6 +66,8 @@ def project(game):
                          owned=art['affinity'] in owned, study_reason=study_reason, casting_reason=cast_reason,
                          status='已补全' if art['affinity'] in owned else '施术中' if cast else '已修成' if learned else '修习中' if progress else '待修习' if has_item(p, art['manual_id']) else '未获传承'))
     config = ContentRegistry.loaded_documents['secret_arts.json']
+    from .technique_secrets import project as project_manuals
+    rows.extend(project_manuals(game))
     return dict(library=rows, revision=state.get('revision', 0), operation_reason=reason,
                 drop_rates=dict(core=config['core_drop_chance'], soul=config['soul_drop_chance']))
 
@@ -111,7 +81,10 @@ def _consume_material(p, art, identity):
     return source
 
 
-def execute(deps, game_id, art_id, action, *, revision, years=None, material_id=''):
+def execute(deps, game_id, art_id, action, *, revision, years=None, material_id='', quote=''):
+    if action == 'awaken':
+        from .technique_secrets import execute as awaken
+        return awaken(deps, game_id, art_id, revision=revision, token=quote)
     if not all(isinstance(value, str) for value in (art_id, action, material_id)):
         raise ValueError('秘术编号、操作与材料编号必须为文本')
     original = deps.load(game_id)

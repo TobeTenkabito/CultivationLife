@@ -8,7 +8,8 @@ from .secret_art_content import AFFINITIES
 def decode_state(value):
     if value is None or value == {}:
         return {}
-    if not isinstance(value, dict) or value.get('schema_version') != 1 or set(value) != {'schema_version', 'revision', 'arts'}:
+    if (not isinstance(value, dict) or type(value.get('schema_version')) is not int or value.get('schema_version') != 1
+            or set(value) not in ({'schema_version', 'revision', 'arts'}, {'schema_version', 'revision', 'arts', 'manuals'})):
         raise ValueError('秘法存档版本或字段不受支持')
     if type(value['revision']) is not int or value['revision'] < 0 or not isinstance(value['arts'], dict):
         raise ValueError('秘法存档进度不合法')
@@ -29,4 +30,7 @@ def decode_state(value):
                 or any(not isinstance(cast[k], str) or not cast[k] for k in ('material_name', 'material_id'))
                 or row['study_years'] != row['study_required']):
             raise ValueError('秘法施术进度或材料收据不合法')
+    if 'manuals' in value:
+        from .technique_secret_content import decode_records
+        decode_records(value['manuals'])
     return copy.deepcopy(value)

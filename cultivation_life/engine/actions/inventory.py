@@ -346,6 +346,8 @@ def equip_known_technique(deps: InventoryDependencies, game_id: str, technique_i
     game = deps._load(game_id)
     if game.pending_event:
         raise ValueError("请先处理当前事件")
+    if game.active_trial:
+        raise ValueError("劫战尚未结束，无法调整功法")
     known = next((technique for technique in game.player.known_techniques if technique.id == technique_id), None)
     if not known:
         raise ValueError("你尚未掌握这部功法")

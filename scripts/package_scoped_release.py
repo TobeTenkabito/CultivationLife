@@ -17,6 +17,8 @@ from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
 
 def main():
     tag=VERSION.replace('.','')
+    output_dir=ROOT/'build/releases'/VERSION
+    output_dir.mkdir(parents=True,exist_ok=True)
     scoped=json.loads((ROOT/f'build/scoped-{tag}.json').read_text(encoding='utf-8'))
     require(scoped['version']==VERSION and scoped['inputs_sha256']==inputs_digest(ROOT),'Scoped tests do not match final sources')
     require(all(r['status']=='passed' for r in scoped['runs']),'Scoped checks incomplete')
@@ -402,6 +404,34 @@ def main():
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
         code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
+    if scoped.get('profile')=='techniques':
+        from scripts.verify_technique_release import BROWSERS
+        require(set(BROWSERS)<={r['name'] for r in scoped['runs']},'Technique/browser acceptance incomplete')
+        require(scoped.get('regression_scope')=='full-repository','Full technique release regression required')
+        collection=ROOT/scoped['collection']
+        require(file_digest(collection)==scoped['collection_sha256'],'Full collection changed')
+        discovered=json.loads(collection.read_text(encoding='utf-8'))
+        require(len(discovered['nodes'])==regression['collected'] and regression['skipped']==0,'Full technique test coverage incomplete')
+        from scripts.recover_technique_regression import node_id
+        identities=[node_id(case,discovered['modules']) for suite in suites for case in suite.iter('testcase')]
+        require(len(identities)==len(set(identities)) and set(identities)==set(discovered['nodes']),'Full regression test identities differ from discovery')
+        for run in scoped['runs']:
+            require(all(file_digest(ROOT/name)==digest for name,digest in run['source_hashes'].items()),'Technique acceptance source changed')
+            if run.get('recovery'):
+                recovery=run['recovery']
+                require(recovery['inputs_sha256']==scoped['inputs_sha256'],'Interrupted regression source mismatch')
+                require(all(file_digest(ROOT/name)==digest for name,digest in recovery['evidence_sha256'].items()),'Interrupted/retry regression evidence changed')
+                require(file_digest(ROOT/run['log'].replace('.log','.xml'))==run['xml_sha256'],'Recovered regression XML changed')
+        require(all(c.get('techniques_verified') for c in evidence['cases']),'Technique EXE acceptance required with and without DLC')
+        required={f'build/android-techniques-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs'])==required and native.get('sdk')=='31','Android 12 technique orientations incomplete')
+        require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native technique test APK changed')
+        require(all('techniques_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Native technique marker missing')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='combat-alpha':
         from scripts.verify_scoped_release import COMBAT_ALPHA_TESTS
         selected={name for shard in scoped['tests'] for name in shard}
@@ -458,17 +488,12 @@ def main():
         base['combat_calibration']=dict(source_sha256=combat['source_sha256'],
             battles={mode:data['battles'] for mode,data in combat['modes'].items()},
             story_choices=combat['story_choices'],changed_story_choices=combat['changed_story_choices'])
-    exe=ROOT/'dist/launcher.exe';named=ROOT/f'dist/浮生问道-v{VERSION}.exe';shutil.copyfile(exe,named)
+    exe=ROOT/'dist/launcher.exe';named=output_dir/f'浮生问道-v{VERSION}.exe';shutil.copyfile(exe,named)
     win=dict(base,platform='Windows',exe_sha256=file_digest(exe),with_and_without_dlc_verified=True)
-    try:shutil.copyfile(exe,ROOT/'launcher.exe');win['root_launcher_updated']=True
-    except OSError as error:
-        # Updating the convenience launcher is optional. Windows can report an
-        # in-use/mapped executable as EINVAL rather than PermissionError; the
-        # separately verified distribution executable must still be packaged.
-        win['root_launcher_updated']=False
-        win['root_launcher_update_error']=str(error)
-    manifest=ROOT/f'dist/release-{VERSION}.json';manifest.write_text(json.dumps(win,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    output=ROOT/f'dist/浮生问道-v{VERSION}-Windows.zip'
+    win['root_launcher_updated']=False
+    win['distribution']='GitHub Releases; temporary assets under build/releases'
+    manifest=output_dir/f'release-{VERSION}.json';manifest.write_text(json.dumps(win,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    output=output_dir/f'浮生问道-v{VERSION}-Windows.zip'
     with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
         z.write(exe,'launcher.exe');z.write(manifest,manifest.name)
         z.writestr('game_config.txt','Debug=False\n')
@@ -489,14 +514,14 @@ def main():
             for p in sorted((ROOT/folder).rglob('*')):
                 if p.is_file() and '__pycache__' not in p.parts and p.suffix not in {'.pyc','.pyo'}:z.write(p,p.relative_to(ROOT).as_posix())
     with zipfile.ZipFile(output) as z:require(z.testzip() is None,'Windows archive damaged')
-    target=ROOT/f'dist/浮生问道-v{VERSION}-Android12.apk';shutil.copyfile(apk,target)
+    target=output_dir/f'浮生问道-v{VERSION}-Android12.apk';shutil.copyfile(apk,target)
     code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
     android=dict(base,platform='Android 12',android_version=f'{VERSION}-android.{code}',version_code=code,
                  apk_sha256=file_digest(apk),native=native,physical_device_tested=False)
-    am=ROOT/f'dist/release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    with zipfile.ZipFile(ROOT/f'dist/浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
+    am=output_dir/f'release-{VERSION}-android.{code}.json';am.write_text(json.dumps(android,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    with zipfile.ZipFile(output_dir/f'浮生问道-v{VERSION}-Android12.zip','w',zipfile.ZIP_DEFLATED) as z:
         z.write(target,target.name);z.write(am,am.name)
-        if scoped.get('profile') in {'body-ui','westward','asura'}:
+        if scoped.get('profile') in {'body-ui','westward','asura','techniques'}:
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for path in (ROOT/'docs').rglob('*'):
                 if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
@@ -504,7 +529,7 @@ def main():
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for name in ('docs/immortal-artifacts.md','docs/release-340.md'):
                 z.write(ROOT/name,name)
-        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura'}:
+        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura','techniques'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
         else:
             z.write(ROOT/'android/README.md','README.md')
@@ -556,7 +581,7 @@ def main():
                 require(z.testzip() is None,'DLC archive damaged')
     if scoped.get('profile')=='westward':
         version=dlcs['yaochi-westward']
-        destination=ROOT/f'dist/瑶池西望-紫气东来-v{version}.zip'
+        destination=output_dir/f'瑶池西望-紫气东来-v{version}.zip'
         with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
             for path in sorted((ROOT/'dlc/yaochi-westward').rglob('*')):
                 if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
@@ -567,7 +592,7 @@ def main():
         with zipfile.ZipFile(destination) as z:require(z.testzip() is None,'Westward DLC archive damaged')
     if scoped.get('profile')=='asura':
         version=dlcs['asura-manifestation']
-        destination=ROOT/f'dist/修罗显圣-无法无天-v{version}.zip'
+        destination=output_dir/f'修罗显圣-无法无天-v{version}.zip'
         with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
             for path in sorted((ROOT/'dlc/asura-manifestation').rglob('*')):
                 if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
@@ -579,7 +604,7 @@ def main():
     if scoped.get('profile')=='body-ui':
         for package,label in [('authored-techniques','著经立道'),('monster-bloodlines','万妖归宗'),('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')]:
             version=json.loads((ROOT/'dlc'/package/'manifest.json').read_text(encoding='utf8'))['version']
-            with zipfile.ZipFile(ROOT/f'dist/{label}-v{version}-更新包.zip','w',zipfile.ZIP_DEFLATED) as z:
+            with zipfile.ZipFile(output_dir/f'{label}-v{version}-更新包.zip','w',zipfile.ZIP_DEFLATED) as z:
                 for path in (ROOT/'dlc'/package).rglob('*'):
                     if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
                 z.write(ROOT/'docs/release-351.md','更新说明.md')

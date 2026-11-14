@@ -98,7 +98,7 @@ Windows 验收使用重新构建的 EXE；Android 使用正式签名构建及独
 
 Windows EXE 通过带／不带 DLC 的真实 HTTP 验收；正式签名 Android APK 在 Android 12 模拟器通过四主题横竖屏原生点击、库存和重载检查。首次 Android 配置加载超时的记录予以保留，同一 APK 重试通过；未将首次失败计为通过。APK 的嵌入源码清单、实际安装包校验值及 EXE 验收收据均与最终构建相符。
 
-这是开发候选构建，未替换根目录启动器或发布新的发行压缩包。可运行 [Windows 候选启动器](../dist/launcher.exe) 体验，在“地图 → 本地市场”查看。验收日志、截图和构建 SHA-256 汇总见 机器验收记录（历史归档路径 `build/economy-v2-acceptance.json`；当前工作区未附带该历史证据）。初始库存、回款深度与费率属于本轮试运行参数，下一轮随商队真实周转继续校准。
+这一节记录历史开发候选构建，当时未替换根目录启动器或发布新的发行压缩包。历史候选安装包已清理，当前版本从[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)下载；相关功能位于“地图 → 本地市场”。验收日志、截图和构建 SHA-256 汇总见 机器验收记录（历史归档路径 `build/economy-v2-acceptance.json`；当前工作区未附带该历史证据）。初始库存、回款深度与费率属于本轮试运行参数，下一轮随商队真实周转继续校准。
 
 ## 第二轮验收记录（2026-10-07）
 
@@ -164,7 +164,7 @@ EXE 收据、APK 的 606 项嵌入输入和设备实际安装包均与最终源�
 
 Windows 候选 EXE 完成带／不带 DLC 的真实 HTTP 验收。正式签名 Android APK 在 Android 12 模拟器完成四主题横竖屏原生点击组队、聘卫、追加资金、个人流水及重载，两个方向均直接通过。APK 的 614 项嵌入输入、设备实际安装包和 EXE 收据均对应最终源码。
 
-第四轮机器验收记录（历史归档路径 `build/economy-v2-r4-acceptance.json`；当前工作区未附带该历史证据） 汇总源码及构建 SHA-256、日志和测试结果。页面截图在 `build/economy-v2-r4-browser/`，原生截图在 `build/economy-v2-r4-native/`。[Windows 候选启动器](../dist/launcher.exe) 与 [Android 签名候选](../android/app/build/outputs/apk/release/app-release.apk) 可用于体验；本轮没有替换根目录启动器或发布新的发行压缩包。
+第四轮机器验收记录（历史归档路径 `build/economy-v2-r4-acceptance.json`；当前工作区未附带该历史证据） 汇总源码及构建 SHA-256、日志和测试结果。页面截图在 `build/economy-v2-r4-browser/`，原生截图在 `build/economy-v2-r4-native/`。本段记录历史Windows与Android候选验收；历史候选不再随仓库保留，当前正式包见[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)。当时没有替换根目录启动器或发布新的发行压缩包。
 
 第四轮验收时总部仍固定在成立地图；这一历史限制由下述补完第一步解除。复杂矿区产权、征服后的产业接管与机构反垄断干预留在补完第二、三步。
 
@@ -230,7 +230,7 @@ Windows 候选 EXE 带／不带 DLC 均通过包内真实 HTTP 迁址、通道�
 
 Windows 候选 EXE 带／不带 DLC 两组包内真实 HTTP 验收通过，包含产权、资金、年度生产及指定商路派遣。签名 Android 候选在 Android 12 专用模拟器完成四主题横竖屏的原生购置、注资、投产、订单保存／派遣、重复操作禁用、布局与重载；两个最终方向均通过。前两次尝试在启动配置加载前耗尽共享等待时间，未进入玩法；测试脚本改为 WebView 就绪后给页面配置独立加载时限，并明确区分启动超时与版本错误，原始诊断保留。
 
-APK 的 **625 项嵌入输入**、设备实际安装包与当前源码一致，签名验证通过；Windows 收据也绑定最终源码与二进制摘要。第二步机器验收记录（历史归档路径 `build/economy-expansion-step2-acceptance.json`；当前工作区未附带该历史证据） 汇总日志、校验值和截图路径。候选为 [Windows EXE](../dist/launcher.exe) 与 [Android 签名 APK](../android/app/build/outputs/apk/release/app-release.apk)，未替换根目录启动器或制作正式发行包。第三步的战争产权接管与市场支配反制尚待后续开发。
+APK 的 **625 项嵌入输入**、设备实际安装包与当前源码一致，签名验证通过；Windows 收据也绑定最终源码与二进制摘要。第二步机器验收记录（历史归档路径 `build/economy-expansion-step2-acceptance.json`；当前工作区未附带该历史证据） 汇总日志、校验值和截图路径。当时验收了Windows EXE与Android签名APK，未替换根目录启动器或制作正式发行包；历史候选安装包不再保留，当前正式包见[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)。第三步的战争产权接管与市场支配反制尚待后续开发。
 
 ## 经济补完第三步：战争产权、商势与本地竞争（v2.2.0）
 

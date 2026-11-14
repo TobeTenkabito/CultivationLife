@@ -2,7 +2,7 @@
 import copy
 import json
 from ...technique_effect_schema import finite, integer
-from ...combat_costs import technique_cost
+from ...combat_costs import technique_cost, payment_tolerance
 
 
 def restore(runtime,value):
@@ -31,8 +31,8 @@ def restore(runtime,value):
         integer(r['expired'],0,80,'过期计数')
         if r['field'] is not None:raise ValueError('固定功法不能保存外部领域状态')
         if not isinstance(r['receipts'],list) or len(r['receipts'])!=used:raise ValueError('固定功法付款回执缺失')
-        expected=technique_cost(b,cap);eps=max(1e-8,expected*1e-10)
-        finite(r['paid'],0,expected*used+eps,'整场实付')
+        expected=technique_cost(b,cap);eps=payment_tolerance(expected,cap)
+        finite(r['paid'],0,expected*used+eps*max(1,used),'整场实付')
         finite(r['refunded'],0,cap*.02+eps,'整场退款')
         totals=[0.,0.]
         for receipt in r['receipts']:

@@ -189,11 +189,10 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         elif action == "body_train":
             training_gain = min(deps._body_training_step(player, rng),
                                 deps._body_progress_required(player) - player.body_progress)
-            player.body_progress = min(deps._body_progress_required(player), player.body_progress + training_gain)
+            from ...cultivation_experience import grant_body_progress
+            training_gain = grant_body_progress(player, training_gain)
             total_body_gain += training_gain
             deps._apply_action_resources(player, action, ledger.claim_resource_cost())
-            if player.body_progress >= deps._body_progress_required(player):
-                player.awaiting_body_breakthrough = True
         elif action == "treasure":
             if ledger.claim_resource_cost():
                 treasure_results.append(deps._treasure_step(game, rng))

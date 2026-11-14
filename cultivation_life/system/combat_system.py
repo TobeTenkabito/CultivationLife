@@ -8,8 +8,8 @@ from ..combat_rule_engine import BattleRuleRuntime, evaluate_rules, prepare_rule
 from ..content_registry import MONSTER_BLOODLINE_SETTINGS, REALMS
 from .custom_lineage_system import evaluate_custom_lineage_rules
 from ..models import Player, Technique
-from ..rules import can_player_practice_technique, max_mp
-from ..combat_costs import mana_reference, exertion, graded_cost
+from ..rules import can_player_practice_technique, max_hp, max_mp
+from ..combat_costs import health_reference, mana_reference, exertion, graded_cost
 from .ghost_system import active_generated_soul_traits, active_soul_traits, ghost_soul_effects
 from ..ghost_soul_traits import evaluate_generated_soul_traits
 from ..monster_bloodline_traits import (
@@ -384,6 +384,10 @@ class PlayerCombatSystem:
         core_power = max(1.0, next((unit.power for unit in player_units if unit.kind == "player"), player_power))
         mana_capacity = max(1., max_mp(player))
         ordinary_mana_basis = mana_reference(REALMS[player.realm_index].base_power, player.layer, player.body_training)
+        hp_capacity = max(1., max_hp(player))
+        ordinary_body_scale = min(1., health_reference(
+            REALMS[player.realm_index].base_power, player.layer, player.body_training,
+        ) / hp_capacity)
 
         def burst_cost(art):
             rate=max(.07+.008*max(1,art.grade),art.immortal_power_cost if art.requires_immortal_power else 0.)
@@ -1014,8 +1018,11 @@ class PlayerCombatSystem:
                 events.append(guard_event)
                 key_events.append(f"第{round_no}轮，{guard_event}")
             body_received_amount = max(0.0, received_amount - absorbed_amount)
-            body_damage_ratio += (body_received_amount / core_power * 0.46 if phases is None
-                                  else getattr(phases,'primary_ordinary_body_loss',phases.primary_ordinary_loss*0.46))
+            # Only ordinary injuries use intrinsic HP. Field sacrifices and
+            # explicit proportional damage/healing retain their actual HP basis.
+            body_damage_ratio += ordinary_body_scale * (
+                body_received_amount / core_power * 0.46 if phases is None
+                else getattr(phases,'primary_ordinary_body_loss',phases.primary_ordinary_loss*0.46))
             actual_received = (received if phases is not None else
                                0.0 if round_no == 1 and "first_round_full_state" in transformation_traits else max(0.012, received))
             if phases is None:

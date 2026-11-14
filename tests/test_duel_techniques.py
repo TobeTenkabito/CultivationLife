@@ -188,6 +188,23 @@ def test_readonly_projection_never_initializes_person():
     assert person.to_dict() == before
 
 
+def test_first_seen_bodiless_npc_fills_only_currently_usable_books():
+    # The broad cached pool must not lend a wandering soul its old body.
+    for index in range(12):
+        person = npc(f'wandering-audit-{index}', rank=8)
+        person.world = 'human'
+        person.body_training = 200
+        person.spirit_state['mode'] = 'wandering'
+        ensure_npc(person)
+        assert len(person.duel_technique_ids) == 7
+        active = npc_books(context(), person)
+        assert len(active) == 7
+        assert all(book.category != 'body' for book in active)
+        before = copy.deepcopy(person.to_dict())
+        assert not ensure_npc(person)
+        assert person.to_dict() == before
+
+
 def test_first_seen_applicant_and_household_owner_are_frozen():
     from cultivation_life.models import GameState
     game = GameState('visible-relations', 1, player(), 'created', 'updated')
