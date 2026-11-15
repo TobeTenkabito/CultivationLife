@@ -16,3 +16,15 @@
 共 4 套人物、12 张头像／全身／缩略图、40 个绘制关键姿态、28 组沿原回放时序组合的动作；动作不是逐帧单独绘制。透明度与完整人体保留，按既有像素尺寸等比导出。运行目录为 web/assets/pixel/swimwear，清单位于 content/visual_assets.json，生成来源与完整提示词位于运行目录 provenance.json；使用内置 image_gen。原稿与参考记录在 design/swimwear-20261027，离线导出为 `python -m scripts.prepare_swimwear_assets`，运行不依赖 design。
 
 针对性验证：tests/test_swimwear_skins.py、tests/browser_swimwear_skins.py，关联皮肤／素材／战报测试与三项开发门禁；真实旧按钮与事件回归为 test_release_212.py、browser_events_212.py。本轮不调整版本、不重打已有 3.1.0 安装包，源码结果不作为双端新包验收证据。
+
+## 沧海传奇与水浪特效
+
+新增男女「沧海传奇」泳装：女款海蓝金边分体泳装，男款同配色贴身泳裤；全道途、无境界要求，唯一解锁条件为完成既有全局成就「传奇故事」`cultivation_rootless_legend`，其条件仍为无灵根开局、修至大乘并位列顺位榜第一。使用原全局成就账本，不以当前高境界代替成就。完成后旧档或新周目都可取得同性别皮肤。
+
+成就奖励沿原 `Player.character_skins.unlocked` 保存；视图准备在原成就评估之后登记与提交奖励，并在同次响应刷新衣橱。直接换装命令同样先读取权威全局记录再校验；未完成时拒绝不扣费、不改档。已解锁外观随个人跨界保留，寄身、附身和变化状态的原禁用规则不变。无新增 Player／GameState 字段、修为收益、资源、时钟或跨界例外。成就数据跨设备仍依赖既有全局数据备份机制，人物存档只携带已获得的皮肤。
+
+两套共6张头像／立绘／缩略图、20个绘制关键姿态、14组沿原时序组合的动作；不宣称逐帧独立绘制。内置 image_gen 原稿和修正提示词位于 `design/tide-swim-20261028`，运行清单、提示词与哈希在 `web/assets/pixel/tide/provenance.json`。导出只分离透明图、等比缩放与排图，不重建肢体。专门复核施法、跪姿和倒地姿态的肢体与遮挡关系。女款按用户确认，以早期绿白泳装原图 `design/frontier-swim-20261027/swim-integration-female-v1.png` 的贴顺长发和自然动作作为参照，替换为新泳装；此前蓬松发型及其补臂尝试不作为最终原稿。
+
+倒地关键帧另以局部生成修正：双前臂自然收在身前，两手错开放在脸侧；两只凉鞋内各五趾。局部拼接边界及最终提示词记录在 `design/tide-swim-20261028/final-sleek-repair.json`，保留所选原稿的头发和其余动作。
+
+专属水浪攻击采用独立绘制的16张流体关键帧：蓄势、卷浪推进、撞击浪冠、泡沫消散各4张，浪形逐张变化，相邻帧短暂交叠过渡。原稿和提示词在 `design/tide-water-20261028`，运行图集为 `web/assets/pixel/tide/water-keyframes.png`，机械导出脚本为 `scripts/prepare_tide_water_assets.ps1`，来源哈希见同目录 `water-provenance.json`。按既有命中时刻前1.15秒至后0.95秒采样，撞击从命中时刻开始；双向镜像、暂停和反向拖动均使用同一时钟，不取游戏 RNG、不增加独立计时器、不更改命中或伤害。仅当前对阵含此皮肤时由原播放器预解码一张1536×1152图集，纳入36张／96MiB预算，关闭回放释放；全部资源离线随包提供。

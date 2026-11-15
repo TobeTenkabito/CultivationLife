@@ -38,7 +38,7 @@
 
 新增 `tests/test_asura_protocols.py` 通过真实引擎命令测试调查、申辩、分次退款、冷却、四军权、轮调、迁署、盟约托管、阵法原材料及过期请求。`tests/browser_asura_protocols.py` 在两主题桌面/手机与横屏点击原建筑事务，验证过期页面恢复、原款退赔、结案禁用、立绘资源和无横向溢出。原生验收同样增加实际侵吞留痕与退赔操作。
 
-完整仓库、三项门禁、原事件212、Windows及签名Android的最终结果，以[发行说明](release-390.md)及对应build/dist证据为准；不得使用第一轮或旧版本通过结果代替本轮。
+完整仓库、三项门禁、原事件212、Windows及签名Android的最终结果，以[历史：发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-390.md)及对应build/dist证据为准；不得使用第一轮或旧版本通过结果代替本轮。
 
 ## 追责与交接补充
 

@@ -26,7 +26,7 @@
 
 按用户后续反馈，规则椭圆改为柔边上升光丝，以深度分前后遮挡，脸前淡出、倒地时随原姿态收拢，不额外设立动画时钟、伤害或触发事件。
 
-alpha.6：明确登记的天魔、心魔、三尸复用战前玩家素材并在离屏画布变色；同名普通人物和反噬元神不套用。变体跟随原有限视觉快照，不影响战斗结算；事件雷劫展示观察正式提交结果，详见[alpha.6说明](alpha6-release.md)。
+alpha.6：明确登记的天魔、心魔、三尸复用战前玩家素材并在离屏画布变色；同名普通人物和反噬元神不套用。变体跟随原有限视觉快照，不影响战斗结算；事件雷劫展示观察正式提交结果，详见[历史：alpha.6说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/alpha6-release.md)。
 
 2026-10-23 妖修DLC1 4.18.0新增蛇族11套战斗图集，7套低阶各六类动作、4套合体各七类。沿真实战报快照与交锋时钟播放，低阶不含邻域动作，详见[蛇族素材接入](monster-serpent-visuals.md)。
 
@@ -103,6 +103,6 @@ alpha.3 正式接入邻域回放。`voisinage.animation` 记录真实建立的�
 - `python tests/browser_combat_groups.py`：七组真实多人结算及三组真实败方随行阵容、1对3／3对1／3对3、四宽度接触和倒地边界、六种单／多人地形选图与人工条件叠层、总态势、无接口／写档和释放检查；覆盖五套随行单位倒地与胜方攻击衔接，输出 `build/combat-replay/groups/`。测试过程使用隔离档，不修写原档。
 - `python scripts/benchmark_combat_replay.py --baseline-ref <更新前提交>`：60场真实普通结算与 RNG 序列对照，记录有限采样耗时，不作为年度经济或原生性能结论。
 
-素材阶段证据输出 `build/combat-replay/`，绑定运行JS哈希，当时仅源码与浏览器验证。随后alpha.2发行采用独立关键领域配置、Windows EXE有／无DLC与签名Android横竖屏验收，最终范围见[alpha.2发行说明](alpha2-release.md)，不借用alpha.1成品记录、不宣称全仓。旧WebView兼容测试显式禁用 `Array.at` 和 `Array.findLast` 后验证真实战报。
+素材阶段证据输出 `build/combat-replay/`，绑定运行JS哈希，当时仅源码与浏览器验证。随后alpha.2发行采用独立关键领域配置、Windows EXE有／无DLC与签名Android横竖屏验收，最终范围见[历史：alpha.2发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/alpha2-release.md)，不借用alpha.1成品记录、不宣称全仓。旧WebView兼容测试显式禁用 `Array.at` 和 `Array.findLast` 后验证真实战报。
 
-alpha.3专项：`tests/test_domain_replay.py` 与 `tests/browser_domain_replay.py` 覆盖真实支配、相持、双向支配、资源不足转普通、三种屏宽、最终态势、外观稳定及无写档释放；Windows同一EXE有／无DLC和签名Android横竖屏均增加真实邻域战报验收。发行范围见[alpha.3说明](alpha3-release.md)。
+alpha.3专项：`tests/test_domain_replay.py` 与 `tests/browser_domain_replay.py` 覆盖真实支配、相持、双向支配、资源不足转普通、三种屏宽、最终态势、外观稳定及无写档释放；Windows同一EXE有／无DLC和签名Android横竖屏均增加真实邻域战报验收。发行范围见[历史：alpha.3说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/alpha3-release.md)。

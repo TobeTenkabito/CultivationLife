@@ -1,6 +1,6 @@
 # 修罗地方任职与总督府实施记录
 
-2026-11-11，第一批源码实现。依据[完整策划](asura-court-governorship-design.md)第13节，先交付任职与公共建筑基础；未增加版本号，仍仅结构12。第二批[派系深化与地方争议](asura-politics-and-disputes.md)已接续实现；第三批[驻军、军令与举兵争位](asura-military-and-succession.md)已接入，尚未进行发行验收。
+2026-11-11第一批实施记录：任职与公共建筑基础，仅结构12。后续实现见[派系深化与地方争议](asura-politics-and-disputes.md)、[驻军、军令与举兵争位](asura-military-and-succession.md)及[第二轮完整实现](asura-protocols.md)。本文保留第一批实施细节；完整交付与发行验收见[历史：3.9.0发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-390.md)。
 
 ## 本体与扩展边界
 

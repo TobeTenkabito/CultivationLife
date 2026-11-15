@@ -4,16 +4,6 @@
 
 本轮全仓回归、Windows EXE有／无DLC、签名Android12横竖屏功法、斗法机制、秘术及百科操作的验收范围见[3.11.0说明](../docs/release-3110.md)。素材随包离线提供，不声明实体手机验收。
 
-v2.17.2 使用 building-visits 相关领域配置，不做全仓：公共设施、年度城市经营、专属景色故事与有限遗物，以及原建筑、产业、佛寺和旧事件页面；同版 Windows EXE 有／无 DLC，签名 Android 12 的 building-visits / economy-enterprises 横竖屏四主题原生验收。最终范围以同版清单为准。
-
-v2.17.0 使用 buildings 发行配置：全仓回归、十一界城市与建筑真实页面、Windows 同一 EXE 有／无 DLC，以及签名 Android 12 的建筑、产业与旧事件横竖屏原生验收。最终通过范围与包哈希以 `dist/` 同版发行清单为准；玩法见[建筑系统](../docs/building-system.md)。
-
-v2.16.3 使用 architecture 发行配置：全仓回归、人物与事件及地区页面，Windows 同一 EXE 有／无 DLC，签名 Android 12 的上界、佛儒、本命、修罗王庭、地区、组织与既有修复共七阶段横竖屏原生验收。最终源码、包哈希和通过范围以 `dist/` 同版发行清单为准；设计边界见[架构第三阶段](../docs/architecture-stage3.md)。
-
-v2.16.0 的地区历法、归墟通知与续程采用 regional 相关领域发行配置；原生验收覆盖四主题、手机横竖屏及商路操作。见[地区历法](../docs/regional-calendar.md)。
-
-v2.15.1 使用common-goods相关领域发行配置，不运行全仓；通用商品、分级拍卖、事件恢复及双端成品验证见[通用商品与拍卖](../docs/common-goods-2151.md)。
-
 **当前3.11.0仅接受存档结构12，旧结构1–11明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构1–11的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
 
 ## 游戏与安装
@@ -48,17 +38,7 @@ Gradle 从仓库复制 Python、content、web、dlc；`app/src/main/mobile` 在�
 
 ## 发布证明与验收
 
-v2.15.0 使用secret-arts发行配置执行全仓回归和秘术、通用功法、事件真实页面；Windows同一EXE有/无DLC，以及签名Android 12 secret-arts、common-techniques四主题横竖屏原生阶段。规则见[秘术说明](../docs/secret-arts.md)，最终产物和证据以dist发行清单为准。
-
-v2.14.4 执行通用灵根功法、坊市资格及相关领域专项回归：python scripts/verify_scoped_release.py --profile common-techniques；Windows 同一 EXE 有／无 DLC，以及签名 Android 12 common-techniques 横竖屏、四主题原生验收。本次不是全仓回归。构建限制一个工作进程、512 MiB Java 堆，浏览器与专用 1 GiB 只读模拟器分阶段运行，最终证据见 dist/release-2.14.4*.json。
-
-v2.14.0 按用户要求执行全仓回归和完整发行验收，后端单进程、浏览器单实例；内存余量充足时二者有界重叠，Windows 与 Gradle 构建、专用只读 Android 12 模拟器分阶段单独运行。新战争的 `strategic-war` 原生阶段覆盖四主题横竖屏的真实闲置调度、原军费托管、本部固守和本宗撤回；不操作用户已在运行的其他模拟器。最终成品版本、范围及哈希以 `dist/release-2.14.0*.json` 为准。
-
-v2.13.6 按用户要求串行运行经济、传承及系统修复相关回归，不运行全仓。发行入口为 `python scripts/verify_scoped_release.py --profile bugfix`、`python scripts/verify_android_scoped.py emulator-5580 --bugfix` 和 `python scripts/package_scoped_release.py`。原生阶段覆盖下界与返界、培养寿元、剩余履约、传承承接、监禁、护山及经济托管的横竖屏真实点击；Windows 同一 EXE 验证有／无 DLC。构建限制单工作进程，验收只运行一台专用模拟器；凭据对应最终代码及实际安装 APK，不沿用旧产物哈希。
-
 `prepareGameAssets` 依赖 `copyGamePython`，核对暂存源码后生成 APK 内 `assets/game-build.json`。证明覆盖后端、内容、网页、DLC、Android 主源码与相关构建脚本。源码变动后旧 APK 证明失效，不能靠历史成功日志重新发布。
-
-v2.11.2 按用户明确要求沿用上一轮422项领域／跨界测试及10个浏览器程序，不重复运行，也不标记为本轮全仓回归。新产物另验版本、签名、Lint、源码对应关系、已安装APK哈希，以及横竖屏四主题的市场搜索、实际购买和妖修入口；Windows验收新EXE的带DLC／不带DLC运行。沿用证据与新验收分别记入当前发行清单。
 
 正式构建后按 `scripts/package_android.py` 要求准备对应版本的回归、界面、设备、签名、版本、Lint、跨端存档及已安装 APK 哈希日志，再执行：
 

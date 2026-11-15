@@ -12,4 +12,4 @@
 
 符合条件的新手可在教学事件中接受或谢绝沈照尘的师缘，再选择宗门引荐。已有在世师父、宗门或高境界的角色按当前处境调整，不替换身份、不重复领取奖励。师父通过 NPC ID 关联真实人物，其后续成长、生死与位置由权威人物记录决定。
 
-修行实践进度随结构11存档传递；FSWD1是传输封装，不提供旧结构兼容。维护代码为 `system/tutorial_walkthrough.py`、`system/tutorial_mentorship.py` 与 `web/tutorial*.js`，验收见[百科维护](handbook-1481.md)。本次双端发行范围与证据见[3.3.1说明](release-331.md)。
+修行实践进度随当前结构12存档传递；FSWD1是传输封装，不提供旧结构兼容。维护代码为 `system/tutorial_walkthrough.py`、`system/tutorial_mentorship.py` 与 `web/tutorial*.js`，验收见[百科维护](handbook-1481.md)。本次双端发行范围与证据见[历史：3.3.1说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-331.md)。

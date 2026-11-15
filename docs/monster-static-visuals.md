@@ -34,4 +34,4 @@
 
 ## alpha.4 正式动作接入
 
-此前羽属／猿属仅静态的限制已解除：全部40套已采用动作现已提升到DLC运行目录，战报使用相应真实身份。资源声明统一由DLC的visual/registry.json提供，本体图录不再硬编码这些可选素材。详见[alpha.4说明](alpha4-release.md)。
+此前羽属／猿属仅静态的限制已解除：全部40套已采用动作现已提升到DLC运行目录，战报使用相应真实身份。资源声明统一由DLC的visual/registry.json提供，本体图录不再硬编码这些可选素材。详见[历史：alpha.4说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/alpha4-release.md)。

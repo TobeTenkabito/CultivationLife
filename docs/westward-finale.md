@@ -1,6 +1,6 @@
 # 瑶池西望 1.0：共同主线与私人服务
 
-2026-11-09 v3.6.1 导航调整：左侧仙途合并仙籍／专修，右侧仙府合并访古／紫气主线；仙会留在瑶池。土地庙、仙圃与私人修缮从当地原建筑办理，不新增建筑侧栏按钮。本文旧批次入口描述以[3.6.1 布局](release-361.md)为准，原结算不变。
+2026-11-09 v3.6.1 导航调整：左侧仙途合并仙籍／专修，右侧仙府合并访古／紫气主线；仙会留在瑶池。土地庙、仙圃与私人修缮从当地原建筑办理，不新增建筑侧栏按钮。本文旧批次入口描述以[历史：3.6.1 布局](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-361.md)为准，原结算不变。
 
 配套本体3.6.0、存档结构12。散仙、地仙、玄仙是职责身份；真仙至大罗仍使用原境界。新增操作位于原瑶池的「仙籍与功德」「紫气东来」「专修」分页，沿用两个像素主题，并使用统一DLC按钮标记。
 
@@ -40,6 +40,6 @@
 
 ## 验证与范围
 
-领域测试：`test_westward_finale.py`、`test_yaochi_guidance.py`；真实页面测试：`browser_westward_finale.py`。发布按[发行说明](release-360.md)校验最终源码、Windows EXE有／无DLC、签名Android 12横竖屏与两主题。具体结果以发行JSON记录为准。
+领域测试：`test_westward_finale.py`、`test_yaochi_guidance.py`；真实页面测试：`browser_westward_finale.py`。发布按[历史：发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-360.md)校验最终源码、Windows EXE有／无DLC、签名Android 12横竖屏与两主题。具体结果以发行JSON记录为准。
 
 1.0包含前八条玩法及本页闭环。策划里的多人竞租、NPC自主提案和私人跨地点运输不作为本版已实现功能；没有添加另一种可流通积分。总规则见[实施记录](yaochi-westward-implementation.md)、[仙圃仙会](yaochi-fair-garden.md)、[访古议政](westward-ventures.md)及[跨界规范](world-transition-development.md)。

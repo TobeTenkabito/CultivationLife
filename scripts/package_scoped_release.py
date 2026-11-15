@@ -527,7 +527,7 @@ def main():
                 if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
         if scoped.get('profile')=='immortal':
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
-            for name in ('docs/immortal-artifacts.md','docs/release-340.md'):
+            for name in ('docs/immortal-artifacts.md',):
                 z.write(ROOT/name,name)
         if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura','techniques'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
@@ -542,7 +542,7 @@ def main():
             for path in (ROOT/'docs').rglob('*'):
                 if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
         if scoped.get('profile') == 'heavens':
-            for name in ('CHANGELOG.md','docs/release-330.md','docs/heavens-outposts.md',
+            for name in ('CHANGELOG.md','docs/heavens-outposts.md',
                          'docs/npc-promises.md','docs/diaochan-skin.md',
                          'docs/world-transition-development.md','docs/world-transition-audit.md','docs/world-transition-state-contract.json'):
                 z.write(ROOT/name,name)
@@ -569,11 +569,11 @@ def main():
                 for p in sorted((ROOT/'dlc'/package).rglob('*')):
                     if p.is_file() and '__pycache__' not in p.parts:
                         z.write(p,p.relative_to(ROOT).as_posix())
-                note='docs/alpha2-release.md' if scoped['profile']=='combat-alpha' else 'docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
+                note='docs/combat-replay.md' if scoped['profile']=='combat-alpha' else 'docs/visual-assets.md' if scoped['profile']=='visual' else 'docs/upper-teachings.md'
                 if scoped['profile']=='authored':note='docs/authored-techniques.md'
-                if scoped['profile']=='update301':note='docs/release-301.md'
-                if package=='monster-bloodlines':note='docs/alpha4-release.md'
-                if scoped.get('regression_scope')=='alpha5-focused':note='docs/alpha5-release.md'
+                if scoped['profile']=='update301':note='CHANGELOG.md'
+                if package=='monster-bloodlines':note='docs/monster-static-visuals.md'
+                if scoped.get('regression_scope')=='alpha5-focused':note='docs/visual-assets.md'
                 z.write(ROOT/note,note)
                 z.writestr('安装说明.txt',f'配套本体 v{VERSION}，仅支持结构 {SAVE_SCHEMA_VERSION}。解压至游戏根目录，覆盖对应 dlc/{package} 文件夹；重启生效。旧本体需先升级；Android 请安装同版签名 APK。用户开关与存档不会被本包覆盖。\n')
                 z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc=package,version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
@@ -585,7 +585,7 @@ def main():
         with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
             for path in sorted((ROOT/'dlc/yaochi-westward').rglob('*')):
                 if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
-            for name in ('docs/release-370.md','docs/institution-ai-and-westward-110.md','docs/temple-art-361.md','docs/westward-finale.md','docs/yaochi-westward-implementation.md'):
+            for name in ('CHANGELOG.md','docs/institution-ai-and-westward-110.md','docs/temple-art-361.md','docs/westward-finale.md','docs/yaochi-westward-implementation.md'):
                 z.write(ROOT/name,name)
             z.writestr('安装说明.txt',f'需配套本体v{VERSION}，仅结构12。解压到游戏目录覆盖dlc/yaochi-westward后重启。Android请使用同版签名APK；存档和用户开关不会被本包覆盖。')
             z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='yaochi-westward',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
@@ -596,7 +596,7 @@ def main():
         with zipfile.ZipFile(destination,'w',zipfile.ZIP_DEFLATED) as z:
             for path in sorted((ROOT/'dlc/asura-manifestation').rglob('*')):
                 if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
-            for name in ('docs/release-390.md','docs/asura-local-development.md','docs/asura-protocols.md','docs/asura-governorship-implementation.md','docs/asura-politics-and-disputes.md','docs/asura-military-and-succession.md'):
+            for name in ('CHANGELOG.md','docs/asura-local-development.md','docs/asura-protocols.md','docs/asura-governorship-implementation.md','docs/asura-politics-and-disputes.md','docs/asura-military-and-succession.md'):
                 z.write(ROOT/name,name)
             z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅结构12。解压至游戏根目录覆盖dlc/asura-manifestation后重启；Android请安装同版签名APK。不会覆盖存档或用户开关。')
             z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='asura-manifestation',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
@@ -607,7 +607,7 @@ def main():
             with zipfile.ZipFile(output_dir/f'{label}-v{version}-更新包.zip','w',zipfile.ZIP_DEFLATED) as z:
                 for path in (ROOT/'dlc'/package).rglob('*'):
                     if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
-                z.write(ROOT/'docs/release-351.md','更新说明.md')
+                z.write(ROOT/'CHANGELOG.md','更新说明.md')
                 z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅支持结构12。覆盖对应dlc目录后重启；Android请安装同版签名APK。')
     print(json.dumps(dict(version=VERSION,tests=tests,windows=str(output),android=str(target)),ensure_ascii=False))
 

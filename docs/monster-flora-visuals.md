@@ -41,4 +41,4 @@ HUD头像、详情立绘和真实战报复用既有入口，无新持久字段�
 
 本机审阅：[立绘与像素头像](../design/flora-growth-alpha4-20261024/index.html)、[战斗动作](../design/flora-combat-alpha4-20261024/index.html)。
 
-2026-10-24 修订：界树元婴第七格失衡使用单独补齐双脚的v2，其他八格保持字节一致；本轮授权进入alpha.4与DLC4.19.0。全部声明迁入DLC注册表，详见[发行说明](alpha4-release.md)。
+2026-10-24 修订：界树元婴第七格失衡使用单独补齐双脚的v2，其他八格保持字节一致；本轮授权进入alpha.4与DLC4.19.0。全部声明迁入DLC注册表，详见[历史：发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/alpha4-release.md)。

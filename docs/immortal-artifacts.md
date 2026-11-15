@@ -1,6 +1,6 @@
 # 本命三铸与仙器培养
 
-2026-11-01实装，2026-11-02纳入v3.4.0「百炼仙锋」。沿用结构11，不迁移结构1–10，不改写用户游玩存档。本命与仙器是两个独立入口，共用原物品、炼器实例或丹田本命记录；发行范围见[3.4.0说明](release-340.md)。
+2026-11-01实装，2026-11-02纳入v3.4.0「百炼仙锋」。当时使用结构11；当前只接受结构12，拒绝结构1–11，不改写用户游玩存档。本命与仙器是两个独立入口，共用原物品、炼器实例或丹田本命记录；发行范围见[历史：3.4.0说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-340.md)。
 
 ## 本命三铸
 
@@ -33,4 +33,4 @@
 
 Item可选`artifact_origin_id / immortal_grade`归原行囊同一装备；本命嵌套`source_item / refinement_count / force_tier / immortal_grade`归原丹田记录，见[状态合同](world-transition-state-contract.json)。炼器成品的品阶只保存在原炼器记录。分离装备保留原物品类型的条件与成就识别，交付仍扣除实际件数；原有附物指针只跟随这一件实物更新，器物真正离开行囊时仍解除附物。拍卖托管保存完整物品，退回及跨界取消原样交割一次，不复制库存。
 
-专项为`tests/test_immortal_artifacts.py`与`tests/browser_immortal_artifacts.py`；另跑本命、材料、战斗、神机、拍卖、持久化、跨界／空间／2.1.1／2.1.2回归、真实事件浏览器和三项工程门禁。3.4.0发行配置为`immortal`；最终EXE与签名Android验收及产物证据见[发行说明](release-340.md)。
+专项为`tests/test_immortal_artifacts.py`与`tests/browser_immortal_artifacts.py`；另跑本命、材料、战斗、神机、拍卖、持久化、跨界／空间／2.1.1／2.1.2回归、真实事件浏览器和三项工程门禁。3.4.0发行配置为`immortal`；最终EXE与签名Android验收及产物证据见[历史：发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-340.md)。

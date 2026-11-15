@@ -48,4 +48,4 @@
 
 ## 第二轮实现衔接
 
-上述第二轮清单现已落实，详见[第二轮完整实现](asura-protocols.md)。本文件384项记录仅属第一轮历史验证，最终3.9.0发行证据单独记录于[发行说明](release-390.md)。
+上述第二轮清单现已落实，详见[第二轮完整实现](asura-protocols.md)。本文件384项记录仅属第一轮历史验证，最终3.9.0发行证据单独记录于[历史：发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-390.md)。

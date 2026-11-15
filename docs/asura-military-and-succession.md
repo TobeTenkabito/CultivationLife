@@ -1,6 +1,6 @@
 # 修罗驻军、军令与举兵争位
 
-2026-11-11第三批源码，承接[派系与地方议事](asura-politics-and-disputes.md)及[完整设计](asura-court-governorship-design.md)。仍为本体3.7.0、修罗包1.4.0开发源码，仅结构12，本批不升级版本或打包。
+2026-11-11第三批实施记录，承接[派系与地方议事](asura-politics-and-disputes.md)，存档仅结构12。本文保留本批军政实施细节；最终整合见[第二轮完整实现](asura-protocols.md)，完整交付与发行验收见[历史：3.9.0发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-390.md)。
 
 ## 分层与原状态
 

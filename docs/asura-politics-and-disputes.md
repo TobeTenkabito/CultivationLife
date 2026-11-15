@@ -1,6 +1,6 @@
 # 修罗派系深化与地方争议
 
-2026-11-11第二批源码实现，承接[总督府第一批](asura-governorship-implementation.md)及[完整策划](asura-court-governorship-design.md)。本批不更新版本、不打包；仍为本体3.7.0／修罗包1.4.0的开发源码，存档仅结构12。驻防、调兵、抗命及起兵夺位见后续[第三批实现](asura-military-and-succession.md)。
+2026-11-11第二批实施记录，承接[总督府第一批](asura-governorship-implementation.md)，存档仅结构12。驻防、调兵、抗命及起兵夺位见[第三批实现](asura-military-and-succession.md)，最终整合见[第二轮完整实现](asura-protocols.md)。本文保留本批实施细节；完整交付与发行验收见[历史：3.9.0发行说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-390.md)。
 
 ## 分层与权威状态
 
