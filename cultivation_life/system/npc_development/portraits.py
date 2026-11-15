@@ -21,5 +21,7 @@ def portrait(target,facts):
     original=target.person if target.kind in ('prisoner','puppet') and target.person else facts
     row={k:read(original,k) for k in FIELDS}
     if (row.get('spirit_state') or {}).get('mode')=='wandering':return None
-    if target.kind in ('prisoner','puppet'):row['restraint']=True;row['status']='受禁控制中'
+    if target.kind=='puppet' and facts.get('type')=='clone':
+        row['status']='独立分身';row['visual_variant']='clone'
+    elif target.kind in ('prisoner','puppet'):row['restraint']=True;row['status']='受禁控制中'
     return row

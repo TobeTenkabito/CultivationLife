@@ -32,7 +32,7 @@ def main():
                     errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
                     page.add_init_script('Array.prototype.at=undefined;Array.prototype.findLast=undefined')
                     page.goto(f'http://127.0.0.1:{http.server_port}');page.wait_for_function('!!configData');page.evaluate('GameThemes.ready')
-                    for kind in ['control','contest','mutual','mixed','group']:
+                    for kind in ['control','contest','mutual','mixed','group','crowd']:
                         made=engine.create_game('邻域验收','heavenly','dao',151,preset_id='core')
                         prepare_domain_battle(engine,made['id'],kind)
                         verify(page,made['id'],output,kind)

@@ -114,9 +114,12 @@ def start(deps: ImmortalTrialDependencies, game, kind, *, doctrine_id=None):
 def initialize(game, trial):
     p = game.player
     target = target_for(game, trial)
-    # No friends, spouses, disciples or puppets may enter an inner tribulation.
+    # Owned clones are the explicit exception; ordinary allies remain excluded.
     units = [BattleUnit('player', p.name, 'player', combat_power(p), p.realm_index, p.path,
                        integrity=min(1, max(.001, p.hp / max_hp(p))))]
+    from ...system import clone_support
+    clones=clone_support.units(game,trial=True)
+    units.extend(clones)
     record = player_record(game)
     old = record.get('active')
     record['active'] = trial['doctrine_id']
@@ -129,7 +132,7 @@ def initialize(game, trial):
         # The copy has the same resource budget, not an inexhaustible reservoir.
         own = battle.units['player'].unit.capabilities
         for key, state in battle.units.items():
-            if key != 'player':
+            if state.unit.side == 'enemy':
                 state.unit = replace(state.unit, capabilities=replace(state.unit.capabilities,
                     capacity=own.capacity, current=own.current, usable_capacity=own.usable_capacity,
                     divine_lights=dict(own.divine_lights),divine_light_levels=dict(own.divine_light_levels),
@@ -139,15 +142,15 @@ def initialize(game, trial):
                 state.current = own.current
     stats = {side: PlayerCombatSystem._aggregate_stats(roster, player=p if side == 'player' else None,
                                                        terrain_tags=['开阔'])
-             for side, roster in (('player', units), ('enemy', PlayerCombatSystem._enemy_units(target)))}
+             for side, roster in (('player', [u for u in units if u.kind=='player']), ('enemy', PlayerCombatSystem._enemy_units(target)))}
     if trial['kind'] == 'three_corpses':
         # Each corpse inherits 100% of the player's actual ordinary attributes.
         # The shared side-level combat resolver therefore receives three copies.
         stats['enemy'] = {key: value * len(target['members']) for key, value in stats['player'].items()}
-    if trial['kind'] in {'human_decline','heaven_decline','three_corpses'}:
-        from ...system.technique_secret_rules import trial_stats
-        trial_stats(p,stats['player'])
+    from ...system.technique_secret_rules import trial_stats
+    trial_stats(p,stats['player'],major=trial['kind'] in {'human_decline','heaven_decline','three_corpses'})
     trial['battle_state'] = dict(mode=trial['kind'], round=0, mp_ratio=min(1, p.mp / max_mp(p)), stats=stats)
+    clone_support.freeze_stats(trial['battle_state'],clones)
     trial['snapshot'] = dump_battle(battle)
     trial['target'] = target
     return battle
@@ -165,6 +168,8 @@ def resolve(deps: ImmortalTrialDependencies, game, step, rng):
     state = trial['battle_state']
     before_body = battle.units['player'].body
     result, rounds = run_batch(battle, state, rng)
+    from ...system import clone_support
+    clone_support.commit(game,battle,state)
     p = game.player
     own = battle.units['player']
     p.hp = max(0, min(max_hp(p), p.hp + (own.body - before_body) * max_hp(p)))
@@ -186,7 +191,7 @@ def resolve(deps: ImmortalTrialDependencies, game, step, rng):
         stat_comparison=[dict(key=k, name=n, player=state['stats']['player'][k], enemy=state['stats']['enemy'][k])
                          for k,n in [('might','威能'),('guard','防护'),('mobility','身法'),('sense','神识'),('sustain','续航'),('breach','破法')]],
         age=p.age, assessment='五轮生存考验' if trial['kind'] != 'three_corpses' else '必须斩灭全部三尸',
-        player_roster=[{'name':p.name,'power':battle.units['player'].unit.power,'kind_name':'玩家'}],
+        player_roster=clone_support.roster(battle,state),
         enemy_roster=[{'name':s.unit.name,'power':s.unit.power,'kind_name':'劫相'} for s in battle.units.values() if s.unit.side=='enemy'],
         battlefield_tags=['开阔'], natural_terrain='开阔', artificial_conditions=[],
         player_combat_state=own.unit.power*own.vitality, player_combat_state_max=own.unit.power,

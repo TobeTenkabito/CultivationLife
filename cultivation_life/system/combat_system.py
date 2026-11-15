@@ -1586,7 +1586,7 @@ class PlayerCombatSystem:
     def _public_roster(units: list[BattleUnit]) -> list[dict[str, Any]]:
         kind_names = {
             "player": "玩家", "mechanical": "傀儡", "corpse": "炼尸",
-            "living": "活傀", "companion": "同行者", "story_ally": "剧情盟友",
+            "living": "活傀", "clone": "分身", "companion": "同行者", "story_ally": "剧情盟友",
             "cultivator": "修士", "beast": "妖兽", "artifact": "器物",
             "formation": "阵势", "environment": "战场威胁",
         }

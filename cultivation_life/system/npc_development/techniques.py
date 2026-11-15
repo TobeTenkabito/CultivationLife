@@ -16,6 +16,8 @@ def plan(game,target,facts,axis,batches,method):
     if not before or not book:raise ValueError('须先传授并掌握所选功法')
     if method=='family':raise ValueError('家族灌顶不用于功法研修')
     limit=9
+    from ...technique_evolution import FROST
+    if key==FROST and (facts['realm_index']<9 or (facts.get('transcendence') or {}).get('conversion',0)<1):limit=6
     if method=='infuse':limit=min(limit,next((t.level for t in game.player.known_techniques if t.id==key),0))
     rounds=min(batches,max(0,limit-before))
     if not rounds:raise ValueError('已达功法九重或施教者掌握的上限')

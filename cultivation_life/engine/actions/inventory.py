@@ -378,7 +378,7 @@ def equip_known_technique(deps: InventoryDependencies, game_id: str, technique_i
 def upgrade_technique(deps: InventoryDependencies, game_id: str, technique_id: str) -> dict[str, Any]:
     technique_id = canonical_content_id(technique_id)
     game = deps._load(game_id)
-    if game.pending_event or not game.player.alive or game.player.imprisonment:
+    if game.pending_event or game.active_trial or not game.player.alive or game.player.imprisonment:
         raise ValueError("当前状态无法升级功法")
     known = next(
         (entry for entry in game.player.known_techniques if entry.id == technique_id), None,
@@ -404,7 +404,7 @@ def merge_technique_manuals(
 ) -> dict[str, Any]:
     technique_id = canonical_content_id(technique_id)
     game = deps._load(game_id)
-    if game.pending_event or not game.player.alive or game.player.imprisonment:
+    if game.pending_event or game.active_trial or not game.player.alive or game.player.imprisonment:
         raise ValueError("当前状态无法合成传承玉简")
     known = next(
         (entry for entry in game.player.known_techniques if entry.id == technique_id), None,

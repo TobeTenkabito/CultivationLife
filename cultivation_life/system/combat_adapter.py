@@ -206,7 +206,8 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                                    technique_context=technique_context(owner) if owner is not None else {})
             combatants.append(Combatant(unit.id, unit.name, side, unit.power, capabilities, unit.integrity, rank,
                 min(1, max(0, game.player.hp / max(1, max_hp(game.player))))
-                if unit.id == "player" else min(1, max(.01, 1 - .15 * read(owner, "wounds", 0)))))
+                if unit.id == "player" else unit.integrity if unit.kind=='clone'
+                else min(1, max(.01, 1 - .15 * read(owner, "wounds", 0)))))
             if owner is not None:
                 owners[unit.id] = owner
     supplies = tuple(ResourceSupply(**row) for row in target.get("resource_supplies", []))

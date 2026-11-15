@@ -75,7 +75,7 @@ def candidates(game):
         person=find_person(game,source,include_inactive=True) if source else None
         if person:
             rows.pop(('npc',person.id),None);rows.pop(('prisoner',person.id),None)
-        rows[('puppet',identity)]=Target('puppet',identity,row,person,('御傀',))
+        rows[('puppet',identity)]=Target('puppet',identity,row,person,('分身',) if row.get('type')=='clone' else ('御傀',))
     from ..mentorship_avatar import avatar_person
     avatar = avatar_person(game)
     if avatar:

@@ -66,8 +66,35 @@ def verify_techniques(base,with_dlc,folder):
             page.evaluate("TutorialGuide.showChapter('combat-review')")
             assert '55.68' in page.locator('#tutorial-handbook [data-chapter=combat-review]').inner_text()
             page.evaluate("TutorialGuide.showChapter('secret-arts')")
-            assert '62门' in page.locator('#tutorial-handbook [data-chapter=secret-arts]').inner_text()
+            assert '107门' in page.locator('#tutorial-handbook [data-chapter=secret-arts]').inner_text()
             if page.locator('#settings-toggle').is_visible():click_control(page.locator('#settings-toggle'))
+            expansion=runpy.run_path(str(ROOT/'tests/fixtures/technique_release.py'))['prepare_expansion_release']
+            for mode,art in [('wind','manual_demon_dance'),('frost','manual_frost_sky')]:
+                identity=create('secret')
+                expansion(engine,identity,mode);page.evaluate('async id=>loadGame(id)',identity)
+                navigation_locator(page,'[data-panel-target=secret-art]').click()
+                click_control(page.locator('#secret-tab-known'));page.locator('#secret-art-filter').select_option('linked')
+                click_control(page.locator(f'[data-secret-art={art}]'))
+                with page.expect_response(lambda r:r.url.endswith('/secret-art')) as response:
+                    click_control(page.locator('#secret-root-detail .secret-art-command'))
+                assert response.value.status==200
+                page.wait_for_function('id=>!busy&&game.secret_arts.library.find(a=>a.id===id).activated',arg=art)
+                saved=engine.store.load(identity)
+                assert saved.player.secret_art_state['manuals'][art]['activated']
+                if mode=='wind':assert len(saved.player.puppets)==2 and all(a['realm_index']==4 for a in saved.player.puppets)
+                stored=engine.store._path(identity).read_bytes()
+                assert page.request.post(response.value.url,data=response.value.request.post_data_json).status==400
+                assert engine.store._path(identity).read_bytes()==stored
+                click_control(page.locator('#secret-art-toggle'))
+            expansion(engine,identity,'crowd');page.evaluate('async id=>loadGame(id)',identity)
+            navigation_locator(page,'#battle-report-open').click()
+            page.wait_for_function('CombatReplay.diagnostics().active&&!document.querySelector("[data-combat-replay]").disabled')
+            assert len(page.evaluate('CombatReplay.diagnostics().participants'))==24, page.evaluate('({shown:CombatReplay.diagnostics().participants.length,teams:Object.fromEntries(Object.entries(game.last_combat_report.visual.teams).map(([k,v])=>[k,v.length])),target:game.last_combat_report.target_name})')
+            assert page.evaluate('typeof TechniqueFx.draw==="function"')
+            stored=engine.store._path(identity).read_bytes()
+            page.evaluate('CombatReplay.seek(CombatReplay.diagnostics().duration)')
+            assert engine.store._path(identity).read_bytes()==stored
+            click_control(page.locator('#battle-report-toggle'))
         assert not errors,errors
         browser.close()
     print(f'Final EXE technique/secret/combat/handbook passed: DLC={with_dlc}',flush=True)

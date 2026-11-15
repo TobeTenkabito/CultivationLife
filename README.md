@@ -2,9 +2,9 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v3.10.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
+**当前本体版本：v3.11.0**，以 [version.py](cultivation_life/version.py) 为准。发行版本、存档结构、内容 schema 与 DLC/MOD 版本独立管理。逐版本变更见 [更新日志](CHANGELOG.md)。
 
-3.10.0加入4258部功法机制、七部斗法配置、混合费用、战斗机制区域与62门功法秘术，百科同步玩法及边界。详见[3.10.0说明](docs/release-3100.md)。
+3.11.0补齐六道途突破秘术，增加分身培养、24人战场，以及临岚天魔功、十万寒霜剑阵与专属秘术特效。详见[3.11.0说明](docs/release-3110.md)。
 
 3.9.0 与修罗DLC1.6.0补齐地方经营、联合议政与追偿、四类军权、轮调迁署、守府阵位、诸府盟约与战后整合；复用原府务及王庭入口，各DLC独立配色。详见[3.9.0说明](docs/release-390.md)。
 
@@ -86,7 +86,7 @@ v2.1.1 修复威名／族群敌意串界、即时交互耗时与炼体超额扣�
 
 ### Android 12
 
-当前安卓版本为 3.10.0-android.104，仅携带新版浅暗两种配色与十二个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包和验收清单统一发布于 [GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)，`dist/`不保留安装包。使用与构建说明见 [安卓说明](android/README.md)。
+当前安卓版本为 3.11.0-android.105，仅携带新版浅暗两种配色与十二个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包和验收清单统一发布于 [GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)，`dist/`不保留安装包。使用与构建说明见 [安卓说明](android/README.md)。
 
 ### Windows 启动器
 

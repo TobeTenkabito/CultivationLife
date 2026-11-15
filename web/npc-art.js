@@ -56,6 +56,7 @@ window.NpcArt = (() => {
     [img.width,img.height]=asset.size;
     img.dataset.art=key;img.loading='lazy';img.decoding='async';img.style.visibility='hidden';
     if(n.restraint){img.classList.add('npc-art-restrained');img.title='受禁控制中 · 保留原人物形象';}
+    if(n.visual_variant==='clone'){img.classList.add('npc-art-clone');img.title='分身 · 半透明灵影';}
     img.onload=()=>{img.style.visibility='visible';};
     img.onerror=()=>{img.hidden=true;img.removeAttribute('src');onFailure?.();};
     img.src=extension||local?asset.file:pack.base+asset.file;return img;

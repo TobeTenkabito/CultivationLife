@@ -1,8 +1,9 @@
 """Resume interrupted release shards without counting incomplete cases as passes.
 
 Only final-source cases recorded PASSED in both JUnit and the original verbose
-log are retained. Every other discovered node runs again. Original evidence is
-kept, and merged results must contain each originally collected node once.
+log are retained. Changed test modules must explicitly opt into a complete
+module rerun; none of their old cases are retained. Original evidence is kept,
+and merged results must contain each originally collected node once.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -33,6 +34,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--shards', nargs='+', type=int, required=True)
     parser.add_argument('--workers', type=int, default=1, choices=(1, 2))
+    parser.add_argument('--retest-changed-modules', action='store_true')
     args = parser.parse_args()
     folder = ROOT / f'build/techniques-release-{BASE_GAME_VERSION.replace(".", "")}'
     manifest = json.loads((folder / 'manifest.json').read_text(encoding='utf-8'))
@@ -43,13 +45,18 @@ def main():
         receipt = folder / f'{name}.json'
         original = json.loads(receipt.read_text(encoding='utf-8'))
         require(original['status'] == 'failed', 'Only failed, finished shards may be recovered')
-        require(all(file_digest(ROOT / p) == h for p, h in original['source_hashes'].items()), 'Test source changed')
+        hashes = {p: file_digest(ROOT / p) for p in original['source_hashes']}
+        changed = {p for p, h in original['source_hashes'].items() if hashes[p] != h}
+        require(not changed or args.retest_changed_modules, 'Test source changed; complete module rerun required')
         require(file_digest(folder / f'{name}.log') == original['log_sha256'], 'Original log changed')
         archive = folder / f'{name}-interrupted'
         require(not archive.exists(), 'Recovery evidence already exists; inspect before retrying')
         archive.mkdir()
         for suffix in ('json', 'log', 'xml'):
             shutil.copyfile(folder / f'{name}.{suffix}', archive / f'original.{suffix}')
+        (archive / 'test-source-changes.json').write_text(json.dumps({
+            p: dict(before=original['source_hashes'][p], after=hashes[p]) for p in sorted(changed)
+        }, indent=2), encoding='utf-8')
         modules = manifest['shards'][index]
         nodes = [n for n in manifest['nodes'] if n.split('::')[0] in modules]
         log = (archive / 'original.log').read_text(encoding='utf-8')
@@ -57,7 +64,8 @@ def main():
         passed = {}
         for case in ET.parse(archive / 'original.xml').getroot().iter('testcase'):
             identity = node_id(case, modules)
-            if identity in nodes and identity in confirmed and not any(case.find(k) is not None for k in ('failure', 'error', 'skipped')):
+            if (identity in nodes and identity.split('::')[0] not in changed and identity in confirmed
+                    and not any(case.find(k) is not None for k in ('failure', 'error', 'skipped'))):
                 require(identity not in passed, 'Duplicate original test identity')
                 passed[identity] = case
         remaining = [n for n in nodes if n not in passed]
@@ -72,7 +80,7 @@ def main():
                 str(argument_file)], cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT)
         require(code == 0, f'{name} retry failed; original and retry evidence retained')
         require(inputs_digest(ROOT) == manifest['inputs_sha256'], 'Final source changed during recovery')
-        require(all(file_digest(ROOT / p) == h for p, h in original['source_hashes'].items()), 'Test source changed during recovery')
+        require(all(file_digest(ROOT / p) == h for p, h in hashes.items()), 'Test source changed during recovery')
         retried = {}
         for case in ET.parse(retry_xml).getroot().iter('testcase'):
             identity = node_id(case, modules)
@@ -90,8 +98,9 @@ def main():
         final_log = folder / f'{name}.log'
         final_log.write_text(log + '\nFINAL-SOURCE RECOVERY: original failures are rerun below\n' + retry_log.read_text(encoding='utf-8'), encoding='utf-8')
         evidence = {p.relative_to(ROOT).as_posix(): file_digest(p) for p in archive.iterdir() if p.is_file()}
-        original.update(status='passed', log_sha256=file_digest(final_log), xml_sha256=file_digest(folder / f'{name}.xml'),
-            recovery=dict(retained_passes=len(passed), rerun_cases=len(retried), inputs_sha256=manifest['inputs_sha256'], evidence_sha256=evidence))
+        original.update(status='passed', source_hashes=hashes, log_sha256=file_digest(final_log), xml_sha256=file_digest(folder / f'{name}.xml'),
+            recovery=dict(retained_passes=len(passed), rerun_cases=len(retried), changed_modules=sorted(changed),
+                          inputs_sha256=manifest['inputs_sha256'], evidence_sha256=evidence))
         receipt.write_text(json.dumps(original, indent=2), encoding='utf-8')
         print(f'{name}: all {len(nodes)} distinct cases passed', flush=True)
 

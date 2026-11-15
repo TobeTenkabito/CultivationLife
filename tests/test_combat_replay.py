@@ -271,10 +271,10 @@ def test_snapshot_uses_actual_deployment_caps_only_display_and_survives_changes(
     from cultivation_life.system.combat_system import BattleUnit
     game, target, _ = fight(engine)
     units = [BattleUnit('player', game.player.name, 'player', 10, 1)]
-    units += [BattleUnit(f'gear-{i}', f'机关{i}', 'mechanical', 10, 1) for i in range(5)]
+    units += [BattleUnit(f'gear-{i}', f'机关{i}', 'mechanical', 10, 1) for i in range(14)]
     units.insert(1, BattleUnit('broken', '损坏机关', 'mechanical', 0, 1, integrity=0))
     snapshot = combat_identity(game, target, player_units=units)
-    assert len(snapshot['teams']['hero']) == 3 and snapshot['team_counts']['hero'] == 6
+    assert len(snapshot['teams']['hero']) == 12 and snapshot['team_counts']['hero'] == 15
     assert all(row['id'] != 'broken' for row in snapshot['teams']['hero'])
     game.player.gender = 'female'
     game.player.puppets.clear()
@@ -306,7 +306,7 @@ def test_multiunit_metadata_does_not_change_settlement_or_random_state(engine):
     original = engine.store.load(made['id'])
     power = engine._player_battle_power(original)
     original.player.puppets = [dict(id=f'guard-{i}', name=f'机关{i}', type='mechanical',
-        alive=True, durability=100, combat_power=power*.2, realm_index=original.player.realm_index) for i in range(2)]
+        alive=True, durability=100, combat_power=power*.2, realm_index=original.player.realm_index) for i in range(5)]
     a,b = copy.deepcopy(original), copy.deepcopy(original)
     target = dict(target_name='联合验收', target_power=power*1.3, target_realm_index=original.player.realm_index,
         members=[dict(npc_id=f'enemy-{i}', name=f'敌方{i}', power=power/3, gender='female', path='dao') for i in range(3)])
@@ -314,7 +314,7 @@ def test_multiunit_metadata_does_not_change_settlement_or_random_state(engine):
     first = engine._combat(a,copy.deepcopy(target),False,ra)
     with patch.object(engine_combat_runtime, 'report_visuals', return_value=None):
         second = engine._combat(b,copy.deepcopy(target),False,rb)
-    assert len(a.last_combat_report['visual']['teams']['hero']) == 3
+    assert len(a.last_combat_report['visual']['teams']['hero']) == 6
     a.last_combat_report.pop('visual')
     assert first == second and ra.getstate() == rb.getstate() and a.to_dict() == b.to_dict()
 

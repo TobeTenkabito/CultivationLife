@@ -24,11 +24,13 @@
     const teams=visual.schema_version===2?visual.teams:{
       hero:[{id:'player',asset:hero,name:report.player_roster?.[0]?.name??'你',kind:'player',weight:1}],
       npc:[{id:'enemy',asset:npc,name:report.target_name??'对手',kind:'cultivator',weight:1}]};
-    if(!teams||!['hero','npc'].every(side=>Array.isArray(teams[side])&&teams[side].length>0&&teams[side].length<=3&&
+    if(!teams||!['hero','npc'].every(side=>Array.isArray(teams[side])&&teams[side].length>0&&teams[side].length<=12&&
       teams[side].every((member,i)=>A.actors[member.asset]&&
         (A.actors[member.asset].role==='npc'||side==='hero'&&i===0&&member.asset===hero||side==='npc'&&member.asset===hero&&ActorVariants.valid(member.visual_variant))&&
         (!member.gender||!A.actors[member.asset].sex||member.gender===A.actors[member.asset].sex)&&
         typeof member.name==='string'&&member.name.length<=64&&Number.isFinite(member.weight)&&member.weight>0)))return null;
+    const unitIds=Object.values(teams).flat().map(member=>member.id);
+    if(unitIds.some(id=>typeof id!=='string'||!id||id.length>96)||new Set(unitIds).size!==unitIds.length)return null;
     const ordinary=report.rounds.filter(r=>r.ordinary_exchange&&['player','enemy'].includes(r.initiative));
     const hasDomains=report.rounds.some(row=>CombatDomains.facts(row,visual));
     if(!ordinary.length&&!hasDomains)return null;
@@ -88,6 +90,7 @@
           const r={index:rounds.length,number:row.round,side,actorIndex,targetIndex,guard:loss===0,action,name:spec.name,start,contacts,
             end:start+Math.max(spec.duration,tail(spec.contacts)+2.15),duration:spec.duration,forceTier:attacks?.[member.id]??1};
           if(r.forceTier>=2)r.name='仙阶 · '+r.name;
+          r.techniqueFx=window.TechniqueFx?.paid(row,member.id)??[];
           rounds.push(r);
           contacts.forEach((t,i)=>events.push({t,round:r.index,side,guard:r.guard,name:r.name,
             value:mix(exchange.before[index],exchange.after[index],(assigned+member.weight*(i+1)/contacts.length)/totalWeight),target}));
@@ -268,7 +271,7 @@
       const natalIcon=items?.assets[asset]?.file;
       const plan=build(report,A,natalIcon);if(!plan){root.hidden=true;return;}
       const T=timer(A);renderer=window.createDuelRenderer(A,T,window.createCombatBeasts(A,T));
-      scene=renderer.create(canvas);scene.panoramic=true;scene.multi=plan.teams.hero.length>1||plan.teams.npc.length>1;scene.battlefield=plan.battlefield;context={renderer,scene,plan,samples:[]};
+      scene=renderer.create(canvas);scene.panoramic=true;scene.multi=plan.teams.hero.length>1||plan.teams.npc.length>1;scene.teamSizes={hero:plan.teams.hero.length,npc:plan.teams.npc.length};scene.battlefield=plan.battlefield;context={renderer,scene,plan,samples:[]};
       await renderer.prepare(plan);
       if(token!==revision||!visible()){renderer.dispose(scene);return;}
       const resize=()=>{if(context?.scene!==scene)return;renderer.resize(scene,Math.min(1280,Math.max(240,root.clientWidth)));paint();};

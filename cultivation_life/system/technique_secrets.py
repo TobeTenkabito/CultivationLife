@@ -18,7 +18,7 @@ from .formation_system import available_formation_candidates, _extract_candidate
 from .technique_secret_rules import equipped
 
 GROWTH = {'body_progress','qi_experience','art_experience'}
-ONCE = {'heart_relief','sense_experience',*GROWTH}
+ONCE = {'heart_relief','sense_experience','clone_pair',*GROWTH}
 
 
 def growth_quote(player, art):
@@ -57,10 +57,15 @@ def quote(game, art):
     if art['effect']=='sense_rank':
         if p.realm_index in record.get('realms',[]):reason=reason or '本大境界已经施展知天，跌境或跨界不会重置次数'
     elif record.get('activated'):reason=reason or ('此秘术的一次性成果已经获得' if art['effect'] in ONCE else '此秘术已经激活，无需再次投入')
-    if art['effect'] in ONCE and p.realm_index!=art['realm']:reason=reason or '一次性秘术须在其对应大境界施展'
-    if art['effect']!='sense_rank' and not record.get('activated') and p.realm_index!=art['realm']:
+    if art['effect'] in ONCE-{'clone_pair'} and p.realm_index!=art['realm']:reason=reason or '一次性秘术须在其对应大境界施展'
+    if art['effect'] not in {'sense_rank','clone_pair','frost_tribulation'} and not record.get('activated') and p.realm_index!=art['realm']:
         reason=reason or '已不在此秘术的适用大境界，无需投入材料'
+    if art['effect']=='clone_pair':
+        from .clone_support import dance_claim_reason
+        reason=reason or dance_claim_reason(p)
     requirements=[]
+    if art['effect']=='frost_tribulation' and book:
+        requirements.append('当前为仙阶：劫战六属性各增加4%，已替换雷劫减伤' if book.level>=7 else '当前为凡阶：雷劫减伤增加7个百分点；Lv.7转仙后替换效果')
     for key,label,current in [('level','原功法等级',book.level if book else 0),('body','普通炼体层数',p.body_training),('sense','神识等级',divine_sense_level(p))]:
         if key not in art['requirements']:continue
         needed=art['requirements'][key];requirements.append(f'{label} {current}/{needed}')
@@ -122,7 +127,7 @@ def project(game):
         elif effect in ONCE:status='成果已获得' if active else '待施展'
         else:
             from .possession_system import is_possessed
-            working=p.alive and p.realm_index==art['realm'] and not (p.cultivation_suppression or p.sealed_cultivation or is_possessed(p))
+            working=p.alive and (p.realm_index==art['realm'] or effect=='frost_tribulation') and not (p.cultivation_suppression or p.sealed_cultivation or is_possessed(p))
             status=('生效中' if working else '已激活·暂不生效') if active else '待激活'
         rows.append(dict(id=art['id'],name=art['name'],description=art['description'],linked=True,builtin=False,
             acquired=True,category='功法秘术',seal='诀',status=status,technique_id=book.id,technique_name=book.name,
@@ -161,6 +166,10 @@ def execute(deps, game_id, identity, *, revision, token):
         p.divine_sense_experience+=amount;result=f'永久获得{amount:g}神识经验，沿原神识升级入口使用。'
     elif effect=='heart_relief':
         p.heart_demon-=art['value'];result=f'已永久消解{art["value"]:g}点心魔。'
+    elif effect=='clone_pair':
+        from .clone_support import grant_dance_pair
+        grant_dance_pair(p)
+        result='已凝成岚影、魔影两具元婴初层分身，修为上限八阶圆满；初始能源为0，请沿原御傀能源入口配置。此生只领取一次，卸装不撤销、损毁不补发。'
     elif effect in GROWTH:
         if effect=='body_progress':grant_body_progress(p,q['growth']['gain'])
         elif effect=='qi_experience':grant_qi_mastery(p,art['target'],art['value'])

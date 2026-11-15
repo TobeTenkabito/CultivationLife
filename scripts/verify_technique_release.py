@@ -13,7 +13,7 @@ from cultivation_life.version import BASE_GAME_VERSION
 from scripts.release_evidence import file_digest,inputs_digest,require
 from scripts.verify_scoped_release import balanced_test_shards
 
-BROWSERS=['browser_technique_release','browser_duel_techniques','browser_combat_mechanisms',
+BROWSERS=['browser_clone_support','browser_wind_frost_techniques','browser_domain_replay','browser_technique_release','browser_duel_techniques','browser_combat_mechanisms',
     'browser_combat_replay','browser_combat_groups','browser_technique_secrets','browser_technique_secret_growth',
     'browser_secret_art_training','browser_events_212','browser_debug_systems','browser_handbook_revision']
 

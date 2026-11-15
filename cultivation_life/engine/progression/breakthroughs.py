@@ -328,8 +328,8 @@ def _breakthrough_chance(deps: BreakthroughDependencies, player: Player, major: 
             dependent_bonus = 0.02
     concubine_base_bonus = min(0.02, player.concubine_breakthrough_bonus) + dependent_bonus
     wish_base_bonus = modifier(player, "breakthrough_base_bonus", 0.0)
-    from ...system.technique_secret_rules import bonus as secret_bonus
-    technique_secret_bonus = secret_bonus(player, 'major_bonus' if major else 'minor_bonus')
+    from ...system.technique_secret_rules import bonus as secret_bonus, major_probability_bonus
+    technique_secret_bonus = major_probability_bonus(player) if major else secret_bonus(player, 'minor_bonus')
     base += concubine_base_bonus + wish_base_bonus + technique_secret_bonus
     scope = f"{'major' if major else 'minor'}:{source}"
     aid_bonus = sum(

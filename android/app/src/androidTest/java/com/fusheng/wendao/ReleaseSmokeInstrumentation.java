@@ -416,10 +416,31 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             js("TutorialGuide.showChapter('combat-review');true");
             check(Boolean.TRUE.equals(js("document.querySelector('#tutorial-handbook [data-chapter=combat-review]').innerText.includes('55.68')")),"Updated mixed-price handbook");
             js("TutorialGuide.showChapter('secret-arts');true");
-            check(Boolean.TRUE.equals(js("document.querySelector('#tutorial-handbook [data-chapter=secret-arts]').innerText.includes('62门')")),"Updated secret handbook");
+            check(Boolean.TRUE.equals(js("document.querySelector('#tutorial-handbook [data-chapter=secret-arts]').innerText.includes('107门')")),"Updated secret handbook");
             tapSelector("#settings-toggle");
         }
-        result.putString("techniques_scope","seven-book-native-input,real-paid-combat,mechanism-replay,secret-payment-replay,handbook,two-palettes");
+        for(String mode:new String[]{"wind","frost"}) {
+            String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'分身霜剑验收',spirit_root:'heavenly',path:'dao',seed:713,preset_id:'core'})}).then(g=>g.id)");
+            String art=mode.equals("wind")?"manual_demon_dance":"manual_frost_sky";
+            python(assetText("technique_release.py")+"\nfrom cultivation_life import server\nprepare_expansion_release(server.ENGINE,"+JSONObject.quote(id)+","+JSONObject.quote(mode)+")");
+            async("loadGame("+JSONObject.quote(id)+")");
+            tapSelector("[data-panel-target=secret-art]");tapSelector("#secret-tab-known");
+            js("(()=>{const s=document.querySelector('#secret-art-filter');s.value='linked';s.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
+            tapSelector("[data-secret-art="+art+"]");tapSelector("#secret-root-detail .secret-art-command");
+            waitForJs("!busy&&game.secret_arts.library.find(a=>a.id==="+JSONObject.quote(art)+").activated","New native secret activation");
+            if(mode.equals("wind"))python("from cultivation_life import server\np=server.ENGINE.store.load("+JSONObject.quote(id)+").player\nassert len(p.puppets)==2 and all(a['realm_index']==4 for a in p.puppets)");
+            capture("new-secret-"+mode+"-"+arguments.getString("orientation"));tapSelector("#secret-art-toggle");
+            python(assetText("technique_release.py")+"\nfrom cultivation_life import server\nprepare_expansion_release(server.ENGINE,"+JSONObject.quote(id)+",'crowd')");
+            async("loadGame("+JSONObject.quote(id)+")");tapSelector("#battle-report-open");
+            waitForJs("CombatReplay.diagnostics().active&&!document.querySelector('[data-combat-replay]').disabled","Native crowd assets ready");
+            check(Boolean.TRUE.equals(js("CombatReplay.diagnostics().participants.length===24&&typeof TechniqueFx.draw==='function'")),"Native 24 units and authored effect module");
+            python("from cultivation_life import server\nserver._crowd_bytes=server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()");
+            js("CombatReplay.seek(CombatReplay.diagnostics().duration);true");
+            python("from cultivation_life import server\nassert server.ENGINE.store._path("+JSONObject.quote(id)+").read_bytes()==server._crowd_bytes");
+            check(Boolean.TRUE.equals(js("document.querySelector('#battle-report-card').scrollWidth<=document.querySelector('#battle-report-card').clientWidth+2")),"Native crowd layout fits");
+            capture("crowd-"+mode+"-"+arguments.getString("orientation"));tapSelector("#battle-report-toggle");
+        }
+        result.putString("techniques_scope","seven-book-native-input,real-paid-combat,mechanism-replay,secret-payment-replay,handbook,two-palettes,wind-frost-secrets,24-unit-clones");
     }
 
     private void python(String code) {

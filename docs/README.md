@@ -3,7 +3,7 @@
 - [GitHub Release发行流程](release-workflow.md)：正式包上传、双端验收、远程哈希校验与本地安装包清理。
 
 - [功法与秘术贯通](technique-secret-arts.md)：指定栏位显现、一次激活、永久成果、原突破／神识／劫战结算与对抗验收。
-- [62门功法秘术完整清单](technique-secret-catalog.md)：逐门功法、适用阶位、栏位、实际资源、养成前置与效果。
+- [107门功法秘术完整清单](technique-secret-catalog.md)：逐门功法、适用阶位、栏位、实际资源、养成前置与效果。
 - [3888部功法完整重命名](technique-name-rewrite-3888/README.md)：逐项完整书名、旧名新名对照、全目录重名校验与原效果保持。
 - [固定4258部功法实战接入](fixed-technique-combat.md)：逐书V3配方、玩家与原NPC法力、七部斗法配置、太元归墟剑升级及对抗测试。
 - [斗法资源与混合费用](combat-resource-costs.md)：低阶固定、同阶比例、越阶混合；普通出手、弱敌伤害与HP上限收益。
@@ -35,6 +35,7 @@
 - [NPC培养第三阶段](npc-development-stage3.md)：能源具体阶位与承载、四道途邻域培养、受控立绘和真实出手动画。
 
 - [傀儡能源与玩家供能](puppet-energy.md)：自供优先、唯一扣费、能源耐久与更换、自动／手动共用供能开关。
+- [分身类别与高阶劫战](clone-support.md)：不占队友名额、复用原资产培养、独立能源与完整度、劫战及续战；暂不开放获取。
 - [NPC高阶简化培养与傀儡供能](npc-development-upper.md)：四道途上境成长、转化不回满、三类傀儡专材与储能、第二阶段历史供能规则。
 
 - [NPC培养系统策划案](npc-development-design.md)：v0.2基线；统一成长与立绘、四道途专材、低成本目标及42项验收。
@@ -264,3 +265,7 @@
 - [本体机构经营与瑶池1.1](institution-ai-and-westward-110.md)
 - [v3.7.0发行说明](release-370.md)
 - [七部斗法功法与人物固定配置](duel-techniques.md)
+
+- [临岚天魔功与十万寒霜剑阵](wind-frost-techniques.md)
+
+- [v3.11.0 分身、风岚与霜剑发行说明](release-3110.md)

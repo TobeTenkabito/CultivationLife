@@ -45,6 +45,8 @@ from .technique_requirements import (
     combat_requirement_met, combat_requirement_display,
 )
 
+from .technique_evolution import evolve as evolve_technique, promotion_reason
+
 TECHNIQUE_MAX_LEVEL = 9
 TECHNIQUE_MANUAL_PREFIX = "technique_manual::"
 
@@ -301,6 +303,8 @@ def upgrade_known_technique(player: Player, technique_id: str) -> int:
         raise ValueError("你尚未掌握这部功法")
     if known.level >= TECHNIQUE_MAX_LEVEL:
         raise ValueError(f"《{known.name}》已经达到 Lv.{TECHNIQUE_MAX_LEVEL}")
+    if reason := promotion_reason(player, technique_id, known.level + 1):
+        raise ValueError(reason)
     if not remove_item(player, technique_manual_item_id(technique_id, known.level)):
         raise ValueError(f"升级《{known.name}》需要一份同名 Lv.{known.level} 传承玉简")
     new_level = known.level + 1
@@ -312,6 +316,7 @@ def upgrade_known_technique(player: Player, technique_id: str) -> int:
     for entry in [*player.known_techniques, *equipped]:
         if entry and entry.id == technique_id:
             entry.level = new_level
+            evolve_technique(entry)
     return new_level
 
 
@@ -370,6 +375,7 @@ def ensure_technique_set(player: Player) -> None:
             technique.ignore_possession_limit = bool(TECHNIQUE_CATALOG[technique.id].ignore_possession_limit)
         if technique:
             technique.level = levels_by_id[technique.id]
+            evolve_technique(technique)
     for technique in equipped:
         if technique and all(known.id != technique.id for known in player.known_techniques):
             player.known_techniques.append(copy.deepcopy(technique))
@@ -391,7 +397,11 @@ def assign_technique(player: Player, technique: Technique, slot: str) -> None:
     known = next((entry for entry in player.known_techniques if entry.id == technique.id), None)
     if known is not None:
         technique.level = max(technique.level, known.level)
+        evolve_technique(technique)
     validate_technique(technique)
+    from .technique_evolution import FROST, WIND
+    if technique.id in {FROST,WIND} and player.realm_index<technique.grade:
+        raise ValueError('境界不足以配置此功法')
     if player.path == "monster" and (slot == "transformation" or technique.category == "transformation"):
         raise ValueError("妖修以血脉本体进化，不能修炼或配置变化术")
     if technique.requires_immortal_power and not player.immortal_power_converted:
@@ -930,6 +940,7 @@ def public_player(player: Player) -> dict[str, Any]:
         if technique.level < TECHNIQUE_MAX_LEVEL:
             next_level = copy.copy(technique)
             next_level.level += 1
+            evolve_technique(next_level)
             result["next_level_gains"] = {
                 key: float(getattr(technique, key)) * (technique_scale(next_level, key) - technique_scale(technique, key))
                 for key in ("opportunity_bonus", "hp_bonus", "mp_bonus", "combat_bonus", "divine_sense_bonus")
@@ -953,6 +964,7 @@ def public_player(player: Player) -> dict[str, Any]:
             ],
             can_upgrade=(
                 technique.level < TECHNIQUE_MAX_LEVEL
+                and not promotion_reason(player, technique.id, technique.level + 1)
                 and not technique.id.endswith(':concordance')
                 and technique_copy_count(player, technique.id, technique.level) > 0
             ),

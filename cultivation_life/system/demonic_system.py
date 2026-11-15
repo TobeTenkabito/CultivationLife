@@ -97,7 +97,7 @@ def puppet_action(
         return deps.train_owned(game_id, puppet_id, "puppet", "cultivation", 1)
     game = deps._load(game_id)
     player = game.player
-    if not player.alive or game.pending_event or player.imprisonment:
+    if not player.alive or game.pending_event or game.active_trial or player.imprisonment:
         raise ValueError("当前状态无法培养傀儡")
     puppet = next((entry for entry in player.puppets if str(entry.get("id")) == puppet_id), None)
     if not puppet:
@@ -109,8 +109,8 @@ def puppet_action(
         from .npc_development.service import feed_pill
         result,summary='pill_fed',feed_pill(game,puppet_id,content_id)
     elif action == "technique":
-        if puppet.get("type") != "living":
-            raise ValueError("只有活傀能够更换功法")
+        if puppet.get("type") not in {"living","clone"}:
+            raise ValueError("只有活傀或分身能够更换功法")
         technique = next((entry for entry in player.known_techniques if entry.id == content_id), None)
         if not technique or technique.category != "spiritual":
             raise ValueError("需要选择已掌握的修仙功法")
@@ -137,7 +137,7 @@ def puppet_action(
             f"你消耗 {mp_cost:.0f} MP 重炼傀印，{puppet['name']}的控制度 +{actual_gain:.1f}。",
         )
     elif action == "devour":
-        if player.path != "demonic" or puppet.get("type") == "mechanical":
+        if player.path != "demonic" or puppet.get("type") not in {"corpse","living"}:
             raise ValueError("只有魔修能够吞噬炼尸或活傀")
         result, summary = deps._devour_puppet(game, puppet)
     elif action == "dismiss":
@@ -273,13 +273,16 @@ def _public_demonic_system(deps: DemonicViewDependencies, player: Player, game=N
         )
         condition = (
             max(0.0, min(1.0, float(entry.get("durability", 100.0)) / 100.0))
-            if kind == "mechanical" else
+            if kind in {"mechanical","clone"} else
             max(0.0, min(1.0, float(entry.get("corpse_integrity", 100.0)) / 100.0))
             if kind == "corpse" else 1.0
         )
         if not available or not can_deploy(player,entry):
             condition = 0.0
         contribution_mode = "队伍战力" if entry.get("type") == "living" else "本体战力"
+        if kind=='clone':
+            contribution_ratio=0.
+            contribution_mode='独立参战，不计入本体与组队战力'
         puppets.append(copy.deepcopy(entry) | {
             "usable": available,
             "operating_energy": energy_current(entry),

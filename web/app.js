@@ -3460,18 +3460,19 @@ function renderDemonicSystem(system) {
     const row = document.createElement('div'); row.className = 'puppet-row';
     const available = puppet.usable !== false;
     const control = puppet.type === 'living' ? ` · 控制度 ${number(puppet.control)}%` : '';
-    row.innerHTML = htmlText`<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}） · 主修《${puppet.main_technique_name}》${control}</small><small>能源耐久 ${number(puppet.operating_energy || 0)}/100 · 在培养窗口更换能源；能源阶差决定消耗，仙阶能源不能用于凡阶傀儡；玩家垫付受战斗设置控制。</small><small>下次培养机缘减免 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
+    const contribution = puppet.type === 'clone' ? '独立参战，不计入本体与组队战力；不占队友名额' : `${puppet.battle_contribution_mode || '战力贡献'} ${number(puppet.battle_contribution || 0)}（${percent(puppet.battle_contribution_ratio || 0)}）`;
+    row.innerHTML = htmlText`<b>${puppet.type_name} · ${puppet.name}</b><small>${puppet.realm_name} · 自身战力 ${number(puppet.combat_power)} · ${contribution} · 主修《${puppet.main_technique_name}》${control}</small><small>能源耐久 ${number(puppet.operating_energy || 0)}/100 · 在培养窗口更换能源；能源阶差决定消耗，仙阶能源不能用于凡阶傀儡；玩家垫付受战斗设置控制。</small><small>下次培养机缘减免 ${percent(puppet.breakthrough_bonus || 0)}${puppet.annual_opportunity ? ` · 每年机缘 +${Number(puppet.annual_opportunity).toFixed(1)}` : ''}</small>`;
     const tools = document.createElement('div'); tools.className = 'puppet-tools';
 
     if (!available) { const status=document.createElement('small');status.textContent='已毁坏或陨落 · 可解除';row.appendChild(status); }
     if (available && (system.pill_options || []).length && puppet.type !== 'mechanical') {
       const select = optionSelect(system.pill_options); tools.append(select, puppetButton('喂丹', puppet.id, 'pill', select));
     }
-    if (available && puppet.type === 'living' && (system.technique_options || []).length) {
+    if (available && ['living','clone'].includes(puppet.type) && (system.technique_options || []).length) {
       const select = optionSelect(system.technique_options); tools.append(select, puppetButton('更换功法', puppet.id, 'technique', select));
     }
     if (available && system.is_demonic && puppet.type === 'living') tools.appendChild(puppetButton(`加固控制（${number(system.control_mp_cost || 0)} MP）`, puppet.id, 'reinforce_control'));
-    if (available && system.is_demonic && puppet.type !== 'mechanical') tools.appendChild(puppetButton('吞噬', puppet.id, 'devour'));
+    if (available && system.is_demonic && ['corpse','living'].includes(puppet.type)) tools.appendChild(puppetButton('吞噬', puppet.id, 'devour'));
     tools.appendChild(puppetButton('解除', puppet.id, 'dismiss'));
     const dimensions=document.createElement('small');dimensions.textContent=`${puppet.form_name ? puppet.form_name+' · ' : ''}普通炼体 ${puppet.body_training||0}/100层 · 高阶肉身 ${puppet.immortal_body_level||0}层 · 神识 ${puppet.divine_sense_rank||0}阶`;row.append(dimensions);
     row.appendChild(tools); if (available) appendTraining(row, puppet, 'puppet'); if(puppet.portrait)window.NpcArt?.avatar(row,puppet.portrait,true); puppetList.appendChild(row);

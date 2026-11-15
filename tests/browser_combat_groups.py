@@ -16,7 +16,7 @@ from playwright.sync_api import sync_playwright
 from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from cultivation_life.ui_preferences import write_ui_preferences
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator,set_theme
 
 
 def fixture(engine, case, *, terrain='开阔', conditions=None, enemy_scale=1):
@@ -39,14 +39,19 @@ def fixture(engine, case, *, terrain='开阔', conditions=None, enemy_scale=1):
             game.player.party.append(dict(id=npc.id))
     elif case == 'display-cap':
         own = [('mechanical', None)] * 5
+    elif case in ('crowd-clones','crowd-overflow'):
+        own = [('clone','female'),('corpse','male'),('living','female'),('mechanical',None)]*3
+        own = own[:11] if case=='crowd-clones' else own+ [('clone','male')]*3
     for i, (kind, sex) in enumerate(own):
         game.player.puppets.append(dict(id=f'support-{i}', name=f'随行{i+1}', type=kind, gender=sex,
             combat_power=power*.23, realm_index=game.player.realm_index, alive=True,
             durability=100, corpse_integrity=100, control=100, path='dao'))
+        if kind=='clone':game.player.puppets[-1].update(layer=game.player.layer,age=30,race='human',
+            operating_energy=100,energy_source_id=f'npc_training_puppet_energy_rank_{game.player.realm_index}')
     total = sum(row.power * row.integrity for row in engine._player_combat_units(game))
     members = [dict(npc_id=f'group-foe-{i}', name=f'敌阵{i+1}', power=total*enemy_scale/3,
-                    realm_index=game.player.realm_index, kind='cultivator', path='dao', gender=('male','female','male')[i])
-               for i in range(1 if case in ('three-one','one-one') else 3)]
+                    realm_index=game.player.realm_index, kind='cultivator', path='dao', gender=('male','female','male')[i%3])
+               for i in range(12 if case=='crowd-clones' else 15 if case=='crowd-overflow' else 1 if case in ('three-one','one-one') else 3)]
     if case == 'companions-beasts':
         for row, name in zip(members, ('青翎灵鹫', '裂岩妖狼', '碧甲刀螳')):
             row.update(kind='beast', name=name)
@@ -85,21 +90,23 @@ def main():
                     page.goto(f'http://127.0.0.1:{http.server_port}')
                     page.wait_for_function('!!window.CombatReplay && !!configData')
                     page.evaluate('GameThemes.ready')
-                    for case in ('corpses', 'mechanical-living', 'companions-beasts', 'demonic-duplicates', 'display-cap', 'one-three', 'three-one'):
+                    for case in ('corpses', 'mechanical-living', 'companions-beasts', 'demonic-duplicates', 'display-cap', 'one-three', 'three-one','crowd-clones','crowd-overflow'):
+                        if case.startswith('crowd-'):set_theme(page,'dark' if case=='crowd-overflow' else 'light')
                         identity = fixture(engine, case)
                         page.evaluate('id=>loadGame(id)', identity)
                         navigation_locator(page, '#battle-report-open').click()
                         page.wait_for_function('CombatReplay.diagnostics().active && !document.querySelector("[data-combat-replay]").disabled')
                         before = engine.store._path(identity).read_bytes()
                         state = page.evaluate('CombatReplay.diagnostics()')
-                        assert len(state['participants']) == (4 if case in ('one-three', 'three-one') else 6)
-                        assert state['cache'] <= 36 and state['decodedBytes'] < 96*1024*1024
+                        assert len(state['participants']) == (24 if case.startswith('crowd-') else 9 if case=='display-cap' else 4 if case in ('one-three', 'three-one') else 6)
+                        assert state['cache'] <= 128 and state['decodedBytes'] < 96*1024*1024
                         assert page.evaluate('''async()=>{
                           const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);const r=game.last_combat_report;
                           const p=CombatReplay.build(r,A),sample=CombatReplay.sample;
                           for(const row of r.rounds){
                             const beats=p.rounds.filter(b=>b.number===row.round);
-                            const expected=(row.ordinary_exchange.actors.player?p.teams.hero.length:0)+(row.ordinary_exchange.actors.enemy?p.teams.npc.length:0);
+                            const paid=row.voisinage?.ordinary_attacks;
+                            const expected=['hero','npc'].reduce((n,side)=>n+(row.ordinary_exchange.actors[side==='hero'?'player':'enemy']?p.teams[side].filter(m=>!paid||paid[m.id]>0).length:0),0);
                             if(beats.length!==expected)return false;
                             for(const side of ['hero','npc']){
                               const turns=beats.filter(b=>b.side===side);if(!turns.length)continue;
@@ -124,12 +131,17 @@ def main():
                         # Seek each actual actor's attack contact and a guard response.
                         beats = page.evaluate('''async()=>{
                           const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();Object.assign(A.actors,(await(await fetch('/assets/pixel/hunt-beasts/manifest.json')).json()).actors);
-                          return CombatReplay.build(game.last_combat_report,A).rounds.slice(0,6).map(b=>b.contacts[0]+.04);
+                          const seen=new Set();return CombatReplay.build(game.last_combat_report,A).rounds.filter(b=>{const k=b.side+':'+b.actorIndex;if(seen.has(k))return false;seen.add(k);return true;}).map(b=>b.contacts[0]+.04);
                         }''')
                         requests.clear()
                         for width, height in ((1440,1080), (800,900), (390,844), (320,740)):
                             page.set_viewport_size(dict(width=width,height=height))
                             page.wait_for_timeout(90)
+                            if case.startswith('crowd-'):
+                                page.evaluate('CombatReplay.seek(0)')
+                                slots=page.evaluate('CombatReplay.diagnostics().participants')
+                                assert all(all(__import__('math').isfinite(v) for v in m['bounds']) for m in slots)
+                                assert len({(m['side'],tuple(m['bounds'])) for m in slots})==24
                             for at in [0, *beats, state['duration']]:
                                 page.evaluate('at=>CombatReplay.seek(at)', at)
                                 current = page.evaluate('CombatReplay.diagnostics()')

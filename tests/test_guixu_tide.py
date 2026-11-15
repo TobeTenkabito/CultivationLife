@@ -250,6 +250,19 @@ class GuixuTideTests(unittest.TestCase):
         with self.assertRaisesRegex(ContentError, "不得被其他内容表引用"):
             validate_guixu_catalog(catalog, CONTENT, documents)
 
+    def test_secret_prerequisite_does_not_add_an_acquisition_source(self):
+        validate_guixu_catalog(GUIXU_TIDE_CONTENT, CONTENT, CONTENT_DOCUMENTS)
+        linked = CONTENT_DOCUMENTS['secret_arts.json']['technique_arts']
+        self.assertTrue(any(row['technique_id'] in GUIXU_EXCLUSIVE_TECHNIQUE_IDS for row in linked))
+
+    def test_secret_reward_cannot_bypass_exclusive_acquisition_guard(self):
+        for field in ('reward', 'cost', 'unknown'):
+            documents = copy.deepcopy(CONTENT_DOCUMENTS)
+            documents['secret_arts.json']['technique_arts'][0][field] = {
+                'technique_id': next(iter(GUIXU_EXCLUSIVE_TECHNIQUE_IDS))}
+            with self.assertRaisesRegex(ContentError, '不得被其他内容表引用'):
+                validate_guixu_catalog(GUIXU_TIDE_CONTENT, CONTENT, documents)
+
     def test_enter_search_and_close_permanently_depletes_pool(self):
         game_id, dungeon = self._open_human_dungeon()
         entered = self.engine.guixu_action(game_id, "enter", {"dungeon_id": dungeon["id"]})

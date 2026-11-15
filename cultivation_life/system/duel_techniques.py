@@ -10,6 +10,9 @@ from .combat.actor_state import read, _write
 
 
 def player_reason(player, book):
+    from ..technique_evolution import FROST, WIND
+    if book.id in {FROST,WIND} and player.realm_index<book.grade:
+        return '境界不足以运转此功法'
     if book.category not in {'spiritual', 'body', 'divine_sense', 'transformation'}:
         return '此类功法不能选入斗法'
     if not book.active_in(player.world):
@@ -139,9 +142,10 @@ def npc_books(game, npc):
     books = []
     for key in selected:
         book = resolve(game, key)
-        if key in facts and book and npc_eligible(npc, book):
-            book.level = facts[key]
-            books.append(book)
+        if key in facts and book:
+            from ..technique_evolution import evolve
+            book.level = facts[key];evolve(book)
+            if npc_eligible(npc, book):books.append(book)
     return books
 
 

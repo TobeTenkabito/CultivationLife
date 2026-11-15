@@ -504,14 +504,16 @@ def _complete_monster_evolution(
 ) -> dict[str, Any]:
     player = game.player
     if not trial_completed and player.world == 'nether' and player.realm_index in {9, 10, 11}:
-        player.opportunity -= opportunity_required(player)
+        from ..cultivation_costs import breakthrough_cost
+        player.opportunity -= breakthrough_cost(player, upper_cultivation=False)
         deps._consume_breakthrough_aids(player, f'major:{player.realm_index}')
         player.awaiting_major_breakthrough = False
         deps._start_upper_trial(game, 'monster_upper', evolution=dict(candidate, id=evolution_id), lineage=prepared_lineage)
         game.updated_at = now_iso()
         deps.store.save(game)
         return deps.present(game)
-    required = opportunity_required(player)
+    from ..cultivation_costs import breakthrough_cost
+    required = breakthrough_cost(player, upper_cultivation=False)
     rng = trial_rng if trial_rng is not None else decode_rng(game.seed, game.rng_state)
     old_label = public_player(player)["realm_name"]
     old_node = MONSTER_EVOLUTIONS[player.monster_evolution_id]

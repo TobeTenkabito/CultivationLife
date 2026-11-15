@@ -30,6 +30,12 @@ def quote(game,kind,identity,axis,method='infuse',batches=1,*,_target=None,stock
     tier=TIERS.get(p.world,0)
     if not tier:raise ValueError('当前空间未开放NPC主动培养')
     cap={1:5,2:8,3:12}[tier]
+    if kind=='puppet':
+        from ...puppet_state import cultivation_cap
+        asset_cap=cultivation_cap(facts)
+        cap=min(cap,asset_cap)
+        if asset_cap<12 and axis=='cultivation' and (r,layer)>=(asset_cap,REALMS[asset_cap].layers):
+            raise ValueError(f'该分身已达{asset_cap}阶培养上限')
     if r>cap:raise ValueError('当前界面无法承载目标真实修为')
     upper_growth=axis=='cultivation' and (r>=9 or r==8 and layer>=REALMS[8].layers and tier==3)
     if upper_growth or axis=='conversion':require_upper(game,target,facts)
@@ -195,7 +201,7 @@ def teach(game,kind,identity,book_id,*,slot=None,family=False):
     book=next((t for t in game.player.known_techniques if t.id==book_id),None)
     if not book:raise ValueError('只能传授自己已掌握的功法')
     facts=normalize_facts(target.facts(game))
-    if kind=='puppet' and facts.get('type')!='living':raise ValueError('只有活傀能学习人物功法')
+    if kind=='puppet' and facts.get('type') not in {'living','clone'}:raise ValueError('只有活傀或分身能学习人物功法')
     root=facts.get('spirit_root')
     if root not in ROOT_DEFINITIONS or not can_practice_technique(root,book):raise ValueError('目标灵根未确认或无法修习此功法')
     if book.required_body_training>int(facts.get('body_training') or 0):raise ValueError('目标炼体尚未达到功法要求')
@@ -213,7 +219,7 @@ def teach(game,kind,identity,book_id,*,slot=None,family=False):
     if kind=='puppet':
         from ...content_registry import TECHNIQUE_CATALOG
         o=target.owner
-        if book.category!='spiritual':raise ValueError('活傀当前只支持主修功法')
+        if book.category!='spiritual':raise ValueError('活傀与分身当前只支持主修功法')
         previous=TECHNIQUE_CATALOG.get(o.get('main_technique_id'))
         base=o.get('technique_power_base',max(1.,o.get('combat_power',1)-(previous.combat_bonus*.1 if previous else 0)))
         scale=o.get('technique_power_scale',1.)

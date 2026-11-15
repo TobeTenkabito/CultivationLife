@@ -16,6 +16,9 @@ def refresh_player(player):
             if not book:continue
             original=TECHNIQUE_CATALOG.get(read(book,'id'))
             if not original or not original.combat_effect or original.combat_effect.get('version')!=3:continue
+            from ..technique_evolution import FROST, evolve
+            if original.id==FROST:
+                original=copy.deepcopy(original);original.level=read(book,'level',1);evolve(original)
             for key in ('combat_effect','description'):
                 value=getattr(original,key)
                 if read(book,key)!=value:

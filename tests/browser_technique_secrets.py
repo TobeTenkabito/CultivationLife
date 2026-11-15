@@ -142,6 +142,17 @@ def main():
                                 page.wait_for_function('!busy && !!game.trial?.active')
                                 assert button.is_disabled()
                                 assert engine.store.load(g.id).player.to_dict()==before
+                                # Newly added upper support book and ascension secret use this same UI.
+                                for identity in ('manual_gate_buddhist_9','manual_gate_confucian_8'):
+                                    g=prepare(engine,original,identity)
+                                    page.evaluate('async id=>loadGame(id)',g.id)
+                                    open_art(page,identity)
+                                    with page.expect_response(lambda r:r.url.endswith('/secret-art')) as added:
+                                        click_control(page.get_by_role('button',name='激活秘术',exact=True))
+                                    assert added.value.status==200
+                                    page.wait_for_function('(id)=>!busy && game.secret_arts.library.find(a=>a.id===id).activated',arg=identity)
+                                    assert page.locator('#secret-art-card').evaluate('e=>e.scrollWidth<=e.clientWidth+2')
+                                    page.screenshot(path=str(output/f'{identity}-{theme}-{width}.png'))
                                 assert not errors,errors
                                 page.close()
                     finally:browser.close()
@@ -149,7 +160,8 @@ def main():
     (output/'result.json').write_text(json.dumps(dict(passed=True,themes=2,layouts=3,
         checks=['real-activation','exact-five-materials','real-equip','hide-when-unequipped','resume-no-repayment',
                 'permanent-rank','duplicate-rejected','stale-page-recovered','event-click','busy-cleared',
-                'disabled-while-event','no-horizontal-overflow','stale-trial-equip-rejected','trial-equip-disabled']),indent=2),encoding='utf-8')
+                'disabled-while-event','no-horizontal-overflow','stale-trial-equip-rejected','trial-equip-disabled',
+                'new-upper-book-activation','new-ascension-secret-activation']),indent=2),encoding='utf-8')
     print('Technique secrets browser passed: six layouts, real activation/equip and stale-event recovery')
 
 

@@ -62,24 +62,28 @@ def start(deps: Dependencies, game, kind, *, evolution=None, lineage=None):
     target = dict(target_name=TITLES[kind][stage], target_power=power*sum(ratios), members=members,
                   target_realm_index=p.realm_index, target_layer=p.layer, combat_type='trial', objective='kill', enemy_objective='kill')
     units = [BattleUnit('player', p.name, 'player', power, p.realm_index, p.path, integrity=min(1., p.hp/max_hp(p)))]
+    from ...system import clone_support
+    clones=clone_support.units(game,trial=True)
+    units.extend(clones)
     original = bind_capabilities(game, units, target, WORLD_SYSTEMS['transcendent_combat']).battle
     own = original.units['player'].unit.capabilities
     actors = []
     for key, state in original.units.items():
         actor = state.unit
-        if key != 'player':
+        if actor.side == 'enemy':
             fields = tuple(replace(copied_field(f,copy_scale), id=f'{key}:{f.id}', attainment=f'{key}:{f.attainment}', name=f'{actor.name}·{f.name}') for f in source.voisinages) if stage else ()
-            actor = replace(actor, capabilities=replace(own, voisinages=fields,
+            actor = replace(actor, capabilities=replace(own, protect_ids=(), voisinages=fields,
                 attainments={f.attainment: 9 for f in fields}, semantic_rules=(),
                 investment=own.investment if fields else 0))
         actors.append(actor)
     battle = VoisinageBattle(actors)
     battle.escape_forbidden_sides = frozenset({'player', 'enemy'})
-    stats = PlayerCombatSystem._aggregate_stats(units, player=p, terrain_tags=['开阔'])
+    stats = PlayerCombatSystem._aggregate_stats([u for u in units if u.kind=='player'], player=p, terrain_tags=['开阔'])
     state = dict(mode='upper_final' if stage == 2 else 'upper_endurance', round=0,
                  mp_ratio=min(1., p.mp/max_mp(p)), stats={'player':stats, 'enemy':{k:v*sum(ratios) for k,v in stats.items()}})
     from ...system.technique_secret_rules import trial_stats
     trial_stats(p,state['stats']['player'])
+    clone_support.freeze_stats(state,clones)
     p.joint_companion_breakthrough = None
     game.active_trial = dict(kind=kind, major=True, lethal=True, old_label=public_player(p)['realm_name'],
         source_realm=p.realm_index, target_realm=p.realm_index+1, title=TITLES[kind][stage],
@@ -100,6 +104,8 @@ def resolve(deps: Dependencies, game, step, rng):
     before = battle.units['player'].body
     state = t['battle_state']
     result, rounds = run_batch(battle, state, rng)
+    from ...system import clone_support
+    clone_support.commit(game,battle,state)
     own = battle.units['player']
     p.hp = max(0, min(max_hp(p), p.hp+(own.body-before)*max_hp(p)))
     p.mp = min(p.mp, max_mp(p)*state['mp_ratio'])
@@ -115,7 +121,7 @@ def resolve(deps: Dependencies, game, step, rng):
         player_stats=state['stats']['player'], enemy_stats=state['stats']['enemy'],
         stat_comparison=[dict(key=k,name=n,player=state['stats']['player'][k],enemy=state['stats']['enemy'][k]) for k,n in
             [('might','威能'),('guard','防护'),('mobility','身法'),('sense','神识'),('sustain','续航'),('breach','破法')]],
-        player_roster=[dict(name=p.name,power=own.unit.power,kind_name='玩家')],
+        player_roster=clone_support.roster(battle,state),
         enemy_roster=[dict(name=s.unit.name,power=s.unit.power,kind_name='劫相') for s in battle.units.values() if s.unit.side=='enemy'],
         player_combat_state=own.unit.power*own.vitality, player_combat_state_max=own.unit.power,
         enemy_combat_state=battle.totals['enemy']*(1-battle.ordinary_loss('enemy')), enemy_combat_state_max=battle.totals['enemy'],

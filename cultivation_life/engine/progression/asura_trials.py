@@ -60,6 +60,9 @@ def initialize(game):
         objective='capture' if fusion else 'kill', enemy_objective='kill', members=members)
     units = [BattleUnit('player', p.name, 'player', trial['power'], p.realm_index, p.path,
                        integrity=min(1., p.hp / max_hp(p)))]
+    from ...system import clone_support
+    clones=clone_support.units(game,trial=True)
+    units.extend(clones)
     binding = bind_capabilities(game, units, target, WORLD_SYSTEMS['transcendent_combat'])
     original = binding.battle
     own = original.units['player'].unit.capabilities
@@ -67,7 +70,7 @@ def initialize(game):
     actors = []
     for key, state in original.units.items():
         actor = state.unit
-        if key != 'player':
+        if actor.side == 'enemy':
             index = int(key.split('-')[-1])
             has_field = specs[index][2]
             if fusion:
@@ -86,7 +89,7 @@ def initialize(game):
                     divine_lights=lights,divine_light_levels=levels,body_mechanisms=aggregates,
                     voisinages=(), semantic_rules=())
             else:
-                caps = replace(own, voisinages=tuple(copied_field(f,copy_scale) for f in copied.voisinages) if has_field else (),
+                caps = replace(own, protect_ids=(), voisinages=tuple(copied_field(f,copy_scale) for f in copied.voisinages) if has_field else (),
                     attainments=copied.attainments if has_field else {},
                     semantic_rules=copied.semantic_rules if has_field else (),
                     investment=own.investment if has_field else 0)
@@ -95,16 +98,16 @@ def initialize(game):
     battle = VoisinageBattle(actors)
     battle.escape_forbidden_sides = frozenset({'player', 'enemy'})
     stats = {side: PlayerCombatSystem._aggregate_stats(roster, player=p if side == 'player' else None, terrain_tags=['开阔'])
-             for side, roster in (('player', units), ('enemy', PlayerCombatSystem._enemy_units(target)))}
+             for side, roster in (('player', [u for u in units if u.kind=='player']), ('enemy', PlayerCombatSystem._enemy_units(target)))}
     if not fusion:
         # Snapshot all six actual ordinary attributes, including the player's
         # existing cultivation, and scale every opponent by the declared ratio.
         total_ratio = sum(ratio for _, ratio, _ in specs)
         stats['enemy'] = {k: v * total_ratio for k, v in stats['player'].items()}
-    if not fusion:
-        from ...system.technique_secret_rules import trial_stats
-        trial_stats(p,stats['player'])
+    from ...system.technique_secret_rules import trial_stats
+    trial_stats(p,stats['player'],major=not fusion)
     trial['battle_state'] = dict(mode=trial['kind'], round=0, mp_ratio=min(1., p.mp / max_mp(p)), stats=stats)
+    clone_support.freeze_stats(trial['battle_state'],clones)
     trial['snapshot'] = dump_battle(battle)
     trial['target'] = target
 
@@ -122,6 +125,8 @@ def resolve(deps: AsuraTrialDependencies, game, step, rng):
     before = battle.units['player'].body
     state = trial['battle_state']
     result, rounds = run_batch(battle, state, rng)
+    from ...system import clone_support
+    clone_support.commit(game,battle,state)
     own = battle.units['player']
     p.hp = max(0, min(max_hp(p), p.hp + (own.body - before) * max_hp(p)))
     p.mp = min(p.mp, max_mp(p) * state['mp_ratio'])
@@ -136,7 +141,7 @@ def resolve(deps: AsuraTrialDependencies, game, step, rng):
         player_stats=state['stats']['player'], enemy_stats=state['stats']['enemy'],
         stat_comparison=[dict(key=k, name=n, player=state['stats']['player'][k], enemy=state['stats']['enemy'][k])
                          for k,n in [('might','威能'),('guard','防护'),('mobility','身法'),('sense','神识'),('sustain','续航'),('breach','破法')]],
-        player_roster=[dict(name=p.name,power=own.unit.power,kind_name='玩家')],
+        player_roster=clone_support.roster(battle,state),
         enemy_roster=[dict(name=b.unit.name,power=b.unit.power,kind_name='劫相') for b in battle.units.values() if b.unit.side=='enemy'],
         age=p.age, battlefield_tags=['开阔'], natural_terrain='开阔', artificial_conditions=[],
         player_combat_state=own.unit.power*own.vitality, player_combat_state_max=own.unit.power,

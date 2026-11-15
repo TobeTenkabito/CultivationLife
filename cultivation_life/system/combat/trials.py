@@ -156,6 +156,8 @@ def run_batch(battle, state, rng, *, batch_size=24):
                             victim.suppressed = False
                             frame.events.append(f'你以可用的主战手段彻底斩灭{victim.unit.name}。')
             stats = copy.deepcopy(state['stats'])
+            from .trial_clones import contribute
+            contribute(battle,state,stats)
             semantic_factors = battle.semantic_ordinary_start()
             state['mp_ratio'] = battle.mp_ratio('player', state['mp_ratio'])
             for side in ('player', 'enemy'):

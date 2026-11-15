@@ -43,6 +43,9 @@ def verify(with_dlc):
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
             if '--techniques' in sys.argv:
+                extensions=config.get('extensions', [])
+                assert all(row['status']=='loaded' for row in extensions), extensions
+                assert bool(extensions)==with_dlc, extensions
                 from scripts.verify_technique_exe import verify_techniques
                 verify_techniques(base,with_dlc,folder)
                 return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,techniques_verified=True)

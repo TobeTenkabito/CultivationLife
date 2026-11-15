@@ -9,6 +9,9 @@ def verify(page, identity, output, label='domain'):
     before=page.evaluate('JSON.stringify(game)')
     state=page.evaluate('CombatReplay.diagnostics()')
     assert state['domainStages'], state
+    if label=='crowd':
+        assert len(state['participants'])==24
+        assert sum(a.get('visualVariant')=='clone' for a in state['teams']['hero'])==9
     assert page.evaluate('''async()=>{
       const A=await(await fetch('/assets/pixel/combat/manifest.json')).json();
       const p=CombatReplay.build(game.last_combat_report,A),s=CombatReplay.sample(p,p.duration);

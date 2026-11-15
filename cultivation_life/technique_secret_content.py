@@ -1,9 +1,9 @@
 """Finite, authored manual-to-secret-art links; no custom-manual inference."""
 SLOTS = {'main': '主修', 'support': '辅修', 'combat': '战斗'}
 EFFECTS = {'major_bonus', 'minor_bonus', 'body_bonus', 'sense_discount',
-           'cost_discount', 'heart_relief', 'sense_experience', 'sense_rank',
+           'cost_discount', 'ascension_guard', 'heart_relief', 'sense_experience', 'sense_rank',
            'trial_guard', 'trial_breach', 'trial_sustain', 'trial_sense',
-           'body_progress', 'qi_experience', 'art_experience'}
+           'body_progress', 'qi_experience', 'art_experience', 'clone_pair', 'frost_tribulation'}
 NATURES = {'metal', 'wood', 'water', 'fire', 'earth', 'wind', 'thunder', 'yin', 'yang'}
 
 
@@ -123,6 +123,55 @@ STATE_KINDS = {'manual_common_qi': ('major_bonus', 1),
  'manual_array_pivots': ('art_experience', 4),
  'manual_thunder_script': ('art_experience', 2),
  'manual_beast_breath': ('art_experience', 7)}
+
+# Reviewed major-breakthrough additions; original receipts keep their identity.
+STATE_KINDS.update({
+ 'manual_demon_dance': ('clone_pair', 4),
+ 'manual_frost_sky': ('frost_tribulation', 8),
+ 'manual_gate_dao_2': ('major_bonus', 2),
+ 'manual_gate_dao_5': ('major_bonus', 5),
+ 'manual_gate_dao_8': ('ascension_guard', 8),
+ 'manual_gate_demonic_1': ('major_bonus', 1),
+ 'manual_gate_demonic_3': ('major_bonus', 3),
+ 'manual_gate_demonic_6': ('major_bonus', 6),
+ 'manual_gate_demonic_7': ('major_bonus', 7),
+ 'manual_gate_demonic_8': ('ascension_guard', 8),
+ 'manual_gate_ghost_1': ('major_bonus', 1),
+ 'manual_gate_ghost_2': ('major_bonus', 2),
+ 'manual_gate_ghost_4': ('major_bonus', 4),
+ 'manual_gate_ghost_5': ('major_bonus', 5),
+ 'manual_gate_ghost_7': ('major_bonus', 7),
+ 'manual_gate_ghost_8': ('ascension_guard', 8),
+ 'manual_gate_monster_1': ('cost_discount', 1),
+ 'manual_gate_monster_2': ('cost_discount', 2),
+ 'manual_gate_monster_3': ('cost_discount', 3),
+ 'manual_gate_monster_4': ('cost_discount', 4),
+ 'manual_gate_monster_5': ('cost_discount', 5),
+ 'manual_gate_monster_6': ('cost_discount', 6),
+ 'manual_gate_monster_8': ('cost_discount', 8),
+ 'manual_gate_buddhist_1': ('major_bonus', 1),
+ 'manual_gate_buddhist_2': ('major_bonus', 2),
+ 'manual_gate_buddhist_3': ('major_bonus', 3),
+ 'manual_gate_buddhist_4': ('major_bonus', 4),
+ 'manual_gate_buddhist_5': ('major_bonus', 5),
+ 'manual_gate_buddhist_6': ('major_bonus', 6),
+ 'manual_gate_buddhist_7': ('major_bonus', 7),
+ 'manual_gate_buddhist_8': ('ascension_guard', 8),
+ 'manual_gate_buddhist_9': ('major_bonus', 9),
+ 'manual_gate_buddhist_10': ('major_bonus', 10),
+ 'manual_gate_buddhist_11': ('major_bonus', 11),
+ 'manual_gate_confucian_1': ('major_bonus', 1),
+ 'manual_gate_confucian_2': ('major_bonus', 2),
+ 'manual_gate_confucian_3': ('major_bonus', 3),
+ 'manual_gate_confucian_4': ('major_bonus', 4),
+ 'manual_gate_confucian_5': ('major_bonus', 5),
+ 'manual_gate_confucian_6': ('major_bonus', 6),
+ 'manual_gate_confucian_7': ('major_bonus', 7),
+ 'manual_gate_confucian_8': ('ascension_guard', 8),
+ 'manual_gate_confucian_9': ('major_bonus', 9),
+ 'manual_gate_confucian_10': ('major_bonus', 10),
+ 'manual_gate_confucian_11': ('major_bonus', 11),
+})
 
 def decode_records(value):
     import copy

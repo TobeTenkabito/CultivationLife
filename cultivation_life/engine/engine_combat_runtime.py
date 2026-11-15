@@ -59,6 +59,9 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
     second = unit(game)
     if second:
         units.append(second)
+    from ..system.clone_support import units as clone_units
+    units.extend(u for u in clone_units(game) if u.id not in (target or {}).get('exclude_allied_ids',[])
+                 and u.id not in {unit.id for unit in units})
     for puppet in player.puppets:
         kind = str(puppet.get("type", "mechanical"))
         if not usable_puppet(puppet, game) or not puppet_can_deploy(player,puppet) or kind not in {"mechanical", "corpse"}:

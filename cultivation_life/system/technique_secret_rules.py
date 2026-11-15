@@ -14,9 +14,9 @@ def equipped(player, art):
     if original is None or not any(t.id==original.id for t in player.known_techniques):return None
     slots={'main':[player.technique], 'support':[player.support_technique], 'combat':player.combat_techniques}
     book=next((t for t in slots[art['slot']] if t and t.id==original.id),None)
-    if (not book or player.realm_index<original.grade or not original.active_in(player.world)
+    if (not book or player.realm_index<book.grade or not original.active_in(player.world)
             or not can_player_practice_technique(player,original)
-            or original.requires_immortal_power and not player.immortal_power_converted
+            or book.requires_immortal_power and not player.immortal_power_converted
             or player.body_training<original.required_body_training):return None
     if art["slot"] == "combat" and not combat_requirement_met(original.combat_requirements, qi_levels(player)):
         return None
@@ -39,8 +39,28 @@ def bonus(player, effect):
     return min(.25,total) if effect.endswith('discount') else total
 
 
-def trial_stats(player, stats):
+def trial_stats(player, stats, *, major=True):
     """Apply once when a real major-tribulation snapshot is constructed."""
-    for stat in ('guard','breach','sustain','sense'):
-        stats[stat]*=1+min(.15,bonus(player,'trial_'+stat))
+    frost = frost_bonus(player, immortal=True)
+    for stat in ('might','mobility','guard','breach','sustain','sense'):
+        extra = bonus(player, 'major_bonus') if major and stat == 'guard' and 9 <= player.realm_index <= 11 else 0.
+        specific=bonus(player,'trial_'+stat) if major else 0.
+        stats[stat]*=1+min(.15,specific + extra + frost)
+
+
+def frost_bonus(player, *, immortal=False):
+    if not player.alive or player.cultivation_suppression or player.sealed_cultivation:return 0.
+    from .possession_system import is_possessed
+    if is_possessed(player):return 0.
+    art=catalog().get('manual_frost_sky')
+    if not art or not player.secret_art_state.get('manuals',{}).get(art['id'],{}).get('activated'):return 0.
+    book=equipped(player,art)
+    if not book or (book.level>=7)!=immortal:return 0.
+    return .04 if immortal else art['value']
+
+
+def major_probability_bonus(player):
+    """Optional upper trials fall back to the original probability route."""
+    extra = sum(bonus(player, 'trial_' + stat) for stat in ('guard','breach','sustain','sense')) if 9 <= player.realm_index <= 11 else 0.
+    return bonus(player, 'major_bonus') + min(.15, extra)
 

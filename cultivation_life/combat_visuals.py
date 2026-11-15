@@ -56,7 +56,7 @@ def _team_visuals(game, target, hero, player_units=None):
         eligible = [row for row in rows if float(row.get('integrity', 1)) > 0 and float(row.get('power', 1)) > 0]
         counts[side] = len(eligible)
         team = []
-        for row in eligible[:3]:
+        for row in eligible[:12]:
             key, kind = str(row['id']), str(row.get('kind', 'cultivator'))
             facts = {**allies.get(key, {}), **party.get(key, {}), **puppets.get(key, {}), **row}
             source_id = str(facts.get('source_npc_id') or facts.get('npc_id') or
@@ -98,6 +98,8 @@ def _team_visuals(game, target, hero, player_units=None):
                 weight=round(max(.001, float(row.get('power', 1)) * float(row.get('integrity', 1))), 4))
             if variant in MIRROR_VARIANTS:
                 member['visual_variant'] = variant
+            elif kind == 'clone':
+                member['visual_variant'] = 'clone'
             from .system.divine_lights import visual_lights
             lights = (visual_lights(game.player, player=True) if kind == 'player' or variant in MIRROR_VARIANTS
                       else visual_lights(person or cached or facts) if kind not in {'mechanical', 'corpse'} else [])

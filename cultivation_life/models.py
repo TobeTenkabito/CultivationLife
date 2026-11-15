@@ -145,6 +145,8 @@ class Technique:
             from .technique_effect_schema import validate_effect
             self.combat_effect = validate_effect(self.combat_effect)
         self.level = max(1, min(9, int(self.level)))
+        from .technique_evolution import evolve
+        evolve(self)
         # 旧存档与未显式标注的内容按道统补齐先天“源”；一旦写入存档，
         # sources 就成为功法自身的固定数据，不随角色所在界面改变。
         if not self.sources:

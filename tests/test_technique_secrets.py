@@ -28,19 +28,19 @@ def prepare(engine, original, identity, *, resources=True):
     g=copy.deepcopy(original);p=g.player;art=catalog()[identity]
     g.pending_event=g.active_trial=None
     p.realm_index=art['realm'];p.layer=1;p.path=TECHNIQUE_CATALOG[art['technique_id']].path
-    p.world=('human' if p.realm_index<=5 else {'dao':'spirit','demonic':'true_demon','ghost':'hell','monster':'monster_realm'}[p.path]) if p.realm_index<9 else {'dao':'celestial','demonic':'asura','ghost':'reincarnation','monster':'nether'}[p.path]
+    p.world=('human' if p.realm_index<=5 else {'dao':'spirit','demonic':'true_demon','ghost':'hell','monster':'monster_realm','buddhist':'spirit','confucian':'spirit'}[p.path]) if p.realm_index<9 else {'dao':'celestial','demonic':'asura','ghost':'reincarnation','monster':'nether','buddhist':'celestial','confucian':'celestial'}[p.path]
     p.location_id=engine.maps.normalize_location(p.world,None)
     p.immortal_power_converted=True;p.immortal_conversion_stage=5
     p.asura_cultivation.update(conversion=5)
     p.additional_roots=['metal','wood','water','fire','earth','wind','thunder','yin','yang']
     p.body_training=80;p.divine_sense_rank=40;p.divine_sense_experience=500
     p.heart_demon=50;p.qi_experience={k:0 for k in ('spirit','demon','monster','yin')}
-    p.qi_experience[{'dao':'spirit','demonic':'demon','ghost':'yin','monster':'monster'}[p.path]]=1000000
+    p.qi_experience[{'dao':'spirit','demonic':'demon','ghost':'yin','monster':'monster','buddhist':'spirit','confucian':'spirit'}[p.path]]=1000000
     p.opportunity=1e12;p.inventory=[];p.formation_materials=[];p.crafting_materials=[]
     p.formation_active_bindings=[];p.formation_ground_arrays=[]
     p.secret_art_state={};p.technique=p.support_technique=None;p.combat_techniques=[];p.known_techniques=[]
     p.sealed_cultivation=p.cultivation_suppression=None
-    book=copy.deepcopy(TECHNIQUE_CATALOG[art['technique_id']]);book.level=9
+    book=copy.deepcopy(TECHNIQUE_CATALOG[art['technique_id']]);book.level=6 if book.id=='TECH_HUNDRED_THOUSAND_FROST' else 9
     learn_technique(p,book);assign_technique(p,book,art['slot'])
     if art['effect']=='body_progress':
         body=copy.deepcopy(next(t for t in TECHNIQUE_CATALOG.values() if t.category=='body' and t.grade<=p.realm_index))
@@ -80,6 +80,10 @@ def test_every_authored_art_activates_through_real_command_once_and_roundtrips(b
     elif art['effect']=='body_progress':assert p.body_progress==pytest.approx(q['growth']['before']+q['growth']['gain'])
     elif art['effect']=='qi_experience':assert p.qi_experience[art['target']]==pytest.approx(q['growth']['before']+q['growth']['gain'])
     elif art['effect']=='art_experience':assert p.art_experience[art['target']]==pytest.approx(q['growth']['before']+q['growth']['gain'])
+    elif art['effect']=='clone_pair':assert len([a for a in p.puppets if a.get('source_secret')==identity])==2
+    elif art['effect']=='frost_tribulation':
+        from cultivation_life.system.technique_secret_rules import frost_bonus
+        assert frost_bonus(p)==pytest.approx(.07)
     else:assert bonus(p,art['effect'])==pytest.approx(art['value'])
     before=e.store._path(g.id).read_bytes()
     with pytest.raises(ValueError):act(e,g,identity)
@@ -272,7 +276,7 @@ def test_real_major_trials_apply_once_without_buffing_copies_and_resume(family,r
     art=next(a for a in catalog().values() if a['realm']==realm and a['effect'].startswith('trial_') and TECHNIQUE_CATALOG[a['technique_id']].path==path)
     original=calibration.configure_field;enabled=False
     def configure(game,*args):
-        result=original(game,*args);book=copy.deepcopy(TECHNIQUE_CATALOG[art['technique_id']]);book.level=9
+        result=original(game,*args);book=copy.deepcopy(TECHNIQUE_CATALOG[art['technique_id']]);book.level=6 if book.id=='TECH_HUNDRED_THOUSAND_FROST' else 9
         game.player.qi_experience[{'dao':'spirit','demonic':'demon','ghost':'yin','monster':'monster'}[path]]=1000000
         learn_technique(game.player,book);assign_technique(game.player,book,art['slot'])
         if enabled:game.player.secret_art_state=dict(schema_version=1,revision=1,arts={},manuals={art['id']:dict(activated=True,realms=[])})

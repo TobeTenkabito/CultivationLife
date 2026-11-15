@@ -55,6 +55,9 @@ def quote(player, target, axis, batches=1, *, legacy_costs=True, upper_simplifie
                 previous_realm = r
                 if (r, l) >= (player.realm_index, player.layer):
                     break
+                from ...puppet_state import cultivation_cap
+                cap=cultivation_cap(target)
+                if (r,l)>=(cap,REALMS[cap].layers):break
                 if l >= REALMS[r].layers:
                     r, l = r + 1, 1
                 else:

@@ -422,9 +422,13 @@ def _tribulation_damage_reduction(deps: TrialDependencies, player: Player, kind:
     one_time = player.next_thunder_damage_reduction if kind in {"periodic_thunder", "celestial_ascension", "asura_ascension"} else 0.0
     sage_key = "thunder_tribulation_reduction" if kind == "periodic_thunder" else "heavenly_tribulation_reduction"
     sage_reduction = max(0.0, float(player.sage_effects.get(sage_key, 0.0)))
+    from ...system.technique_secret_rules import bonus as secret_bonus
+    manual_reduction = min(.15, secret_bonus(player, 'ascension_guard')) if kind in {'celestial_ascension', 'asura_ascension'} else 0.
+    from ...system.technique_secret_rules import frost_bonus
+    manual_reduction += frost_bonus(player) if kind in {'heavenly','periodic_thunder','celestial_ascension','asura_ascension'} else 0.
     return min(
         0.75,
-        item_reduction + deps._body_tribulation_damage_reduction(player) + one_time + sage_reduction
+        item_reduction + deps._body_tribulation_damage_reduction(player) + one_time + sage_reduction + manual_reduction
         + modifier(player, "thunder_damage_reduction", 0.0, kind=kind),
     )
 

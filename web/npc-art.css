@@ -1,6 +1,9 @@
 .npc-art-avatar{float:left;width:48px;height:48px;margin:0 10px 6px 0;padding:0;border:1px solid var(--line);background:transparent;cursor:pointer;flex-shrink:0}
 .npc-art-portrait{width:48px;height:48px;object-fit:contain;image-rendering:pixelated;display:block}
 .npc-art-figure{width:256px;height:auto;max-width:100%;object-fit:contain;image-rendering:pixelated;display:block}
+.npc-art-clone{opacity:.62;filter:grayscale(1) sepia(1) saturate(2.4) hue-rotate(155deg) blur(.65px) drop-shadow(0 0 3px #83bde8);}
+.npc-art-portrait.npc-art-clone{filter:grayscale(1) sepia(1) saturate(2.4) hue-rotate(155deg) blur(.3px) drop-shadow(0 0 2px #83bde8);}
+.npc-art-profile .npc-art-figure.npc-art-clone{background:transparent;}
 .npc-art-portrait[hidden],.npc-art-figure[hidden],#npc-event-art[hidden]{display:none}
 .npc-art-person .npc-art-portrait{float:left;margin:0 8px 4px 0}
 .roster-identity:has(>.npc-art-avatar){display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:10px}.roster-identity>.npc-art-avatar{grid-column:1;grid-row:1;margin:0}.roster-identity:has(>.npc-art-avatar)>.roster-heading{grid-column:2;min-width:0}.roster-identity:has(>.npc-art-avatar)>.roster-biography,.roster-identity:has(>.npc-art-avatar)>.roster-status{grid-column:1/-1}

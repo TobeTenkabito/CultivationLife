@@ -69,9 +69,10 @@ def test_preview_injection_and_blocked_combat_do_not_grant_intelligence(fight):
 
 def test_same_artifact_once_per_actual_fight_and_all_real_opponents_not_display_cap(fight):
     engine, game, artifact_id, holder, target = fight
-    definitions = game.tianji_state['artifacts'][:5]
-    people = [n for n in game.world_npcs.values() if n.alive and n.world==game.player.world][:5]
-    assert len(people)==5
+    definitions = game.tianji_state['artifacts'][:13]
+    candidates = [*game.world_npcs.values(), *(n for sect in game.sects.values() for n in sect.npcs)]
+    people = list({n.id:n for n in candidates if n.alive and n.world==game.player.world}.values())[:13]
+    assert len(people)==len(definitions)==13
     game.tianji_state['holders'] = {r['id']:dict(npc_id=n.id,kind='replica',replica_ratio=.3,world=game.player.world)
                                     for r,n in zip(definitions,people)}
     game.tianji_state['knowledge'] = {r['id']:2 for r in definitions}
@@ -83,7 +84,8 @@ def test_same_artifact_once_per_actual_fight_and_all_real_opponents_not_display_
     for repeat in range(2):
         engine._combat(game, copy.deepcopy(target), False, random.Random(65))
         assert all(game.tianji_state['knowledge'][r['id']] == 3+repeat for r in definitions)
-    assert len(game.last_combat_report['visual']['teams']['npc']) == 3
+    assert len(game.last_combat_report['enemy_roster']) == 13
+    assert len(game.last_combat_report['visual']['teams']['npc']) == 12
 
 
 def test_disabled_and_nonparticipating_holders_are_not_revealed(fight):

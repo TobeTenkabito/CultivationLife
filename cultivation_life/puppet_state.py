@@ -4,7 +4,7 @@ from .relationship_records import find_person
 
 def usable(puppet, game=None):
     # Control can naturally decay to zero without destroying the living body.
-    condition = {'corpse': 'corpse_integrity', 'mechanical': 'durability'}
+    condition = {'corpse': 'corpse_integrity', 'mechanical': 'durability', 'clone': 'durability'}
     if not puppet.get('alive', True) or float(puppet.get(condition.get(puppet.get('type')), 100)) <= 0:
         return False
     if game is not None and puppet.get('type') == 'living' and puppet.get('source_npc_id'):
@@ -23,3 +23,10 @@ def training_facts(game, puppet):
             row.setdefault('age', source.age)
             row.setdefault('lifespan', source.lifespan)
     return row
+
+
+DANCE_IDS = ('clone_linlan_wind', 'clone_linlan_demon')
+
+
+def cultivation_cap(asset):
+    return 8 if asset.get('type')=='clone' and (asset.get('source_secret')=='manual_demon_dance' or asset.get('id') in DANCE_IDS) else 12

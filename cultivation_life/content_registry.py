@@ -176,6 +176,16 @@ def validate_guixu_catalog(
     for name, other_document in documents.items():
         if name in definition_documents:
             continue
+        if name == "secret_arts.json":
+            # An equipped-book prerequisite consumes no book and grants no book.
+            # Exempt only that schema field; rewards and every other reference
+            # remain subject to the exclusive-acquisition guard below.
+            other_document = dict(other_document)
+            other_document['technique_arts'] = [
+                {key: value for key, value in row.items()
+                 if key != 'technique_id' or not isinstance(value, str) or value not in registry.techniques}
+                for row in other_document.get('technique_arts', [])
+            ]
         leaked = exclusive_content_ids.intersection(scalar_strings(other_document))
         if leaked:
             raise ContentError(

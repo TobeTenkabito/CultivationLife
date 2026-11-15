@@ -3,7 +3,7 @@
   'use strict';
   function createDuelRenderer(A,T,extension={}){
   const {clamp,between,mix}=T,TAU=Math.PI*2;
-  const cache=new Map(),pending=new Map(),maxCache=36;
+  const cache=new Map(),pending=new Map(),maxCache=128,smallAtlases=new Set(),atlasRatios=new Map();
   const abort=new AbortController();
   const variants=window.ActorVariants?.create();
   let disposed=false;
@@ -14,7 +14,14 @@
     if(cache.has(path)){const im=cache.get(path);cache.delete(path);cache.set(path,im);return Promise.resolve(im);}
     if(pending.has(path))return pending.get(path);
     const p=fetch(path,{signal:abort.signal}).then(r=>{if(!r.ok)throw Error('Missing image: '+path);return r.blob();})
-      .then(blob=>createImageBitmap(blob)).then(im=>{
+      .then(blob=>createImageBitmap(blob)).then(async im=>{
+        if(smallAtlases.has(path)&&!disposed){
+          const w=im.width,h=im.height;
+          let small;
+          try{small=await createImageBitmap(im,{resizeWidth:Math.max(1,Math.floor(w/2)),resizeHeight:Math.max(1,Math.floor(h/2)),resizeQuality:'pixelated'});}
+          finally{im.close();}
+          im=small;atlasRatios.set(path,{x:im.width/w,y:im.height/h});
+        }
         if(disposed){im.close();return null;}cache.set(path,im);
         while(cache.size>maxCache){const key=cache.keys().next().value;cache.get(key).close();cache.delete(key);}return im;
       }).finally(()=>pending.delete(path));
@@ -33,8 +40,16 @@
   function resize(s,available){
     const zoom=available>=960?2:1,w=Math.floor(available/zoom);
     const panorama=s.panoramic&&available>=900;
-    const scale=panorama?(s.multi?.375:.5):(s.multi?(w<340?.5:w<440?.625:.75):(w<280?.375:w<340?.5:w<440?.625:.75));
-    const h=panorama?(s.multi?Math.ceil(515*scale+35):180):(s.multi?Math.ceil(515*scale+50):(w<340?220:w<440?258:300));
+    let scale=panorama?(s.multi?.375:.5):(s.multi?(w<340?.5:w<440?.625:.75):(w<280?.375:w<340?.5:w<440?.625:.75));
+    let h=panorama?(s.multi?Math.ceil(515*scale+35):180):(s.multi?Math.ceil(515*scale+50):(w<340?220:w<440?258:300));
+    const count=Math.max(s.teamSizes?.hero??1,s.teamSizes?.npc??1);
+    s.crowded=count>3;s.columns=count>8?3:2;s.rows=Math.ceil(count/s.columns);
+    if(s.crowded){
+      // Reserve separate cells for both sides and a central action corridor.
+      const cell=w*.40/s.columns;
+      scale=Math.min(panorama?.25:.55,cell/220);
+      h=Math.ceil(Math.max(panorama?245:300,s.rows*220*scale+105));
+    }
     s.width=w;s.height=h;s.zoom=zoom;s.scale=scale;
     s.ground=s.battlefield?.ground_ratio!=null?Math.round(h*s.battlefield.ground_ratio):h-25;
     s.canvas.width=w*zoom;s.canvas.height=h*zoom;s.canvas.style.width=w*zoom+'px';s.canvas.style.height=h*zoom+'px';
@@ -63,9 +78,10 @@
   }
   function geometry(s,state){
     const teams=Object.fromEntries(['hero','npc'].map(side=>[side,state.teams[side].map((v,i)=>{
-      const ratio=s.multi?[.31,.15,.23][i]:(A.actors[v.id].home_ratio??(side==='hero'?.24:.76));
+      const ratio=s.crowded?.45-(i%s.columns+.5)*.40/s.columns:s.multi?[.31,.15,.23][i]:(A.actors[v.id].home_ratio??(side==='hero'?.24:.76));
       const home=s.multi?(side==='hero'?ratio:1-ratio):ratio;
-      return info({...v,x:Math.round(s.width*home),y:s.ground-(s.multi?i*135*s.scale:0)});
+      const row=s.crowded?Math.floor(i/s.columns):i;
+      return info({...v,x:Math.round(s.width*home),y:s.ground-(s.multi?row*(s.crowded?220:135)*s.scale:0)});
     })]));
     const hero=teams.hero[0],npc=teams.npc[0],participants=[...teams.hero,...teams.npc];
     for(const v of participants)v.barrier=barrier(v,s,state);
@@ -92,6 +108,7 @@
         }
         const goal=contact-attacker.dir*reach;
         attacker.x=Math.round(mix(attacker.x,goal,close));
+        if(s.crowded)attacker.y=mix(attacker.y,defender.y,close);
       }
     }
     const motion={hero,npc,teams,participants,attacker,defender,contact,hitY};
@@ -111,7 +128,8 @@
     c.save();c.translate(Math.round(v.x),v.y);c.scale(v.dir*(v.group.facing??1),1);c.imageSmoothingEnabled=false;
     const [cw,ch]=v.group.cell??v.actor.cell??A.cell;
     const rect=v.group.rects?.[v.index]??[v.index%8*cw,Math.floor(v.index/8)*ch,cw,ch,0,0];
-    c.drawImage(im,rect[0],rect[1],rect[2],rect[3],
+    const ratio=atlasRatios.get(v.group.sheet)??{x:1,y:1};
+    c.drawImage(im,rect[0]*ratio.x,rect[1]*ratio.y,rect[2]*ratio.x,rect[3]*ratio.y,
       (rect[4]-v.anchor[0])*s.scale,(rect[5]-v.anchor[1])*s.scale,rect[2]*s.scale,rect[3]*s.scale);c.restore();
   }
   function projectClip(c,m,s,draw){
@@ -201,6 +219,7 @@
     planSeal=plan.natalIcon;
     const optional=new Set();
     const needed=[plan.battlefield?.file??A.terrace];if(planSeal)needed.push(planSeal);
+    const crowded=Math.max(plan.teams.hero.length,plan.teams.npc.length)>3;
     for(const side of ['hero','npc'])for(const [slot,member] of plan.teams[side].entries()){
       const id=member.asset,actor=A.actors[id];
       const historical=window.HistoricalEffects?.sheetFor(actor);
@@ -210,8 +229,8 @@
       if(actor.cast_effect==='tidal_wave'&&window.TideEffects)needed.push(TideEffects.sheet);
       const moves=actor.role==='hero'?[...new Set(plan.rounds.filter(r=>r.side===side&&r.actorIndex===slot).map(r=>r.action))]:['attack'];
       if(plan.domains?.length)moves.push(actor.role==='hero'?(actor.domain_action??(id.startsWith('demonic')?'blast':'dragon')):'attack');
-      for(const mode of ['idle','hit','brace',...moves])needed.push(actor.animations[mode].sheet);
-      if(plan.defeat?.side===side)needed.push(actor.animations.defeat.sheet);
+      const modes=['idle','hit','brace',...moves,...(plan.defeat?.side===side?['defeat']:[])];
+      for(const mode of modes){const sheet=actor.animations[mode].sheet;needed.push(sheet);if(crowded)smallAtlases.add(sheet);}
     }
     // Keep only the current duel's resources; do not decode the whole roster.
     for(const key of [...cache.keys()])if(!needed.includes(key)){cache.get(key).close();cache.delete(key);}
@@ -219,6 +238,7 @@
     for(const path of new Set(needed)){
       if(disposed)return;
       try{await load(path);}catch(error){if(!optional.has(path))throw error;}
+      if([...cache.values()].reduce((n,im)=>n+im.width*im.height*4,0)>96*1024*1024)throw Error('Combat decode budget exceeded');
     }
     if([...cache.values()].reduce((n,im)=>n+im.width*im.height*4,0)>96*1024*1024)throw Error('Combat decode budget exceeded');
     return needed;
@@ -279,6 +299,7 @@
       if(options.effects!==false)guard(s,v,time);
     }
     if(options.effects!==false){effects(s,m,state);
+      window.TechniqueFx?.draw(context(s.front),s,m,state);
       window.CombatDomains?.draw(context(s.domainRear),s,m,state.domain,time,false);
       window.CombatDomains?.draw(context(s.domainFront),s,m,state.domain,time,true);
     }
@@ -300,7 +321,7 @@
   }
   function dispose(s){
     if(disposed)return;
-    disposed=true;abort.abort();variants?.dispose();for(const im of cache.values())im.close();cache.clear();pending.clear();
+    disposed=true;abort.abort();variants?.dispose();for(const im of cache.values())im.close();cache.clear();pending.clear();smallAtlases.clear();atlasRatios.clear();
     if(s){for(const key of layers){s[key].width=s[key].height=0;}s.canvas.width=s.canvas.height=0;s.state=s.motion=null;}
   }
   return {create,resize,prepare,render,dispose,cacheSize:()=>cache.size,geometry,
