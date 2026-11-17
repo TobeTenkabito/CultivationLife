@@ -67,7 +67,7 @@
       "event_id":"EVT_TWO_REALMS_004","target_name":"玄烬化身与界种风暴","natural_terrain":"开阔","artificial_conditions":["禁神识"],
       "enemy_members":[{"name":"玄烬化身","share":0.66,"path":"demonic","realm_offset":1,"full_power_multiplier":0.82},{"name":"真魔界门","share":0.20,"path":"demonic","kind":"environment"},{"name":"界种灵潮","share":0.14,"path":"dao","kind":"environment"}],
       "player_allies":[{"name":"绯月圣祖","power_ratio":0.16,"path":"demonic","realm_offset":1,"full_power_multiplier":1.18,"exclude_choices":["attack"]}],
-      "story_beats":["玄烬催动降界通道补充魔气，荒原被魔焰覆盖。","绯月圣祖揭露界种并非无药可救，并以本命月轮斩断玄烬退路。","两位圣祖的法则碰撞，你寻找化身与本体之间最薄弱的魔念。","降界节点崩溃，玄烬不计代价突围；两界也终于有了和谈的理由。"]
+      "story_beats":["玄烬催动降界通道补充魔气，荒原被魔焰覆盖。","绯月圣祖道出救治界种之法，并以本命月轮斩断玄烬退路。","两位圣祖的法则碰撞，你寻找化身与本体之间最薄弱的魔念。","降界节点崩溃，玄烬不计代价突围；两界也终于有了和谈的理由。"]
     },
     {
       "event_id":"EVT_BITTER_ISLAND_002","target_name":"罡风海巡弋战群","natural_terrain":"开阔","artificial_conditions":["禁神识"],

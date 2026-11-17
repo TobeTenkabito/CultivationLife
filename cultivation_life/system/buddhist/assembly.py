@@ -105,7 +105,8 @@ def _finish_buddhist_assembly(deps: BuddhistAssemblyDependencies, game, rng=None
     site["followers"] = max(floor, (site["followers"] + delta) * retained_followers)
     delta = round(site["followers"] - before_followers)
     set_dharma_karma(game, state["dharma_karma"] + reward["karma"])
-    game.player.fame = max(0, game.player.fame + reward["fame"])
+    from ...reputation import record
+    record(game.player, f"assembly:{session['world']}:{session['location']}:{game.player.age}:{session.get('started_age', '')}", reward["renown"], "弘法法会评价")
     text = f"法会{reward['name']}，评价 {score:.1f}，信众 {delta:+}，业力 {reward['karma']:+}。"
     if intervention:
         text += f"因未获许可，{'、'.join(intervention)}干预了此次弘法。"

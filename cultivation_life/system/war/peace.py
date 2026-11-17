@@ -275,7 +275,7 @@ def war_peace(deps: WarPeaceDependencies, game_id: str, war_id: str, term: str, 
     player_side = deps._player_war_side(game, war)
     beneficiary = ("defender" if player_side == "attacker" else "attacker") if concede else player_side
     if not beneficiary:
-        raise ValueError("你并非参战方")
+        raise ValueError("请由参战方提出议和")
     effective_score = float(war.get("war_score", 0)) * (1 if beneficiary == "attacker" else -1)
     cost = deps.WAR_TERM_DEFS[term][1]
     loser = "defender" if beneficiary == "attacker" else "attacker"

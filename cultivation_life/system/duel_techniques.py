@@ -13,7 +13,7 @@ def player_reason(player, book):
     from ..technique_evolution import FROST, WIND
     if book.id in {FROST,WIND} and player.realm_index<book.grade:
         return '境界不足以运转此功法'
-    if book.category not in {'spiritual', 'body', 'divine_sense', 'transformation'}:
+    if book.category != 'spiritual':
         return '此类功法不能选入斗法'
     if not book.active_in(player.world):
         return '此功法在当前界面不生效'
@@ -37,6 +37,8 @@ def select(player, identity, *, remove=False):
             raise ValueError('这部功法未选入斗法')
         chosen.remove(identity)
     else:
+        obsolete = {t.id for t in player.combat_techniques if t.category != 'spiritual'}
+        chosen = [key for key in chosen if key not in obsolete]
         book = next((t for t in player.combat_techniques if t.id == identity), None)
         if book is None:
             raise ValueError('须先成功装备为战斗功法，才能选入斗法')
@@ -63,12 +65,7 @@ def npc_eligible(npc, book):
         root_allowed = can_practice_technique(read(npc, 'spirit_root', ''), book)
     except KeyError:
         root_allowed = False
-    if book.category=='transformation':
-        from .technique_context import context
-        if not context(npc)['form']:return False
-    if book.category=='body' and (read(npc,'spirit_state',{}) or {}).get('mode')=='wandering':return False
-    return (book.category in {'spiritual', 'body', 'divine_sense', 'transformation'}
-            and (book.category != 'transformation' or read(npc, 'path') != 'monster')
+    return (book.category == 'spiritual'
             and 1 <= book.grade <= read(npc, 'realm_index', read(npc, 'target_realm_index', 0))
             and book.active_in(read(npc, 'world', ''))
             and root_allowed
@@ -187,14 +184,16 @@ def prepare_visible(game):
 
 
 def public(player):
-    selected = validate_ids(player.duel_technique_ids)
+    from ..rules import technique_special_effect
+    obsolete = {t.id for t in player.combat_techniques if t.category != 'spiritual'}
+    selected = [key for key in validate_ids(player.duel_technique_ids) if key not in obsolete]
     rows, seen = [], set()
     for book in player.combat_techniques:
-        if book.id in seen:
+        if book.id in seen or book.category != 'spiritual':
             continue
         seen.add(book.id)
         reason = player_reason(player, book)
         rows.append(dict(id=book.id, name=book.name, level=book.level, selected=book.id in selected,
-                         active=not reason, reason=reason, description=book.description,
+                         active=not reason, reason=reason, description=technique_special_effect(book),
                          has_effect=bool(book.combat_effect)))
     return dict(limit=LIMIT, selected=list(selected), candidates=rows)

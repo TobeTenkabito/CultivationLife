@@ -5,7 +5,8 @@ and HP/MP accents. No theme is flattened into another theme's palette.
 """
 import re
 
-COLOR = r'(?:var\(--[\w-]+\)|\#[0-9a-fA-F]{3,8}|transparent|white|black|rgba?\([^()]+\))'
+LITERAL = r'(?:\#[0-9a-fA-F]{3,8}|transparent|white|black|rgba?\([^()]+\))'
+COLOR = r'(?:var\(--[\w-]+(?:\s*,\s*(?:var\(--[\w-]+\)|'+LITERAL+r'))?\)|'+LITERAL+r')'
 MIX = re.compile(r'color-mix\(\s*in srgb\s*,\s*('+COLOR+r')\s*([\d.]+)%\s*,\s*('+COLOR+r')\s*\)')
 DECL = re.compile(r'(--[\w-]+)\s*:\s*([^;{}]+)(?=[;}])')
 
@@ -13,7 +14,10 @@ DECL = re.compile(r'(--[\w-]+)\s*:\s*([^;{}]+)(?=[;}])')
 def channels(color):
     color = color.strip()
     if color.startswith('var('):
-        name = color[4:-1]
+        name,separator,fallback = color[4:-1].partition(',')
+        name=name.strip()
+        if separator:
+            return tuple(f'var({name}-{c},{v})' for c,v in zip('rgba',channels(fallback)))
         return tuple(f'var({name}-{c})' for c in 'rgba')
     if color == 'transparent': return ('0','0','0','0')
     if color in ('white','black'): color = '#ffffff' if color == 'white' else '#000000'

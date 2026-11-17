@@ -115,15 +115,21 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
         self.assertIn("EVT_MONSTER_WORLD_BLOOD_MARKET_001", self.engine.events_by_id)
         self.assertIn("EVT_PHANTOM_MOON_TIDE_001", self.engine.events_by_id)
 
-    def test_monster_worlds_support_treasure_action_from_mortal_tier(self):
+    def test_monster_worlds_use_dungeons_after_entering_cultivation(self):
         for index, world in enumerate(("monster_realm", "phantom_underworld")):
             shown = self.engine.create_game(
                 f"{world}探宝", "supreme_earth", "monster", seed=7310 + index,
                 start_world=world, monster_species_id="ape",
             )
-            result = self.engine.advance(shown["id"], "treasure")
-            self.assertEqual(result["pending_event"]["id"], "EVT_TREASURE_REWARD_SELECT_001")
-            self.assertEqual({choice["id"] for choice in result["pending_event"]["choices"]}, {"artifact", "technique", "pill"})
+            with self.assertRaisesRegex(ValueError,'替代'):
+                self.engine.advance(shown['id'],'treasure')
+            game=self.engine.store.load(shown['id'])
+            game.player.realm_index=1;game.player.layer=1
+            self.engine.store.save(game)
+            result=self.engine.dungeon_action(game.id,'discover',dict(world=world,location_id=game.player.location_id,slot=0))
+            self.assertEqual(result['dungeons']['used'],1)
+            self.assertIsNone(result['pending_event'])
+
 
     def test_monster_cannot_use_transformation_system_even_with_legacy_state(self):
         game = self._monster()
@@ -768,7 +774,7 @@ class MonsterBloodlineSystemTests(unittest.TestCase):
         initial = lineage_deed_budget(game, config)
         game.player.age = 90000
         game.player.spirit_stones = 99999999
-        game.player.fame = 99999
+        game.player.infamy = 99999
         game.player.realm_index = 12
         game.player.monster_adaptations = ["moonlit", "ancient_forest"]
         game.player.monster_bloodline_imprints = ["nine_tail_ancestry"]

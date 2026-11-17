@@ -27,7 +27,7 @@ def occupied(game, world=None, location=None):
 
 
 def resource_reason(game, action):
-    if action in {'travel', 'treasure'} and occupied(game) and game.player.faction_id != SOURCE:
+    if action in {'travel', 'dungeon'} and occupied(game) and game.player.faction_id != SOURCE:
         return '岚疆实际驻军暂封野外取材；仍可修行、调息、救护，或沿地图道路撤离。'
     return None
 

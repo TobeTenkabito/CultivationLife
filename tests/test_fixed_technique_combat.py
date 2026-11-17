@@ -309,17 +309,23 @@ def test_npc_mana_persists_and_unknown_world_interval_does_not_restore():
     assert prepare(npc,12)['current']>capacity/4
 
 
-def test_body_and_sense_books_use_existing_combat_and_seven_selection():
+def test_specialty_books_use_only_their_cultivation_slots():
     from cultivation_life.models import Player
     from cultivation_life.rules import assign_technique
     from cultivation_life.system.duel_techniques import select,player_books
     from cultivation_life.rules import QI_SOURCE_NAMES
     p=Player(name='测试',spirit_root='chaos',realm_index=8,layer=1,body_training=100,
              qi_experience={k:1e12 for k in QI_SOURCE_NAMES})
-    for category in ('body','divine_sense'):
-        book=copy.deepcopy(next(t for t in TECHNIQUE_CATALOG.values() if t.category==category and t.grade<9 and t.element=='neutral'))
-        assign_technique(p,book,'combat');select(p,book.id)
-    assert len(player_books(p))==2
+    body=copy.deepcopy(next(t for t in TECHNIQUE_CATALOG.values() if t.category=='body' and t.grade<9 and t.element=='neutral'))
+    with pytest.raises(ValueError, match='炼体栏'):
+        assign_technique(p,body,'combat')
+    book=copy.deepcopy(next(t for t in TECHNIQUE_CATALOG.values() if t.category=='divine_sense' and t.grade<9 and t.element=='neutral'))
+    with pytest.raises(ValueError,match='神识栏'):
+        assign_technique(p,book,'combat')
+    assign_technique(p,book,'divine_sense')
+    assert p.divine_sense_technique.id==book.id
+    p.combat_techniques=[body,book];p.duel_technique_ids=[body.id,book.id]
+    assert player_books(p)==[]
 
 
 def test_npc_mana_moves_with_original_person_and_only_known_time_recovers():

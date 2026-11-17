@@ -7,7 +7,7 @@
       "tags":["true_demon_common","exploration"],"weight":6,"intent_weights":{"explore":1.7,"cultivate":1.3},
       "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":6},{"path":"player.realm_index","op":"lte","value":8}]},
       "choices":[
-        {"id":"guide","text":"引导兽群避开火脉喷口","effects":[{"type":"add_karma","value":-5},{"type":"add_fame","value":5}]},
+        {"id":"guide","text":"引导兽群避开火脉喷口","effects":[{"type":"add_karma","value":-5},{"type":"add_infamy","value":5}]},
         {"id":"temper","text":"借倒灌魔火淬炼经脉","effects":[{"type":"damage","value":0.09,"reason":"黑日魔火灼穿护体罡气"},{"type":"add_opportunity","value":18,"if_result":["injured"]}]},
         {"id":"trade","text":"收购伤兽，再卖给神殿","effects":[{"type":"add_karma","value":5},{"type":"add_sha_qi","value":8}]}
       ]
@@ -19,7 +19,7 @@
       "choices":[
         {"id":"listen","text":"替古魔执念记下姓名","effects":[{"type":"restore_mp","value":-0.10},{"type":"add_opportunity","value":16}]},
         {"id":"smelt","text":"趁火雨炼化新露出的矿髓","effects":[{"type":"add_sha_qi","value":10},{"type":"add_heart_demon","value":3}]},
-        {"id":"close","text":"封闭矿口，等火雨自行退去","effects":[{"type":"add_karma","value":-3},{"type":"add_fame","value":3}]}
+        {"id":"close","text":"封闭矿口，等火雨自行退去","effects":[{"type":"add_karma","value":-3},{"type":"add_infamy","value":3}]}
       ]
     },
     {
@@ -28,7 +28,7 @@
       "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":6},{"path":"player.realm_index","op":"lte","value":8}]},
       "choices":[
         {"id":"inspect","text":"协助老阵师检查城基","effects":[{"type":"restore_mp","value":-0.08},{"type":"add_opportunity","value":14}]},
-        {"id":"dispel","text":"击散魔相，安定城中人心","effects":[{"type":"add_fame","value":5}]},
+        {"id":"dispel","text":"击散魔相，安定城中人心","effects":[{"type":"add_infamy","value":5}]},
         {"id":"imitate","text":"观摩三张魔面推演魔功","effects":[{"type":"add_heart_demon","value":2},{"type":"add_sha_qi","value":7}]}
       ]
     },
@@ -38,7 +38,7 @@
       "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":7},{"path":"player.realm_index","op":"lte","value":8}]},
       "choices":[
         {"id":"observe","text":"在魂雨中观想异域星空","effects":[{"type":"restore_mp","value":-0.16},{"type":"add_opportunity","value":22}]},
-        {"id":"rescue","text":"驱散倒影，带海兽离开星骨滩","effects":[{"type":"add_karma","value":-5},{"type":"add_fame","value":4}]},
+        {"id":"rescue","text":"驱散倒影，带海兽离开星骨滩","effects":[{"type":"add_karma","value":-5},{"type":"add_infamy","value":4}]},
         {"id":"collect","text":"拘来魂雨炼入识海","effects":[{"type":"add_sha_qi","value":12},{"type":"add_heart_demon","value":4}]}
       ]
     },
@@ -58,13 +58,13 @@
       "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":6},{"path":"player.realm_index","op":"lte","value":8}]},
       "choices":[
         {"id":"board","text":"登舟替亡客走完旧路","effects":[{"type":"damage","value":0.07,"reason":"虚空乱流割裂法体"},{"type":"add_opportunity","value":18,"if_result":["injured"]}]},
-        {"id":"anchor","text":"以法力替黑帆舟稳住锚点","effects":[{"type":"restore_mp","value":-0.10},{"type":"add_fame","value":4}]},
+        {"id":"anchor","text":"以法力替黑帆舟稳住锚点","effects":[{"type":"restore_mp","value":-0.10},{"type":"add_infamy","value":4}]},
         {"id":"watch","text":"记下航路，但不登舟","effects":[{"type":"add_opportunity","value":7}]}
       ]
     },
 
     {
-      "id":"EVT_TRUE_DEMON_BLACK_SUN_001","version":1,"title":"黑日失辉","body":"黑日原连续三月没有升温，冻裂的地表下传来缓慢心跳。黑日神殿声称只是日轮衰变，噬火兽部族却说，他们供奉的从来不是太阳，而是一头被锁在天幕后的古老魔禽。",
+      "id":"EVT_TRUE_DEMON_BLACK_SUN_001","version":1,"title":"黑日失辉","body":"黑日原连续三月没有升温，冻裂的地表下传来缓慢心跳。黑日神殿声称只是日轮衰变，噬火兽部族却说，受供奉的是一头锁在天幕后的古老魔禽。",
       "tags":["story_chain","true_demon_black_sun","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"true_demon_black_sun_eligible","base_chance":0.15,"unit_increment":0.03},
       "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":6},{"path":"player.realm_index","op":"lte","value":7}]},
       "choices":[
@@ -75,12 +75,12 @@
       ]
     },
     {
-      "id":"EVT_TRUE_DEMON_BLACK_SUN_002","version":1,"title":"神殿旧巢","body":"神殿最高处并非祭坛，而是一座以万根火羽铺成的空巢。取火簿记载，三足魔乌曜烬曾以本命火温暖荒原；后来历代殿主将赠火变成采火，锁链也从护巢之阵变成了囚笼。",
+      "id":"EVT_TRUE_DEMON_BLACK_SUN_002","version":1,"title":"神殿旧巢","body":"神殿最高处是一座以万根火羽铺成的空巢。取火簿记载，三足魔乌曜烬曾以本命火温暖荒原；后来历代殿主将赠火变成采火，锁链也从护巢之阵变成了囚笼。",
       "tags":["story_chain","true_demon_black_sun","manual_only"],"weight":0,
       "choices":[
         {"id":"ledger","text":"查清锁链与四条地火脉的联系","effects":[{"type":"restore_mp","value":-0.12},{"type":"add_opportunity","value":20},{"type":"set_flag","flag":"black_sun_knows_fire_veins"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_BLACK_SUN_003"}]},
         {"id":"break","text":"立刻斩断一根采火锁链","effects":[{"type":"damage","value":0.12,"reason":"积压万年的日火沿锁链反灌"},{"type":"set_flag","flag":"black_sun_broke_chain","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_BLACK_SUN_003","if_result":["injured"]}]},
-        {"id":"negotiate","text":"逼神殿交出控制火脉的阵图","effects":[{"type":"add_fame","value":10},{"type":"set_flag","flag":"black_sun_has_array_chart"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_BLACK_SUN_003"}]}
+        {"id":"negotiate","text":"逼神殿交出控制火脉的阵图","effects":[{"type":"add_infamy","value":10},{"type":"set_flag","flag":"black_sun_has_array_chart"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_BLACK_SUN_003"}]}
       ]
     },
     {
@@ -106,7 +106,7 @@
       "tags":["story_chain","true_demon_black_sun","manual_only"],"weight":0,
       "choices":[
         {"id":"release","text":"斩尽锁链，让曜烬重归天外","effects":[{"type":"add_item","item_id":"black_sun_origin_flame"},{"type":"add_karma","value":-14},{"type":"add_opportunity","value":32},{"type":"set_flag","flag":"true_demon_black_sun_completed"},{"type":"set_milestone","milestone":"true_demon_black_sun_completed"}]},
-        {"id":"pact","text":"由曜烬与荒原诸族重订百年火契","conditions":{"has_flag":"black_sun_sought_new_pact"},"disabled_reason":"你没有促成双方重新议约","effects":[{"type":"learn_technique","technique_id":"TECH_BLACK_SUN_TRUE_FLAME"},{"type":"add_fame","value":28},{"type":"add_karma","value":-6},{"type":"set_flag","flag":"true_demon_black_sun_completed"},{"type":"set_milestone","milestone":"true_demon_black_sun_completed"}]},
+        {"id":"pact","text":"由曜烬与荒原诸族重订百年火契","conditions":{"has_flag":"black_sun_sought_new_pact"},"disabled_reason":"你没有促成双方重新议约","effects":[{"type":"learn_technique","technique_id":"TECH_BLACK_SUN_TRUE_FLAME"},{"type":"add_infamy","value":28},{"type":"add_karma","value":-6},{"type":"set_flag","flag":"true_demon_black_sun_completed"},{"type":"set_milestone","milestone":"true_demon_black_sun_completed"}]},
         {"id":"inherit","text":"取一缕自愿留下的元火传承","effects":[{"type":"add_item","item_id":"black_sun_origin_flame"},{"type":"learn_technique","technique_id":"TECH_BLACK_SUN_TRUE_FLAME"},{"type":"add_karma","value":8},{"type":"set_flag","flag":"true_demon_black_sun_completed"},{"type":"set_milestone","milestone":"true_demon_black_sun_completed"}]}
       ]
     },
@@ -123,12 +123,12 @@
       ]
     },
     {
-      "id":"EVT_TRUE_DEMON_FALLEN_STAR_002","version":1,"title":"遗骸有息","body":"巨兽并非坠海后才死。它的脊骨布满灼痕，显然曾以身体挡住横越界壁的星火；腹中那枚尚未孵化的星胎，正靠母兽最后一段脊髓维持生机。",
+      "id":"EVT_TRUE_DEMON_FALLEN_STAR_002","version":1,"title":"遗骸有息","body":"巨兽坠海之前就已身亡。它的脊骨布满灼痕，显然曾以身体挡住横越界壁的星火；腹中那枚尚未孵化的星胎，正靠母兽最后一段脊髓维持生机。",
       "tags":["story_chain","true_demon_fallen_star","manual_only"],"weight":0,
       "choices":[
         {"id":"listen","text":"以神识聆听遗骸残留的迁徙记忆","effects":[{"type":"restore_mp","value":-0.18},{"type":"add_opportunity","value":26},{"type":"set_flag","flag":"fallen_star_knows_route"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_FALLEN_STAR_003"}]},
         {"id":"feed","text":"以自身精元稳住星胎心跳","effects":[{"type":"damage","value":0.12,"reason":"星胎本能抽取护胎精元"},{"type":"set_flag","flag":"fallen_star_fed_womb","if_result":["injured"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_FALLEN_STAR_003","if_result":["injured"]}]},
-        {"id":"mark","text":"标出可采骨区，避免伤及星胎","effects":[{"type":"add_fame","value":12},{"type":"set_flag","flag":"fallen_star_marked_safe_bones"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_FALLEN_STAR_003"}]}
+        {"id":"mark","text":"标出可采骨区，避免伤及星胎","effects":[{"type":"add_infamy","value":12},{"type":"set_flag","flag":"fallen_star_marked_safe_bones"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_FALLEN_STAR_003"}]}
       ]
     },
     {
@@ -136,7 +136,7 @@
       "tags":["story_chain","true_demon_fallen_star","manual_only"],"weight":0,
       "choices":[
         {"id":"hold","text":"立在三宗阵前，逼他们逐一停手（敌方总战力 13,600,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":13600000}],"failure_reason":"三座大阵同时落下，你与星胎一并被炼入遗骸","success_text":"三宗退到海岸，星胎保住了最后一线生机。"},{"type":"set_flag","flag":"fallen_star_stopped_sects","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_FALLEN_STAR_004","if_result":["check_success"]}]},
-        {"id":"bargain","text":"以安全采骨区换三宗暂缓争夺","conditions":{"has_flag":"fallen_star_marked_safe_bones"},"disabled_reason":"你没有查明哪些星骨可在不伤星胎的情况下取用","effects":[{"type":"add_fame","value":18},{"type":"set_flag","flag":"fallen_star_brokered_truce"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_FALLEN_STAR_004"}]},
+        {"id":"bargain","text":"以安全采骨区换三宗暂缓争夺","conditions":{"has_flag":"fallen_star_marked_safe_bones"},"disabled_reason":"你没有查明哪些星骨可在不伤星胎的情况下取用","effects":[{"type":"add_infamy","value":18},{"type":"set_flag","flag":"fallen_star_brokered_truce"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_FALLEN_STAR_004"}]},
         {"id":"choose_palace","text":"助天魔宫先夺星胎，趁乱分取遗骸","effects":[{"type":"add_karma","value":20},{"type":"add_sha_qi","value":18},{"type":"set_flag","flag":"fallen_star_betrayed_womb"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_FALLEN_STAR_004"}]}
       ]
     },
@@ -154,7 +154,7 @@
       "tags":["story_chain","true_demon_fallen_star","manual_only"],"weight":0,
       "choices":[
         {"id":"release","text":"送幼兽沿母亲留下的星路远行","conditions":{"has_flag":"fallen_star_womb_stabilized"},"disabled_reason":"星胎没有被成功孵化","effects":[{"type":"add_item","item_id":"star_womb_breath"},{"type":"add_karma","value":-16},{"type":"add_opportunity","value":38},{"type":"set_flag","flag":"true_demon_fallen_star_completed"},{"type":"set_milestone","milestone":"true_demon_fallen_star_completed"}]},
-        {"id":"guard","text":"让幼兽留守新生星礁，与海兽共生","conditions":{"has_flag":"fallen_star_guarded_beasts"},"disabled_reason":"海兽群并不信任你与幼兽","effects":[{"type":"learn_technique","technique_id":"TECH_STAR_DEVOURING_BODY"},{"type":"add_fame","value":32},{"type":"set_flag","flag":"true_demon_fallen_star_completed"},{"type":"set_milestone","milestone":"true_demon_fallen_star_completed"}]},
+        {"id":"guard","text":"让幼兽留守新生星礁，与海兽共生","conditions":{"has_flag":"fallen_star_guarded_beasts"},"disabled_reason":"海兽群并不信任你与幼兽","effects":[{"type":"learn_technique","technique_id":"TECH_STAR_DEVOURING_BODY"},{"type":"add_infamy","value":32},{"type":"set_flag","flag":"true_demon_fallen_star_completed"},{"type":"set_milestone","milestone":"true_demon_fallen_star_completed"}]},
         {"id":"marrow","text":"收下遗骸凝成的最后一块星髓","effects":[{"type":"add_item","item_id":"fallen_star_marrow"},{"type":"learn_technique","technique_id":"TECH_STAR_DEVOURING_BODY"},{"type":"add_karma","value":10},{"type":"set_flag","flag":"true_demon_fallen_star_completed"},{"type":"set_milestone","milestone":"true_demon_fallen_star_completed"}]}
       ]
     },
@@ -166,15 +166,15 @@
       "choices":[
         {"id":"descend","text":"随老阵师进入城下界柱井","effects":[{"type":"set_flag","flag":"abyss_axis_followed_engineer"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_002"}]},
         {"id":"records","text":"调取三宗千年来的采脉记录","effects":[{"type":"restore_mp","value":-0.12},{"type":"set_flag","flag":"abyss_axis_has_records"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_002"}]},
-        {"id":"evacuate","text":"先组织城民撤离倾斜城区","effects":[{"type":"add_karma","value":-9},{"type":"add_fame","value":12},{"type":"set_flag","flag":"abyss_axis_started_evacuation"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_002"}]},
+        {"id":"evacuate","text":"先组织城民撤离倾斜城区","effects":[{"type":"add_karma","value":-9},{"type":"add_infamy","value":12},{"type":"set_flag","flag":"abyss_axis_started_evacuation"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_002"}]},
         {"id":"leave","text":"在天倾扩大前离开渊极城","effects":[{"type":"set_flag","flag":"true_demon_abyss_axis_incomplete"}]}
       ]
     },
     {
-      "id":"EVT_TRUE_DEMON_ABYSS_AXIS_002","version":1,"title":"三脉寻根","body":"三宗分别取走界柱的魔髓、魂露与地火，单看每一份账册都未越过旧约上限；但旧约从未计算三种采掘叠加后的损耗。界柱不是遭人一击斩断，而是在三方都守规矩时被慢慢耗死。",
+      "id":"EVT_TRUE_DEMON_ABYSS_AXIS_002","version":1,"title":"三脉寻根","body":"三宗分别取走界柱的魔髓、魂露与地火，单看每一份账册都未越过旧约上限；但旧约从未计算三种采掘叠加后的损耗。三方各依约索取，界柱却在日复一日的消耗中逐渐枯竭。",
       "tags":["story_chain","true_demon_abyss_axis","manual_only"],"weight":0,
       "choices":[
-        {"id":"show","text":"公开三份账册，迫使三宗共同担责","conditions":{"has_flag":"abyss_axis_has_records"},"disabled_reason":"你没有取得完整采脉记录","effects":[{"type":"add_fame","value":24},{"type":"set_flag","flag":"abyss_axis_sects_admitted"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_003"}]},
+        {"id":"show","text":"公开三份账册，迫使三宗共同担责","conditions":{"has_flag":"abyss_axis_has_records"},"disabled_reason":"你没有取得完整采脉记录","effects":[{"type":"add_infamy","value":24},{"type":"set_flag","flag":"abyss_axis_sects_admitted"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_003"}]},
         {"id":"survey","text":"亲自测算界柱剩余承载力","effects":[{"type":"restore_mp","value":-0.20},{"type":"add_opportunity","value":28},{"type":"set_flag","flag":"abyss_axis_knows_limit"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_003"}]},
         {"id":"blame","text":"借机把罪责推给势力最弱的一宗","effects":[{"type":"add_karma","value":18},{"type":"add_sha_qi","value":15},{"type":"set_flag","flag":"abyss_axis_false_blame"},{"type":"queue_event","event_id":"EVT_TRUE_DEMON_ABYSS_AXIS_003"}]}
       ]
@@ -210,7 +210,7 @@
       "id":"EVT_TRUE_DEMON_ABYSS_AXIS_006","version":1,"title":"祖渊重生","body":"天幕缓缓回正。复苏的祖根不再只托住一座城，而是向黑日原、血焰山与坠星魔海分别伸出新根；若渊极城被放弃，幸存者也在远处看见三地重新连成稳定地脉。",
       "tags":["story_chain","true_demon_abyss_axis","manual_only"],"weight":0,
       "choices":[
-        {"id":"covenant","text":"立下三宗共同养护、不得分割的界柱新约","conditions":{"has_flag":"abyss_axis_root_revived"},"disabled_reason":"祖根未能复苏","effects":[{"type":"add_item","item_id":"abyss_demon_heart"},{"type":"add_karma","value":-20},{"type":"add_fame","value":42},{"type":"set_flag","flag":"true_demon_abyss_axis_completed"},{"type":"set_milestone","milestone":"true_demon_abyss_axis_completed"}]},
+        {"id":"covenant","text":"立下三宗共同养护、不得分割的界柱新约","conditions":{"has_flag":"abyss_axis_root_revived"},"disabled_reason":"祖根未能复苏","effects":[{"type":"add_item","item_id":"abyss_demon_heart"},{"type":"add_karma","value":-20},{"type":"add_infamy","value":42},{"type":"set_flag","flag":"true_demon_abyss_axis_completed"},{"type":"set_milestone","milestone":"true_demon_abyss_axis_completed"}]},
         {"id":"inherit","text":"从新生根节参悟万魔归渊之法","conditions":{"has_flag":"abyss_axis_root_revived"},"disabled_reason":"祖根未能复苏","effects":[{"type":"learn_technique","technique_id":"TECH_ABYSS_RETURN_CANON"},{"type":"add_opportunity","value":48},{"type":"set_flag","flag":"true_demon_abyss_axis_completed"},{"type":"set_milestone","milestone":"true_demon_abyss_axis_completed"}]},
         {"id":"new_city","text":"护送幸存者在三脉交界建立新城","conditions":{"has_flag":"abyss_axis_city_abandoned"},"disabled_reason":"旧城没有被主动撤离","effects":[{"type":"add_item","item_id":"abyss_demon_heart"},{"type":"learn_technique","technique_id":"TECH_ABYSS_RETURN_CANON"},{"type":"add_karma","value":-12},{"type":"set_flag","flag":"true_demon_abyss_axis_completed"},{"type":"set_milestone","milestone":"true_demon_abyss_axis_completed"}]},
         {"id":"claim","text":"把新生祖根据为自己的魔道根基","effects":[{"type":"add_item","item_id":"abyss_demon_heart"},{"type":"learn_technique","technique_id":"TECH_ABYSS_RETURN_CANON"},{"type":"add_karma","value":30},{"type":"set_flag","flag":"true_demon_abyss_axis_completed"},{"type":"set_milestone","milestone":"true_demon_abyss_axis_completed"}]}

@@ -45,7 +45,7 @@ window.NpcContacts = (() => {
   function drawPromise(target,n){
     target.querySelector('.contact-promise')?.remove();
     const form=el('form',undefined,'contact-promise');
-    form.append(el('h4',`${n.name} · 要求承诺`),el('p','双方须在同一地点。交战可能导致负伤、元婴脱出或真正陨落；承诺不保证获胜。','muted'));
+    form.append(el('h4',`${n.name} · 要求承诺`),el('p','双方须在同一地点。交战结果随双方实力与临阵选择结算，可能负伤、元婴脱出或陨落。','muted'));
     const label=el('label','指定交战目标'),select=el('select');select.name='target_id';select.setAttribute('aria-label','指定交战目标');
     const targets=people.filter(row=>row.id!==n.id&&row.perceived_alive&&!row.contact_promise_target_reason&&n.contact_location_id&&row.contact_location_id===n.contact_location_id);
     for(const row of targets){const option=el('option',`${row.name} · ${row.realm_name}`);option.value=row.id;select.append(option);}

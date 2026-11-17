@@ -395,15 +395,13 @@ def test_batch_charges_cost_per_unit_and_stops_on_interruption(engine):
     assert engine.store.load(game.id).player.age == game.player.age + years + 1
 
 
-def test_treasure_batch_stops_for_first_manual_reward(engine):
+def test_removed_treasure_batch_never_spends_time_or_generates_reward(engine):
     game = create(engine, realm=1)
-    with patch.object(engine, '_advance_world_year', return_value=True), \
-         patch.object(engine, '_treasure_step', return_value='test') as treasure:
+    with pytest.raises(ValueError,match='替代'):
         engine.advance(game.id, 'treasure', 3)
     loaded = engine.store.load(game.id)
-    assert treasure.call_count == 1
-    assert loaded.player.age == game.player.age + 1
-    assert loaded.pending_event['id'] == 'EVT_TREASURE_REWARD_SELECT_001'
+    assert loaded.player.age == game.player.age
+    assert loaded.pending_event is None
 
 
 def test_dead_character_cannot_found_faction_or_consume_items(engine):

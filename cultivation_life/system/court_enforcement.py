@@ -161,7 +161,7 @@ def abort(game,maps,job):
     return '转运条件已经失效，保留原人物地点与已耗路费；本案不发报酬，须按原公物交接流程结清。'
 
 def delivery(game,job):
-    if not job.get('operation_done'):raise ValueError('须完成实际讨伐或救援转运，工时足额不等于任务完成')
+    if not job.get('operation_done'):raise ValueError('工时足额后，还须完成讨伐或救援转运')
     if job['offer']['operation']=='bounty':return '原持令交战已经核验；不把击退或镇压冒记为死亡。'
     npc=find_person(game,job['offer']['target'])
     if person_reason(game,npc,job=job) or person_site(game,npc)!=job['location']:raise ValueError('原获救者不在交接现场，不能凭转运文字结案')

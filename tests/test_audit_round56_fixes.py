@@ -115,7 +115,7 @@ def test_original_captor_dies_and_free_actions_resume(engine):
     assert game.player.ghost_captor is None
     assert game.player.location_id == location
     assert sum(h.event_id == 'SYS_GHOST_CAPTOR_DIED' for h in game.history) == 1
-    engine.advance(game.id, 'treasure', 1)
+    engine.advance(game.id, 'travel', 1)
     assert engine.store.load(game.id).player.ghost_captor is None
 
 
@@ -135,7 +135,7 @@ def test_captor_load_reconciles_known_death_without_freeing_snapshot_only(engine
         assert engine.store.load(game.id).player.ghost_captor is None
     else:
         with pytest.raises(ValueError, match='拘魂|受制'):
-            engine.advance(game.id, 'treasure', 1)
+            engine.advance(game.id, 'travel', 1)
 
 
 def planted_field(engine, game):

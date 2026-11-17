@@ -45,7 +45,7 @@
       "choices": [{"id": "temper", "text": "忍痛重炼道基", "effects": [{"type": "damage", "value": 0.12}, {"type": "add_opportunity", "value": 8}]}, {"id": "suppress", "text": "暂以法力压住裂纹", "effects": [{"type": "restore_mp", "value": -0.10}]}]
     },
     {
-      "id": "EVT_FOUNDATION_DEBATE_001", "version": 1, "title": "筑基论道", "body": "数名筑基同道围炉论法。此时所争的不是招式，而是哪一条道路能承载未来金丹。",
+      "id": "EVT_FOUNDATION_DEBATE_001", "version": 1, "title": "筑基论道", "body": "数名筑基同道围炉论法。此时双方各展道途，要以此争出承载未来金丹的道路。",
       "tags": ["realm_exclusive", "realm:foundation", "encounter"], "weight": 5,
       "conditions": {"path": "player.realm_index", "op": "eq", "value": 2},
       "choices": [{"id": "speak", "text": "坦陈自身见解", "effects": [{"type": "add_opportunity", "value": 5}]}, {"id": "listen", "text": "静听诸家之言", "effects": [{"type": "restore_mp", "value": 0.10}]}]

@@ -34,14 +34,12 @@ def beginner(game):
 
 
 def lesson_art(game):
-    """Use the player's main art, or a legal ordinary introductory art."""
+    """Use only an already learned art; opening the dungeon grants no manual."""
     p = game.player
     saved = p.tutorial_state.get('guide_art')
     candidates = [p.technique, *p.known_techniques]
     if saved:
-        candidates = [x for x in candidates if x and x.id == saved] + [TECHNIQUE_CATALOG.get(saved)]
-    elif beginner(game):
-        candidates += sorted((x for x in TECHNIQUE_CATALOG.values() if x.grade == 1 and x.path == p.path), key=lambda x: x.id)
+        candidates = [x for x in candidates if x and x.id == saved]
     for art in candidates:
         if not art or art.category != 'spiritual':
             continue
@@ -116,14 +114,7 @@ def perform_guide(engine, game, action, expected, target_id=None):
         summary = f'你试行一周天，获得 {gain} 点机缘。此次入门练习不推进岁月，也不自动突破。' if gain else '你观察运气方式；当前角色只演示操作，不改变修为或资质。'
     elif action == 'guide_treasure' and step == 'treasure':
         art = lesson_art(game)
-        if beginner(game):
-            from .economy.rewards import grant
-            grant(game,3,'教学探宝：既有藏石交付')
-            if art:
-                acquire_technique(p, deepcopy(art))
-            summary = '你在旧亭找到灵石三枚' + (f'与《{art.name}》玉简一份。' if art else '。') + '此次教学探宝不推进岁月。'
-        else:
-            summary = '你回顾探宝与传承的去处；高境界角色此次不领取入门物资。'
+        summary = '探幽寻宝现为副本入口：探寻后入口固定，入境不耗岁月，退出后须间隔一个完整行动单位。此次引导只认识入口。'
         if art:
             state['guide_art'] = art.id
     elif action == 'guide_equip' and step == 'equip':

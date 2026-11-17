@@ -54,6 +54,7 @@ def _select_npc_treasure(npc: SectNpc, rng: random.Random) -> str | None:
 
 
 def _npc_power(deps: NpcDependencies, npc: SectNpc) -> float:
+    from ...system.npc_techniques import family_combat_bonus
     if (npc.body_training is None or npc.divine_sense_rank is None
             or (npc.realm_index >= 10 and (npc.immortal_body_level <= 0 or npc.body_training < 100))):
         from ...system.cultivation_ranks import ensure_npc
@@ -61,7 +62,7 @@ def _npc_power(deps: NpcDependencies, npc: SectNpc) -> float:
     treasure = ITEM_CATALOG.get(npc.treasure_item_id or "")
     return npc_combat_power(
         npc, expected_combat_power, deps._npc_root_efficiency(npc.spirit_root), treasure
-    ) * max(0.1, float(getattr(npc, "combat_factor", 1.0))) * max(0.35, 1 - int(getattr(npc, "wounds", 0)) * 0.15) + npc.family_combat_bonus
+    ) * max(0.1, float(getattr(npc, "combat_factor", 1.0))) * max(0.35, 1 - int(getattr(npc, "wounds", 0)) * 0.15) + family_combat_bonus(npc)
 
 
 def _npc_breakthrough_probability(deps: NpcDependencies, npc: SectNpc) -> float:

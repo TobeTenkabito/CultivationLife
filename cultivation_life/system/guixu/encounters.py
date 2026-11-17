@@ -93,7 +93,7 @@ def _break_guixu_relationship(deps: GuixuEncountersDependencies, game: GameState
     player.concubines = [row for row in player.concubines if str(row.get("id")) != npc_id]
     if not player_defending:
         player.karma += 60
-    player.fame += 25
+    player.infamy += 25
 
 
 def _guixu_fight(

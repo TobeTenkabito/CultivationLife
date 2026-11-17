@@ -91,7 +91,8 @@
           <div><dt>战斗力</dt><dd id="combat-power" tabindex="0"></dd></div>
           <div><dt>因果</dt><dd id="karma"></dd></div>
           <div><dt>煞气</dt><dd id="sha-qi"></dd></div>
-          <div><dt>威名</dt><dd id="fame"></dd></div>
+          <div><dt>威名</dt><dd id="renown" title="实力与已确认事迹形成的威望"></dd></div>
+          <div><dt>凶名</dt><dd id="infamy"></dd></div>
           <div><dt>组队战力</dt><dd id="battle-power"></dd></div>
           <div id="heart-demon-stat" class="hidden"><dt>心魔 Debug</dt><dd id="heart-demon"></dd></div>
           <div><dt>有效因果</dt><dd id="effective-karma"></dd></div>
@@ -181,7 +182,8 @@
           </div>
           <div class="action-folds">
             <details><summary>历练与生计</summary><div class="fold-actions actions">
-              <button data-action="treasure"><b>寻幽探宝</b><span>微量机缘，并随机获得法器、功法或丹药</span></button>
+              <button data-action="treasure"><b>探幽寻宝</b><span>寻访隐境，结伴争缘；入境不耗岁月</span></button>
+              <button type="button" id="mailbox-main-open" class="mailbox-entry"><b>修士来信<i class="mailbox-dot" hidden></i></b><span>查看邀约与同行消息</span></button>
               <button data-action="commission" id="commission-action"><b>坊市委托</b><span>承接同阶委托，稳定赚取灵石</span></button>
               <button data-action="travel"><b>下山游历</b><span>遭遇更多故事</span></button>
               <button data-action="generated_explore"><b>勘察异闻</b><span>一个行动单位，阅读线索判断随机情境</span></button>
@@ -217,6 +219,14 @@
           <div id="map-locations" class="map-locations"></div>
           <section id="map-directory" class="map-directory hidden" aria-label="活动与商盟据点"></section>
           <section id="map-economy" class="hidden" aria-label="本地市场"></section>
+        </article>
+        <article id="dungeon-card" class="paper utility-panel" role="dialog" aria-modal="false" aria-label="探幽寻宝">
+          <div class="section-title"><div><p class="eyebrow">山河藏机 · 人心难测</p><h2>探幽寻宝</h2></div><button id="dungeon-toggle" type="button">关闭</button></div>
+          <div id="dungeon-panel"></div>
+        </article>
+        <article id="mailbox-card" class="paper utility-panel" role="dialog" aria-modal="false" aria-label="修士来信">
+          <div class="section-title"><h2>修士来信</h2><button id="mailbox-toggle" type="button">关闭</button></div>
+          <div id="mailbox-panel"></div>
         </article>
         <article id="trial-site-card" class="paper utility-panel hidden" role="dialog" aria-modal="false" aria-label="万象试境">
           <div class="section-title"><div><p class="eyebrow">机关遗境</p><h2>万象试境</h2></div><div class="panel-heading"><span>DLC · 种子守关</span><button id="trial-site-toggle" type="button">关闭</button></div></div>
@@ -564,6 +574,7 @@
         <button type="button" id="battle-report-open" title="最近战报"><span>斗</span><small>战报</small></button>
       </nav>
       <nav id="strategy-dock" class="strategy-dock" aria-label="社会互动">
+        <button type="button" data-panel-target="mailbox" class="mailbox-entry" title="修士来信"><span>信<i class="mailbox-dot" hidden></i></span><small>信箱</small></button>
         <button type="button" data-panel-target="immortal-estate" data-dlc="yaochi-westward" title="仙府" class="hidden"><span>府</span><small>仙府</small></button>
         <button type="button" data-panel-target="relationship" title="人际关系"><span>缘</span><small>关系</small></button>
         <button type="button" data-panel-target="heavens" title="诸天联系"><span>天</span><small>诸天</small></button>
@@ -655,7 +666,7 @@
   <script src="/pixel-library.js?v=3-alpha-1"></script>
   <script src="/pixel-map.js?v=alpha6"></script>
   <script src="/home-map-modes.js?v=governorship-2"></script>
-  <script src="/pixel-inventory.js?v=3-alpha-1"></script>
+  <script src="/pixel-inventory.js?v=loot-1118"></script>
   <script src="/pixel-natal.js?v=3-alpha-1"></script>
   <script src="/pixel-home.js?v=divine1"></script>
   <script src="/organization-finance.js?v=1"></script>
@@ -681,13 +692,13 @@
   <script src="/asura-panel.js?v=eightfold1"></script>
   <script src="/upper-institution-panel.js?v=1.55.0"></script>
   <script src="/monster-civilizations.js?v=2100"></script>
-  <script src="/authored-techniques.js?v=310"></script>
+  <script src="/authored-techniques.js?v=categories-1118"></script>
   <script src="/immortal-artifacts.js?v=2"></script>
   <script src="/soul.js?v=crisis-audit"></script>
   <script src="/character-skins.js?v=321a"></script>
   <script src="/combat-plan-panel.js?v=1"></script>
   <script src="/tutorial-content.js?v=1"></script>
-  <script src="/handbook-content.js?v=3100-linked-growth-1wf"></script>
+  <script src="/handbook-content.js?v=categories-1118"></script>
   <script src="/tutorial-steps.js?v=desktop-1"></script>
   <script src="/tutorial-interface.js?v=351"></script>
   <script src="/tutorial-upper.js?v=351"></script>
@@ -738,6 +749,8 @@
   <script src="/map-atlas.js?v=3-alpha-1"></script>
   <link rel="stylesheet" href="/trial-site-panel.css?v=2120">
   <script src="/trial-site-panel.js?v=2120"></script>
+  <link rel="stylesheet" href="/dungeon-panel.css?v=loot-1118">
+  <script src="/dungeon-panel.js?v=loot-1118"></script>
   <link rel="stylesheet" href="/panel-pages.css?v=355">
   <script src="/panel-pages.js?v=360"></script>
   <script src="/strategic-war-panel.js?v=1"></script>
@@ -763,7 +776,7 @@
   <script src="/event-scenes.js?v=fx3"></script>
   <script src="/combat-beasts.js?v=beasts1-monster-418"></script>
   <link rel="stylesheet" href="/combat-mechanisms.css?v=c1">
-  <script src="/combat-mechanisms.js?v=c1"></script>
+  <script src="/combat-mechanisms.js?v=copy-1118"></script>
   <script src="/combat-replay.js?v=c3"></script>
   <link rel="stylesheet" href="/npc-development.css?v=1">
   <script src="/npc-development.js?v=market-pages"></script>
@@ -783,7 +796,7 @@
   <script src="/westward-development.js?v=370"></script>
   <script src="/building-affairs.js?v=governorship-1"></script>
   <script src="/immortal-navigation.js?v=361"></script>
-  <script src="/app.js?v=linked-audit-2"></script>
+  <script src="/app.js?v=loot-1118"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

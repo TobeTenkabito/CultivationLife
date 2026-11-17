@@ -45,7 +45,7 @@ def test_actual_garrison_and_finite_admin_no_whole_world_seizure(military):
     assert state['administration_spent'] == 100
     assert work.sects['tianjian'].world == 'human'
     assert all(not r.get('controller_id') for r in work.intrigue_state['factions'].values()) and not work.wars
-    assert occupied(work) and resource_reason(work, 'treasure')
+    assert occupied(work) and all(resource_reason(work, action) for action in ('travel','dungeon'))
     assert not occupied(work, 'human', 'muling_desert')
     assert not occupied(work, 'demon', 'lanjiang_steppe')
     assert not resource_reason(work, 'cultivate') and not resource_reason(work, 'rest')
@@ -68,7 +68,7 @@ def test_losing_real_garrison_immediately_removes_resource_restriction(military,
     if cause == 'rank': npc.realm_index = 6
     if cause == 'supply':
         row['supply']['spent'] += row['supply']['target']; row['supply']['target'] = 0
-    assert not resource_reason(work, 'treasure')
+    assert all(not resource_reason(work, action) for action in ('travel','dungeon'))
     assert settlement.control(military[2], work, row)[0] == 'uncontrolled'
 
 
@@ -270,7 +270,7 @@ def test_real_ordinary_resource_action_obeys_garrison_and_rest_stays_available(m
     military[0]._load(work.id)
     military[0]._load(work.id)
     before = military[0].store._path(work.id).read_bytes()
-    with pytest.raises(ValueError, match='驻军'): military[0].advance(work.id, 'treasure', 1)
+    with pytest.raises(ValueError, match='驻军'): military[0].advance(work.id, 'travel', 1)
     assert military[0].store._path(work.id).read_bytes() == before
     with patch.object(military[0], '_advance_guixu_calendar', return_value=False):
         result = military[0].advance(work.id, 'rest', 1)

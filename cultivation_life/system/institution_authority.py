@@ -74,7 +74,7 @@ def nominate(game, row, person, term):
 def assume(game, row, person, world, location):
     if (row['status'] != 'appointed' or row['nominee'] != person
             or game.player.age >= row['expires']):
-        raise ValueError('任命已失效或并非受任人')
+        raise ValueError('请持本人的有效任命办理')
     if (world, location) != (row['world'], row['location']):
         raise ValueError('须亲赴原址办理交接')
     row.update(holder=person, controller=person, nominee=None, status='active')
@@ -93,7 +93,7 @@ def revoke(game, row):
 
 def relinquish(game, row, person):
     if row['controller'] != person and row['nominee'] != person:
-        raise ValueError('并非原任或待赴任人')
+        raise ValueError('请由原任或待赴任人办理')
     if any(u['phase'] not in {'home','lost'} for u in row.get('garrison',{}).get('units',[])):
         raise ValueError('原驻军尚未归返，不能提前解除交接责任')
     clear_delegation(game, row, operations=True)
@@ -108,7 +108,7 @@ def fund(game, row, source, amount):
         raise ValueError('拨款须为有效的正整数')
     transfer_value(game, source, row['wallet'], amount, '原地方机构实款拨付')
     row['funded'] += amount
-    log(game, row, f'原款拨入 {amount:,} 灵石；此款不构成私人产权。')
+    log(game, row, f'原款拨入 {amount:,} 灵石；此款归所属机构公账。')
 
 
 def return_funds(game, row):

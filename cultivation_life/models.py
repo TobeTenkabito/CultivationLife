@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import math
 from .snapshot_copy import copy_plain_data
 from .authored_technique_schema import validate_library as validate_authored_library
 from dataclasses import asdict, dataclass, field
@@ -45,6 +46,8 @@ class Item:
     breakthrough_scope: str | None = None
     trial_restore_hp: float = 0.0
     trial_restore_mp: float = 0.0
+    recovery_hp_limit: float | None = None
+    recovery_mp_limit: float | None = None
     tribulation_damage_reduction: float = 0.0
     passive_breakthrough_bonus: float = 0.0
     passive_breakthrough_max_realm: int | None = None
@@ -80,6 +83,9 @@ class Item:
     immortal_grade: int | None = None
 
     def __post_init__(self):
+        for value in (self.recovery_hp_limit,self.recovery_mp_limit):
+            if value is not None and (type(value) not in (int,float) or not math.isfinite(value) or value<0):
+                raise ValueError('灵药恢复上限无效')
         if self.immortal_grade is not None and (type(self.immortal_grade) is not int or not 1 <= self.immortal_grade <= 5):
             raise ValueError('仙器品阶无效')
         if self.artifact_origin_id is not None and not isinstance(self.artifact_origin_id,str):
@@ -135,6 +141,14 @@ class Technique:
         return not self.effective_worlds or world in self.effective_worlds
 
     def __post_init__(self) -> None:
+        # The first expedition recipe omitted this required field. Complete
+        # only that identifiable recipe when materializing its Technique;
+        # frozen loot stats, seed and identity are never regenerated.
+        if (self.id.startswith('dungeon:') and (':reward:' in self.id or ':bonus:' in self.id)
+                and (self.id.endswith(':manual:1') or self.id.endswith(':concordance'))
+                and self.path=='dao' and self.grade>=9 and self.category=='spiritual'
+                and self.requires_immortal_power and self.immortal_power_cost==0):
+            self.immortal_power_cost=.08
         from .authored_technique_schema import validate_buffs
         validate_buffs(self.authored_buffs)
         if not isinstance(self.description, str) or len(self.description) > 4000:
@@ -523,8 +537,9 @@ class Player:
     location_id: str | None = None
     race: str = "human"
     spirit_realm_attempted: bool = False
-    fame: float = 0.0
-    fame_by_world: dict[str, float] = field(default_factory=dict)
+    infamy: float = 0.0
+    infamy_by_scope: dict[str, float] = field(default_factory=dict)
+    renown_records: dict[str, Any] = field(default_factory=dict)
     race_hostility_by_world: dict[str, dict[str, float]] = field(default_factory=dict)
     instant_action_ages: dict[str, int] = field(default_factory=dict)
     hostility: dict[str, float] = field(default_factory=dict)
@@ -641,6 +656,11 @@ class Player:
     talisman_methods: list[str] = field(default_factory=list)
     talisman_sequence: int = 0
 
+    @property
+    def renown(self):
+        from .reputation import assess
+        return assess(self)['value']
+
     def to_dict(self) -> dict[str, Any]:
         result = asdict(self)
         return result
@@ -648,6 +668,8 @@ class Player:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> Player:
         data = dict(normalize_content_references(value))
+        from .reputation import decode_player
+        decode_player(data)
         from .duel_technique_schema import validate_ids
         data['duel_technique_ids'] = validate_ids(data.get('duel_technique_ids', []))
         if set(data['duel_technique_ids']) - {row['id'] for row in data.get('combat_techniques', [])}:
@@ -982,6 +1004,7 @@ class GameState:
     pending_event: dict[str, Any] | None = None
     generated_event_state: dict[str, Any] = field(default_factory=dict)
     trial_site_state: dict[str, Any] = field(default_factory=dict)
+    dungeon_state: dict[str, Any] = field(default_factory=dict)
     history: list[HistoryRecord] = field(default_factory=list)
     sects: dict[str, SectState] = field(default_factory=dict)
     world_npcs: dict[str, SectNpc] = field(default_factory=dict)
@@ -1062,6 +1085,10 @@ class GameState:
     map_war_last_encounter_unit: int = -2
 
     def __post_init__(self):
+        from .dungeon_schema import decode as decode_dungeons
+        self.dungeon_state = decode_dungeons(self.dungeon_state)
+        from .reputation import bind_scope
+        bind_scope(self)
         self.building_state = decode_building_state(self.building_state)
         from .mentorship_schema import validate as validate_mentorship
         validate_mentorship(self.mentorship_state)
@@ -1104,6 +1131,7 @@ class GameState:
             "pending_event": self.pending_event,
             "generated_event_state": decode_generated_event_state(self.generated_event_state),
             "trial_site_state": decode_trial_site_state(self.trial_site_state),
+            "dungeon_state": copy_plain_data(self.dungeon_state),
             "history": [record.to_dict() for record in self.history],
             "sects": {sect_id: sect.to_dict() for sect_id, sect in self.sects.items()},
             "world_npcs": {npc_id: npc.to_dict() for npc_id, npc in self.world_npcs.items()},
@@ -1179,6 +1207,8 @@ class GameState:
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> GameState:
         value = normalize_content_references(value)
+        from .reputation import decode_pending
+        value['pending_event'] = decode_pending(value.get('pending_event'))
         from .economy_schema import validate_economy
         validate_economy(value.get('economy_v2', {}), value.get('merchant_state', {}), value)
         from .regional_schema import validate as validate_regional
@@ -1187,6 +1217,7 @@ class GameState:
             from .system.combat.migration import migrate
             value = migrate(value)
         return cls(
+            dungeon_state=copy_plain_data(value.get("dungeon_state", {})),
             id=value["id"],
             seed=value["seed"],
             player=Player.from_dict({"immortal_trace_rng": value["seed"], **value["player"]}),

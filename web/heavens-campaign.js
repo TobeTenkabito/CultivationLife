@@ -73,7 +73,7 @@
                 control.replaceChildren(); actions(control, [`campaign_${choices.value}`]);
               };
               choices.onchange = choose; choose();
-            } else detail.append(node('small', '这是你见证的原签署文书。远方履约情况须通过现场查验；旧文书不代表新任者已经续约。'));
+            } else detail.append(node('small', '这是你见证的原签署文书。远方履约情况须通过现场查验；新任者的约定以续约文书为准。'));
             return;
           }
           title(detail, '救护与去留', '败退不结束修行。留在当地调息，或沿原道路回到无棣原。');

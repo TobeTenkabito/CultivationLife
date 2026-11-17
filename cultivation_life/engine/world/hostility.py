@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ...system.path_modifiers import pursuit_immunity
-from ...rules import effective_fame
+from ...rules import effective_infamy
 
 import random
 from typing import Any
@@ -40,22 +40,22 @@ def _maybe_wanted_encounter(deps: HostilityDependencies, game: GameState, rng: r
     player = game.player
     config = WORLD_SYSTEMS["faction_conflict"]
     coalition_threshold = float(
-        config["demonic_coalition_fame_threshold"]
-        if player.path == "demonic" else config["coalition_fame_threshold"]
+        config["demonic_coalition_infamy_threshold"]
+        if player.path == "demonic" else config["coalition_infamy_threshold"]
     )
     key = deps._hostility_key("world", player.world)
     subdued_flag = f"world_coalition_subdued:{player.world}"
     if subdued_flag in player.story_flags:
         # “全界”不是会重建组织结构的实体；一旦被玩家压服，本界不能
-        # 仅因威名仍高就立即重发同一份围杀令。
+        # 仅因凶名仍高就立即重发同一份围杀令。
         player.hostility[key] = 0.0
     else:
-        amnesty_fame = deps._world_coalition_amnesty_fame(player, player.world)
-        issue_threshold = max(coalition_threshold, amnesty_fame)
-        if effective_fame(player) > issue_threshold and not pursuit_immunity(game, "fame"):
+        amnesty_infamy = deps._world_coalition_amnesty_infamy(player, player.world)
+        issue_threshold = max(coalition_threshold, amnesty_infamy)
+        if effective_infamy(player) > issue_threshold and not pursuit_immunity(game, "infamy"):
             player.hostility[key] = max(
                 player.hostility.get(key, 0),
-                effective_fame(player) - issue_threshold + float(config["wanted_threshold"]),
+                effective_infamy(player) - issue_threshold + float(config["wanted_threshold"]),
             )
     hostiles: list[tuple[str, float]] = []
     for key, value in list(player.hostility.items()):
@@ -100,7 +100,7 @@ def _maybe_wanted_encounter(deps: HostilityDependencies, game: GameState, rng: r
     return True
 
 
-def _world_coalition_amnesty_fame(player: Player, world: str) -> float:
+def _world_coalition_amnesty_infamy(player: Player, world: str) -> float:
     prefix = f"world_coalition_amnesty:{world}:"
     values = []
     for flag in player.story_flags:
@@ -116,7 +116,7 @@ def _world_coalition_amnesty_fame(player: Player, world: str) -> float:
 def _record_world_coalition_amnesty(player: Player, world: str) -> None:
     prefix = f"world_coalition_amnesty:{world}:"
     player.story_flags = [flag for flag in player.story_flags if not flag.startswith(prefix)]
-    player.story_flags.append(f"{prefix}{max(0.0, effective_fame(player)):.1f}")
+    player.story_flags.append(f"{prefix}{max(0.0, effective_infamy(player)):.1f}")
 
 
 def _player_protected_npc_ids(deps: HostilityDependencies, game: GameState) -> set[str]:

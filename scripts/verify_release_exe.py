@@ -48,7 +48,9 @@ def verify(with_dlc):
                 assert bool(extensions)==with_dlc, extensions
                 from scripts.verify_technique_exe import verify_techniques
                 verify_techniques(base,with_dlc,folder)
-                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,techniques_verified=True)
+                from scripts.verify_dungeon_exe import verify_dungeons
+                verify_dungeons(base,with_dlc,folder)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,techniques_verified=True,dungeons_verified=True)
             if '--asura-governance' in sys.argv:
                 from scripts.verify_asura_exe import verify_asura
                 verify_asura(base,with_dlc,folder)

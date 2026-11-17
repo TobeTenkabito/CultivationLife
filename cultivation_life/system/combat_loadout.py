@@ -40,7 +40,8 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
         techniques = [t for t in [owner.technique, *owner.combat_techniques] if t and t.active_in(owner.world)]
         # Ordinary Item equipment is passive while held under the existing bag
         # model; crafted items must still occupy an equipped crafted slot.
-        artifacts = [i for i in owner.inventory if i.quantity > 0 and set(i.tags) & {'artifact', 'equipment'}
+        from ..rules import passive_inventory
+        artifacts = [i for i in passive_inventory(owner) if i.quantity > 0 and set(i.tags) & {'artifact', 'equipment'}
                      and (not i.crafted_artifact_id or i.crafted_artifact_id in owner.equipped_crafted_artifact_ids)]
         ward = 2 if golden_light(owner) else 1
         resistance = golden_light_resistance(owner)
@@ -72,6 +73,7 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
             from .npc_techniques import equipped
             techniques = [book for _, book in equipped(game, owner) if book.active_in(read(owner, 'world'))]
             artifacts = list(second['equipment'])
+    techniques = [t for t in techniques if read(t, 'category', 'spiritual') == 'spiritual']
     if player:
         from .tianji_system import tianji_content_available
         if not tianji_content_available():

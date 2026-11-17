@@ -45,7 +45,7 @@ def validate_effect(value):
             raise ValueError('三界本体功法尚无合练入口')
     if (not isinstance(value['kind'], str) or not isinstance(value['trigger'], str) or not isinstance(value['delivery'], str)
             or value['kind'] not in KINDS or value['trigger'] not in (LINEAGE_TRIGGERS if version == 2 else TRIGGERS) or value['delivery'] not in DELIVERIES):
-        raise ValueError('未知功法效果、触发或兑现方式')
+        raise ValueError('功法效果、触发条件或施展方式无效')
     ceiling = 150 if value['kind'] in {'guard', 'recover', 'frugal'} else 1000
     if value.get('mastery'):
         ceiling = ceiling * 6 // 5
@@ -95,28 +95,30 @@ def validate_loadout(rows):
 def describe(effect):
     e = validate_effect(effect)
     if e['version'] == 3:
+        from .technique_effect_copy import mechanics
+        prefix=mechanics(e)
         if 'mana_cost' in e:
-            return (f'{e["clause"] or "本书专属运转"}：Lv.1费用低于自身境界时为{e["mana_cost"]:g}点法力，'
-                    f'同阶为开战容量{e["cost_bp"]/100:g}%，越阶为两者之和；每战至多{e["uses"]}次，'
-                    'Lv.1—9最多减费16%。完整触发与兑现见功法描述。')
-        return (f'{e["clause"] or "本书专属运转"}：低阶按品阶标准固定付费，同阶实付开战'
+            return prefix + (f'Lv.1运功消耗：功法品阶低于自身境界时为{e["mana_cost"]:g}点法力，'
+                    f'同阶为开战法力容量的{e["cost_bp"]/100:g}%，越阶为两者之和；每战至多{e["uses"]}次，'
+                    'Lv.1—9逐步降低消耗，最高降低16%。')
+        return prefix + (f'运功消耗：功法品阶低于自身境界时，按此品阶标准消耗固定灵力；同阶消耗开战'
                 f'{"法力" if e["resource"] == "mana" else "元力"}容量的{e["cost_bp"]/100:g}%，越阶为两者之和，'
-                f'每战至多{e["uses"]}次，Lv.1—9最多减费16%。完整触发与兑现见功法描述。')
+                f'每战至多{e["uses"]}次，Lv.1—9逐步降低消耗，最高降低16%。')
     p = e['strength_bp'] / 100
-    trigger = {'opening': '普通交锋可进行时', 'after_hit': '本人上轮普通交锋实际伤及敌人后',
-               'after_hurt': '本人上轮普通交锋实际受敌人伤害后', 'first_exchange': '本人本场首次可进行普通交锋时',
-               'low_state': '本人态势不高于开战时一半时', 'target_wounded': '存在可作用且态势不高于开战时一半的敌人时',
-               'steady': '第三轮起且本人上轮未因普通交锋实际受伤时', 'odd_round': '奇数轮普通交锋时',
+    trigger = {'opening': '普通交锋时', 'after_hit': '上轮普通攻击伤及敌人后',
+               'after_hurt': '上轮受到敌人普通攻击的伤害后', 'first_exchange': '本场首次普通交锋时',
+               'low_state': '自身战斗态势低至开战时一半时', 'target_wounded': '场上有战斗态势低至开战时一半的敌人时',
+               'steady': '第三轮起，若上轮普通交锋毫发无损', 'odd_round': '奇数轮普通交锋时',
                'even_round': '偶数轮普通交锋时'}[e['trigger']]
     payload = {
-        'guard': f'获得最多初始最大战斗态势{p:g}%的有限护持，受击逐次扣减余额',
-        'strike': f'下一次合法普通交锋追加至多该次原始损耗{p:g}%，不增加攻击次数',
-        'recover': f'恢复最多初始最大战斗态势{p:g}%，不能超过开战状态，不修复肉身或复活',
-        'breach': f'一次普通交锋的破法提高{p:g}%，不提高仙凡作用资格',
-        'frugal': f'获得最多初始最大战斗态势{p:g}%的有限护持；真实减免后返还该次实付资源的{e["refund_bp"]/100:g}%，不重复返还',
+        'guard': f'凝聚护身之力，可抵挡最多开战最大态势{p:g}%的伤害，护持随受击逐渐消耗',
+        'strike': f'下一次普通攻击追加至多基础伤害的{p:g}%',
+        'recover': f'恢复最多初始最大战斗态势{p:g}%，恢复上限为开战状态',
+        'breach': f'一次普通交锋的破法提高{p:g}%，依当前仙凡层次作用',
+        'frugal': f'凝聚开战最大态势{p:g}%的护身之力；挡下伤害后，可收回本次所耗灵力的{e["refund_bp"]/100:g}%，每次运功可回气一次',
     }[e['kind']]
     timing = {'immediate': '本轮准备后使用', 'delayed': '延至下一轮使用',
-              'split': '同一份效果额度分两轮各兑现一半'}[e['delivery']]
-    return (f'{trigger}，同阶支付原可用元力容量的{e["cost_bp"]/100:g}%；低阶支付对应品阶初层元力标准的固定费用，越阶支付两者之和：{payload}；{timing}。'
-            f'每战最多{e["uses"]}次，冷却{e["cooldown"]}个完整轮，待用效果{e["duration"]}轮过期。'
-            '无真实可用元力时不发动；Lv.1—9只降低本书费用，最多降低16%，不放大效果。')
+              'split': '招式分两轮施展，每轮发挥一半效果'}[e['delivery']]
+    return (f'{trigger}，运转此法。{payload}；{timing}。功法与自身境界同阶时，消耗开战元力容量的{e["cost_bp"]/100:g}%；低阶按此品阶初层的标准消耗固定元力，越阶合计两项消耗。'
+            f'每战最多{e["uses"]}次，冷却{e["cooldown"]}个完整轮，所蓄招势保留{e["duration"]}轮。'
+            '运转需支付所列元力；Lv.1—9逐步减费，最高降低16%。')

@@ -1,9 +1,10 @@
 from __future__ import annotations
 from ...rules import public_catalog_entry
+from ... import universal_manuals
 from ..path_modifiers import adjusted_cost
 import copy
 from typing import Any
-from ...content_registry import ITEM_CATALOG, MARKET_GOODS, MARKET_SETTINGS, REALMS, TECHNIQUE_CATALOG, TECHNIQUE_ELEMENT_NAMES
+from ...content_registry import ITEM_CATALOG, MARKET_GOODS, MARKET_SETTINGS, REALMS, TECHNIQUE_CATALOG, TECHNIQUE_ELEMENT_NAMES, WORLD_SYSTEMS
 from ...models import GameState
 from ...runtime import now_iso
 from ...rules import QI_SOURCE_NAMES, can_player_practice_technique, combat_requirement_display, technique_affinity_display
@@ -40,7 +41,9 @@ def _refresh_world_market(deps: MarketDependencies, game: GameState, rng: Any) -
                 offer.update(price=material['base_value'], pricing_version=2)
                 repriced = True
     game.market_offers[:] = [row for row in game.market_offers if natural_market_acquisition_allowed(
-        str(row.get("kind", "")), str(row.get("content_id", "")))]
+        str(row.get("kind", "")), str(row.get("content_id", ""))) and (
+        not (manual := universal_manuals.parse(str(row.get("content_id", ""))))
+        or universal_manuals.allowed(manual[1], WORLD_SYSTEMS["seeded_dungeons"]["ceilings"].get(player.world)))]
     if player.realm_index == 0:
         changed = bool(
             game.market_offers or game.market_realm_index is not None
@@ -330,6 +333,8 @@ def toggle_market_offer_lock(deps: MarketDependencies, game_id: str, offer_id: s
 
 
 def _is_world_market_good(deps: MarketDependencies, world: str, kind: str, content_id: str) -> bool:
+    if kind == 'item' and (manual := universal_manuals.parse(content_id)):
+        return universal_manuals.allowed(manual[1], WORLD_SYSTEMS['seeded_dungeons']['ceilings'].get(world))
     if restricted_acquisition(kind, content_id):
         return False
     if any(

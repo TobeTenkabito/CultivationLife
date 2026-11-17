@@ -88,6 +88,7 @@ def main():
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if asura:require('asura_governance_scope' in text,f'Missing native governance coverage: {name}')
         if techniques:require('techniques_scope' in text,f'Missing native technique coverage: {name}')
+        if techniques:require('dungeons_scope' in text,f'Missing native dungeon coverage: {name}')
         if westward:require('westward_scope' in text and 'institution_scope' in text,f'Missing Westward/institution native coverage: {name}')
         if immortal:require('immortal_artifacts_scope' in text,f'Missing native immortal cultivation: {name}')
         if body_ui:require('body_ui_scope' in text and 'upper_social_scope' in text and 'npc_development_scope' in text and 'mentorship_scope' in text,f'Missing native body/UI or mentorship coverage: {name}')

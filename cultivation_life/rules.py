@@ -7,6 +7,7 @@ from .system.path_modifiers import projected_resource, modifier
 import copy
 import math
 import random
+from . import universal_manuals
 from typing import Any
 
 from .content_registry import (
@@ -164,10 +165,11 @@ def technique_special_effect(technique: Technique) -> str:
         effects.append('习得后不受成功夺舍次数上限限制；仍须满足原有夺舍资格。')
     elif technique.possession_limit_bonus:
         effects.append(f'习得后成功夺舍次数上限 +{technique.possession_limit_bonus}；同类加成取最高值。')
-    if technique.description:
-        effects.append(technique.description)
-    if technique.combat_effect and technique.combat_effect.get('version') in (1,2):
-        effects.append('当前斗法费用按本书品阶与本人实际境界比较：低阶固定，同阶按原可用元力容量比例，越阶为比例加固定；原注解的容量百分比为同阶费率。升级对总费用减费，不放宽原使用资格。')
+    from .technique_description import generated
+    template = TECHNIQUE_CATALOG.get(technique.id)
+    effects.append(template.description if template else generated(technique))
+    if technique.category=='spiritual' and technique.combat_effect and technique.combat_effect.get('version') in (1,2):
+        effects.append('当前斗法费用按本书品阶与本人实际境界比较：低阶固定，同阶按原可用元力容量比例，越阶为比例加固定；原注解的容量百分比为同阶费率。功法升级逐步降低总费用，使用时依所列资格运转。')
     return ' '.join(effects)
 
 
@@ -183,9 +185,7 @@ def public_catalog_entry(row: dict[str, Any]) -> dict[str, Any]:
         if old_name and old_name != template.name and isinstance(row.get('description'), str):
             result['description'] = row['description'].replace(old_name, template.name)
         if kind == 'technique' and (special := technique_special_effect(template)):
-            description = str(result.get('description', ''))
-            if special not in description:
-                result['description'] = (description + ' ' + special).strip()
+            result['description'] = special
     return result
 
 
@@ -296,7 +296,7 @@ def acquire_technique(player: Player, technique: Technique) -> bool:
 
 
 def upgrade_known_technique(player: Player, technique_id: str) -> int:
-    if technique_id.endswith(':concordance'):
+    if technique_id.endswith(':concordance') and not technique_id.startswith('dungeon:'):
         raise ValueError('合练功法须在道统界面消耗仙痕参悟，不使用玉简升级')
     known = next((entry for entry in player.known_techniques if entry.id == technique_id), None)
     if known is None:
@@ -306,7 +306,8 @@ def upgrade_known_technique(player: Player, technique_id: str) -> int:
     if reason := promotion_reason(player, technique_id, known.level + 1):
         raise ValueError(reason)
     if not remove_item(player, technique_manual_item_id(technique_id, known.level)):
-        raise ValueError(f"升级《{known.name}》需要一份同名 Lv.{known.level} 传承玉简")
+        if not universal_manuals.supported(known) or not remove_item(player, universal_manuals.material(known), universal_manuals.cost(known)):
+            raise ValueError(f"升级《{known.name}》需要同名 Lv.{known.level} 传承玉简 ×1，或 {known.grade}阶对应道途 Lv.{known.level} 万能玉简 ×1")
     new_level = known.level + 1
     equipped = [
         player.technique, player.support_technique, player.body_technique,
@@ -325,6 +326,15 @@ def merge_technique_copies(player: Player, technique_id: str, level: int) -> int
     manual_level = int(level)
     if not 1 <= manual_level < TECHNIQUE_MAX_LEVEL:
         raise ValueError(f"只有 Lv.1–{TECHNIQUE_MAX_LEVEL - 1} 玉简可以继续合成")
+    universal = universal_manuals.parse(technique_id)
+    if universal:
+        path, grade, stored_level = universal
+        if stored_level != manual_level:
+            raise ValueError('请选择与当前玉简等级一致的合成操作')
+        if not remove_item(player, technique_id, 2):
+            raise ValueError('合成需要两份同道途、同品阶、同等级的万能玉简')
+        add_item(player, universal_manuals.identity(path, grade, manual_level + 1))
+        return manual_level + 1
     known = next((entry for entry in player.known_techniques if entry.id == technique_id), None)
     template = known or TECHNIQUE_CATALOG.get(technique_id)
     if template is None:
@@ -410,6 +420,9 @@ def assign_technique(player: Player, technique: Technique, slot: str) -> None:
         raise ValueError("灵根属性与功法不合")
     if player.body_training < int(technique.required_body_training):
         raise ValueError(f"肉身不足：配置《{technique.name}》需要炼体{technique.required_body_training}层")
+    if slot == "combat" and technique.category != "spiritual":
+        specialty = {"body":"炼体", "divine_sense":"神识", "transformation":"变身"}[technique.category]
+        raise ValueError(f"请将{specialty}功法配置至{specialty}栏")
     if slot == "body":
         if technique.category != "body":
             raise ValueError("只有炼体功法可以放入炼体槽位")
@@ -475,6 +488,17 @@ def breakthrough_opportunity_required(player: Player) -> int:
     return breakthrough_cost(player, upper_cultivation=(player.world == 'celestial' or asura_active(player)))
 
 
+def passive_inventory(player: Player):
+    """Ordinary item rules are unchanged; expedition relics share one resonance."""
+    relics=[i for i in player.inventory if i.quantity>0 and 'dungeon_relic' in i.tags]
+    selected=max(relics,key=lambda i:(i.combat_bonus,i.hp_bonus,i.mp_bonus,i.id),default=None)
+    return [i for i in player.inventory if 'dungeon_relic' not in i.tags]+([selected] if selected else [])
+
+
+def passive_quantity(item):
+    return min(1,item.quantity) if 'dungeon_relic' in item.tags else item.quantity
+
+
 def raw_external_hp_bonus(player: Player) -> float:
     from .system.crafted_artifact_rules import crafted_artifact_bonuses
     reference = intrinsic_hp_reference(player)
@@ -487,7 +511,7 @@ def raw_external_hp_bonus(player: Player) -> float:
         )
     return (
         reference * support_bonus
-        + sum(i.hp_bonus * i.quantity for i in player.inventory)
+        + sum(i.hp_bonus * passive_quantity(i) for i in passive_inventory(player))
         + player.faction_hp_bonus
         + player.natal_artifact_hp_bonus
         + ghost_external_hp_bonus(player)
@@ -511,7 +535,7 @@ def raw_external_mp_bonus(player: Player) -> float:
         )
     return (
         reference * support_bonus
-        + sum(i.mp_bonus * i.quantity for i in player.inventory)
+        + sum(i.mp_bonus * passive_quantity(i) for i in passive_inventory(player))
         + player.faction_mp_bonus
         + player.natal_artifact_mp_bonus
         + ghost_external_mp_bonus(player)
@@ -594,13 +618,13 @@ def combat_power(player: Player) -> float:
     status = 0.35 + 0.40 * hp_ratio + 0.25 * mp_ratio
     layer_factor = 1 + 0.08 * (player.layer - 1)
     progress = min(1.5, player.opportunity / max(1, opportunity_required(player)))
-    item_power = sum(item.combat_bonus * item.quantity for item in player.inventory)
+    item_power = sum(item.combat_bonus * passive_quantity(item) for item in passive_inventory(player))
     current_qi_levels = qi_levels(player)
     technique_power = sum(
         entry.combat_bonus * technique_scale(entry)
         * (1 + max(0.0, float(player.sage_effects.get("technique_learning_multiplier", 0.0))))
         for entry in player.combat_techniques
-        if combat_requirement_met(entry.combat_requirements, current_qi_levels)
+        if entry.category == "spiritual" and combat_requirement_met(entry.combat_requirements, current_qi_levels)
         and can_player_practice_technique(player, entry)
         and entry.active_in(player.world)
         and (not entry.requires_immortal_power or player.immortal_power_converted)
@@ -672,8 +696,8 @@ def effective_sha_qi(player: Player, context: str = "general") -> float:
     return projected_resource(player, "sha_qi", context)
 
 
-def effective_fame(player: Player) -> float:
-    return projected_resource(player, "fame")
+def effective_infamy(player: Player) -> float:
+    return projected_resource(player, "infamy")
 
 
 def negative_event_multiplier(player: Player) -> float:
@@ -775,7 +799,7 @@ def opportunity_multiplier(
     ) if player.technique else 0.0
     from .system.crafted_artifact_rules import crafted_artifact_bonuses
     item_bonus = (
-        sum(item.opportunity_bonus * item.quantity for item in player.inventory)
+        sum(item.opportunity_bonus * item.quantity for item in player.inventory if 'dungeon_restorative' not in item.tags)
         + player.natal_artifact_opportunity_bonus
         + crafted_artifact_bonuses(player)["opportunity_efficiency"]
     )
@@ -878,6 +902,10 @@ def intrinsic_resource_breakdown(player: Player) -> dict[str, Any]:
 def public_player(player: Player) -> dict[str, Any]:
     ensure_technique_set(player)
     data = player.to_dict()
+    from .reputation import assess
+    data["renown"] = player.renown
+    data["renown_breakdown"] = assess(player)
+    data.pop("renown_records", None)
     from .character_skins import appearance as skin_appearance, public as public_skins
     appearance = skin_appearance(player)
     data['visual_actor'] = appearance['static'] if appearance else None
@@ -922,6 +950,7 @@ def public_player(player: Player) -> dict[str, Any]:
         result['affinity_requirement_display'] = technique_affinity_display(technique)
         result['root_requirement_met'] = can_player_practice_technique(player, technique)
         result['special_effect_description'] = technique_special_effect(technique)
+        result['description'] = result['special_effect_description']
         level_multiplier = technique.level_multiplier
         effect_multiplier = technique_scale(technique)
         for field_name in (
@@ -957,6 +986,9 @@ def public_player(player: Player) -> dict[str, Any]:
             effect_multiplier=effect_multiplier,
             max_level=TECHNIQUE_MAX_LEVEL,
             upgrade_copies=technique_copy_count(player, technique.id, technique.level),
+            universal_copies=universal_manuals.count(player, technique),
+            universal_cost=universal_manuals.cost(technique),
+            universal_name=(universal_manuals.name(technique.path, technique.grade, technique.level) if universal_manuals.supported(technique) else "对应道途玉简"),
             manuals_by_level=[
                 {"level": level, "quantity": quantity}
                 for level in range(1, TECHNIQUE_MAX_LEVEL + 1)
@@ -965,11 +997,12 @@ def public_player(player: Player) -> dict[str, Any]:
             can_upgrade=(
                 technique.level < TECHNIQUE_MAX_LEVEL
                 and not promotion_reason(player, technique.id, technique.level + 1)
-                and not technique.id.endswith(':concordance')
-                and technique_copy_count(player, technique.id, technique.level) > 0
+                and (not technique.id.endswith(':concordance') or technique.id.startswith('dungeon:'))
+                and (technique_copy_count(player, technique.id, technique.level) > 0
+                     or (universal_manuals.supported(technique) and universal_manuals.count(player, technique) >= universal_manuals.cost(technique)))
             ),
             effective_karma_multiplier=effective_technique_karma_multiplier(technique),
-            doctrine_fusion=technique.id.endswith(':concordance'),
+            doctrine_fusion=technique.id.endswith(':concordance') and not technique.id.startswith('dungeon:'),
             source_names=[QI_SOURCE_NAMES[source] for source in technique.sources],
             source_display="、".join(
                 QI_SOURCE_NAMES[source] + (f" {weight:.0%}" if len(technique.sources) > 1 else "")
@@ -1081,7 +1114,7 @@ def public_player(player: Player) -> dict[str, Any]:
             "body": public_technique(player.body_technique, True),
             "divine_sense": public_technique(player.divine_sense_technique, True),
             "transformation": public_technique(player.transformation_technique, False),
-            "combat": [public_technique(technique, False) for technique in player.combat_techniques],
+            "combat": [public_technique(technique, False) for technique in player.combat_techniques if technique.category == "spiritual"],
         },
         known_techniques=[
             public_technique(technique, False) | {

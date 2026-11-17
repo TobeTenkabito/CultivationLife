@@ -1,10 +1,10 @@
 # 浮生问道 · Android
 
-维护基线：本体 **v3.11.0**，Android **3.11.0-android.105**，versionCode **105**。同包名、同签名；仅支持结构12，结构1–11拒绝，不迁移、不覆盖。仅保留山海图志、沧海夜色两个像素主题，取消旧四主题与启用新版开关。
+维护基线：本体 **v3.12.0**，Android **3.12.0-android.106**，versionCode **106**。同包名、同签名；仅支持结构12，结构1–11拒绝，不迁移、不覆盖。仅保留山海图志、沧海夜色两个像素主题，取消旧四主题与启用新版开关。
 
-本轮全仓回归、Windows EXE有／无DLC、签名Android12横竖屏功法、斗法机制、秘术及百科操作的验收范围见[3.11.0说明](../docs/release-3110.md)。素材随包离线提供，不声明实体手机验收。
+本轮全仓回归、Windows EXE有／无DLC、签名Android12横竖屏副本、物品操作、功法、斗法机制、秘术及百科操作的验收范围见[3.12.0说明](../docs/release-3120.md)。素材随包离线提供，不声明实体手机验收。
 
-**当前3.11.0仅接受存档结构12，旧结构1–11明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构1–11的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
+**当前3.12.0仅接受存档结构12，旧结构1–11明确不兼容；不迁移或覆盖原文件。** 同包名、同签名覆盖安装保留原文件；结构1–11的角色需要新建，不能因为覆盖安装成功就视为兼容。存档码格式 FSWD1 未变，只能在支持相应结构的版本之间互通。
 
 ## 游戏与安装
 
@@ -40,13 +40,13 @@ Gradle 从仓库复制 Python、content、web、dlc；`app/src/main/mobile` 在�
 
 `prepareGameAssets` 依赖 `copyGamePython`，核对暂存源码后生成 APK 内 `assets/game-build.json`。证明覆盖后端、内容、网页、DLC、Android 主源码与相关构建脚本。源码变动后旧 APK 证明失效，不能靠历史成功日志重新发布。
 
-正式构建后按 `scripts/package_android.py` 要求准备对应版本的回归、界面、设备、签名、版本、Lint、跨端存档及已安装 APK 哈希日志，再执行：
+正式构建后准备对应版本的全仓回归、界面、设备、签名、版本、Lint、跨端存档及已安装 APK 哈希日志，与Windows验收一起执行：
 
 ```powershell
-python scripts/package_android.py
+python scripts/package_scoped_release.py
 ```
 
-发布检查使用显式异常，在 `python -O` 和 `python -OO` 下仍有效；发行清单的 `save_schema` 从统一结构版本读取。输出在 `dist/`，不会通过更新 README 自动更新 APK。
+发行清单的 `save_schema` 从统一结构版本读取。正式包暂存于 `build/releases/<版本>/`，推送代码后通过 `scripts/publish_github_release.py` 上传、核对远程SHA-256并清理临时安装包，详见[发行流程](../docs/release-workflow.md)。
 
 控制台原生行为通过 `debug-console` instrumentation 阶段在横竖屏验证；Agent 指令和结构化参数详见 [Debug 文档](../docs/debug-development.md)。
 

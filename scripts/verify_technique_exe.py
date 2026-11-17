@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import runpy
 import urllib.request
+import urllib.error
 
 from playwright.sync_api import sync_playwright
 from scripts.browser_navigation import navigation_locator, click_control, reveal_subpage, set_theme
@@ -16,7 +17,10 @@ def verify_techniques(base,with_dlc,folder):
     prepare=runpy.run_path(str(ROOT/'tests/fixtures/technique_release.py'))['prepare_technique_release']
     def request(path,data=None):
         req=urllib.request.Request(base+path,data=None if data is None else json.dumps(data).encode(),headers={'Content-Type':'application/json'})
-        with urllib.request.urlopen(req,timeout=90) as response:return json.load(response)
+        try:
+            with urllib.request.urlopen(req,timeout=90) as response:return json.load(response)
+        except urllib.error.HTTPError as error:
+            raise AssertionError(f'{path}: {error.code}: {error.read().decode("utf-8")}') from error
     engine=GameEngine(ROOT,folder/'data/saves')
     def create(mode):
         identity=request('/api/games',dict(name='成品功法验收',path='dao',spirit_root='heavenly',seed=713,preset_id='core'))['id']

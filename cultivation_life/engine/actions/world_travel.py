@@ -94,7 +94,7 @@ def _prepare_permanent_world_transition(
     player.faction_contribution = 0
     player.faction_reward_preference = None
     player.allegiance_race = player.lineage_race or player.race
-    player.fame = 0.0
+    player.infamy = 0.0
     if player.imprisonment:
         player.imprisonment = None
         deps._intrigue_sync_player_prison(game)
@@ -344,7 +344,7 @@ def _complete_demonic_ascension(deps: WorldTravelDependencies, game: GameState) 
     else:
         raise ValueError("当前境界尚未触及下一魔界的飞升门槛")
     origin = player.world
-    old_fame = player.fame
+    old_infamy = player.infamy
     lost_puppets = len(player.puppets)
     rng = decode_rng(game.seed, game.rng_state)
     plan = deps._plan_world_transition(game, destination, reason="魔道飞升")
@@ -365,7 +365,7 @@ def _complete_demonic_ascension(deps: WorldTravelDependencies, game: GameState) 
     game.history.append(HistoryRecord(
         "SYS_DEMONIC_ASCENSION", 1, player.age, f"{'平移' if plan.direction.value == 'lateral' else '飞升'}{destination_name}", destination, "ascended",
         f"你撕开{origin_name}界壁，降临{destination_name}。{puppet_text}{entourage_text}",
-        {"world": [origin, destination], "lost_puppets": lost_puppets, "fame": [old_fame, 0]},
+        {"world": [origin, destination], "lost_puppets": lost_puppets, "infamy": [old_infamy, 0]},
         ["system", "ascension", "demonic", "world:global"],
     ))
     game.updated_at = now_iso()

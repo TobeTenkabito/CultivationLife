@@ -190,10 +190,10 @@ def test_execution_marks_true_death_and_prevents_second_reward(held_game):
     engine.relationship_violence(game.id, 'captive', npc.id)
     assert not npc.alive and npc.custody is None
     assert not game.player.dao_companion['alive'] and not game.player.prisoners
-    fame, karma = game.player.fame, game.player.karma
+    infamy, karma = game.player.infamy, game.player.karma
     with pytest.raises(ValueError):
         engine.relationship_violence(game.id, 'companion', npc.id)
-    assert (game.player.fame, game.player.karma) == (fame, karma)
+    assert (game.player.infamy, game.player.karma) == (infamy, karma)
 
 
 def test_permanent_departure_retires_without_death(held_game):

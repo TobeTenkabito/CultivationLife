@@ -133,8 +133,8 @@ def _public_buddhist(deps: BuddhistStateDependencies, game):
     site = site_state(state, scope_key(game), site_key(game))
     burden = deps._buddhist_burden(game)
     chosen = selected_blessings(game)
-    from ..rules import effective_fame
-    audience = round(config["attendance_base"] + player.realm_index * config["attendance_realm"] + math.sqrt(max(0, effective_fame(player))) * config["attendance_fame"] + math.sqrt(site["followers"]) * config["attendance_followers"] + site["temple"] * config["attendance_temple"])
+    from ..rules import effective_infamy
+    audience = round(config["attendance_base"] + player.realm_index * config["attendance_realm"] + math.sqrt(max(0, player.renown)) * config["attendance_renown"] + math.sqrt(site["followers"]) * config["attendance_followers"] + site["temple"] * config["attendance_temple"])
     sites = []
     for world, network in state["worlds"].items():
         for location, row in network["sites"].items():
@@ -148,7 +148,7 @@ def _public_buddhist(deps: BuddhistStateDependencies, game):
     tier = int(WORLD_SYSTEMS["world_profiles"][player.world]["tier"])
     return {"available": True, "karma": state["dharma_karma"], "grace_units": state["grace_units"],
             "wish": {**copy.deepcopy(state["wish"]), "blocked": nirvana_target(deps, game)[1]},
-            "raw_karma": player.karma, "raw_sha": player.sha_qi, "effective_fame": effective_fame(player),
+            "raw_karma": player.karma, "raw_sha": player.sha_qi, "effective_infamy": effective_infamy(player),
             "followers": round(followers(state, scope_key(game))), "sites": sites,
             "site": copy.deepcopy(site), "temple_cost": config["temples"][level + 1]["cost"] * config["temple_tier_scale"] ** (max(1, tier) - 1) if level < 3 else None,
             "blessings": [{"id": key, **spec, "selected": key in chosen, "annual_cost": round(upkeep(game, key), 3)} for key, spec in config["blessings"].items()],

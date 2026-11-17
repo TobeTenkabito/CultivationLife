@@ -415,6 +415,7 @@ $('#new-game-form').addEventListener('submit', async event => {
 });
 
 document.querySelectorAll('[data-action]').forEach(button => button.addEventListener('click', () => {
+  if (button.dataset.action === 'treasure') { window.UtilityPanels.open('dungeon'); return; }
   mutate(`/api/games/${game.id}/advance`, {action: button.dataset.action, years: window.ThemeComposition?.units || 1});
 }));
 
@@ -486,6 +487,7 @@ function render(data) {
   window.NpcArt?.context(data);
   window.NpcDevelopment?.context(data,{api,mutate,busy:()=>busy});
   window.TrialSitePanel?.update(data, mutate, () => busy);
+  window.DungeonPanel?.update(data, mutate, () => busy);
   window.HeavensPanel?.render(data,{api,toast,confirm:openGameConfirm,busy:()=>busy,
     refresh:async()=>render(await api(`/api/games/${game.id}`)),command:async(id,payload)=>{
     if(busy)return;
@@ -605,8 +607,9 @@ function render(data) {
   combatNode.title = combatHint; combatNode.dataset.tooltip = combatHint;
   $('#karma').textContent = number(p.karma);
   $('#sha-qi').textContent = number(p.sha_qi || 0);
-  $('#fame').textContent = number(p.fame || 0);
-  $('#fame').title = p.fame_assessment || '';
+  $('#renown').textContent = number(p.renown);
+  $('#infamy').textContent = number(p.infamy || 0);
+  $('#infamy').title = p.infamy_assessment || '';
   $('#battle-power').textContent = number(p.battle_power || p.combat_power);
   $('#heart-demon-stat').classList.toggle('hidden', p.heart_demon == null);
   $('#heart-demon').textContent = p.heart_demon == null ? '' : number(p.heart_demon);
@@ -2898,7 +2901,7 @@ function renderMap(map, auction) {
     build.onclick=()=>openGameConfirm({title:'建立当地传送阵',body:`由${plan.owner_name}支付预计 ${number(plan.total)} 灵石并消耗所列资材。费用以提交时当地账目为准，确认建阵？`,confirmText:'确认建阵',onConfirm:()=>mutate(`/api/games/${game.id}/teleport-action`,{action:'build',owner_id:plan.owner_id})});
     box.append(build);list.append(box);
   }
-  if(tp?.origin){const box=document.createElement('section');box.className='teleport-controls';const label=document.createElement('p');label.textContent=`${tp.origin.owner_name}执掌此阵；通行许可须为本门修士或声望达 ${tp.required_fame}。先选通行方式，再选择目的地。`;box.append(label);
+  if(tp?.origin){const box=document.createElement('section');box.className='teleport-controls';const label=document.createElement('p');label.textContent=`${tp.origin.owner_name}执掌此阵；通行许可须为本门修士或声望达 ${tp.required_renown}。先选通行方式，再选择目的地。`;box.append(label);
     const action=(text,payload,disabled=false)=>{const b=document.createElement('button');b.textContent=text;b.className='map-teleport';b.dataset.unavailable=disabled?'1':'0';b.disabled=disabled||busy||!!game.pending_event||!game.player.alive;b.onclick=()=>mutate(`/api/games/${game.id}/teleport-action`,payload);box.append(b);};
     action(tp.origin.licensed?'已取得许可':'申请通行许可',{action:'request'},tp.origin.licensed||!tp.can_request);
     const permit=tp.temporary || {};
@@ -2912,7 +2915,7 @@ function renderMap(map, auction) {
     methods.push(['bribe',`贿赂 · ${number(tp.bribe)} 灵石 · ${Math.round(tp.exposure.bribe*100)}% 暴露`],['assassinate',`暗杀 · ${Math.round(tp.exposure.assassinate*100)}% 暴露`]);
     for(const [method,title] of methods){const b=document.createElement('button');b.textContent=title;b.type='button';choices.append(b);
       b.onclick=()=>{route.replaceChildren();choices.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
-        const hint=document.createElement('p');hint.className='muted';hint.textContent=['travel','temporary'].includes(method)?'凭许可瞬息传送，不消耗年龄；临时证使用后作废。':`仅本次偷渡有效。若暴露，威名增加 ${number(tp.fame_penalty)} 并遭执阵势力通缉。`;
+        const hint=document.createElement('p');hint.className='muted';hint.textContent=['travel','temporary'].includes(method)?'凭许可瞬息传送，不消耗年龄；临时证使用后作废。':`仅本次偷渡有效。若暴露，凶名增加 ${number(tp.infamy_penalty)} 并遭执阵势力通缉。`;
         const select=document.createElement('select');select.setAttribute('aria-label','传送目的地');
         for(const dest of tp.destinations){const o=document.createElement('option');o.value=dest.id;o.textContent=dest.name;select.append(o);}
         const go=document.createElement('button');go.textContent='确认传送';go.className='map-teleport';go.dataset.unavailable=tp.destinations.length?'0':'1';go.disabled=!tp.destinations.length||busy||!!game.pending_event||!game.player.alive;
@@ -3236,7 +3239,7 @@ function renderArtSkills(skills) {
 function renderSpiritField(field) {
   $('#spirit-field-summary').textContent = `${number(field.reclaimed_qing || 0)}/${number(field.max_qing || 0)} 顷`;
   $('#spirit-field-note').textContent = field.reclaimed_qing
-    ? `已有 ${field.free_qing} 顷空闲。按数量级向下取整：201 年记作 200 年，2,001 年记作 2,000 年；年份更高不保证品质更好。`
+    ? `已有 ${field.free_qing} 顷空闲。按数量级向下取整：201 年记作 200 年，2,001 年记作 2,000 年；品质依灵田、作物与养护条件结算。`
     : '尚未开垦。开垦只消耗灵石，视为瞬间完成，不推进任何时间单位。';
   if (field.local_available === false) $('#spirit-field-note').textContent = '灵田留在原界面或空间实例，返回后可继续操持。';
   const plots = $('#spirit-field-plots'); plots.innerHTML = '';
@@ -3316,7 +3319,7 @@ function renderInventory(items) {
   const list = $('#inventory-list'); list.innerHTML = '';
   if (!items.length) { list.innerHTML = '<p class="empty">袖中空空，唯有清风。</p>'; window.PixelInventory?.render(game); return; }
   const definitions = [
-    ['功法传承玉简', item => item.tags?.includes('technique_manual') || !!item.technique_id],
+    ['功法传承玉简', item => item.tags?.some(tag=>['technique_manual','universal_manual','dungeon_manual'].includes(tag)) || !!item.technique_id],
     ['丹药与突破材料', item => item.breakthrough_bonus > 0 || item.tags?.includes('pill') || item.tags?.includes('breakthrough')],
     ['灵植与种子', item => item.tags?.includes('spirit_plant') || item.tags?.includes('seed')],
     ['灵根法门', item => item.tags?.includes('root_manual')],
@@ -3346,6 +3349,15 @@ function renderInventory(items) {
       effect.textContent += ` 原始战力 ${number(artifact.raw_combat_power)}；${limit}，实际生效 ${number(artifact.effective_combat_power)}。Buff 与其他属性不受此战力上限影响。`;
     }
     text.append(name, effect); row.appendChild(text);
+    if (item.tags?.includes('universal_manual') && Number(item.technique_level || 1) < 9) {
+      const level=Number(item.technique_level || 1), merge=document.createElement('button');
+      merge.className='technique-merge';merge.textContent=`合成 Lv.${level+1}（2→1）`;
+      merge.dataset.available=item.quantity>=2?'1':'0';
+      merge.disabled=busy||item.quantity<2||!!game.pending_event||!game.player.alive;
+      merge.title=`消耗两份 Lv.${level} 万能玉简`;
+      merge.onclick=()=>mutate(`/api/games/${game.id}/technique-manual-merge`,{technique_id:item.id,level});
+      row.appendChild(merge);
+    }
     if (item.technique_id) {
       const known = (game?.player?.known_techniques || []).find(art => art.id === item.technique_id);
       const manualLevel = Number(item.technique_level || 1);
@@ -3402,11 +3414,23 @@ function renderInventory(items) {
     const economicMedicine = (item.tags || []).some(tag => ['economic_use:healing','economic_use:cultivation','economic_use:longevity'].includes(tag));
     const economicCore = item.tags?.includes('economic_raw') && (item.tags || []).some(t=>t.startsWith('economic_role:core_'));
     const economicTalisman = item.tags?.includes('economic_use:talisman');
-    const normalUse = economicMedicine || economicCore || economicTalisman || item.id === 'qilin_blessing_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
+    const normalUse = item.tags?.includes('dungeon_restorative') || economicMedicine || economicCore || economicTalisman || item.id === 'qilin_blessing_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
     if (item.tags?.includes('secret_art_manual')) {
       const browse=document.createElement('button');browse.textContent='参阅秘法';
       browse.onclick=()=>{window.SecretArtPanel?.select(item.tags.find(t=>t.startsWith('secret_art:')).slice(11));window.UtilityPanels?.open('secret-art');};
       row.appendChild(browse);
+    }
+    if (item.tags?.includes('dungeon_manual')) {
+      const manual=game.dungeons?.manuals.find(m=>'MANUAL_DUNGEON_'+m.id===item.id);
+      if(manual){
+        effect.textContent=`${manual.grade} · ${manual.fused?'合练真传':'功法传承'} · Lv.${manual.level}。${manual.description}`;
+        const learn=document.createElement('button');learn.textContent='研习传承';learn.className='dungeon-manual-learn';
+        learn.dataset.dungeonAction='learn';learn.dataset.enabled=String(manual.can_learn);
+        learn.disabled=busy||!manual.can_learn;learn.title=manual.learn_reason||'研习行囊中的传承原件';
+        learn.onclick=()=>mutate(`/api/games/${game.id}/dungeon-action`,{action:'learn',manual_id:manual.id});row.appendChild(learn);
+      }
+      const browse=document.createElement('button');browse.textContent='参阅所得传承';
+      browse.onclick=()=>window.UtilityPanels.open('dungeon');row.appendChild(browse);
     }
     if (!artifact && (trialRecovery || (normalUse && !game.pending_event)) && game.player.alive) {
       const use = document.createElement('button'); use.className = 'item-use'; use.textContent = '服用';
@@ -3635,7 +3659,7 @@ function renderKnownTechniques(techniques) {
     const info = document.createElement('div'); const name = document.createElement('b'); name.textContent = `${art.name} Lv.${art.level} · ${art.growth_name || "均衡"}倾向 · ${art.category_name || '修仙'} · ${art.element_name}`;
     const sourceText = art.source_display || '灵源';
     const detail = document.createElement('small'); detail.textContent = art.category === 'body'
-      ? `${sourceText} · 炼体突破 +${percent(art.body_breakthrough_bonus)}（至 ${art.body_bonus_max_layer} 层） · 通用四维：机缘 +${percent(art.opportunity_bonus)} · HP +${percent(art.hp_bonus)} · MP +${percent(art.mp_bonus)} · 战力 +${number(art.combat_bonus)}`
+      ? `${sourceText} · 炼体突破 +${percent(art.body_breakthrough_bonus)}（至 ${art.body_bonus_max_layer} 层） · 炼体栏修习`
       : art.category === 'divine_sense'
         ? `${sourceText} · 神识修炼 +${percent(art.divine_sense_bonus)} · 当前环境倍率参与神识经验计算`
       : art.category === 'transformation'
@@ -3654,7 +3678,7 @@ function renderKnownTechniques(techniques) {
     }
     row.appendChild(info);
     const buttons = document.createElement('div'); buttons.className = 'technique-equip-buttons';
-    const slotChoices = art.category === 'body' ? [['body','体'],['combat','战']] : art.category === 'divine_sense' ? [['divine_sense','识'],['combat','战']] : art.category === 'transformation' ? (game.player.path === 'monster' ? [] : [['transformation','变'],['combat','战']]) : [['main','主'],['support','辅'],['combat','战']];
+    const slotChoices = art.category === 'body' ? [['body','体']] : art.category === 'divine_sense' ? [['divine_sense','识']] : art.category === 'transformation' ? (game.player.path === 'monster' ? [] : [['transformation','变']]) : [['main','主'],['support','辅'],['combat','战']];
     slotChoices.forEach(([slot,label]) => {
       const button = document.createElement('button'); button.className = 'technique-equip'; button.textContent = label;
       if (slot === 'main' && art.id === game.tutorial?.guide.art?.id) button.dataset.guideEquip = art.id;
@@ -3669,19 +3693,20 @@ function renderKnownTechniques(techniques) {
       buttons.appendChild(button);
     });
     const upgrade = document.createElement('button'); upgrade.className = 'technique-upgrade';
-    upgrade.textContent = art.level >= art.max_level ? '已满级' : `升级 · 玉简 ×${art.upgrade_copies || 0}`;
+    upgrade.textContent = art.level >= art.max_level ? '已满级' : `升级 · ${art.upgrade_copies ? "传承玉简" : "万能玉简"}`;
     if(art.doctrine_fusion && art.level < art.max_level)upgrade.textContent='前往道统参悟';
     upgrade.dataset.available = art.can_upgrade ? '1' : '0';
-    upgrade.disabled = busy || !art.can_upgrade || !!game.pending_event || !game.player.alive;
+    upgrade.disabled = busy || !art.can_upgrade || !!game.pending_event || !game.player.alive || game.dungeons?.manuals.some(m=>m.id===art.id&&m.study);
     upgrade.title = art.level >= art.max_level
       ? `最高等级 Lv.${art.max_level}`
-      : art.upgrade_copies ? `消耗一份《${art.name}》Lv.${art.level} 传承玉简，提升至 Lv.${art.level + 1}` : `包裹中缺少同名 Lv.${art.level} 传承玉简`;
+      : art.upgrade_copies ? `消耗一份《${art.name}》Lv.${art.level} 传承玉简，提升至 Lv.${art.level + 1}` : `消耗 ${art.universal_name} ×${art.universal_cost}（持有 ${art.universal_copies || 0}），或同名 Lv.${art.level} 传承玉简 ×1`;
     upgrade.onclick = () => mutate(`/api/games/${game.id}/technique-upgrade`, {technique_id:art.id});
     if(art.doctrine_fusion && art.level < art.max_level){
       upgrade.disabled=busy||!!game.pending_event||!game.player.alive||game.player.world!=='celestial';
       upgrade.title='在道统界面使用仙痕参悟，无需同名玉简';
       upgrade.onclick=()=>UtilityPanels.open('doctrine');
     }
+    const materials=document.createElement('small');materials.className='technique-growth';materials.textContent=`升级材料：同名 Lv.${art.level} 玉简 ${art.upgrade_copies||0} / 1 · ${art.universal_name} ${art.universal_copies||0} / ${art.universal_cost}`;if(art.level<art.max_level&&!art.doctrine_fusion)info.append(materials);
     buttons.appendChild(upgrade);
     row.appendChild(buttons); list.appendChild(row);
   });
@@ -4501,12 +4526,18 @@ function renderButtons() {
     const choiceMissing = preset?.select_path && (!selectedPath || (selectedPath === 'monster' && !button.parentElement.querySelector('[data-quick-species]')?.value));
     button.disabled = busy || (preset ? !preset.enabled || speciesMissing || choiceMissing : false);
   });
+  if (game?.dungeons?.active) {
+    document.querySelectorAll('[data-action], .map-travel, .map-teleport, .market-buy, .market-lock, .relationship-action, .contact-action, .party-action, .technique-upgrade, .technique-merge, #breakthrough-action, #body-breakthrough-action, #sense-breakthrough-action, #spirit-crossing-action, #cross-world-action, #cross-world-secondary-action').forEach(button => { button.disabled = true; });
+  }
+  const dungeonEntry = document.querySelector('[data-action="treasure"]');
+  if (dungeonEntry) dungeonEntry.disabled = busy || !game;
+  window.DungeonPanel?.lock();
   if (game?.trial_site?.active) {
     document.querySelectorAll('[data-immortal-refine], .map-travel, .map-teleport, .market-buy, .market-lock, .relationship-action, .contact-action, .party-action, .companion-action, .friend-action, .relationship-exit, .technique-upgrade, .technique-merge, .bloodline-evolve, #body-train-action, #sense-train-action, #breakthrough-action, #body-breakthrough-action, #sense-breakthrough-action, #spirit-crossing-action, #cross-world-action, #cross-world-secondary-action').forEach(button => { button.disabled = true; });
   }
   // Both dungeon sessions reject these legacy personal commands on the server.
   // Keep the read-only NPC development shortcut available for its explanation.
-  if (guixuSession || game?.trial_site?.active) {
+  if (guixuSession || game?.trial_site?.active || game?.dungeons?.active) {
     document.querySelectorAll('.relationship-interaction, .companion-action, [data-family], .captive-tools button, .puppet-tools button, .concubine-owner-action, .owned-training-action').forEach(button => { button.disabled = true; });
   }
 }

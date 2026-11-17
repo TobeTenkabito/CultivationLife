@@ -43,7 +43,7 @@ def quote(deps, game, action, target, options):
     if echo['project_stones'] < BUDGET:
         raise ValueError('合作项目实有资金不足 7000 灵石')
     return dict(years=0, costs={'material_id': options['material_id']}, refundable={}, project_cost=BUDGET,
-        message='将所选原阵材捐赠给异界研究项目，交货后不再属于玩家；3000 灵石为定额供材补贴，并非市价收购。项目预留 4000 往返路费及 3000 供材报酬。去程、返程各 2 年，到达即交货，报酬须在出发地领取。每处仅一次。',
+        message='将所选原阵材捐赠给异界研究项目，交货后不再属于玩家；供材补贴定额为 3000 灵石。项目预留 4000 往返路费及 3000 供材报酬。去程、返程各 2 年，到达即交货，报酬须在出发地领取。每处仅一次。',
         warning='承运途中陨落，未交付物资随身遗失，不补发；已交货物不可撤回。')
 
 

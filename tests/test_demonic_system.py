@@ -281,14 +281,14 @@ class DemonicSystemTests(unittest.TestCase):
         game.player.realm_index, game.player.layer = 5, 1
         game.player.world = "demon"
         game.player.qi_experience["demon"] = qi_level_threshold(8)
-        game.player.fame = 1234
+        game.player.infamy = 1234
         game.player.puppets = [{"id":"lost", "name":"遗傀", "type":"corpse", "combat_power":100, "alive":True}]
         self.engine.store.save(game)
         before = self.engine.get_game(game_id)
         self.assertTrue(before["demonic_system"]["true_demon_ascension"]["available"])
         shown = self.engine.begin_spirit_crossing(game_id)
         self.assertEqual(shown["player"]["world"], "true_demon")
-        self.assertEqual(shown["player"]["fame"], 0)
+        self.assertEqual(shown["player"]["infamy"], 0)
         self.assertFalse(shown["demonic_system"]["puppets"])
         self.assertEqual(shown["history"][0]["state_diff"]["lost_puppets"], 1)
 

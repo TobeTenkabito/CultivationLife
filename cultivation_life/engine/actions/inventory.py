@@ -70,6 +70,11 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             return deps.present(game)
     if item is None and item_id.startswith('RELIC_'):
         item = next((i for i in game.player.inventory if i.id == item_id and 'generated_loot' in i.tags), None)
+    if item is None and item_id.startswith('dungeon:'):
+        from ...dungeon_schema import all_rewards
+        claimed = any(item_id in site['claims'] and any(r['id']==item_id and r['kind']=='pill' for r in all_rewards(site))
+                      for site in game.dungeon_state.get('instances',{}).values())
+        if claimed:item=next((i for i in game.player.inventory if i.id==item_id),None)
     if not item or not has_item(game.player, item_id):
         raise ValueError("物品不存在")
     from ...economy_content import specification
@@ -126,6 +131,20 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             f"你服下{item.name}，下一次与道侣缠绵时的孕育概率 +{bonus:.0%}。",
             {"bonus": bonus}, ["system", "item", "family", "offspring"],
         ))
+    elif 'dungeon_restorative' in item.tags:
+        remove_item(game.player,item_id)
+        hp_gain=max_hp(game.player)*item.trial_restore_hp
+        mp_gain=max_mp(game.player)*item.trial_restore_mp
+        if item.recovery_hp_limit is not None:hp_gain=min(hp_gain,item.recovery_hp_limit)
+        if item.recovery_mp_limit is not None:mp_gain=min(mp_gain,item.recovery_mp_limit)
+        hp_gain=min(hp_gain,max(0,max_hp(game.player)-game.player.hp))
+        mp_gain=min(mp_gain,max(0,max_mp(game.player)-game.player.mp))
+        game.player.hp=min(max_hp(game.player),game.player.hp+hp_gain)
+        game.player.mp=min(max_mp(game.player),game.player.mp+mp_gain)
+        gain=deps._add_opportunity(game.player,item.opportunity_bonus)
+        game.history.append(HistoryRecord('SYS_DUNGEON_RECOVERY',1,game.player.age,'服用探境灵药',
+            item_id,'consumed',f'服下{item.name}，恢复气血、法力并获得 {gain:g} 机缘。',
+            {'hp_gain':hp_gain,'mp_gain':mp_gain,'opportunity_gain':gain},['system','item','dungeon']))
     elif item.permanent_intrinsic_hp_bonus > 0 or item.permanent_intrinsic_mp_bonus > 0:
         player = game.player
         ensure_ghost_cultivation_state(player)
@@ -387,10 +406,20 @@ def upgrade_technique(deps: InventoryDependencies, game_id: str, technique_id: s
         raise ValueError("你尚未掌握这部功法")
     technique_name = known.name
     old_level = known.level
+    from ... import universal_manuals
+    from ...rules import technique_copy_count
+    row = game.dungeon_state.get('manuals', {}).get(technique_id)
+    if row and row.get('study'):
+        raise ValueError('请先完成正在进行的传承参悟')
+    payment = (f'《{technique_name}》Lv.{old_level} 传承玉简 ×1'
+        if technique_copy_count(game.player, technique_id, old_level) else
+        f'{universal_manuals.name(known.path, known.grade, known.level)} ×1')
     new_level = upgrade_known_technique(game.player, technique_id)
+    if row:
+        row['level'] = new_level
     game.history.append(HistoryRecord(
         "SYS_TECHNIQUE_UPGRADE", 1, game.player.age, "合参功法", technique_id, "upgraded",
-        f"你消耗一份《{technique_name}》Lv.{old_level} 传承玉简，将功法提升至 Lv.{new_level}。",
+        f"你消耗{payment}，将《{technique_name}》提升至 Lv.{new_level}。",
         {"technique_id":technique_id, "level":[old_level, new_level]},
         ["system", "technique", "upgrade"],
     ))
@@ -411,6 +440,9 @@ def merge_technique_manuals(
     )
     template = TECHNIQUE_CATALOG.get(technique_id)
     technique_name = known.name if known else (template.name if template else "无名功法")
+    from ...universal_manuals import parse
+    if parse(technique_id):
+        technique_name = ITEM_CATALOG[technique_id].name.rsplit(" Lv.", 1)[0]
     new_level = merge_technique_copies(game.player, technique_id, int(level))
     game.history.append(HistoryRecord(
         "SYS_TECHNIQUE_MANUAL_MERGE", 1, game.player.age, "合炼玉简", technique_id, "merged",

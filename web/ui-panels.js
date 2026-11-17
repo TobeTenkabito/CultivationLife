@@ -25,7 +25,7 @@ window.GameUi = Object.freeze({
   const pending = new Map();
   let saveId = null;
   panelNames.push('civilizations','authored','nascent','immortal-artifacts');
-  panelNames.push('trial-site','monster-body','ghost-body');
+  panelNames.push('trial-site','monster-body','ghost-body','dungeon','mailbox');
   panelNames.push('immortal-practice','immortal-estate','building-affairs');
 
   function reset() {

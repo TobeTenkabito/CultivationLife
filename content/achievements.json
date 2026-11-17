@@ -173,7 +173,7 @@
     },
     {
       "id": "cultivation_dao_ancestor", "name": "道祖", "category": "cultivation",
-      "description": "修至大罗，拥有任一至臻邻域，并将任一道统参悟至 Lv9。",
+      "description": "修至大罗后期，并拥有任一至臻邻域。",
       "source": {"kind": "base", "id": "base", "name": "游戏本体"},
       "condition": {"dao_ancestor": true}
     },

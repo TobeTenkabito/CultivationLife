@@ -2,8 +2,8 @@
   "schema_version": 1,
   "settings": {
     "enabled": true,
-    "karma_fame_ratio": 1,
-    "sha_fame_ratio": 1,
+    "karma_infamy_ratio": 1,
+    "sha_infamy_ratio": 1,
     "negative_combat_cap": 0.2,
     "grace_units": 5,
     "upkeep_follower_scale": 5,
@@ -19,7 +19,7 @@
     "burden_sha_weight": 1.5,
     "attendance_base": 30,
     "attendance_realm": 25,
-    "attendance_fame": 2,
+    "attendance_renown": 2,
     "attendance_followers": 3,
     "attendance_temple": 30,
     "technique_level_score": 5,
@@ -87,25 +87,25 @@
         "name": "大成",
         "followers_ratio": 0.65,
         "karma": 18,
-        "fame": 12
+        "renown": 12
       },
       "success": {
         "name": "成功",
         "followers_ratio": 0.35,
         "karma": 10,
-        "fame": 6
+        "renown": 6
       },
       "normal": {
         "name": "平稳收场",
         "followers_ratio": 0.12,
         "karma": 4,
-        "fame": 2
+        "renown": 2
       },
       "failure": {
         "name": "失利",
         "followers_ratio": -0.15,
         "karma": -12,
-        "fame": -3
+        "renown": -3
       }
     },
     "blessings": {

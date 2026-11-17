@@ -126,12 +126,12 @@ def test_player_manual_stance_reaches_battle_boundary(prepared):
 @pytest.mark.parametrize('exposed',[True,False])
 def test_teleport_smuggling_uses_existing_wanted_and_does_not_advance_age(prepared,method,exposed):
     e,g,_=prepared;info=public_teleport(g,e.maps);dest=info['destinations'][0]['id']
-    age,fame=g.player.age,g.player.fame
+    age,infamy=g.player.age,g.player.infamy
     with patch('random.Random.random',return_value=0 if exposed else .99):
         shown=e.teleport_action(g.id,method,dest)
     p=e.store.load(g.id).player
     assert p.age==age and p.location_id==dest and not p.teleport_permissions
-    assert (p.fame>fame)==exposed
+    assert (p.infamy>infamy)==exposed
     if exposed:assert shown['wanted']
 
 

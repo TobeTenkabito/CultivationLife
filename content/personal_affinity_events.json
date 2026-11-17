@@ -14,7 +14,7 @@
     },
     {
       "id":"EVT_PERSONAL_REVENGE_001","version":1,"title":"旧怨截杀",
-      "body":"{npc_name}对你的怨恨积压已久，终于趁你落单时封住退路。对方战力约{target_power}，这不是切磋，而是蓄谋已久的报复。",
+      "body":"{npc_name}对你的怨恨积压已久，终于趁你落单时封住退路。对方战力约{target_power}，眼中杀意暴涨，这场报复已蓄谋多时。",
       "category":"relationship_combat","tags":["manual_only","relationship","personal_affinity","revenge","combat","negative"],"weight":0,
       "choices":[
         {"id":"fight","text":"正面应战，了结旧怨","effects":[{"type":"personal_revenge_response","mode":"fight"}]},

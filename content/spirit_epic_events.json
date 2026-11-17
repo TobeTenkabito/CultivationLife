@@ -3,14 +3,14 @@
   "world": "spirit",
   "events": [
     {
-      "id":"EVT_TWO_REALMS_001","version":1,"title":"裂界魔潮","body":"灵界西境忽然裂开数百道魔渊，玄烬圣祖率真魔大军跨界而来。他并非只为杀戮：真魔界北域灵脉正在枯死，他要夺走灵界孕育万年的界种，移植到自己的疆域。界种一旦离土，灵界西境也会在百年内化为荒原。",
+      "id":"EVT_TWO_REALMS_001","version":1,"title":"裂界魔潮","body":"灵界西境忽然裂开数百道魔渊，玄烬圣祖率真魔大军跨界而来。真魔界北域灵脉正在枯死，他要夺走灵界孕育万年的界种，移植到自己的疆域。界种一旦离土，灵界西境也会在百年内化为荒原。",
       "tags":["realm:integration","story_chain","two_realms_war","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"two_realms_war_eligible","base_chance":0.20,"unit_increment":0.02},
       "conditions":{"all":[{"path":"player.world","op":"eq","value":"spirit"},{"path":"player.realm_index","op":"eq","value":7}]},
       "choices":[
         {"id":"defend","text":"赴界渊城正面迎战","effects":[{"type":"set_flag","flag":"two_realms_defender"},{"type":"queue_event","event_id":"EVT_TWO_REALMS_002"}]},
         {"id":"rescue","text":"先迁走魔渊附近的凡人与低阶修士","effects":[{"type":"add_karma","value":-8},{"type":"set_flag","flag":"two_realms_rescuer"},{"type":"queue_event","event_id":"EVT_TWO_REALMS_002"}]},
         {"id":"scout","text":"潜入魔渊侦察玄烬圣祖化身","effects":[{"type":"restore_mp","value":-0.12},{"type":"set_flag","flag":"two_realms_scout"},{"type":"queue_event","event_id":"EVT_TWO_REALMS_002"}]},
-        {"id":"avoid","text":"封闭洞府，不介入两界因果","effects":[{"type":"add_fame","value":-12},{"type":"set_flag","flag":"two_realms_war_incomplete"}]}
+        {"id":"avoid","text":"封闭洞府，不介入两界因果","effects":[{"type":"add_infamy","value":-12},{"type":"set_flag","flag":"two_realms_war_incomplete"}]}
       ]
     },
     {
@@ -30,11 +30,11 @@
         {"id":"rescue_thunder","text":"催动遁术救走护根修士（MP 至少 100,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":100000},{"stat":"mp_ratio","op":"gte","value":0.60}],"failure_reason":"遁光被玄烬魔焰击碎","success_text":"你的遁光卷住活根与伤员，抢在魔焰落下前脱身。"},{"type":"set_flag","flag":"two_realms_thunder_ally","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_TWO_REALMS_004","if_result":["check_success"]}]},
         {"id":"fight_six","text":"正面截住玄烬化身（战斗力至少 10,400,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":10400000}],"failure_reason":"玄烬化身以魔功吞尽你的精元","success_text":"玄烬化身被你逼退，绯色月光中的强者终于现身。"},{"type":"set_flag","flag":"two_realms_repulsed_six","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_TWO_REALMS_004","if_result":["check_success"]}]},
         {"id":"mislead","text":"以幻术化出假根，将追兵引向魔渊","effects":[{"type":"restore_mp","value":-0.15},{"type":"add_opportunity","value":18},{"type":"set_flag","flag":"two_realms_clever_route"},{"type":"queue_event","event_id":"EVT_TWO_REALMS_004"}]},
-        {"id":"bargain_six","text":"向玄烬圣祖出卖护根修士的行踪","effects":[{"type":"add_karma","value":18},{"type":"add_fame","value":8},{"type":"queue_event","event_id":"EVT_TWO_REALMS_004"}]}
+        {"id":"bargain_six","text":"向玄烬圣祖出卖护根修士的行踪","effects":[{"type":"add_karma","value":18},{"type":"add_infamy","value":8},{"type":"queue_event","event_id":"EVT_TWO_REALMS_004"}]}
       ]
     },
     {
-      "id":"EVT_TWO_REALMS_004","version":1,"title":"绯月现身","body":"来者是被玄烬逐出真魔界的绯月圣祖。她曾镇守北域万年，知道灵脉枯竭并非无解：天墟岛中留有一眼万劫雷池，可以洗去界种病根。玄烬不肯等待，是因为一旦北域得救，他借灾劫吞并诸部的谋划便会败露。",
+      "id":"EVT_TWO_REALMS_004","version":1,"title":"绯月现身","body":"来者是被玄烬逐出真魔界的绯月圣祖。她曾镇守北域万年，熟知救治灵脉的办法：天墟岛中留有一眼万劫雷池，可以洗去界种病根。玄烬不肯等待，是因为一旦北域得救，他借灾劫吞并诸部的谋划便会败露。",
       "tags":["realm:integration","story_chain","two_realms_war","manual_only"],"weight":0,
       "choices":[
         {"id":"ally","text":"与绯月联手逼退玄烬化身（战斗力至少 10,000,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":10000000}],"failure_reason":"你被两位圣祖交锋的余波抹去","success_text":"你封住玄烬化身退路，绯月以月轮魔焰将其彻底击溃。"},{"type":"set_flag","flag":"baohua_respected_strength","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_TWO_REALMS_005","if_result":["check_success"]}]},
@@ -47,9 +47,9 @@
       "id":"EVT_TWO_REALMS_005","version":1,"title":"两界盟誓","body":"绯月愿以心魔起誓：她会带活根进入天墟岛，洗去病根后将界种一分为二，让两界各自重栽。作为交换，灵界联军必须助她夺回通往天墟岛的古路。她先交出定魂丹与两界盟符，选择是否相信她则在你。",
       "tags":["realm:integration","story_chain","two_realms_war","manual_only"],"weight":0,
       "choices":[
-        {"id":"peace_clause","text":"接受合作，并要求她以心魔立誓归还半数界种","effects":[{"type":"add_item","item_id":"baohua_soul_pill"},{"type":"add_item","item_id":"baohua_covenant"},{"type":"add_karma","value":-10},{"type":"add_fame","value":18},{"type":"set_flag","flag":"baohua_cooperation_completed"},{"type":"set_milestone","milestone":"two_realms_war_completed"}]},
+        {"id":"peace_clause","text":"接受合作，并要求她以心魔立誓归还半数界种","effects":[{"type":"add_item","item_id":"baohua_soul_pill"},{"type":"add_item","item_id":"baohua_covenant"},{"type":"add_karma","value":-10},{"type":"add_infamy","value":18},{"type":"set_flag","flag":"baohua_cooperation_completed"},{"type":"set_milestone","milestone":"two_realms_war_completed"}]},
         {"id":"pool_clause","text":"接受合作，换取天墟岛与万劫雷池情报","effects":[{"type":"add_item","item_id":"baohua_soul_pill"},{"type":"add_item","item_id":"baohua_covenant"},{"type":"add_opportunity","value":35},{"type":"set_flag","flag":"baohua_pool_route"},{"type":"set_flag","flag":"baohua_cooperation_completed"},{"type":"set_milestone","milestone":"two_realms_war_completed"}]},
-        {"id":"reward_only","text":"只收丹药，不替两界许下承诺","effects":[{"type":"add_item","item_id":"baohua_soul_pill"},{"type":"add_fame","value":6},{"type":"set_flag","flag":"baohua_cooperation_completed"},{"type":"set_milestone","milestone":"two_realms_war_completed"}]},
+        {"id":"reward_only","text":"只收丹药，不替两界许下承诺","effects":[{"type":"add_item","item_id":"baohua_soul_pill"},{"type":"add_infamy","value":6},{"type":"set_flag","flag":"baohua_cooperation_completed"},{"type":"set_milestone","milestone":"two_realms_war_completed"}]},
         {"id":"refuse","text":"拒绝合作，各走各路","effects":[{"type":"add_heart_demon","value":2},{"type":"set_flag","flag":"baohua_cooperation_refused"}]}
       ]
     },
@@ -85,7 +85,7 @@
       ]
     },
     {
-      "id":"EVT_BITTER_ISLAND_004","version":1,"title":"雷池与魂芝","body":"岛心万劫雷池由历代飞升者散落的劫雷汇成，入池可重炼经脉与法体；崖上的太初魂芝则以雷火为养分，千年才成熟一株。两种造化并非不能兼得，但雷霆炼体时元神必须归窍，采芝又需神游崖顶，稍有差错便会形神俱灭。",
+      "id":"EVT_BITTER_ISLAND_004","version":1,"title":"雷池与魂芝","body":"岛心万劫雷池由历代飞升者散落的劫雷汇成，入池可重炼经脉与法体；崖上的太初魂芝则以雷火为养分，千年才成熟一株。两种造化可依次取用，雷霆炼体时元神须归窍，采芝时则需神游崖顶；稍有差错便会形神俱灭。",
       "tags":["realm:integration","story_chain","bitter_spirit_island","manual_only"],"weight":0,
       "choices":[
         {"id":"bathe","text":"先入万劫雷池淬炼法体（HP、MP 均至少 90,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":90000},{"stat":"mp","op":"gte","value":90000},{"stat":"hp_ratio","op":"gte","value":0.65}],"failure_reason":"法体无法承受万劫雷火，当场崩解","success_text":"雷火洗过每一条经脉，肉身与元神重新浑成一体。"},{"type":"damage","value":0.25,"if_result":["check_success"]},{"type":"restore_mp","value":-0.25,"if_result":["injured"]},{"type":"set_flag","flag":"bitter_island_bathed"},{"type":"queue_event","event_id":"EVT_BITTER_ISLAND_005"}]},
@@ -100,7 +100,7 @@
       "choices":[
         {"id":"pool_escape","text":"舍弃魂芝，护住雷池淬体所得遁走","conditions":{"has_flag":"bitter_island_bathed"},"disabled_reason":"你并未进入万劫雷池","effects":[{"type":"attribute_check","checks":[{"stat":"mp_ratio","op":"gte","value":0.45}],"failure_reason":"遁光耗尽，被玄烬化身留在罡风海中","success_text":"你以雷火撕开魔舟封锁，沿绯月留下的界路返回灵界。"},{"type":"add_item","item_id":"cleansed_spirit_mark","if_result":["check_success"]},{"type":"set_flag","flag":"bitter_island_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"bitter_spirit_island_completed","if_result":["check_success"]}]},
         {"id":"lotus_escape","text":"护住太初魂芝，斩开魔舟封锁（战斗力至少 9,710,000）","conditions":{"has_flag":"bitter_island_lotus"},"disabled_reason":"你没有取得太初魂芝","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":9710000}],"failure_reason":"追兵击碎护身灵光，魂芝与性命皆失","success_text":"魂芝护住元神，你强行斩开魔舟封锁返回灵界。"},{"type":"add_item","item_id":"purifying_lotus","if_result":["check_success"]},{"type":"set_flag","flag":"bitter_island_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"bitter_spirit_island_completed","if_result":["check_success"]}]},
-        {"id":"full_escape","text":"同时带走雷池道印与太初魂芝（战力 12,500,000；MP 70,000）","conditions":{"all":[{"has_flag":"bitter_island_bathed"},{"has_flag":"bitter_island_lotus"}]},"disabled_reason":"你没有同时取得两种造化","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":12500000},{"stat":"mp","op":"gte","value":70000}],"failure_reason":"玄烬化身击碎遁光，将你连同两种造化一并镇杀","success_text":"你以雷池道印护身、魂芝守神，借绯月留下的坐标遁出罡风海。"},{"type":"add_item","item_id":"cleansed_spirit_mark","if_result":["check_success"]},{"type":"add_item","item_id":"purifying_lotus","if_result":["check_success"]},{"type":"add_fame","value":25,"if_result":["check_success"]},{"type":"set_flag","flag":"bitter_island_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"bitter_spirit_island_completed","if_result":["check_success"]}]},
+        {"id":"full_escape","text":"同时带走雷池道印与太初魂芝（战力 12,500,000；MP 70,000）","conditions":{"all":[{"has_flag":"bitter_island_bathed"},{"has_flag":"bitter_island_lotus"}]},"disabled_reason":"你没有同时取得两种造化","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":12500000},{"stat":"mp","op":"gte","value":70000}],"failure_reason":"玄烬化身击碎遁光，将你连同两种造化一并镇杀","success_text":"你以雷池道印护身、魂芝守神，借绯月留下的坐标遁出罡风海。"},{"type":"add_item","item_id":"cleansed_spirit_mark","if_result":["check_success"]},{"type":"add_item","item_id":"purifying_lotus","if_result":["check_success"]},{"type":"add_infamy","value":25,"if_result":["check_success"]},{"type":"set_flag","flag":"bitter_island_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"bitter_spirit_island_completed","if_result":["check_success"]}]},
         {"id":"empty_escape","text":"放弃全部造化，轻装破界","effects":[{"type":"add_opportunity","value":20},{"type":"set_flag","flag":"bitter_island_survived"},{"type":"set_flag","flag":"bitter_island_incomplete"}]}
       ]
     },
@@ -109,10 +109,10 @@
       "tags":["realm:mahayana","story_chain","mother_borer","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"mother_borer_eligible","base_chance":0.20,"unit_increment":0.02},
       "conditions":{"all":[{"path":"player.world","op":"eq","value":"spirit"},{"path":"player.realm_index","op":"eq","value":8}]},
       "choices":[
-        {"id":"vanguard","text":"加入直捣祖根的精锐队伍","effects":[{"type":"set_flag","flag":"mother_borer_vanguard"},{"type":"add_fame","value":20},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_002"}]},
+        {"id":"vanguard","text":"加入直捣祖根的精锐队伍","effects":[{"type":"set_flag","flag":"mother_borer_vanguard"},{"type":"add_infamy","value":20},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_002"}]},
         {"id":"command","text":"统筹各族大乘，先保住撤退路线","effects":[{"type":"set_flag","flag":"mother_borer_commander"},{"type":"add_karma","value":-8},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_002"}]},
         {"id":"infiltrate","text":"独自潜入根海，寻找祖藤主根","effects":[{"type":"restore_mp","value":-0.12},{"type":"set_flag","flag":"mother_borer_scout"},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_002"}]},
-        {"id":"refuse","text":"拒绝参战，任各族自求多福","effects":[{"type":"add_fame","value":-25},{"type":"add_karma","value":12},{"type":"set_flag","flag":"mother_borer_incomplete"}]}
+        {"id":"refuse","text":"拒绝参战，任各族自求多福","effects":[{"type":"add_infamy","value":-25},{"type":"add_karma","value":12},{"type":"set_flag","flag":"mother_borer_incomplete"}]}
       ]
     },
     {
@@ -122,7 +122,7 @@
         {"id":"power_banner","text":"以法力催动照脉天镜（MP 至少 520,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":520000},{"stat":"mp_ratio","op":"gte","value":0.62}],"failure_reason":"祖藤根须循神识反噬，将你的元神吸干","success_text":"镜光照彻地底，祖藤所有主根第一次同时显形。"},{"type":"restore_mp","value":-0.20,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_banner_mastered"},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_003"}]},
         {"id":"break_tide","text":"以蛮力劈开根海（战斗力至少 55,000,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":55000000}],"failure_reason":"你被无穷根须耗尽法宝与肉身","success_text":"你在根海中斩出一条直通祖根的裂谷。"},{"type":"add_sha_qi","value":15,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_tide_broken","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_003","if_result":["check_success"]}]},
         {"id":"shield_allies","text":"以法体护住持钉诸修（HP 至少 420,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":420000},{"stat":"hp_ratio","op":"gte","value":0.65}],"failure_reason":"木傀自爆层层叠加，你的法体彻底崩坏","success_text":"你替众人扛下自爆余波，九枚锁根神钉顺利落下。"},{"type":"damage","value":0.18,"if_result":["check_success"]},{"type":"add_karma","value":-8,"if_result":["injured"]},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_003","if_result":["injured"]}]},
-        {"id":"seize_tool","text":"趁乱夺取阵器据为己有","effects":[{"type":"add_karma","value":25},{"type":"add_fame","value":18},{"type":"add_heart_demon","value":8},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_003"}]}
+        {"id":"seize_tool","text":"趁乱夺取阵器据为己有","effects":[{"type":"add_karma","value":25},{"type":"add_infamy","value":18},{"type":"add_heart_demon","value":8},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_003"}]}
       ]
     },
     {
@@ -140,7 +140,7 @@
       "tags":["realm:mahayana","story_chain","mother_borer","manual_only"],"weight":0,
       "choices":[
         {"id":"trust","text":"暂信桑离，请他指点祖藤命门（因果不高于 100）","effects":[{"type":"attribute_check","checks":[{"stat":"karma","op":"lte","value":100},{"stat":"heart_demon","op":"lte","value":40}],"failure_reason":"残魂勾动你积累的业障，心神当场崩溃","success_text":"你辨明残魂话中真伪，得到枯神法相的破绽。"},{"type":"set_flag","flag":"mother_borer_he_kang_alliance","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_005","if_result":["check_success"]}]},
-        {"id":"question","text":"以神识检查桑离残魂（MP 至少 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":500000}],"failure_reason":"祖藤毒念沿残魂反灌识海，你沦为新的木傀","success_text":"你剥去祖藤侵蚀，确认桑离记下的七处命门并非陷阱。"},{"type":"restore_mp","value":-0.15,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_he_kang_verified"},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_005"}]},
+        {"id":"question","text":"以神识检查桑离残魂（MP 至少 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":500000}],"failure_reason":"祖藤毒念沿残魂反灌识海，你沦为新的木傀","success_text":"你剥去祖藤侵蚀，七处命门一一显露，与桑离所记相合。"},{"type":"restore_mp","value":-0.15,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_he_kang_verified"},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_005"}]},
         {"id":"bind","text":"修补阵纹，请桑离暂驻阵中稳住神魂","effects":[{"type":"add_opportunity","value":40},{"type":"set_flag","flag":"mother_borer_he_kang_bound"},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_005"}]},
         {"id":"devour","text":"吞噬桑离残魂，强夺祖藤弱点（煞气不高于 80）","effects":[{"type":"attribute_check","checks":[{"stat":"sha_qi","op":"lte","value":80},{"stat":"mp_ratio","op":"gte","value":0.75}],"failure_reason":"祖藤毒念藏在残魂深处，反客为主占据你的识海","success_text":"你夺得部分记忆，也让桑离残魂彻底与你为敌。"},{"type":"add_karma","value":35,"if_result":["check_success"]},{"type":"add_heart_demon","value":12,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_he_kang_hostile","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_005","if_result":["check_success"]}]}
       ]
@@ -152,7 +152,7 @@
         {"id":"mystic_sword","text":"以枯荣天剑直斩祖藤命门（需持剑；战力 61,800,000）","conditions":{"has_item":"mystic_heaven_sword"},"disabled_reason":"你没有枯荣天剑","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":61800000}],"failure_reason":"枯荣剑光被主根反震，你与灵剑一同折断","success_text":"剑光斩断一条主根，祖藤本源首次暴露。"},{"type":"set_flag","flag":"mother_borer_shell_cut","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_006","if_result":["check_success"]}]},
         {"id":"overpower","text":"以绝对战力击裂枯神法相（至少 66,500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":66500000},{"stat":"hp","op":"gte","value":430000}],"failure_reason":"你被枯神法相撞碎法体","success_text":"你硬生生击穿万丈木躯，祖藤尖啸震碎整片根海。"},{"type":"damage","value":0.15,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_shell_broken"},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_006"}]},
         {"id":"exploit","text":"依桑离指出的命门攻击（战斗力至少 56,900,000）","conditions":{"any":[{"has_flag":"mother_borer_he_kang_alliance"},{"has_flag":"mother_borer_he_kang_verified"},{"has_flag":"mother_borer_he_kang_bound"}]},"disabled_reason":"你没有取得可信的命门位置","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":56900000},{"stat":"mp","op":"gte","value":420000}],"failure_reason":"已知命门仍不足以弥补实力差距","success_text":"你连续击中七处祖藤命门，逼得枯神法相转攻为守。"},{"type":"set_flag","flag":"mother_borer_weakness_exploited","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MOTHER_BORER_006","if_result":["check_success"]}]},
-        {"id":"retreat","text":"撤出根海，任其余大乘继续围攻","effects":[{"type":"add_fame","value":-20},{"type":"set_flag","flag":"mother_borer_survived"},{"type":"set_flag","flag":"mother_borer_incomplete"}]}
+        {"id":"retreat","text":"撤出根海，任其余大乘继续围攻","effects":[{"type":"add_infamy","value":-20},{"type":"set_flag","flag":"mother_borer_survived"},{"type":"set_flag","flag":"mother_borer_incomplete"}]}
       ]
     },
     {
@@ -169,8 +169,8 @@
       "id":"EVT_MOTHER_BORER_007","version":1,"title":"万木天雷","body":"蚀天祖藤吞噬一界又一界，本是为了积蓄足够本源，借成熟时的飞升天劫化为真正仙种。如今道种被迫提前显露，九天劫云已经锁定根海。桑离愿以最后残魂引雷入根，你必须决定是趁势斩尽祖藤，还是先保住被根海吞没的山河与修士。",
       "tags":["realm:mahayana","story_chain","mother_borer","manual_only"],"weight":0,
       "choices":[
-        {"id":"coordinated","text":"依既定战术引雷斩根（战力 71,200,000；HP 380,000；MP 420,000）","conditions":{"any":[{"has_flag":"mother_borer_body_pinned"},{"has_flag":"mother_borer_fire_suppressed"},{"has_flag":"mother_borer_allies_saved"}]},"disabled_reason":"你没有为最终合击建立任何优势","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":71200000},{"stat":"hp","op":"gte","value":380000},{"stat":"mp","op":"gte","value":420000}],"failure_reason":"最终合击失衡，你被祖藤拖入万木天雷","success_text":"你将祖藤推入雷心，万丈枯神法相彻底化灰。"},{"type":"add_item","item_id":"mother_borer_core","if_result":["check_success"]},{"type":"add_item","item_id":"punishment_thunder_mark","if_result":["check_success"]},{"type":"add_fame","value":55,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"mother_borer_defeated","if_result":["check_success"]}]},
-        {"id":"solo","text":"独自踏入雷心斩尽祖根（战力 80,600,000；HP、MP 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":80600000},{"stat":"hp","op":"gte","value":500000},{"stat":"mp","op":"gte","value":500000}],"failure_reason":"你在祖藤与天雷的双重夹击下陨落","success_text":"你独压祖藤，夺下绝大部分道种与雷痕。"},{"type":"add_item","item_id":"mother_borer_core","quantity":2,"if_result":["check_success"]},{"type":"add_item","item_id":"punishment_thunder_mark","if_result":["check_success"]},{"type":"add_fame","value":80,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"mother_borer_defeated","if_result":["check_success"]}]},
+        {"id":"coordinated","text":"依既定战术引雷斩根（战力 71,200,000；HP 380,000；MP 420,000）","conditions":{"any":[{"has_flag":"mother_borer_body_pinned"},{"has_flag":"mother_borer_fire_suppressed"},{"has_flag":"mother_borer_allies_saved"}]},"disabled_reason":"你没有为最终合击建立任何优势","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":71200000},{"stat":"hp","op":"gte","value":380000},{"stat":"mp","op":"gte","value":420000}],"failure_reason":"最终合击失衡，你被祖藤拖入万木天雷","success_text":"你将祖藤推入雷心，万丈枯神法相彻底化灰。"},{"type":"add_item","item_id":"mother_borer_core","if_result":["check_success"]},{"type":"add_item","item_id":"punishment_thunder_mark","if_result":["check_success"]},{"type":"add_infamy","value":55,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"mother_borer_defeated","if_result":["check_success"]}]},
+        {"id":"solo","text":"独自踏入雷心斩尽祖根（战力 80,600,000；HP、MP 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":80600000},{"stat":"hp","op":"gte","value":500000},{"stat":"mp","op":"gte","value":500000}],"failure_reason":"你在祖藤与天雷的双重夹击下陨落","success_text":"你独压祖藤，夺下绝大部分道种与雷痕。"},{"type":"add_item","item_id":"mother_borer_core","quantity":2,"if_result":["check_success"]},{"type":"add_item","item_id":"punishment_thunder_mark","if_result":["check_success"]},{"type":"add_infamy","value":80,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"mother_borer_defeated","if_result":["check_success"]}]},
         {"id":"save_seal","text":"放弃争夺道种，救回根海中的生灵（MP 480,000；心魔不高于 35）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":480000},{"stat":"heart_demon","op":"lte","value":35}],"failure_reason":"崩溃的根海将你与被困众生一同吞没","success_text":"祖藤死于天雷，你则护住被吞噬的灵脉与众修。"},{"type":"add_item","item_id":"punishment_thunder_mark","if_result":["check_success"]},{"type":"add_karma","value":-18,"if_result":["check_success"]},{"type":"set_flag","flag":"mother_borer_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"mother_borer_defeated","if_result":["check_success"]}]},
         {"id":"flee","text":"趁万木天雷落下立刻远遁","effects":[{"type":"damage","value":0.28,"reason":"未能逃出万木天雷波及范围"},{"type":"set_flag","flag":"mother_borer_survived","if_result":["injured"]},{"type":"set_flag","flag":"mother_borer_incomplete","if_result":["injured"]}]}
       ]
@@ -181,9 +181,9 @@
       "conditions":{"all":[{"path":"player.world","op":"eq","value":"spirit"},{"path":"player.realm_index","op":"eq","value":8},{"has_flag":"mother_borer_completed"}]},
       "choices":[
         {"id":"investigate","text":"潜入坠星之地，探明真仙伤势与仙炉弱点","effects":[{"type":"restore_mp","value":-0.10},{"type":"set_flag","flag":"ma_liang_route_known"},{"type":"queue_event","event_id":"EVT_MA_LIANG_002"}]},
-        {"id":"protect","text":"先转移沿途弱小族群","effects":[{"type":"add_karma","value":-15},{"type":"add_fame","value":18},{"type":"set_flag","flag":"ma_liang_lives_saved"},{"type":"queue_event","event_id":"EVT_MA_LIANG_002"}]},
+        {"id":"protect","text":"先转移沿途弱小族群","effects":[{"type":"add_karma","value":-15},{"type":"add_infamy","value":18},{"type":"set_flag","flag":"ma_liang_lives_saved"},{"type":"queue_event","event_id":"EVT_MA_LIANG_002"}]},
         {"id":"hunt_servants","text":"截杀替洛天衡掘取灵脉的仙傀（战力至少 51,900,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":51900000}],"failure_reason":"你被真仙傀儡围杀，一身精元也被投入仙炉","success_text":"你从傀儡残骸中找到洛天衡下一处落脚点。"},{"type":"add_sha_qi","value":10,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_servants_destroyed","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_002","if_result":["check_success"]}]},
-        {"id":"hide","text":"远离东荒，静观真仙与各族争斗","effects":[{"type":"add_fame","value":-20},{"type":"add_heart_demon","value":5},{"type":"set_flag","flag":"ma_liang_incomplete"}]}
+        {"id":"hide","text":"远离东荒，静观真仙与各族争斗","effects":[{"type":"add_infamy","value":-20},{"type":"add_heart_demon","value":5},{"type":"set_flag","flag":"ma_liang_incomplete"}]}
       ]
     },
     {
@@ -193,7 +193,7 @@
         {"id":"join","text":"加入盟会，领取太一真罡护身法","effects":[{"type":"learn_technique","technique_id":"TECH_ORIGIN_GANG_SHIELD"},{"type":"set_flag","flag":"ma_liang_alliance_joined"},{"type":"queue_event","event_id":"EVT_MA_LIANG_003"}]},
         {"id":"negotiate","text":"要求云海老人说明锁仙阵的全部代价","effects":[{"type":"add_opportunity","value":45},{"type":"learn_technique","technique_id":"TECH_ORIGIN_GANG_SHIELD"},{"type":"set_flag","flag":"ma_liang_failure_known"},{"type":"queue_event","event_id":"EVT_MA_LIANG_003"}]},
         {"id":"spy","text":"假意入盟，暗查云海老人的阵图","effects":[{"type":"restore_mp","value":-0.12},{"type":"set_flag","flag":"ma_liang_array_secret_known"},{"type":"queue_event","event_id":"EVT_MA_LIANG_003"}]},
-        {"id":"challenge","text":"拒绝受盟会号令，独自向洛天衡下战书","effects":[{"type":"add_fame","value":30},{"type":"add_heart_demon","value":8},{"type":"set_flag","flag":"ma_liang_lone_challenger"},{"type":"queue_event","event_id":"EVT_MA_LIANG_003"}]}
+        {"id":"challenge","text":"拒绝受盟会号令，独自向洛天衡下战书","effects":[{"type":"add_infamy","value":30},{"type":"add_heart_demon","value":8},{"type":"set_flag","flag":"ma_liang_lone_challenger"},{"type":"queue_event","event_id":"EVT_MA_LIANG_003"}]}
       ]
     },
     {
@@ -201,9 +201,9 @@
       "tags":["realm:mahayana","story_chain","ma_liang","manual_only"],"weight":0,
       "choices":[
         {"id":"modify","text":"协助叶归尘暗改焚神后手（MP 至少 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":500000},{"stat":"heart_demon","op":"lte","value":45}],"failure_reason":"阵纹反噬，将你的元神炼成无主阵灵","success_text":"阵图表面未变，七名守阵者却多出一条自行脱阵的生门。"},{"type":"restore_mp","value":-0.12,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_array_modified"},{"type":"queue_event","event_id":"EVT_MA_LIANG_004"}]},
-        {"id":"confront","text":"当众质问云海老人为何隐瞒献祭后手","effects":[{"type":"add_fame","value":12},{"type":"add_karma","value":-5},{"type":"set_flag","flag":"ma_liang_array_exposed"},{"type":"queue_event","event_id":"EVT_MA_LIANG_004"}]},
+        {"id":"confront","text":"当众质问云海老人为何隐瞒献祭后手","effects":[{"type":"add_infamy","value":12},{"type":"add_karma","value":-5},{"type":"set_flag","flag":"ma_liang_array_exposed"},{"type":"queue_event","event_id":"EVT_MA_LIANG_004"}]},
         {"id":"trust","text":"相信云海老人的判断，将性命押在原阵图上","effects":[{"type":"set_flag","flag":"ma_liang_array_unmodified"},{"type":"queue_event","event_id":"EVT_MA_LIANG_004"}]},
-        {"id":"outside","text":"不入阵眼，埋伏在大阵之外","effects":[{"type":"set_flag","flag":"ma_liang_outside_array"},{"type":"add_fame","value":-6},{"type":"queue_event","event_id":"EVT_MA_LIANG_004"}]}
+        {"id":"outside","text":"不入阵眼，埋伏在大阵之外","effects":[{"type":"set_flag","flag":"ma_liang_outside_array"},{"type":"add_infamy","value":-6},{"type":"queue_event","event_id":"EVT_MA_LIANG_004"}]}
       ]
     },
     {
@@ -213,11 +213,11 @@
         {"id":"slay","text":"正面斩杀负山神猿（战斗力至少 58,700,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":58700000},{"stat":"hp_ratio","op":"gte","value":0.60}],"failure_reason":"你被神猿与副鼎合力炼化","success_text":"负山神猿伏诛，洛天衡失去试探大阵的先锋。"},{"type":"set_flag","flag":"ma_liang_yang_deer_slain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_005","if_result":["check_success"]}]},
         {"id":"trap","text":"以移山幻阵困住神猿（MP 450,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":450000}],"failure_reason":"幻阵被副鼎吸干，你的元神也被卷入炉中","success_text":"神猿在万重假山间迷失，背上的副鼎第一次露出裂纹。"},{"type":"restore_mp","value":-0.15,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_yang_deer_trapped"},{"type":"queue_event","event_id":"EVT_MA_LIANG_005"}]},
         {"id":"bait","text":"以自身为饵，将负山神猿引离阵枢（HP 420,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":420000},{"stat":"hp_ratio","op":"gte","value":0.60}],"failure_reason":"负山神猿看破诱敌之计，一拳砸碎你的法体","success_text":"你付出伤势，将负山神猿引入云海老人布置的杀域。"},{"type":"damage","value":0.18,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_yang_deer_baited"},{"type":"queue_event","event_id":"EVT_MA_LIANG_005"}]},
-        {"id":"watch","text":"保留实力，任其他大乘围攻负山神猿","effects":[{"type":"add_karma","value":8},{"type":"add_fame","value":-10},{"type":"set_flag","flag":"ma_liang_yang_deer_survived"},{"type":"queue_event","event_id":"EVT_MA_LIANG_005"}]}
+        {"id":"watch","text":"保留实力，任其他大乘围攻负山神猿","effects":[{"type":"add_karma","value":8},{"type":"add_infamy","value":-10},{"type":"set_flag","flag":"ma_liang_yang_deer_survived"},{"type":"queue_event","event_id":"EVT_MA_LIANG_005"}]}
       ]
     },
     {
-      "id":"EVT_MA_LIANG_005","version":2,"title":"太虚灵域","body":"洛天衡终于降临天柱原。下界没有足够的仙灵力，他便以积攒的仿仙灵力展开太虚灵域，将众修的神识、身法与退路一并封住。云海老人已备好锁仙灯：第一轮须承受封禁，第二轮初燃的灯辉会挡住致命压制，第三轮灯火大盛，彻底封停洛天衡的灵域。此前损失的战意与战斗态势不会恢复。你可以护持灯阵撑过这一劫，也可以待灯火封域后直击太虚仙炉。主动攻炉建议战力 124,000,000，气血法力充盈；法力仅剩七成时，宜准备到 135,000,000 以上。这是借助灯阵与盟友完成破炉的准备建议，并非独力斩仙的保证。",
+      "id":"EVT_MA_LIANG_005","version":2,"title":"太虚灵域","body":"洛天衡终于降临天柱原。下界没有足够的仙灵力，他便以积攒的仿仙灵力展开太虚灵域，将众修的神识、身法与退路一并封住。云海老人已备好锁仙灯：第一轮须承受封禁，第二轮初燃的灯辉会挡住致命压制，第三轮灯火大盛，彻底封停洛天衡的灵域。此前损失的战意与战斗态势不会恢复。你可以护持灯阵撑过这一劫，也可以待灯火封域后直击太虚仙炉。主动攻炉建议战力 124,000,000，气血法力充盈；法力仅剩七成时，宜准备到 135,000,000 以上。可借灯阵与盟友合力破炉，临战时按敌方攻势应变。",
       "tags":["realm:mahayana","story_chain","ma_liang","manual_only"],"weight":0,
       "choices":[
         {"id":"body_resist","text":"以法体护住灯阵（HP 至少 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp","op":"gte","value":500000},{"stat":"hp_ratio","op":"gte","value":0.68}],"failure_reason":"你未能撑到锁仙灯燃起，太虚灵域压碎了你的法体与神魂","success_text":"你顶住前两轮重压，借初燃灯辉保住性命；第三轮锁仙灯封停灵域，众修终于得以喘息。"},{"type":"damage","value":0.16,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_domain_endured"},{"type":"queue_event","event_id":"EVT_MA_LIANG_006"}]},
@@ -233,7 +233,7 @@
         {"id":"guard_lamp","text":"守住锁仙灯，不让洛天衡重接仙界（战力 66,500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":66500000}],"failure_reason":"你挡不住真仙一指，连同锁仙灯一同破碎","success_text":"锁仙灯持续燃烧，仙力跌落至灵界能够承受的层次。"},{"type":"set_flag","flag":"ma_liang_lamp_guarded","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_007","if_result":["check_success"]}]},
         {"id":"support_nine","text":"向九曜封天阵灌注法力（MP 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp","op":"gte","value":500000},{"stat":"mp_ratio","op":"gte","value":0.55}],"failure_reason":"九曜阵力反噬，将你的元神撕成九份","success_text":"九轮法相短暂锁死仙躯，洛天衡第一次露出惊怒。"},{"type":"restore_mp","value":-0.20,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_nine_true_supported"},{"type":"queue_event","event_id":"EVT_MA_LIANG_007"}]},
         {"id":"strike","text":"抓住仙力被禁的瞬间重创洛天衡（战力 72,900,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":72900000},{"stat":"hp_ratio","op":"gte","value":0.55}],"failure_reason":"你没能破开仙躯，反被洛天衡一掌抹杀","success_text":"你的攻击贯穿仙躯，迫使洛天衡燃烧本源恢复。"},{"type":"set_flag","flag":"ma_liang_immortal_body_wounded","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_007","if_result":["check_success"]}]},
-        {"id":"steal_lamp","text":"趁乱夺取锁仙灯","effects":[{"type":"add_karma","value":28},{"type":"add_fame","value":15},{"type":"set_flag","flag":"ma_liang_lamp_stolen"},{"type":"queue_event","event_id":"EVT_MA_LIANG_007"}]}
+        {"id":"steal_lamp","text":"趁乱夺取锁仙灯","effects":[{"type":"add_karma","value":28},{"type":"add_infamy","value":15},{"type":"set_flag","flag":"ma_liang_lamp_stolen"},{"type":"queue_event","event_id":"EVT_MA_LIANG_007"}]}
       ]
     },
     {
@@ -252,18 +252,18 @@
       "choices":[
         {"id":"mystic_finish","text":"以枯荣天剑斩断仙炉（需持剑；战力 77,000,000）","conditions":{"has_item":"mystic_heaven_sword"},"disabled_reason":"你没有枯荣天剑","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":77000000},{"stat":"hp","op":"gte","value":350000}],"failure_reason":"仙躯虽残，仍在剑光落下前贯穿你的神魂","success_text":"枯荣剑光穿过破碎仙域，斩断洛天衡与太虚仙炉的联系。"},{"type":"set_flag","flag":"ma_liang_slain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_009","if_result":["check_success"]}]},
         {"id":"advantages","text":"利用此前造成的伤势与阵法优势合击（战力 74,100,000；MP 400,000）","conditions":{"any":[{"has_flag":"ma_liang_bottle_interrupted"},{"has_flag":"ma_liang_lamp_guarded"},{"has_flag":"ma_liang_nine_true_supported"},{"has_flag":"ma_liang_immortal_body_wounded"}]},"disabled_reason":"你未能在前几战中削弱洛天衡","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":74100000},{"stat":"mp","op":"gte","value":400000}],"failure_reason":"先前造成的伤势不足以撼动仙躯，你被洛天衡反手镇杀","success_text":"锁仙灯、九曜阵与仙炉裂痕同时发作，你趁机击溃真仙。"},{"type":"set_flag","flag":"ma_liang_slain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_009","if_result":["check_success"]}]},
-        {"id":"solo_finish","text":"不借任何外力正面斩仙（战力 86,400,000；HP、MP 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":86400000},{"stat":"hp","op":"gte","value":500000},{"stat":"mp","op":"gte","value":500000}],"failure_reason":"你以凡躯挑战完整仙法，最终形神俱灭","success_text":"你正面压过残仙，将洛天衡彻底轰杀。"},{"type":"add_fame","value":60,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_slain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_009","if_result":["check_success"]}]},
-        {"id":"retreat","text":"带着伤势退出决战，让残仙远去","effects":[{"type":"add_fame","value":-35},{"type":"add_heart_demon","value":15},{"type":"set_flag","flag":"ma_liang_survived_encounter"},{"type":"set_flag","flag":"ma_liang_incomplete"}]}
+        {"id":"solo_finish","text":"不借任何外力正面斩仙（战力 86,400,000；HP、MP 500,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":86400000},{"stat":"hp","op":"gte","value":500000},{"stat":"mp","op":"gte","value":500000}],"failure_reason":"你以凡躯挑战完整仙法，最终形神俱灭","success_text":"你正面压过残仙，将洛天衡彻底轰杀。"},{"type":"add_infamy","value":60,"if_result":["check_success"]},{"type":"set_flag","flag":"ma_liang_slain","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_MA_LIANG_009","if_result":["check_success"]}]},
+        {"id":"retreat","text":"带着伤势退出决战，让残仙远去","effects":[{"type":"add_infamy","value":-35},{"type":"add_heart_demon","value":15},{"type":"set_flag","flag":"ma_liang_survived_encounter"},{"type":"set_flag","flag":"ma_liang_incomplete"}]}
       ]
     },
     {
       "id":"EVT_MA_LIANG_009","version":1,"title":"仙炉遗宝","body":"洛天衡陨落后，残破的太虚仙炉吐出三枚九转还真丹。离火童子与幽泉魔影失去主人，既畏惧被灵界联军诛灭，又不愿再受仙炉奴役；你可以收服其中一方、将两者一并镇压，或毁去仙炉放它们自行离去。",
       "tags":["realm:mahayana","story_chain","ma_liang","manual_only"],"weight":0,
       "choices":[
-        {"id":"bind_both","text":"接管仙炉，强行收服两名仙灵","effects":[{"type":"add_item","item_id":"fire_beard_contract"},{"type":"add_item","item_id":"otherworld_demon_contract"},{"type":"add_item","item_id":"true_soul_pill","quantity":2},{"type":"add_karma","value":16},{"type":"add_fame","value":70},{"type":"set_flag","flag":"ma_liang_completed"},{"type":"set_milestone","milestone":"true_immortal_ma_liang_defeated"}]},
-        {"id":"fire_only","text":"净化离火童子，只取还真丹","effects":[{"type":"add_item","item_id":"fire_beard_contract"},{"type":"add_item","item_id":"true_soul_pill","quantity":3},{"type":"add_karma","value":-6},{"type":"add_fame","value":55},{"type":"set_flag","flag":"ma_liang_completed"},{"type":"set_milestone","milestone":"true_immortal_ma_liang_defeated"}]},
-        {"id":"demon_only","text":"降服幽泉魔影，放离不相容的火灵","effects":[{"type":"add_item","item_id":"otherworld_demon_contract"},{"type":"add_item","item_id":"true_soul_pill"},{"type":"add_sha_qi","value":20},{"type":"add_karma","value":22},{"type":"add_fame","value":65},{"type":"set_flag","flag":"ma_liang_completed"},{"type":"set_milestone","milestone":"true_immortal_ma_liang_defeated"}]},
-        {"id":"destroy","text":"毁去仙炉奴印，分丹后任两名仙灵离去","effects":[{"type":"add_item","item_id":"true_soul_pill"},{"type":"add_karma","value":-25},{"type":"add_opportunity","value":80},{"type":"add_fame","value":50},{"type":"set_flag","flag":"ma_liang_completed"},{"type":"set_milestone","milestone":"true_immortal_ma_liang_defeated"}]}
+        {"id":"bind_both","text":"接管仙炉，强行收服两名仙灵","effects":[{"type":"add_item","item_id":"fire_beard_contract"},{"type":"add_item","item_id":"otherworld_demon_contract"},{"type":"add_item","item_id":"true_soul_pill","quantity":2},{"type":"add_karma","value":16},{"type":"add_infamy","value":70},{"type":"set_flag","flag":"ma_liang_completed"},{"type":"set_milestone","milestone":"true_immortal_ma_liang_defeated"}]},
+        {"id":"fire_only","text":"净化离火童子，只取还真丹","effects":[{"type":"add_item","item_id":"fire_beard_contract"},{"type":"add_item","item_id":"true_soul_pill","quantity":3},{"type":"add_karma","value":-6},{"type":"add_infamy","value":55},{"type":"set_flag","flag":"ma_liang_completed"},{"type":"set_milestone","milestone":"true_immortal_ma_liang_defeated"}]},
+        {"id":"demon_only","text":"降服幽泉魔影，放离不相容的火灵","effects":[{"type":"add_item","item_id":"otherworld_demon_contract"},{"type":"add_item","item_id":"true_soul_pill"},{"type":"add_sha_qi","value":20},{"type":"add_karma","value":22},{"type":"add_infamy","value":65},{"type":"set_flag","flag":"ma_liang_completed"},{"type":"set_milestone","milestone":"true_immortal_ma_liang_defeated"}]},
+        {"id":"destroy","text":"毁去仙炉奴印，分丹后任两名仙灵离去","effects":[{"type":"add_item","item_id":"true_soul_pill"},{"type":"add_karma","value":-25},{"type":"add_opportunity","value":80},{"type":"add_infamy","value":50},{"type":"set_flag","flag":"ma_liang_completed"},{"type":"set_milestone","milestone":"true_immortal_ma_liang_defeated"}]}
       ]
     }
   ]

@@ -10,7 +10,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.models import GameState
 from cultivation_life.content_registry import CONTENT_DOCUMENTS, ITEM_CATALOG, TECHNIQUE_CATALOG, WORLD_SYSTEMS
 from cultivation_life.rules import (add_item, has_item, learn_technique, effective_karma, effective_sha_qi,
-                                    effective_fame, has_living_master, max_hp, max_mp, opportunity_required)
+                                    effective_infamy, has_living_master, max_hp, max_mp, opportunity_required)
 from cultivation_life.system.buddhist_system import (buddhist_config, set_dharma_karma, selected_blessings,
                                                     site_state, followers)
 from cultivation_life.system.path_modifiers import modifier, adjusted_cost, commission_duration, pursuit_immunity
@@ -41,17 +41,17 @@ def setup(tmp_path):
 def test_resource_projection_preserves_raw_and_other_paths(setup):
     engine, game, _ = setup
     player = game.player
-    player.karma, player.sha_qi, player.fame = 120, 60, 20
+    player.karma, player.sha_qi, player.infamy = 120, 60, 20
     assert effective_karma(player) == effective_sha_qi(player) == 0
-    assert effective_fame(player) == 200
+    assert effective_infamy(player) == 200
     assert effective_karma(player, "dharma_assembly") == 120
     assert effective_sha_qi(player, "dharma_assembly") == 60
     shown = engine.present(game)["player"]
     assert shown["raw_karma"] == 120 and shown["raw_sha_qi"] == 60
     saved = GameState.from_dict(game.to_dict())
-    assert (saved.player.karma, saved.player.sha_qi, saved.player.fame) == (120, 60, 20)
+    assert (saved.player.karma, saved.player.sha_qi, saved.player.infamy) == (120, 60, 20)
     player.path = "dao"
-    assert effective_fame(player) == 20 and effective_sha_qi(player) == 60
+    assert effective_infamy(player) == 20 and effective_sha_qi(player) == 60
     player.path = "demonic"
     assert effective_karma(player) == 0
 
@@ -84,24 +84,24 @@ def test_five_real_action_units_grace_and_restoration(setup):
     game.player.realm_index = 5
     unit = int(WORLD_SYSTEMS["time_units"]["5"])
     set_dharma_karma(game, -26)
-    assert pursuit_immunity(game, "fame")
+    assert pursuit_immunity(game, "infamy")
     assert not pursuit_immunity(game, "war")
     for _ in range(5 * unit - 1):
         game.player.age += 1
         engine._advance_buddhist_year(game)
-    assert pursuit_immunity(game, "fame")
+    assert pursuit_immunity(game, "infamy")
     engine._advance_buddhist_year(game)
-    assert not pursuit_immunity(game, "fame")
+    assert not pursuit_immunity(game, "infamy")
     game.player.hostility["sect:wanmo"] = 100
     set_dharma_karma(game, -25)
-    assert pursuit_immunity(game, "fame") and game.player.hostility["sect:wanmo"] == 100
+    assert pursuit_immunity(game, "infamy") and game.player.hostility["sect:wanmo"] == 100
     set_dharma_karma(game, -30)
     assert game.buddhist_state["grace_units"] == 5
 
 
-def test_fame_immunity_blocks_new_bounty_but_keeps_existing(setup):
+def test_infamy_immunity_blocks_new_bounty_but_keeps_existing(setup):
     engine, game, _ = setup
-    game.player.fame = 10_000
+    game.player.infamy = 10_000
     engine._maybe_wanted_encounter(game, random.Random(1))
     assert not game.player.hostility.get("world:human")
     game.player.hostility["sect:wanmo"] = 200

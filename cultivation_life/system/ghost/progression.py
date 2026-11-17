@@ -240,7 +240,7 @@ def accumulate_soul_erosion_time(player: Player, elapsed_years: int = 1) -> int:
 
 def spend_wangsheng_energy(player: Player, uses: int = 1) -> tuple[int, float]:
     if not ghost_cultivation_active(player):
-        raise ValueError(f"未启用【{GHOST_DLC_NAME}】或当前并非鬼修")
+        raise ValueError(f"请启用【{GHOST_DLC_NAME}】并以鬼修身份修习")
     config = ghost_cultivation_config()
     unit_cost = max(1, int(config.get("wangsheng_cost", 2)))
     actual_uses = max(1, int(uses))

@@ -19,7 +19,7 @@
     if(!id && item.plant_id)id=manifest.plants[item.plant_id];
     if(!id && item.definition_id)id=manifest.crafting_materials[item.definition_id];
     if(!id){
-      if(item.technique_id||tags.includes('technique_manual'))id='item.technique_manual';
+      if(item.technique_id||tags.includes('technique_manual')||tags.includes('universal_manual'))id='item.technique_manual';
       else if(tags.includes('secret_art_manual'))id='item.secret_manual';
       else if(tags.includes('root_manual'))id='item.root_book';
       else if(tags.includes('secret_art_core'))id='item.elemental_core';

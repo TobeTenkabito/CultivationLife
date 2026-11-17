@@ -230,7 +230,7 @@ def gift_disciple(deps: RelationshipActionDependencies, game_id: str, disciple_i
         raise ValueError("请先处理当前事件")
     disciple = next((entry for entry in player.disciples if entry.get("id") == disciple_id), None)
     if not disciple:
-        raise ValueError("此人并非你的弟子")
+        raise ValueError("请选择你的弟子")
     require_access(game, disciple)
     if not is_free(disciple):
         raise ValueError("弟子已经陨落，无法接受赠予")
@@ -549,7 +549,7 @@ def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind:
     elif kind == "friend":
         relation = next((entry for entry in player.dao_friends if entry.get("id") == npc_id), None)
         if not relation:
-            raise ValueError("此人并非你的道友")
+            raise ValueError("请选择你的道友")
         player.dao_friends.remove(relation)
         deps._set_person_affinity(game, str(relation.get("id", "")), float(rules.get("relationship_release_affinity", 0)))
         summary = f"你与{relation['name']}收回道友信符，双方好感重置为中立，此后只是寻常相识。"
@@ -557,7 +557,7 @@ def leave_relationship(deps: RelationshipActionDependencies, game_id: str, kind:
     elif kind == "disciple":
         relation = next((entry for entry in player.disciples if entry.get("id") == npc_id), None)
         if not relation:
-            raise ValueError("此人并非你的弟子")
+            raise ValueError("请选择你的弟子")
         npc = deps._persist_relationship_npc(game, relation, "逐出师门")
         npc.affinity = float(rules.get("relationship_release_affinity", 0))
         from ...system.mentorship import end

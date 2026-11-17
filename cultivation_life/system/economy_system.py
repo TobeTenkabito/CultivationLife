@@ -129,6 +129,10 @@ def _listed_price(kind: str, content_id: str, market_identity: int, limited_iden
 
 
 def _catalog_price(kind: str, content_id: str) -> int:
+    from ..universal_manuals import parse, identity
+    manual = parse(content_id) if kind == 'item' else None
+    if manual and manual[2] > 1:
+        return _catalog_price('item', identity(manual[0], manual[1])) * 2 ** (manual[2]-1)
     from ..content_registry import LIMITED_TRADE_GOODS
     if kind in {"item", "talisman_material"} and content_id.startswith("talisman_"):
         from ..talisman_content import catalog
@@ -370,9 +374,6 @@ class EconomySystemMixin(ExchangeSystemMixin):
 
     def _treasure_reward_pool(self, game: GameState, category: str) -> list[dict[str, Any]]:
         return economy_treasure._treasure_reward_pool(self._economy_dependencies.treasure, game, category)
-
-    def _treasure_step(self, game: GameState, rng: Any) -> str:
-        return economy_treasure._treasure_step(self._economy_dependencies.treasure, game, rng)
 
     def _prepare_treasure_reward_event(self, game: GameState, rng: Any) -> dict[str, Any]:
         return economy_treasure._prepare_treasure_reward_event(self._economy_dependencies.treasure, game, rng)

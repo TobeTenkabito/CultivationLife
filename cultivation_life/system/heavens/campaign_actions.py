@@ -71,7 +71,7 @@ def quote(deps, game, action, target, options):
         if row['aid'] is not None:
             raise ValueError('本次有限援助已经作出选择，不会刷新物资')
     years = deps.campaign_escape_plan(game)['years'] if action == 'campaign_evacuate' else DURATIONS[action]
-    message = '仅在实际所在地执行个人行动。击退不等于占领；援助不附带军队指挥权。'
+    message = '仅在实际所在地执行个人行动。击退后须完成驻守接管；援助不附带军队指挥权。'
     if action in {'campaign_relief', 'campaign_release'}:
         unit = settlement_actions.patient(deps, game, row, captive=action == 'campaign_release')
         name = deps.campaign_facts(game, unit)['name']

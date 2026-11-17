@@ -175,7 +175,7 @@
               "value": 5
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 3
             }
           ]
@@ -226,7 +226,7 @@
               "value": -4
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 4
             }
           ]
@@ -302,7 +302,7 @@
               "value": -0.08
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 3
             }
           ]
@@ -368,7 +368,7 @@
               "value": -5
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 4
             }
           ]
@@ -405,7 +405,7 @@
               "value": -6
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 5
             }
           ]
@@ -435,7 +435,7 @@
       "id": "EVT_HELL_COMMON_005",
       "version": 1,
       "title": "九狱回声",
-      "body": "九重狱境深处传来一声与你完全相同的叹息。那不是幻术，而是你曾经放弃的一种选择在阴气中留下的回声。",
+      "body": "九重狱境深处传来一声与你完全相同的叹息。你曾放弃的选择，在阴气中留下了一道回声。",
       "category": "hell_common",
       "tags": [
         "hell_common",
@@ -672,7 +672,7 @@
               "value": -3
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 3
             }
           ]
@@ -750,7 +750,7 @@
       "id": "EVT_HELL_MEMORY_003",
       "version": 1,
       "title": "归还姓名",
-      "body": "渡册末页记录了真相：负责转运的旧吏并非为财，而是想把亲族从轮回名册中偷出来，结果中间人趁机复制了数百份无辜记忆。旧吏已经认罪，受害亡魂却仍在等自己的姓名。",
+      "body": "渡册末页记录了真相：负责转运的旧吏想把亲族从轮回名册中偷出来，中间人却趁机复制了数百份无辜记忆。旧吏已经认罪，受害亡魂却仍在等自己的姓名。",
       "category": "hell_story",
       "tags": [
         "hell_common",
@@ -773,7 +773,7 @@
               "value": -10
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 10
             },
             {

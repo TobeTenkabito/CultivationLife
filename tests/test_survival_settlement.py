@@ -360,12 +360,21 @@ def test_missing_host_coordinate_does_not_overwrite_explicit_other_coordinate(re
     assert g.player.divine_sense_rank == 1 and g.player.body_training >= 0
 
 
-def test_treasure_fatal_summary_matches_survival(ready):
-    e, g = ready
-    g.player.hp, g.player.mp = 1., 0.
-    summary = e._treasure_step(g, random.Random(3))
-    assert g.player.alive and wandering(g.player)
-    assert '未能生还' not in summary and '神游' in summary
+def test_dungeon_fatal_node_preserves_survival_and_releases_session(ready):
+    e,g=ready
+    e.dungeon_action(g.id,'discover',dict(world=g.player.world,location_id=g.player.location_id,slot=0))
+    saved=e.store.load(g.id);site=next(iter(saved.dungeon_state['instances'].values()))
+    e.dungeon_action(g.id,'enter',dict(dungeon_id=site['id'],revision=site['revision']))
+    saved=e.store.load(g.id);site=saved.dungeon_state['instances'][site['id']]
+    saved.player.hp=1.;saved.player.mp=0.
+    site['nodes'][0]['kind']='hazard';site['nodes'][0]['risk']=1.
+    site['roles'][site['nodes'][0]['actor']]['state']='left'
+    e.store.save(saved)
+    shown=e.dungeon_action(g.id,'choose',dict(dungeon_id=site['id'],revision=site['revision'],choice='seize'))
+    after=e.store.load(g.id)
+    assert after.player.alive and wandering(after.player)
+    assert not shown['dungeons']['active'] and not after.dungeon_state['active']
+    assert after.player.age==g.player.age
 
 
 def test_failed_prison_escape_real_command_records_survival(ready):

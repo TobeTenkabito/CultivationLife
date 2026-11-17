@@ -167,7 +167,7 @@ def test_existing_markets_adopt_zero_stock_without_rewriting_owned_items(ready):
     bag = copy.deepcopy(game.player.inventory)
     funds = sum(r['balance'] for r in game.economy_v2['accounts'].values())
     ensure_market(game, engine.maps)
-    assert market['commodities'][identity]['stock'] == 0 and market['goods_policy'] == 2
+    assert market['commodities'][identity]['stock'] == 0 and market['goods_policy'] == 4
     assert game.player.inventory == bag
     assert sum(r['balance'] for r in game.economy_v2['accounts'].values()) == funds
 

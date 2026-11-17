@@ -34,7 +34,7 @@ def main():
                             game=engine._load(engine.create_game('初始阵点验收','supreme_metal','dao',419,preset_id='core')['id'])
                             game.pending_event=None
                             game.player.faction_id=None
-                            game.player.fame=10000
+                            game.player.infamy=10000
                             engine.store.save(game)
                             page=browser.new_page(viewport=dict(width=width,height=height))
                             errors=[]

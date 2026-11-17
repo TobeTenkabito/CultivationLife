@@ -66,7 +66,7 @@ def intrigue_guest_action(deps: IntrigueGuestsDependencies, game_id: str, kind: 
         before = len(record.get("guests", []))
         record["guests"] = [row for row in record.get("guests", []) if row.get("npc_id") != deps.PLAYER_ID]
         if len(record["guests"]) == before:
-            raise ValueError("你并非该势力客卿")
+            raise ValueError("请先取得该势力客卿身份")
         summary = f"你辞去了{deps._intrigue_faction_name(game, kind, faction_id)}的客卿身份。"
     else:
         faction_id = deps._intrigue_player_faction_id(game, kind)

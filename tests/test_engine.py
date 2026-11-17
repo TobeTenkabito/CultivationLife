@@ -190,23 +190,16 @@ class EngineTests(unittest.TestCase):
         self.assertTrue(game.player.spirit_root.startswith("acquired_"))
         self.assertLess(root_definition(game.player.spirit_root)["efficiency"], root_definition("pseudo_all")["efficiency"])
 
-    def test_treasure_costs_one_resource_then_offers_three_rewards(self):
+    def test_old_treasure_action_is_replaced_without_granting_loot(self):
         created = self.engine.create_game("探宝", "supreme_metal", "dao", 81, "metal")
-        game = self.engine.store.load(created["id"])
-        before_hp, before_mp = game.player.hp, game.player.mp
-        before_items = sum(item.quantity for item in game.player.inventory)
-        expected_gain = 2 * opportunity_multiplier(game.player)
+        game = self.engine.store.load(created['id'])
+        with self.assertRaisesRegex(ValueError,'替代'):
+            self.engine.advance(created['id'],'treasure')
+        loaded = self.engine.store.load(created['id'])
+        self.assertEqual(loaded.player.inventory,game.player.inventory)
+        self.assertEqual(loaded.player.age,game.player.age)
+        self.assertIsNone(loaded.pending_event)
 
-        shown = self.engine.advance(created["id"], "treasure")
-        hp_lost = shown["player"]["hp"] < before_hp
-        mp_lost = shown["player"]["mp"] < before_mp
-        self.assertNotEqual(hp_lost, mp_lost)
-        self.assertAlmostEqual(shown["player"]["opportunity"], expected_gain)
-        self.assertEqual(shown["pending_event"]["id"], "EVT_TREASURE_REWARD_SELECT_001")
-        self.assertEqual({choice["id"] for choice in shown["pending_event"]["choices"]}, {"artifact", "technique", "pill"})
-
-        claimed = self.engine.choose(created["id"], "artifact")
-        self.assertGreater(sum(item["quantity"] for item in claimed["player"]["inventory"]), before_items)
 
     def test_treasure_reward_pool_keeps_lower_tiers_and_technique_does_not_auto_equip(self):
         created = self.engine.create_game("古卷择取", "supreme_metal", "dao", 82, "metal", preset_id="nascent")

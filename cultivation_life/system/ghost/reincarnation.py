@@ -18,7 +18,7 @@ def prepare_ghost_reincarnation(deps: GhostReincarnationDependencies, game_id: s
     game = deps._load(game_id)
     player = game.player
     if not ghost_cultivation_active(player):
-        raise ValueError(f"未启用【{GHOST_DLC_NAME}】或当前并非鬼修")
+        raise ValueError(f"请启用【{GHOST_DLC_NAME}】并以鬼修身份修习")
     reason = reincarnation_block_reason(player)
     if reason:
         raise ValueError(reason)
@@ -94,7 +94,7 @@ def reincarnate_ghost(deps: GhostReincarnationDependencies, game_id: str) -> dic
     game = deps._load(game_id)
     player = game.player
     if not ghost_cultivation_active(player):
-        raise ValueError(f"未启用【{GHOST_DLC_NAME}】或当前并非鬼修")
+        raise ValueError(f"请启用【{GHOST_DLC_NAME}】并以鬼修身份修习")
     reason = reincarnation_block_reason(player)
     if reason:
         raise ValueError(reason)

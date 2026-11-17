@@ -101,10 +101,10 @@ class RelationshipStoryUpdateTests(unittest.TestCase):
         self.assertIsInstance(ranking["player_rank"], int)
         self.assertEqual(sum(entry["is_player"] for entry in ranking["entries"]), int(ranking["on_board"]))
 
-    def test_high_fame_guarantees_no_ignored_encounter_ambush(self):
+    def test_high_infamy_guarantees_no_ignored_encounter_ambush(self):
         created = self.engine.create_game("声震四方", "supreme_fire", "dao", 605, preset_id="core")
         game = self.engine.store.load(created["id"])
-        game.player.fame = 50
+        game.player.infamy = 50
         result, text = self.engine._effect({"type": "cultivator_reaction", "chance": 1.0}, game, {"id": "TEST"}, random.Random(1))
         self.assertEqual(result, "deterred")
         self.assertIsNone(game.pending_event)

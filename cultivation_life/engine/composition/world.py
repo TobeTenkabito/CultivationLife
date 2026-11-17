@@ -166,7 +166,7 @@ def bind_hostility(engine: GameEngine) -> HostilityDependencies:
         _revenge_ready=lambda *args, **kwargs: engine._revenge_ready(*args, **kwargs),
         _sect_members=lambda *args, **kwargs: engine._sect_members(*args, **kwargs),
         _wanted_target=lambda *args, **kwargs: engine._wanted_target(*args, **kwargs),
-        _world_coalition_amnesty_fame=lambda *args, **kwargs: engine._world_coalition_amnesty_fame(*args, **kwargs),
+        _world_coalition_amnesty_infamy=lambda *args, **kwargs: engine._world_coalition_amnesty_infamy(*args, **kwargs),
         _world_supports=lambda *args, **kwargs: engine._world_supports(*args, **kwargs),
         _get_events_by_id=lambda: engine.events_by_id,
     )

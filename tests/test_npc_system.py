@@ -94,7 +94,7 @@ class NpcSystemTests(unittest.TestCase):
         }, random.Random(1))
         self.assertIsNone(game.player.faction_id)
         self.assertGreaterEqual(game.player.hostility["sect:tianjian"], 60)
-        self.assertGreater(game.player.fame, 0)
+        self.assertGreater(game.player.infamy, 0)
         self.assertFalse(victim.alive)
         self.assertTrue(victim.treasure_looted)
         self.engine.store.save(game)
@@ -126,10 +126,10 @@ class NpcSystemTests(unittest.TestCase):
         self.assertEqual(shown["player"]["hostility"]["sect:cloud_immortal_palace"], 0)
         self.assertIsNone(shown["imprisonment"])
 
-    def test_world_coalition_sentence_creates_fame_amnesty_until_fame_rises(self):
+    def test_world_coalition_sentence_creates_infamy_amnesty_until_infamy_rises(self):
         created = self.engine.create_game("服尽界刑", "supreme_earth", "dao", 524)
         game = self.engine.store.load(created["id"])
-        game.player.fame = 900
+        game.player.infamy = 900
         game.player.hostility["world:human"] = 600
         game.player.imprisonment = {
             "key":"world:human", "name":"人界修仙界", "remaining_years":1,
@@ -141,7 +141,7 @@ class NpcSystemTests(unittest.TestCase):
         game = self.engine.store.load(created["id"])
         self.assertFalse(self.engine._maybe_wanted_encounter(game, random.Random(99)))
         self.assertEqual(game.player.hostility["world:human"], 0)
-        game.player.fame += 1
+        game.player.infamy += 1
         self.engine._maybe_wanted_encounter(game, random.Random(99))
         self.assertGreater(game.player.hostility["world:human"], 100)
 
@@ -196,22 +196,22 @@ class NpcSystemTests(unittest.TestCase):
         if known:
             self.assertNotIn(known.get("npc_id"), protected_ids)
 
-    def test_world_coalition_fame_threshold_is_path_specific_and_strict(self):
-        normal = self.engine.create_game("正道威名", "supreme_earth", "dao", 519)
+    def test_world_coalition_infamy_threshold_is_path_specific_and_strict(self):
+        normal = self.engine.create_game("正道凶名", "supreme_earth", "dao", 519)
         game = self.engine.store.load(normal["id"])
-        game.player.fame = 400
+        game.player.infamy = 400
         self.engine._maybe_wanted_encounter(game, random.Random(99))
         self.assertNotIn("world:human", game.player.hostility)
-        game.player.fame = 401
+        game.player.infamy = 401
         self.engine._maybe_wanted_encounter(game, random.Random(99))
         self.assertIn("world:human", game.player.hostility)
 
-        demon = self.engine.create_game("魔道威名", "supreme_fire", "demonic", 520, start_world="demon")
+        demon = self.engine.create_game("魔道凶名", "supreme_fire", "demonic", 520, start_world="demon")
         game = self.engine.store.load(demon["id"])
-        game.player.fame = 1000
+        game.player.infamy = 1000
         self.engine._maybe_wanted_encounter(game, random.Random(99))
         self.assertNotIn("world:demon", game.player.hostility)
-        game.player.fame = 1001
+        game.player.infamy = 1001
         self.engine._maybe_wanted_encounter(game, random.Random(99))
         self.assertIn("world:demon", game.player.hostility)
 
@@ -219,7 +219,7 @@ class NpcSystemTests(unittest.TestCase):
         created = self.engine.create_game("威压一界", "supreme_earth", "dao", 522)
         game = self.engine.store.load(created["id"])
         game.player.realm_index, game.player.layer = 1, 1
-        game.player.fame = 900
+        game.player.infamy = 900
         game.player.puppets = [{
             "id":"overwhelming-machine", "type":"mechanical",
             "combat_power":100_000_000, "alive":True,

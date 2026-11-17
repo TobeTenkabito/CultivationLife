@@ -44,9 +44,11 @@ def main():
         name = f'shard-{index}'
         receipt = folder / f'{name}.json'
         original = json.loads(receipt.read_text(encoding='utf-8'))
-        require(original['status'] == 'failed', 'Only failed, finished shards may be recovered')
+        require(original['status'] in {'failed','passed'}, 'Only finished shards may be reconciled')
         hashes = {p: file_digest(ROOT / p) for p in original['source_hashes']}
         changed = {p for p, h in original['source_hashes'].items() if hashes[p] != h}
+        require(original['status']=='failed' or (changed and args.retest_changed_modules),
+                'A passed shard may only rerun explicitly changed test modules')
         require(not changed or args.retest_changed_modules, 'Test source changed; complete module rerun required')
         require(file_digest(folder / f'{name}.log') == original['log_sha256'], 'Original log changed')
         archive = folder / f'{name}-interrupted'

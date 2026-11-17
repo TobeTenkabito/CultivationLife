@@ -9,7 +9,7 @@ from .guixu import encounters as guixu_encounters
 from .guixu import calendar as guixu_calendar
 from .guixu import actions as guixu_actions
 
-from ..rules import effective_fame
+from ..rules import effective_infamy
 
 import copy
 import math

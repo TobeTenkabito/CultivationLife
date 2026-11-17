@@ -122,7 +122,7 @@
       const scene=s.scene;
       root.append(node('p',`界面等级 ${scene.tier}。${scene.kind==='secluded'?`此地修炼收益为普通地图的六倍，魔修不受自然修炼折损。界壁门槛：${({5:'化神',6:'炼虚',7:'合体',8:'大乘'})[scene.exit_realm||5]}后期；主动开辟还须至少合体期。自然裂缝可提前离开。`:`${scene.resource_description||'本界修炼资源可支持至大乘后期。'} ${scene.power_description||'界面之力承载至大乘后期，九阶道果将被排斥。'} 本界人物仍会老去并经历雷劫。`} 外界交互暂停；此地专属产物不会进入外界货源。`),
         button('探索 · 一年','spatial','explore'));
-      if(scene.population_rules){const r=scene.population_rules;root.append(node('p',`本界${r.abundance==='barren'?'资源匮乏':'资源寻常'}，修炼收益 ×${r.cultivation_multiplier}；初始修士最高 ${r.npc_realm_ceiling}阶后期。此为人口生成状况，并非界面修炼上限。`));}
+      if(scene.population_rules){const r=scene.population_rules;root.append(node('p',`本界${r.abundance==='barren'?'资源匮乏':'资源寻常'}，修炼收益 ×${r.cultivation_multiplier}；初始修士最高 ${r.npc_realm_ceiling}阶后期。当地修士的修为分布。`));}
       scene.locations.forEach(l=>{const card=node('article');card.className='map-location';card.dataset.location=l.id;card.append(node('h3',l.name),node('p',l.description||'独立空间内的地域。'),node('small',`气经验：${Object.entries(l.qi_gain_efficiencies).map(([key,value])=>`${({spirit:'灵气',demon:'魔气',monster:'妖气',yin:'阴气'})[key]} ×${value.toFixed(2)}`).join(' · ')}`),button(l.id===scene.location_id?'所在地':'前往 · 一年','spatial','move',{target_id:l.id},l.id===scene.location_id));appendRifts(card,l.id);root.append(card);});
       scene.sects.forEach(f=>root.append(button(scene.joined_sect===f.id?`已加入${f.name}`:`拜入${f.name}`,'spatial','join',{target_id:f.id},f.location_id!==scene.location_id || scene.joined_sect===f.id)));
       scene.npcs.forEach(n=>root.append(button(`${n.name} · ${n.realm_index}阶${n.layer}层 · ${n.alive?'交流':n.death_reason}`,'spatial','talk',{target_id:n.id},!n.alive)));

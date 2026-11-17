@@ -19,10 +19,10 @@ from cultivation_life.system.world_transition_system import (
 
 
 @pytest.mark.parametrize('destination', [w for w in WORLD_SYSTEMS['world_profiles'] if w != 'human'])
-def test_every_rift_route_preserves_independent_fame(local, destination):
+def test_every_rift_route_preserves_independent_infamy(local, destination):
     engine, game, _ = local
     p = game.player
-    p.world, p.realm_index, p.layer, p.fame = 'human', 5, 1, 3115
+    p.world, p.realm_index, p.layer, p.infamy = 'human', 5, 1, 3115
     p.hostility = {'world:human': 900}
     ports = WorldTransitionPorts(Mock(), Mock(), Mock())
     scene = spatial.create_instance(game, random.Random(8), 'lost' if destination == 'lost' else 'secluded') if destination in {'rift', 'lost'} else None
@@ -30,16 +30,16 @@ def test_every_rift_route_preserves_independent_fame(local, destination):
         plan = plan_world_transition(game, WorldTransitionRequest(
             target, 'rift', f'rift:{p.world}:{target}', instance_id=scene['id'] if scene and target == destination else None), WORLD_SYSTEMS, engine.maps)
         apply_world_transition(game, plan, ports)
-        assert p.fame == expected
+        assert p.infamy == expected
         assert p.hostility == {'world:human': 900}
         if target == destination:
-            p.fame = 17
+            p.infamy = 17
 
 
 @pytest.mark.parametrize('action', ['spar', 'capture', 'slay', 'befriend_neighbors'])
 def test_immediate_encounters_are_once_persisted_and_do_not_advance_clocks(local, action):
     engine, game, _ = local
-    game.player.fame = 100
+    game.player.infamy = 100
     engine.store.save(game)
     combat = Mock(return_value='一次实际遭遇')
     year = Mock(side_effect=AssertionError('Immediate action advanced the world'))
@@ -63,13 +63,13 @@ def test_demonic_early_first_layer_crossing_and_monster_dream_route(local):
     engine, game, _ = local
     p = game.player
     p.world, p.location_id, p.path, p.realm_index, p.layer = 'human', engine.maps.default_location('human'), 'demonic', 5, 1
-    p.fame = 900
+    p.infamy = 900
     engine.store.save(game)
     assert engine._public_demonic_system(p)['true_demon_ascension']['available']
     engine.begin_spirit_crossing(game.id)
     crossed = engine.store.load(game.id)
-    assert crossed.player.world == 'demon' and crossed.player.fame == 0
-    assert crossed.player.fame_by_world['human'] == 900
+    assert crossed.player.world == 'demon' and crossed.player.infamy == 0
+    assert crossed.player.infamy_by_scope['human'] == 900
     p.world, p.path = 'monster_realm', 'monster'
     plan = plan_public_crossing(game, 'phantom_underworld', engine.maps)
     assert plan.direction.value == 'lateral' and plan.target_rank == (5, 1)
@@ -190,18 +190,18 @@ def test_distinct_lost_instances_have_distinct_reputation_and_return_cleanly(loc
     engine, game, _ = local
     from cultivation_life.engine.actions.exploration import enter_scene, move_world
     game.player.realm_index, game.player.layer = 5, 1
-    game.player.fame = 40
+    game.player.infamy = 40
     rng = random.Random(17)
     scenes = [spatial.create_instance(game, rng, 'lost') for _ in range(2)]
     deps = engine._exploration_dependencies()
     for scene, expected in [(scenes[0], 0), (scenes[1], 0), (scenes[0], 15)]:
         enter_scene(deps, game, scene, rng)
         assert spatial.current(game)['id'] == scene['id']
-        assert game.player.fame == expected
-        game.player.fame = 15
+        assert game.player.infamy == expected
+        game.player.infamy = 15
     move_world(deps, game, 'celestial', rng)
     assert spatial.current(game) is None
-    assert game.player.fame == 40
+    assert game.player.infamy == 40
 
 
 def test_stale_arrival_plan_rejects_without_refunding_or_mutating(local):

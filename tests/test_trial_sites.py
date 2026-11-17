@@ -90,7 +90,7 @@ def test_actual_five_choices_fight_claim_does_not_advance_time(local):
     assert saved.auction_sequence == original['auction_sequence']
     assert saved.diplomacy_unit == original['diplomacy_unit']
     assert saved.world_npcs.keys() == original['world_npcs'].keys()
-    assert saved.player.fame == original['player']['fame']
+    assert saved.player.infamy == original['player']['infamy']
     assert saved.player.karma == original['player']['karma']
     assert saved.player.sha_qi == original['player']['sha_qi']
     enter(engine, saved, 2)

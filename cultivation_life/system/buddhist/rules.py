@@ -59,8 +59,8 @@ def buddhist_modifier(subject, key, **context):
     config = buddhist_config()
     if key in {"karma", "sha_qi"}:
         return getattr(player, key) if context.get("context") == "dharma_assembly" else 0.0
-    if key == "fame":
-        return player.fame + player.karma * config["karma_fame_ratio"] + player.sha_qi * config["sha_fame_ratio"]
+    if key == "infamy":
+        return player.infamy + player.karma * config["karma_infamy_ratio"] + player.sha_qi * config["sha_infamy_ratio"]
     if key == "ascension_destination":
         if player.world == "human":
             rule = config["ascension_selector"]
@@ -82,7 +82,7 @@ def buddhist_modifier(subject, key, **context):
     if key == "combat_stats":
         return 1 + max(0, -karma) / 100 * config["negative_combat_cap"]
     if key == "pursuit_immunity":
-        return context.get("source") == "fame" and (karma >= -25 or float(state.get("grace_units") or 0) > 0)
+        return context.get("source") == "infamy" and (karma >= -25 or float(state.get("grace_units") or 0) > 0)
     chosen = selected_blessings(subject)
     if key == "cost":
         blessing = {"market": "market", "black_market": "market", "natal": "natal"}.get(context.get("activity"))

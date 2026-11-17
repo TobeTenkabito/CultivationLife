@@ -212,7 +212,7 @@ def plant_spirit_crop(deps: SpiritFieldsDependencies, game_id: str, plant_id: st
         candidate for candidate in range(int(field.get("reclaimed_qing", 0))) if candidate not in occupied
     )
     if chosen_slot < 0 or chosen_slot >= int(field.get("reclaimed_qing", 0)) or chosen_slot in occupied:
-        raise ValueError("所选田块并非空闲沃土")
+        raise ValueError("请选择空闲沃土")
     if not remove_item(game.player, plant["seed_id"]):
         raise ValueError("行囊中没有对应灵植种子")
     field["sequence"] = int(field.get("sequence", 0)) + 1

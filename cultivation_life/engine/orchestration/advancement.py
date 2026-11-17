@@ -31,6 +31,8 @@ from ..dependencies import AdvancementDependencies
 def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int = 1) -> dict[str, Any]:
     game = deps._load(game_id)
     player = game.player
+    if action == "treasure":
+        raise ValueError("普通寻宝已由种子副本替代，请从探幽寻宝入口进入")
     if action == 'body_train':
         from ...soul_rules import require_body_training
         require_body_training(player)
@@ -96,6 +98,9 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     deps._begin_doctrine_action(game, action, commit=True)
     time_unit = int(WORLD_SYSTEMS["time_units"][str(player.realm_index)])
     years = units * time_unit
+    if action == 'dungeon_study':
+        from ...system.dungeons.study import begin
+        years = min(years, begin(game))
     if action in {'antiquity_work','council_work','purple_work'}:
         from ...system import yaochi_antiquity,court_projects,purple_east
         agenda={'antiquity_work':yaochi_antiquity,'council_work':court_projects,'purple_work':purple_east}[action]
@@ -123,8 +128,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     total_gain = 0.0
     total_body_gain = 0.0
     total_sense_gain = 0.0
-    total_fame_reduction = 0.0
-    treasure_results: list[str] = []
+    total_infamy_reduction = 0.0
     commission_results: list[str] = []
     combat_results: list[str] = []
     era_news: list[str] = []
@@ -193,11 +197,6 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             training_gain = grant_body_progress(player, training_gain)
             total_body_gain += training_gain
             deps._apply_action_resources(player, action, ledger.claim_resource_cost())
-        elif action == "treasure":
-            if ledger.claim_resource_cost():
-                treasure_results.append(deps._treasure_step(game, rng))
-                if not player.alive:
-                    break
         elif action == "commission":
             commission_results.append(deps._commission_step(game, rng))
             deps._apply_action_resources(player, action, ledger.claim_resource_cost())
@@ -212,14 +211,14 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             paid_cost = ledger.claim_resource_cost()
             deps._apply_action_resources(player, action, paid_cost)
             if action == "befriend_neighbors" and paid_cost:
-                fame_rules = WORLD_SYSTEMS["fame"]
+                infamy_rules = WORLD_SYSTEMS["infamy"]
                 reduction = max(0.0, min(
-                    player.fame,
-                    float(fame_rules["reconciliation_base"])
-                    + player.realm_index * float(fame_rules["reconciliation_realm_scale"]),
+                    player.infamy,
+                    float(infamy_rules["reconciliation_base"])
+                    + player.realm_index * float(infamy_rules["reconciliation_realm_scale"]),
                 ))
-                player.fame = max(0.0, player.fame - reduction)
-                total_fame_reduction += reduction
+                player.infamy = max(0.0, player.infamy - reduction)
+                total_infamy_reduction += reduction
             if action == "rest" and player.heart_demon > 0:
                 player.heart_demon = max(0.0, player.heart_demon - 0.5)
         if not advance_elapsed_year(deps.year, game, rng, era_news):
@@ -229,11 +228,14 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         if (elapsed_index + 1) % time_unit == 0 and deps.heavens_take_pause and deps.heavens_take_pause(game):
             era_news.append('已完成当前时间单位，停下查看诸天联系。')
             break
-        if action in {'treasure', 'generated_explore'} and (elapsed_index + 1) % time_unit == 0:
+        if action == 'generated_explore' and (elapsed_index + 1) % time_unit == 0:
             # Selecting the reward is a manual event. Stop this batch before
             # starting another expedition whose reward could be overwritten.
             break
     deps._finish_doctrine_action(game, action, player.age - start_world_age)
+    if action == 'dungeon_study':
+        from ...system.dungeons.study import finish
+        finish(game, player.age - start_world_age)
     deps._finish_yaochi_action(game, action, player.age - start_world_age)
     practice_units = None
     if action in {'antiquity_work','council_work','purple_work'}:
@@ -284,8 +286,6 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             if action == "cultivate" and player.spirit_root == "none"
             else f"从 {start_age} 岁摸索至 {current_body_age(player)} 岁；尚无主修功法，无法炼化机缘。"
             if action == "cultivate" and player.technique is None
-            else f"获得微量机缘 {total_gain:.1f}；{deps._condense_action_results(treasure_results)}"
-            if action == "treasure"
             else deps._condense_action_results(commission_results)
             if action == "commission"
             else deps._condense_action_results(combat_results)
@@ -294,7 +294,7 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             if action == "sense_train"
             else f"从 {start_age} 岁淬炼肉身至 {current_body_age(player)} 岁，炼体积累 +{total_body_gain:.1f}；当前为 {player.body_training} 层。"
             if action == "body_train"
-            else f"你主动收敛声势、修复近邻关系，威名 -{total_fame_reduction:.0f}；当前威名 {player.fame:.0f}。"
+            else f"你主动收敛声势、修复近邻关系，凶名 -{total_infamy_reduction:.0f}；当前凶名 {player.infamy:.0f}。"
             if action == "befriend_neighbors"
             else "你完成一次本地勘察，异闻情境与遗藏已确定，等待判断处理。"
             if action == "generated_explore"
@@ -306,12 +306,10 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
             {
                 "age": [start_age, current_body_age(player)], "world_age": [start_world_age, player.age],
                 "opportunity": round(total_gain, 1),
-                **({"fame_reduction": round(total_fame_reduction, 1)} if action == "befriend_neighbors" else {}),
+                **({"infamy_reduction": round(total_infamy_reduction, 1)} if action == "befriend_neighbors" else {}),
             }, ["action", action],
         ))
-        if action == "treasure":
-            deps._queue_followup_event(game, deps._prepare_treasure_reward_event(game, rng))
-        elif action == "generated_explore" and player.age > start_world_age:
+        if action == "generated_explore" and player.age > start_world_age:
             deps._queue_followup_event(game, deps._prepare_generated_event(game))
         settle_elapsed_time(
             deps.settlement, game, rng, era_news, action=action,
@@ -327,6 +325,9 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
     deps._ensure_market(game, rng)
 
     deps._compact_world_history(game)
+    if player.age > start_world_age:
+        from ...system.dungeons.runtime import invite_tick
+        invite_tick(game, deps._get_maps())
     game.updated_at = now_iso()
     game.rng_state = encode_rng(rng)
     deps.store.save(game)
@@ -340,12 +341,12 @@ def _instant_action(deps: AdvancementDependencies, game: GameState, action: str)
     rng = decode_rng(game.seed, game.rng_state)
     player.instant_action_ages[action] = player.age
     if action == 'befriend_neighbors':
-        rules = WORLD_SYSTEMS['fame']
-        reduction = min(player.fame, float(rules['reconciliation_base'])
+        rules = WORLD_SYSTEMS['infamy']
+        reduction = min(player.infamy, float(rules['reconciliation_base'])
                         + player.realm_index * float(rules['reconciliation_realm_scale']))
-        player.fame = max(0.0, player.fame - reduction)
+        player.infamy = max(0.0, player.infamy - reduction)
         deps._apply_action_resources(player, action, True)
-        summary = f"你修复了近邻关系，本界威名降低 {reduction:g}；本次往来不消耗年份。"
+        summary = f"你修复了近邻关系，本界凶名降低 {reduction:g}；本次往来不消耗年份。"
     else:
         summary = deps._personal_combat_step(game, action, rng)
     game.history.append(HistoryRecord(

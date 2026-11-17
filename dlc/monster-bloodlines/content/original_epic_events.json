@@ -36,10 +36,10 @@
     },
     {
       "id":"EVT_NAMELESS_CITY_004","version":1,"title":"无相妖祖",
-      "body":"祖坛深处走出一名没有本相的古妖，自称万兽山主。它承认山门上的血脉印记并非天意，而是自己从八族祖壁中推演出的诱饵；它要借当世最强妖修的肉身重生。只要你自愿献出一缕本源，它便能先稳住祖山百年，再慢慢完成夺舍。",
+      "body":"祖坛深处走出一名没有本相的古妖，自称万兽山主。它承认山门上的血脉印记是自己从八族祖壁中推演出的诱饵；它要借当世最强妖修的肉身重生。只要你自愿献出一缕本源，它便能先稳住祖山百年，再慢慢完成夺舍。",
       "tags":["realm:integration","monster","story_chain","nameless_city","manual_only"],"weight":0,
       "choices":[
-        {"id":"lend","text":"暂借一缕本源，三日内另寻稳山之法","effects":[{"type":"add_fame","value":-8},{"type":"set_flag","flag":"nameless_lent_name"},{"type":"queue_event","event_id":"EVT_NAMELESS_CITY_005"}]},
+        {"id":"lend","text":"暂借一缕本源，三日内另寻稳山之法","effects":[{"type":"add_infamy","value":-8},{"type":"set_flag","flag":"nameless_lent_name"},{"type":"queue_event","event_id":"EVT_NAMELESS_CITY_005"}]},
         {"id":"refuse","text":"拒绝让任何族人再成为祖火祭品","effects":[{"type":"set_flag","flag":"nameless_break_old_law"},{"type":"queue_event","event_id":"EVT_NAMELESS_CITY_005"}]},
         {"id":"claim","text":"夺取万兽骨印，亲自掌控祖坛","effects":[{"type":"add_karma","value":10},{"type":"set_flag","flag":"nameless_claimed_city"},{"type":"queue_event","event_id":"EVT_NAMELESS_CITY_005"}]},
         {"id":"expose","text":"将八面祖壁投映到山外，请百族共同辨真伪","conditions":{"has_flag":"nameless_preserve_truth"},"disabled_reason":"你没有保住八面祖壁的完整拓本","effects":[{"type":"set_flag","flag":"nameless_public_record"},{"type":"queue_event","event_id":"EVT_NAMELESS_CITY_005"}]}
@@ -84,7 +84,7 @@
       "choices":[
         {"id":"keep_lamp","text":"带走祖火灯，为自创血脉留下一缕火种","effects":[{"type":"add_item","item_id":"rain_archive_lamp"},{"type":"add_opportunity","value":55},{"type":"add_karma","value":-6},{"type":"set_flag","flag":"nameless_city_completed"}]},
         {"id":"take_seal","text":"收取破碎骨印，参悟万兽血脉之变","effects":[{"type":"add_item","item_id":"name_law_seal"},{"type":"add_opportunity","value":42},{"type":"set_flag","flag":"nameless_city_completed"}]},
-        {"id":"leave_both","text":"祖火与骨印都留在山中，只为本族添上一面新碑","effects":[{"type":"add_fame","value":18},{"type":"add_karma","value":-10},{"type":"add_opportunity","value":70},{"type":"set_flag","flag":"nameless_city_completed"}]},
+        {"id":"leave_both","text":"祖火与骨印都留在山中，只为本族添上一面新碑","effects":[{"type":"add_infamy","value":18},{"type":"add_karma","value":-10},{"type":"add_opportunity","value":70},{"type":"set_flag","flag":"nameless_city_completed"}]},
         {"id":"rule","text":"保留山主之位，以万兽骨印号令山中百族","conditions":{"has_flag":"nameless_claimed_city"},"disabled_reason":"你从未夺得万兽骨印","effects":[{"type":"add_item","item_id":"rain_archive_lamp"},{"type":"add_item","item_id":"name_law_seal"},{"type":"add_karma","value":24},{"type":"set_flag","flag":"nameless_city_ruled"}]}
       ]
     }

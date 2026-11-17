@@ -87,7 +87,7 @@ class EventCatalog:
                             raise ContentError(f"事件 {event['id']} 的判定引用不存在的物品：{check.get('item_id')}")
                         if check.get("stat") not in {
                             "has_item", "hp", "mp", "combat_power", "hp_ratio", "mp_ratio",
-                            "combat_ratio", "karma", "sha_qi", "heart_demon", "fame",
+                            "combat_ratio", "karma", "sha_qi", "heart_demon", "infamy", "renown",
                         }:
                             raise ContentError(f"事件 {event['id']} 使用未知属性判定：{check.get('stat')}")
 

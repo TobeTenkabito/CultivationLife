@@ -22,7 +22,7 @@ def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: 
         raise ValueError("当前状态无法处理征伐")
     side = deps._player_war_side(game, war)
     if not side:
-        raise ValueError("你并非这场战争的参战方")
+        raise ValueError("请由本场战争的参战方操作")
     if action != "participate_round" and (
         war.get("controller") != "player" or not deps._player_has_war_voice(game, war)
     ):
@@ -57,7 +57,7 @@ def war_action(deps: WarActionsDependencies, game_id: str, war_id: str, action: 
             raise ValueError("请选择要邀请参战的盟友")
         outcomes = deps._call_war_allies(game, war, side, rng, ally_id=ally_id, limit=1)
         if not outcomes:
-            raise ValueError("该势力并非可邀请盟友，或仍处于重邀冷却")
+            raise ValueError("请选择已达成同盟且邀约间隔已满的势力")
     elif action == "accept_ai_peace":
         offer = war.get("peace_offer")
         if war.get("status") != "peace_ready" or not offer or offer.get("recipient_side") != side:

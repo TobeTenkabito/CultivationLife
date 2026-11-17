@@ -16,7 +16,7 @@ def public(game,power=None):
         address=location(game,target) if target.kind=='npc' else None
         local=(target.kind in {'puppet','prisoner'} or '身外化身' in target.relations or (accessible(game,n) and bool(address) and address==site_key(game)))
         row=dict(id=target.identity,kind=target.kind,relations=list(target.relations),name='暂不可接触的人物',
-                 reason='当前无法确认或接触',portrait=None,quotes=[],techniques=[])
+                 reason='等待接触',portrait=None,quotes=[],techniques=[])
         if not local:
             rows.append(row);continue
         facts=normalize_facts(target.facts(game))

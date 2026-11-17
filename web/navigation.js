@@ -1,7 +1,7 @@
 /* One directory for the existing controls; preferences contain no game state. */
 (() => {
   const groups = {
-    common: {name:'常用', mark:'常', panels:['settings','extension','battle-report']},
+    common: {name:'常用', mark:'常', panels:['settings','extension','battle-report','mailbox']},
     practice: {name:'修行', mark:'修', panels:['immortal-practice','nascent','authored','immortal-artifacts','doctrine','immortal-conversion','immortal-veins','combat-plan','immortal-aperture','spirit-voisinage','asura-conversion','asura-body','asura-veins','asura-route','asura-domain','asura-powers','monster-body','ghost-body','upper-voisinage','golden-light','immortal-body','voisinage','buddhist-wish','secret-art','transformation','bloodline','ghost-soul','sage-inner-outer']},
     craft: {name:'百艺', mark:'艺', panels:['inventory','spirit-field','puppet-workshop','captive','crafting','formation','talisman','natal-artifact','tianji']},
     economy: {name:'经营', mark:'营', panels:['personal-economy','market','merchant','auction','exchange','faction','intrigue','upper-institution','heavenly-court','war']},

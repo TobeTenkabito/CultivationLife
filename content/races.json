@@ -106,7 +106,7 @@
     {"id":"winged_demon","name":"翼魔族","worlds":["true_demon"],"description":"生有多对刃翼，占据高空魔巢，以高速围猎和军阵著称。"},
     {"id":"abyss_demon","name":"渊魔族","worlds":["true_demon"],"description":"来自地底裂渊的庞然魔物，能吞纳浊气并在黑暗中持续生长。"},
     {"id":"soul_demon","name":"魂魔族","worlds":["true_demon"],"description":"肉身只是容器，真正本体是聚散无常的魔魂，精于夺舍和御魂。"},
-    {"id":"corpse_demon","name":"尸魔族","worlds":["true_demon"],"description":"由万年古尸自行诞灵，并非受人操纵的炼尸，肉身不腐不灭。"},
+    {"id":"corpse_demon","name":"尸魔族","worlds":["true_demon"],"description":"万年古尸自行诞灵，神智自持，肉身长存。"},
     {"id":"witch_demon","name":"巫魔族","worlds":["true_demon"],"description":"以祭坛、咒血和祖灵沟通界外伟力，部族由十二巫脉共同议事。"},
     {"id":"horn_demon","name":"角魔族","worlds":["true_demon"],"description":"魔角可聚集地脉煞力，崇尚角斗与力量，常受黑日诸宗招揽。"},
     {"id":"many_eye_demon","name":"千目族","worlds":["true_demon"],"description":"周身魔眼各具异能，能窥法力节点、识破幻术并放出灭魂邪光。"},

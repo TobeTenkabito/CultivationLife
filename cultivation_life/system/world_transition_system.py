@@ -209,7 +209,7 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
     # Every route shares this boundary, including rifts and reversible visits.
     source_scope = f'{plan.source}:{plan.source_instance}' if plan.source_instance else plan.source
     destination_scope = f'{plan.destination}:{plan.destination_instance}' if plan.destination_instance else plan.destination
-    player.fame_by_world[source_scope] = player.fame
+    player.infamy_by_scope[source_scope] = player.infamy
     player.race_hostility_by_world[source_scope] = {
         key: value for key, value in player.hostility.items() if key.startswith('race:')}
     player.hostility = {key: value for key, value in player.hostility.items() if not key.startswith('race:')}
@@ -252,7 +252,8 @@ def apply_world_transition(game, plan, ports, *, entourage=None):
         second.location_id = None
     player.nascent_state.pop('refining', None)
     game.spatial_state['current'] = plan.destination_instance
-    player.fame = player.fame_by_world.get(destination_scope, 0.0)
+    player.infamy = player.infamy_by_scope.get(destination_scope, 0.0)
+    player._renown_scope = destination_scope
     player.location_id = plan.arrival_location
     if plan.source == 'celestial' and not player.immortal_power_converted:
         player.immortal_conversion_paused_age = player.age

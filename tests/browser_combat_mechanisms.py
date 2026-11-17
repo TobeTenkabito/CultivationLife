@@ -100,10 +100,11 @@ def main():
                                 assert page.locator('.combat-technique[data-book]').count() == 7, page.evaluate('({html:document.querySelector("#battle-mechanisms").outerHTML,keys:game.last_combat_report.rounds.map(r=>Object.keys(r.voisinage?.technique_effects??{}))})')
                                 page.evaluate('CombatReplay.seek(0)')
                                 assert '等待本轮结算记录' in page.locator('[data-mechanism-timeline]').inner_text()
-                                assert '实际支付' not in page.locator('[data-mechanism-timeline]').inner_text()
+                                assert '运功消耗' not in page.locator('[data-mechanism-timeline]').inner_text()
                                 assert plan['paidIndex'] >= 0, 'Fixture must contain an actual paid cast'
                                 page.locator('[data-combat-scrub]').fill(f"{min(plan['duration'],plan['frames'][plan['paidIndex']]['settled']+.02):.2f}")
-                                assert '实际支付' in page.locator('[data-mechanism-timeline]').inner_text(), page.locator('#battle-mechanisms').inner_text()
+                                assert '运功消耗' in page.locator('[data-mechanism-timeline]').inner_text(), page.locator('#battle-mechanisms').inner_text()
+                                assert all(word not in page.locator('#battle-mechanisms').inner_text() for word in ('兑现','付费','回执'))
                                 page.locator('.combat-technique[data-book]').first.click()
                                 assert page.locator('.mechanism-lane:not(.observed-lane):not(.domain-lane)').count() == 1
                                 page.locator('.combat-technique[data-book]').first.click()
@@ -163,7 +164,7 @@ def main():
                     assert page.locator('#battle-mechanisms').is_visible()
                     paid = page.evaluate("game.last_combat_report.rounds.findIndex(r=>r.voisinage.technique_effects.events.some(e=>e.owner==='player'&&e.event==='paid'))")
                     page.locator('[aria-label="机制记录轮次"]').select_option(str(paid))
-                    assert '实际支付' in page.locator('[data-mechanism-timeline]').inner_text()
+                    assert '运功消耗' in page.locator('[data-mechanism-timeline]').inner_text()
                     page.evaluate('''()=>{const r=structuredClone(game.last_combat_report);delete r.visual;
                         for(const row of r.rounds)delete row.voisinage.technique_effects;renderBattleReport(r);}''')
                     assert '未记录七部功法' in page.locator('#battle-mechanisms').inner_text()

@@ -66,7 +66,7 @@
       }); section.append(cards); if (!policies.length) section.append(note('暂无政令。')); body.append(section);
       });
       if (c.factions) {
-        body.append(note(c.factions.developed?'派系影响来自原爵位、实际任职和履约支持。势大不等于谋反；忠诚、对具体议案的立场和私人支持分别记录。地方具名呈案在内政办理。':'派系共用百点影响力，单派上限七十。贡赋会降低派系忠诚。'));
+        body.append(note(c.factions.developed?'派系影响来自原爵位、实际任职和履约支持。势力与谋反嫌疑分别记录；忠诚、对具体议案的立场和私人支持分别记录。地方具名呈案在内政办理。':'派系共用百点影响力，单派上限七十。贡赋会降低派系忠诚。'));
         c.factions.rows.forEach(f => {
           const row = box(`${f.mark||'议'} · ${f.name}`, `影响力 ${f.external.toFixed(1)} · 忠诚 ${f.loyalty.toFixed(1)}`);row.dataset.dlcScope='asura-manifestation';
           if(f.interest)row.append(node('p',f.interest,'court-description'));

@@ -124,7 +124,7 @@ def can_possess(player: Player, target: dict[str, Any]) -> tuple[bool, str]:
     if player.sealed_cultivation:
         return False, "请先沿原通道解除下界封印，再进行夺舍"
     if str(target.get("race", "human")) not in {"human", "demon", "immortal"}:
-        return False, "目标并非可夺舍的人形生灵"
+        return False, "请选择具有适用肉身的人形生灵"
     if int(target.get("realm_index", 0)) > int(player.realm_index):
         return False, "不能夺舍境界高于自身的目标"
     limit = possession_limit(player)

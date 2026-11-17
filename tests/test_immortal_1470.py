@@ -146,7 +146,10 @@ def test_array_permission_bribe_zero_time_and_adjacency_enforced(prepared):
         engine.teleport_action(game.id,'travel',dest)
     result=engine.teleport_action(game.id,'bribe',dest)
     assert result['player']['age']==age and result['player']['location_id']==dest
-    game=engine.store.load(game.id);game.player.fame=10000;engine.store.save(game)
+    game=engine.store.load(game.id)
+    from cultivation_life.reputation import record
+    record(game.player,'test:teleport-service',1000,'护佑同道')
+    engine.store.save(game)
     engine.teleport_action(game.id,'request')
     game=engine.store.load(game.id)
     assert public_teleport(game,engine.maps)['origin']['licensed']

@@ -117,6 +117,12 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                       for index, row in enumerate(target.get("player_allies", []))})
     rosters = (("player", player_units), ("enemy", PlayerCombatSystem._enemy_units(target)))
     persistent = persistent_owners(game, {unit.id for _, units in rosters for unit in units})
+    from .dungeons.domains import definitions as dungeon_domains
+    for owner in persistent.values():
+        for key, definition in voisinage_definitions({'voisinages': dungeon_domains(owner)}).items():
+            if key in definitions and definitions[key] != definition:
+                raise ValueError('Original NPC domain cannot be overridden by a battle target')
+            definitions[key] = definition
     static_ids = set(target.get('static_resource_ids', ()))
     puppet_ids = {str(row.get('id')) for row in game.player.puppets}
     for key in static_ids:
@@ -196,7 +202,8 @@ def bind_capabilities(game: GameState, player_units: list[BattleUnit], target: d
                     from .npc_mana import prepare as prepare_mana
                     mana = prepare_mana(owner, game.player.age)
                     capabilities = replace(capabilities, mana_capacity=mana['capacity'], mana_initial=mana['current'])
-                rank = rank_for(read(owner, 'true_realm_index', realm), layer)
+                origin = (read(owner, 'family_traits', {}) or {}).get('dungeon_origin', {})
+                rank = rank_for(origin.get('true_realm', read(owner, 'true_realm_index', realm)), layer)
                 multiplier = 1 + .5 * max(0, (realm - 9) * 3 + (layer - 1) // 3)
                 if game.player.world != 'celestial':
                     multiplier = 1

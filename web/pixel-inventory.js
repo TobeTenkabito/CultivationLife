@@ -25,8 +25,12 @@
     desktop.replaceChildren();if(detail!==desktop)detail.replaceChildren();
     shell.querySelectorAll('[data-pixel-item]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pixelItem===key)));
     if(!row||!item){if(sheet.open)sheet.close();return;}
+    // Legacy list pagination must not hide the selected tile's original detail/actions.
+    row.removeAttribute('data-list-page-hidden');
+    row.removeAttribute('data-page-hidden');
     const artifact=(state.crafting_system?.artifacts||[]).find(a=>a.id===item.crafted_artifact_id);
-    const status=item.is_natal_artifact||artifact?.is_natal?'本命':artifact?.tianji?(artifact.equipped?'当前神机':'未激活'):artifact||item.combat_bonus>0?'随身生效':'';
+    const relic=item.tags?.includes('dungeon_relic');
+    const status=item.is_natal_artifact||artifact?.is_natal?'本命':relic?(state.dungeons?.resonating_relic_id===item.id?'遗宝共鸣 · 随身生效':'遗宝收藏 · 由最强遗宝共鸣'):artifact?.tianji?(artifact.equipped?'当前神机':'未激活'):artifact||item.combat_bonus>0?'随身生效':'';
     const art=document.createElement('div');art.className='pixel-bag-art';art.append(PixelLibrary.image(item,state,128));
     detail.append(text('small',status,'pixel-item-status'),art,text('h3',item.name),text('p',`持有 ${Number(item.quantity).toLocaleString('zh-CN')} 件`,'muted'));
     if(artifact){const facts=document.createElement('dl');facts.className='pixel-item-stats';

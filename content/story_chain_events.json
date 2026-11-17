@@ -29,7 +29,7 @@
     },
 
     {
-      "id":"EVT_KUNWU_001","version":1,"title":"天裂古台现世","body":"元婴中期时，西荒群山忽然从中裂开，一座残破石台自万丈地底升起。古籍称它并非宗门洞府，而是上古修士用来缝合界壁的补天台。如今台下魔气冲霄，各方修士却只看见殿阁中堆积的古宝。",
+      "id":"EVT_KUNWU_001","version":1,"title":"天裂古台现世","body":"元婴中期时，西荒群山忽然从中裂开，一座残破石台自万丈地底升起。古籍称此地为补天台，上古修士曾借它缝合界壁。如今台下魔气冲霄，各方修士却只看见殿阁中堆积的古宝。",
       "tags":["realm:nascent","story_chain","kunwu","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"kunwu_eligible","base_chance":0.20,"unit_increment":0.02},
       "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":4},{"path":"player.layer","op":"gte","value":4},{"path":"player.layer","op":"lte","value":6}]},
       "choices":[
@@ -76,7 +76,7 @@
     },
 
     {
-      "id":"EVT_SPIRIT_CROSSING_001","version":1,"title":"节点启封","body":"你以化神神识触及界壁，空间乱流立刻吞没退路。第一关不是蛮力，而是找到灵界节点唯一稳定的潮汐缝隙。若无准确节点信息，必死无疑。",
+      "id":"EVT_SPIRIT_CROSSING_001","version":1,"title":"节点启封","body":"你以化神神识触及界壁，空间乱流立刻吞没退路。第一关须找到灵界节点中唯一稳定的潮汐缝隙。若无准确节点信息，必死无疑。",
       "tags":["ascension","spirit_crossing","manual_only"],"weight":0,
       "conditions":{"all":[{"path":"player.world","op":"eq","value":"human"},{"path":"player.realm_index","op":"eq","value":5}]},
       "choices":[{"id":"locate","text":"校准灵界空间节点（必要钥匙判定）","effects":[{"type":"attribute_check","checks":[{"stat":"has_item","item_id":"spirit_node_info"}],"failure_reason":"没有空间节点信息，你误入虚空死域，神魂俱灭","success_text":"节点情报与眼前潮汐完全吻合。"},{"type":"remove_item","item_id":"spirit_node_info","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_SPIRIT_CROSSING_002","if_result":["check_success"]}]}]

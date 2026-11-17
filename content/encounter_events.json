@@ -11,7 +11,7 @@
       ]
     },
     {
-      "id":"EVT_TEAM_SLAY_PREVIEW_001","version":1,"title":"携宝修士结队而行","body":"你盯上的目标并非落单，而是一支{team_size}人小队。为首者修为{target_realm}，整队战斗力约{target_power}；你当前队伍战斗力约{player_power}。若仍要杀人夺宝，需要自行承担后果。",
+      "id":"EVT_TEAM_SLAY_PREVIEW_001","version":1,"title":"携宝修士结队而行","body":"目标身边聚起同伴，共有{team_size}人。为首者修为{target_realm}，整队战斗力约{target_power}；你当前队伍战斗力约{player_power}。若仍要杀人夺宝，需要自行承担后果。",
       "category":"combat_preview","tags":["manual_only","combat","team","slay"],"weight":0,
       "choices":[
         {"id":"attack","text":"确认实力后动手灭杀","effects":[{"type":"runtime_combat","lethal":true}]},

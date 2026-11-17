@@ -111,7 +111,7 @@
       box.append(meter('守关元力', session.energy, 1200, 'energy'));
     }
     box.append(conditions); panel.append(box); panel.append(rewards(session));
-    panel.append(node('p', '交锋可能受创或死亡。邻域、金光与保命沿原战斗规则结算；倍率表示当前配置，不代表胜率。', 'trial-risk'));
+    panel.append(node('p', '交锋可能受创或死亡。邻域、金光与保命沿原战斗规则结算；倍率表示当前配置的战力对照。', 'trial-risk'));
     if (session.result) {
       const details = node('details', undefined, 'trial-battle-result'); details.append(node('summary', session.status === 'won' ? '守关成功 · 查看交锋记录' : '本次未通过 · 查看交锋记录'),node('p',session.result.summary)); panel.append(details);
     }

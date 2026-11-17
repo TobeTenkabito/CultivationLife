@@ -84,7 +84,7 @@ def raise_banner(game,row,claimant):
     if claimant not in (row['holder'],row['controller']) or not local_office(game,row):raise ValueError('须有原府实际控制及完好府署')
     units=troops.stationed(game,row,row['location'])
     supporters=[u for u in units if politics.state(game).get('people',{}).get(u['person_id'],{}).get('bonds',{}).get(claimant,0)>=config()['support_required']]
-    if not supporters:raise ValueError('至少须有一名实际驻军明确支持本人；任命不等于私人效忠')
+    if not supporters:raise ValueError('至少须有一名实际驻军明确支持本人；部属依公职任命服役')
     if claimant!='player':
         if person_reason(game,claimant,row['world'],row['location']):raise ValueError('举兵者须本人在场且没有其他占用')
         supporters=supporters[:5]

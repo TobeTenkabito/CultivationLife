@@ -13,7 +13,7 @@ from cultivation_life.version import BASE_GAME_VERSION
 from scripts.release_evidence import file_digest,inputs_digest,require
 from scripts.verify_scoped_release import balanced_test_shards
 
-BROWSERS=['browser_clone_support','browser_wind_frost_techniques','browser_domain_replay','browser_technique_release','browser_duel_techniques','browser_combat_mechanisms',
+BROWSERS=['browser_seeded_dungeons','browser_dungeon_loot','browser_authored_techniques','browser_clone_support','browser_wind_frost_techniques','browser_domain_replay','browser_technique_release','browser_duel_techniques','browser_combat_mechanisms',
     'browser_combat_replay','browser_combat_groups','browser_technique_secrets','browser_technique_secret_growth',
     'browser_secret_art_training','browser_events_212','browser_debug_systems','browser_handbook_revision']
 
@@ -49,6 +49,12 @@ def main():
         if args.resume and receipt.exists():
             previous=json.loads(receipt.read_text(encoding='utf-8'))
             if previous['status']=='passed' and previous['source_hashes']==hashes and previous['log_sha256']==file_digest(log):return previous
+        import shutil,time
+        existing=[p for p in (receipt,log,folder/f'{name}.xml') if p.exists()]
+        if existing:
+            archive=folder/'attempts'/f'{name}-{time.time_ns()}'
+            archive.mkdir(parents=True)
+            for path in existing:shutil.copy2(path,archive/path.name)
         with log.open('w',encoding='utf-8') as stream:
             code=subprocess.call([sys.executable,'-X','utf8',*argv],cwd=ROOT,stdout=stream,stderr=subprocess.STDOUT,env=os.environ|{'PYTHONIOENCODING':'utf-8'})
         require(inputs_digest(ROOT)==digest,'Release inputs changed during acceptance')
@@ -80,7 +86,7 @@ def main():
     if args.checks_only:return
     document=dict(version=BASE_GAME_VERSION,inputs_sha256=digest,profile='techniques',regression_scope='full-repository',
         collection=manifest_path.relative_to(ROOT).as_posix(),collection_sha256=file_digest(manifest_path),
-        scope='Full repository regression; fixed and seeded techniques, seven-book combat, mixed costs, linked secrets, handbook and actual event browsers; final Windows and signed Android 12 acceptance.',
+        scope='Full repository regression; seeded dungeons, frozen rewards, team/faction choices, mailbox, reputation, universal manuals, cultivation categories, prose, seven-book combat, secrets and real browser commands; final Windows and signed Android 12 dungeon and technique acceptance.',
         tests=manifest['shards'],runs=runs)
     (ROOT/f'build/scoped-{tag}.json').write_text(json.dumps(document,ensure_ascii=False,indent=2),encoding='utf-8')
 

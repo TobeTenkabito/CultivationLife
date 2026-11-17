@@ -46,24 +46,6 @@ def reward_pool_for_scene(deps: TreasureDependencies, world: str, location_id: s
     return eligible
 
 
-def _treasure_step(deps: TreasureDependencies, game: GameState, rng: Any) -> str:
-    player = game.player
-    resource = "mp" if player.mp > 0 and rng.random() < 0.5 else "hp"
-    if resource == "hp":
-        cost = round(max_hp(player) * rng.uniform(0.07, 0.15), 1)
-        player.hp = max(0, player.hp - cost)
-        cost_text = f"HP -{cost:.0f}"
-        if player.hp <= 0:
-            deps._die(game, "探宝时气血耗尽，埋骨荒野", "ACT_TREASURE")
-            outcome = '肉身毁去，存活结算后进入神游' if player.alive else '未能生还'
-            return f"探宝消耗 {cost_text}，{outcome}。"
-    else:
-        cost = round(min(player.mp, max_mp(player) * rng.uniform(0.10, 0.22)), 1)
-        player.mp = max(0, player.mp - cost)
-        cost_text = f"MP -{cost:.0f}"
-    return f"探宝消耗 {cost_text}，寻得三处灵光各异的遗藏。"
-
-
 def _prepare_treasure_reward_event(deps: TreasureDependencies, game: GameState, rng: Any) -> dict[str, Any]:
     event = deps._instantiate_event(deps.events_by_id["EVT_TREASURE_REWARD_SELECT_001"], game, rng)
     rewards: dict[str, dict[str, Any]] = {}

@@ -216,7 +216,8 @@ def _path(deps: EventDependencies, path: str, game: GameState) -> Any:
             for entry in game.player.disciples
         ),
         "player.sha_qi": projected_resource(game.player, "sha_qi"),
-        "player.fame": projected_resource(game.player, "fame"),
+        "player.infamy": projected_resource(game.player, "infamy"),
+        "player.renown": game.player.renown,
         "player.born_rootless": game.player.born_rootless,
         "player.mortal_aspiration": game.player.mortal_aspiration,
         "player.spouse": game.player.spouse,

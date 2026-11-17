@@ -37,7 +37,7 @@ def facts(game, case):
     excused=bool(row.get('closure_obstruction'))
     return dict(missing=False,owed={},late=row.get('closed',0)>=row['deadline'],
         excused=excused,fault=not excused and bool(row.get('cancelled')),
-        summary=('原交接记录存在客观阻碍：'+row['closure_obstruction'] if excused else '原差事逾期且未完成；尚不能据此认定故意虚报。'),
+        summary=('原交接记录存在客观阻碍：'+row['closure_obstruction'] if excused else '原差事逾期且未完成，案卷记作履职延误。'),
         progress=row['progress'],years=row['years'],receipt=receipt)
 
 def leads(game):

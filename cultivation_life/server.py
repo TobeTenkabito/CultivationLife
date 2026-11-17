@@ -352,6 +352,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.buddhist_action(game_id, **payload)
             elif operation == "guixu-action":
                 result = ENGINE.guixu_action(game_id, payload.get("action", ""), payload)
+            elif operation == "dungeon-action":
+                result = ENGINE.dungeon_action(game_id, payload.get("action", ""), payload)
             elif operation == "trial-site-action":
                 result = ENGINE.trial_site_action(game_id, payload.get("action", ""), payload)
             elif operation == "doctrine-action":

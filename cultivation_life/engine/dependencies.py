@@ -302,7 +302,6 @@ class AdvancementDependencies:
     _queue_followup_event: Callable[..., None]
     _select_event: Callable[..., dict[str, Any] | None]
     _sense_training_step: Callable[..., float]
-    _treasure_step: Callable[..., str]
     _get_maps: Callable[[], MapPort]
     present: Callable[..., dict[str, Any]]
     _get_store: Callable[[], SavePort]
@@ -870,7 +869,7 @@ class HostilityDependencies:
     _revenge_ready: Callable[..., bool]
     _sect_members: Callable[..., list[SectNpc]]
     _wanted_target: Callable[..., dict[str, Any]]
-    _world_coalition_amnesty_fame: Callable[..., float]
+    _world_coalition_amnesty_infamy: Callable[..., float]
     _world_supports: Callable[..., bool]
     _get_events_by_id: Callable[[], dict[str, dict[str, Any]]]
 

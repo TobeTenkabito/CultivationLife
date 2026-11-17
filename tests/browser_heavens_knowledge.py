@@ -92,7 +92,7 @@ def main():
                     game.pending_event=None
                     p=game.player
                     p.world,p.location_id,p.path,p.realm_index,p.layer='human',engine.maps.default_location('human'),'demonic',5,1
-                    p.fame=100
+                    p.infamy=100
                     engine.store.save(game)
                     page.evaluate('async id=>loadGame(id)',initial.id)
                     page.evaluate("UtilityPanels.closeAll?.()")

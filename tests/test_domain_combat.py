@@ -378,11 +378,11 @@ def test_destroying_a_supply_artifact_does_not_award_cultivator_kill(engine_game
     monkeypatch.setitem(WORLD_SYSTEMS, "transcendent_combat", {
         "voisinages": [asdict(voisinage(effect="strike", effect_power=1))]})
     game.player.transcendence = state()
-    before_fame, before_karma = game.player.fame, game.player.karma
+    before_infamy, before_karma = game.player.infamy, game.player.karma
     result, _ = engine._combat(game, dict(target_name="仙炉", target_power=1000,
                                          target_realm_index=8, combat_type="story",
                                          members=[{"name": "仙炉", "power": 1000,
                                                    "realm_index": 8, "kind": "artifact"}]),
                                True, random.Random(1))
     assert result == "victory"
-    assert (game.player.fame, game.player.karma) == (before_fame, before_karma)
+    assert (game.player.infamy, game.player.karma) == (before_infamy, before_karma)

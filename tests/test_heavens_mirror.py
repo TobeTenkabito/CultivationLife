@@ -228,7 +228,7 @@ def test_real_combat_has_report_actual_cost_no_cultivator_kill_or_duplicate_loot
     assert after.last_combat_report['enemy_roster'][0]['kind'] == 'mechanical'
     assert after.last_combat_report['result'] == 'victory'
     assert len(after.player.formation_materials) == 1
-    assert after.player.fame == before.player.fame
+    assert after.player.infamy == before.player.infamy
     assert after.player.opportunity == before.player.opportunity
     data = mirror.get(after)
     assert data['collected_mana'] - mirror.get(before)['collected_mana'] == pytest.approx((before.player.mp-after.player.mp)*.25)

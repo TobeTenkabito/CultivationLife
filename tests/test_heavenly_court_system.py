@@ -86,7 +86,7 @@ class HeavenlyCourtSystemTests(unittest.TestCase):
         self.assertTrue(law["active"])
         self.assertTrue(shown["heavenly_court"]["last_vote"]["passed"])
 
-    def test_court_beast_hunt_uses_beast_combat_and_grants_fame_on_kill(self):
+    def test_court_beast_hunt_uses_beast_combat_and_grants_infamy_on_kill(self):
         game = self.engine.store.load(self._true_immortal())
         event = self.engine.events_by_id["EVT_CELESTIAL_COMBAT_LAW_BEAST_001"]
         pending = self.engine._instantiate_event(event, game, random.Random(8))
@@ -94,10 +94,10 @@ class HeavenlyCourtSystemTests(unittest.TestCase):
         self.assertEqual(pending["runtime"]["action"], "hunt_beast")
         pending["runtime"]["target_power"] = 1
         pending["runtime"]["members"][0]["power"] = 1
-        before = game.player.fame
+        before = game.player.infamy
         result, _ = self.engine._combat(game, pending["runtime"], True, random.Random(3))
         self.assertEqual(result, "killed")
-        self.assertGreater(game.player.fame, before)
+        self.assertGreater(game.player.infamy, before)
 
     def test_celestial_market_and_commissions_work_during_power_conversion(self):
         game_id = self._true_immortal(2402)

@@ -271,7 +271,7 @@ def _prepare_sage_action(deps: SageSocietyDependencies, game: GameState, action:
     if action not in {"sage_preach", "sage_teach", "sage_answer"}:
         return
     if not sage_content_available() or game.player.path != "confucian" or not teaching_world(game):
-        raise ValueError("当前界面尚未开放圣人教化，或并非儒修")
+        raise ValueError("请由儒修在开放圣人教化的界面施行")
     if not deps._player_doctrine(game):
         raise ValueError("请先加入或创立一个学说")
     game.sage_state["active_action"] = action

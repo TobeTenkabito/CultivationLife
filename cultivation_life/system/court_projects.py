@@ -135,7 +135,7 @@ def command(deps,game,action,target,amount):
         transfer_value(game,'player','background:celestial',200,'项目会商文书费用')
         r['pledges'][value]=dict(name=h['name'],promise='二百五十年内交付并公开原收支回执',age=game.player.age)
         r['deadline']=min(r['deadline'],r['started']+250)
-        summary='承诺本案缩短至二百五十年并公开账目；代表仍按原支持度表决，不保证赞成。'
+        summary='承诺本案缩短至二百五十年并公开账目；代表依各自支持度表决。'
     elif action=='council_vote':
         if blocked:=authority(game):raise ValueError(blocked)
         w=work(game)

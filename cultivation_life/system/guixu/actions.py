@@ -5,7 +5,7 @@ from ...models import HistoryRecord
 from ...content_registry import WORLD_SYSTEMS
 from ..possession_system import advance_player_age
 from ...rules import divine_sense_level
-from ...rules import effective_fame
+from ...rules import effective_infamy
 from ...runtime import encode_rng
 from ...rules import max_hp
 from ...rules import max_mp
@@ -232,7 +232,7 @@ def guixu_action(deps: GuixuActionsDependencies, game_id: str, action: str, payl
             elif action == "recruit":
                 if len(session.get("recruited_actor_ids", [])) >= int(deps._guixu_settings().get("recruit_cap", 2)):
                     raise ValueError("临时队友已经达到上限")
-                chance = max(.05, min(.82, .24 + effective_fame(game.player) / 1000 + max(0, game.player.realm_index - int(actor["realm_index"])) * .08))
+                chance = max(.05, min(.82, .24 + effective_infamy(game.player) / 1000 + max(0, game.player.realm_index - int(actor["realm_index"])) * .08))
                 if rng.random() < chance:
                     if actor.get("team_id"):
                         deps._dissolve_guixu_npc_team(

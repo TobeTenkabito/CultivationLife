@@ -1,13 +1,13 @@
 /* Short coach marks. Long reference text remains in Settings. */
 window.TutorialSteps={
-  welcome:{target:'#action-heading',title:'这次，亲手走一遍',text:'跟着箭头操作。教学中的修炼、探宝、拜师和入门都有确定结果，不消耗年月；普通游玩仍按按钮标注的耗时与规则进行。',read:true},
+  welcome:{target:'#action-heading',title:'这次，亲手走一遍',text:'跟着箭头操作。教学中的修炼、拜师和入门都有确定结果；副本入口只作介绍，不消耗年月；普通游玩仍按按钮标注的耗时与规则进行。',read:true},
   identity:{target:'.hud-identity',title:'先看看自己',text:'请点击高亮的人物入口，打开人物详情。',click:true},
   roots:{target:'#root-efficiency',context:'details',title:'资质与成长',text:'这里是机缘效率。灵根影响修行积累，功法与天地环境也会影响成长。机缘用来修行，灵石用来交易；气血与法力则是行动的底气。',read:true},
   close_identity:{target:'[data-close-dialog="player-details-dialog"]',context:'details',title:'回到修行主界面',text:'请点“返回主界面”，准备亲自运气。',click:true},
   practice:{target:'#cultivate-action',context:'daily',title:'亲自修炼一次',action:'guide_practice',text:g=>g.practice_gain?'请点击“潜心修炼”。此次试行一周天，固定获得 5 点机缘，不耗岁月、不触发其他事件，也不自动突破。':'请点击“潜心修炼”体验入口。当前角色只观察运气方式，不改变修为或资质。'},
   gain:{target:'#hud-opportunity',title:'看见刚才的变化',text:g=>`${g.last_result} 平时积累充足后，还要关注突破条件、寿元和渡劫准备。`,read:true},
   living:{target:'#tab-living',title:'不只靠闭关成长',text:'请切换到“历练与生计”。探宝、游历和委托各有不同收获。',click:true},
-  treasure:{target:'[data-action="treasure"]',context:'living',title:'找到第一份收获',action:'guide_treasure',text:g=>g.beginner?`请点“寻幽探宝”。这次固定找到 3 枚灵石${g.art?`与一份《${g.art.name}》玉简`:''}，不耗岁月。首次所得功法收入已悟功法，重复玉简留在行囊。`:'请点“寻幽探宝”认识入口。高境界角色只演示，不领取入门物资。'},
+  treasure:{target:'[data-action="treasure"]',context:'living',title:'认识副本入口',action:'guide_treasure',text:()=> '请点“探幽寻宝”认识入口。探寻会固定一处副本，入境不耗岁月，撤离后须间隔一个完整行动单位。本步不生成副本或发放奖励。'},
   bag:{target:'[data-panel-target="inventory"]',title:'亲手打开行囊',text:'请点“行囊”，看看刚才找到的资源。电脑从左侧打开；手机可从“常用”或“百艺”找到它。',click:true},
   resources:{target:'#inventory-card h2',context:'inventory',title:'资源有了去处',text:g=>`${g.last_result} 平时可在坊市买卖、完成商盟委托，或用灵田与百艺建立供给。请留意丹药和材料的用途。`,read:true},
   close_bag:{target:'#inventory-toggle',context:'inventory',title:'收好行囊',text:'请关闭行囊，接下来亲自配置功法。',click:true},

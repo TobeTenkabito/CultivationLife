@@ -119,7 +119,7 @@ def test_direct_take_real_combat_outage_then_restoration(site):
     assert data['guardian']['encounters'] == 1
     assert work.last_combat_report['objective'] == 'repel'
     assert work.last_combat_report['enemy_roster'][0]['kind'] == 'mechanical'
-    assert work.player.opportunity == before.player.opportunity and work.player.fame == before.player.fame
+    assert work.player.opportunity == before.player.opportunity and work.player.infamy == before.player.infamy
     assert 'ruins_take' in data['guardian_records']
     with pytest.raises(ValueError, match='通信中断'):
         act(site, 'ruins_contact')

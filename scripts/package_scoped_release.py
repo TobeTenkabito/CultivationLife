@@ -423,10 +423,12 @@ def main():
                 require(all(file_digest(ROOT/name)==digest for name,digest in recovery['evidence_sha256'].items()),'Interrupted/retry regression evidence changed')
                 require(file_digest(ROOT/run['log'].replace('.log','.xml'))==run['xml_sha256'],'Recovered regression XML changed')
         require(all(c.get('techniques_verified') for c in evidence['cases']),'Technique EXE acceptance required with and without DLC')
+        require(all(c.get('dungeons_verified') for c in evidence['cases']),'Dungeon EXE acceptance required with and without DLC')
         required={f'build/android-techniques-{o}-{tag}.log' for o in ('portrait','landscape')}
         require(set(native['logs'])==required and native.get('sdk')=='31','Android 12 technique orientations incomplete')
         require(native.get('test_apk_sha256')==file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'),'Native technique test APK changed')
         require(all('techniques_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Native technique marker missing')
+        require(all('dungeons_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),'Native dungeon marker missing')
         require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.','Android lint required')
         require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(encoding='utf-8'),'Signature evidence missing')
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')

@@ -264,9 +264,9 @@ def captive_action(deps: CaptivityDependencies, game_id: str, target_id: str, ac
         if disciple:
             raise ValueError("弟子不能作为俘虏拷打")
         target["affinity"] = float(target.get("affinity", 0)) - 12
-        player.fame += 2
+        player.infamy += 2
         emit(game, "captive.tortured", target_id=target_id)
-        result, summary = "tortured", f"你拷打{name}逼问情报；好感 -12，威名 +2。"
+        result, summary = "tortured", f"你拷打{name}逼问情报；好感 -12，凶名 +2。"
     else:
         result, summary = deps._convert_to_puppet(game, target, action, rng, bool(disciple))
 

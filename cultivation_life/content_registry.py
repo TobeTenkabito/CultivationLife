@@ -330,6 +330,11 @@ class ContentRegistry:
         market_doc['goods'].extend(npc_goods)
         from .talisman_content import item_definitions as talisman_items
         items_doc["items"].extend(talisman_items())
+        from .universal_manuals import build as universal_definitions
+        universal_items, universal_goods = universal_definitions(
+            world_doc['systems']['seeded_dungeons']['ceilings'], world_doc['realms'])
+        items_doc['items'].extend(universal_items)
+        market_doc['goods'].extend(universal_goods)
         from .economy_content import build as economic_definitions
         economic_items, economic_goods = economic_definitions(
             world_doc['systems']['world_profiles'], world_doc['realms'])
@@ -381,6 +386,10 @@ class ContentRegistry:
                     {"all": [source_expression, *caps]} if caps else source_expression
                 )
         techniques = cls._index_models(techniques_doc, "techniques", Technique)
+        from .technique_description import generated as describe_generated_technique
+        for technique in techniques.values():
+            if not technique.description:
+                technique.description = describe_generated_technique(technique)
         from .technique_secret_content import validate as validate_technique_secrets
         validate_technique_secrets(secret_doc, techniques)
         from .system.combat.contracts import Intervention
@@ -557,6 +566,11 @@ class ContentRegistry:
             monster_bloodline_settings=monster_bloodline_settings,
         )
         from .system.world_transition_schema import validate_transition_content
+        from .dungeon_content import validate as validate_dungeon_content
+        try:
+            validate_dungeon_content(registry.world_systems.get('seeded_dungeons',{}),documents.get('maps.json',{}).get('worlds',{}))
+        except (ValueError,KeyError,TypeError) as error:
+            raise ContentError(f'种子副本配置不合法：{error}') from error
         from .system.combat.contracts import voisinage_definitions
         from .system.combat.lifecycle_schema import validate_lifecycle
         try:
@@ -1557,7 +1571,7 @@ class ContentRegistry:
         actions: dict[str, Any], world: dict[str, Any], market: dict[str, Any], factions: dict[str, Any],
         items: dict[str, Item], faction_definitions: dict[str, dict[str, Any]],
     ) -> None:
-        required_actions = {"cultivate", "travel", "rest", "treasure", "commission", "befriend_neighbors", "hunt_beast", "spar", "slay"}
+        required_actions = {"cultivate", "travel", "rest", "dungeon_study", "commission", "befriend_neighbors", "hunt_beast", "spar", "slay"}
         if not required_actions <= set(actions):
             raise ContentError("年度行动定义不完整")
         for action_id, action in actions.items():

@@ -898,11 +898,13 @@ class GameEngine:
         from .transactions import request_games, active_command
         from ..system.spatial import guard
         from ..system.trial_sites import guard as trial_guard
+        from ..system.dungeons.runtime import guard as dungeon_guard
         games = request_games(self)
         if games is not None and game_id in games:
             if active_command():
                 guard(games[game_id], active_command())
                 trial_guard(games[game_id], active_command())
+                dungeon_guard(games[game_id], active_command())
             return games[game_id]
         game = persistence_runtime._load(self._dependencies.persistence_runtime, game_id)
         from .world.regions import attach
@@ -910,6 +912,7 @@ class GameEngine:
         if active_command():
             guard(game, active_command())
             trial_guard(game, active_command())
+            dungeon_guard(game, active_command())
         if games is not None:
             games[game_id] = game
         return game
@@ -1777,8 +1780,8 @@ class GameEngine:
         return hostility_runtime._maybe_wanted_encounter(self._dependencies.hostility, game, rng)
 
     @staticmethod
-    def _world_coalition_amnesty_fame(player: Player, world: str) -> float:
-        return hostility_runtime._world_coalition_amnesty_fame(player, world)
+    def _world_coalition_amnesty_infamy(player: Player, world: str) -> float:
+        return hostility_runtime._world_coalition_amnesty_infamy(player, world)
 
     @staticmethod
     def _record_world_coalition_amnesty(player: Player, world: str) -> None:
@@ -3004,9 +3007,6 @@ class GameEngine:
     def _treasure_reward_pool(self, game: GameState, category: str) -> list[dict[str, Any]]:
         return economy_treasure._treasure_reward_pool(self._dependencies.economy.treasure, game, category)
 
-    def _treasure_step(self, game: GameState, rng: Any) -> str:
-        return economy_treasure._treasure_step(self._dependencies.economy.treasure, game, rng)
-
     def _prepare_treasure_reward_event(self, game: GameState, rng: Any) -> dict[str, Any]:
         return economy_treasure._prepare_treasure_reward_event(self._dependencies.economy.treasure, game, rng)
 
@@ -3029,6 +3029,11 @@ class GameEngine:
                 pools.append(dict(kind=kind, content_id=row['content_id'], name=catalog[row['content_id']].name, tier=int(row['tier'])))
         best = max(row['tier'] for row in pools)
         return [row for row in pools if row['tier'] == best]
+
+    def dungeon_action(self, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:
+        from .composition.dungeons import bind
+        from ..system.dungeons.runtime import command
+        return command(bind(self), game_id, action, payload)
 
     def trial_site_action(self, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:
         from .composition.trial_sites import bind

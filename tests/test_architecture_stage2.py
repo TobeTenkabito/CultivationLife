@@ -132,7 +132,7 @@ def test_response_preserves_settlement_commit_and_preparation_order(tmp_path, mo
         assert actual is game
         seen.append('settle')
         if moved:
-            actual.player.fame += 1
+            actual.player.infamy += 1
         return moved
 
     def commit(actual):

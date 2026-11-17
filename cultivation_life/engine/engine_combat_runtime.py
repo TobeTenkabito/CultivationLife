@@ -51,7 +51,7 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
     avatar = avatar_unit(game, deps._npc_power)
     if avatar and avatar.id not in (target or {}).get('exclude_allied_ids', []):
         units.append(avatar)
-    for identity in (target or {}).get('mentorship_allies', []):
+    for identity in [*(target or {}).get('mentorship_allies', []), *(target or {}).get('dungeon_allies', [])]:
         npc = find_person(game, identity)
         if npc and npc.alive and identity not in {u.id for u in units}:
             units.append(BattleUnit(npc.id, npc.name, 'companion', deps._npc_power(npc), npc.realm_index, npc.path))
@@ -76,6 +76,8 @@ def _player_combat_units(deps: CombatDependencies, game: GameState, target: dict
         ))
 
     for relation in deps._public_party(game):
+        if (target or {}).get('local_dungeon'):
+            continue
         if str(relation.get("id")) in (target or {}).get("exclude_allied_ids", []) or str(relation.get('id')) in {u.id for u in units}:
             continue
         power = max(0.0, float(relation.get("combat_power", 0)))
@@ -198,7 +200,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     deps._inject_tianji_npc_artifacts(game, target)
     ensure_formation_state(player)
     portable_formation = active_formation_profile(player)
-    ground_array = None if portable_formation.get("active") else deps._local_ground_formation(game)
+    ground_array = None if portable_formation.get("active") or target.get('local_dungeon') else deps._local_ground_formation(game)
     if ground_array:
         ground_profile = deps._ground_profile(player, ground_array)
         target["allied_formation_profile"] = ground_profile
@@ -419,12 +421,12 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             deps._record_player_combat(game, target, resolution, result)
             return result, lead + "你已制伏对手，但本次结果没有形成实际击杀。"
         if resolution.outcome == "victory":
-            fame_config = WORLD_SYSTEMS["fame"]
-            fame_gain = (
-                float(fame_config["kill_gain_base"])
-                + int(target.get("target_realm_index", 0)) * float(fame_config["kill_realm_scale"])
+            infamy_config = WORLD_SYSTEMS["infamy"]
+            infamy_gain = (
+                float(infamy_config["kill_gain_base"])
+                + int(target.get("target_realm_index", 0)) * float(infamy_config["kill_realm_scale"])
             )
-            player.fame += fame_gain
+            player.infamy += infamy_gain
             demonic_gain = deps._grant_demonic_kill_opportunity(
                 player, int(target.get("target_realm_index", 0)),
             )
@@ -436,7 +438,7 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
             deps._record_player_combat(game, target, resolution, result)
             return result, lead + (
                 f"你在复杂交锋中建立压制并击杀了{target['target_name']}；狩猎准备要求为对手战力的 {threshold:.1f} 倍。"
-                f" 威名 +{fame_gain:.0f}。"
+                f" 凶名 +{infamy_gain:.0f}。"
                 + core_summary
                 + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
             )
@@ -547,7 +549,7 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
         return 'victory_escape', lead + f"{victim['name']}肉身已毁，元婴离体逃出，未结算击杀奖励。"
     player = game.player
     target["killed_member"] = victim
-    fame_before = player.fame
+    infamy_before = player.infamy
     treasure_id = victim.get("treasure_item_id")
     material_source = dict(victim)
     source_person = find_person(game, str(victim.get('npc_id') or ''), include_inactive=True)
@@ -570,15 +572,15 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
     if target.get('non_story_combat') and not target.get('player_defending'):
         from ..system.secret_art_loot import grant as grant_secret_material
         spoils += grant_secret_material(game, material_source, rng, 'soul')
-    fame_text = f" 威名 +{player.fame - fame_before:.0f}。"
+    infamy_text = f" 凶名 +{player.infamy - infamy_before:.0f}。"
     victim_path = str(victim.get("path", "dao"))
     if player.path == "monster" and victim_path != "monster" and not target.get("player_defending"):
         sha_text = ""
         if victim_path == "dao":
-            fame_rules = WORLD_SYSTEMS["fame"]
+            infamy_rules = WORLD_SYSTEMS["infamy"]
             sha_gain = round(
-                float(fame_rules["monster_dao_kill_sha_base"])
-                + int(victim["realm_index"]) * float(fame_rules["monster_dao_kill_sha_realm_scale"])
+                float(infamy_rules["monster_dao_kill_sha_base"])
+                + int(victim["realm_index"]) * float(infamy_rules["monster_dao_kill_sha_realm_scale"])
             )
             sha_gain = deps._sage_scaled_gain(player, sha_gain, "sha_qi_gain_reduction")
             player.sha_qi += sha_gain
@@ -588,7 +590,7 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
         return (
             result,
             lead + f"你在追击阶段击杀了{victim['name']}；妖修猎杀异道不沾因果。"
-            + sha_text + fame_text + spoils
+            + sha_text + infamy_text + spoils
             + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else ""),
         )
     if target.get("kill_karma", True) and not target.get("player_defending"):
@@ -597,7 +599,7 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
             player.karma = max(0.0, player.karma - reduction)
             result = "killed"
             deps._record_player_combat(game, target, resolution, result)
-            return result, lead + f"你在追击阶段诛杀恶贯满盈的{victim['name']}，因果 -{reduction:.0f}。{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
+            return result, lead + f"你在追击阶段诛杀恶贯满盈的{victim['name']}，因果 -{reduction:.0f}。{infamy_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
         karma_gain = round(18 + int(victim["realm_index"]) * 7)
         alliance = deps._race_alliance(game, player.world, deps._player_allegiance_race(player), str(victim.get("race", "human")))
         if alliance:
@@ -606,10 +608,10 @@ def _settle_combat_kill(deps: CombatDependencies, game: GameState, target: dict[
         warning = f" 你违背了{alliance['name']}。" if alliance else ""
         result = "killed"
         deps._record_player_combat(game, target, resolution, result)
-        return result, lead + f"你在追击阶段击杀了{victim['name']}，因果 +{karma_gain}。{warning}{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
+        return result, lead + f"你在追击阶段击杀了{victim['name']}，因果 +{karma_gain}。{warning}{infamy_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
     result = "killed"
     deps._record_player_combat(game, target, resolution, result)
-    return result, lead + f"你在追击阶段击杀了{victim['name']}。{fame_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
+    return result, lead + f"你在追击阶段击杀了{victim['name']}。{infamy_text}{spoils}" + (f" 杀戮炼化机缘 +{demonic_gain:.0f}。" if demonic_gain else "")
 
 
 def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: dict[str, Any], rng: random.Random) -> None:
@@ -618,7 +620,9 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
     from ..achievement_kills import record as record_ghost_kill
     record_ghost_kill(game, victim)
     from ..system.spirit_voisinage import secondary, offers, grant
-    if secondary(player.world) and int(victim.get('realm_index', 0)) >= 5:
+    source_npc = find_person(game, str(victim.get('npc_id') or ''))
+    generated_dungeon_person = source_npc and source_npc.family_traits.get('dungeon_origin')
+    if secondary(player.world) and int(victim.get('realm_index', 0)) >= 5 and not generated_dungeon_person:
         identity = str(victim.get('npc_id') or victim.get('id') or victim.get('name', ''))
         books = offers(game, 'kill', identity)
         looted = game.doctrine_state.setdefault('spirit_looted', [])
@@ -629,10 +633,10 @@ def _apply_cultivator_kill(deps: CombatDependencies, game: GameState, victim: di
                 game.history.append(HistoryRecord('SYS_SPIRIT_MANUAL_LOOT', 1, player.age,
                     '遗落仙法', identity, 'looted', f'从遗物中寻得《{book.name}》玉简。', {}, ['loot']))
     config = WORLD_SYSTEMS["faction_conflict"]
-    fame_config = WORLD_SYSTEMS["fame"]
-    player.fame += float(fame_config["kill_gain_base"]) + int(victim["realm_index"]) * float(fame_config["kill_realm_scale"])
+    infamy_config = WORLD_SYSTEMS["infamy"]
+    player.infamy += float(infamy_config["kill_gain_base"]) + int(victim["realm_index"]) * float(infamy_config["kill_realm_scale"])
     if victim.get("notorious"):
-        player.fame += max(40.0, float(victim.get("notoriety", 0)) * 0.55)
+        player.infamy += max(40.0, float(victim.get("notoriety", 0)) * 0.55)
     npc_id = victim.get("npc_id")
     if npc_id:
         for relation in [player.master, player.dao_companion, *player.disciples, *player.concubines, *player.dao_friends]:
@@ -817,7 +821,7 @@ def _snapshot(player: Player) -> dict[str, Any]:
         "hp": round(player.hp, 2), "mp": round(player.mp, 2),
         "opportunity": round(player.opportunity, 2), "karma": round(player.karma, 2),
         "sha_qi": player.sha_qi,
-        "fame": round(player.fame, 2),
+        "infamy": round(player.infamy, 2),
         "hostility": dict(player.hostility),
         "imprisonment": copy.deepcopy(player.imprisonment),
         "party": [entry.get("id") for entry in player.party],

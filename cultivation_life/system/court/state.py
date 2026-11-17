@@ -175,7 +175,7 @@ def _court_resolve_election_round(
         elif method == "faction":
             seat = next((row for row in court["seats"] if row["sect_id"] == game.player.faction_id), None)
             if not seat or seat.get("representative_id") != "player":
-                raise ValueError("你并非宗门的天庭代表，无法调动本宗选票")
+                raise ValueError("请取得本宗天庭代表资格后投票")
             spend = min(15, int(seat["influence"]))
             seat["influence"] -= spend
             player_bonus = 0.32 + spend / 50

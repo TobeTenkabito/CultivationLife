@@ -27,8 +27,7 @@ def resolve(game, identity):
 def learn(npc, book, level=1, slot=None):
     from ..authored_technique_schema import integer
     integer(level,1,9,'人物功法等级')
-    if slot == 'combat' and (book.grade > read(npc, 'realm_index', 0) or book.category not in {'spiritual','body','divine_sense','transformation'}
-                             or book.category=='transformation' and read(npc,'path')=='monster'
+    if slot == 'combat' and (book.grade > read(npc, 'realm_index', 0) or book.category != 'spiritual'
                              or not can_practice_technique(read(npc, 'spirit_root', ''), book)):
         raise ValueError('人物境界、灵根或功法类别不满足斗法配置')
     facts=levels(npc)
@@ -58,7 +57,7 @@ def learn(npc, book, level=1, slot=None):
         traits=read(npc,'family_traits',{})
         bonuses=traits.setdefault('authored_combat_bonuses',{})
         learned=copy.copy(book);learned.level=facts[book.id]
-        bonus=learned.combat_bonus*technique_scale(learned) if book.id.startswith('TECH_AUTHORED_') else 0
+        bonus=learned.combat_bonus*technique_scale(learned) if book.id.startswith('TECH_AUTHORED_') and book.category=='spiritual' else 0
         if bonus!=bonuses.get(slot,0):
             write('family_combat_bonus',read(npc,'family_combat_bonus',0)+(bonus-bonuses.get(slot,0)))
         bonuses[slot]=bonus
@@ -80,6 +79,18 @@ def equipped(game,npc):
         if book.requires_immortal_power and (read(npc,'transcendence',{}) or {}).get('conversion',0)<1:continue
         book.level=facts[identity];result.append((slot,book))
     return result
+
+
+def family_combat_bonus(npc):
+    """Exclude recorded specialty-book bonuses without rewriting family history."""
+    bonuses=read(npc,'family_traits',{}).get('authored_combat_bonuses',{})
+    slots={'main':read(npc,'main_technique_id'),**read(npc,'technique_slots',{})}
+    obsolete=0.
+    for slot,amount in bonuses.items():
+        book=TECHNIQUE_CATALOG.get(slots.get(slot))
+        if slot in {'body','sense','divine_sense','transformation'} or book and book.category!='spiritual':
+            obsolete+=amount
+    return read(npc,'family_combat_bonus',0)-obsolete
 
 
 def public(game,npc):

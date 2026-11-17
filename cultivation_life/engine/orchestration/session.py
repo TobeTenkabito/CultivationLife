@@ -122,7 +122,7 @@ def create_game(
         player.race = str(preset["race"])
         player.karma = float(preset.get("karma", 0))
         player.sha_qi = int(preset.get("sha_qi", 0))
-        player.fame = float(preset.get("fame", 0))
+        player.infamy = float(preset.get("infamy", 0))
         player.body_training = max(0, int(preset.get("body_training", player.body_training)))
         player.body_progress = max(0.0, float(preset.get("body_progress", player.body_progress)))
         player.immortal_body = copy.deepcopy(preset.get('immortal_body', {}))

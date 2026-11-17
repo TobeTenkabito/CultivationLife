@@ -6,9 +6,9 @@
   const select=root.querySelector('select'),caption=root.querySelector('[data-mechanism-caption]');
   const phase=root.querySelector('[data-mechanism-phase]');
   const mobile=matchMedia('(max-width: 640px)');
-  const labels={prepared:'准备运转',paid:'实际支付',strike:'追加攻势',breach:'破法兑现',absorbed:'护持承伤',guard:'守御减损',
-    restored:'恢复态势',refunded:'实付返还',cleanse:'净除减益',mobility:'步势变换',expired:'待用消散',interrupted:'运转中断'};
-  const prices={fixed:'固定费用',proportional:'比例费用',mixed:'比例＋固定',recorded:'战前费用'};
+  const labels={prepared:'凝神蓄势',paid:'运功消耗',strike:'追加攻势',breach:'寻隙破法',absorbed:'护持承伤',guard:'守御减损',
+    restored:'恢复态势',refunded:'收回灵力',cleanse:'净除减益',mobility:'步势变换',expired:'招势消散',interrupted:'运功中断'};
+  const prices={fixed:'固定消耗',proportional:'比例消耗',mixed:'比例＋固定',recorded:'战前消耗'};
   const amount=n=>Number.isFinite(n)?Number(n.toPrecision(4)).toLocaleString('zh-CN'):'—';
   const resource=k=>({mana:'MP',energy:'元力'}[k]??'资源（单位未记录）');
   const element=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -58,7 +58,7 @@
       if(selection&&!books.some(b=>b.id===selection))selection=null;
     }
     select.value=String(roundIndex);
-    caption.textContent=confirmed?'费用与效果取自本轮结算；点选功法查看，重复点选返回全部。':'当前轮演绎中；费用与效果在轮末确认，点选功法可查看此前记录。';
+    caption.textContent=confirmed?'点选功法查看本轮消耗与招式效果，再次点选查看全部。':'本轮交锋正在进行，点选功法可回顾此前的出招。';
     const oldFocus=strip.contains(document.activeElement)?document.activeElement.dataset.book:null;
     strip.replaceChildren();
     for(let i=0;i<(recorded?7:books.length);i++){
@@ -78,7 +78,7 @@
       const now=events(row).filter(e=>e.owner==='player'&&e.technique===b.id),s=snapshot?.find(s=>s.id===b.id);
       lane(b.name,b.level?`第 ${b.level} 重`:'等级未记录',previous.slice(-3).map(e=>`第 ${e.round} 轮 · ${eventText(e)}`),
         confirmed?now.map(eventText):'等待本轮结算记录',confirmed&&s?
-          [stateText(s),`已用 ${s.used} / ${s.limit} 次`,`累计实付 ${amount(s.paid)} · 返还 ${amount(s.refunded)} ${resource(s.resource)}`]:
+          [stateText(s),`已用 ${s.used} / ${s.limit} 次`,`累计消耗 ${amount(s.paid)} · 收回 ${amount(s.refunded)} ${resource(s.resource)}`]:
           confirmed?'此战报未记录状态':'轮末确认后显示');
     }
     // Only opponents/allies with actual recorded events appear; no hidden loadouts or balances.
@@ -86,7 +86,7 @@
     const participants=row.voisinage?.participants??{};
     const others=[...new Set(visible.map(e=>e.owner))];
     for(const owner of others){
-      lane(participants[owner]?.name??'参战者','本轮已见功法',[],visible.filter(e=>e.owner===owner).map(e=>`《${e.name??'已见功法'}》${eventText(e)}`),'未展示未使用的功法','observed-lane');
+      lane(participants[owner]?.name??'参战者','本轮已见功法',[],visible.filter(e=>e.owner===owner).map(e=>`《${e.name??'已见功法'}》${eventText(e)}`),'留意后续出招','observed-lane');
     }
     const field=row.voisinage;
     if(field?.fields?.length||field?.animation?.fields?.length){

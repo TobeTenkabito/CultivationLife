@@ -11,6 +11,11 @@ def recipe(market, item):
     definition = ITEM_CATALOG.get(item)
     if definition is None or restricted_acquisition('item', item):
         return None
+    from ...universal_manuals import parse, allowed
+    from ...content_registry import WORLD_SYSTEMS
+    if manual := parse(item):
+        if manual[2] > 1 or not allowed(manual[1],WORLD_SYSTEMS['seeded_dungeons']['ceilings'].get(market.get('world'))):
+            return None
     tags = set(definition.tags)
     # Seeds/herbs/ordinary mineral supplies are the extraction stage. Puppet
     # cores and talisman paper are processed goods even when tagged material.

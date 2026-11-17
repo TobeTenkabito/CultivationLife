@@ -69,7 +69,7 @@
       "choices": [{"id": "help", "text": "催动丹火相助", "effects": [{"type": "restore_mp", "value": -0.15}, {"type": "add_item", "item_id": "spirit_stone", "quantity": 18}]}]
     },
     {
-      "id": "EVT_NASCENT_DREAM_002", "version": 1, "title": "婴神远梦", "body": "元婴出窍时梦见千里之外的山川。那不是幻觉，而是神识将要蜕变的征兆。",
+      "id": "EVT_NASCENT_DREAM_002", "version": 1, "title": "婴神远梦", "body": "元婴出窍时梦见千里之外的山川。那是神识将要蜕变的征兆。",
       "tags": ["realm_exclusive", "realm:nascent"], "weight": 5, "intent_weights": {"cultivate": 2.0}, "conditions": {"path": "player.realm_index", "op": "eq", "value": 4},
       "choices": [{"id": "follow", "text": "循梦境淬炼神识", "effects": [{"type": "restore_mp", "value": -0.16}, {"type": "add_opportunity", "value": 18}]}, {"id": "return", "text": "及时收摄元婴", "effects": [{"type": "restore_mp", "value": 0.08}]}]
     },

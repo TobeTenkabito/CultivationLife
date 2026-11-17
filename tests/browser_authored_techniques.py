@@ -33,6 +33,15 @@ def main():
                     page.goto(base);page.wait_for_function('!!configData&&!busy');page.evaluate('id=>loadGame(id)',g.id)
                     navigation_locator(page,'[data-panel-target=authored]').click()
                     page.locator('[data-authored-input=name]').fill('流云自著真经')
+                    # Changing to a cultivation-only category clears combat
+                    # effects and removes the UI path for adding another one.
+                    for category in ('body','divine_sense','transformation'):
+                        page.locator('[data-authored-input=category]').select_option('main')
+                        page.locator('[data-author-add-buff]').click()
+                        assert page.locator('.at-buff').count()==1
+                        page.locator('[data-authored-input=category]').select_option(category)
+                        assert page.locator('.at-buff').count()==0
+                        assert page.locator('[data-author-add-buff]').is_disabled()
                     page.locator('[data-authored-input=category]').select_option('support')
                     page.locator('[data-author-add-buff]').click()
                     selects=page.locator('.at-buff select');selects.nth(1).select_option('from_round');selects.nth(2).select_option('restore')

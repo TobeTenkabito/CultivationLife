@@ -2568,7 +2568,7 @@
       "name": "万妖宫",
       "world": "nether",
       "path": "monster",
-      "description": "五祖族把持万妖宫，议权依族势分配，并非一族一票。玩家靠功绩与支持取得门阀代言资格，提案须争取过半议权；没有固定任期或普选。",
+      "description": "五祖族把持万妖宫，议权依族势分配。玩家靠功绩与支持取得门阀代言资格，提案须争取过半议权；没有固定任期或普选。",
       "color": "#897564",
       "location_id": "ancestral_beast_garden",
       "kind": "institution",

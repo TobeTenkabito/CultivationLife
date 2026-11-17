@@ -262,7 +262,7 @@
           "text": "拒绝留印，自行离去",
           "effects": [
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 5
             }
           ]
@@ -366,7 +366,7 @@
               ]
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 4
             }
           ]
@@ -573,7 +573,7 @@
               "value": 5
             },
             {
-              "type": "add_fame",
+              "type": "add_infamy",
               "value": 4
             }
           ]

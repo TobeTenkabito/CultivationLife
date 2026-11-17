@@ -270,7 +270,7 @@
       host.append(node('p','同道完成研读并返乡后，可委托运送一件本界九阶普通阵材。每处联系仅接收一次，使用背包中的原物资。'));
       const route=node('ol',null,'heavens-visit-route');route.setAttribute('aria-label','运材路线');
       for(const text of ['去程 · 2 年','抵达交货','返乡 · 2 年'])route.append(node('li',text));
-      host.append(route,node('p','这是研究供材捐赠，交货后原物资归当地项目。项目预留 4,000 往返路费及 3,000 定额补贴；补贴并非市价收购款，交货后在出发地领取。'));
+      host.append(route,node('p','这是研究供材捐赠，交货后原物资归当地项目。项目预留 4,000 往返路费及 3,000 定额补贴；补贴按供材定额结算，交货后在出发地领取。'));
     }else{
       const owners={carrier:'承运人携带',destination:'目的地研究库存',depot:'出发地托存，待领取',player:'已经取回',lost:'随承运人遗失'};
       host.append(node('p',f.material.name||f.material.material_id,'heavens-visit-finding'),badge(owners[f.cargo_owner]));

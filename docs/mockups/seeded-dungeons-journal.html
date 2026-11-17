@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>副本日志与局势 · 策划界面示意</title>
+<style>
+:root{color-scheme:dark;--bg:#101d25;--panel:#192a33;--line:#38505b;--ink:#ebeee5;--muted:#aebfc0;--gold:#dec18a;--blue:#82b8c2;--red:#d69a8b;--wash:#233943}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 system-ui,"Microsoft YaHei",sans-serif}body.paper{color-scheme:light;--bg:#f2ecdd;--panel:#fffaf0;--line:#c8bda4;--ink:#343e38;--muted:#616a60;--gold:#836124;--blue:#427e87;--red:#a75b4c;--wash:#e6e1d2}
+button{font:inherit;cursor:pointer;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:7px 13px;border-radius:3px}button:hover,button[aria-pressed="true"]{border-color:var(--gold);background:var(--wash)}button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--blue);outline-offset:3px}small,.muted{color:var(--muted)}h1,h2,h3,p{margin:0}h1{font:600 34px/1.4 "Noto Serif SC","SimSun",serif;letter-spacing:7px}h2{font-size:18px}h3{font-size:15px}a{color:var(--blue)}[hidden]{display:none!important}
+.prototype{padding:10px max(20px,calc((100vw - 1240px)/2));background:var(--wash);border-bottom:1px solid var(--line);font-size:12px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}.prototype strong{color:var(--gold)}.controls{display:flex;flex-wrap:wrap;gap:6px}.controls button{font-size:12px;padding:5px 9px}.wrap{max-width:1280px;margin:auto;padding:0 20px 28px}
+.heading{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:24px;align-items:center;padding:25px 0;border-bottom:1px solid var(--line);margin-bottom:18px}.eyebrow{font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:5px}.title-block{text-align:center}.title-rule{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--gold);font-size:10px;letter-spacing:5px;margin-top:4px}.title-rule:before,.title-rule:after{content:"";width:28px;height:1px;background:var(--line)}.reputations{justify-self:end;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 18px;max-width:290px;width:100%}.reputation{display:grid;grid-template-columns:1fr auto;align-items:center;border-bottom:1px solid var(--line);padding-bottom:3px}.reputation strong{font-size:24px;line-height:1.3;color:var(--gold);font-variant-numeric:tabular-nums}.reputation.infamy strong{color:var(--red)}.reputation small{grid-column:1/-1;font-size:10px}.reputation-hint{grid-column:1/-1;font-size:10px;color:var(--muted)}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.section-head small{font-size:12px}.party{margin-bottom:18px}.party h2,.encounters h2{font-size:14px;color:var(--muted)}.members{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.member{text-align:left;display:flex;gap:10px;align-items:center;min-width:0;padding:9px 12px}.portrait{flex-shrink:0;width:33px;height:38px;display:grid;place-items:center;border:1px solid var(--line);color:var(--blue);background:var(--wash);font-family:serif;font-size:21px}.member strong,.member small{display:block}.member strong{font-size:13px}.member small{font-size:11px}.member-detail{padding:12px;margin-top:10px;background:var(--wash);border-left:2px solid var(--blue);font-size:13px}
+.encounters{margin-bottom:16px}.object-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.object-list button{text-align:left;padding:9px 12px;border-bottom-width:2px}.object-list button[aria-pressed="true"]{border-bottom-color:var(--gold)}.object-list strong,.object-list small{display:block}.object-list strong{font-size:14px}.object-list small{font-size:11px}.caption{font-size:12px;color:var(--muted);margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:stretch}.panel{height:760px;min-width:0;display:flex;flex-direction:column;border:1px solid var(--line);border-top:2px solid var(--gold);background:var(--panel)}.panel-head{flex-shrink:0;padding:16px 20px 13px;border-bottom:1px solid var(--line);height:136px}.panel-head .section-head{margin-bottom:8px}.panel-index{font:12px/1 monospace;color:var(--gold);margin-right:10px;font-weight:400}.panel-body{flex:1;min-height:0;overflow-y:auto;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--line) var(--panel);padding:18px 20px}.panel-body:focus-visible{outline-offset:-3px}.target-title{font-size:16px;color:var(--gold)}.badge{display:inline-block;font-size:11px;padding:1px 6px;border:1px solid var(--line);border-radius:3px;white-space:nowrap}.badge.fact{color:var(--blue)}.badge.report{color:var(--gold);border-style:dashed}.badge.heard{color:var(--muted);border-style:dotted}
+#primary-factors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 18px}#primary-factors .factor:last-child{grid-column:1/-1;border-top:1px solid var(--line);padding-top:14px}.factor{min-width:0}.factor-head{display:flex;flex-direction:column;gap:3px;font-size:12px}.factor-head strong{color:var(--gold);font-size:14px;font-variant-numeric:tabular-nums}.number-bar{height:10px;position:relative;background:var(--wash);border:1px solid var(--line);margin:8px 0 6px;overflow:hidden}.number-bar .fill{position:absolute;inset:0 auto 0 0;background:var(--blue)}.number-bar.opponent .fill{background:var(--red)}.number-bar.estimated{border-style:dashed}.number-bar .range{position:absolute;top:0;height:100%;background:repeating-linear-gradient(135deg,transparent,transparent 3px,var(--gold) 3px,var(--gold) 4px);opacity:.55}.number-bar.unavailable{background:repeating-linear-gradient(135deg,var(--wash),var(--wash) 7px,var(--line) 7px,var(--line) 8px)}.factor small{font-size:11px;display:block}.detail-factors{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}.detail-factors summary{cursor:pointer;color:var(--ink);font-size:13px}#secondary-factors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:12px}#secondary-factors .factor-head strong{font-size:12px}.conditions{font-size:11px;list-style:none;padding:0;margin:16px 0 0;color:var(--muted)}.conditions li{padding:6px 0;border-top:1px solid var(--line)}.reason{margin-top:10px;padding:10px 12px;border-left:2px solid var(--gold);background:var(--wash);font-size:12px}.text-button{margin-top:12px;font-size:12px;width:100%;padding:7px}
+.filters{display:flex;flex-wrap:wrap;gap:6px}.filters button{font-size:12px;padding:3px 10px}.entries{list-style:none;padding:0;margin:0}.entry{padding:0 0 23px 17px;border-left:1px solid var(--line);position:relative}.entry:last-child{padding-bottom:2px}.entry:before{content:"";position:absolute;left:-4px;top:7px;width:7px;height:7px;background:var(--muted);border-radius:50%}.entry.fact:before{background:var(--blue)}.meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-bottom:7px}.entry p{font-size:13px;line-height:1.85}.entry small{display:block;margin-top:7px;font-size:11px}.correction{color:var(--red)}.empty{padding:22px 0;color:var(--muted)}.focus-flash{outline:2px solid var(--gold);outline-offset:4px}.distant{display:flex;gap:16px;align-items:baseline;margin-top:16px;padding:12px 16px;border:1px solid var(--line)}.distant h3{flex-shrink:0;font-size:12px;color:var(--muted)}.distant p{font-size:12px;color:var(--muted)}.footnote{margin-top:18px;font-size:11px;color:var(--muted)}
+@media(min-width:1600px){.wrap{max-width:1400px}.prototype{padding-inline:max(20px,calc((100vw - 1360px)/2))}.panel{height:780px}}
+@media(max-width:1000px){.heading{gap:15px}h1{font-size:28px;letter-spacing:4px}.reputations{max-width:230px;gap:5px 10px}.reputation small{display:none}.panel-head,.panel-body{padding-inline:15px}#secondary-factors{grid-template-columns:1fr;gap:12px}#secondary-factors .factor-head{flex-direction:row;justify-content:space-between;flex-wrap:wrap}.member{padding:8px}.member small{font-size:10px}.panel{height:850px}}
+@media(max-width:760px){.wrap{padding:0 14px 24px}.prototype{padding:10px 14px;gap:8px}.heading{grid-template-columns:1fr 1fr;padding:20px 0;gap:15px}.title-block{grid-column:1/-1;grid-row:1}.heading-location{font-size:12px}.eyebrow{font-size:10px;letter-spacing:1px}.reputation strong{font-size:21px}.reputations{gap:4px 10px}.reputation-hint{font-size:9px}.members{grid-template-columns:1fr;gap:6px}.member{padding:8px 10px}.member small{font-size:11px}.member strong{font-size:13px}.portrait{width:28px;height:32px;font-size:18px}.object-list{grid-template-columns:1fr;gap:6px}.object-list button{padding:8px 10px}.object-list strong{font-size:13px}.object-list small{font-size:11px}.encounters .section-head{align-items:flex-start;flex-direction:column;gap:3px}.grid{grid-template-columns:1fr;gap:16px}.panel{height:auto}.panel-head{height:auto;min-height:0;padding:14px}.panel-body{overflow:visible;padding:16px 14px}.logs .panel-body{max-height:660px;overflow-y:auto}#secondary-factors{grid-template-columns:1fr}.factor-head strong{font-size:13px}.distant{align-items:flex-start;flex-direction:column;gap:5px}.section-head small{font-size:11px}.footnote{font-size:10px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+.members:has(.member:nth-child(4)){grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1100px){.members:has(.member:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.members:has(.member:nth-child(4)){grid-template-columns:1fr}}
+/* The replay contains observed facts only; it has no hidden character-purpose data. */
+.replay{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--line);background:var(--panel)}.replay strong{font-size:13px;color:var(--gold)}.replay p{font-size:12px;color:var(--muted)}.replay-controls{display:flex;gap:7px;flex-shrink:0}.replay-controls button{font-size:12px}.replay button:disabled{opacity:.45;cursor:default;border-color:var(--line)}.members{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.member-heading{display:flex;align-items:center;justify-content:space-between;gap:6px}.member-copy{min-width:0;width:100%}.member-status{font-size:10px;border:1px solid var(--line);padding:0 5px;white-space:nowrap;color:var(--muted)}.member-status.present{color:var(--blue)}.member.departed{border-style:dashed}.member.departed .portrait{color:var(--muted)}.member-detail p+p{margin-top:6px}.member-detail button{font-size:12px;margin-top:10px}.join-offer{margin-top:12px;padding:14px;border:1px solid var(--gold);background:var(--wash)}.join-offer h3{color:var(--gold);margin-bottom:5px}.join-offer p{font-size:13px}.join-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.join-actions button{font-size:12px}.party-note{font-size:11px;color:var(--muted);margin-top:7px}.event-change{font-size:11px;color:var(--blue);margin-bottom:5px}.panel-head{height:146px}
+@media(max-width:760px){.replay{align-items:stretch;flex-direction:column;gap:9px;padding:12px}.replay-controls{justify-content:space-between}.members{grid-template-columns:1fr}.panel-head{height:auto}.member-heading{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<div class="prototype"><div><strong>策划界面示意 · V0.7</strong>　人物、宗门、数值均为演示；不连接游戏、不生成副本、不读取存档。</div>
+<div class="controls" aria-label="演示控制"><button id="outer" aria-pressed="true">场景：外缘传闻</button><button id="near" aria-pressed="false">场景：近处见证</button><button id="theme" aria-pressed="false">切换明暗示意</button></div></div>
+<main class="wrap">
+<header class="heading">
+<div class="heading-location"><p class="eyebrow">秘境见闻 · 当次探索</p><p id="position" class="muted">东侧殿门 · 第 11 步</p></div>
+<div class="title-block"><h1>沉水古府</h1><p class="title-rule" aria-hidden="true">探 秘</p></div>
+<section class="reputations" aria-label="威名与凶名：独立数值，均为示意"><div class="reputation"><span>威名</span><strong id="demo-renown">460</strong><small>威望、实力与综合素质</small></div><div class="reputation infamy"><span>凶名</span><strong id="demo-infamy">120</strong><small>杀戮等行为留下的代价</small></div><p class="reputation-hint">威名影响邀约，凶名带来顾虑；两者不相抵。</p></section>
+</header>
+<section class="replay" aria-label="队伍见闻演示"><div><strong>队伍见闻演示</strong><p id="replay-status" aria-live="polite"></p></div><div class="replay-controls"><button id="previous-step">上一步</button><button id="next-step">继续探索 →</button><button id="restart-replay">重看此段</button></div></section>
+<section class="party" aria-labelledby="party-title"><div class="section-head"><h2 id="party-title">同行队伍</h2><small id="party-count" aria-live="polite"></small></div><div id="members" class="members"></div><div id="member-detail" class="member-detail" hidden></div><p id="party-note" class="party-note"></p>
+<div id="join-offer" class="join-offer" hidden><h3>陆衍请求同行</h3><p>他自报姓名，称自己是散修，想借道寻找同伴：“我记得偏殿有条路，若能同行，正好互相照应。”</p><p class="caption">你辨明他显露元婴七层；所称近路与同伴下落尚未核实。他仍未加入队伍。</p><div class="join-actions"><button id="accept-join">答应同行</button><button id="decline-join">婉拒结伴</button></div></div>
+</section>
+<section class="encounters" aria-labelledby="situations-title"><div class="section-head"><h2 id="situations-title">外宗修士与势力队伍</h2><small>选择观察对象 · 与同行队伍分开</small></div><div id="objects" class="object-list"></div></section>
+<div class="grid">
+<section class="panel" id="factor-card" aria-labelledby="factor-title">
+<header class="panel-head"><div class="section-head"><h2 id="factor-title"><span class="panel-index" aria-hidden="true">01</span>博弈因素</h2><span id="factor-badge" class="badge report">据说／估计</span></div><p id="target-title" class="target-title"></p><p id="factor-context" class="caption"></p></header>
+<div class="panel-body" tabindex="0" role="region" aria-label="博弈因素详情，可滚动"><div id="primary-factors"></div><details class="detail-factors" open><summary>准备、关系与顾忌</summary><div id="secondary-factors"></div></details><ul id="conditions" class="conditions"></ul><div id="factor-reason" class="reason"></div><button id="related" class="text-button">查看相关见闻 →</button></div>
+</section>
+<section id="journal" class="logs panel" aria-labelledby="journal-title">
+<header class="panel-head"><div class="section-head"><h2 id="journal-title"><span class="panel-index" aria-hidden="true">02</span>副本日志</h2><small id="log-count"></small></div><nav class="filters" aria-label="证据筛选"><button data-filter="全部" aria-pressed="true">全部</button><button data-filter="实证" aria-pressed="false">实证</button><button data-filter="据说" aria-pressed="false">据说</button><button data-filter="听说" aria-pressed="false">听说</button></nav><p class="caption">保留当时所知，后续补证不抹去旧消息。</p></header>
+<div class="panel-body" tabindex="0" role="region" aria-label="副本见闻记录，可滚动"><ol id="entries" class="entries" aria-live="polite"></ol></div>
+</section></div>
+<aside class="distant"><h3>核心区域动静</h3><p><span class="badge heard">听说</span> 第 9 步在外缘获知东北有猛烈波动；交手者身份与结果仍不明。</p></aside>
+<p class="footnote">示意范围：途中结伴、行为线索、离队与同步日志，以及具体博弈数值。上一步／重看仅回放此段演示。评分不是概率；估计数值不代表知道对方内心。真实行动与结算尚未接入。<a href="../seeded-dungeons-design.md">返回策划案</a></p>
+</main>
+<script>
+'use strict';
+const kinds={'实证':'fact','据说':'report','听说':'heard'};
+const baseLogs=[
+{id:'core',step:9,kind:'听说',place:'外缘收讯 · 东北方向',text:'听说在东北方向有灵力波动，杀气重重，想来是有不得了的人物在交手。',source:'来自途经者的辗转传闻；交手者与结果均不明。'},
+{id:'gate',step:8,kind:'据说',place:'东侧殿门 · 数步前的交手',text:'据说青岚宗的元婴后期修士沈砚，在与赤霄宗的元婴后期修士霍厉争夺中败退。霍厉急需玄水珠疗伤，拒绝以灵石换取。',source:'来源：一名自称刚从殿门逃出的修士；动机仍是转述。'},
+{id:'sects',step:7,kind:'据说',place:'东侧通路',text:'据说霍厉率赤霄宗修士与青岚宗争夺东侧通路，双方已有伤亡，是否仍在交手尚不清楚。',source:'来源：同行者转述；没有可靠伤亡数目。'},
+{id:'help',step:6,kind:'实证',place:'外缘石廊 · 亲历',text:'洛凝替你挡下禁制余波，手臂受了轻伤。她要求稍后谈妥分配，再继续共同破阵。',source:'只确认这次援助和公开条件，不能据此确定她之后的所有打算。'}];
+const witness={id:'witness',step:11,kind:'实证',place:'东侧殿门 · 亲眼见证',text:'你辨明青岚宗沈砚显露元婴九层、赤霄宗霍厉显露元婴八层。沈砚击退霍厉，玄水珠当场落入沈砚手中，赤霄宗修士随后退至第二道门后。',source:'纠正第 8 步传闻：当时谁占住殿门无法核实；当前目击结果已确认。未确认本体境界、更远战况或最终离本归属。'};
+const encounter={id:'encounter',step:10,kind:'实证',place:'北廊路遇 · 非同行队伍',text:'凝霜宗的元婴七层修士顾长庚带两名同门封住北廊。他要求你报明来历并商议通行条件；你和洛凝随后绕行东侧殿门。',source:'确认当时共三人，不知是否另有援军。未达成结伴或通行约定，双方仍是独立队伍。'};
+let near=true,filter='全部',target='huo',replayStep=0,joinChoice=null,selectedMember=null;
+// These are public observations, not a simulation of a character's private intentions.
+const partyEvents={
+request:{id:'party-request',step:12,kind:'实证',place:'东侧殿门 · 当面交谈',text:'一名自报名为陆衍的修士请求同行。你辨明他显露元婴七层。他称自己是散修，正在找一位失散同伴，愿以偏殿近路换取沿途照应。',source:'亲见其人并听到这番说辞；其散修身份、近路和失散同伴均未核实。',change:'请求结伴 · 尚未入队'},
+join:{id:'party-join',step:13,kind:'实证',place:'东侧殿门 · 同行约定',text:'你答应与陆衍同行。他走入队伍，约定带路至偏殿，沿途互相照应；宝物分配尚未谈妥。临行前，他问起你破禁后还剩多少法力。',source:'只确认加入与公开约定。先前所得仍归原持有人。',change:'陆衍加入 · 3 人同场／1 人失联'},
+question:{id:'party-question',step:14,kind:'实证',place:'偏殿岔口 · 亲耳听到',text:'陆衍第二次问起你的法力还余几成，又问洛凝是否还能出手。你提起寻人的事，他只说“过了偏殿再看”，随后催促众人改走较窄的石廊。',source:'亲耳听到询问与提议；窄廊通向何处尚未探明。',change:'同行期间的言行'},
+contact:{id:'party-contact',step:14,kind:'据说',place:'偏殿岔口 · 洛凝转述',text:'洛凝低声说，方才停步时，她似乎看见陆衍朝侧门外的人影点了点头；隔着石柱，她没看清那是谁。',source:'来源：洛凝的转述。你没有亲见，人影身份与点头含义不明。'},
+leave:{id:'party-leave',step:15,kind:'实证',place:'偏殿侧门 · 亲眼见到',text:'陆衍说要去侧门外找人，提出就此分开。你亲见他离开队伍，转过石柱后不见了踪影；是否继续往外走，已无法确认。',source:'只确认离队与最后所见位置；寻找何人、是否离开副本均未知。此前言行与约定仍留在记录中。',change:'陆衍离队 · 2 人同场／1 人失联／1 人已离队'},
+decline:{id:'party-decline',step:12,kind:'实证',place:'东侧殿门 · 当面婉拒',text:'你婉拒了陆衍的结伴请求。他应了一声，独自转向北廊。你没有跟去。',source:'他从未加入本队；此后的行动与去向尚不清楚。',change:'未结伴 · 队伍人数不变'}
+};
+function replayEvents(){
+ if(!near||replayStep===0)return [];
+ if(joinChoice==='declined')return [partyEvents.decline,partyEvents.request];
+ const events=[partyEvents.request];
+ if(replayStep>=2)events.unshift(partyEvents.join);
+ if(replayStep>=3)events.unshift(partyEvents.question,partyEvents.contact);
+ if(replayStep>=4)events.unshift(partyEvents.leave);
+ return events;
+}
+function yanPresent(){return near&&joinChoice==='accepted'&&replayStep>=2&&replayStep<4;}
+function partyRows(){
+ const rows=[
+ {id:'you',portrait:'你',name:'你 · 队伍发起人',state:'同场',present:true,brief:'当前位置同场 · 无公开分配约定',lines:['你与洛凝当前同场。裴渊仍失联，不计入同场战力。','邀请关系不等于有权替队员签署宗门协议。']},
+ {id:'luo',portrait:'洛',name:'洛凝 · 青岚宗',state:'同行',present:true,brief:'元婴中期（已识别） · 轻伤',lines:['已知约定：共同破禁；分配尚未谈妥。第 6 步曾援助你。',near&&replayStep>=3&&joinChoice==='accepted'?'第 14 步曾转述在侧门见到的情形；你没有亲见。':'当前同场，手臂轻伤。'],event:near&&replayStep>=3&&joinChoice==='accepted'?'party-contact':'help'},
+ {id:'pei',portrait:'裴',name:'裴渊 · 散修',state:'失联',present:false,brief:'修为未探明 · 最后见于西廊',lines:['最后见于西廊，当前伤势与位置不明。','失联不等于已死亡，也不计入同场参战成员。']}
+ ];
+ if(near&&joinChoice==='accepted'&&replayStep>=2){
+  const left=replayStep===4;
+  const lines=['自报姓名陆衍，自称散修。显露元婴七层已识别；自述前来找一位失散同伴，尚未核实。','第 13 步加入。公开约定：带路至偏殿、互相照应；宝物分配未定。'];
+  if(replayStep>=3)lines.push('第 14 步：再次询问法力余量，催促改走窄廊。洛凝另转述他曾朝侧门的人影点头；你未亲见。');
+  if(left)lines.push('第 15 步：自称去找人后离队。最后见于偏殿侧门，当前去向不明；不计入同场战力。');
+  rows.splice(2,0,{id:'yan',portrait:'陆',name:'陆衍 · 自称散修',state:left?'已离队':'同行',present:!left,departed:left,brief:left?'最后见于侧门 · 当前去向不明':'元婴七层（已识别） · 第 13 步加入',lines,event:left?'party-leave':replayStep>=3?'party-question':'party-join'});
+ }
+ return rows;
+}
+function renderParty(){
+ const rows=partyRows(),present=rows.filter(r=>r.present).length,left=rows.some(r=>r.departed);
+ document.getElementById('party-count').textContent=present+' 人同场 · 1 人失联'+(left?' · 1 人已离队':'');
+ const members=document.getElementById('members');members.replaceChildren();
+ if(!rows.some(r=>r.id===selectedMember))selectedMember=null;
+ for(const row of rows){
+  const button=document.createElement('button');button.className='member'+(row.departed?' departed':'');button.dataset.member=row.id;button.setAttribute('aria-expanded',String(selectedMember===row.id));
+  const portrait=document.createElement('span');portrait.className='portrait';portrait.textContent=row.portrait;portrait.setAttribute('aria-hidden','true');
+  const copy=document.createElement('span');copy.className='member-copy';const heading=document.createElement('span');heading.className='member-heading';const name=document.createElement('strong');name.textContent=row.name;const badge=document.createElement('span');badge.className='member-status'+(row.present?' present':'');badge.textContent=row.state;heading.append(name,badge);const brief=document.createElement('small');brief.textContent=row.brief;copy.append(heading,brief);button.append(portrait,copy);
+  button.onclick=()=>{selectedMember=selectedMember===row.id?null:row.id;renderParty();document.querySelector('[data-member="'+row.id+'"]').focus();};members.append(button);
+ }
+ const detail=document.getElementById('member-detail'),selected=rows.find(r=>r.id===selectedMember);detail.replaceChildren();detail.hidden=!selected;
+ if(selected){for(const line of selected.lines){const p=document.createElement('p');p.textContent=line;detail.append(p);}if(selected.event){const link=document.createElement('button');link.textContent='查看相关见闻 →';link.dataset.memberLog=selected.event;link.onclick=()=>showLog(selected.event);detail.append(link);}}
+ document.getElementById('party-note').textContent=left?'已离队者保留最后所见与交往记录；不计入同场人数。':yanPresent()?'陆衍已同行，其整体战力尚未评估。所称来意与近路尚未核实。':'同场人数包含你；失联者不计入当前队伍战力。';
+ document.getElementById('join-offer').hidden=!(near&&replayStep===1&&joinChoice===null);
+ const ended=joinChoice==='declined'||replayStep===4;
+ document.getElementById('previous-step').disabled=!near||replayStep===0;
+ document.getElementById('next-step').disabled=!near||ended||(replayStep===1&&joinChoice===null);
+ document.getElementById('next-step').textContent=ended?'此段演示结束':replayStep===1?'先处理结伴请求':'继续探索 →';
+ document.getElementById('restart-replay').disabled=!near||replayStep===0;
+ document.getElementById('replay-status').textContent=!near?'外缘场景；切换“近处见证”可体验途中队伍变化。':joinChoice==='declined'?'第 12 步 · 已婉拒结伴。可重看此段，选择另一种回应。':['第 11 步 · 从殿门继续探索，查看沿途发生的事。','第 12 步 · 有修士请求同行，尚未加入队伍。','第 13 步 · 陆衍加入，队伍与见闻已更新。','第 14 步 · 来到偏殿岔口，记下沿途言行。','第 15 步 · 陆衍离队，先前见闻仍可回看。'][replayStep];
+}
+function changeReplay(next){
+ replayStep=next;filter='全部';if(next<=1)joinChoice=null;render();
+ document.querySelector('#journal .panel-body').scrollTop=0;
+}
+function showLog(id){
+ filter='全部';render();const row=document.querySelector('[data-event="'+id+'"]');if(!row)return;
+ row.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});row.classList.add('focus-flash');setTimeout(()=>row.classList.remove('focus-flash'),1600);
+}
+
+const targets={
+huo:{name:'霍厉 · 赤霄宗',realm:8,power:[145,120,170],want:[90,80,95],prep:[40,20,60],trust:null,caution:[65,45,80],goal:'玄水珠',context:'单人对比；同宗支援未确认',known:'已见其退守第二道门 · 未同行',rumor:'仅获传闻 · 尚未接触',reason:'求宝依据：据说此珠关系其疗伤且拒绝替代品。准备依据：近处见到其退守门后；未知暗手不披露。',conditions:['仙凡攻击／防护资格：未探明，数值优势不能代替资格。','动机评分不是背叛概率；不能在当前页面直接结算战斗。']},
+shen:{name:'沈砚 · 青岚宗',realm:9,power:[160,140,185],want:[75,60,90],prep:[55,40,70],trust:null,caution:[45,30,65],goal:'玄水珠（保有／交涉）',context:'单人对比；同宗关系不等于同行关系',known:'殿门目击 · 持珠一方／未同行',rumor:'仅获传闻 · 尚未接触',reason:'据所见持宝与守门行为估计其保有意愿。你尚未与他达成交易，对你的信任仍未探明。',conditions:['已识别显露修为；本体与未展示手段不公开。','可以进一步接触、交换条件或回避；此页仅演示因素。']},
+gu:{name:'顾长庚 · 凝霜宗领队',realm:7,power:[130,110,160],want:null,prep:[70,55,85],trust:[25,10,40],caution:[50,30,70],goal:'北廊通行条件（未见求宝目标）',context:'战力比较：你与洛凝 2 人为 100；对方已确认 3 人',known:'第 10 步直接路遇 · 盘查／未同行',reason:'准备依据：亲见三人占住通路；关系依据：要求报明身份且尚未达成约定。不推断其对玄水珠的兴趣。',conditions:['领队境界与整队战力分开；未确认援军不计入。','对应交互：报明来历、议价、绕行；冲关须进入真实战斗。']}
+};
+function factor(host,label,display,value,maximum,note,range=null,opponent=false){
+ const row=document.createElement('div');row.className='factor';const head=document.createElement('div');head.className='factor-head';const name=document.createElement('span');name.textContent=label;const number=document.createElement('strong');number.textContent=display;head.append(name,number);
+ const bar=document.createElement('div');bar.className='number-bar'+(opponent?' opponent':'')+(range?' estimated':'')+(value===null?' unavailable':'');bar.setAttribute('role','img');bar.setAttribute('aria-label',label+'：'+display+'。'+note);
+ if(value!==null){const fill=document.createElement('span');fill.className='fill';fill.style.width=(value/maximum*100)+'%';bar.append(fill);if(range){const interval=document.createElement('span');interval.className='range';interval.style.left=(range[0]/maximum*100)+'%';interval.style.width=((range[1]-range[0])/maximum*100)+'%';bar.append(interval);}}
+ const detail=document.createElement('small');detail.textContent=note;row.append(head,bar,detail);host.append(row);
+}
+function renderFactors(){
+ if(!near&&target==='gu')target='huo';const actor=targets[target],objects=document.getElementById('objects');objects.replaceChildren();
+ for(const key of near?['huo','shen','gu']:['huo','shen']){const a=targets[key],button=document.createElement('button');button.dataset.target=key;button.setAttribute('aria-pressed',String(key===target));const name=document.createElement('strong');name.textContent=a.name;const state=document.createElement('small');state.textContent=near?a.known:a.rumor;button.append(name,state);button.onclick=()=>{target=key;renderFactors();};objects.append(button);}
+ document.getElementById('target-title').textContent=actor.name+' ↔ 你';document.getElementById('factor-context').textContent='目标线索：'+actor.goal+'。'+(target==='gu'&&yanPresent()?'你方 3 人、对方 3 人；新队员战力尚未评估。':actor.context);
+ const badge=document.getElementById('factor-badge');badge.textContent=near?'实证＋因素估计':'据说＋因素估计';badge.className='badge '+(near?'fact':'report');
+ const primary=document.getElementById('primary-factors'),secondary=document.getElementById('secondary-factors');primary.replaceChildren();secondary.replaceChildren();
+ factor(primary,'你的显露境界','元婴五层 · 5／9',5,9,'玩家自身已知境界；同境共用九层刻度。');
+ factor(primary,'对方显露境界／差距',near?'元婴'+actor.realm+'层 · 高 '+(actor.realm-5)+' 小层':'元婴七至九层 · 高 2～4 小层',near?actor.realm:8,9,near?'已识别显露修为；非本体境界。':'据转述仅知后期，不将中点当成已确认层数。',near?null:[7,9],true);
+ const incompleteTeam=target==='gu'&&yanPresent();
+ factor(primary,target==='gu'?'己方同场队伍战力':'你的相对战力',incompleteTeam?'未探明（3 人）':'100（比较基准）',incompleteTeam?null:100,200,incompleteTeam?'陆衍已同场，但尚未观察其出手；不能补出全队战力。':'双方共用 0～200 刻度，100 为基准，不是成功率。');
+ factor(primary,target==='gu'?'对方同场队伍战力':'对方相对战力',near&&!incompleteTeam?actor.power[0]+' · 估计 '+actor.power[1]+'～'+actor.power[2]:'未探明',near&&!incompleteTeam?actor.power[0]:null,200,incompleteTeam?'己方完整战力未知，暂不能沿旧的两人基准给出全队比值。':near?'依据已观察的交手／同场配置估计，不计未知援军。':'只有境界传闻不足以给出可靠战力数值。',near&&!incompleteTeam?actor.power.slice(1):null,true);
+ const want=(near||target==='huo')?actor.want:null;
+ factor(primary,'对目标宝物的志在必得',want?want[0]+'／100 · 估计 '+want[1]+'～'+want[2]:'未探明',want?want[0]:null,100,want?'对应当前宝物；0～100 是求取／保有意愿评分，不是概率。':'没有可据以判断的求宝目标或行为；不以 0 代替未知。',want?want.slice(1):null,true);
+ for(const [label,key] of [['对方动手准备','prep'],['对方对你的信任','trust'],['对方动手的顾忌','caution']]){const value=near?actor[key]:null;factor(secondary,label,value?value[0]+'／100 · 估计 '+value[1]+'～'+value[2]:'未探明',value?value[0]:null,100,value?'按可观察行为估计；不会公开真实隐藏决策值。':'没有足够可见依据，不能随机补出一个分数。',value?value.slice(1):null,true);}
+ const conditions=document.getElementById('conditions');conditions.replaceChildren();for(const line of actor.conditions){const li=document.createElement('li');li.textContent=line;conditions.append(li);}
+ document.getElementById('factor-reason').textContent=near?actor.reason:target==='huo'?'据第 8 步消息估计求宝决心，其余准备与关系待接触探明。':'目前只有交手传闻，动机与对你的态度尚不清楚。';
+}
+function render(){
+ document.getElementById('position').textContent=near?(replayStep>=3?'偏殿岔口':'东侧殿门')+' · 第 '+(11+replayStep)+' 步':'外缘石廊 · 第 9 步';
+ renderParty();
+ document.getElementById('outer').setAttribute('aria-pressed',String(!near));document.getElementById('near').setAttribute('aria-pressed',String(near));
+ renderFactors();
+ const all=near?[...replayEvents(),witness,encounter,...baseLogs]:baseLogs,rows=all.filter(x=>filter==='全部'||x.kind===filter),list=document.getElementById('entries');list.replaceChildren();
+ document.getElementById('log-count').textContent=rows.length+' / '+all.length+' 条';
+ for(const row of rows){const li=document.createElement('li');li.className='entry '+kinds[row.kind];li.dataset.event=row.id;const meta=document.createElement('div');meta.className='meta';const step=document.createElement('span');step.textContent='第 '+row.step+' 步';const tag=document.createElement('span');tag.className='badge '+kinds[row.kind];tag.textContent=row.kind;const place=document.createElement('span');place.textContent=row.place;meta.append(step,tag,place);const text=document.createElement('p');text.textContent=row.text;const source=document.createElement('small');source.textContent=row.source;li.append(meta);if(row.change){const change=document.createElement('p');change.className='event-change';change.textContent=row.change;li.append(change);}li.append(text,source);if(near&&row.id==='gate'){const correction=document.createElement('small');correction.className='correction';correction.textContent='后证修正：第 11 步见闻已确认当前结果；保留原传闻供对照。';li.append(correction);}list.append(li);}
+ if(!rows.length){const empty=document.createElement('li');empty.className='empty';empty.textContent='当前筛选没有已获知的消息。';list.append(empty);}
+ document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));
+}
+document.getElementById('outer').onclick=()=>{near=false;render();};document.getElementById('near').onclick=()=>{near=true;render();};
+document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;render();});
+document.getElementById('theme').onclick=()=>{document.body.classList.toggle('paper');document.getElementById('theme').setAttribute('aria-pressed',String(document.body.classList.contains('paper')));};
+document.getElementById('related').onclick=()=>showLog(near?(target==='gu'?'encounter':'witness'):'gate');
+document.getElementById('next-step').onclick=()=>{if(!near||replayStep>=4||joinChoice==='declined'||(replayStep===1&&!joinChoice))return;changeReplay(replayStep+1);};
+document.getElementById('previous-step').onclick=()=>{if(near&&replayStep>0)changeReplay(replayStep-1);};
+document.getElementById('restart-replay').onclick=()=>{if(near){selectedMember=null;changeReplay(0);}};
+document.getElementById('accept-join').onclick=()=>{if(!near||replayStep!==1||joinChoice!==null)return;joinChoice='accepted';selectedMember='yan';changeReplay(2);};
+document.getElementById('decline-join').onclick=()=>{if(!near||replayStep!==1||joinChoice!==null)return;joinChoice='declined';filter='全部';render();document.querySelector('#journal .panel-body').scrollTop=0;};
+
+render();
+</script>
+</body>
+</html>

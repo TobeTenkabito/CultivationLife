@@ -53,9 +53,23 @@ def ready(sandbox,key,world='monster_realm'):
 
 def test_old_nodes_attributes_and_all_old_edges_survive():
     assert len(NODES)==265 and len(NEW)==65
+    # The two reviewed prose edits leave every mechanical field and old edge
+    # intact. Compare against the original snapshot after checking their exact
+    # replacements, rather than regenerating the historical attribute hashes.
+    revised_copy={
+        'AVIAN_PHOENIX':('description','祖血完成返照，自此化为凤凰真身。',
+            '祖血完成返照，自此并非模拟凤凰，而是凤凰本身。'),
+        'SERPENT_TRUE_DRAGON':('abilities',['真龙本体：完整的龙属生命。'],
+            ['真龙本体：并非变化模拟，而是完整龙属生命。']),
+    }
     for key,prior in LEGACY.items():
         node=NODES[key]
-        raw=json.dumps({k:v for k,v in node.items() if k!='parents'},sort_keys=True,ensure_ascii=False).encode()
+        attributes={k:v for k,v in node.items() if k!='parents'}
+        if key in revised_copy:
+            field,current,previous=revised_copy[key]
+            assert attributes[field]==current
+            attributes[field]=previous
+        raw=json.dumps(attributes,sort_keys=True,ensure_ascii=False).encode()
         assert hashlib.sha256(raw).hexdigest()==prior['sha256'],key
         assert set(prior['parents'])<=set(node['parents']),key
     assert {s:sum(n['species']==s and n['realm_index']<=8 for n in NODES.values()) for s in FAMILIES}=={

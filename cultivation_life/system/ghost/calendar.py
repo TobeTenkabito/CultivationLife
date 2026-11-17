@@ -39,7 +39,7 @@ def advance_parade_year(deps: GhostCalendarDependencies, game: GameState, rng: r
         parade["souls"] = deps._generate_parade_souls(game, phase_rng, realm_index=parade.get('realm_index', game.player.realm_index))
         records.append(HistoryRecord(
             "SYS_GHOST_PARADE_STARTED", 1, game.player.age, "百鬼夜行", None, "active",
-            "鬼门洞开，游魂并非临时数值，而以姓名、修为、魂压与魂性现身世间。",
+            "鬼门洞开，游魂带着各自的姓名、修为、魂压与魂性现身世间。",
             {"location_id": parade.get("location_id"), "soul_count": len(parade["souls"])},
             ["system", "ghost", "parade", "world_event"],
         ))

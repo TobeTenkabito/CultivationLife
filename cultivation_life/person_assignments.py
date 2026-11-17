@@ -86,6 +86,10 @@ def in_transit(game, identity):
 
 
 def require_unassigned(game, identity):
+    active = game.dungeon_state.get('active')
+    site = game.dungeon_state.get('instances', {}).get(active, {})
+    if any(r['npc_id'] == identity and r['state'] in {'joined','hostile'} for r in site.get('roles', {}).values()):
+        raise ValueError('此人正在副本内同行或交战，不能同时安排其他职责')
     if deployment_assignment(game, identity):
         raise ValueError('此人已有先遣部署，结束前不能另行安排关系或同行职责')
     if research_assignment(game, identity):

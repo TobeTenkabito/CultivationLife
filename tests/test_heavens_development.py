@@ -124,6 +124,24 @@ def test_real_market_procurement_stale_quote_and_no_duplicate_goods(branch):
     open_branch(branch)
     game, row = local(branch)
     ensure_regional_market(game, branch[0].maps, 'demon', 'red_marrow_city')
+    # The preceding journey runs the real economy: opening stock can already
+    # be consumed by local production. Arrange explicit short/full baskets so
+    # this command test does not depend on incidental remaining market stock.
+    market=game.economy_v2['markets']['demon:red_marrow_city']
+    required=base.materials(row['destination'])
+    for key,quantity in required.items():
+        market['commodities'][key.removeprefix('item:')]['stock']=quantity
+    missing=next(iter(required))
+    market['commodities'][missing.removeprefix('item:')]['stock']=0
+    branch[0].store.save(game)
+    short_quote=development.local_quote(branch[2],game,row)[4]
+    path=branch[0].store._path(game.id);before=path.read_bytes()
+    with pytest.raises(ValueError,match='资材不足'):
+        act(branch,'outpost_buy_materials',{'quote_id':short_quote})
+    assert path.read_bytes()==before
+    game,row=local(branch)
+    market=game.economy_v2['markets']['demon:red_marrow_city']
+    market['commodities'][missing.removeprefix('item:')]['stock']=required[missing]
     branch[0].store.save(game)
     game, row = local(branch)
     market, needed, bills, total, fingerprint = development.local_quote(branch[2], game, row)

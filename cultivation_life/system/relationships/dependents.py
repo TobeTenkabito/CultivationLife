@@ -288,7 +288,7 @@ def manage_concubine_status(deps: DependentLifecycleDependencies, game_id: str, 
     if not player.alive or game.pending_event or player.imprisonment:
         raise ValueError("当前状态无法处理侍妾处境")
     if not status:
-        raise ValueError("你当前并非他人的侍妾")
+        raise ValueError("请在侍妾身份下进行此项互动")
     owner = deps._find_npc(game, str(status.get("owner_id", "")))
     if not owner or not owner.alive or owner.world != player.world:
         player.concubine_status = None

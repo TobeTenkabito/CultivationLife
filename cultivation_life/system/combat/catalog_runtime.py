@@ -61,9 +61,9 @@ class CatalogRuntime(CatalogPayloads):
     def note(self, owner, book, event, **data):
         self.events.append(dict(round=self.round,owner=owner,technique=book['id'],event=event,**data))
         self.events=self.events[-256:]
-        labels={'paid':'运转付费','strike':'剑势追加','breach':'寻隙破法','absorbed':'护持承伤','guard':'守御减损',
-                'restored':'回转态势','refunded':'返还实付法力','cleanse':'净除短效减益','mobility':'步势变换',
-                'expired':'待用效果消散','interrupted':'运转被打断','prepared':'登记运转机会'}
+        labels={'paid':'运功消耗','strike':'剑势追加','breach':'寻隙破法','absorbed':'护持承伤','guard':'守御减损',
+                'restored':'回转态势','refunded':'收回灵力','cleanse':'净除短效减益','mobility':'步势变换',
+                'expired':'招势消散','interrupted':'运功被打断','prepared':'凝神蓄势'}
         if event in labels:
             amount=data.get('amount')
             detail=f' {amount:.4g}' if amount is not None else ''

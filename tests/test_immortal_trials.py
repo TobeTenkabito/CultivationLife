@@ -211,13 +211,14 @@ def test_suppressed_zero_vitality_corpse_requires_an_actual_finishing_attack():
     assert result=='victory' and battle.enemy_killed()
 
 
-def test_dao_ancestor_requires_all_three_facts():
+def test_dao_ancestor_requires_late_daluo_and_perfected_domain():
     game=fixture('three_corpses',field_rank=13,doctrine_level=8)
     record=game.doctrine_state['player']; key=record['active']
     assert not dao_ancestor(game)
     game.player.realm_index=12
+    game.player.layer=1
     assert not dao_ancestor(game)
-    record['progress'][key]['level']=9
+    game.player.layer=7
     assert dao_ancestor(game)
     record['voisinage_training'][key]['rank']=12
     assert not dao_ancestor(game)
@@ -228,6 +229,7 @@ def test_dao_ancestor_is_a_persisted_base_achievement(prepared):
     profile = fixture('three_corpses', field_rank=13, doctrine_level=8)
     game.player, game.doctrine_state = profile.player, profile.doctrine_state
     game.player.realm_index = 12
+    game.player.layer = 7
     game.player.location_id = engine.maps.default_location('celestial')
     record = game.doctrine_state['player']
     record['progress'][record['active']]['level'] = 9

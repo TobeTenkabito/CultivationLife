@@ -59,7 +59,7 @@ def test_decline_never_grants_or_reoffers_master(lesson):
     e.tutorial_action(g.id,'offer_mentor');before=e.store.load(g.id)
     e.tutorial_action(g.id,'decline_mentor');e.tutorial_action(g.id,'accept_mentor')
     after=e.store.load(g.id)
-    assert not after.player.master and after.player.fame==before.player.fame
+    assert not after.player.master and after.player.infamy==before.player.infamy
     assert after.player.tutorial_state['mentor_result']=='declined'
 
 @pytest.mark.parametrize('condition',['master','high_realm','sealed','upper_world','pending','trial','dead','prison'])

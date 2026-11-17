@@ -197,7 +197,8 @@ def test_original_technique_card_and_catalog_text_show_frozen_mechanics():
     once = public_catalog_entry(listing)
     assert t.description in once['description'] and once['price'] == 500
     assert public_catalog_entry(once) == once and listing['description'] == '原货单'
-    assert technique_special_effect(Technique()) == ''
+    default_description=technique_special_effect(Technique())
+    assert '引气诀' in default_description and '周天' in default_description
     assert technique_special_effect(Technique(ignore_possession_limit=True)).startswith('习得后不受成功夺舍次数上限限制')
 
 

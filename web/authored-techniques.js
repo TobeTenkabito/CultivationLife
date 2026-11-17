@@ -40,7 +40,9 @@ window.AuthoredTechniques = (() => {
       if(b.condition!=='always')grid.append(label('指定轮次',number(b.round,1,8,v=>b.round=v)));
       row.append(grid);holder.append(row);
     });
-    document.querySelector('[data-author-add-buff]').disabled=draft.buffs.length>=4;
+    const add=document.querySelector('[data-author-add-buff]');
+    add.disabled=draft.buffs.length>=4||!['main','support','combat'].includes(draft.category);
+    add.title='修仙类功法可编撰斗法招式';
   }
   async function command(payload){if(pending)return;pending=true;draw();try{await send(payload);}finally{pending=false;draw();schedule();}}
   function draw(){
@@ -51,7 +53,7 @@ window.AuthoredTechniques = (() => {
     const tabs=el('div',undefined,'at-section-title');tabs.append(el('span','01'),el('h3','编撰新卷'));host.append(tabs);
     const desk=el('div',undefined,'at-desk'),form=el('div',undefined,'at-form'),fields=el('div',undefined,'at-fields');
     const name=el('input');name.value=draft.name;name.maxLength=24;name.placeholder='为功法题名';name.dataset.authoredInput='name';name.oninput=()=>{draft.name=name.value;schedule();};
-    fields.append(label('功法名称',name),label('功法类型',select(categories,draft.category,v=>{draft.category=v;const slot={body:'body',divine_sense:'sense',transformation:'transformation'}[v]||v;draft.buffs.forEach(b=>b.slot=slot);drawBuffs();},'category')),
+    fields.append(label('功法名称',name),label('功法类型',select(categories,draft.category,v=>{draft.category=v;if(!['main','support','combat'].includes(v))draft.buffs=[];const slot={body:'body',divine_sense:'sense',transformation:'transformation'}[v]||v;draft.buffs.forEach(b=>b.slot=slot);drawBuffs();},'category')),
       label('功法境界',select(Object.fromEntries(Array.from({length:Math.max(1,state.max_grade)},(_,i)=>[i+1,configData.combat_benchmarks[i]?.name||`${i+1}阶`])),String(draft.grade),v=>draft.grade=Number(v),'grade')),
       label('灵根属性',select({neutral:'无属性',metal:'金',wood:'木',water:'水',fire:'火',earth:'土',wind:'风',thunder:'雷',yin:'阴',yang:'阳'},draft.element,v=>draft.element=v,'element')));
     form.append(fields,el('h4','属性投入'));

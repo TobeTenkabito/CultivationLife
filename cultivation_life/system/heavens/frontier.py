@@ -149,7 +149,7 @@ def complete(deps, game, task):
     elif action == 'frontier_parley':
         row['withdrawal'] = True
         phase(row, 'returning', ROUTE.crossing_years)
-        report(game, 'agreement', '先遣验明阵眼恢复，接受结束本次勘察；本人仍须经原路实际返乡，不代表双方宗门签订停战。', now)
+        report(game, 'agreement', '先遣验明阵眼恢复，接受结束本次勘察；本人仍须经原路返乡；宗门停战另依议约办理。', now)
 
 
 def year_step(deps, game):

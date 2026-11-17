@@ -9,7 +9,7 @@ from ..system.mentorship_advanced import public as public_inheritance
 from ..system.economy.enterprise_view import public_estates
 
 from ..system.path_modifiers import modifier, pursuit_immunity, projected_resource
-from ..rules import effective_fame, effective_sha_qi, effective_karma
+from ..rules import effective_infamy, effective_sha_qi, effective_karma
 from ..system.instant_actions import public as instant_actions
 
 from ..snapshot_copy import copy_plain_data
@@ -77,8 +77,8 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
     player_data['duel_techniques']['can_configure'] = bool(game.player.alive and not game.player.imprisonment
                                                          and not game.pending_event and not game.active_trial)
     player_data.update(identity(game.player))
-    player_data.update(raw_fame=game.player.fame, raw_karma=game.player.karma, raw_sha_qi=game.player.sha_qi,
-                       fame=effective_fame(game.player), karma=projected_resource(game.player, "karma"), sha_qi=effective_sha_qi(game.player), effective_karma=effective_karma(game.player))
+    player_data.update(raw_infamy=game.player.infamy, raw_karma=game.player.karma, raw_sha_qi=game.player.sha_qi,
+                       infamy=effective_infamy(game.player), karma=projected_resource(game.player, "karma"), sha_qi=effective_sha_qi(game.player), effective_karma=effective_karma(game.player))
     natal_inventory_item = deps._natal_artifact_inventory_item(game)
     if natal_inventory_item:
         player_data["inventory"].insert(0, natal_inventory_item)
@@ -183,22 +183,22 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
         secret_arts["concealment"]["realm_name"]
         if secret_arts["concealment"]["active"] else secret_arts["current_realm_name"]
     )
-    fame_config = WORLD_SYSTEMS["fame"]
+    infamy_config = WORLD_SYSTEMS["infamy"]
     coalition_threshold = float(
-        WORLD_SYSTEMS["faction_conflict"]["demonic_coalition_fame_threshold"]
+        WORLD_SYSTEMS["faction_conflict"]["demonic_coalition_infamy_threshold"]
         if game.player.path == "demonic"
-        else WORLD_SYSTEMS["faction_conflict"]["coalition_fame_threshold"]
+        else WORLD_SYSTEMS["faction_conflict"]["coalition_infamy_threshold"]
     )
-    player_data["fame_assessment"] = (
+    player_data["infamy_assessment"] = (
         "威压全界，本界围杀势力已经低头"
         if f"world_coalition_subdued:{game.player.world}" in game.player.story_flags else
         "凶名震世，各方势力正在酝酿包围网"
-        if effective_fame(game.player) > coalition_threshold and not pursuit_immunity(game, "fame") else
-        "威名过盛，修仙界已经明显警觉"
-        if effective_fame(game.player) >= float(fame_config["alarmed_threshold"]) else
-        "声名足以使同道敬重"
-        if effective_fame(game.player) >= float(fame_config["respected_threshold"]) else
-        "尚未在修仙界留下显赫名声"
+        if effective_infamy(game.player) > coalition_threshold and not pursuit_immunity(game, "infamy") else
+        "凶名已使修仙界明显警觉"
+        if effective_infamy(game.player) >= float(infamy_config["alarmed_threshold"]) else
+        "杀名渐传，同道开始戒备"
+        if effective_infamy(game.player) >= float(infamy_config["respected_threshold"]) else
+        "尚无显著凶名"
     )
     party = deps._public_party(game)
     player_data["combat_power"] = deps._player_intrinsic_combat_power(game.player)
@@ -254,6 +254,7 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
                               f"修为将受当地法则压制至{deps._npc_realm_name(target_shell)}；可循原路返界"})
     eligible = {row["destination"] for row in travel_routes}
     from ..system.trial_sites import public as public_trial_sites
+    from ..system.dungeons.presentation import public as public_dungeons
     result = {
         "id": game.id,
         "seed": game.seed,
@@ -264,6 +265,7 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
         "generated_event": {"pending": bool(game.generated_event_state.get("active")),
                             "last_result": copy_plain_data(game.generated_event_state.get("last_result"))},
         "trial_site": public_trial_sites(game, deps.maps),
+        "dungeons": public_dungeons(game, deps.maps),
         "last_combat_report": copy_plain_data(game.last_combat_report),
         "settings": {**game.settings, 'manual_combat_plan': bool(game.player.combat_plan.get('manual')),
                      'puppet_supply':game.player.combat_plan.get('puppet_supply',True)},

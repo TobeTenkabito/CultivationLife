@@ -5,7 +5,7 @@ import hashlib
 import math
 from ..content_registry import WORLD_SYSTEMS
 from ..models import HistoryRecord
-from ..rules import remove_item, effective_fame
+from ..rules import remove_item, effective_infamy
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..time_dependencies import TeleportDependencies
 from .heavens.local_control import arrival_notice
@@ -34,8 +34,8 @@ def public_teleport(game, maps):
     return dict(arrays=list(rows.values()), origin=here, construction=construction, bribe=1000 * tier ** 2,
         temporary=permit, temporary_fee=500 * tier ** 2, wait_years=unit,
         forge_fee=300 * tier ** 2, forge_chance=min(.95, max(.05, .12 + .035 * talisman_level - .03 * (tier - 1))), talisman_level=talisman_level,
-        exposure={'bribe': .12, 'assassinate': .40}, fame_penalty=500 * tier ** 2,
-        required_fame=200 * tier, can_request=bool(here and (effective_fame(p) >= 200 * tier or p.faction_id == here['owner_id'])),
+        exposure={'bribe': .12, 'assassinate': .40}, infamy_penalty=500 * tier ** 2,
+        required_renown=200 * tier, can_request=bool(here and (p.renown >= 200 * tier or p.faction_id == here['owner_id'])),
         destinations=[row for key, row in rows.items() if here and separated(maps, p.world, p.location_id, key)
                       and maps.travel_plan(p.world, p.location_id, key, p.realm_index).status == 'ok'])
 
@@ -77,7 +77,7 @@ def teleport_action(deps: TeleportDependencies, game_id, action, destination=Non
         if here['licensed']:
             raise ValueError('已取得此势力的许可')
         if not info['can_request']:
-            raise ValueError(f"须属{here['owner_name']}或声望达到 {info['required_fame']} 方可申请许可")
+            raise ValueError(f"须属{here['owner_name']}或声望达到 {info['required_renown']} 方可申请许可")
         p.teleport_permissions.append(permission)
         summary = f"{here['owner_name']}授予传送阵通行许可。"
     elif action == 'request_temporary':
@@ -107,12 +107,12 @@ def teleport_action(deps: TeleportDependencies, game_id, action, destination=Non
         if action in {'bribe','assassinate'} or (action == 'forge' and not forged):
             rng = decode_rng(game.seed, game.rng_state)
             if action == 'forge' or rng.random() < info['exposure'][action]:
-                p.fame += info['fame_penalty']
+                p.infamy += info['infamy_penalty']
                 key = ('sect:' + here['owner_id']) if here['owner_id'] in game.sects else ('world:' + p.world)
                 threshold = float(WORLD_SYSTEMS['faction_conflict']['wanted_threshold'])
                 p.hostility[key] = max(p.hostility.get(key, 0), threshold + 100)
                 p.milestones['became_wanted_target'] = 1
-                exposure = f"行迹暴露！威名 +{info['fame_penalty']}，{here['owner_name']}发出通缉。"
+                exposure = f"行迹暴露！凶名 +{info['infamy_penalty']}，{here['owner_name']}发出通缉。"
             game.rng_state = encode_rng(rng)
         if forged:
             deps._instant_arrival(game, destination)

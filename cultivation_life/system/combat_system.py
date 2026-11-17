@@ -828,7 +828,7 @@ class PlayerCombatSystem:
                 events.append(f"{pressure_name}镇住敌方气机，本轮由你方强制取得先手。")
             usable_combat_techniques = [
                 art for art in player.combat_techniques
-                if art.active_in(player.world)
+                if art.category == 'spiritual' and art.active_in(player.world)
                 and can_player_practice_technique(player, art)
                 and (not art.requires_immortal_power or player.immortal_power_converted)
             ]
@@ -1679,8 +1679,7 @@ class PlayerCombatSystem:
 
         if player:
             techniques = [
-                player.technique, player.support_technique, player.body_technique,
-                player.divine_sense_technique, player.transformation_technique,
+                player.technique, player.support_technique,
                 *player.combat_techniques,
             ]
             total_power = max(1.0, sum(unit.power for unit in units))
@@ -1699,20 +1698,12 @@ class PlayerCombatSystem:
 
     @classmethod
     def _apply_technique(cls, stats: dict[str, float], technique: Technique, total_power: float) -> None:
+        if technique.category != 'spiritual':
+            return
         weight = min(0.18, (0.010 + technique.grade * 0.006) * technique.stat_multiplier("combat_bonus"))
         factors = cls.ELEMENT_FACTORS.get(technique.element, {})
         for key, factor in factors.items():
             stats[key] += total_power * weight * max(0.0, factor - 1.0)
-        if technique.category == "body":
-            stats["guard"] += total_power * weight
-            stats["sustain"] += total_power * weight * 0.75
-        elif technique.category == "divine_sense":
-            stats["sense"] += total_power * weight * (
-                1.0 + max(0.0, technique.divine_sense_bonus) * technique.stat_multiplier("divine_sense_bonus")
-            )
-        elif technique.category == "transformation":
-            stats["might"] += total_power * weight * 0.65
-            stats["sustain"] += total_power * weight * 0.65
 
     @staticmethod
     def _apply_objective(stats: dict[str, float], objective: str) -> None:

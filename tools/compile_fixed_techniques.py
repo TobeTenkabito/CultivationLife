@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from cultivation_life.catalog_effect_schema import validate_catalog
 from cultivation_life.combat_costs import mana_reference
+from tools.technique_copy import description as rewrite_description
 
 # Reviewed clause order in the frozen 2026-11-12 design. Unlisted named clauses
 # express the shared receipt/ownership/finite-budget invariants, not a new power.
@@ -86,25 +87,15 @@ def compile_all(design):
             ward_bp=round(max(caps['recovery_fraction_of_initial_max_state'],caps['prevention_fraction_of_initial_max_state'])*10000),
             cooldown=limits['cooldown_full_rounds'], uses=limits['casts_per_battle'], duration=2,
             resource='energy' if row['grade']>=9 or row['original_definition'].get('requires_immortal_power') else 'mana')
-        description = row['description'] + '\n' + row['battle_description']
         if effect['prestige']:
             effect.update(payload='taiyuan_sword',cost_bp=400,cooldown=1)
-            description = ('归墟剑意随修士自身普通交锋成长：首次真实伤及敌人后留隙印，下一次对同一目标的合法攻击消耗。'
-                'Lv.1—9的剑意加成由8%逐级提升至16%；若期间真实耗尽该敌人的临时护持，则改为12%—24%，两档不叠加。'
-                '护持自然过期不算破持，换敌或两轮未用即失效。每战至多3次，冷却1个完整轮；'
-                '每次支付开战法力容量4%，升级最多减费16%。元婴至大乘均按本人原始交锋计算，'
-                '不乘旧等级倍率、不增加攻击次数、不越过仙凡资格；先登记剑意、下一合法窗口付费兑现。')
         if effect['resource']=='mana':
             effect['mana_cost']=round(mana_reference(realms[row['grade']]['base_power'])*effect['cost_bp']/10000,4)
             fee=f"{effect['mana_cost']:g}点法力"
-            pricing=f'Lv.1费用：品阶低于自身境界时为{fee}，同阶为开战法力容量的{effect["cost_bp"]/100:g}%，越阶为两者之和'
-            description=re.sub(r'Lv\.1费用为初始法力容量的[\d.]+%', pricing, description)
-            description=description.replace('每次支付开战法力容量4%', pricing)
-            description+=' Lv.1—9对本次总费用最多减费16%；费用规则不放宽装备与修炼资格。'
+            pricing=f'Lv.1运功消耗：品阶低于自身境界时为{fee}，同阶为开战法力容量的{effect["cost_bp"]/100:g}%，越阶为两者之和'
         else:
-            description=re.sub(r'Lv\.1费用为初始法力容量的[\d.]+%',
-                f'Lv.1同阶费用为开战可用元力容量的{effect["cost_bp"]/100:g}%',description)
-            description+=' 费用按品阶与本人实际境界比较：低阶用对应品阶初层元力标准的固定费用，同阶用开战可用容量比例，越阶为两者之和；下界仿仙灵力使用原60点单位，Lv.1—9对总费用最多减费16%。'
+            pricing = f'运功消耗：低阶按品阶初层的标准消耗固定元力，同阶消耗开战可用元力容量的{effect["cost_bp"]/100:g}%，越阶合计两项消耗；下界仿仙灵力以60点为单位'
+        description = rewrite_description(row, effect, pricing)
         result[row['id']] = dict(combat_effect=validate_catalog(effect), description=description)
     return result, [{**value, 'operations':flags[name] or ['shared_invariants']} for name,value in clauses.items()]
 

@@ -5,7 +5,7 @@
       "id":"EVT_MASTER_TEACHING_001","version":1,"title":"师门夜课","body":"师父忽然传讯，要你在月落前将近年的修行疑难尽数说出。洞府里没有旁人，这次指点会朝哪个方向展开，由你自己选择。","tags":["relationship","master","interaction"],"weight":3,"conditions":{"path":"player.master_available","op":"eq","value":true},
       "choices":[
         {"id":"foundation","text":"请教修行根基","effects":[{"type":"add_opportunity","value":10},{"type":"relationship_affinity","role":"master","value":2}]},
-        {"id":"combat","text":"请师父拆解近期斗法失误","effects":[{"type":"add_fame","value":2},{"type":"relationship_affinity","role":"master","value":1}]},
+        {"id":"combat","text":"请师父拆解近期斗法失误","effects":[{"type":"add_infamy","value":2},{"type":"relationship_affinity","role":"master","value":1}]},
         {"id":"heart","text":"坦言自身心魔与畏惧","effects":[{"type":"add_heart_demon","value":-4},{"type":"relationship_affinity","role":"master","value":3}]},
         {"id":"avoid","text":"称正在闭关，婉拒夜课","effects":[{"type":"relationship_affinity","role":"master","value":-2}]}
       ]
@@ -15,7 +15,7 @@
       "choices":[
         {"id":"guard","text":"守在洞府外替师父护法","effects":[{"type":"restore_mp","value":-0.08},{"type":"relationship_affinity","role":"master","value":4},{"type":"add_karma","value":-2}]},
         {"id":"medicine","text":"送上一枚回春丹","conditions":{"has_item":"healing_pill"},"disabled_reason":"你没有回春丹","effects":[{"type":"remove_item","item_id":"healing_pill"},{"type":"relationship_affinity","role":"master","value":6}]},
-        {"id":"seek_help","text":"请同门长老共同会诊","effects":[{"type":"add_fame","value":2},{"type":"relationship_affinity","role":"master","value":2}]},
+        {"id":"seek_help","text":"请同门长老共同会诊","effects":[{"type":"add_infamy","value":2},{"type":"relationship_affinity","role":"master","value":2}]},
         {"id":"ignore","text":"修行生死自负，不加过问","effects":[{"type":"relationship_affinity","role":"master","value":-6},{"type":"add_heart_demon","value":2}]}
       ]
     },
@@ -23,7 +23,7 @@
       "id":"EVT_DISCIPLE_TRIAL_001","version":1,"title":"弟子历练归来","body":"一名弟子带伤返回，把一只封好的储物袋放在你面前。他在历练中夺得机缘，也因一次错误判断连累了同行者。","tags":["relationship","disciple","interaction"],"weight":3,"conditions":{"path":"player.living_disciple_count","op":"gt","value":0},
       "choices":[
         {"id":"teach","text":"先疗伤，再复盘得失","effects":[{"type":"relationship_affinity","role":"disciple","value":4},{"type":"add_karma","value":-2}]},
-        {"id":"punish","text":"罚其闭门反省，重立门规","effects":[{"type":"relationship_affinity","role":"disciple","value":-2},{"type":"add_fame","value":3}]},
+        {"id":"punish","text":"罚其闭门反省，重立门规","effects":[{"type":"relationship_affinity","role":"disciple","value":-2},{"type":"add_infamy","value":3}]},
         {"id":"take","text":"没收全部战利品","effects":[{"type":"add_item","item_id":"spirit_stone","quantity":60},{"type":"relationship_affinity","role":"disciple","value":-6},{"type":"add_karma","value":4}]},
         {"id":"praise","text":"只论胜败，当众嘉奖","effects":[{"type":"relationship_affinity","role":"disciple","value":2},{"type":"add_sha_qi","value":2}]}
       ]
@@ -32,7 +32,7 @@
       "id":"EVT_DISCIPLE_DOUBT_001","version":1,"title":"门下问心","body":"弟子问你：长生路上若必须在宗门大义与至亲性命之间选择，究竟应当舍去哪一边？周围弟子都停下了修炼。","tags":["relationship","disciple","interaction"],"weight":2,"conditions":{"path":"player.living_disciple_count","op":"gt","value":0},
       "choices":[
         {"id":"people","text":"先救眼前之人，再担天下因果","effects":[{"type":"relationship_affinity","role":"disciple","value":3},{"type":"add_karma","value":-3}]},
-        {"id":"sect","text":"宗门传承高于一人得失","effects":[{"type":"relationship_affinity","role":"disciple","value":1},{"type":"add_fame","value":3}]},
+        {"id":"sect","text":"宗门传承高于一人得失","effects":[{"type":"relationship_affinity","role":"disciple","value":1},{"type":"add_infamy","value":3}]},
         {"id":"power","text":"实力足够，便不必接受这种选择","effects":[{"type":"add_opportunity","value":8},{"type":"add_heart_demon","value":1}]},
         {"id":"silence","text":"不替弟子回答，让其自行悟道","effects":[{"type":"relationship_affinity","role":"disciple","value":-1},{"type":"add_opportunity","value":4}]}
       ]
@@ -68,7 +68,7 @@
       "id":"EVT_MASTER_DISCIPLE_FEAST_001","version":1,"title":"一脉小宴","body":"师门难得无人闭关。师父与门下围坐一席，谈起这些年谁进境最快、谁惹出的麻烦最多。你需要决定这场小宴留下怎样的规矩。","tags":["relationship","master","disciple","interaction"],"weight":2,"conditions":{"all":[{"path":"player.master_available","op":"eq","value":true},{"path":"player.living_disciple_count","op":"gt","value":0}]},
       "choices":[
         {"id":"share","text":"拿出修炼心得供一脉共参","effects":[{"type":"add_opportunity","value":10},{"type":"relationship_affinity","role":"master","value":2},{"type":"relationship_affinity","role":"disciple","value":3}]},
-        {"id":"rules","text":"借宴席重新申明师门戒律","effects":[{"type":"add_fame","value":3},{"type":"relationship_affinity","role":"disciple","value":1}]},
+        {"id":"rules","text":"借宴席重新申明师门戒律","effects":[{"type":"add_infamy","value":3},{"type":"relationship_affinity","role":"disciple","value":1}]},
         {"id":"stories","text":"只谈旧事，不谈修行高下","effects":[{"type":"add_heart_demon","value":-4},{"type":"relationship_affinity","role":"master","value":3},{"type":"relationship_affinity","role":"disciple","value":3}]},
         {"id":"skip","text":"闭关为重，不参加小宴","effects":[{"type":"relationship_affinity","role":"master","value":-1},{"type":"relationship_affinity","role":"disciple","value":-2}]}
       ]

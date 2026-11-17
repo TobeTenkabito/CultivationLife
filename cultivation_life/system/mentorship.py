@@ -358,7 +358,7 @@ def peer_reason(game, identity, action):
     if not own or not active(game, teacher, 'player', own) or identity == 'player' or not peer:
         return '此人不是同一师门的在籍同门'
     if own['rank'] == 'registered' or peer['rank'] == 'registered': return '记名弟子无师门福利或交流权利'
-    if peer['joined'] > own['joined']: return '此人入门晚于你，并非师兄师姐'
+    if peer['joined'] > own['joined']: return '此人入门晚于你，属师弟师妹'
     reason = contact_reason(game, identity)
     if reason: return reason
     if own.get('peer_requests', {}).get(identity, {}).get(action) == own['cycle']:
@@ -430,7 +430,7 @@ def public(game):
         npc = person(game, identity)
         saved = record(game, teacher, identity)
         row = deepcopy(saved) if saved else _entry(game, rank_of(game, teacher, identity) or 'registered')
-        row.update(id=identity, name=getattr(npc, 'name', '无法确认的人物'),
+        row.update(id=identity, name=getattr(npc, 'name', '待寻访的人物'),
                    rank_name=LABELS[row['rank']], reason=contact_reason(game, teacher if identity == 'player' else identity))
         if npc and identity != 'player':
             from .npc_development.portraits import FIELDS

@@ -80,7 +80,7 @@ def main():
             game.player.immortal_power_converted = True
             game.player.hp, game.player.mp = max_hp(game.player), max_mp(game.player)
             game.player.next_tribulation_age = None
-            game.player.fame, game.player.karma, game.player.sha_qi = 0, 0, 0
+            game.player.infamy, game.player.karma, game.player.sha_qi = 0, 0, 0
             game.pending_event = None
             game.heavenly_court = {}
             engine._ensure_heavenly_court(game, random.Random(7190))

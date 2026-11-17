@@ -32,7 +32,7 @@
     const labels={stationed:'驻守',outbound:'行军',returning:'归返',issued:'待受令',delayed:'有据缓调',refused:'具名抗命',accepted:'执行中',fulfilled:'已抵达',cancelled:'已撤令',enforced:'撤任追责',obsolete:'原令失效',raised:'举兵集结',marching:'向目标推进',contested:'争夺据点',capital:'已破王庭守备',won:'王权已交接',defeated:'举兵失败',withdrawn:'撤军收束',ended:'原案结束'};
     panel.append(el('p',`实际部众 ${m.units.length} 人 · 营务余款 ${fmt(m.balance)} 灵石 · 已耗 ${fmt(m.spent)} 灵石`,'governor-case-amount'));
     if(m.shortfall)panel.append(el('p',`营务欠付 ${m.shortfall} 年；连续三年不足将循原路撤军。`,'court-note'));
-    for(const u of m.units){const line=el('p',null,'governor-unit');line.append(el('strong',u.name),el('span',`${labels[u.phase]} · ${u.destination_name}${u.remaining?' · 余 '+u.remaining+' 年':''} · 年费 ${fmt(u.rate)}`),el('small',u.supporting?'已明确支持指挥人':'公职服役，不等于私人效忠','court-description'));panel.append(line);}
+    for(const u of m.units){const line=el('p',null,'governor-unit');line.append(el('strong',u.name),el('span',`${labels[u.phase]} · ${u.destination_name}${u.remaining?' · 余 '+u.remaining+' 年':''} · 年费 ${fmt(u.rate)}`),el('small',u.supporting?'已明确支持指挥人':'部属依据公职任命服役','court-description'));panel.append(line);}
     if(m.order)panel.append(el('p',`中央军令 · ${labels[m.order.status]} · ${m.order.deadline}年前回应。${m.order.reason||'请在原府核验守备、道路与军费。'}`,'court-note'));
     const open=m.conflict&&['raised','marching','contested','capital'].includes(m.conflict.status);
     if(m.conflict)panel.append(el('p',`举兵争位 · ${labels[m.conflict.status]}。${m.conflict.result||'须实际抵达、突破守备并解决旧王抵抗；占城不自动登位。'}`,'court-note'));

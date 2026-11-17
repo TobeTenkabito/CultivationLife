@@ -34,7 +34,7 @@ class Incident:
 INCIDENTS = (
     Incident('human_beacon', 'human', '人界', '断烽归路', 'wudi_plain', '无棣原', 'lanjiang_steppe', '岚疆草原', 2, 2,
         '边道的旧烽标接连熄灭，沿途留下了相互矛盾的路引。先核对原上的旧驿簿，再亲赴草原处理。',
-        '两批路引来自不同年代。旧界门的回声扰动了烽标，不能据此认定眼前已有入侵军。',
+        '两批路引来自不同年代。旧界门的回声扰动了烽标，前哨正沿界门查探。',
         (Response('重校烽标', 4, 400, .03, 'practice', 12, '在草原重校了烽标。回到原上复核后，可借辨向所得辅助十二年的当地修行。'),
          Response('封存误导路引', 2, 80, 0, 'rest', 8, '误导路引封存，留下安全辨认法。复核后可在原上调息八年，逐年恢复额外气血。'))),
     Incident('spirit_thunder', 'spirit', '灵界', '雷汛借道', 'tianyuan_realm', '垂虹境', 'thunder_continent', '霆潮陆', 6, 4,

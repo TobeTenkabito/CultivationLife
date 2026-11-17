@@ -5,6 +5,7 @@ import uuid
 
 from .. import content_registry as registry
 from ..authored_technique_schema import PREFIX, SLOTS, STATS, EFFECTS, integer, validate_buffs, buff_text, validate_library
+from ..technique_description import generated as technique_description
 from ..models import Technique
 from ..rules import acquire_technique, add_technique_copy, technique_manual_item_id, can_player_practice_technique
 
@@ -64,6 +65,8 @@ def quote(player, payload):
     for value in allocations.values():
         integer(value, 1, 1000000, '属性点数')
     buffs = copy.deepcopy(validate_buffs(payload.get('buffs', [])))
+    if category in {'body','divine_sense','transformation'} and buffs:
+        raise ValueError('炼体、神识和变身功法用于专属修持，请以修仙类功法编写斗法招式')
     allowed = {'main', 'support', 'combat'} if category in {'main', 'support', 'combat'} else {{'body':'body','divine_sense':'sense','transformation':'transformation'}[category]}
     if any(b['slot'] not in allowed for b in buffs):
         raise ValueError('效果栏目必须与该类型功法的可装备栏目一致')
@@ -169,7 +172,7 @@ def market_offers(game, prefix):
     for key,row in local_books(game).items():
         t=row['technique']; grade=t['grade']
         result.append(dict(id=prefix+key, kind='authored_technique', content_id=key, name=t['name'],
-            description='前世传承 · '+ ' '.join(buff_text(b) for b in t['authored_buffs']), tier=grade,
+            description='前世传承 · '+technique_description(t), tier=grade,
             tier_name=registry.REALMS[grade].name, price=max(100, round(100*10**((grade-1)*.8)*(1+row['cost']/(100*grade**2)))),
             sold=False,bargained=False))
     return result
@@ -179,6 +182,8 @@ def public(game):
     facts=insight_projection(game.player)
     known={t.id:t.level for t in game.player.known_techniques}
     can_operate=bool(game.player.alive and not (game.pending_event or game.active_trial or game.player.imprisonment or game.player.ghost_captor))
+    from .. import universal_manuals
+    universal_ready = {b.id for b in game.player.known_techniques if universal_manuals.supported(b) and universal_manuals.count(game.player,b)>=universal_manuals.cost(b)}
     manuals={i.id:i.quantity for i in game.player.inventory if i.technique_id}
     return dict(available=enabled(), can_operate=can_operate, revision=game.authored_techniques.get('revision',0),
         points={k:v for k,v in facts.items() if k!='claimed'}, source_name=game.authored_techniques.get('source_name'),
@@ -187,8 +192,8 @@ def public(game):
         books=[dict(id=k,name=r['technique']['name'],grade=r['technique']['grade'],author=r.get('author',''),
                     own=k in definitions(game,'own'),level=known.get(k,0),cost=r['cost'],
                     manual_cost=manual_price(r,min(8,known.get(k,1) or 1)),
-                    can_upgrade=can_operate and 0<known.get(k,0)<9 and manuals.get(technique_manual_item_id(k,known.get(k,1) or 1),0)>0,
-                    buffs=[buff_text(b) for b in r['technique']['authored_buffs']]) for k,r in definitions(game).items()])
+                    can_upgrade=can_operate and 0<known.get(k,0)<9 and (manuals.get(technique_manual_item_id(k,known.get(k,1) or 1),0)>0 or k in universal_ready),
+                    buffs=[buff_text(b) for b in r['technique']['authored_buffs']] if r['technique'].get('category','spiritual')=='spiritual' else []) for k,r in definitions(game).items()])
 
 
 def combat_rules(game, owner, *, player=False):
@@ -204,7 +209,7 @@ def combat_rules(game, owner, *, player=False):
     rules=[]
     seen=set()
     for slot,t in slots:
-        if not t or not t.active_in(owner.world if not isinstance(owner,dict) else owner.get('world','')):
+        if not t or t.category != 'spiritual' or not t.active_in(owner.world if not isinstance(owner,dict) else owner.get('world','')):
             continue
         if player:
             from ..rules import combat_requirement_met, qi_levels

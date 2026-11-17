@@ -443,6 +443,45 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
         result.putString("techniques_scope","seven-book-native-input,real-paid-combat,mechanism-replay,secret-payment-replay,handbook,two-palettes,wind-frost-secrets,24-unit-clones");
     }
 
+    private void runDungeons(Bundle result) throws Exception {
+        String fixture=assetText("dungeon_release.py");
+        for(String palette:new String[]{"light","dark"}) {
+            String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'探境原生验收',spirit_root:'heavenly',path:'dao',seed:342,preset_id:'core'})}).then(g=>g.id)");
+            python(fixture+"\nfrom cultivation_life import server\nprepare_dungeon_player(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");
+            tapSelector("#theme-open");tapSelector("#theme-dialog [data-pixel-theme-choice="+palette+"]");async("GameThemes.saved");tapSelector("[data-close-dialog=theme-dialog]");
+            tapSelector("[data-action-tab=living]");tapSelector("[data-action=treasure]");
+            tapSelector("[data-dungeon-action=discover]");waitForJs("!busy&&game.dungeons.used===1","Native discovery persisted");
+            python(fixture+"\nfrom cultivation_life import server\nserver._dungeon_release_loot=prepare_dungeon_loot(server.ENGINE,"+JSONObject.quote(id)+")");
+            JSONObject loot=new JSONObject(com.chaquo.python.Python.getInstance().getModule("json").callAttr("dumps",com.chaquo.python.Python.getInstance().getModule("cultivation_life.server").get("_dungeon_release_loot")).toString());
+            async("loadGame("+JSONObject.quote(id)+")");tapSelector("[data-dungeon-action=enter]");waitForJs("!busy&&game.dungeons.active","Native dungeon entered");
+            check(Boolean.TRUE.equals(js("['ordinary','rare','epic','legendary'].includes(document.querySelector('#dungeon-card').dataset.quality)&&document.querySelector('#dungeon-card').scrollHeight<=document.querySelector('#dungeon-card').clientHeight+2")),"Native quality and workspace bounds");
+            for(int i=0;i<3;i++) {tapSelector("[data-choice=seize]");waitForJs("!busy","Native loot claim");}
+            python(fixture+"\nfrom cultivation_life import server\nprepare_dungeon_fight(server.ENGINE,"+JSONObject.quote(id)+")");
+            async("loadGame("+JSONObject.quote(id)+")");tapSelector("[data-choice=fight]");waitForJs("!busy&&!!game.last_combat_report","Native dungeon combat");
+            check(Boolean.TRUE.equals(js("(()=>{const n=document.querySelector('#battle-report-toggle'),r=n.getBoundingClientRect();return n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));})()")),"Battle is above the dungeon");
+            capture("dungeon-battle-"+palette+"-"+arguments.getString("orientation"));tapSelector("#battle-report-toggle");
+            tapSelector("[data-dungeon-action=exit]");waitForJs("!busy&&!game.dungeons.active&&game.dungeons.ready_in>0","Native exit and cooldown");
+            tapSelector("#dungeon-toggle");tapSelector("[data-panel-target=inventory]");
+            String[] items={loot.getString("pill"),"MANUAL_DUNGEON_"+loot.getString("book")};
+            for(int i=0;i<items.length;i++) {
+                String item=items[i],selector=".pixel-bag-detail .item[data-item-id='"+item+"']";
+                tapSelector("[data-pixel-item='"+item+"']");
+                check(Boolean.TRUE.equals(js("(()=>{const n=document.querySelector("+JSONObject.quote(selector)+");return n.getClientRects().length>0&&n.querySelector(':scope>span>small').innerText.length>10;})()")),"Loot description is visible");
+                capture("dungeon-loot-"+i+"-"+palette+"-"+arguments.getString("orientation"));
+                tapSelector(selector+(i==0?" .item-use":" .dungeon-manual-learn"));waitForJs("!busy","Native loot command");
+                python("from cultivation_life import server\np=server.ENGINE.store.load("+JSONObject.quote(id)+").player\nassert all(i.id!="+JSONObject.quote(item)+" for i in p.inventory)");
+                if(Boolean.TRUE.equals(js("(()=>{const n=document.querySelector('.pixel-item-sheet>header button');return !!n&&n.getClientRects().length>0;})()")))tapSelector(".pixel-item-sheet>header button");
+            }
+            python("from cultivation_life import server\np=server.ENGINE.store.load("+JSONObject.quote(id)+").player\nassert any(t.id=="+JSONObject.quote(loot.getString("book"))+" for t in p.known_techniques)");
+            for(String category:new String[]{"body","divine_sense","transformation"}) {
+                check(Boolean.TRUE.equals(async("fetch('/api/games/'+game.id+'/equip-technique',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({technique_id:game.player.known_techniques.find(t=>t.category==="+JSONObject.quote(category)+").id,slot:'combat'})}).then(r=>r.status===400)")),"Cultivation category rejected from combat: "+category);
+            }
+            tapSelector("#inventory-toggle");
+        }
+        result.putString("dungeons_scope","native-discovery-entry-three-claims-real-battle-overlay-exit-cooldown-inventory-descriptions-use-learn-specialty-categories-two-palettes");
+    }
+
     private void python(String code) {
         com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("exec",code,
             com.chaquo.python.Python.getInstance().getModule("builtins").callAttr("dict"));
@@ -1531,6 +1570,7 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
             if(phase.equals("techniques")) {
                 runTechniques(result);
+                runDungeons(result);
             } else if(phase.equals("asura-governance")) {
                 runAsuraGovernance(result);
             } else if(phase.equals("westward")) {

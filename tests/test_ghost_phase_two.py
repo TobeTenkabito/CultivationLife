@@ -198,7 +198,7 @@ class GhostPhaseTwoTests(unittest.TestCase):
         game.player.ghost_captor = {"id": "c", "name": "拘魂者", "combat_power": combat_power(game.player) * 2, "location_id": game.player.location_id}
         self.engine.store.save(game)
         with self.assertRaisesRegex(ValueError, "魂印受制"):
-            self.engine.advance(game.id, "treasure")
+            self.engine.advance(game.id, "travel")
         destination = next(row["id"] for row in self.engine.present(game)["map"]["locations"] if not row["current"])
         with self.assertRaisesRegex(ValueError, "拘魂者"):
             self.engine.travel_map(game.id, destination)

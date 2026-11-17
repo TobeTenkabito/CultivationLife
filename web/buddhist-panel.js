@@ -27,11 +27,11 @@
     const fill = el('i'); fill.style.left = `${Math.min(50, (system.karma + 100) / 2)}%`; fill.style.width = `${Math.abs(system.karma) / 2}%`; fill.className = system.karma < 0 ? 'negative' : 'positive';
     meter.append(fill, el('span', '', 'dharma-zero'), el('span', '', 'dharma-warning')); balance.append(meter);
     const ticks = el('div', undefined, 'dharma-ticks'); ticks.append(el('span', '−100'), el('span', '−25'), el('span', '0'), el('span', '+100')); balance.append(ticks);
-    let status = system.karma < -25 ? `暂不能开坛。${system.grace_units > 0 ? `威名庇护还剩 ${fmt(system.grace_units)} 个时间单位。` : '威名庇护已失效。'}` : '威名庇护生效；个人恩怨、战争与地方通缉仍需应对。';
+    let status = system.karma < -25 ? `暂不能开坛。${system.grace_units > 0 ? `凶名庇护还剩 ${fmt(system.grace_units)} 个时间单位。` : '凶名庇护已失效。'}` : '凶名庇护生效；个人恩怨、战争与地方通缉仍需应对。';
     if (system.karma < 0) status += ` 当前战斗六维 +${fmt(-system.karma * .2)}%。`;
     balance.append(el('p', status, system.karma < -25 ? 'dharma-alert' : 'muted'));
     const metrics = el('div', undefined, 'dharma-metrics');
-    for (const [label, number] of [['本界信众',fmt(system.followers)],['每年业力开支',fmt(system.upkeep)],['有效威名',fmt(system.effective_fame)]]) {const box=el('div');box.append(el('small',label),el('strong',number));metrics.append(box);} balance.append(metrics);
+    for (const [label, number] of [['本界信众',fmt(system.followers)],['每年业力开支',fmt(system.upkeep)],['有效凶名',fmt(system.effective_infamy)]]) {const box=el('div');box.append(el('small',label),el('strong',number));metrics.append(box);} balance.append(metrics);
     balance.append(el('p', `原始因果 ${fmt(system.raw_karma)} · 原始煞气 ${fmt(system.raw_sha)}；日常规则均按 0 结算，开坛时仍会形成问难。`, 'muted'));
     const blessings = section('世间加持'); blessings.append(el('p','正业力时最多选择三项，仅在选择的界面生效；业力耗尽会自动停用。', 'muted'));
     const cards=el('div',undefined,'dharma-blessings');

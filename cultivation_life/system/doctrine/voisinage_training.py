@@ -51,7 +51,7 @@ def public(training, rules):
 
 def dao_ancestor(game):
     record = game.doctrine_state.get('player', {})
-    return (game.player.realm_index >= 12
-            and any(p.get('level', 0) >= 9 for p in record.get('progress', {}).values())
-            and any(record.get('progress', {}).get(key, {}).get('level', 0) >= 4 and rank(t) == 13
-                    for key, t in record.get('voisinage_training', {}).items()))
+    return (game.player.realm_index == 12 and game.player.layer >= 7
+            and (any(record.get('progress', {}).get(key, {}).get('level', 0) >= 4 and rank(t) == 13
+                    for key, t in record.get('voisinage_training', {}).items())
+                 or any(level==13 for level in game.player.world_voisinages.get(game.player.world,{}).get('levels',{}).values())))

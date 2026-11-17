@@ -8,7 +8,7 @@
     const d=game.yaochi.identity;if(!d)return null;
     const s=section(root,'仙籍与功德','三途是职责与修行方式；真仙、金仙、太乙、大罗仍沿原境界成长。');
     const grid=e('div',null,'gather-grid');s.append(grid);
-    for(const [id,name,text] of [['free','散仙','无常设编制，不依靠香火；访古、经营、仙会与紫气主线照常参与。'],['earth','地仙','在原庙主持护民并依当地香火助修；离庙暂停，主庙与分庙的额度不叠加。'],['xuan','玄仙','凭原职司或在任七曜席位确立编制；正式办差换取功德，私产不等于地仙主持。']]){
+    for(const [id,name,text] of [['free','散仙','无常设编制，不依靠香火；访古、经营、仙会与紫气主线照常参与。'],['earth','地仙','在原庙主持护民并依当地香火助修；离庙暂停，主庙与分庙的额度不叠加。'],['xuan','玄仙','凭原职司或在任七曜席位确立编制；正式办差换取功德，地仙主持须取得相应职任。']]){
       const c=card(grid,name);c.classList.toggle('finale-current',id===d.primary);c.append(e('small',id===d.primary?'当前主身份':'职责选择','yaochi-eyebrow'),e('p',text));
     }
     const actions=e('div',null,'gather-actions');actions.append(button('登记原主庙神位','identity_register',d.token,d.register_reason,dispatch),button('交接并退隐散修','identity_retire',d.token,d.retire_reason,dispatch));s.append(actions);

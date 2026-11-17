@@ -23,7 +23,7 @@ from ...rules import (
     assign_technique,
     expected_combat_power,
     effective_karma,
-    effective_fame,
+    effective_infamy,
     effective_sha_qi,
     has_item,
     has_living_master,
@@ -87,10 +87,15 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         player.karma = max(0, player.karma + float(value))
         sign = "+" if value >= 0 else ""
         return None, f"因果 {sign}{value}。"
-    if kind == "add_fame":
-        player.fame = max(0.0, player.fame + float(value))
+    if kind == "add_renown":
+        from ...reputation import record
+        receipt = str(pending.get('id', '')) + ':' + str(pending.get('renown_receipt', 'once'))
+        changed = record(player, receipt, float(value), str(pending.get('title', '事迹')))
+        return None, f"威名 {float(value):+g}。" if changed else "此事迹已经记入威名。"
+    if kind == "add_infamy":
+        player.infamy = max(0.0, player.infamy + float(value))
         sign = "+" if value >= 0 else ""
-        return None, f"威名 {sign}{value}。"
+        return None, f"凶名 {sign}{value}。"
     if kind == "add_sha_qi":
         if float(value) > 0 and pending.get("runtime", {}).get("player_defending"):
             return None, "正当防御不增煞气。"
@@ -146,10 +151,10 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         return result, deps._apply_combat_action_rewards(game, action, result, summary, rng,
                                                        player_defending=target["player_defending"])
     if kind == "cultivator_reaction":
-        threshold = float(WORLD_SYSTEMS["faction_conflict"]["fame_deterrence_threshold"])
-        if effective_fame(player) >= threshold:
-            return "deterred", "你的威名足以压住贪念，对方最终不敢追来。"
-        chance = float(effect.get("chance", 0.2)) * max(0.0, 1 - effective_fame(player) / max(1.0, threshold))
+        threshold = float(WORLD_SYSTEMS["faction_conflict"]["infamy_deterrence_threshold"])
+        if effective_infamy(player) >= threshold:
+            return "deterred", "你的凶名足以压住贪念，对方最终不敢追来。"
+        chance = float(effect.get("chance", 0.2)) * max(0.0, 1 - effective_infamy(player) / max(1.0, threshold))
         if rng.random() >= chance:
             return "ignored", "对方虽有不满，最终没有节外生枝。"
         target = deps._generate_cultivator_target(player, "心生贪念的修士", ACTIONS["slay"]["combat"], rng, game=game)
@@ -331,7 +336,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
                     "karma": effective_karma(player),
                     "sha_qi": effective_sha_qi(player),
                     "heart_demon": player.heart_demon,
-                    "fame": effective_fame(player),
+                    "infamy": effective_infamy(player),
                 }.get(stat)
                 if actual is None:
                     raise ValueError(f"未知属性判定：{stat}")
@@ -340,7 +345,7 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
                     "hp": "当前HP", "mp": "当前MP", "combat_power": "当前战斗力",
                     "hp_ratio": "HP比例", "mp_ratio": "MP比例",
                     "combat_ratio": "期望战力倍率", "karma": "有效因果",
-                    "sha_qi": "煞气", "heart_demon": "心魔", "fame": "威名",
+                    "sha_qi": "煞气", "heart_demon": "心魔", "infamy": "凶名",
                 }
                 displays.append(f"{labels[stat]} {actual:.2f}/{float(target):.2f}")
             if not passed:

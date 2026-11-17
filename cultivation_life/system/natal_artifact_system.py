@@ -94,7 +94,7 @@ def _bind_crafted_natal_artifact(deps: NatalStateDependencies, game: GameState, 
 def _unbind_crafted_natal_artifact(deps: NatalStateDependencies, game: GameState, artifact_id: str) -> None:
     current = str(game.natal_artifact.get("crafted_artifact_id", "")) if game.natal_artifact else ""
     if current != str(artifact_id):
-        raise ValueError("这件法宝并非当前本命法宝")
+        raise ValueError("请选择当前本命法宝")
     for material_id in game.natal_artifact.get("slots", []):
         if material_id:
             add_item(game.player, str(material_id))
