@@ -1,6 +1,7 @@
 """Frozen branch, contract and evidence definitions; no offscreen person inventories."""
 from ...rules import combat_power, expected_combat_power, max_hp, max_mp, remove_item
 from . import prose
+from .ecology import appearance_depth, close_realms
 from .prose_expansion import EPIC_RESULTS, LEGENDARY_RESULTS, RUMORS, DEPARTURES, TREASURES
 
 
@@ -20,7 +21,9 @@ def blueprint(site, rng, reward_factory):
     if site['quality'] in {'epic','legendary'}:
         for role in roles.values():
             role['ledger']['supporters']=[r['id'] for r in roles.values()
-                if r['sect_id'] and r['sect_id']==role['sect_id'] and r['id']!=role['id']][:2]
+                if r['sect_id'] and r['sect_id']==role['sect_id'] and r['id']!=role['id']
+                and close_realms(r['realm'],role['realm'])
+                and appearance_depth(site,r)<=appearance_depth(site,role)][:2]
     facts=[]
     if site['quality'] in {'epic','legendary'}:
         for i in range(2):

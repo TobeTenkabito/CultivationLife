@@ -2,6 +2,16 @@
 
 本记录对应 [V0.7 策划](seeded-dungeons-design.md) 与用户后续修订，代码入口和此前修复详见 [实施记录](seeded-dungeons-implementation.md)。本次交付为本地试玩修订，存档仍为结构 12；正式发布另按 [发行流程](release-workflow.md) 执行。
 
+## 2026-11-19 境界分布修订验收
+
+本节为源码修订，尚未重新打包或发布。新生成实例使用玩家与地图共同定级的普通／稀有奖励、近阶探索者与深处强者分布；史诗地图上限、传奇本界顶阶规则及原蓝图冻结继续保留。具体参数见[实施记录](seeded-dungeons-implementation.md)。
+
+- `test_dungeon_rank_ecology.py` 新增18项与 `test_seeded_dungeons.py` 原15项最终合跑33项通过；其余副本、事件与跨界回归184项通过，合计217项。首轮发现的低阶来客在高层界面入口候选为空已修复：宝物流通下限与来客修为分别处理。完整探索用例改用固定对手实力并覆盖战后分道，援弱用例显式固定双方强弱，继续提交真实战斗与奖励结算；修正后重跑通过。
+- `browser_seeded_dungeons.py`、`browser_dungeon_loot.py`、`browser_events_212.py` 全部通过。新增页面检查覆盖两套主题的桌面／手机：高差距同行按钮禁用、谢绝与分道提交、路遇高阶修士后探索推进、队伍／日志同步、撤离解除忙碌。
+- 三项工程门禁通过：跨界状态契约、模块依赖、文档检查。未修改用户存档；新分布作用于新生成副本，原实例的冻结奖励与人物等级保留。
+
+本轮日志：`build/dungeon-rank-focused.log`、`build/dungeon-rank-regression.log`（首轮）、`build/dungeon-rank-browser.log`、`build/dungeon-rank-loot-browser.log`、`build/dungeon-rank-events-browser.log`。
+
 ## 逐项责任与证据
 
 | 策划要求 | 最终实现与验证入口 |

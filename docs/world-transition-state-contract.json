@@ -564,6 +564,7 @@
     "NPC.body_attainments / Player.ghost_host_body.body_attainments": "body：原人物实际肉身的四系分项精修，0至10重；普通NPC／受禁NPC写回唯一原人物，关系仅引用。原肉身毁坏时清空，夺舍仅把既有宿身记录带入原ghost_host_body投影；不赋予原灵魂、第二元婴或傀儡独立人物能力。DLC关闭不删除记录，不激活已关闭体系。跨界随原肉身地址规则保留，不另建人物或资源池。"
   },
   "dungeon_ownership_notes": {
+    "GameState.dungeon_state.instances.*.roles.*.state=observed": "session：原址会话中亲眼遇见但各自行动的人物状态，保存于同一角色原型；不实例化NPC、不移动人物、不授予队伍成员资格。新生成的奖励与角色分层在发现时冻结，旧蓝图不改写。组队资格读取玩家及已实例化原NPC的当前修为。",
     "GameState.dungeon_state.instances.*.expedition.facts[].rumor": "session：新蓝图生成时冻结的远处风声，仅含方位与可闻动静，达到原消息时点才写入玩家日志；不提前公开人物、胜负或宝物。旧事实缺失时沿原通用风声，不补写或重抽。",
     "Player.inventory[].opportunity_bonus (dungeon_restorative)": "副本恢复药的此值属于消耗时的单份机缘，不属于被动效率。opportunity_multiplier排除该标签，跨地图囤积、跨界携带与连续服用均不产生额外被动倍率；原物品数量及冻结机缘原值保留，仍由use_item实扣并经原grant结算。原固定物品的被动修炼加成不变。",
     "Player known/equipped expedition Technique.immortal_power_cost": "随原功法携带：新仙阶道修传承在生成时冻结同阶仙灵力消耗。首轮副本配方曾漏填消耗；仅对dungeon前缀、reward或bonus身份、manual:1或concordance后缀、九阶以上道修灵修且requires_immortal_power为真的零消耗配方，在Technique实例化时补齐固定0.08。原蓝图、种子、属性与身份保持原值；不重抽，不改写用户文件，不处理其他书籍或结构1—11。正常保存仍沿原备份及原子提交。",

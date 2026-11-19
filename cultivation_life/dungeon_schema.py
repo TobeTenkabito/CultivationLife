@@ -78,7 +78,7 @@ def decode(value):
             for clue in role['clues']:
                 fields(clue,{'step','text'});integer(clue['step'],0,100)
                 if not isinstance(clue['text'],str):raise ValueError('线索文本无效')
-            if role['state'] not in {'unseen','contact','invited','joined','left','missing','hostile','dead','declined'}:
+            if role['state'] not in {'unseen','contact','invited','joined','left','missing','hostile','dead','declined','observed'}:
                 raise ValueError('副本队员状态无效')
             validate_observations(row,role)
         if len(person_ids)!=len(set(person_ids)):raise ValueError('同一人物不能重复出现')

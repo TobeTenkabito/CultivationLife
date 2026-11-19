@@ -6,7 +6,7 @@ from ...cultivation_coordinates import rank_for
 from ...reputation import true_rank
 from ...content_registry import WORLD_SYSTEMS, FACTION_DEFINITIONS
 from .rewards import recipe
-from . import prose, scenes
+from . import prose, scenes, ecology
 
 NAMES = ('沈砚','洛凝','陆衍','顾长庚','宋微澜','钟离朔','叶闻秋','秦照','温玄','韩晚舟','裴渊','萧弦','许承风','苏问尘','关苍','陈雪岑')
 NAMES += tuple(prose.extra.PERSON_NAMES)
@@ -31,21 +31,20 @@ def generate(game, location, slot, legends):
     if legends>=config()['legendary_limit'][world]:weights[-1]=0
     quality=rng.choices(QUALITIES,weights=weights)[0]
     index=QUALITIES.index(quality)
-    realm=ceiling if quality=='legendary' else min(profile['cap'],profile['realm']+(index//2))
     reference=true_rank(p)
+    realm=ecology.site_rank(world,quality,profile,reference,ceiling)
     tier=WORLD_SYSTEMS['world_profiles'][world]['tier']
     theme=profile['theme'];words=THEMES[theme]
     name=words[0]+rng.choice(('太微','九曜','承露','含章','流霞','问玄','长离','栖真','照夜','归藏','怀璧','通幽','观澜','悬星','鸣玉','玄都','少清','停云','步虚','洞明')+tuple(prose.extra.NAMES))+words[1]
     factions=[(sect.id,sect.name) for sect in game.sects.values() if sect.world==world and not sect.extinct]
     if not factions:factions=[(None,'散修')]
     roles={}
-    count=(2,4,10,16)[index]
+    count,near=ecology.POPULATIONS[quality]
     for number in range(count):
         rr=stream(game.seed,identity,'role',number);key=identity+':person:'+str(number)
         sect_id,sect_name=rr.choice(factions)
         purpose=rr.choices(PURPOSES,weights=[35,15,15,10,10,15])[0]
-        role_realm=min(ceiling,max(1,realm+rr.choice((-1,0,0,1))))
-        layer=rr.randint(3,9)
+        role_realm,layer=ecology.person_rank(rr,world,quality,number,reference,realm,profile,ceiling)
         if purpose=='assassinate' and rank_for(role_realm,layer)<rank_for(*reference):
             if reference[0]>ceiling or reference[0]>max(realm,profile['cap']) and quality not in {'epic','legendary'}:
                 purpose='observe'
@@ -66,18 +65,22 @@ def generate(game, location, slot, legends):
             preparation=rr.randint(15,45),trust=rr.randint(15,50),caution=rr.randint(30,80),
             npc_id=None,existing=False,state='unseen',known=False,clues=[],target='player' if purpose=='assassinate' else 'treasure',
             story=story,power_factor=round(rr.uniform(.9,1.3),3),joined_step=None,left_step=None,
-            revealed=False,materialized=False,ledger={'domain_rank':domain_rank},offer_step=rr.randint(1,4))
+            revealed=False,materialized=False,ledger={'domain_rank':domain_rank},
+            offer_step=rr.randint(1,4) if number<near and (purpose=='assassinate' or rr.random()<.6) else profile['nodes']+1)
     nodes=[];structures=scenes.history(game);texts=set(game.dungeon_state.get('text_fingerprints',[]))
     for number in range(profile['nodes']):
         nr=stream(game.seed,identity,'node',number)
-        kind,mechanism,variant,actor=scenes.structure(nr,roles,structures,core=number==profile['nodes']-1)
+        depth=min(3,number*4//profile['nodes'])
+        local_roles={key:r for key,r in roles.items() if ecology.appearance_depth(dict(reference=reference,ceiling=ceiling),r)<=depth}
+        if number==profile['nodes']-1:
+            guardian=next(reversed(roles));local_roles={guardian:roles[guardian]}
+        kind,mechanism,variant,actor=scenes.structure(nr,local_roles,structures,core=number==profile['nodes']-1)
         direction=nr.choice(('东','西','南','北','东北','西北'))
         text=scenes.compose(nr,location['name'],theme,kind,direction,mechanism,texts)
         nodes.append(dict(id=identity+':node:'+str(number),kind=kind,mechanism=mechanism,variant=variant,text=text,
             risk=round(nr.uniform(.04,.12)*(1+index*.2),3),
             reward=recipe(stream(game.seed,identity,'reward',number),identity+':reward:'+str(number),realm,p.path,theme,quality,core=kind=='core',world=world),
             actor=actor,direction=direction))
-    if quality=='legendary':nodes[-1]['actor']=next(reversed(roles))
     site=dict(id=identity,world=world,location_id=location['id'],name=name,quality=quality,realm=realm,
         layer=9 if quality=='legendary' else 5,ceiling=ceiling,theme=theme,terrain=profile['terrain'],
         conditions=profile['conditions'][:],slot=slot,seed=rng.randrange(2**32),reference=list(reference),

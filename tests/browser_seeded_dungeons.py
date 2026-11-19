@@ -81,6 +81,49 @@ def check_quality_palettes(browser,engine,url,output):
         page.close()
 
 
+def check_rank_gates(browser,engine,url):
+    for theme,width,height in (('light',1440,960),('dark',393,852)):
+        page=browser.new_page(viewport=dict(width=width,height=height))
+        errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+        page.goto(url);page.wait_for_function('window.GameThemes && configData')
+        page.locator(f'[data-theme-picker=start] [data-pixel-theme-choice={theme}]').click()
+        game=engine.store.load(engine.create_game('同行境界验收','heavenly','dao',342,preset_id='core')['id'])
+        game.player.realm_index=1;game.player.layer=3
+        game.player.hp=max_hp(game.player);game.player.mp=max_mp(game.player)
+        engine.store.save(game)
+        page.evaluate('async id=>{await loadGame(id);window.UtilityPanels.open("dungeon");}',game.id)
+        page.locator('[data-dungeon-action=discover]').click();page.wait_for_function('!busy && game.dungeons.used===1')
+        page.locator('[data-dungeon-action=enter]').click();page.wait_for_function('!busy && game.dungeons.active')
+        for kind,join,leave in (('join','accept','decline'),('settlement','ask_join','part')):
+            saved=engine.store.load(game.id);site=saved.dungeon_state['instances'][saved.dungeon_state['active']]
+            role=next(iter(site['roles'].values()))
+            for r in site['roles'].values():r['offer_step']=99
+            role.update(realm=4,true_realm=4,layer=9,known=True,state='contact',purpose='heal',resolve=0,desire=0,trust=100)
+            site['pending']=dict(kind=kind,actor=role['id']);engine.store.save(saved)
+            page.evaluate('async id=>{await loadGame(id);}',game.id)
+            assert page.locator(f'[data-choice={join}]').is_disabled()
+            page.locator(f'[data-choice={leave}]').click();page.wait_for_function('!busy')
+            assert page.evaluate('game.dungeons.session.party_count')==1
+        # A distant cultivator encountered on the route passes by without a join prompt.
+        saved=engine.store.load(game.id);site=saved.dungeon_state['instances'][saved.dungeon_state['active']]
+        role=next(iter(site['roles'].values()));role.update(state='unseen',known=False)
+        site['nodes'][site['step']].update(kind='contact',mechanism='contact',actor=role['id'])
+        step=site['step'];engine.store.save(saved)
+        page.evaluate('async id=>{await loadGame(id);}',game.id)
+        page.locator('[data-choice=seize]').click();page.wait_for_function('!busy')
+        saved=engine.store.load(game.id);site=saved.dungeon_state['instances'][site['id']]
+        assert site['step']==step+1 and not site['pending'] and not site['party']
+        assert role['id'] not in saved.world_npcs
+        panel_view(page,'team')
+        assert page.locator('.dungeon-person').filter(has_text='各自行动').count()==1
+        panel_view(page,'journal')
+        assert page.locator('.dungeon-log').filter(has_text='独自向前探去').count()==1
+        page.locator('[data-dungeon-action=exit]').click();page.wait_for_function('!busy && !game.dungeons.active')
+        assert page.locator('[data-action=rest]').is_enabled()
+        assert not errors,errors
+        page.close()
+
+
 def main():
     output=ROOT/'build/reviews/seeded-dungeons';output.mkdir(parents=True,exist_ok=True)
     with tempfile.TemporaryDirectory() as folder:
@@ -281,6 +324,7 @@ def main():
 
                             assert not errors,errors
                             page.close()
+                    check_rank_gates(browser,engine,f'http://127.0.0.1:{httpd.server_port}')
                     check_quality_palettes(browser,engine,f'http://127.0.0.1:{httpd.server_port}',output)
                     browser.close()
             finally:httpd.shutdown();httpd.server_close()

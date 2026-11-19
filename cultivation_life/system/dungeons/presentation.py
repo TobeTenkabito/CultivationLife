@@ -4,11 +4,11 @@ from ...rules import combat_power, max_mp
 from ...cultivation_coordinates import rank_for
 from .generation import config
 from .runtime import require_actor
-from .people import power, opposition
+from .people import power, opposition, team_reason
 
 QUALITY_NAMES={'ordinary':'普通','rare':'稀有','epic':'史诗','legendary':'传奇'}
 STATES={'contact':'请求同行','invited':'已发来邀请','joined':'同行中','left':'已离队',
-    'missing':'失去联系','hostile':'已翻脸','dead':'已陨落','declined':'已谢绝'}
+    'missing':'失去联系','hostile':'已翻脸','dead':'已陨落','declined':'已谢绝','observed':'各自行动'}
 REALMS=('凡人','练气','筑基','结丹','元婴','化神','炼虚','合体','大乘','真仙','金仙','太乙','大罗')
 
 
@@ -143,7 +143,8 @@ def public(game,maps):
         result['session']=dict(id=site['id'],revision=site['revision'],name=site['name'],
             quality=QUALITY_NAMES[site['quality']],place=('入口','外围','深处','核心')[min(3,site['depth'])],
             text=site['last_result'] if pending or not current else current['text'],
-            choices=[dict(id=k,label=v,enabled=not reason and not(k in {'accept','ask_join'} and len(site['party'])>=config()['max_team']-1)
+            choices=[dict(id=k,label=v,enabled=not reason and not(k in {'accept','ask_join'} and
+                (len(site['party'])>=config()['max_team']-1 or team_reason(game,site['roles'][pending['actor']])))
                 and not(k=='survey' and current and current['id'] in site['branches'])
                 and not(k in TACTICS and p.mp<max_mp(p)*TACTICS[k][1])) for k,v in choices],
             can_exit=not reason and (not pending or pending['kind']=='join'),

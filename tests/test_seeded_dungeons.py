@@ -172,7 +172,14 @@ def test_complete_route_real_combat_claim_and_exit(local,monkeypatch):
     game.player.body_training=48
     game.player.hp=max_hp(game.player);game.player.mp=max_mp(game.player)
     add_item(game.player,'healing_pill',12);engine.store.save(game)
-    discover(engine,game);act(engine,game,'enter')
+    discover(engine,game)
+    # Exercise real combat and the complete reward/study lifecycle with a
+    # controlled opposition, independently of the seed's population balance.
+    prepared=engine.store.load(game.id)
+    for site in prepared.dungeon_state['instances'].values():
+        for role in site['roles'].values():
+            role.update(realm=3,true_realm=3,layer=1,power_factor=.9,purpose='seek')
+    engine.store.save(prepared);act(engine,game,'enter')
     for _ in range(35):
         saved=engine.store.load(game.id);site=saved.dungeon_state['instances'][saved.dungeon_state['active']]
         if site['step']==len(site['nodes']) and not site['pending']:break
@@ -180,7 +187,7 @@ def test_complete_route_real_combat_claim_and_exit(local,monkeypatch):
             engine.use_item(game.id,'healing_pill')
             continue
         pending=site['pending']
-        choice=('decline' if pending['kind']=='join' else 'support_actor' if pending['kind']=='conflict' else 'fight') if pending else 'seize'
+        choice={'join':'decline','conflict':'support_actor','settlement':'part','guardian':'fight','ambush':'fight'}[pending['kind']] if pending else 'seize'
         result=act(engine,game,'choose',choice=choice)
         assert result['dungeons']['active'],result.get('last_combat_report')
     else:pytest.fail('route did not terminate')
@@ -336,7 +343,7 @@ def test_support_weaker_side_real_combat_grants_bounded_share_and_gratitude(loca
     a,b=list(site['roles'].values())[:2]
     for index,role in enumerate((a,b)):
         role.update(realm=1,layer=index+1,true_realm=1,purpose='observe',trust=50,
-                    preparation=0,resolve=0,desire=0,known=True,state='contact')
+                    preparation=0,resolve=0,desire=0,known=True,state='contact',power_factor=.5 if index==0 else 1.5)
     site['pending']=dict(kind='conflict',actor=a['id'],other=b['id'])
     trust=a['trust'];engine.store.save(saved)
     act(engine,game,'choose',choice='support_actor')

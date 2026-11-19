@@ -9,7 +9,8 @@ from ...models import HistoryRecord
 from ...runtime import now_iso
 from ...soul_rules import wandering
 from .generation import generate, config, stream
-from .people import materialize, power, pressures, fight, gratitude, available, opposition
+from .people import materialize, power, pressures, fight, gratitude, available, opposition, team_reason
+from .ecology import appearance_depth
 from .rewards import grant, learn
 from . import expedition, scenes
 
@@ -95,7 +96,9 @@ def invite_tick(game, maps):
     if rng.random()>=chance:return
     try:site=discover(game,maps)
     except ValueError:return
-    role=next(iter(site['roles'].values()));role.update(known=True,state='invited')
+    role=next((r for r in site['roles'].values() if not team_reason(game,r)),None)
+    if role is None:return
+    role.update(known=True,state='invited')
     site['initiator']=role['id']
     state['mail'].append(dict(id=site['id']+':invitation',dungeon_id=site['id'],
         sender=role['name'],sender_id=role['id'],title='邀你同探一处隐境',
@@ -130,10 +133,15 @@ def claim(game,site,node):
 def contact(game,site,role):
     if not available(game,site,role):
         mark_absent(site,role)
-        return
+        return False
+    if team_reason(game,role):
+        role.update(known=True,state='observed')
+        log(site,label(role)+'从岔路经过，独自向前探去。',actors=[role['id']])
+        return False
     role.update(known=True,state='contact')
     log(site,label(role)+'在岔路停步，提出结伴。'+role['story']+'。',actors=[role['id']])
     site['pending']={'kind':'join','actor':role['id']}
+    return True
 
 
 def mark_absent(site,role):
@@ -209,7 +217,8 @@ def advance_scene(game,site):
             log(site,label(a)+'忽然截下'+b['name']+'的去路，索要刚发现的遗物；两人翻脸相向。',actors=[a['id'],b['id']])
             site['pending']={'kind':'conflict','actor':a['id'],'other':b['id'],'aftermath':True};return
     for role in site['roles'].values():
-        if role['state']=='unseen' and role['offer_step']<=site['step']<len(site['nodes']):
+        if (role['state']=='unseen' and role['offer_step']<=site['step']<len(site['nodes'])
+                and appearance_depth(site,role)<=site['depth'] and not team_reason(game,role)):
             contact(game,site,role)
             if site['pending']:return
 
@@ -248,13 +257,15 @@ def resolve_node(deps,game,site,choice):
             log(site,label(role)+'正守在遗物附近。你一接近，对方立刻展开封锁，争夺已无法悄然进行。',actors=[role['id']])
             site['pending']={'kind':'guardian','actor':role['id']};return
         if present and node['kind']=='conflict' and role['state'] not in {'dead','left','declined','joined'}:
-            other=next((r for r in site['roles'].values() if r['id']!=role['id'] and r['state']=='unseen' and available(game,site,r)),None)
+            others=[r for r in site['roles'].values() if r['id']!=role['id']
+                and r['state'] in {'unseen','observed'} and appearance_depth(site,r)<=site['depth'] and available(game,site,r)]
+            other=min(others,key=lambda r:abs(r['realm']-role['realm']),default=None)
             if other:
                 role.update(known=True,state='contact');other.update(known=True,state='contact')
                 log(site,label(role)+'与'+label(other)+'争抢同一件遗物，双方已经动手。',actors=[role['id'],other['id']])
                 site['pending']={'kind':'conflict','actor':role['id'],'other':other['id']};return
         if present and node['kind']=='contact' and role['state']=='unseen':
-            contact(game,site,role);return
+            if contact(game,site,role):return
         if present and node['kind']=='core' and role['state'] not in {'dead','joined'}:
             role.update(known=True,state='hostile',revealed=True)
             log(site,label(role)+'拦住核心入口，要你交出此前所得。',actors=[role['id']])
@@ -282,6 +293,8 @@ def resolve_pending(deps,game,site,choice):
     allowed={'join':{'accept','decline'},'conflict':{'support_actor','support_other','flee'},
              'guardian':{'fight','flee'},'ambush':{'fight','flee'},'settlement':{'part','ask_join'}}
     if choice not in allowed[pending['kind']]:raise ValueError('当前局势没有这个选项')
+    if choice in {'accept','ask_join'}:
+        if reason:=team_reason(game,role):raise ValueError(reason)
     participants=[role]+([site['roles'][pending['other']]] if pending['kind']=='conflict' else [])
     absent=[r for r in participants if not available(game,site,r)]
     if absent:

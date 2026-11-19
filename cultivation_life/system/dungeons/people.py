@@ -3,6 +3,13 @@ from ...models import SectNpc
 from ...relationship_records import find_person
 from ...rules import expected_combat_power, combat_power, max_hp
 from ...cultivation_coordinates import rank_for
+from .ecology import close_realms, appearance_depth
+
+
+def team_reason(game,role):
+    npc=find_person(game,role['npc_id']) if role['npc_id'] else None
+    realm=npc.realm_index if npc else role['realm']
+    return '' if close_realms(game.player.realm_index,realm) else '同行修士的修为须与你相差至多一个大境界'
 
 
 def available(game, site, role):
@@ -74,6 +81,7 @@ def candidates(game):
     result=[]
     for npc in people.values():
         if not npc.encountered_player or not is_free(npc) or not npc.alive or (npc.world,npc.location_id)!=(game.player.world,game.player.location_id):continue
+        if not close_realms(game.player.realm_index,npc.realm_index):continue
         try:require_unassigned(game,npc.id)
         except ValueError:continue
         result.append(npc)
@@ -85,7 +93,7 @@ def invite(game,site,identity):
     from ...content_registry import FACTION_DEFINITIONS
     import copy
     npc=next((n for n in candidates(game) if n.id==identity),None)
-    if not npc:raise ValueError('此修士须已结识、实际在场，且未承担其他职责')
+    if not npc:raise ValueError('此修士须已结识、实际在场、未承担其他职责，且与你相差至多一个大境界')
     if identity in site['roles'] or any(r['npc_id']==identity for r in site['roles'].values()):raise ValueError('已经邀请过此人')
     if len(site['roles'])>=32:raise ValueError('此副本的可接触人数已达上限')
     rng=stream(site['seed'],'invite',identity)
@@ -155,6 +163,7 @@ def domains(site):
 def opposition(game,site,enemy):
     followers=[site['roles'][key] for key in enemy['ledger'].get('supporters',[])
         if key in site['roles'] and key not in site['party'] and site['roles'][key]['state'] not in {'dead','left','declined','missing'}
+        and appearance_depth(site,site['roles'][key])<=site['depth']
         and available(game,site,site['roles'][key])]
     return [enemy]+followers
 
