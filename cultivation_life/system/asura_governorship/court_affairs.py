@@ -86,7 +86,7 @@ def command(game,row,op,p):
         if not rules.king(game) or royal_audience(game)!='player':raise ValueError('须由现君在王庭立案')
         if any(c['kind']=='audit' for c in council.book(row)['cases']):raise ValueError('已有原监察案，继续原案调查')
         order=row.get('asura_military',{}).get('order')
-        if not order or order['status']!='refused' or order['issuer']!=king(game) or order['recipient']!=row['controller']:raise ValueError('没有当前原任的具名抗命凭据，不能凭空定罪')
+        if not order or order['status']!='refused' or order['issuer']!=king(game) or order['recipient']!=row['controller']:raise ValueError('须有现任总督拒领本王王令的具名记录')
         council.open_case(row,'audit','player',row['controller'],game.player.age,facts=dict(cause='order',order=order['id'],issuer=order['issuer'],unjustified=order.get('refusal_evidence',{}).get('unjustified',False)))
         text='原抗命文书立案；守备缺口和申辩将在调查中单独核验。'
     elif op=='investigate':

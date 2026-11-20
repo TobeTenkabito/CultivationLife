@@ -42,7 +42,7 @@
         quote.reward_stones?`完成后获 ${quote.reward_stones.toLocaleString()} 灵石；从合作项目现有资金预留，取消或失败退回项目。每份旧录仅履约一次。`:'',
         quote.return_fare?`其中 ${quote.return_fare.toLocaleString()} 灵石专用于返程，抵达后继续保留。申请机会仅有一次，取消启程也会结束本次许可。`:'',
         quote.message||'',
-        action==='attune'?'登记后，下一次普通修炼在原奖励上获得有限增益；登记本身不发放奖励。':'',
+        action==='attune'?'登记后，下次普通修炼时可多得一份收益。':'',
         quote.warning||'',
         '遇到事件会暂停；已耗时间和投入不会返还。'].filter(Boolean).join('\n');
       ctx.confirm({title:'确认诸天行动',body:text,onConfirm:()=>{if(current.id===id)send(payload);}});
@@ -279,7 +279,7 @@
       if(f.delivered)host.append(node('p',f.claimed?'3,000 灵石供材报酬已领取。':'已交货：3,000 灵石供材报酬待在出发地领取。'));
       if(f.blocked_reason)host.append(node('p',f.blocked_reason,'heavens-visit-finding'));
     }
-    if(f.status==='unavailable'||f.status==='active')host.append(node('small','普通世界年度推进行程，独立空间冻结。陨落时未交物资遗失；交货后不可撤回。'));
+    if(f.status==='unavailable'||f.status==='active')host.append(node('small','行程按外界年份推进，在独立空间中暂停。若承运者陨落，未交物资会遗失。交货后无法撤回。'));
     renderActions(host,f.actions.filter(a=>f.status==='unavailable'?a.action==='freight_start':a.action==='mission_wait'||a.action==='freight_cancel'&&f.status==='active'&&f.phase==='outbound'||a.action==='freight_collect'&&(f.cargo_owner==='depot'||f.reward_available)),f.materials);
   }
   function renderMission(host,m) {
@@ -302,7 +302,7 @@
     if(!ui.target||h.anomalies?.some(r=>r.id===ui.target)){renderRegional(host,h,'anomaly');return;}
     const entries=[h.mirror,h.ruins].filter(Boolean),selected=entries.find(row=>row.id===ui.target);
     if(!selected){
-      title(host,'异象行旅','从真实地点进入一处异象，沿原路返回。每处机关与所得都将保留。');
+      title(host,'异象行旅','前往异象所在之地探查，再沿原路返回。离开后，已解的机关和所得仍会保留。');
       const list=node('div',null,'heavens-directory');
       for(const row of entries)tile(list,{name:row.name,description:row.entry,status:row.inside?'身处其中':row.capacity_pending?'已知入口':row.known?'可重访':'元婴起可进入',glyph:row.id==='mirror_field'?'镜':'因',onClick:()=>openTarget(row.id)});
       host.append(list);return;
@@ -325,7 +325,7 @@
     const page=category==='anomaly'?'anomalies':'frontier',rows=h[category==='anomaly'?'anomalies':'conflicts']||[];
     const selected=rows.find(r=>r.id===ui.target);
     if(selected){window.HeavensIncidents.render(host,selected,ui,{node,title,back,subview,renderActions});return;}
-    title(host,category==='anomaly'?'异象行旅':'诸界战局',category==='anomaly'?'亲临异象所在，求证后选择疏导或封存。':'战地救护与庇护工事各有投入；真实战争消息另记于风闻。');
+    title(host,category==='anomaly'?'异象行旅':'诸界战局',category==='anomaly'?'亲临异象所在，求证后选择疏导或封存。':'可到战地救护伤者，也可修筑庇护工事。各地战况可查阅风闻。');
     const world=rows.some(r=>r.world===ui.world)?ui.world:rows.find(r=>r.current)?.world||rows[0]?.world;
     const select=node('select');select.className='heavens-world-select';select.setAttribute('aria-label','选择界域');
     for(const row of rows){const option=node('option',`${row.world_name}${row.current?' · 当前所在':''}`);option.value=row.world;select.append(option);}
@@ -334,7 +334,7 @@
     if(row){host.append(window.HeavensAtlas.feature(row,node));tile(list,{name:row.name,description:`${row.location_name} → ${row.field_name}`,status:row.stage==='closed'?'已归档':category==='anomaly'?'本地异象':'战地事务',glyph:category==='anomaly'?'象':'戈',onClick:()=>go(page,row.id)});}
     if(world==='human'){
       if(category==='anomaly')for(const entry of [h.mirror,h.ruins].filter(Boolean))tile(list,{name:entry.name,description:entry.entry,status:entry.inside?'身处其中':'独立场域',glyph:'界',onClick:()=>openTarget(entry.id)});
-      else {if(h.frontier)tile(list,{name:h.frontier.name,description:'岚疆问讯与跨界接触',status:'边情',glyph:'疆',onClick:()=>go(page,h.frontier.id)});if(h.campaign?.known)tile(list,{name:h.campaign.name,description:'实际军队、输送与交锋',status:'战役',glyph:'关',onClick:()=>go(page,h.campaign.id)});}
+      else {if(h.frontier)tile(list,{name:h.frontier.name,description:'岚疆问讯与跨界接触',status:'边情',glyph:'疆',onClick:()=>go(page,h.frontier.id)});if(h.campaign?.known)tile(list,{name:h.campaign.name,description:'兵马调遣、粮运与交锋',status:'战役',glyph:'关',onClick:()=>go(page,h.campaign.id)});}
     }
     host.append(list,node('small','远界细节受界层认识限制；可辨识的传闻与征兆收录于「见闻 · 诸天风闻」。'));
   }
@@ -354,7 +354,7 @@
         const task=(current.heavens.tasks||[]).find(t=>t.id===p.task_id);
         if(task)host.append(node('p',`实际修补 ${task.progress} / ${task.duration} 年`),button('查看任务与续做',()=>go('journey')));
       }else if(p.status==='kept')host.append(node('p','规律记录已取得，两处核心仍留在场域。离开和重访不会解除这项约定。','heavens-finding'));
-      else if(p.status==='released')host.append(node('p','已有记录保留，两处核心永久关闭低耗破解与材料隔断许可；可到机关页按真实战斗规则强攻。'));
+      else if(p.status==='released')host.append(node('p','已有记录保留，两处核心永久关闭低耗破解与材料隔断许可；仍可到机关页强攻。'));
       else host.append(node('p','本次修补未取得记录，已安装阵材保留。原机关探索仍可继续，不再受理第二次修补约定。'));
     }
     host.append(node('small','解除守约须在场明确确认，之后只能强攻核心；不退修补投入，也不重置已有机关与镜储。'));
@@ -373,7 +373,7 @@
     if(chamber.opened){body.append(node('p',chamber.reward?`已领取：${chamber.reward}`:'已取得镜律规律记录。'));body.append(node('small','此处机关已解开，重访不会重复领取所得。'));}
     else if(m.pact?.status==='kept'&&chamber.index<2){body.append(node('p','这处核心依约保留，仍由场域持有。'),button('查看守约',()=>go('anomalies',m.id,'pact')));}
     else {body.append(node('p',m.pact?.status==='released'&&chamber.index<2?'约定已解除，此处只能按当前战斗预案强攻；原守护状态继续保留。':chamber.isolated?'此处联系已隔断，后续施术不再供给这处机关。':'可投入法力破解、消耗阵材隔断，或按当前战斗预案强攻。'));renderActions(body,m.actions.filter(row=>row.options.chamber===String(chamber.index)),m.materials);}
-    if(chamber.guardian)body.append(node('small',`已遭遇 ${chamber.guardian.encounters} 次；守护快照与损伤保留。`));
+    if(chamber.guardian)body.append(node('small',`已遭遇 ${chamber.guardian.encounters} 次；守卫的伤势沿用上次交手的结果。`));
     const rules=node('details',null,'heavens-notes');rules.append(node('summary','查阅收集规律与痕迹'),node('p','登记施术实付法力的 25% 被收集；普通修炼和其他战斗不计入。隔断停止对应联系，守护强度最多增加 15%。'),node('small',`累计收集 ${amount(m.collected_mana)}；保留 ${m.traces.length} 条施术或施工痕迹。`));body.append(rules);
   }
   function renderRuins(host,r) {
@@ -404,7 +404,7 @@
     const s=r.survey;if(!s)return;
     const place=s.exit||(r.id==='mirror_field'?'穆陵沙漠':'无棣原');
     host.dataset.survey=s.status;
-    if(s.status==='unmet'){empty(host,'尚未遇到同行者','可继续亲自调查，在场域中留意真实来访者。');return;}
+    if(s.status==='unmet'){empty(host,'尚未遇到同行者','继续在此地探查，沿途留心经过的修士。');return;}
     if(s.status==='unavailable'){
       title(host,'结伴同勘','邀一位相熟居民自行观察、抄录，归来后当面交流。');
       host.append(node('p',`先亲自踏勘，再返回${place}邀约。可选择人界自由、无其他职责、交情至少 20 的四至五阶居民；每座异象安排一次，同时进行一项。`));
@@ -424,7 +424,7 @@
       host.append(node('p',s.shared?`已当面交换笔记，${s.benefit}`:s.learned?`本人已有完整笔记，可在场域内或${place}当面交换。`:s.observed?'本人已完成观察，正在整理笔记。':'本人尚未完成观察。'));
       if(s.blocked_reason)host.append(node('p',s.blocked_reason,'heavens-visit-finding'));
     }
-    host.append(node('small','入场后只随同一场域的空间年度行动；你离开时内部冻结，外界年月不补算。本人会真实衰老，笔记不会自动交给你。'));
+    host.append(node('small','勘察按此地的年月推进，你离开期间暂停。受邀者也会渐渐老去，勘察笔记由他自己保管。'));
     renderActions(host,s.actions.filter(a=>s.status==='unavailable'?a.action==='survey_start':a.action==='survey_share'&&s.learned&&!s.shared||s.status==='active'&&(a.action==='survey_wait'||a.action==='survey_recall'&&s.phase!=='returning')),[],s.candidates);
   }
   function renderApplication(host,app){const row=node('article',null,'heavens-task');row.append(node('h4',app.name),node('p',`参悟已登记 · 剩余 ${app.remaining} 个实际修炼年`),button('取消参悟安排',()=>propose('cancel',app.target_id)));host.append(row);}
@@ -433,7 +433,7 @@
     if(!selected){
       const list=node('div',null,'heavens-directory');
       for(const m of h.migrations||[])tile(list,{name:m.name+'的接引',description:`迁往 ${m.destination_name}`,status:({unavailable:'一次民用名额',active:'正在迁居',completed:'已经定居',cancelled:'已撤销',failed:'已终止'})[m.status],glyph:'居',onClick:()=>go('journey',m.target_id,'migration')});
-      host.append(node('p','选择出发地，查看真实居民与接引安排。接引是长期迁居，没有自动返乡。'),list);return;
+      host.append(node('p','选择出发地，可查看当地居民与接引安排。此行是长久迁居，动身前请与对方谈妥。'),list);return;
     }
     host.append(button('‹ 返回接引目录',()=>go('journey',null,'migration')));
     if(h.target_id!==selected.target_id){

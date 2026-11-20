@@ -58,7 +58,7 @@ def project(game,row,node):
         body=content.get('audience','新城值房的案上摊着街坊图与工料册，来往居民把问题逐条记下，等待你安排次序。')
         choices=[option('city:audience:listen','旁听议事'),option('back','返回城中')]
     elif node=='city:audience:listen':
-        body=content.get('audience','你与值守人员逐项核对城内公共事务。')+'\n\n众人把分歧记入案卷，暂不作无凭的承诺。你离开值房时，案前已经让出位置给下一位来客。'
+        body=content.get('audience','你与值守人员逐项核对城内公共事务。')+'\n\n议事将散，主簿合上案卷。你起身让座，门外候着的人这才进来。'
         choices=[option('city:audience','返回城府'),option('back','返回城中')]
     elif node=='city:rumor':
         title+=' · 坊巷'
@@ -66,15 +66,15 @@ def project(game,row,node):
         choices=[option('back','返回城中')]
     elif node=='city:story':
         tale=story(row);title+=' · '+tale['title'];body=tale['body']
-        reason='此城逸事奖励已经领取；读档、重建和跨界均不重置' if usage(game,row).get('story') else ''
-        body+='\n\n此番取舍只能获得一次感悟。'
+        reason='此事已了，可在阅历中回顾' if usage(game,row).get('story') else ''
+        body+='\n\n两种办法只能择一，此城逸事可得一次感悟。'
         choices=[option(f'city:resolve:{i}',text,reason) for i,(text,_) in enumerate(tale['choices'])]
         choices.append(option('back','返回城中'))
     elif node.startswith('city:result:'):
         index=node.rsplit(':',1)[1]
         if index not in {'0','1'}:return None
         index=int(index);tale=story(row)
-        title+=' · '+tale['title'];body=tale['choices'][index][1]+'\n\n这段经历已经留在你的阅历中，不能再次领取感悟。'
+        title+=' · '+tale['title'];body=tale['choices'][index][1]
         choices=[option('back','返回城中')]
     elif node=='city:arena':
         attempts=usage(game,row).get('arena',0)

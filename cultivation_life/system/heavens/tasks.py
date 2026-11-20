@@ -124,7 +124,7 @@ def quote(deps, game, action, target_id, options):
         if options.get('person_id') != echo['visitor_id'] or not deps.person_available(game, echo['visitor_id']):
             raise ValueError('合作人物不在场、已受控或正被其他事务占用')
         if echo['project_stones'] < site.correspondence_stones:
-            raise ValueError('合作项目实有资金不足，不能凭空支付酬劳')
+            raise ValueError('项目余款不足以支付此次酬劳')
         if site.correspondence_years > cutoff-offset:
             raise ValueError('窗口余量不足以完成校订')
         return dict(action=action, target_id=target_id, years=site.correspondence_years,

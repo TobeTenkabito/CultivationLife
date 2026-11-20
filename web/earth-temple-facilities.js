@@ -5,7 +5,7 @@
   function render(data, button) {
     const d = data.facilities, root = el('section', null, 'earth-facilities');
     root.append(el('h4', '两席营造 · 三途取舍'), el('p', '每庙两个专项设施位。施工需本人在场，旧设施开工即停用拆解；竣工后开放原址业务。', 'muted'));
-    if (!data.local) root.append(el('p', '当前为异地只读。请沿原地图道路亲赴这座庙，再办理营造与专项事务。', 'yaochi-notice'));
+    if (!data.local) root.append(el('p', '你身在外地。办理营造与庙务，须先亲赴这座庙。', 'yaochi-notice'));
     if (d.works) {
       const w = d.works, name = d.options.find(o => o.id === (w.kind || 'remove'))?.name || '专项营造';
       const box = el('section', null, 'yaochi-current earth-works');

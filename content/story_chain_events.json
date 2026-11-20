@@ -79,7 +79,7 @@
       "id":"EVT_SPIRIT_CROSSING_001","version":1,"title":"节点启封","body":"你以化神神识触及界壁，空间乱流立刻吞没退路。第一关须找到灵界节点中唯一稳定的潮汐缝隙。若无准确节点信息，必死无疑。",
       "tags":["ascension","spirit_crossing","manual_only"],"weight":0,
       "conditions":{"all":[{"path":"player.world","op":"eq","value":"human"},{"path":"player.realm_index","op":"eq","value":5}]},
-      "choices":[{"id":"locate","text":"校准灵界空间节点（必要钥匙判定）","effects":[{"type":"attribute_check","checks":[{"stat":"has_item","item_id":"spirit_node_info"}],"failure_reason":"没有空间节点信息，你误入虚空死域，神魂俱灭","success_text":"节点情报与眼前潮汐完全吻合。"},{"type":"remove_item","item_id":"spirit_node_info","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_SPIRIT_CROSSING_002","if_result":["check_success"]}]}]
+      "choices":[{"id":"locate","text":"循所得线索，校准灵界空间节点","effects":[{"type":"attribute_check","checks":[{"stat":"has_item","item_id":"spirit_node_info"}],"failure_reason":"没有空间节点信息，你误入虚空死域，神魂俱灭","success_text":"节点情报与眼前潮汐完全吻合。"},{"type":"remove_item","item_id":"spirit_node_info","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_SPIRIT_CROSSING_002","if_result":["check_success"]}]}]
     },
     {
       "id":"EVT_SPIRIT_CROSSING_002","version":1,"title":"界壁炼身","body":"稳定缝隙只维持数息。跨界压力将肉身寸寸压碎，任何未愈的伤势都会在此刻扩大成致命裂口。",

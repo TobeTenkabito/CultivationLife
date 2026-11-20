@@ -64,7 +64,7 @@ def dispatch(game, maps, fleet, destination, *, remittance_percent=25, order=Non
     if region(game) and game.player.age < game._game.player.age:
         # No shipment was dispatched while this society was frozen. Do not
         # invent a historical order against a market already in its future.
-        raise ValueError('历史补算不补造新的跨界货单，入界后重新询价')
+        raise ValueError('请在进入当地界面后重新询价')
     synchronize(game, path)
     path = route_path(game, owner, destination)
     if len(path) < 2:

@@ -23,7 +23,7 @@ def deed_quote(game,maps):
     row=garden_estate(game)
     if row:return dict(cost=0,reason='原药田损毁，须先在原产业页恢复' if row.get('building_status')=='destroyed' else '')
     cost=price(game,maps,dict(id=garden_id(),world='celestial',location=config()['location_id'],kind='farm',level=1))
-    return dict(cost=cost,reason='瑶池原府库不足以购买原地块，不登记无来源产业' if balance(game,YAOCHI)<cost else '')
+    return dict(cost=cost,reason='瑶池府库余款不足，尚买不起这块地' if balance(game,YAOCHI)<cost else '')
 
 def repair_quote(game):
     row=original(game)
@@ -58,7 +58,7 @@ def command(deps,game,action,target,amount):
         ensure_state(game)['records'][BUILDING]=dict(id=BUILDING,name='紫宸古仙府',type='artificiality',subtype='cave',
             level=1,status='destroyed',quality='professional',invested=0,address=address(game),
             owner=dict(kind='background',id=BUILDING),users=[],public=False,
-            description='紫气异象中的原址空府。公议后实付重建，原封藏不另造可流通货币。')
+            description='府门久闭，旧封条仍在，门缝里透出一线紫气。重修仙府所需的工料须经公议筹措。')
         buildings.persist(game,city)['civic_disruption_until']=s['disruption_until']
         farm['public_water_until']=max(game.player.age,farm.get('public_water_until',0))+10
         if farm.get('job'):farm['job']['finish']+=10
@@ -84,7 +84,7 @@ def command(deps,game,action,target,amount):
         if not row or row['status']!='destroyed' or row['owner']!=dict(kind='background',id=BUILDING):raise ValueError('原仙府权属已变，不得重开定议')
         for key in ('plan','companion','evidence','paused_work'):s.pop(key,None)
         s['phase']='hearing'
-        summary='已撤回原方案并解除协作者占用。已耗整理工时与工料不退还；原调查、护持和真实履约回执保留，可另选方案重新定议。'
+        summary='方案已撤，协作者可以离开了。先前耗去的工时与用料概不退还。勘查、护持及履约记录仍在，可据此另议方案。'
     elif action=='purple_mitigate':
         if s['phase']!='dispute' or s.get('mitigation') or s.get('paused_work'):raise ValueError('当前不能重选疏导方案')
         if value not in {'canal','wait'}:raise ValueError('请选择实付疏导或轮值安置')
@@ -119,14 +119,14 @@ def command(deps,game,action,target,amount):
         w=work(game)
         if w['progress']<w['years']:raise ValueError('本步实际工时尚未完成')
         kind=w['kind']
-        if kind=='survey':s['phase']='dispute';summary='原府、聚落与药田事实已核对；选择修渠疏导或轮值安置，原物资不复制。'
+        if kind=='survey':s['phase']='dispute';summary='仙府、聚落和药田都已查过。可召集众人商议修渠，也可安排轮值。'
         elif kind in {'canal','wait'}:
             row=game.building_state['records'].get(s['city'])
             if not row:raise ValueError('原聚落记录失效，不能覆盖另一座城市')
             if row.get('civic_disruption_until')==s['disruption_until']:row['civic_disruption_until']=min(game.player.age,s['disruption_until'])
             s.update(phase='hearing',mitigation=kind);summary='地方影响已处理。可用公开护持或既有玩法的真实成果参与瑶池定议。'
         elif kind=='civic':s['civic_done']=True;summary='十年地方护持已完成，可作为本案定议依据，不兑换第二份香火或报酬。'
-        elif kind=='hearing':s['phase']='implementation';summary='定议通过，按约定权属与使用者实施；原七曜公共修持回执仍独立有效。'
+        elif kind=='hearing':s['phase']='implementation';summary='议案已通过，可按约定动工。先前七曜议定的公共修持仍然有效。'
         elif kind=='build':
             q=repair_quote(game)
             if q['reason']:raise ValueError(q['reason'])

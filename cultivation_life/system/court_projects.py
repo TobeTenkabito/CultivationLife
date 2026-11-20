@@ -133,7 +133,7 @@ def command(deps,game,action,target,amount):
             if not is_free(n) or person_site(game,n)!=game.player.location_id:raise ValueError('须与原星君在同一地点当面协商')
         # A named institutional office without an NPC receives a written undertaking, never a synthetic person.
         transfer_value(game,'player','background:celestial',200,'项目会商文书费用')
-        r['pledges'][value]=dict(name=h['name'],promise='二百五十年内交付并公开原收支回执',age=game.player.age)
+        r['pledges'][value]=dict(name=h['name'],promise='二百五十年内交付，并公布收支账目',age=game.player.age)
         r['deadline']=min(r['deadline'],r['started']+250)
         summary='承诺本案缩短至二百五十年并公开账目；代表依各自支持度表决。'
     elif action=='council_vote':
@@ -196,10 +196,10 @@ def command(deps,game,action,target,amount):
             result=deliver(game,r['job']);r['job'].update(result=result,delivered=True);r['status']='executed'
             state(game).pop('work',None);summary=result+' 须回原提案地点复核结项。'
         else:
-            archive(game,r);summary='原回执已公开并移交诸司履历，未耗款退回原府库；履约支持度增加3，不给本人另发钱货或功德。'
+            archive(game,r);summary='收支明细已公布，余款退回府库。此事记入诸司履历，履约支持度增加3。'
     elif action=='council_cancel':
         if r.get('job') and game.player.location_id!=r['offer']['origin']:raise ValueError('须沿原地图返回原提案地交接公物与余款')
-        archive(game,r,True);summary='原款及余货已交接；已耗工料与表决费不退。逾期承诺扣5支持，原逾期回执进入现有监察线索。'
+        archive(game,r,True);summary='余款和存货已移交，已耗工料与表决费概不退还。逾期失约扣5点支持度，监察可据此追查。'
     else:raise ValueError('未知项目议政操作')
     deps._sync_player_court_identity(game)
     s=game.heavenly_court.setdefault('projects',{});s['last_result']=summary

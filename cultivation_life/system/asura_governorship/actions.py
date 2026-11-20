@@ -92,7 +92,7 @@ def settle(game,payload,*,maps=None,combat=None):
     if action=='petition':
         from .disputes import command
         command(game,row,payload)
-        return '地方案卷已按原权限办理；裁决、担保与资金回执保留在原府。'
+        return '此案已办结。裁决、担保书与收支凭据均留在当地府中备查。'
     elif action=='fund':
         if not rules.king(game) or not capital:raise ValueError('须由修罗王在王庭拨付原府库款')
         from .charters import recognized

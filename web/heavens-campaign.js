@@ -124,7 +124,7 @@
       if (section === 'engagement') {
         const people = campaign.people || [];
         if (!campaign.local) empty(body, '尚未抵达战场', '交锋须在岚疆草原当面进行。可以自行离开，也可以继续原有修行。');
-        else if (!people.length) empty(body, '未查明当前在场人物', '先到界门页查勘；没有真实对手时不会生成替代敌人。');
+        else if (!people.length) empty(body, '尚未查明守军', '前往界门查勘，看看有谁驻守。');
         else {
           const roster = node('div', null, 'heavens-campaign-roster');
           for (const person of people) {

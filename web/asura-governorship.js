@@ -61,7 +61,7 @@
   }
   function disputes(host,row,button,choose,fold,local,locked){
     const d=row.disputes;if(!d||!local&&!d.active.length)return;
-    const panel=fold(local?'地方争议':'地方呈案',local?'按原账目受理，三派表态供裁决参考。具名担保会随兑现或失约影响具体人物关系。':'原府具名呈交的公开案卷；批准实拨原款，任期和未结责任分别核验。');
+    const panel=fold(local?'地方争议':'地方呈案',local?'裁决前可查阅账册，听取三派意见。担保人守约或失信，都关系到彼此的交情。':'各府呈案皆有署名。批款前可查经手人的任期，以及他手上尚未办结的事。');
     panel.classList.add('governor-disputes');
     keepOpen(panel,`disputes:${row.id}:${local}`);
     const control=(label,operation,c,data={},disabled=false)=>{const b=button(label,'petition',()=>({office:row.id,operation,case:c?.id,...(typeof data==='function'?data():data)}),disabled);b.dataset.petitionOperation=operation;return b;};
@@ -87,8 +87,8 @@
       if(c.can_withdraw)item.append(control('撤回并留档','withdraw',c));
       panel.append(item);
     }
-    if(!d.active.length)panel.append(el('p','暂无待决事项。每类事项按百年期受理；没有原始事实时不生成。','court-description'));
-    if(d.history.length){const history=fold('案卷与承诺回执');for(const c of [...d.history].reverse())history.append(el('p',`${c.closed}年 · ${caseLabels[c.status]} · ${c.result}${c.pledge?'（具名担保已记入履历）':''}`));panel.append(history);}
+    if(!d.active.length)panel.append(el('p','府中暂无待决事项。各类呈案每百年受理一次。','court-description'));
+    if(d.history.length){const history=fold('案卷与履约记录');for(const c of [...d.history].reverse())history.append(el('p',`${c.closed}年 · ${caseLabels[c.status]} · ${c.result}${c.pledge?'（具名担保已记入履历）':''}`));panel.append(history);}
     host.append(panel);
   }
   function protocols(host,row,button,choose,fold,locked){
@@ -124,7 +124,7 @@
       note.textContent=(!cases.hidden&&!p.cases.length)?'暂无可办理的原案。已结清事项不能重复领取或退赔。':({divert:'此项会把公款转入本人，并立即留下可调查、撤任和追偿的原始凭据。',charter:'只改变后续授权；原军费剩余部分仍退回实际付款机构。',relief:'须预留一个接防名额；新旧部将实际同地交接后，旧将才沿路撤回。',move_request:'先交接驻军、属员、项目、合同、案卷及公款，再亲赴王庭取得新址许可。',move_complete:'须本人沿地图抵达许可新址；旧建筑留在原地，新府署按原工程重新营造。',ally:'亲赴另一原府与在任总督交涉，个人实付担保；盟军不会复制或自动移至王庭。',integrate:'新君亲赴原府，以实际安置拨款和原人物关系争取承认；不自动恢复被撤职者。',guard_bind:'先在原阵法界面布置镇地阵，再登记到此府；撤去原阵后本府效果同时失效。',guard_repair:'每次使用一份实际持有的修阵资源，完整阵法不会扣费。',negotiate:'与原交战方实际会面；举兵者须付赔款，NPC仍有实力和意愿时可以拒降。'})[op]||'提交时重新核验身份、地点、时限、原案及实际资金；旧页不能重复结算。';
     }
     action.onchange=update;update();panel.append(action,person,cases,target,choice,destination,funds,note,send);
-    if(p.history.length){const history=fold('议政与交接回执');for(const c of [...p.history].reverse())history.append(el('p',`${caseTitle(c)} · ${c.result}`));panel.append(history);}
+    if(p.history.length){const history=fold('议政与交接记录');for(const c of [...p.history].reverse())history.append(el('p',`${caseTitle(c)} · ${c.result}`));panel.append(history);}
     host.append(panel);
   }
   function render(host,game,dispatch,selected=null){

@@ -496,7 +496,7 @@
       "choices": [
         {
           "id": "ponder",
-          "text": "暂缓进度细细校正",
+          "text": "停下来仔细校正",
           "effects": [
             {
               "type": "add_opportunity",
@@ -1059,7 +1059,7 @@
       "id": "EVT_WANDER_TRUE_DEMON_02",
       "version": 1,
       "title": "魔碑剥文",
-      "body": "古魔碑外壳剥落，显露出的断句强调约束力量而非一味宣泄。",
+      "body": "古魔碑上掉下一片石皮，露出半行刀刻的小字。你照着末尾那个“收”字一试，掌中翻涌的魔气渐渐聚成一线。",
       "tags": [
         "common",
         "world:true_demon"

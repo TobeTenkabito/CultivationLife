@@ -176,7 +176,7 @@ def save_formation(
             "推演九宫",
             loadout["id"],
             "saved",
-            f"你将九宫灵流定名为“{name}”并保存阵法预设；预设只记录阵材类型，不复制任何实例。",
+            f"你将九宫灵流定名为“{name}”，记下了这套阵法所用的阵材。",
             {"formation_id": loadout["id"], "active": should_activate},
             ["system", "formation", "art:formation"],
         )

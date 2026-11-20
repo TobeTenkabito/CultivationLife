@@ -5,7 +5,7 @@
     const d=data.disputes,root=e('section',null,'earth-disputes');
     const heading=e('header',null,'earth-case-heading');
     heading.append(e('small','六事听讼 · 各有所归','yaochi-eyebrow'),e('h4','地方来报'),
-      e('p',`本期至世界历 ${d.until.toLocaleString('zh-CN')} 年。只登记可核验的本地事项；换页和读档不会重开旧案。`,'muted'));
+      e('p',`本期至世界历 ${d.until.toLocaleString('zh-CN')} 年。本期各案可在这里查阅。`,'muted'));
     root.append(heading);
     const notice=e('details',null,'yaochi-materials');notice.append(e('summary','登记与承诺的边界'),
       e('p','登记只接收来报，不代你许诺。每类每庙每500年一期；道路塌方登记后会增加沿该路的普通远行耗时。未许诺可无损婉拒，拒绝不会消除道路损坏。'),

@@ -190,7 +190,7 @@ def quote(deps, game, action, target_id, options):
                     raise ValueError('驻地已经关闭或正在撤回')
                 message = '停止施工经营。原人员循路撤回，最后一位驻守者携回当地剩余钱货；无人可搬运时须从总部另派回收使者。'
     return dict(years=years, costs=costs, refundable={}, message=message,
-                warning='人物可能寿尽、被俘或因路线失效而滞留；不会生成替身或免费返乡。')
+                warning='远行途中可能寿尽、被俘，或因道路断绝而滞留异地。返乡须另备路费。')
 
 
 def execute(deps, game, action, target_id, options, proposal, *, run_task, cancel_task, task_result):

@@ -85,7 +85,7 @@ def start_job(game, maps, row, *, automatic=False):
     if used(row) + sum(missing.values()) > capacity(row) or used(row) + sum(missing.values()) - sum(inputs.values()) + count > capacity(row):
         raise ValueError('原料与预留成品超过仓储容量')
     if row['kind'] in {'mine','hunt'} and row['reserve'] < count:
-        raise ValueError('此矿区或猎场剩余储量不足，不能凭空再生矿藏或丹源')
+        raise ValueError('此地余下的储量已不足以开工')
     wage = max(1, math.ceil(market['commodities'][recipe['output']]['price'] * count * recipe['labor']))
     total = wage
     for item, number in missing.items():

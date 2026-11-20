@@ -26,7 +26,7 @@ def sources(game, maps):
         if products:
             key,row = min(products,key=lambda pair:(pair[1]['stock']/max(1,pair[1]['target']),pair[0]))
             result['supply'] = dict(target=key, title=ITEM_CATALOG[key].name, market=market['id'],
-                quantity=min(20,max(1,math.ceil(row['target']*.5-row['stock']))), evidence='原市场库存低于目标的一半；只能交付本人实际持有的商品，不凭空补货。')
+                quantity=min(20,max(1,math.ceil(row['target']*.5-row['stock']))), evidence='当地存货已不足所需的一半，可从自己的货物中调拨补给。')
     if maps:
         for road in maps.worlds.get(p.world,{}).get('routes',[]):
             if p.location_id not in (road['from'],road['to']): continue

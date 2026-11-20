@@ -82,7 +82,7 @@ def quote(deps, game, action, target_id, options):
         return dict(years=task['duration']-task['progress'] if action == 'resume' else 0, costs={}, refundable={})
     saved = get(game, target_id)
     if action != 'omen_study' or not saved:
-        raise ValueError('须先亲见本地征兆，不能凭空补发见闻')
+        raise ValueError('须先到当地察看征兆')
     if task:
         raise ValueError('请先继续或取消当前诸天任务')
     if saved['studied']:
@@ -91,7 +91,7 @@ def quote(deps, game, action, target_id, options):
     if reason := task_reason(deps, game, dict(target_id=target_id, duration=duration, progress=0)):
         raise ValueError(reason)
     return dict(years=duration, costs=dict(stones=0, mp=0), refundable={}, deadline=saved['last_seen']+saved['definition']['lifetime_years'],
-                warning='只在地面核对征兆，保存本地认识；不进入异象、不授予越阶力量。')
+                warning='沿地面痕迹查探，所得线索记入见闻。')
 
 
 def execute(deps, game, action, target_id, options, proposal, *, cancel_task, run_task, task_result):

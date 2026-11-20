@@ -74,7 +74,7 @@ def outcome(game, scope, case, decision, *, actor):
         fulfilled=pledge['choice']==decision and case['status']=='resolved'
         for witness in case['witnesses']:
             remember(game,witness['id'],pledge['actor'],6 if fulfilled else -6,
-                     '具名担保兑现' if fulfilled else '具名担保未兑现',case['id'],settlement=True)
+                     '担保人履约' if fulfilled else '担保人失约',case['id'],settlement=True)
 
 
 def summary(game):

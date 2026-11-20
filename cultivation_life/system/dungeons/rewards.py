@@ -170,7 +170,7 @@ def recipe(rng, identity, realm, path, theme, quality, core=False,world=None):
 
 def grant(game, reward):
     if reward['kind']=='resource':
-        if any(row['id'] not in ITEM_CATALOG for row in reward['items']):raise ValueError('原资源定义已不可用，保留未领取回执')
+        if any(row['id'] not in ITEM_CATALOG for row in reward['items']):raise ValueError('奖品资料缺失，这份奖励仍待领取')
         for row in reward['items']:add_item(game.player,row['id'],row['quantity'])
     elif reward['kind']=='technique':
         book=Technique(**reward['book'])
@@ -181,7 +181,7 @@ def grant(game, reward):
         state['manuals'][book.id]=dict(book=copy.deepcopy(reward['book']),fused=reward['fused'],
             acquired=True,learned=False,level=1,study=None)
         add_item(game.player,Item(id='MANUAL_DUNGEON_'+book.id,name='《'+book.name+'》传承',
-            description='从探幽寻宝的传承页研习；原配方与品阶已确定。',
+            description='此卷得自秘境，可前往“探幽寻宝”的传承页研习。',
             force_tier=book.force_tier,tags=['dungeon_manual']))
     else:
         add_item(game.player,Item(**reward['item']))

@@ -83,7 +83,7 @@ class BodyEffects:
             source=intent.field.owner,slot=intent.allowance.slot,**result)
         if success:
             if not self._action_paused(key) and self._body_round.arm_reaction(key,intent.field.owner,result['chain']):
-                self._light_note('reaction_ready',key,f'{state.unit.name}实际闪避成功，兑现一份烈脏免费施权额度；从已解锁功能中择一，因果链禁止同一角色机制重入。',target=intent.field.owner)
+                self._light_note('reaction_ready',key,f'{state.unit.name}闪过一击，借烈脏之力可免费施展一项已掌握的邻域手段。',target=intent.field.owner)
         return success
 
     def _reaction_effect(self,field,token):

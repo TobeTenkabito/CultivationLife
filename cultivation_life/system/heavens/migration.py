@@ -53,7 +53,7 @@ def finish(game, echo, status, *, year=None):
     row['status'] = status
     record(game, {'completed': '居民已完成当地安置，解除行程占用；同一人物继续在目的界面生活。',
                   'cancelled': '居民尚未抵达，迁居已撤销，未耗接引款退回原项目。',
-                  'failed': '迁居人物已陨落，原行程终止；未耗接引款退回原项目，不生成替代居民。'}[status], year=year)
+                  'failed': '迁居者途中陨落，行程就此终止。余下的接引款已退回。'}[status], year=year)
 
 
 def execute(deps, game, action, target, options):

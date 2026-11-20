@@ -18,7 +18,7 @@ OFFICES = {
     'works': dict(name='天工署', mark='工', title='邻域实货调拨', years=10,
         text='从本地实购标准商品，运抵已知相邻市场补缺；公物与行囊分开保管。'),
     'audit': dict(name='御史台', mark='察', title='公务收支复核', years=5,
-        text='核对已归档公务的付款、退回与交付回执；确认结清或标记账差，不能凭空定罪。'),
+        text='核对归档公务的付款、退款与交付凭据。账目相符即可结清，有出入则记下差额待查。'),
 }
 HOME='jade_capital'
 COURT='organization:court:heavenly'

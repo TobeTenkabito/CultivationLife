@@ -3,12 +3,12 @@
   'use strict';
   const TAU=Math.PI*2,clamp=v=>Math.max(0,Math.min(1,v)),ease=v=>{v=clamp(v);return v*v*(3-2*v);};
   const catalog=[
-    {id:'rings',name:'三重束纹',note:'已采用：三道束纹环绕人物，节点收紧。'},
+    {id:'rings',name:'三重束纹',note:'三道束纹环绕周身，逐层收紧。'},
     {id:'talismans',name:'符箓围禁',note:'四枚符箓环行，符文亮起后向目标收拢。'},
     {id:'stars',name:'星轨牵缚',note:'星点依次连成牵引线，外侧星芒向内归位。'},
     {id:'lotus',name:'莲瓣合禁',note:'莲瓣从足下升起，前后合拢，保留人物轮廓。'},
     {id:'pillars',name:'四柱锁界',note:'四枚法柱落定，脚下连线锁合；柱印向下归位。'},
-    {id:'crystal',name:'晶棱凝禁',note:'晶棱由下向上凝成，折线闭合；不表示附加冻结。'}
+    {id:'crystal',name:'晶棱凝禁',note:'晶棱从足下升起，在头顶合拢。'}
   ].map(row=>Object.freeze({...row,semantics:['domination','seal'],status:'approved'}));
   function register(rows){for(const row of rows||[])if(row.motif&&!catalog.some(r=>r.id===row.id))catalog.push(Object.freeze({...row}));}
   function draw(id,ctx,active=false){

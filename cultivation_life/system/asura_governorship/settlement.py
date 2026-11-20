@@ -41,7 +41,7 @@ def refund(game,row,c,maps,*,won=False):
         authority.fund(game,ally,c['facts']['wallet'],c['amount']);c['paid']=c['amount']
     else:transfer_value(game,c['facts']['wallet'],'player',balance(game,c['facts']['wallet']),'原盟约未履行担保退回原出资人')
     if ally and ally['controller']==c['subject'] and c['stage']=='active':troops.recall(game,maps,ally)
-    politics.remember(game,c['subject'],'player',6 if won else -6,'盟约兑现' if won else '原盟约收束',c['id'],settlement=True)
+    politics.remember(game,c['subject'],'player',6 if won else -6,'依约相助' if won else '盟约告终',c['id'],settlement=True)
     council.close(row,c,'fulfilled' if won else 'cancelled','原担保按约实拨。' if won else '原未耗担保退回，已耗军费与原撤任保留。')
 
 

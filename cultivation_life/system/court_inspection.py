@@ -48,7 +48,7 @@ def finish(game,elapsed):
             if w['key']=='hearing':
                 npc=find_person(game,c['subject'])
                 present=c['subject']=='player' or bool(npc and npc.alive and npc.world=='celestial' and person_site(game,npc)==HOME)
-                c['evidence'][w['key']]['attendance']='实际到场' if present else '当事人缺席，仅核原记录，不虚构口供'
+                c['evidence'][w['key']]['attendance']='实际到场' if present else '当事人缺席，按卷宗查核'
             c['stage']='decision' if len(c['evidence'])==3 else 'evidence'
         c.pop('work')
 
@@ -56,7 +56,7 @@ def verdict_reason(game,c,key):
     f=facts(game,c)
     if key not in VERDICTS:return '未知裁定'
     if key=='clear' and f['fault']:return '仍有未交代事实，不能直接认定无责'
-    if key=='remedy' and (f['owed'] or f.get('difference')):return '须先补交实际短缺；来源未明的账差不能凭空核销'
+    if key=='remedy' and (f['owed'] or f.get('difference')):return '请先补齐欠款，查清账差来由后再核销'
     if key=='remedy' and c['kind']!='procurement':return '补交结案只适用于采购案'
     if key=='recuse' and c['kind']!='conflict':return '本案不涉及任命回避'
     if key=='suspend' and (not f['fault'] or f.get('missing')):return '没有足够履约事实支持停止经办资格'

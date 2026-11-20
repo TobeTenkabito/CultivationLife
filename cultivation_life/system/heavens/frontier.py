@@ -103,7 +103,7 @@ def quote(deps, game, action, target, options):
         raise ValueError('已向当地递交警讯')
     return dict(years=DURATIONS[action], costs={}, refundable={},
                 warning='问讯将主动送出无棣原的回程位置。对方须另行批准一人勘察；可能拒绝，不会直接开战。' if action == 'frontier_inquire' else '',
-                message='此行动仅代表个人，不授予征兵、军事建设或全界停战权。')
+                message='此次问讯、报信或交涉，均以你个人的名义行事。')
 
 
 def execute(deps, game, action, target, options, proposal, *, run_task, cancel_task, task_result):

@@ -13,7 +13,7 @@
       "event_id":"EVT_NORTH_NIGHT_PALACE_001","target_name":"寒月宫地脉妖灵","natural_terrain":"狭窄","artificial_conditions":["禁空","大阵"],
       "enemy_members":[{"name":"寒脉妖灵","share":0.55,"path":"monster","kind":"environment"},{"name":"噬魂冰魄","share":0.25,"path":"ghost"},{"name":"失控宫傀","share":0.20,"path":"dao","kind":"artifact"}],
       "player_allies":[{"name":"寒月宫护法","power_ratio":0.08,"path":"dao"}],
-      "story_beats":["受污寒脉封死地宫遁路，历代宫傀从冰壁中苏醒。","噬魂冰魄侵入神识，地脉妖灵试图吞下寒魄山髓。","寒月宫护法稳住外阵，你循着污秽源头深入地底。","妖灵本体显化，必须剥离魔气而非毁掉整条寒脉。"]
+      "story_beats":["受污寒脉封死地宫遁路，历代宫傀从冰壁中苏醒。","噬魂冰魄侵入神识，地脉妖灵试图吞下寒魄山髓。","寒月宫护法稳住外阵，你循着污秽源头深入地底。","妖灵从冰壁里探出身来，周身黑气与寒脉紧紧相缠。要保住寒脉，得先剥去它身上的魔气。"]
     },
     {
       "event_id":"EVT_GUANGHAN_003","target_name":"星刻古碑守卫","natural_terrain":"狭窄","artificial_conditions":["禁神识","大阵"],
@@ -178,7 +178,7 @@
       "event_id":"EVT_DEMON_SACRED_004","target_name":"焚天门图争夺者","natural_terrain":"险要","artificial_conditions":["禁空","禁神识"],
       "enemy_members":[{"name":"赤霄天君化身","share":0.50,"path":"demonic"},{"name":"玄烬魔念","share":0.22,"path":"demonic"},{"name":"跨界守门兽","share":0.18,"path":"monster"},{"name":"界壁乱流","share":0.10,"path":"ghost","kind":"environment"}],
       "player_allies":[{"name":"三祖残魂","power_ratio":0.07,"path":"ghost"}],
-      "story_beats":["赤霄化身与玄烬魔念同时锁定焚天门图。","守门兽吞下阵图核心，界壁乱流切断各方退路。","三祖残魂指出兽腹中的空间锚点，你转而攻击锚点而非兽躯。","两道上界神念争夺魔胎与降临权，门图即将被撕碎。"]
+      "story_beats":["赤霄化身与玄烬魔念同时锁定焚天门图。","守门兽吞下阵图核心，界壁乱流切断各方退路。","三祖残魂指向兽腹。你循他所指，看准腹中明灭的空间锚点，一击落下。","两道上界神念争夺魔胎与降临权，门图即将被撕碎。"]
     },
     {
       "event_id":"EVT_TRUE_DEMON_SACRED_001","target_name":"焚天回廊追猎队","natural_terrain":"开阔","artificial_conditions":["禁神识"],

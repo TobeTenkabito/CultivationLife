@@ -104,7 +104,7 @@
         const preview=note(''),fight=button('融合所选肉身（开始生死战）','fuse',{},true);
         const update=()=>{const rows=(s.bodies||[]).filter(b=>selected.has(b.id)),name=rows.length===2?'阿修罗':rows[0]?.matched_route;preview.textContent=rows.length?`已选 ${rows.length} 具 · ${name?`将进入${name}本命`:'此单具不符合本命条件，需搭配另一具肉身'}`:'尚未选择肉身';fight.disabled=blocked||!converted||(s.body_level||0)<10||!name||rows.length>2;};
         for(const b of s.bodies||[]){const row=el('label',null,'asura-body-choice'),box=el('input');box.type='checkbox';box.checked=selected.has(b.id);box.onchange=()=>{if(box.checked)selected.add(b.id);else selected.delete(b.id);update();};row.append(box,el('span',`${b.name} · 普通炼体 ${b.body_training}/100 · 高阶肉身 ${b.immortal_body_level||0} 层 · 肉身战力 ${fmt(b.power)}`));fusion.append(row);}
-        fight.onclick=()=>act({action:'fuse',body_ids:[...selected]});fusion.append(preview,fight,note('融合战双方不可逃跑。须镇压或击杀全部凝练肉身；失败可能身死。只继承肉身炼体战力，不复制其装备与功法。'));update();content.append(fusion);
+        fight.onclick=()=>act({action:'fuse',body_ids:[...selected]});fusion.append(preview,fight,note('一旦开战，双方都须血战到底。镇压或击杀全部凝练肉身，可继承其炼体战力。落败有身死之险。'));update();content.append(fusion);
       }else{
         const route=section(`${s.route_name}本命 · ${s.part} ${s.level}/9级`,`融合所得永久肉身战力 ${fmt(s.inherited_power)}。本命已经确定。`);route.append(button(`修炼本体 · ${fmt(60*s.level)} 精魂`,'train_route',{expected_level:s.level},!converted||s.level>=9||s.souls<60*s.level||!!s.body_training_reason));content.append(route);
         if(s.field_discipline){
@@ -135,7 +135,7 @@
         const naming=el('details',null,'asura-details');naming.append(el('summary','为魔域更名'));const input=el('input');input.maxLength=24;input.value=s.domain_name;input.setAttribute('aria-label','魔域名称');const rename=button('保存名称','rename');rename.onclick=()=>act({action:'rename',name:input.value});naming.append(input,rename);domain.append(naming);content.append(domain);
         const effects=section('额外分支与神通');(s.rule_descriptions||[]).forEach(rule=>effects.append(el('p',rule,'asura-description')));if(!s.rule_descriptions?.length)effects.append(note('尚未配置额外分支或随机神通；本命权能与预案见下方。'));content.append(effects);
         if(s.field_discipline){
-          const d=s.field_discipline,plan=section(d.name+' · 战前预案','八部权能与五蕴共同结算，入战后冻结。在进逼预案下，恢复型领域缺少反攻条件时会收拢覆盖，形成天威或听律记录后再进逼。');
+          const d=s.field_discipline,plan=section(d.name+' · 战前预案','八部权能可与五蕴配合，预案须在开战前选定。在进逼预案下，恢复型领域缺少反攻条件时会收拢覆盖，形成天威或听律记录后再进逼。');
           const label=el('label','八部权能预案','asura-field-plan'),select=el('select');select.setAttribute('aria-label','八部权能预案');select.disabled=blocked||!converted||!!s.body_training_reason;
           for(const m of d.modes){const o=el('option',m.name+(m.unlocked?'':`（${m.level}级）`));o.value=m.id;o.disabled=!m.unlocked;select.append(o);}select.value=d.mode;
           select.onchange=()=>act({action:'set_field_plan',target_id:'mode:'+select.value,expected_level:s.level});label.append(select);plan.append(label);

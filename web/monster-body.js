@@ -36,7 +36,7 @@
     const select=el('select');select.setAttribute('aria-label','烈脏每次施权择一');select.disabled=!data.can_select;
     for(const r of data.choices){const option=el('option',r.name+(r.unlocked?'':'（培养后解锁）'));option.value=r.id;option.disabled=!r.unlocked;select.append(option);}
     select.value=data.reaction;select.onchange=()=>act({action:'monster_body_select',voisinage_id:select.value});
-    section.append(el('label','烈脏选择：'),select,el('p','自动择一优先恢复自身，再镇压或封锁刚才的施术者。固定选择无合法目标时不执行。选项随入战快照冻结。','muted'));root.append(section);
+    section.append(el('label','烈脏选择：'),select,el('p','自动选择时优先疗伤，其次镇压或封锁刚才的施术者。指定招式须有合适的目标才能发动，请在开战前选定。','muted'));root.append(section);
   }
   window.MonsterBody=Object.freeze({render});
 })();

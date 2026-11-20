@@ -33,14 +33,14 @@
       button(data.leave?'销假':'请假',data.leave?'resume':'leave','',data.home_reason),button('交接离任','resign','',data.recovery_home_reason||(data.jobs.length?'须先交接全部公务':'')));appointments.append(actions);
       if(data.promote_reason)appointments.append(e('p',data.promote_reason,'muted'));}
     duties.append(e('h4','当前案卷'));
-    if(!data.jobs.length)duties.append(e('p','暂无在办公务。下方差事按本人当前所在地的真实对象列出。','muted'));
+    if(!data.jobs.length)duties.append(e('p','手头暂无公务，可在下方挑选当地的差事。','muted'));
     for(const j of data.jobs){const card=e('article',null,'bureau-current');card.dataset.bureauJob=j.id;
       card.append(e('small',`${j.person_name} · ${phases[j.phase]||j.phase}`,'bureau-eyebrow'),e('h4',j.name),
         e('p',`${j.place_name} · 现场 ${j.progress} / ${j.years} 年 · 截止 ${j.deadline} 年`));
       if(j.leg&&['outbound','homeward'].includes(j.phase))card.append(e('p',`实际路程 ${j.leg.progress} / ${j.leg.years} 年`));
       if(j.evacuation)card.append(e('p',`伤者实际转运 ${j.evacuation.progress} / ${j.evacuation.years} 年`));
       if(j.offer.detail)card.append(e('p',j.offer.detail,'bureau-notice'));
-      if(j.offer.operation==='bounty')card.append(e('p',`接案时目标：${j.offer.target_state[0]}阶 ${j.offer.target_state[1]}层 · 临战仍按原人物当前状态结算`,'muted'));
+      if(j.offer.operation==='bounty')card.append(e('p',`接案时目标：${j.offer.target_state[0]}阶 ${j.offer.target_state[1]}层 · 交手时以对方当时的修为为准`,'muted'));
       if(j.battle)card.append(e('p',j.battle.summary,'bureau-receipt'));
       const bar=e('progress');bar.max=j.years;bar.value=j.progress;bar.setAttribute('aria-label','公务实际进度');card.append(bar);
       card.append(e('p',`原款托管 ${fmt(j.remaining_cash)} 灵石 · 公物 ${Object.values(j.cargo).reduce((a,b)=>a+b,0)} 件 · 总功德 ${fraction(j.reward)}`,'muted'));
@@ -84,7 +84,7 @@
     if(!data.candidates.length)staff.append(e('p','此地没有可见的原天官人物。虚拟选举席位不能替代属员。','muted'));
     history.append(e('h4','近十二份履历'));
     for(const j of [...data.history].reverse()){const r=j.receipt,card=e('article',null,'bureau-card');card.append(e('h4',j.name),e('p',r?.result||'已归档'),e('small',`采购 ${fmt(r?.purchase)} · 劳务 ${fmt(r?.labor)} · 工程 ${fmt(r?.engineering)} · 退回 ${fmt(r?.refunded)} 灵石${j.audited?' · 已经御史复核':''}`));history.append(card);}
-    if(!data.history.length)history.append(e('p','完成或交接公务后保留实际收支回执。','muted'));
+    if(!data.history.length)history.append(e('p','公务办结或移交后，可在这里查阅收支。','muted'));
     window.CourtInspection?.render(inspection,data,button);
     window.PanelPages.mount('court-bureau-pages',pages,[['任职', [appointments]],['差事',[duties]],['属员',[staff]],['监察',[inspection]],['履历',[history]]]);
     const council=window.WestwardVentures?.council(root,projects,dispatch);

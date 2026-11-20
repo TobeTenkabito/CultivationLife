@@ -236,7 +236,7 @@ class VoisinageEffects:
                 zhen=self.light_value(intent.field.owner,'zhen')
                 if not zhen and not intent.allowance.requires_evade:self._ordinary_acted.add(intent.field.owner)
                 name=owner.unit.name
-                if intent.allowance.requires_evade:self._light_note('body_reaction',intent.field.owner,f'{name}以烈脏兑现免费治疗，不占普通出手或基础邻域行动。',cost=0,ordinary_spent=False)
+                if intent.allowance.requires_evade:self._light_note('body_reaction',intent.field.owner,f'{name}借烈脏之力疗伤，仍可照常出手、施展邻域。',cost=0,ordinary_spent=False)
                 elif zhen:self._light_note('zhen_action',intent.field.owner,f'{name}以震合缥光维持治疗：消耗一次邻域行动与{cost:g}元力，保留普通出手。',cost=cost,ordinary_spent=False)
                 else:self.frame.events.append(f'{name}尚未解锁震合缥光，邻域治疗占用本回合一次普通出手，并消耗{cost:g}元力。')
             if not intent.ordinary:

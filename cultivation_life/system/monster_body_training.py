@@ -65,7 +65,7 @@ def act(game,action,key,expected_level,*,has_item,remove_item):
         rank=data.get('training',{}).get('liezang',0)
         if level<30 or key not in MODE_NAMES or (key!='auto' and rank<UNLOCKS[key]):raise ValueError('烈脏功能尚未解锁')
         p.immortal_body.setdefault('monster',{})['reaction']=key
-        return f'烈脏改为{MODE_NAMES[key]}，每次闪避仍只兑现一项免费施权。'
+        return f'烈脏改为{MODE_NAMES[key]}，每次闪避后可免费施权一次。'
     if action=='monster_body_train':
         if p.body_training<100 or level>=50:raise ValueError('须普通炼体100层，妖躯上限50层')
         rank=level;bill=quote(rank,{config()['body_material']:1});label='妖躯'

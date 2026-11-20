@@ -66,7 +66,7 @@ def plan(deps, game, row, options):
     defense = deps.outpost_defenders(game, row, location, enemy.id)
     defenders = defense['people']
     if not defenders:
-        raise ValueError('当地没有可实际应战的原守军，不虚构战争或战果')
+        raise ValueError('当地守军无人应战')
     travel = (outward['years'] + homeward['years']) * profile(row['source'])['annual']
     if balance(game, base.wallet(row)) < profile(row['source'])['war_budget'] + travel + 3*profile(row['source'])['annual']:
         raise ValueError(f'当地须实有军费{profile(row['source'])['war_budget']}、往返行旅{travel}及驻地养护{3*profile(row['source'])['annual']}灵石')
@@ -112,7 +112,7 @@ def quote(deps, game, row, action, options):
                     raise ValueError('战败组织或原目标驻地已变化，不能套用旧战果')
                 if not requirements.deployed_people(game, war, 'attacker', arrived_only=True):
                     raise ValueError('实际战场已无本方部众，不能远领征服战果')
-                message = '沿原战争依附条款确立原组织的宗主／附庸关系，不复制对方宗门、人物或资产。'
+                message = '双方依战约结为宗主与附庸。归附者仍领本门弟子，掌管自家产业。'
             elif action == 'outpost_war_stop':
                 if war['campaign_phase'] in {'returning', 'home'}:
                     raise ValueError('原军队已经在撤回或结清')

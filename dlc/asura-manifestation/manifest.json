@@ -8,6 +8,6 @@
   "enabled": true,
   "load_order": 160,
   "requires": [],
-  "description": "配套本体3.9.0：地方经营、真实供货与待遇，联合议政与监察追偿，四类军权与轮调，守府阵位与迁署，诸府结盟、议降及战后整合；保留原有魔躯五蕴与八部权能。",
+  "description": "修炼魔躯五蕴，执掌八部权能。入仕后可经营属地、调兵守府，与诸府结盟议政，追查亏空，战后受降安民。",
   "visual_registry": "visual/registry.json"
 }

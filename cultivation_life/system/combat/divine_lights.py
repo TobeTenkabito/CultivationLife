@@ -97,7 +97,7 @@ class DivineLights(BodyEffects):
                     if key in self._light_muted:result+='；已被静默，实际暴击停用'
                     self._light_note('critical_plan',key,f"{self.units[key].unit.name}的{row['name']}轮首暴击判定{result}（概率{row['probability']:.0%}）。",record=dict(row))
                 if 'critical_extra' in row['effects'] and row['triggered']:
-                    self._light_note('action_plan',key,f"{self.units[key].unit.name}的{row['name']}可在实际暴击后追加施权（免费概率{row['effects'].get('free',0):.0%}）；兑现时判定免费，同一角色机制禁止沿自身因果链重入。",record=dict(row))
+                    self._light_note('action_plan',key,f"{self.units[key].unit.name}的{row['name']}可在暴击后追加一次施权（免费概率{row['effects'].get('free',0):.0%}，出手时判定）。",record=dict(row))
         for state in self.units.values():
             state.controls={kind:owner for kind,owner in state.controls.items() if owner not in self._light_muted}
 

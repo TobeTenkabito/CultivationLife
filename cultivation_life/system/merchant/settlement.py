@@ -107,7 +107,7 @@ def _merchant_intelligence(deps: MerchantSettlementDependencies, game, world, st
         if len(facts) >= stars:
             break
     if not facts:
-        facts.append('未查到可核实的修士关系，商盟没有提供猜测')
+        facts.append('商盟打听了一圈，也没查到这些修士有什么往来')
     clues = []
     if tianji_content_available():
         deps._ensure_tianji_state(game)

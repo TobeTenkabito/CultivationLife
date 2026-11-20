@@ -33,7 +33,7 @@ def growth_quote(player, art):
         if player.body_training>=WORLD_SYSTEMS['body_cultivation']['max_layer']:reason=reason or '炼体已达上限，无需投入材料'
         required=body_progress_required(player)
         gain=max(0.,min(required*value,required-player.body_progress))
-        if gain<=0:reason=reason or '本层炼体积累已满，请先沿原入口突破'
+        if gain<=0:reason=reason or '本层炼体积累已满，请先在炼体页突破'
         return dict(reason=reason,gain=gain,before=player.body_progress,level=player.body_training,
                     text=f'炼体积累 +{gain:g}（{player.body_progress:g} → {player.body_progress+gain:g} / {required:g}）；积满后手动突破')
     if effect=='qi_experience':

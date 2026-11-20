@@ -15,7 +15,7 @@ from . import building_projects as buildings
 BUILDING='purple-east:celestial:cloud-palace'
 PLANS={
     'guard':dict(name='守土济民',years=30,text='本人承接原仙府，并向当地居民开放；取得原产权，后续公开与私人使用仍按原建筑权限办理。'),
-    'public':dict(name='公共修持',years=20,text='原仙府转交天庭作公共静室；须已有真实公共修持议案的交付回执，不给本人拨款或加修为。'),
+    'public':dict(name='公共修持',years=20,text='将仙府交予天庭，开为公共静室。须先办结一项经七曜议定的公共修持项目。'),
     'yaochi':dict(name='瑶池承办',years=20,text='原仙府转交瑶池并保留本人具名使用权；须以原仙圃合同证明供货，经营款、保证金及期限照常。'),
     'shared':dict(name='同道共修',years=15,text='本人承担原工程，与一名同境以上原同道共同整理，双方获得使用权；对方实际在场并被占用。'),
 }
@@ -53,7 +53,7 @@ def proofs(game):
 
 def plan_reason(game,key):
     p=proofs(game)
-    if key=='public' and not p['council']:return '须先通过原七曜表决并完成一项公共修持项目；不以功德替代投票'
+    if key=='public' and not p['council']:return '须先由七曜表决通过，并办结一项公共修持项目'
     if key=='yaochi' and not p['garden']:return '须在本案登记后新完成原仙圃实物供货合同'
     if key=='guard' and not p['civic']:return '须完成本案公开护持与居民安置工时'
     return ''

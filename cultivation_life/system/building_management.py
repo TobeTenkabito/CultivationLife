@@ -43,7 +43,7 @@ def quote(game,row,kind,*,administration=None,stock=None):
         if kind=='settle':
             receipt=unit*row['level']*costs['receipt_units'][row['subtype']]
             if 'exchange' not in facilities(row):reason='须先建成市舶会馆'
-            elif local_cash(game,row)<receipt:reason='当地原经营账户实款不足，不能垫付或凭空生息'
+            elif local_cash(game,row)<receipt:reason='当地经营账上余款不足，付不起本次经营所得'
         elif kind=='aid':
             if row['level']>=3:reason='本城已达三级，无需再积累治理进度'
             elif row.get('development',0)>=cfg['city_development'][row['level']-1]:reason='治理进度已足，请先扩建'
@@ -52,7 +52,7 @@ def quote(game,row,kind,*,administration=None,stock=None):
         used=usage(game,row)
         if administration is not None:
             used=dict(used,last_year=max(used.get('last_year',0),administration['appointed']))
-        if 'last_year' not in used or game.player.age<=used['last_year']:reason='须先在城外度过一个真实年份；不补领离城期间的历年收益'
+        if 'last_year' not in used or game.player.age<=used['last_year']:reason='须先在城外度过一年，再回城办理当年的经营或赈济'
     from .institution_authority import can_operate_city
     authorized=can_operate_city(game,administration,row) if administration is not None else projects.owns(game,row)
     if not authorized:reason='没有原城市经营授权' if administration is not None else '只有城主可以经营此城'

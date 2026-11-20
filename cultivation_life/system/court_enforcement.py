@@ -54,7 +54,7 @@ def offers(game,maps):
         item=product_id('celestial',max(9,npc.realm_index),'healing')
         out.append(dict(operation='rescue',target=npc.id,location=place,name='救治转运 · '+npc.name,
             materials={item:1},coins=0,years=1,evacuation=leg,target_state=[npc.realm_index,npc.layer,npc.wounds],
-            detail='实购对应阶疗伤丹，现场救护一年，再沿原道路转运至'+maps.location('celestial',leg['destination'])['name']+'。自然恢复不冻结；没有原伤者不生成救援。'))
+            detail='购入相应品阶的疗伤丹，就地救治一年，再将伤者护送至'+maps.location('celestial',leg['destination'])['name']+'。途中伤势也会逐渐恢复。'))
         if len(out)>=16:break
     return out
 

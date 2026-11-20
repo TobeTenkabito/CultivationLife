@@ -106,7 +106,7 @@ def deliver(game,job):
     if not source or source.get('audited') or source['status']!='closed':raise ValueError('原案卷已变化或已经复核')
     receipt=source['receipt'];difference=receipt['reserved']-sum(receipt[k] for k in ('purchase','labor','engineering','refunded'))
     source['audited']=dict(age=game.player.age,auditor=job['person'],difference=difference)
-    return f'原案卷已复核，收支差额{difference}灵石。'+('记录账差，须按实际回执追查，不自动认定人物有罪。' if difference else '款项结清，采购及交付凭据保留。')
+    return f'案卷已复核，收支相差{difference}灵石。'+('账差已记入案卷，可循收支凭据追查。' if difference else '款项结清，采购及交付凭据保留。')
 
 def close(game,job,*,cancel=False):
     if cancel:

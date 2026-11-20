@@ -124,7 +124,7 @@ class FieldEconomy:
         if data.get('record'):
             m['echo']={}
             self._field_note(key,d.names[2] if intent.discipline_action=='rupture' else d.names[1],
-                f'消费一份{self._field_effect_name(data["record"]["kind"])}听律记录，不复制敌方威能与行动。',record=data['record'])
+                f'用去一份{self._field_effect_name(data["record"]["kind"])}听律记录。',record=data['record'])
         if data.get('marks'):
             m['marks'][data['target']]['count']-=data['marks']
             self._field_note(key,d.names[1],f'消费{data["marks"]}枚禁印，余{m["marks"][data["target"]]["count"]}枚；本次只尝试一项短封。',target=data['target'],spent=data['marks'])

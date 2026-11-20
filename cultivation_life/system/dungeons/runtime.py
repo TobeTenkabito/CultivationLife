@@ -435,7 +435,7 @@ def command(deps,game_id,action,payload):
                 if state['active'] or site['status']!='open' or site['entered']:raise ValueError('此副本已进入或已经结束')
                 if game.player.age<state['ready_age']:raise ValueError('刚刚退出副本，尚需度过一个完整行动单位')
                 site.update(status='active',entered=True,unit=int(WORLD_SYSTEMS['time_units'][str(true_rank(game.player)[0])]))
-                state['active']=site['id'];log(site,'你踏入入口。内部形势仍需亲自探查。')
+                state['active']=site['id'];log(site,'你跨过入口，停下脚步，听了听四周的动静。')
                 carry(game,site,log)
                 offer_invited(game,site)
                 for mail in state['mail']:
