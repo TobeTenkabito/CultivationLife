@@ -6,7 +6,7 @@
   const el = (tag,text,cls='') => {const n=document.createElement(tag);n.className=cls;if(text!==undefined)n.textContent=text;return n;};
   function button(label,action,payload={},enabled=true) {
     const choice=payload.choice;
-    const tone=choice==='fight'?'danger':
+    const tone=choice==='fight'||action==='slay'?'danger':
       ['exit','decline_invite'].includes(action)||['bypass','decline','flee'].includes(choice)?'quiet':
       ['discover','enter','learn','study','continue_study'].includes(action)||['seize','accept'].includes(choice)?'primary':'secondary';
     const b=el('button',label,`dungeon-button dungeon-button--${tone}`);b.type='button';b.dataset.dungeonAction=action;
@@ -101,6 +101,7 @@
         if(p.treasure_bars?.length){const select=el('select'),observed=el('div');select.setAttribute('aria-label','查看'+p.name+'对已知宝物的表现');p.treasure_bars.forEach(m=>{const o=el('option',m.label.replace('夺宝意向 · ',''));o.value=m.id;select.append(o);});const show=()=>observed.replaceChildren(metric(p.treasure_bars.find(m=>m.id===select.value)));select.onchange=show;show();body.append(select,observed);}
         p.clues.forEach(c=>body.append(el('p','实证 · '+c.text,'dungeon-clue')));
         if(p.can_pact)body.append(button('约定互相掩护','pact',{...token,actor_id:p.id}));
+        if(p.can_slay)body.append(button('出手灭杀','slay',{...token,actor_id:p.id}));
         if(p.contract)body.append(el('p','交药换取辨阵：'+({promised:'待交付',fulfilled:'已当面履行',broken:'已撤回约定'}[p.contract.state])));
         if(p.can_trade){const deal=el('div',undefined,'dungeon-mail-actions');
           if(!p.contract)deal.append(button('商议交药换取辨阵','bargain',{...token,actor_id:p.id,choice:'promise'}));

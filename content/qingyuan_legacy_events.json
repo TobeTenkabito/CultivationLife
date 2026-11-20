@@ -6,7 +6,7 @@
       "conditions":{"all":[{"path":"player.realm_index","op":"eq","value":1},{"has_affinity":"wood"},{"not":{"knows_technique":"TECH_QINGYUAN_SWORD"}}]},
       "choices":[
         {"id":"study","text":"循着剑痕逐式参悟","effects":[{"type":"restore_mp","value":-0.15},{"type":"learn_technique","technique_id":"TECH_QINGYUAN_SWORD"},{"type":"add_opportunity","value":8}]},
-        {"id":"seek","text":"请附近老药农辨认崖上灵藤","conditions":{"has_item":"spirit_stone","quantity":6},"disabled_reason":"至少需要六枚灵石作为酬资","effects":[{"type":"remove_item","item_id":"spirit_stone","quantity":6},{"type":"learn_technique","technique_id":"TECH_QINGYUAN_SWORD"},{"type":"add_infamy","value":1}]},
+        {"id":"seek","text":"请附近老药农辨认崖上灵藤","conditions":{"has_item":"spirit_stone","quantity":6},"disabled_reason":"至少需要六枚灵石作为酬资","effects":[{"type":"remove_item","item_id":"spirit_stone","quantity":6},{"type":"learn_technique","technique_id":"TECH_QINGYUAN_SWORD"},{"type":"add_renown","value":1}]},
         {"id":"trial","text":"引木灵力入剑，当场演练崖上剑意","effects":[{"type":"damage","value":0.08,"reason":"失控木剑贯伤经脉"},{"type":"learn_technique","technique_id":"TECH_QINGYUAN_SWORD"}]},
         {"id":"leave","text":"以古藤重新遮住剑痕","effects":[{"type":"add_heart_demon","value":1}]}
       ]
@@ -27,7 +27,7 @@
       "choices":[
         {"id":"disciple","text":"替古松引泉三日，请木离真人完整演法","effects":[{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"},{"type":"add_karma","value":-3}]},
         {"id":"exchange","text":"以自身剑阵心得与他平等论道","effects":[{"type":"add_opportunity","value":60},{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"}]},
-        {"id":"contest","text":"主动撤去半数飞剑，请他破阵","effects":[{"type":"restore_mp","value":-0.18},{"type":"add_infamy","value":8},{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"}]},
+        {"id":"contest","text":"主动撤去半数飞剑，请他破阵","effects":[{"type":"restore_mp","value":-0.18},{"type":"add_renown","value":8},{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"}]},
         {"id":"observe","text":"沉默旁观，将两套阵势尽数烙入识海","effects":[{"type":"add_heart_demon","value":-4},{"type":"learn_technique","technique_id":"TECH_QINGPAN_SWORD_ARRAY"},{"type":"learn_technique","technique_id":"TECH_CHUNLI_SWORD_ARRAY"}]}
       ]
     }

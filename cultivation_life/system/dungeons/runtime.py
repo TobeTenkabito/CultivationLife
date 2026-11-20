@@ -13,6 +13,7 @@ from .people import materialize, power, pressures, fight, gratitude, available, 
 from .ecology import appearance_depth
 from .rewards import grant, learn
 from . import expedition, scenes
+from .companions import carry, separate
 
 
 @dataclass(frozen=True)
@@ -134,6 +135,7 @@ def contact(game,site,role):
     if not available(game,site,role):
         mark_absent(site,role)
         return False
+    role['ledger']['encounter_step']=site['step']
     if team_reason(game,role):
         role.update(known=True,state='observed')
         log(site,label(role)+'从岔路经过，独自向前探去。',actors=[role['id']])
@@ -189,7 +191,8 @@ def advance_scene(game,site):
     for key in list(site['party']):
         role=site['roles'][key]
         if not available(game,site,role):
-            mark_absent(site,role);continue
+            mark_absent(site,role);separate(game,role);continue
+        if role['ledger'].get('outside_party'):continue
         if role['ledger'].get('conduct_step')==site['step']:continue
         role['ledger']['conduct_step']=site['step']
         if expedition.conduct(game,site,role,log):continue
@@ -217,7 +220,7 @@ def advance_scene(game,site):
             log(site,label(a)+'忽然截下'+b['name']+'的去路，索要刚发现的遗物；两人翻脸相向。',actors=[a['id'],b['id']])
             site['pending']={'kind':'conflict','actor':a['id'],'other':b['id'],'aftermath':True};return
     for role in site['roles'].values():
-        if (role['state']=='unseen' and role['offer_step']<=site['step']<len(site['nodes'])
+        if (role['state'] in {'unseen','observed'} and role['offer_step']<=site['step']<len(site['nodes'])
                 and appearance_depth(site,role)<=site['depth'] and not team_reason(game,role)):
             contact(game,site,role)
             if site['pending']:return
@@ -264,7 +267,7 @@ def resolve_node(deps,game,site,choice):
                 role.update(known=True,state='contact');other.update(known=True,state='contact')
                 log(site,label(role)+'与'+label(other)+'争抢同一件遗物，双方已经动手。',actors=[role['id'],other['id']])
                 site['pending']={'kind':'conflict','actor':role['id'],'other':other['id']};return
-        if present and node['kind']=='contact' and role['state']=='unseen':
+        if present and node['kind']=='contact' and role['state'] in {'unseen','observed'}:
             if contact(game,site,role):return
         if present and node['kind']=='core' and role['state'] not in {'dead','joined'}:
             role.update(known=True,state='hostile',revealed=True)
@@ -320,6 +323,7 @@ def resolve_pending(deps,game,site,choice):
             role.update(state='joined',joined_step=site['step']);site['party'].append(role['id'])
             log(site,role['name']+'应下继续同行的提议。',actors=[role['id']])
         elif choice=='part':
+            separate(game,role)
             if role['id'] in site['party']:site['party'].remove(role['id'])
             role.update(state='left',left_step=site['step'])
             log(site,'你与'+role['name']+'当面分道，各自收拢所得。',actors=[role['id']])
@@ -364,6 +368,7 @@ def resolve_pending(deps,game,site,choice):
             or wandering(game.player) or game.player.nascent_state.get('crisis') or game.player.imprisonment or game.player.ghost_captor):
         close(game,site,'你未能继续深入，探境结束。');return
     enemy['state']='dead' if enemy['state']=='dead' else 'left'
+    separate(game,enemy)
     if enemy['id'] in site['party']:site['party'].remove(enemy['id'])
     if pending['kind'] in {'conflict','guardian'} and not pending.get('aftermath'):
         node=site['nodes'][site['step']];claim(game,site,node)
@@ -431,6 +436,7 @@ def command(deps,game_id,action,payload):
                 if game.player.age<state['ready_age']:raise ValueError('刚刚退出副本，尚需度过一个完整行动单位')
                 site.update(status='active',entered=True,unit=int(WORLD_SYSTEMS['time_units'][str(true_rank(game.player)[0])]))
                 state['active']=site['id'];log(site,'你踏入入口。内部形势仍需亲自探查。')
+                carry(game,site,log)
                 offer_invited(game,site)
                 for mail in state['mail']:
                     if mail['dungeon_id']==site['id']:mail.update(status='accepted',unread=False)
@@ -447,6 +453,9 @@ def command(deps,game_id,action,payload):
                 elif action=='choose':
                     if site['pending']:resolve_pending(deps,game,site,payload.get('choice'))
                     else:resolve_node(deps,game,site,payload.get('choice'))
+                elif action=='slay':
+                    from .encounters import slay
+                    slay(deps,game,site,payload.get('actor_id'),log,close,offer_invited)
                 elif action=='bargain':
                     role=site['roles'].get(payload.get('actor_id'))
                     if not role or not available(game,site,role):raise ValueError('交涉对象已不在场')
@@ -459,6 +468,8 @@ def command(deps,game_id,action,payload):
                     log(site,'你与'+role['name']+'约定互相掩护。对方拱手应下，目光扫过前方岔路。',actors=[role['id']])
                 else:raise ValueError('未知副本操作')
             reveal_local_support(game,site)
+            from .encounters import reveal
+            reveal(game,site,log,label)
             site['revision']+=1
     game.dungeon_state=decode(game.dungeon_state)
     game.updated_at=now_iso();deps.save(game);deps.commit(game)

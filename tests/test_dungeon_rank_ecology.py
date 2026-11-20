@@ -57,7 +57,7 @@ def test_novice_rewards_and_population_are_separate(local,monkeypatch,quality,ra
         if quality=='legendary':
             assert people[-1]['true_realm']==6 and people[-1]['realm']==5
         assert site==generation.generate(game,location,0,0)
-    assert high>0  # Strong cultivators remain possible, including in ordinary sites.
+    assert (high>0) if quality in {'epic','legendary'} else high==0
 
 
 @pytest.mark.parametrize('quality',['ordinary','rare','epic','legendary'])
@@ -171,4 +171,4 @@ def test_outer_conflict_and_join_queue_exclude_distant_strong_cultivator(local):
     site['pending']=None;site['nodes'][0]['kind']='trace';engine.store.save(saved)
     act(engine,game,'choose',choice='bypass')
     saved,site=loaded(engine,game)
-    assert site['pending'] is None and not site['roles'][strong['id']]['known']
+    assert site['pending'] is None and strong['id'] not in site['party']

@@ -31,7 +31,8 @@ def generate(game, location, slot, legends):
     if legends>=config()['legendary_limit'][world]:weights[-1]=0
     quality=rng.choices(QUALITIES,weights=weights)[0]
     index=QUALITIES.index(quality)
-    reference=true_rank(p)
+    reference=(p.realm_index,p.layer)
+    assassination_floor=true_rank(p)
     realm=ecology.site_rank(world,quality,profile,reference,ceiling)
     tier=WORLD_SYSTEMS['world_profiles'][world]['tier']
     theme=profile['theme'];words=THEMES[theme]
@@ -45,10 +46,11 @@ def generate(game, location, slot, legends):
         sect_id,sect_name=rr.choice(factions)
         purpose=rr.choices(PURPOSES,weights=[35,15,15,10,10,15])[0]
         role_realm,layer=ecology.person_rank(rr,world,quality,number,reference,realm,profile,ceiling)
-        if purpose=='assassinate' and rank_for(role_realm,layer)<rank_for(*reference):
-            if reference[0]>ceiling or reference[0]>max(realm,profile['cap']) and quality not in {'epic','legendary'}:
+        if purpose=='assassinate' and rank_for(role_realm,layer)<rank_for(*assassination_floor):
+            limit=reference[0]+int(quality=='rare') if quality in {'ordinary','rare'} else ceiling
+            if assassination_floor[0]>min(ceiling,limit):
                 purpose='observe'
-            else:role_realm,layer=reference
+            else:role_realm,layer=assassination_floor
         true_realm=role_realm
         if quality=='legendary' and number==count-1:
             true_realm={1:6,2:9,3:12}[tier];role_realm=min(ceiling,true_realm);layer=9

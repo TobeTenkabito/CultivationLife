@@ -260,12 +260,7 @@
         {
           "id": "refuse",
           "text": "拒绝留印，自行离去",
-          "effects": [
-            {
-              "type": "add_infamy",
-              "value": 5
-            }
-          ]
+          "effects": []
         }
       ]
     },
@@ -366,7 +361,7 @@
               ]
             },
             {
-              "type": "add_infamy",
+              "type": "add_renown",
               "value": 4
             }
           ]
@@ -573,7 +568,7 @@
               "value": 5
             },
             {
-              "type": "add_infamy",
+              "type": "add_renown",
               "value": 4
             }
           ]

@@ -76,6 +76,7 @@ def person(game,site,role):
     contract=site.get('expedition',{}).get('contracts',{}).get(role['id'])
     can_trade=bool(site.get('expedition') and role['id'] in site['party'] and not site['pending'])
     support=[r for r in opposition(game,site,role) if r['known']]
+    from .encounters import can_slay
     return dict(id=role['id'],name=role['name'],sect=role['sect_name'],
         realm=REALMS[role['realm']]+f" {role['layer']} 层",status=STATES[role['state']],state=role['state'],
         story=role['story'],clues=copy.deepcopy(clues[-5:]),bars=bars,treasure_bars=treasure_bars,
@@ -83,7 +84,7 @@ def person(game,site,role):
         squad=dict(count=len(support),power=round(sum(power(game,r) for r in support)),
             rank=max((rank_for(r['realm'],r['layer']) for r in support),default=rank_for(role['realm'],role['layer']))) if len(support)>1 else None,
         representative=bool(role['ledger'].get('representative')),
-        contract=copy.deepcopy(contract),can_trade=can_trade,
+        contract=copy.deepcopy(contract),can_trade=can_trade,can_slay=can_slay(game,site,role),
         can_deliver=can_trade and any(i.quantity>0 and 'dungeon_restorative' in i.tags for i in game.player.inventory),
         exposed=role['revealed'],can_pact=role['id'] in site['party'] and role['id'] not in site['agreements'] and not site['pending'])
 

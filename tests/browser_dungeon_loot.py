@@ -15,7 +15,7 @@ from cultivation_life import server
 from cultivation_life.engine import GameEngine
 from cultivation_life.content_registry import ITEM_CATALOG, WORLD_SYSTEMS
 from cultivation_life.rules import add_item,max_hp,max_mp
-from cultivation_life.system.dungeons.rewards import recipe,bounded_recipe
+from cultivation_life.system.dungeons.rewards import recipe,bounded_recipe,RELIC_FORMS
 from scripts.browser_navigation import navigation_locator
 
 
@@ -88,11 +88,25 @@ def main():
                         page.locator('[data-dungeon-action=exit]').click();page.wait_for_function('!busy&&!game.dungeons.active')
                         page.keyboard.press('Escape')
                         navigation_locator(page,'[data-panel-target=inventory]').click()
+                        icons=page.evaluate("""async forms=>{
+                            await PixelLibrary.ensure();
+                            return Promise.all(forms.map(async name=>{
+                                const asset=PixelLibrary.resolve({id:'dungeon:legacy',name,tags:['equipment']});
+                                const image=new Image();image.src=asset.file;await image.decode();
+                                return asset.file;
+                            }));
+                        }""",list(RELIC_FORMS))
+                        assert len(set(icons))==len(RELIC_FORMS)
                         def inspect(item_id):
                             page.locator(f'[data-pixel-item="{item_id}"]').click()
                             row=page.locator(f'.pixel-bag-detail .item[data-item-id="{item_id}"]')
                             assert row.is_visible(),row.evaluate('n=>n.outerHTML')
                             assert len(row.locator(':scope>span>small').inner_text())>10
+                            art=page.locator('.pixel-bag-detail:visible .pixel-bag-art img')
+                            assert art.evaluate('async img=>{await img.decode();return img.naturalWidth>0}')
+                            key=art.get_attribute('data-asset')
+                            assert key and key not in {'gear.other','extra.unknown'}
+                            assert page.locator(f'[data-pixel-item="{item_id}"] img').get_attribute('data-asset')==key
                             return row
                         pill=rewards[0]['id']
                         assert page.locator(f'#inventory-list [data-item-id="{pill}"]').get_attribute('data-list-page-hidden') is not None

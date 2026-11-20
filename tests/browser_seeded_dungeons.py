@@ -115,7 +115,7 @@ def check_rank_gates(browser,engine,url):
         assert site['step']==step+1 and not site['pending'] and not site['party']
         assert role['id'] not in saved.world_npcs
         panel_view(page,'team')
-        assert page.locator('.dungeon-person').filter(has_text='各自行动').count()==1
+        assert '各自行动' in page.locator(f'.dungeon-person[data-person-id="{role["id"]}"]').inner_text()
         panel_view(page,'journal')
         assert page.locator('.dungeon-log').filter(has_text='独自向前探去').count()==1
         page.locator('[data-dungeon-action=exit]').click();page.wait_for_function('!busy && !game.dungeons.active')
@@ -179,7 +179,8 @@ def main():
                             assert page.locator('.dungeon-compare .dungeon-metric').count()==3
                             check_workspace(page)
                             panel_view(page,'team')
-                            page.locator('.dungeon-person > summary').first.click()
+                            joined=page.evaluate('game.dungeons.session.people.find(p=>p.state==="joined").id')
+                            page.locator(f'.dungeon-person[data-person-id="{joined}"] > summary').click()
                             page.locator('[aria-label="对照一方"]').select_option(index=1)
                             page.locator('[aria-label="对照另一方"]').select_option('player')
                             panel_view(page,'journal')

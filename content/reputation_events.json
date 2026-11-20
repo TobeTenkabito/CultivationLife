@@ -57,7 +57,7 @@
       "body":"宗门顺位榜第一的强者隔空降下法旨：你已经取得议事与控制之权，但尚未真正压服全宗。同门血案仅容这一次；若有再犯，宗门将奉诛杀令。",
       "category":"faction_warning","tags":["manual_only","faction_warning","warning"],"weight":0,
       "conditions":{},
-      "choices":[{"id":"acknowledge","text":"收下法旨，暂且罢手","effects":[{"type":"add_infamy","value":2}]}]
+      "choices":[{"id":"acknowledge","text":"收下法旨，暂且罢手","effects":[]}]
     }
   ]
 }

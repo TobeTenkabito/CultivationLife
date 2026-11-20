@@ -57,7 +57,7 @@ def decode(value):
         finite(row['unit']);integer(row['depth'],0,100)
         if row['status'] not in {'open','active','closed'} or not isinstance(row['entered'],bool):
             raise ValueError('副本生命周期无效')
-        if not isinstance(row['roles'],dict) or len(row['roles'])>32 or not 4<=len(row['nodes'])<=32:
+        if not isinstance(row['roles'],dict) or len(row['roles'])>34 or not 4<=len(row['nodes'])<=32:
             raise ValueError('副本角色或节点超限')
         if row['step']>len(row['nodes']):raise ValueError('副本探索位置越界')
         if row['status']=='active' and (not row['entered'] or row['unit']<=0):raise ValueError('入境记录缺失')
@@ -69,7 +69,7 @@ def decode(value):
                 'ledger','offer_step'})
             if key != role['id'] or role['purpose'] not in PURPOSES:raise ValueError('副本角色目的无效')
             for metric in ('desire','resolve','preparation','trust','caution'):finite(role[metric],0,100)
-            for metric in ('realm','true_realm'):integer(role[metric],1,12)
+            for metric in ('realm','true_realm'):integer(role[metric],0 if role['existing'] else 1,12)
             integer(role['layer'],1,13)
             finite(role['power_factor'],.1,10)
             if role['materialized'] != bool(role['npc_id']):raise ValueError('人物实例化引用不一致')
@@ -175,7 +175,9 @@ def all_rewards(site):
 
 def validate_observations(site,role):
     ledger=role['ledger'];metrics={'desire','preparation','trust','caution'}
-    fields(ledger,(),{'domain_rank','representative','supporters','observed','evidence','treasure_evidence','conduct_step'})
+    fields(ledger,(),{'domain_rank','representative','supporters','observed','evidence','treasure_evidence','conduct_step','outside_party','encounter_step'})
+    if 'outside_party' in ledger and (type(ledger['outside_party']) is not bool or not role['existing']):raise ValueError('外界队友须引用原人物')
+    if 'encounter_step' in ledger:integer(ledger['encounter_step'],0,len(site['nodes']))
     if 'conduct_step' in ledger:integer(ledger['conduct_step'],0,len(site['nodes']))
     if 'domain_rank' in ledger:integer(ledger['domain_rank'],0,13)
     if 'representative' in ledger and type(ledger['representative']) is not bool:raise ValueError('代表标记无效')

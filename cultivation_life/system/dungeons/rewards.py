@@ -13,6 +13,21 @@ from .prose_expansion import NAMES as EXTRA_NAMES
 THEMES = {'water':'沧溟','mountain':'山岳','fire':'离火','frost':'霜雪',
           'fort':'镇封','shadow':'寂灭','grove':'青木','ruins':'玄文'}
 
+RELIC_FORMS = {
+    '护道印':'印底的篆文磨得发亮，托在掌中还能摸出笔锋。',
+    '镇灵环':'环身由两股银丝拧成，接口处扣着一粒乌金。',
+    '承光镜':'镜背铸着一枝梅，迎光转动时，镜中花影比镜身慢上半拍。',
+    '照影灯':'灯腹开了六扇小窗，火苗在窗纸上映出细细的竹叶。',
+    '凝华佩':'佩上还系着一截旧绦，贴近手腕时，玉里的白絮便缓缓舒展。',
+    '观星盘':'拨动外圈，盘上七枚银钉依次指向同一片星野。',
+    '听泉铃':'铃舌是一颗磨圆的青石，摇响时像水珠落进深潭。',
+    '引风幡':'幡尾缀着三枚鱼形铜片，风一起，鱼尾便齐齐转向。',
+    '栖云伞':'将伞骨撑开一寸，伞面上绣的山影便退远一分。',
+    '分水针':'针身细如松芒，一滴水沿针尖分成两股滑落。',
+    '照夜剑':'剑脊上留着磨石走过的细痕，近锷处藏着一线青光。',
+    '温玉鼎':'三只鼎足各衔一颗白石，鼎腹尚有淡淡松脂香。',
+}
+
 
 @lru_cache(maxsize=144)
 def equipment_anchor(realm,world=None):
@@ -140,12 +155,13 @@ def recipe(rng, identity, realm, path, theme, quality, core=False,world=None):
         return dict(id=identity,kind=family,name=book['name'],realm=realm,fused=fused,book=book)
     anchor=equipment_anchor(realm,world)
     power = round(anchor.combat_bonus*factor,3)
-    item = dict(id=identity,name=name+(rng.choice(('护道印','镇灵环','承光镜','照影灯','凝华佩','观星盘')) if family=='artifact' else rng.choice(('回元露','凝神液','养灵丹','玉髓散','归真丸','蕴华膏'))),
+    form=rng.choice(tuple(RELIC_FORMS) if family=='artifact' else ('回元露','凝神液','养灵丹','玉髓散','归真丸','蕴华膏'))
+    item = dict(id=identity,name=name+form,
                 force_tier=2 if realm>=9 else 1,description='古修留下的护道之物。' if family=='artifact' else '消耗一份固本培元；药力由遗境品阶确定。',
                 tags=['equipment',f'grade:{realm}'] if family=='artifact' else ['pill',f'grade:{realm}'])
     if family=='artifact':
         item.update(combat_bonus=power,hp_bonus=round(anchor.hp_bonus*factor),mp_bonus=round(anchor.mp_bonus*factor))
-        item['description']=f"古修遗宝：战力 +{power:g}，气血 +{item['hp_bonus']:g}，法力 +{item['mp_bonus']:g}。"
+        item['description']=RELIC_FORMS[form]+f"战力 +{power:g}，气血 +{item['hp_bonus']:g}，法力 +{item['mp_bonus']:g}。"
     else:
         item.update(permanent_intrinsic_hp_bonus=round(expected_combat_power(realm,9)*.02*factor,3))
         item['description']=f"服用后本体气血永久 +{item['permanent_intrinsic_hp_bonus']:g}；药力由遗境品阶确定。"

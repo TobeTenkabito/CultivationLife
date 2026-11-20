@@ -3,6 +3,16 @@
   'use strict';
   let manifest=null, pending=null;
   const bound=new Map();
+  // The form at the end of a generated name is frozen in both the blueprint and the bag.
+  const relicArt={
+    '印':'gear.seal','环':'gear.ring','镜':'gear.mirror','灯':'treasure.soul_lamp',
+    '佩':'treasure.spirit_spring_pendant','盘':'item.formation_plate','铃':'gear.bell',
+    '幡':'gear.banner','伞':'gear.umbrella','针':'gear.needle','剑':'gear.sword','鼎':'gear.cauldron',
+  };
+  const remedyArt={
+    '露':'medicine.ascension_spirit_dew','液':'medicine.taixu_jade_liquid','丹':'item.pill_cultivation',
+    '散':'medicine.haotian_powder','丸':'item.pill_healing','膏':'medicine.void_breaking_paste',
+  };
   const active=()=>document.documentElement.dataset.visual==='pixel';
   function ensure(explicit=false){
     if(!active()&&!explicit)return Promise.resolve(null);
@@ -18,6 +28,13 @@
     const tags=item.tags||[];
     if(!id && item.plant_id)id=manifest.plants[item.plant_id];
     if(!id && item.definition_id)id=manifest.crafting_materials[item.definition_id];
+    if(!id && tags.includes('dungeon_manual'))id='item.technique_manual';
+    if(!id && (tags.includes('dungeon_relic') || tags.includes('dungeon_restorative') ||
+        String(item.id||item.item_id||'').startsWith('dungeon:'))){
+      const form=(item.name||'').slice(-1);
+      if(tags.includes('equipment') || tags.includes('dungeon_relic'))id=relicArt[form];
+      else if(tags.includes('pill') || tags.includes('dungeon_restorative'))id=remedyArt[form];
+    }
     if(!id){
       if(item.technique_id||tags.includes('technique_manual')||tags.includes('universal_manual'))id='item.technique_manual';
       else if(tags.includes('secret_art_manual'))id='item.secret_manual';

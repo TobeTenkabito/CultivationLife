@@ -7,10 +7,10 @@
       "tags":["realm:spirit","story_chain","demon_sacred_adaptation","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"demon_sacred_eligible","base_chance":0.20,"unit_increment":0.02},
       "conditions":{"all":[{"path":"player.world","op":"eq","value":"demon"},{"path":"player.realm_index","op":"eq","value":5}]},
       "choices":[
-        {"id":"rally","text":"召集魔界三宗，共同镇压失控魔气","effects":[{"type":"add_infamy","value":12},{"type":"set_flag","flag":"demon_sacred_coalition"},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_002"}]},
+        {"id":"rally","text":"召集魔界三宗，共同镇压失控魔气","effects":[{"type":"add_renown","value":12},{"type":"set_flag","flag":"demon_sacred_coalition"},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_002"}]},
         {"id":"infiltrate","text":"顺着血月牵引潜入裂谷，反查真魔坐标","effects":[{"type":"restore_mp","value":-0.12},{"type":"set_flag","flag":"demon_sacred_infiltrator"},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_002"}]},
         {"id":"seize","text":"等待双方交战，再夺取裂隙控制权","effects":[{"type":"add_karma","value":10},{"type":"set_flag","flag":"demon_sacred_opportunist"},{"type":"queue_event","event_id":"EVT_DEMON_SACRED_002"}]},
-        {"id":"avoid","text":"封闭洞府，不介入上界争端","effects":[{"type":"add_infamy","value":-10},{"type":"set_flag","flag":"demon_sacred_incomplete"}]}
+        {"id":"avoid","text":"封闭洞府，不介入上界争端","effects":[{"type":"add_renown","value":-10},{"type":"set_flag","flag":"demon_sacred_incomplete"}]}
       ]
     },
     {
@@ -34,8 +34,8 @@
       "id":"EVT_DEMON_SACRED_004","version":1,"title":"焚天魔门","body":"断魂碑显出一座通往真魔界的焚天魔门。赤霄天君要夺回魔胎完成第二道身，玄烬圣祖则想吞噬魔胎壮大自身；两道上界投影同时降临北荒。你可以击退双方，保留魔门日后上界，也可以彻底毁门，让魔胎与血月一同断绝。",
       "tags":["realm:spirit","story_chain","demon_sacred_adaptation","manual_only"],"weight":0,
       "choices":[
-        {"id":"keep_chart","text":"击退双方并保留焚天魔门坐标（敌方总战力 342,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":342000}],"failure_reason":"两位圣祖神念撕裂你的元神并夺走坐标","success_text":"你击碎两道投影，把焚天门图握在自己手中。"},{"type":"add_item","item_id":"true_demon_gate_chart","if_result":["check_success"]},{"type":"add_infamy","value":28,"if_result":["check_success"]},{"type":"set_flag","flag":"demon_sacred_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"demon_sacred_gate_secured","if_result":["check_success"]}]},
-        {"id":"destroy_chart","text":"毁掉坐标，让任何上界势力都无法长期降临（敌方总战力 317,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":317000}],"failure_reason":"坐标石先一步被上尊神念夺走","success_text":"坐标石化为齑粉，血月裂隙在两道怒吼中永久闭合。"},{"type":"add_karma","value":-12,"if_result":["check_success"]},{"type":"add_infamy","value":20,"if_result":["check_success"]},{"type":"set_flag","flag":"demon_sacred_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"demon_sacred_gate_destroyed","if_result":["check_success"]}]}
+        {"id":"keep_chart","text":"击退双方并保留焚天魔门坐标（敌方总战力 342,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":342000}],"failure_reason":"两位圣祖神念撕裂你的元神并夺走坐标","success_text":"你击碎两道投影，把焚天门图握在自己手中。"},{"type":"add_item","item_id":"true_demon_gate_chart","if_result":["check_success"]},{"type":"add_renown","value":28,"if_result":["check_success"]},{"type":"set_flag","flag":"demon_sacred_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"demon_sacred_gate_secured","if_result":["check_success"]}]},
+        {"id":"destroy_chart","text":"毁掉坐标，让任何上界势力都无法长期降临（敌方总战力 317,000）","effects":[{"type":"attribute_check","checks":[{"stat":"combat_power","op":"gte","value":317000}],"failure_reason":"坐标石先一步被上尊神念夺走","success_text":"坐标石化为齑粉，血月裂隙在两道怒吼中永久闭合。"},{"type":"add_karma","value":-12,"if_result":["check_success"]},{"type":"add_renown","value":20,"if_result":["check_success"]},{"type":"set_flag","flag":"demon_sacred_completed","if_result":["check_success"]},{"type":"set_milestone","milestone":"demon_sacred_gate_destroyed","if_result":["check_success"]}]}
       ]
     }
   ]

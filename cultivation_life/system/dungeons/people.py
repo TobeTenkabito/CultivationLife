@@ -3,6 +3,7 @@ from ...models import SectNpc
 from ...relationship_records import find_person
 from ...rules import expected_combat_power, combat_power, max_hp
 from ...cultivation_coordinates import rank_for
+from ...reputation import true_rank
 from .ecology import close_realms, appearance_depth
 
 
@@ -99,7 +100,7 @@ def invite(game,site,identity):
     rng=stream(site['seed'],'invite',identity)
     role=copy.deepcopy(next(iter(site['roles'].values())))
     purpose=rng.choice(('seek','heal','escort','observe','assassinate'))
-    if purpose=='assassinate' and rank_for(npc.realm_index,npc.layer)<rank_for(*site['reference']):purpose='observe'
+    if purpose=='assassinate' and rank_for(npc.realm_index,npc.layer)<rank_for(*true_rank(game.player)):purpose='observe'
     role.update(id=identity,npc_id=identity,name=npc.name,sect_id=npc.faction_id,
         sect_name=game.sects[npc.faction_id].name if npc.faction_id in game.sects else FACTION_DEFINITIONS.get(npc.faction_id,{}).get('name','散修'),realm=npc.realm_index,layer=npc.layer,
         true_realm=npc.realm_index,path=npc.path,purpose=purpose,resolve=95 if purpose=='assassinate' else 50,
@@ -168,7 +169,7 @@ def opposition(game,site,enemy):
     return [enemy]+followers
 
 
-def fight(deps, game, site, enemy, allies=()):
+def fight(deps, game, site, enemy, allies=(), *, attack=False):
     npc = materialize(game, site, enemy)
     actual_power=deps.npc_power(npc)
     own_ids = [materialize(game, site, r).id for r in allies if r['id'] != enemy['id']]
@@ -183,10 +184,13 @@ def fight(deps, game, site, enemy, allies=()):
             faction_id=member.faction_id,world=member.world,race=member.race,treasure_item_id=member.treasure_item_id))
     target = dict(npc_id=npc.id, target_name=npc.name, faction_id=npc.faction_id,
         target_power=actual_power, target_realm_index=npc.realm_index, target_layer=npc.layer,
-        combat_type='dungeon', objective='repel', player_defending=True, non_story_combat=True,
+        combat_type='dungeon', objective='kill' if attack else 'repel', player_defending=not attack, non_story_combat=True,
         dungeon_allies=own_ids, local_dungeon=True,
         natural_terrain=site['terrain'], artificial_conditions=site['conditions'],
         members=members)
+    if attack:
+        if enemy['ledger'].get('outside_party'):target['relationship_kind']='party'
+        target['exclude_allied_ids']=[r['npc_id'] for r in participants]
     if site['preparations']:
         target['enemy_buffs']=[dict(id='dungeon_observed_terrain',name='已探明地势',stat='might',
             multiplier=max(.85,1-.03*site['preparations']))]
