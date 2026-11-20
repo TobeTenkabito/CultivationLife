@@ -81,6 +81,7 @@ def test_faction_reinforcements_are_lazy_until_actual_battle(local):
     engine,game=local;discover(engine,game);act(engine,game,'enter')
     saved,site=loaded(engine,game);a,b=list(site['roles'].values())[:2]
     for role in (a,b):role.update(realm=1,true_realm=1,layer=1,purpose='seek',state='unseen')
+    site['space']['positions'].update({r['id']:site['step'] for r in (a,b)})
     a['ledger']['supporters']=[b['id']];a.update(known=True,state='hostile')
     site['pending']=dict(kind='guardian',actor=a['id']);engine.store.save(saved)
     assert not a['materialized'] and not b['materialized']
@@ -96,6 +97,7 @@ def test_evidence_chain_updates_without_instantiating_remote_people(local):
     saved,site=loaded(engine,game)
     # Frozen V2 reports exist only in epic/legend; install one controlled audit fact.
     site['quality']='epic';ids=list(site['roles'])
+    site['space']['positions'].update({key:3 for key in ids[:2]})
     site['expedition']['facts']=[dict(id='audit-news',actors=ids[:2],direction='东',occurred=1,reported=2,verified=4,result='伤亡后撤',mistaken=True)]
     for role in site['roles'].values():role['offer_step']=99
     engine.store.save(saved)

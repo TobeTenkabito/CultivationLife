@@ -1,3 +1,14 @@
+.dungeon-floor {grid-area:journal;min-height:0;overflow:auto;}
+.dungeon-map-grid {display:grid;gap:3px;margin:8px 0;padding:6px;background:color-mix(in srgb,var(--dungeon-accent) 7%,var(--surface));}
+.dungeon-map-cell {align-self:stretch;min-width:0;padding:4px 2px;text-align:center;border:1px dashed var(--line);font-size:11px;}
+.dungeon-map-cell.visited {border-style:solid;}
+.dungeon-map-cell.current {border:2px solid var(--dungeon-accent);color:var(--dungeon-accent);}
+.dungeon-map-cell small {display:block;}
+.dungeon-compass {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin:6px 0;}
+.dungeon-floor select {max-width:100%;margin:0 4px 4px 0;color:var(--ink);background:var(--surface);}
+.dungeon-compass span {place-self:center;color:var(--muted);font-size:12px;}
+.dungeon-floor .dungeon-button {min-height:28px;padding:3px 6px;}
+.dungeon-sense,.dungeon-map-caption {font-size:12px;margin:4px 0;}
 /* Bounded expedition workspace: each reading pane scrolls independently. */
 #dungeon-card.panel-open {z-index:60;}
 #dungeon-card {--dungeon-accent:var(--pine);--dungeon-on-accent:var(--on-accent);width:min(1440px,calc(100vw - 32px));max-width:calc(100vw - 32px);left:16px;right:16px;top:12px;margin:auto;padding:0;max-height:calc(100dvh - 24px);background:var(--surface)!important;color:var(--ink);border-radius:12px;box-sizing:border-box;}

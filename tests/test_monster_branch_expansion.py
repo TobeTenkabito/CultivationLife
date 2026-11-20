@@ -53,10 +53,12 @@ def ready(sandbox,key,world='monster_realm'):
 
 def test_old_nodes_attributes_and_all_old_edges_survive():
     assert len(NODES)==265 and len(NEW)==65
-    # The two reviewed prose edits leave every mechanical field and old edge
+    # The reviewed prose edits leave every mechanical field and old edge
     # intact. Compare against the original snapshot after checking their exact
     # replacements, rather than regenerating the historical attribute hashes.
     revised_copy={
+        'APE_NEW_ANCESTOR':('abilities',['今世立祖：将一生所学传给后辈，自此另开一脉。'],
+            ['今世立祖：以自身经历而非远祖血统定义谱系。']),
         'AVIAN_PHOENIX':('description','祖血完成返照，自此化为凤凰真身。',
             '祖血完成返照，自此并非模拟凤凰，而是凤凰本身。'),
         'SERPENT_TRUE_DRAGON':('abilities',['真龙本体：完整的龙属生命。'],

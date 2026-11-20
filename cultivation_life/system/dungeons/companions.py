@@ -23,6 +23,7 @@ def carry(game,site,log):
             revealed=False,materialized=True,ledger={'outside_party':True},offer_step=len(site['nodes'])+1)
         if not existing and len(site['roles'])>=34:raise ValueError('此行名册已满')
         site['roles'][role['id']]=role
+        if 'space' in site:site['space']['positions'][role['id']]=site['step']
         if role['id'] not in site['party']:site['party'].append(role['id'])
         log(site,npc.name+'随你一同进入副本。',actors=[role['id']])
 

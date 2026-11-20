@@ -107,6 +107,10 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             f"你在劫隙中使用{item.name}，恢复 HP {hp_gain:.0f}、MP {mp_gain:.0f}。",
             {"hp_gain": hp_gain, "mp_gain": mp_gain}, ["system", "item", "tribulation"],
         ))
+    elif 'dungeon_medicine' in item.tags:
+        from ...dungeon_medicines import consume
+        summary=consume(game.player,item)
+        game.history.append(HistoryRecord('SYS_CAVERN_PILL',1,game.player.age,'炼化遗丹',item.id,'consumed',summary,{},['item','dungeon']))
     elif item.id == "qilin_blessing_elixir":
         if game.player.guaranteed_progeny:
             raise ValueError("口服液的药力仍在，等待下一次有效缠绵即可")
@@ -193,6 +197,8 @@ def use_item(deps: InventoryDependencies, game_id: str, item_id: str) -> dict[st
             ["system", "item", "guixu", "spirit_plant"],
         ))
     elif item.breakthrough_bonus > 0 and item.breakthrough_scope:
+        paths={'dao','demonic','monster','ghost','buddhist','confucian'}.intersection(item.tags)
+        if paths and game.player.path not in paths:raise ValueError('此丹与你所修道途不合')
         if 'celestial' in item.tags and (game.player.world != 'celestial' or game.player.sealed_cultivation):
             raise ValueError('仙家破境丹须在仙界、真实修为未受封印时服用')
         if game.player.path == "demonic":

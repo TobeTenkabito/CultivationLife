@@ -21,6 +21,9 @@ def _ground_array_public(
         location_name = str(deps.maps.location(world, location_id)["name"])
     except Exception:
         location_name = location_id
+    if location_id.startswith('dungeon:') and ':node:' in location_id:
+        index=location_id.rsplit(':',1)[-1]
+        if index.isdigit():location_name=f'遗境第 {int(index)+1} 处阵位'
     return {
         key: copy.deepcopy(array.get(key))
         for key in (
@@ -47,6 +50,44 @@ def _ground_array_public(
         "local": world == player.world
         and location_id == (player.location_id or location_id),
     }
+
+
+def anchor_active_formation(game, profile, location_id, owner_kind, owner_id, owner_name):
+    """Move the occupied material instances to one fixed battlefield."""
+    player = game.player
+    if not profile.get("active") or not player.formation_active_bindings:
+        raise ValueError("请先启用一座有效的随身九宫阵")
+    if any(
+        row.get("world") == player.world
+        and row.get("location_id") == location_id
+        and row.get("owner_kind") == owner_kind
+        and row.get("owner_id") == owner_id
+        for row in player.formation_ground_arrays
+    ):
+        raise ValueError("此地已经存在同归属的镇地阵，请先撤阵")
+    player.formation_ground_sequence += 1
+    ground = {
+        "id": f"ground-formation-{game.id}-{player.formation_ground_sequence}",
+        "name": profile["name"],
+        "loadout_id": player.active_formation_id or "",
+        "owner_kind": owner_kind,
+        "owner_id": owner_id,
+        "owner_name": owner_name,
+        "creator_id": game.id,
+        "creator_name": player.name,
+        "world": player.world,
+        "location_id": location_id,
+        "bindings": player.formation_active_bindings,
+        "durability": 100.0,
+        "created_year": player.age,
+        "last_repaired_year": player.age,
+        "battles": 0,
+    }
+    player.formation_ground_arrays.append(ground)
+    player.active_formation_id = None
+    player.formation_active_bindings = []
+    player.formation_profile_cache = {}
+    return ground
 
 
 def deploy_ground_formation(
@@ -79,36 +120,7 @@ def deploy_ground_formation(
         owner_id, owner_name = "player", player.name
     else:
         raise ValueError("未知镇地阵归属")
-    if any(
-        row.get("world") == player.world
-        and row.get("location_id") == location_id
-        and row.get("owner_kind") == owner_kind
-        and row.get("owner_id") == owner_id
-        for row in player.formation_ground_arrays
-    ):
-        raise ValueError("此地已经存在同归属的镇地阵，请先撤阵")
-    player.formation_ground_sequence += 1
-    ground = {
-        "id": f"ground-formation-{game.id}-{player.formation_ground_sequence}",
-        "name": profile["name"],
-        "loadout_id": player.active_formation_id or "",
-        "owner_kind": owner_kind,
-        "owner_id": owner_id,
-        "owner_name": owner_name,
-        "creator_id": game.id,
-        "creator_name": player.name,
-        "world": player.world,
-        "location_id": location_id,
-        "bindings": copy.deepcopy(player.formation_active_bindings),
-        "durability": 100.0,
-        "created_year": player.age,
-        "last_repaired_year": player.age,
-        "battles": 0,
-    }
-    player.formation_ground_arrays.append(ground)
-    player.active_formation_id = None
-    player.formation_active_bindings = []
-    player.formation_profile_cache = {}
+    ground = anchor_active_formation(game, profile, location_id, owner_kind, owner_id, owner_name)
     public = deps._ground_array_public(player, ground)
     game.history.append(
         HistoryRecord(
@@ -166,6 +178,11 @@ def _require_ground_array_access(
     return array
 
 
+def return_ground_bindings(player, array, release_bindings):
+    release_bindings(player, list(array.get("bindings", [])))
+    player.formation_ground_arrays.remove(array)
+
+
 def withdraw_ground_formation(
     deps: FormationGroundDependencies, game_id: str, ground_id: str
 ) -> dict[str, Any]:
@@ -180,8 +197,7 @@ def withdraw_ground_formation(
     ):
         raise ValueError("宗门正在交战，不能临阵撤走护山阵")
     name = str(array.get("name", "镇地阵"))
-    deps._release_bindings(game.player, list(array.get("bindings", [])))
-    game.player.formation_ground_arrays.remove(array)
+    return_ground_bindings(game.player, array, deps._release_bindings)
     game.history.append(
         HistoryRecord(
             "SYS_FORMATION_GROUND_WITHDRAW",

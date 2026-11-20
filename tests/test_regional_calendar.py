@@ -254,6 +254,6 @@ def test_historical_unissued_trade_cannot_write_future_market(regional):
     game.player.age+=10
     game.world_simulation['regions']['true_demon']['year']=game.player.age
     before=copy.deepcopy(game.to_dict())
-    with pytest.raises(ValueError,match='历史补算'):
+    with pytest.raises(ValueError,match='进入当地界面后重新询价'):
         cross_freight.dispatch(CalendarGame(game,'spirit',old),engine.maps,fleet,'true_demon')
     assert game.to_dict()==before

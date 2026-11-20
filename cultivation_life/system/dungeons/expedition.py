@@ -110,10 +110,18 @@ def news(site,log,label):
     for fact in ex['facts']:
         step=site['step'];level=ex['evidence'].get(fact['id'],0)
         stage=3 if step>=fact['verified'] and site['depth']>=2 else 2 if step>=fact['reported'] else 1 if step>=fact['occurred'] else 0
+        direction=fact['direction'];occurred=fact['occurred']
+        if 'space' in site:
+            from .trails import bearing,here
+            space=site['space'];echo=space['echoes'].get(fact['id'])
+            if not echo:continue
+            at,occurred=echo;step=space['turn'];direction=bearing(space,here(site),at)
+            stage=3 if here(site)==at and space['turn']>occurred else 2 if space['turn']>occurred else 1
         if stage<=level:continue
         a,b=[site['roles'][k] for k in fact['actors']]
         if stage==1:
             text=fact.get('rumor') or f"听说在{fact['direction']}方有灵力波动，杀气重重，想来是有不得了的人物在交手。"
+            if 'space' in site:text=f'听说{direction}有两股灵力相撞，余波震得山石簌簌作响。'
             kind,source='听说','不明来历的传言'
         elif stage==2:
             if 'treasure' in fact:
@@ -127,21 +135,21 @@ def news(site,log,label):
             kind,source='据说','撤离修士转述'
         else:
             sides=f"{a['sect_name']}与{b['sect_name']}" if a['sect_id']!=b['sect_id'] else a['sect_name']+'的两支队伍'
-            text=f"你在{fact['direction']}侧亲眼看见残破阵旗与战痕，确认{sides}曾在此交锋。"
+            text=f"你在交手处看见残破阵旗与战痕，确认{sides}曾在此交锋。"
             if 'treasure' in fact:
                 winner=site['roles'][fact['winner']]
                 text+=f"侧廊中，{winner['sect_name']}修士当面接过{fact['treasure']['name']}，随后合拢护阵，将宝物带向其阵地。"
-                if fact['mistaken']:text+='先前关于宝物归属的说法已由此次目击修正。'
+                if fact['mistaken'] and level==2:text+='先前关于宝物归属的说法已由此次目击修正。'
                 kind,source='实证','现场战痕与宝物交接'
             else:
                 kind,source='实证','现场战痕'
         log(site,text,kind,actors=fact['actors'] if stage==2 else (),source=source)
-        site['logs'][-1].update(fact_id=fact['id'],occurred_step=fact['occurred'],received_step=step,
+        site['logs'][-1].update(fact_id=fact['id'],occurred_step=occurred,received_step=step,
             supersedes=next((r['id'] for r in reversed(site['logs'][:-1]) if r.get('fact_id')==fact['id']),None))
         ex['evidence'][fact['id']]=stage
-        if stage==3 and fact['mistaken'] and 'treasure' not in fact:
+        if stage==3 and level==2 and fact['mistaken'] and 'treasure' not in fact:
             log(site,'一名伤者指着阵旗，称先前传话时认错了归属，原先的归属说法已撤回。','据说',source='伤者转述')
-            site['logs'][-1].update(fact_id=fact['id'],occurred_step=fact['occurred'],received_step=step,
+            site['logs'][-1].update(fact_id=fact['id'],occurred_step=occurred,received_step=step,
                 supersedes=site['logs'][-2]['id'])
     return True
 
@@ -196,4 +204,4 @@ def detour(game,site,log):
     ex['route_choices'].append(dict(node=node['id'],destination=route['destination']))
     site['node_history'].append(dict(id=node['id'],choice='detour'))
     site['step']=route['destination']
-    log(site,'你从'+route['direction']+'穿行，放弃沿途尚未取得的机缘，绕过前路争夺。')
+    log(site,'你从'+route['direction']+'穿行，绕过了正路上的争夺。')

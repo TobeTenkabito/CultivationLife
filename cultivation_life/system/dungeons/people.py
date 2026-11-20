@@ -162,9 +162,12 @@ def domains(site):
 
 
 def opposition(game,site,enemy):
-    followers=[site['roles'][key] for key in enemy['ledger'].get('supporters',[])
+    from .trails import present
+    pending=site['pending'] or {}
+    pursuers=pending.get('pursuers',[]) if pending.get('actor')==enemy['id'] else []
+    followers=[site['roles'][key] for key in dict.fromkeys([*enemy['ledger'].get('supporters',[]),*pursuers])
         if key in site['roles'] and key not in site['party'] and site['roles'][key]['state'] not in {'dead','left','declined','missing'}
-        and appearance_depth(site,site['roles'][key])<=site['depth']
+        and present(site,key) and (key in pursuers or appearance_depth(site,site['roles'][key])<=site['depth'])
         and available(game,site,site['roles'][key])]
     return [enemy]+followers
 
@@ -192,7 +195,7 @@ def fight(deps, game, site, enemy, allies=(), *, attack=False):
         if enemy['ledger'].get('outside_party'):target['relationship_kind']='party'
         target['exclude_allied_ids']=[r['npc_id'] for r in participants]
     if site['preparations']:
-        target['enemy_buffs']=[dict(id='dungeon_observed_terrain',name='已探明地势',stat='might',
+        target['enemy_debuffs']=[dict(id='dungeon_observed_terrain',name='已探明地势',stat='might',
             multiplier=max(.85,1-.03*site['preparations']))]
     from .generation import stream
     outcome, summary = deps.combat(game, target, True, stream(site['seed'], site['revision'], 'combat'))

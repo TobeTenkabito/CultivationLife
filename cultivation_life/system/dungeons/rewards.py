@@ -85,6 +85,54 @@ def bound_growth_budget(site):
         restorative_description(item)
 
 
+@lru_cache(maxsize=512)
+def fixed_stock(world,realm):
+    # Only stock actually circulating in this world and of exactly this grade.
+    return sorted({r['content_id'] for r in MARKET_GOODS if r.get('world')==world and r.get('tier')==realm
+                   and r.get('kind')=='item' and r.get('content_id') in ITEM_CATALOG})
+
+def fixed_cache(rng,reward,node,world,theme,path):
+    if node['kind'] not in {'seal','hazard','cache'} or rng.random()>=.55:return reward
+    realm=reward['realm'];stock=fixed_stock(world,realm)
+    paths={'dao','demonic','monster','ghost','buddhist','confucian'}
+    medicines=[]
+    equipment=[]
+    for key in stock:
+        item=ITEM_CATALOG[key]
+        restricted=paths.intersection(item.tags)
+        if restricted and path not in restricted:continue
+        if item.breakthrough_bonus>0 and path!='demonic' and item.breakthrough_scope and int(item.breakthrough_scope.split(':')[-1])==realm:
+            if path=='ghost' and (realm<4 or realm<6 and item.breakthrough_scope.startswith('major:')):continue
+            if path=='monster' and item.breakthrough_scope.startswith('major:'):continue
+            medicines.append(key)
+        elif item.combat_bonus>0 and 'pill' not in item.tags:equipment.append(key)
+    special=None
+    if world=='celestial' and realm>=9 and path=='dao':special=f'cavern_trace_{realm}'
+    if 6<=realm<=8 and world=='true_demon' and path=='demonic':special=f'cavern_blood_{realm}'
+    if 6<=realm<=8 and world=='spirit' and path in {'dao','buddhist','confucian'}:special=f'cavern_guard_{realm}'
+    favored={'spirit':{'fire','mountain','fort'},'true_demon':{'shadow','ruins','fire'},
+             'celestial':{'grove','ruins','mountain'}}
+    if special and rng.random()<(.60 if theme in favored[world] else .20):
+        key=special
+    elif medicines and (theme in {'fire','grove','ruins','water'} or node['kind']=='cache'):
+        key=rng.choice(medicines)
+    elif equipment and theme in {'fort','ruins','mountain'} and node['kind']!='hazard':
+        key=rng.choice(equipment)
+    else:return reward
+    return dict(kind='fixed',id=reward['id'],realm=realm,name=ITEM_CATALOG[key].name,fused=False,items=[dict(id=key,quantity=1)])
+
+
+def cache_clue(node):
+    reward=node['reward']
+    if reward['kind']!='fixed':return ''
+    key=reward['items'][0]['id']
+    if key.startswith('cavern_trace_'):return ' 丹匣上的仙篆还泛着金光，缝里透出一丝药香。'
+    if key.startswith('cavern_blood_'):return ' 一口黑鼎扣在石座上，鼎沿粘着干透的血砂。'
+    if key.startswith('cavern_guard_'):return ' 壁龛垂下几截引雷铜索，护着底下一只青瓷药瓶。'
+    if ITEM_CATALOG[key].breakthrough_bonus:return ' 石榻上还留着闭关用的蒲团，旁边搁着封了蜡的丹瓶。'
+    return ' 石壁边斜靠着一只兵匣，匣扣已经锈住了。'
+
+
 def resource_recipe(rng,identity,realm,world,path,quality):
     """Finite original cultivation materials, selected by their actual use grade."""
     choices=[r for r in WORLD_SYSTEMS['natal_artifact']['materials']
@@ -169,7 +217,12 @@ def recipe(rng, identity, realm, path, theme, quality, core=False,world=None):
 
 
 def grant(game, reward):
-    if reward['kind']=='resource':
+    if reward['kind']=='fixed':
+        key=reward['items'][0]['id'];world=game.player.world;realm=reward['realm']
+        special=(world=='celestial' and realm>=9 and key==f'cavern_trace_{realm}' or 6<=realm<=8 and
+                 (world,key) in {('spirit',f'cavern_guard_{realm}'),('true_demon',f'cavern_blood_{realm}')})
+        if not special and key not in fixed_stock(world,realm):raise ValueError('此处封藏的物品与本界品阶不符')
+    if reward['kind'] in {'fixed','resource'}:
         if any(row['id'] not in ITEM_CATALOG for row in reward['items']):raise ValueError('奖品资料缺失，这份奖励仍待领取')
         for row in reward['items']:add_item(game.player,row['id'],row['quantity'])
     elif reward['kind']=='technique':

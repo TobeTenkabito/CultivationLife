@@ -15,7 +15,11 @@ def test_shipped_reviewed_assets_are_self_contained():
     from cultivation_life.content_registry import EXTENSION_REPORT
     source=dict(catalog(ROOT), assets=public_catalog(ROOT,EXTENSION_REPORT)['assets'])
     assert len(source['assets'])==1696 and len(source['maps'])==11
-    assert len(source['items'])==1184
+    assert len(source['items'])==1194
+    for group, tiers in [('guard', (6, 7, 8)), ('blood', (6, 7, 8)), ('trace', (9, 10, 11, 12))]:
+        for tier in tiers:
+            icon = source['items'][f'cavern_{group}_{tier}']['asset']
+            assert icon.startswith('medicine.') and icon in source['assets']
     packages={json.loads(p.read_text(encoding='utf-8'))['id']:p.parent for p in (ROOT/'dlc').glob('*/manifest.json')}
     for identity,row in source['assets'].items():
         if row['file'].startswith('/extension-assets/'):

@@ -47,7 +47,10 @@ def main():
                     selects=page.locator('.at-buff select');selects.nth(1).select_option('from_round');selects.nth(2).select_option('restore')
                     page.locator('.at-buff input').nth(2).fill('3')
                     page.wait_for_function('!document.querySelector("[data-author-create]").disabled')
-                    page.locator('[data-author-create]').click();page.wait_for_function('!busy&&game.authored_techniques.books.length===1')
+                    with page.expect_response(lambda response: response.url.endswith('/authored-technique') and response.request.post_data_json.get('action')=='create') as submitted:
+                        page.locator('[data-author-create]').click()
+                    assert submitted.value.ok,submitted.value.text()
+                    page.wait_for_function('!busy&&game.authored_techniques.books.length===1')
                     key=page.evaluate('game.authored_techniques.books[0].id')
                     page.locator('[data-author-manual]').click();page.wait_for_function('!busy&&game.authored_techniques.revision===2')
                     page.locator('[data-author-upgrade]').click();page.wait_for_function('!busy&&game.authored_techniques.books[0].level===2')
@@ -97,6 +100,7 @@ def main():
                         set_theme(page,palette)
                         for width,height in [(1440,960),(390,844),(844,390)]:
                             page.set_viewport_size(dict(width=width,height=height))
+                            page.evaluate('()=>new Promise(done=>requestAnimationFrame(()=>requestAnimationFrame(done)))')
                             navigation_locator(page,'[data-panel-target=authored]').click()
                             page.locator('#authored-card').wait_for(state='visible')
                             page.wait_for_timeout(350)

@@ -76,7 +76,8 @@ def test_procurement_actual_diversion_compensation_and_no_self_award(bureau):
     e,gid=bureau;ids=officers(e,gid);identity,j=diverted(e,gid);g=e._load(gid)
     assert not state(g)['jobs'][0]['cargo'] and state(g)['jobs'][0]['diversion']['goods']==j['offer']['materials']
     before=g.heavenly_court['player_merit'];investigate(e,gid,identity)
-    with pytest.raises(ValueError,match='补交'):cmd(e,gid,'case_propose',identity+'~remedy')
+    with pytest.raises(ValueError,match='补齐欠款'):cmd(e,gid,'case_propose',identity+'~remedy')
+    assert state(e._load(gid))['jobs'][0]['diversion']['goods'] == j['offer']['materials']
     travel(e,gid,j['location']);g=e._load(gid)
     for key,n in j['offer']['materials'].items():add_item(g.player,key,n)
     e.store.save(g);cmd(e,gid,'case_restitution',identity)

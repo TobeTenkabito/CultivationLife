@@ -171,7 +171,8 @@ def test_native_resource_title_is_local_and_upgrade_cannot_reroll_it(economy,kin
     game.player.age=row['job']['finish'];advance_estates(game,engine.maps)
     assert row['stock'][profile[0]]==4
     if kind in {'mine','hunt'}:
-        with pytest.raises(ValueError,match='储量不足'):start_job(game,engine.maps,row)
+        with pytest.raises(ValueError,match='储量已不足以开工'):start_job(game,engine.maps,row)
+        assert row['reserve'] == 0
     assert GameState.from_dict(game.to_dict())
 
 

@@ -12025,6 +12025,106 @@
         "material"
       ],
       "force_tier": 1
+    },
+    {
+      "id": "cavern_guard_6",
+      "name": "含霆丹",
+      "description": "青白丹衣上有一道细小的焦痕，靠近耳边能听见轻微的雷鸣。炼虚同阶道、佛、儒修可服，下次雷劫所受伤害减少 8%，同类护雷药力取最高。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:6"
+      ]
+    },
+    {
+      "id": "cavern_blood_6",
+      "name": "敛煞丹",
+      "description": "黑丹入喉，翻涌的血煞会沿经络沉入丹田。炼虚同阶魔修可服，下次雷劫所受伤害减少 8%，同类护雷药力取最高。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:6"
+      ]
+    },
+    {
+      "id": "cavern_guard_7",
+      "name": "七返避雷丹",
+      "description": "银丝绕丹身七匝，隔着瓷瓶也能看见游动的电光。合体同阶道、佛、儒修可服，下次雷劫所受伤害减少 11%，同类护雷药力取最高。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:7"
+      ]
+    },
+    {
+      "id": "cavern_blood_7",
+      "name": "玄煞伏雷丹",
+      "description": "刮去丹壳上的黑砂，底下藏着一粒血红的丹心。合体同阶魔修可服，下次雷劫所受伤害减少 11%，同类护雷药力取最高。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:7"
+      ]
+    },
+    {
+      "id": "cavern_guard_8",
+      "name": "太清镇雷丹",
+      "description": "丹色近乎透明，摇动瓶身时，丹中雷光始终凝在一处。大乘同阶道、佛、儒修可服，下次雷劫所受伤害减少 14%，同类护雷药力取最高。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:8"
+      ]
+    },
+    {
+      "id": "cavern_blood_8",
+      "name": "九煞镇霆丹",
+      "description": "九点暗红丹砂结成一环，遇上魔气便逐一亮起。大乘同阶魔修可服，下次雷劫所受伤害减少 14%，同类护雷药力取最高。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:8"
+      ]
+    },
+    {
+      "id": "cavern_trace_9",
+      "name": "凝痕丹",
+      "description": "薄薄的丹衣里浮着一缕金丝，随呼吸缓缓舒卷。真仙同阶道修在仙界以仙灵力炼化，可凝得 12 道仙痕。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:9"
+      ]
+    },
+    {
+      "id": "cavern_trace_10",
+      "name": "金霞篆纹丹",
+      "description": "丹瓶初开，一抹金霞便沿瓶口绕了一圈。金仙同阶道修在仙界以仙灵力炼化，可凝得 24 道仙痕。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:10"
+      ]
+    },
+    {
+      "id": "cavern_trace_11",
+      "name": "太乙含章丹",
+      "description": "玉白丹壳分作数瓣，瓣底的细纹一直连到丹心。太乙同阶道修在仙界以仙灵力炼化，可凝得 36 道仙痕。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:11"
+      ]
+    },
+    {
+      "id": "cavern_trace_12",
+      "name": "大罗合纹丹",
+      "description": "丹丸在掌心滚动，表面散开的仙纹随即合拢如初。大罗同阶道修在仙界以仙灵力炼化，可凝得 48 道仙痕。",
+      "tags": [
+        "pill",
+        "dungeon_medicine",
+        "grade:12"
+      ]
     }
   ]
 }

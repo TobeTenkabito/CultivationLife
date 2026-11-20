@@ -163,6 +163,7 @@ def test_outer_conflict_and_join_queue_exclude_distant_strong_cultivator(local):
     a.update(realm=1,true_realm=1);strong.update(realm=4,true_realm=4,offer_step=0)
     b.update(realm=2,true_realm=2)
     for r in [a,b,*rest]:r['offer_step']=99
+    site['space']['positions'].update({r['id']:0 for r in (a,b,strong)})
     site['nodes'][0].update(kind='conflict',mechanism='conflict',actor=a['id'])
     engine.store.save(saved)
     act(engine,game,'choose',choice='seize')

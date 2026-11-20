@@ -12,7 +12,7 @@ from .generation import generate, config, stream
 from .people import materialize, power, pressures, fight, gratitude, available, opposition, team_reason
 from .ecology import appearance_depth
 from .rewards import grant, learn
-from . import expedition, scenes
+from . import expedition, scenes, topography, formations
 from .companions import carry, separate
 
 
@@ -26,6 +26,8 @@ class Dependencies:
     die: object
     npc_power: object
     maps: object
+    activate_loadout: object
+    formation_candidates: object
 
 
 LOCAL_COMMANDS = {'get_game','present','dungeon_action','choose','use_item','equip_known_technique',
@@ -55,7 +57,9 @@ def require_actor(game):
 
 
 def log(site, text, kind='实证', actors=(), source='亲眼所见'):
-    site['logs'].append(dict(id=site['id']+':log:'+str(len(site['logs'])), step=site['step'],
+    sequence=int(site['logs'][-1]['id'].rsplit(':',1)[1])+1 if site['logs'] else 0
+    if len(site['logs'])>=2000:site['logs'].pop(0)
+    site['logs'].append(dict(id=site['id']+':log:'+str(sequence), step=site['step'],
         kind=kind, place=('入口','外围','深处','核心')[min(3,site['depth'])], text=text,
         source=source, actors=list(actors)))
     site['last_result'] = text
@@ -108,6 +112,7 @@ def invite_tick(game, maps):
 
 
 def close(game, site, text):
+    formations.close_arrays(game,site,log)
     for key,contract in site.get('expedition',{}).get('contracts',{}).items():
         if contract['state']=='promised':
             contract['state']='broken'
@@ -115,6 +120,7 @@ def close(game, site, text):
             log(site,'离开时与'+role['name']+'的交付约定仍未完成，履约记录已注明。',actors=[key])
     for key in site['party']:
         role=site['roles'][key];role.update(state='left',left_step=site['step'])
+    if 'space' in site:site['space']['chase']=None
     site['party']=[];site['pending']=None;site['status']='closed'
     game.dungeon_state['active']=None
     game.dungeon_state['ready_age']=max(game.dungeon_state['ready_age'],game.player.age+site['unit'])
@@ -174,7 +180,7 @@ def reveal_local_support(game,site):
 
 def background(site):
     if site['quality'] not in {'epic','legendary'}:return
-    if expedition.news(site,log,label):return
+    if expedition.news(site,log,label) or 'space' in site:return
     rng=stream(site['seed'],'news',site['step'])
     a,b=rng.sample(list(site['roles'].values()),2)
     # These are reports, not authoritative changes to instantiated world people.
@@ -221,17 +227,19 @@ def advance_scene(game,site):
             site['pending']={'kind':'conflict','actor':a['id'],'other':b['id'],'aftermath':True};return
     for role in site['roles'].values():
         if (role['state'] in {'unseen','observed'} and role['offer_step']<=site['step']<len(site['nodes'])
-                and appearance_depth(site,role)<=site['depth'] and not team_reason(game,role)):
+                and topography.present(site,role['id']) and appearance_depth(site,role)<=site['depth'] and not team_reason(game,role)):
             contact(game,site,role)
             if site['pending']:return
 
 
 def resolve_node(deps,game,site,choice):
     if site['step']>=len(site['nodes']):raise ValueError('已到探索尽头，请撤离')
-    node=site['nodes'][site['step']];role=site['roles'][node['actor']]
+    if site['step'] in site.get('space',{}).get('cleared',[]):raise ValueError('此地已经探过，请另选方位')
+    node=site['nodes'][site['step']];role=topography.local_actor(game,site,node)
     rng=stream(site['seed'],node['id'],choice)
     if choice=='detour':
-        expedition.detour(game,site,log);advance_scene(game,site);return
+        origin=site['step'];expedition.detour(game,site,log)
+        after_travel(deps,game,site,origin,completed=True);return
     if choice=='survey':
         if node['id'] in site['branches']:raise ValueError('这一处已经勘察')
         cost=max_mp(game.player)*.04
@@ -240,7 +248,7 @@ def resolve_node(deps,game,site,choice):
         for key in site['party']:site['roles'][key]['trust']=min(100,site['roles'][key]['trust']+3)
         log(site,'你辨出阵势'+('向内收束，正面冲入容易受创。' if node['variant']%2 else '向外散逸，借势破阵或能取得遗物。'))
         route=site.get('expedition',{}).get('routes',{}).get(node['id'])
-        if route:log(site,'你发现'+route['direction']+'可以绕行，但会错过正路的机缘。')
+        if route:log(site,'你发现'+route['direction']+'可以绕行，另一头接着前面的石径。')
         return
     tactic=scenes.tactic(node,choice)
     if choice not in {'seize','bypass'} and not tactic:raise ValueError('不存在的探索选择')
@@ -252,8 +260,8 @@ def resolve_node(deps,game,site,choice):
         log(site,f'你{tactic[3]}，消耗 {cost:g} 点法力。')
     log(site,node['text'])
     if choice=='seize' or tactic:
-        present=available(game,site,role)
-        if not present:mark_absent(site,role)
+        present=role is not None and available(game,site,role)
+        if role and not present:mark_absent(site,role)
         contested=(site['quality']=='legendary' or site['quality']=='epic' and rng.random()<.55)
         if present and contested and node['kind'] in {'seal','cache','hazard'} and role['state'] not in {'dead','left','declined','joined'}:
             role.update(known=True,state='hostile')
@@ -261,7 +269,7 @@ def resolve_node(deps,game,site,choice):
             site['pending']={'kind':'guardian','actor':role['id']};return
         if present and node['kind']=='conflict' and role['state'] not in {'dead','left','declined','joined'}:
             others=[r for r in site['roles'].values() if r['id']!=role['id']
-                and r['state'] in {'unseen','observed'} and appearance_depth(site,r)<=site['depth'] and available(game,site,r)]
+                and topography.present(site,r['id']) and r['state'] in {'unseen','observed'} and appearance_depth(site,r)<=site['depth'] and available(game,site,r)]
             other=min(others,key=lambda r:abs(r['realm']-role['realm']),default=None)
             if other:
                 role.update(known=True,state='contact');other.update(known=True,state='contact')
@@ -288,6 +296,26 @@ def resolve_node(deps,game,site,choice):
     site['node_history'].append({'id':node['id'],'choice':choice});site['step']+=1
     if not game.player.alive or wandering(game.player) or game.player.nascent_state.get('crisis') or game.player.imprisonment or game.player.ghost_captor:
         close(game,site,'探境被迫中断，已取得的物品依照现有生死与拘禁规则处理。');return
+    after_travel(deps,game,site,site['step']-1,completed=True)
+
+
+def after_travel(deps,game,site,origin,*,completed=False):
+    if 'space' in site:
+        space=site['space']
+        if completed and origin not in space['cleared']:space['cleared'].append(origin)
+        dest=topography.here(site)
+        revisited=dest in space['visited']
+        if origin!=dest:
+            topography.arrive(game,site,origin,dest)
+            topography.encounter_snare(deps,game,site,log,close)
+            if site['status']!='active':return
+        if space['chase']:
+            background(site)
+            topography.pursuit(game,site,log)
+            return
+        if revisited and not completed:
+            background(site)
+            return
     advance_scene(game,site)
 
 
@@ -295,6 +323,7 @@ def resolve_pending(deps,game,site,choice):
     pending=site['pending'];role=site['roles'][pending['actor']]
     allowed={'join':{'accept','decline'},'conflict':{'support_actor','support_other','flee'},
              'guardian':{'fight','flee'},'ambush':{'fight','flee'},'settlement':{'part','ask_join'}}
+    if choice=='flee' and pending.get('intercepted'):raise ValueError('追兵已经截住去路')
     if choice not in allowed[pending['kind']]:raise ValueError('当前局势没有这个选项')
     if choice in {'accept','ask_join'}:
         if reason:=team_reason(game,role):raise ValueError(reason)
@@ -343,9 +372,8 @@ def resolve_pending(deps,game,site,choice):
         enemies=opposition(game,site,enemy)
         if pending['kind']=='conflict':enemies+=opposition(game,site,site['roles'][pending['other']])
         enemies=list({r['id']:r for r in enemies}.values())
-        escaped=stream(site['seed'],'flee',site['revision']).random()<expedition.escape_chance(game,site,enemies)
-        if escaped:close(game,site,'你借混乱脱离争斗，带着已取得的物品退出副本。');return
-        log(site,'你的退路被截断，只得迎战。')
+        topography.start_chase(game,site,[r['id'] for r in enemies],log)
+        return
     elif pending['kind']=='conflict':
         if choice not in {'support_actor','support_other'}:raise ValueError('请选择援助一方或脱身')
         other=site['roles'][pending['other']]
@@ -362,7 +390,9 @@ def resolve_pending(deps,game,site,choice):
         their_side=[r for r in opposition(game,site,enemy) if r['id'] not in {a['id'] for a in allies}]
         weaker=sum(deps.npc_power(materialize(game,site,r)) for r in own_side)<sum(deps.npc_power(materialize(game,site,r)) for r in their_side)
     expedition.witnessed(game,site,[enemy['id']]+[r['id'] for r in allies])
-    outcome,text=fight(deps,game,site,enemy,allies);log(site,text,actors=[enemy['id']]+([ally['id']] if ally else []))
+    ambush = bool(pending.get('snared') and formations.local_field(game))
+    outcome,text = fight(deps,game,site,enemy,allies,attack=ambush)
+    log(site,text,actors=[enemy['id']]+([ally['id']] if ally else []))
     site['pending']=None
     if (outcome not in {'victory','killed','victory_escape','victory_controlled'} or not game.player.alive
             or wandering(game.player) or game.player.nascent_state.get('crisis') or game.player.imprisonment or game.player.ghost_captor):
@@ -383,6 +413,13 @@ def resolve_pending(deps,game,site,choice):
                     log(site,ally['name']+'感谢你援助弱势一方，将所得中的另一份也交给你。')
             log(site,f"{label(ally)}在与{label(enemy)}的争夺中胜出，{node['reward']['name']}最后由你取得。",actors=[ally['id'],enemy['id']])
         site['step']+=1
+        if 'space' in site:
+            space=site['space'];origin=site['step']-1
+            if origin not in space['cleared']:space['cleared'].append(origin)
+            if site['step']<len(site['nodes']):
+                topography.arrive(game,site,origin,site['step'])
+                topography.encounter_snare(deps,game,site,log,close)
+                if site['status']!='active':return
     elif ally and available(game,site,ally):
         gratitude(game,ally,20)
         if weaker:
@@ -394,13 +431,15 @@ def resolve_pending(deps,game,site,choice):
         site['expedition']['performance']['wins']+=1
         if ally and available(game,site,ally):
             site['expedition']['performance']['helped']+=1
+            if 'space' in site:site['space']['positions'][ally['id']]=topography.here(site)
             site['pending']=dict(kind='settlement',actor=ally['id'])
-            log(site,'战局暂定，'+ally['name']+'仍站在遗物旁。你们尚需决定接下来如何行动。',actors=[ally['id']]);return
+            log(site,'战局暂定，'+ally['name']+'跟了上来，想问问你往后怎么走。',actors=[ally['id']]);return
     advance_scene(game,site)
 
 
 def command(deps,game_id,action,payload):
     allowed={'action','dungeon_id','revision','choice','actor_id','mail_id','manual_id','world','location_id','slot'}
+    if action=='ward':allowed.add('loadout_id')
     if not isinstance(payload,dict) or set(payload)-allowed or payload.get('action',action)!=action:
         raise ValueError('副本仅接受玩家操作，不接受覆盖隐藏参数')
     game=copy.deepcopy(deps.load(game_id));state=game.dungeon_state
@@ -427,6 +466,7 @@ def command(deps,game_id,action,payload):
             if site is None or type(payload.get('revision')) is not int or payload['revision']!=site['revision']:
                 raise ValueError('副本页面已过期，请查看当前局势')
             if (site['world'],site['location_id'])!=(game.player.world,game.player.location_id):raise ValueError('必须实际抵达副本所在地图')
+            if site['status']=='active' or action=='enter':topography.restore_map(site)
             if action=='invite':
                 if state['active'] or site['status']!='open':raise ValueError('请在入境前发出同行邀请')
                 from .people import invite
@@ -436,6 +476,9 @@ def command(deps,game_id,action,payload):
                 if game.player.age<state['ready_age']:raise ValueError('刚刚退出副本，尚需度过一个完整行动单位')
                 site.update(status='active',entered=True,unit=int(WORLD_SYSTEMS['time_units'][str(true_rank(game.player)[0])]))
                 state['active']=site['id'];log(site,'你跨过入口，停下脚步，听了听四周的动静。')
+                if 'space' in site:
+                    for key,role in site['roles'].items():
+                        if role['state']=='invited':site['space']['positions'][key]=0
                 carry(game,site,log)
                 offer_invited(game,site)
                 for mail in state['mail']:
@@ -447,9 +490,23 @@ def command(deps,game_id,action,payload):
                     if mail['dungeon_id']==site['id']:mail.update(status='declined',unread=False)
             else:
                 if state['active']!=site['id'] or site['status']!='active':raise ValueError('当前未在此副本中')
-                if action=='exit':
+                space=site.get('space')
+                if space and space['chase'] and action!='move':raise ValueError('追兵将至，请先选择遁行方位')
+                if action=='move':
+                    if not space or site['pending']:raise ValueError('须先处置眼前局势')
+                    origin=topography.here(site)
+                    dest=topography.exits(space,origin).get(payload.get('choice'))
+                    if dest is None:raise ValueError('此方向没有通路')
+                    site['step']=dest
+                    after_travel(deps,game,site,origin)
+                elif action=='ward':
+                    if not space:raise ValueError('此处无法布阵')
+                    formations.place(game,site,payload.get('loadout_id'),deps,log)
+                elif action=='withdraw_ward':
+                    formations.withdraw(game,site,log)
+                elif action=='exit':
                     if site['pending'] and site['pending']['kind']!='join':raise ValueError('正在争斗，须先尝试脱身')
-                    close(game,site,'你收拢所得退出副本；这处入口不再向你开放。')
+                    close(game,site,'你收拢所得，沿原路退出副本。')
                 elif action=='choose':
                     if site['pending']:resolve_pending(deps,game,site,payload.get('choice'))
                     else:resolve_node(deps,game,site,payload.get('choice'))

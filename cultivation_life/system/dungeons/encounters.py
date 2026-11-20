@@ -6,12 +6,15 @@ from ...soul_rules import wandering
 
 
 def visible_now(site):
+    from .trails import present
     keys=set(site['party'])
+    if 'space' in site:
+        keys.update(k for k in site['roles'] if present(site,k))
     pending=site['pending']
     if pending:
         keys.add(pending['actor'])
         if pending.get('other'):keys.add(pending['other'])
-    elif site['step']<len(site['nodes']):keys.add(site['nodes'][site['step']]['actor'])
+    elif 'space' not in site and site['step']<len(site['nodes']):keys.add(site['nodes'][site['step']]['actor'])
     return keys
 
 
@@ -30,9 +33,9 @@ def reveal(game,site,log,label):
 
 
 def can_slay(game,site,role):
-    return bool(site['status']=='active' and role['known']
+    return bool(site['status']=='active' and not site.get('space',{}).get('chase') and role['known']
         and role['state'] not in {'dead','left','missing'}
-        and (role['id'] in visible_now(site) or role['ledger'].get('encounter_step')==site['step'])
+        and (role['id'] in visible_now(site) or ('space' not in site and role['ledger'].get('encounter_step')==site['step']))
         and available(game,site,role))
 
 

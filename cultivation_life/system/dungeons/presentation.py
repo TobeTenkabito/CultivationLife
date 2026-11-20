@@ -125,6 +125,9 @@ def public(game,maps):
             can_learn=not learn_reason and not active and not reason,learn_reason=learn_reason,
             study=copy.deepcopy(row['study']),quote=quote(game,row)))
     if active:
+        if 'space' not in active:
+            from .topography import restore_map
+            active=copy.deepcopy(active);restore_map(active)
         site=active;pending=site['pending'];choices=[]
         if pending:
             kind=pending['kind']
@@ -141,18 +144,30 @@ def public(game,maps):
                 spec=tactic(current,key)
                 if spec:choices.append((key,f'{spec[3]}（法力 {max_mp(p)*spec[1]:g}）'))
         if not pending and route and current['id'] in site['branches']:choices.append(('detour','沿'+route['direction']+'绕行'))
+        space=site.get('space')
+        if space:
+            if space['chase'] or (not pending and site['step'] in space['cleared']):choices=[]
+            if pending and pending.get('intercepted'):
+                from .formations import local_field
+                choices=[('fight','启阵迎敌' if pending.get('snared') and local_field(game) else '迎战追兵')]
+        from .rewards import cache_clue
         result['session']=dict(id=site['id'],revision=site['revision'],name=site['name'],
             quality=QUALITY_NAMES[site['quality']],place=('入口','外围','深处','核心')[min(3,site['depth'])],
-            text=site['last_result'] if pending or not current else current['text'],
+            text=site['last_result'] if pending or (space and space['chase']) or not current else current['text']+cache_clue(current),
             choices=[dict(id=k,label=v,enabled=not reason and not(k in {'accept','ask_join'} and
                 (len(site['party'])>=config()['max_team']-1 or team_reason(game,site['roles'][pending['actor']])))
                 and not(k=='survey' and current and current['id'] in site['branches'])
                 and not(k in TACTICS and p.mp<max_mp(p)*TACTICS[k][1])) for k,v in choices],
-            can_exit=not reason and (not pending or pending['kind']=='join'),
+            can_exit=not reason and not (space and space['chase']) and (not pending or pending['kind']=='join'),
             party_count=len(site['party'])+1,team_limit=config()['max_team'],
             people=[person(game,site,r) for r in site['roles'].values() if r['known'] and r['state']!='unseen'],
             logs=public_logs(site['logs'],site),acquired=len(site['claims']),
             preparation=min(100,site['preparations']*10),
             player_comparison=dict(rank=rank_for(p.realm_index,p.layer),power=round(combat_power(p))),
             hp=p.hp,mp=p.mp)
+        if space:
+            from .perception import view
+            session=result['session'];session['map']=view(game,site)
+            if space['chase']:session['text']='身后遁光紧逼，选择方位遁行。'
+            elif not pending and site['step'] in space['cleared']:session['text']='你认出方才留下的足迹。可在这里布阵，或沿岔路继续探查。'
     return result

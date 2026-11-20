@@ -74,6 +74,7 @@ def generate(game, location, slot, legends):
         nr=stream(game.seed,identity,'node',number)
         depth=min(3,number*4//profile['nodes'])
         local_roles={key:r for key,r in roles.items() if ecology.appearance_depth(dict(reference=reference,ceiling=ceiling),r)<=depth}
+        if number==0 and len(local_roles)>1:local_roles.pop(next(reversed(roles)),None)
         if number==profile['nodes']-1:
             guardian=next(reversed(roles));local_roles={guardian:roles[guardian]}
         kind,mechanism,variant,actor=scenes.structure(nr,local_roles,structures,core=number==profile['nodes']-1)
@@ -92,6 +93,9 @@ def generate(game, location, slot, legends):
     from .rewards import bounded_recipe, resource_recipe, bound_growth_budget
     for number,node in enumerate(nodes):
         bounded_recipe(node['reward'],quality,world)
+        if number!=len(nodes)//2:
+            from .rewards import fixed_cache
+            node['reward']=fixed_cache(stream(game.seed,identity,'sealed-cache',number),node['reward'],node,world,theme,p.path)
         if number==len(nodes)//2:
             resource=resource_recipe(stream(game.seed,identity,'resource',number),node['reward']['id'],realm,world,p.path,quality)
             if resource:node['reward']=resource
@@ -100,5 +104,16 @@ def generate(game, location, slot, legends):
         bounded_recipe(reward,quality,world)
         return reward
     site['expedition']=blueprint(site,stream(game.seed,identity,'expedition-v2'),bonus)
+    from .trails import bearing, exits, layout
+    space=site['space']=layout(site,stream(site['seed'],'map'))
+    routes=site['expedition']['routes']
+    for i,node in enumerate(nodes[:-2]):
+        route=routes[node['id']]
+        nearby=[p for p in exits(space,i).values() if p>i+1]
+        if not nearby:
+            del routes[node['id']]
+            continue
+        dest=min(nearby,key=lambda p:abs(p-route['destination']))
+        route.update(destination=dest,direction=bearing(space,i,dest)+'侧岔道')
     bound_growth_budget(site)
     return site

@@ -42,7 +42,7 @@ def test_city_real_receipt_once_per_year_and_original_owner(setup):
     e,g=setup;g,row,_=ready(e,g)
     owner=copy.deepcopy(rules.cities(g)[0]['owner'])
     g=act(e,g,'city:exchange');row=rules.offices(g)[0]
-    with pytest.raises(ValueError,match='真实年份'):act(e,g,'city:settle')
+    with pytest.raises(ValueError,match='城外度过一年'):act(e,g,'city:settle')
     g.player.age+=1;e.store.save(g)
     q=development.quote(g,row,'city:settle');before=balance(g,row['wallet']);purse=balance(g,'player')
     g=act(e,g,'city:settle');row=rules.offices(g)[0];state=operations.book(row)

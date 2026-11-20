@@ -192,7 +192,7 @@ class PlayerCombatSystem:
         formation_profile = (
             dict(field_formation)
             if isinstance(field_formation, dict) and field_formation.get("active")
-            and not portable_formation.get("active")
+            and (not portable_formation.get("active") or (target.get('local_dungeon') and target.get('ground_formation_id')))
             else portable_formation
         )
         enemy_formation_profile = (
@@ -317,6 +317,9 @@ class PlayerCombatSystem:
                     if "执念" in soul_traits:
                         resistance = min(0.55, resistance + 0.20)
                     player_stats[stat] *= 1.0 - (1.0 - multiplier) * (1.0 - resistance)
+        for debuff in target.get('enemy_debuffs', []):
+            stat=debuff.get('stat')
+            if stat in enemy_stats:enemy_stats[stat]*=max(0.,min(1.,float(debuff['multiplier'])))
         enemy_buffs = []
         for raw_buff in target.get("enemy_buffs", []):
             buff = dict(raw_buff)

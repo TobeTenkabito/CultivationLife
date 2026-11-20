@@ -6,4 +6,5 @@ from ..transactions import accept_committed_game
 def bind(engine):
     return Dependencies(load=engine._load,save=engine.store.save,present=engine.present,
         commit=lambda game:accept_committed_game(engine,game),combat=engine._combat,
-        die=engine._die,npc_power=engine._npc_power,maps=engine.maps)
+        die=engine._die,npc_power=engine._npc_power,maps=engine.maps,activate_loadout=engine._activate_loadout,
+        formation_candidates=engine._formation_candidates)

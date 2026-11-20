@@ -10882,6 +10882,46 @@
       "asset": "affinity.soul.yang",
       "requires": []
     },
+    "cavern_guard_6": {
+      "asset": "medicine.void_meridian_pill",
+      "requires": []
+    },
+    "cavern_guard_7": {
+      "asset": "medicine.heaven_bearing_pill",
+      "requires": []
+    },
+    "cavern_guard_8": {
+      "asset": "medicine.tribulation_vitality_pill",
+      "requires": []
+    },
+    "cavern_blood_6": {
+      "asset": "medicine.blood_womb_pill",
+      "requires": []
+    },
+    "cavern_blood_7": {
+      "asset": "medicine.yin_core_pill",
+      "requires": []
+    },
+    "cavern_blood_8": {
+      "asset": "medicine.primordial_void_pill",
+      "requires": []
+    },
+    "cavern_trace_9": {
+      "asset": "medicine.mystic_truth_pill",
+      "requires": []
+    },
+    "cavern_trace_10": {
+      "asset": "medicine.three_origin_unity_pill",
+      "requires": []
+    },
+    "cavern_trace_11": {
+      "asset": "medicine.three_purity_creation_pill",
+      "requires": []
+    },
+    "cavern_trace_12": {
+      "asset": "medicine.grand_dao_pill",
+      "requires": []
+    },
     "healing_pill": {
       "asset": "pill.healing_pill",
       "requires": []

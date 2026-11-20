@@ -3414,7 +3414,7 @@ function renderInventory(items) {
     const economicMedicine = (item.tags || []).some(tag => ['economic_use:healing','economic_use:cultivation','economic_use:longevity'].includes(tag));
     const economicCore = item.tags?.includes('economic_raw') && (item.tags || []).some(t=>t.startsWith('economic_role:core_'));
     const economicTalisman = item.tags?.includes('economic_use:talisman');
-    const normalUse = item.tags?.includes('dungeon_restorative') || economicMedicine || economicCore || economicTalisman || item.id === 'qilin_blessing_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
+    const normalUse = item.tags?.includes('dungeon_medicine') || item.tags?.includes('dungeon_restorative') || economicMedicine || economicCore || economicTalisman || item.id === 'qilin_blessing_elixir' || item.id === 'healing_pill' || !!item.root_grant || item.breakthrough_bonus > 0 || item.conception_bonus > 0 || item.permanent_intrinsic_hp_bonus > 0 || item.permanent_intrinsic_mp_bonus > 0 || specialPlantUse || guixuUse;
     if (item.tags?.includes('secret_art_manual')) {
       const browse=document.createElement('button');browse.textContent='参阅秘法';
       browse.onclick=()=>{window.SecretArtPanel?.select(item.tags.find(t=>t.startsWith('secret_art:')).slice(11));window.UtilityPanels?.open('secret-art');};

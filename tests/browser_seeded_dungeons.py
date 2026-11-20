@@ -40,7 +40,7 @@ def check_workspace(page):
     for button in page.locator('.dungeon-actions button,.dungeon-retreat button').all():
         assert button.evaluate('''n=>{const r=n.getBoundingClientRect();return n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}''')
     if page.viewport_size['width']>=1100 and page.viewport_size['height']>540:
-        for name in ('team','scene','manuals' if page.locator('.dungeon-manuals').is_visible() else 'journal'):
+        for name in ('team','scene','manuals' if page.locator('.dungeon-manuals').is_visible() else 'floor' if page.locator('.dungeon-floor').is_visible() else 'journal'):
             assert page.locator('.dungeon-'+name).is_visible()
             bounds=page.locator('.dungeon-'+name).bounding_box()
             assert bounds['height']>200 and bounds['y']+bounds['height']<=result['frame']['bottom'],(name,bounds)
@@ -121,6 +121,46 @@ def check_rank_gates(browser,engine,url):
         page.locator('[data-dungeon-action=exit]').click();page.wait_for_function('!busy && !game.dungeons.active')
         assert page.locator('[data-action=rest]').is_enabled()
         assert not errors,errors
+        page.close()
+
+
+def check_map_chase(browser,engine,url):
+    from test_dungeon_spatial_exploration import prepare_loadout
+    from cultivation_life.system.dungeons.trails import exits
+    for width,height in ((1366,768),(393,852)):
+        page=browser.new_page(viewport=dict(width=width,height=height))
+        page.goto(url);page.wait_for_function('window.GameThemes && configData')
+        game=engine.store.load(engine.create_game('舆图验收','heavenly','dao',342,preset_id='core')['id'])
+        engine.store.save(game)
+        prepare_loadout(engine,game,'赤砂伏阵')
+        selected,_=prepare_loadout(engine,game,'青木炼阳阵')
+        page.evaluate('async id=>{await loadGame(id);window.UtilityPanels.open("dungeon");}',game.id)
+        page.locator('[data-dungeon-action=discover]').click();page.wait_for_function('!busy && game.dungeons.used===1')
+        page.locator('[data-dungeon-action=enter]').click();page.wait_for_function('!busy && game.dungeons.active')
+        panel_view(page,'map')
+        assert page.locator('.dungeon-compass button').count()==8
+        page.get_by_label('选择九宫阵').select_option(selected)
+        page.locator('[data-dungeon-action=ward]').click()
+        page.wait_for_function('!busy && game.dungeons.session.map.cells.some(c=>c.here&&c.marks.some(m=>m.includes("青木炼阳阵")))')
+        saved=engine.store.load(game.id);site=saved.dungeon_state['instances'][saved.dungeon_state['active']]
+        for role in site['roles'].values():role['offer_step']=99
+        site['space']['snares'].clear();engine.store.save(saved)
+        direction,dest=next(iter(exits(site['space'],0).items()))
+        page.locator(f'.dungeon-compass [data-choice="{direction}"]').click();page.wait_for_function('!busy')
+        saved=engine.store.load(game.id);site=saved.dungeon_state['instances'][site['id']]
+        assert site['step']==dest
+        key=site['nodes'][dest]['actor'];site['space']['positions'][key]=dest
+        site['pending']=dict(kind='ambush',actor=key);engine.store.save(saved)
+        page.evaluate('async id=>await loadGame(id)',game.id)
+        page.locator('[data-choice=flee]').click();page.wait_for_function('!busy && game.dungeons.session.map.chasing')
+        assert page.locator('[data-dungeon-action=exit]').is_disabled()
+        back=next(d for d,v in exits(site['space'],dest).items() if v==0)
+        page.locator(f'.dungeon-compass [data-choice="{back}"]').click()
+        page.wait_for_function('!busy && !game.dungeons.session.map.chasing')
+        assert page.locator('[data-choice=fight]').inner_text()=='启阵迎敌'
+        page.locator('[data-choice=fight]').click()
+        page.wait_for_function('!busy && game.last_combat_report')
+        assert page.evaluate('game.last_combat_report.formation_profile.name')=='青木炼阳阵'
         page.close()
 
 
@@ -235,6 +275,7 @@ def main():
                             saved=engine.store.load(game.id);site=saved.dungeon_state['instances'][saved.dungeon_state['active']]
                             tactic='disarm' if theme=='light' else 'attune'
                             site['nodes'][site['step']].update(kind='seal',mechanism='fractured' if tactic=='disarm' else 'resonant',variant=0,risk=.1,actor=site['party'][0])
+                            site['space']['snares'].clear()
                             expected_damage=max_hp(saved.player)*.1*.4*(0 if tactic=='disarm' else .25)
                             for r in site['roles'].values():
                                 r['offer_step']=99
@@ -325,6 +366,7 @@ def main():
 
                             assert not errors,errors
                             page.close()
+                    check_map_chase(browser,engine,f'http://127.0.0.1:{httpd.server_port}')
                     check_rank_gates(browser,engine,f'http://127.0.0.1:{httpd.server_port}')
                     check_quality_palettes(browser,engine,f'http://127.0.0.1:{httpd.server_port}',output)
                     browser.close()

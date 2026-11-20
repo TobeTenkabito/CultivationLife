@@ -46,7 +46,7 @@ def decode(value):
         fields(row, {'id','world','location_id','name','quality','realm','layer','ceiling','theme',
             'terrain','conditions','slot','seed','reference','roles','nodes','status','revision','step',
             'depth','logs','party','claims','pending','entered','unit','preparations','agreements',
-            'revealed','last_result','node_history','branches','initiator'}, {'expedition'})
+            'revealed','last_result','node_history','branches','initiator'}, {'expedition','space'})
         if row['id'] != identity or row['world'] not in WORLD_IDS or row['quality'] not in QUALITIES:
             raise ValueError('副本身份或界面无效')
         integer(row['realm'],1,12);integer(row['ceiling'],1,12);integer(row['layer'],1,13)
@@ -83,9 +83,14 @@ def decode(value):
             validate_observations(row,role)
         if len(person_ids)!=len(set(person_ids)):raise ValueError('同一人物不能重复出现')
         if row['pending'] is not None:
-            pending=row['pending'];fields(pending,{'kind','actor'}, {'other','aftermath'})
+            pending=row['pending'];fields(pending,{'kind','actor'}, {'other','aftermath','snared','intercepted','pursuers'})
             if pending['kind'] not in {'join','ambush','guardian','conflict','settlement'} or pending['actor'] not in row['roles']:
                 raise ValueError('副本待处理交互无效')
+            if 'intercepted' in pending and (pending['kind']!='ambush' or pending['intercepted'] is not True):raise ValueError('追击拦截无效')
+            if 'snared' in pending and (not pending.get('intercepted') or pending['snared'] is not True):raise ValueError('伏阵拦截无效')
+            if 'pursuers' in pending:
+                group=pending['pursuers']
+                if not pending.get('intercepted') or not isinstance(group,list) or not group or any(k not in row['roles'] or k==pending['actor'] for k in group) or len(group)!=len(set(group)):raise ValueError('追兵名单无效')
             if pending['kind']=='conflict' and (pending.get('other') not in row['roles'] or pending['other']==pending['actor']):
                 raise ValueError('副本争夺双方无效')
             if pending['kind']=='settlement' and 'expedition' not in row:raise ValueError('善后缺少对应会话')
@@ -98,6 +103,7 @@ def decode(value):
             fields(log, {'id','step','kind','place','text','source','actors'}, {'fact_id','occurred_step','received_step','supersedes'})
             if log['kind'] not in {'实证','据说','听说'}:raise ValueError('副本证据等级无效')
         if 'expedition' in row:validate_expedition(row)
+        if 'space' in row:validate_space(row)
         for node in row['nodes']:
             fields(node, {'id','kind','variant','text','risk','reward','actor','direction'}, {'mechanism'})
             if 'mechanism' in node and node['mechanism'] not in {'fractured','resonant','volatile','cache','trail','contact','conflict'}:
@@ -109,7 +115,7 @@ def decode(value):
         for reward in all_rewards(row):
             fields(reward,{'id','kind','name','realm','fused'}, {'book','item','items'})
             integer(reward['realm'],1,12)
-            if reward['realm']!=row['realm'] or reward['kind'] not in {'technique','artifact','pill','resource'}:raise ValueError('奖励品阶或类型无效')
+            if reward['realm']!=row['realm'] or reward['kind'] not in {'technique','artifact','pill','resource','fixed'}:raise ValueError('奖励品阶或类型无效')
             if row['quality']=='legendary' and reward['realm']!=row['ceiling']:raise ValueError('传奇奖励不能受地图降阶')
             if reward['kind']=='technique':
                 from .technique_effect_schema import validate_effect
@@ -117,6 +123,11 @@ def decode(value):
                 if book.get('grade')!=reward['realm'] or book.get('level')!=1 or not book.get('id','').startswith(reward['id']+':'):
                     raise ValueError('传承原始配方无效')
                 validate_effect(book.get('combat_effect'))
+            elif reward['kind']=='fixed':
+                items=reward.get('items')
+                if not isinstance(items,list) or len(items)!=1:raise ValueError('封藏物品无效')
+                fields(items[0],{'id','quantity'});integer(items[0]['quantity'],1,1)
+                if not isinstance(items[0]['id'],str) or not items[0]['id']:raise ValueError('封藏物品缺少名录编号')
             elif reward['kind']=='resource':
                 if not isinstance(reward.get('items'),list) or not 1<=len(reward['items'])<=3:raise ValueError('资源预算无效')
                 for item in reward['items']:
@@ -167,6 +178,37 @@ def decode(value):
             for n in job['paid'].values():finite(n)
     if active_studies>1:raise ValueError('不能同时参悟多部传承')
     return copy.deepcopy(value)
+
+
+def validate_space(site):
+    space=site['space'];size=len(site['nodes'])
+    fields(space,{'coords','positions','turn','visited','cleared','snares','spent','chase','echoes'}, {'wards'})
+    integer(space['turn'],0,100000)
+    coords=space['coords']
+    if not isinstance(coords,list) or len(coords)!=size:raise ValueError('副本地图大小无效')
+    for pair in coords:
+        if not isinstance(pair,list) or len(pair)!=2:raise ValueError('副本节点坐标无效')
+        for n in pair:integer(n,-32,32)
+    if len(set(map(tuple,coords)))!=size:raise ValueError('副本节点坐标重复')
+    if any(max(abs(x-y) for x,y in zip(a,b))!=1 for a,b in zip(coords,coords[1:])):raise ValueError('主路断开')
+    for key in ('visited','cleared','spent','wards'):
+        seq=space.get(key,[])
+        if not isinstance(seq,list) or len(seq)>size:raise ValueError('副本足迹无效')
+        for n in seq:integer(n,0,size-1)
+        if len(set(seq))!=len(seq):raise ValueError('副本足迹重复')
+    if not isinstance(space['positions'],dict) or set(space['positions'])-set(site['roles']):raise ValueError('副本人物位置无效')
+    for pos in space['positions'].values():integer(pos,0,size-1)
+    if not isinstance(space['snares'],dict) or any(k not in {str(i) for i in range(size)} or owner not in site['roles'] for k,owner in space['snares'].items()):raise ValueError('副本伏阵无效')
+    facts={f['id'] for f in site.get('expedition',{}).get('facts',[])}
+    if not isinstance(space['echoes'],dict) or set(space['echoes'])-facts:raise ValueError('副本战痕无效')
+    for echo in space['echoes'].values():
+        if not isinstance(echo,list) or len(echo)!=2:raise ValueError('副本战痕位置无效')
+        point,turn=echo
+        integer(point,0,size-1);integer(turn,0,space['turn'])
+    if space['chase'] is not None:
+        chase=space['chase'];fields(chase,{'hunters','round'})
+        if site['status']!='active' or site['pending'] or not isinstance(chase['hunters'],list) or not chase['hunters'] or set(chase['hunters'])-set(space['positions']):raise ValueError('追逐人物无效')
+        integer(chase['round'],0,space['turn'])
 
 
 def all_rewards(site):

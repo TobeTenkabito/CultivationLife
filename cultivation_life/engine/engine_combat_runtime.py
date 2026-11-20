@@ -200,7 +200,11 @@ def _combat(deps: CombatDependencies, game: GameState, target: dict[str, Any], l
     deps._inject_tianji_npc_artifacts(game, target)
     ensure_formation_state(player)
     portable_formation = active_formation_profile(player)
-    ground_array = None if portable_formation.get("active") or target.get('local_dungeon') else deps._local_ground_formation(game)
+    if target.get("local_dungeon"):
+        from ..system.dungeons.formations import local_field
+        ground_array = local_field(game)
+    else:
+        ground_array = None if portable_formation.get("active") else deps._local_ground_formation(game)
     if ground_array:
         ground_profile = deps._ground_profile(player, ground_array)
         target["allied_formation_profile"] = ground_profile

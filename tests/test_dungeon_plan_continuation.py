@@ -63,6 +63,7 @@ def test_tactic_shortfall_disables_button_and_preserves_save(local):
 def test_background_ownership_evidence_stays_separate_from_loot(local,mistaken):
     e,g=local;discover(e,g);act(e,g,'enter');saved,site=loaded(e,g)
     site['quality']='epic';keys=list(site['roles'])[:2]
+    site['space']['positions'].update({key:3 for key in keys})
     fact=dict(id='audit-fact',actors=keys,direction='东',occurred=1,reported=2,verified=4,
         result='双方负伤后退',mistaken=mistaken,scope='person',winner=keys[0],
         treasure=dict(id='audit-fact:background',name='照影古镜'))
