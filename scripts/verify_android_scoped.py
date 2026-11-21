@@ -12,6 +12,7 @@ from cultivation_life.version import BASE_GAME_VERSION
 
 def main():
     serial=sys.argv[1] if len(sys.argv)>1 else 'emulator-5580'
+    dungeon_art = '--dungeon-art' in sys.argv[2:]
     economy = '--economy' in sys.argv[2:]
     bugfix = '--bugfix' in sys.argv[2:]
     naming = '--naming' in sys.argv[2:]
@@ -81,9 +82,11 @@ def main():
     if westward:logs=[f'build/android-westward-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if asura:logs=[f'build/android-asura-governance-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
     if techniques:logs=[f'build/android-techniques-{orientation}-{tag}.log' for orientation in ('portrait','landscape')]
+    if dungeon_art:logs=[f'build/android-dungeon-art-{o}-{tag}.log' for o in ('portrait','landscape')]
     for name in logs:
         text=(ROOT/name).read_text(encoding='utf-8-sig')
-        if heavens or tutorial or immortal or body_ui or westward or asura or techniques:
+        if dungeon_art:require('dungeon_art_scope' in text,'Missing native dungeon/art evidence')
+        if dungeon_art or heavens or tutorial or immortal or body_ui or westward or asura or techniques:
             require((ROOT/name).stat().st_mtime >= (ROOT/'android/app/build/outputs/apk/release/app-release.apk').stat().st_mtime,'Heavens native log predates the final APK')
         require('status=passed' in text and 'status=failed' not in text,f'Native test failed: {name}')
         if asura:require('asura_governance_scope' in text,f'Missing native governance coverage: {name}')
@@ -153,6 +156,7 @@ def main():
                   sdk=command('shell','getprop','ro.build.version.sdk'),logs=logs,test_apk_sha256=file_digest(test_apk),
                   log_hashes={name:file_digest(ROOT/name) for name in logs},
                   scope='Annual finance, original organizational guards, trust and real production; six native orientation phases' if economy else 'Legacy soul and upper scope')
+    if dungeon_art:receipt['scope']='Signed Android 12 portrait/landscape: touch map entry and inspection, terrain art and four character asset sets'
     if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
     if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
     if body_ui:receipt['scope']=f'{BASE_GAME_VERSION} native school peer commands/cooldown/menu/replay plus NPC body/technique/domain cultivation, controlled portraits, energy and upper-world guides, two pixel palettes; signed Android 12 portrait/landscape'

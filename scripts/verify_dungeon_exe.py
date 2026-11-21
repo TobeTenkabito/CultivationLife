@@ -26,6 +26,13 @@ def verify_dungeons(base,with_dlc,folder):
             loot=fixture['prepare_dungeon_loot'](engine,identity)
             page.evaluate('async id=>loadGame(id)',identity)
             click_control(page.locator('[data-dungeon-action=enter]'));page.wait_for_function('!busy&&game.dungeons.active')
+            click_control(page.locator('.atlas-node.here'))
+            assert page.locator('.atlas-chart').evaluate("""async chart=>{
+                const image=new Image();
+                image.src=getComputedStyle(chart,'::before').backgroundImage.slice(5,-2);
+                await image.decode();
+                return image.naturalWidth===768 && image.naturalHeight===512;
+            }""")
             for _ in range(3):click_control(page.locator('[data-choice=seize]'));page.wait_for_function('!busy')
             fixture['prepare_dungeon_fight'](engine,identity)
             page.evaluate('async id=>loadGame(id)',identity)

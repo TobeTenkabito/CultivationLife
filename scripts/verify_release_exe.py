@@ -42,6 +42,19 @@ def verify(with_dlc):
             else:
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
+            if '--dungeon-art' in sys.argv:
+                from scripts.verify_dungeon_exe import verify_dungeons
+                from scripts.verify_update301_exe import verify_update301
+                verify_dungeons(base,with_dlc,folder)
+                verify_update301(base,with_dlc)
+                combat=json.load(urllib.request.urlopen(base+'/assets/pixel/combat/manifest.json'))
+                for faction in ('dao','demonic'):
+                    for sex in ('male','female'):
+                        for clip in combat['actors'][f'{faction}-{sex}']['animations'].values():
+                            from hashlib import sha256
+                            with urllib.request.urlopen(base+clip['sheet']) as response:
+                                assert sha256(response.read()).hexdigest()==clip['sha256']
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,dungeon_art_verified=True)
             if '--techniques' in sys.argv:
                 extensions=config.get('extensions', [])
                 assert all(row['status']=='loaded' for row in extensions), extensions

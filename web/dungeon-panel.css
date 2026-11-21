@@ -1,14 +1,79 @@
 .dungeon-floor {grid-area:journal;min-height:0;overflow:auto;}
-.dungeon-map-grid {display:grid;gap:3px;margin:8px 0;padding:6px;background:color-mix(in srgb,var(--dungeon-accent) 7%,var(--surface));}
-.dungeon-map-cell {align-self:stretch;min-width:0;padding:4px 2px;text-align:center;border:1px dashed var(--line);font-size:11px;}
-.dungeon-map-cell.visited {border-style:solid;}
-.dungeon-map-cell.current {border:2px solid var(--dungeon-accent);color:var(--dungeon-accent);}
-.dungeon-map-cell small {display:block;}
-.dungeon-compass {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;margin:6px 0;}
-.dungeon-floor select {max-width:100%;margin:0 4px 4px 0;color:var(--ink);background:var(--surface);}
-.dungeon-compass span {place-self:center;color:var(--muted);font-size:12px;}
-.dungeon-floor .dungeon-button {min-height:28px;padding:3px 6px;}
-.dungeon-sense,.dungeon-map-caption {font-size:12px;margin:4px 0;}
+.dungeon-floor {scrollbar-width:thin;overscroll-behavior:contain;}
+.atlas-chart {position:relative;isolation:isolate;overflow:hidden;border-radius:5px;border:1px solid #788475;background:#ede4c8;color:#233f38;}
+.atlas-chart::before {content:'';position:absolute;inset:0;z-index:-1;background-image:var(--atlas-landscape,url('/assets/dungeon-ink-atlas.webp'));background-position:var(--atlas-bg-x,50%) var(--atlas-bg-y,50%);background-size:cover;background-repeat:no-repeat;}
+.atlas-chart:has([data-camera=local])::after {content:'';pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 35%,#e9e6ce44 64%,#e5e3cfb0 100%);}
+.atlas-viewport {height:clamp(170px,42vh,410px);overflow:hidden;overscroll-behavior:contain;scrollbar-width:thin;touch-action:none;cursor:grab;}
+.atlas-viewport:active {cursor:grabbing;}
+.atlas-viewport[data-camera=overview] {overflow:auto;touch-action:pan-x pan-y;cursor:default;}
+.atlas-stage {height:100%;position:relative;box-sizing:border-box;}
+.atlas-plot {position:absolute;inset:0;}
+.atlas-trails {position:absolute;width:100%;height:100%;inset:0;overflow:visible;pointer-events:none;}
+.atlas-trails path {fill:none;stroke:#576d60;stroke-width:1.6;stroke-linecap:round;vector-effect:non-scaling-stroke;}
+.atlas-trails .near {stroke:#234e43;stroke-width:2.6;stroke-dasharray:5 4;}
+.atlas-trails .walked {stroke:#344f47;stroke-width:2.4;}
+.atlas-trails .distant {stroke-dasharray:2 4;opacity:.7;}
+.atlas-trails .into-mist {stroke-dasharray:2 6;opacity:.34;}
+.atlas-status,.atlas-north {position:absolute;pointer-events:none;top:6px;font:600 11px/1.4 var(--serif,serif);z-index:2;}
+.atlas-camera-controls {position:absolute;bottom:7px;right:7px;display:flex;gap:4px;z-index:2;}
+#dungeon-card .atlas-camera-button {min-height:30px;padding:2px 8px;background:var(--surface);color:var(--ink);font:600 12px/1.3 var(--serif,serif);border:1px solid var(--line);border-radius:3px;}
+.atlas-pan-hint {opacity:.85;}
+.atlas-status {left:8px;padding:2px 7px;color:#30463d;background:#f3ebcfe8;border:1px solid #9eaa90;border-radius:2px;}
+.atlas-status.chasing {color:#812e25;border-color:#a65143;}
+.atlas-north {right:9px;display:flex;align-items:center;gap:3px;color:#24463d;}
+.atlas-north::before {content:'';width:9px;height:16px;clip-path:polygon(50% 0,100% 100%,50% 71%,0 100%);background:linear-gradient(90deg,#284437 50%,#8b9a80 50%);}
+#dungeon-card .atlas-node {position:absolute;margin:-22px 0 0 -22px;padding:0;display:grid;place-items:center;width:44px;height:44px;min-height:0;border:0;border-radius:50%;background:transparent;color:#294d43;box-shadow:none;z-index:1;}
+#dungeon-card .atlas-node:hover {filter:none;}
+.atlas-seal {display:grid;place-items:center;width:27px;height:27px;border:1.5px dashed #526a56;border-radius:50%;background:#f5edd8;box-shadow:0 1px 4px #24372d35;}
+.atlas-seal svg {width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.atlas-seal .atlas-illustration {width:25px;height:25px;object-fit:contain;}
+.atlas-detail>.atlas-illustration {flex:none;width:38px;height:38px;object-fit:contain;}
+.atlas-detail .atlas-description {flex:1;}
+.atlas-node.fogged .atlas-seal {isolation:isolate;border-style:none;background:transparent;box-shadow:none;}
+.atlas-node.fogged .atlas-seal::before {content:'';z-index:-1;position:absolute;inset:-3px -11px 2px;border-radius:50%;background:radial-gradient(ellipse,#ecebd0 16%,#eae8cfdf 39%,#dddcc180 58%,transparent 73%);}
+.atlas-node.visited .atlas-seal {border:2px solid #496554;background:#c6d2b7;}
+.atlas-node.here .atlas-seal {width:32px;height:32px;background:#245b50;border:2px solid #f6eac2;color:#fff3cd;box-shadow:0 0 0 2px #31594a;}
+.atlas-node.here svg {fill:currentColor;stroke-width:1;}
+.atlas-node[aria-pressed=true]:not(.here) .atlas-seal,.atlas-node:hover .atlas-seal {outline:2px solid #87452d;outline-offset:2px;}
+.atlas-here-label {position:absolute;top:calc(50% + 16px);line-height:14px;padding:0 4px;border-radius:2px;background:#264c41;color:#fff1d0;font:600 10px/14px var(--serif,serif);}
+.atlas-bearing {position:absolute;top:calc(50% + 14px);padding:0 3px;border-radius:2px;color:#334837;background:#f1ecd6e6;font:600 10px/13px var(--serif,serif);}
+#dungeon-card .atlas-node.here .atlas-seal {background:var(--dungeon-accent);color:var(--dungeon-on-accent);}
+.atlas-signs {position:absolute;left:62%;bottom:73%;display:flex;z-index:2;gap:1px;pointer-events:none;}
+.atlas-sign {font:600 10px/14px var(--serif,serif);white-space:nowrap;padding:0 3px;background:#304b58;color:#fff;border-radius:2px;}
+.atlas-sign.danger {background:#8b3b36;}.atlas-sign.ward {background:#61502c;}
+.atlas-legend {display:flex;justify-content:center;gap:15px;padding:6px 0;color:var(--muted);font-size:11px;}
+.atlas-legend span {display:inline-flex;align-items:center;gap:4px;}
+.atlas-legend i {width:9px;height:9px;border-radius:50%;box-sizing:border-box;border:1px dashed currentColor;}
+.atlas-legend .visited {border:2px solid currentColor;}
+.atlas-legend .here {border:0;background:var(--dungeon-accent);border-radius:0;clip-path:polygon(50% 0,95% 100%,50% 76%,5% 100%);}
+.atlas-detail {display:flex;gap:6px;justify-content:space-between;align-items:center;min-height:42px;padding:4px 0 7px;border-bottom:1px solid var(--line);}
+.atlas-description {min-width:0;}.atlas-description strong,.atlas-description small {display:block;}
+.atlas-description strong {font:600 14px/1.5 var(--serif,serif);}.atlas-description small,.dungeon-sense,.dungeon-map-caption {font-size:12px;}
+.atlas-detail button {flex:none;}
+.atlas-formation {display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.atlas-formation select {min-width:0;max-width:100%;flex:1;color:var(--ink);background:var(--surface);}
+.atlas-formation p,.dungeon-sense {margin:4px 0;color:var(--muted);}
+:root[data-pixel-theme=dark] .atlas-chart {background:#233b38;}
+:root[data-pixel-theme=dark] .atlas-chart::before {filter:brightness(.60) saturate(.8);opacity:.83;}
+:root[data-pixel-theme=dark] .atlas-node.fogged .atlas-seal {color:#e4ebdd;}
+:root[data-pixel-theme=dark] .atlas-node.fogged .atlas-seal::before {background:radial-gradient(ellipse,#36504ef5 12%,#536a65b8 39%,#73908b45 58%,transparent 74%);}
+:root[data-pixel-theme=dark] .atlas-chart:has([data-camera=local])::after {background:radial-gradient(ellipse at center,transparent 35%,#354b4b4d 65%,#34484bd4 100%);}
+:root[data-pixel-theme=dark] .atlas-trails .near {stroke:#e2d3a3;}
+:root[data-pixel-theme=dark] .atlas-trails :is(.walked,.distant) {stroke:#a3b9a9;}
+:root[data-pixel-theme=dark] .atlas-north {color:#e4e5ce;}
+:root[data-pixel-theme=dark] .atlas-north::before {background:linear-gradient(90deg,#e1d5ac 50%,#88a797 50%);}
+@media(min-width:1100px) and (min-height:541px) {
+  .dungeon-grid.dungeon-workspace:has(.dungeon-floor) {grid-template-columns:minmax(0,2fr) minmax(300px,1fr);grid-template-areas:'tabs scene' 'journal scene';}
+  .dungeon-workspace:has(.dungeon-floor) .dungeon-team {grid-area:journal;}
+  #dungeon-card .dungeon-workspace:has(.dungeon-floor) [data-dungeon-view=team] {display:inline-flex;}
+  .dungeon-floor .atlas-viewport {height:clamp(220px,48dvh,540px);}
+}
+@media(max-width:1099px) and (min-height:541px) {
+  .dungeon-grid.dungeon-workspace[data-view=map] {grid-template-rows:44px minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:'tabs' 'journal' 'scene';}
+  .atlas-viewport {height:clamp(158px,22dvh,245px);}
+  .dungeon-floor>h3 {position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;}
+}
+@media(max-height:540px) {.atlas-viewport {height:158px;}}
 /* Bounded expedition workspace: each reading pane scrolls independently. */
 #dungeon-card.panel-open {z-index:60;}
 #dungeon-card {--dungeon-accent:var(--pine);--dungeon-on-accent:var(--on-accent);width:min(1440px,calc(100vw - 32px));max-width:calc(100vw - 32px);left:16px;right:16px;top:12px;margin:auto;padding:0;max-height:calc(100dvh - 24px);background:var(--surface)!important;color:var(--ink);border-radius:12px;box-sizing:border-box;}

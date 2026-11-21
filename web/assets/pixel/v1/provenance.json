@@ -16,26 +16,35 @@
     "provenance.json": "455b7a6a790ec2949d3a870b075f0e4c88e678f21b4d6f99977ad98a65c362fb"
   },
   "demonic_characters": {
-    "source": "demonic-basic-variants-20261021",
-    "approval": "2026-10-22 user requested existing demonic protagonists in HUD and character details",
-    "processing": "Byte-for-byte copy of selected final atlases and same-source portraits; no redraw",
-    "manifest_sha256": "2c433b614cef43ab9593f8f8c60cc0b63100110c1cc9d2004c2de49c923dc606",
+    "source": "design/demonic-redraw-20261121/v10",
     "source_hashes": {
-      "demonic-male-atlas.png": "776e6350bd574c87110050a4216d09903d7829e13c160ed3ff8d67e2f141e78c",
-      "demonic-male-portrait.png": "f1cedf1a87d719f76591ec091240746f11089d4deebcdd09ea99ccd3c32d5c6d",
-      "demonic-female-atlas.png": "85aa3d0efa6b79002f166b540720ba7bdaa1df9f51fb82bace49a8490666cefc",
-      "demonic-female-portrait.png": "69636b33b746a53261821c3fe1ccf757151d2c1aa2e16351d7c27bfe0bb572ea"
+      "demonic-male-atlas.png": "2a61555559391f2147266bb7e871ad84c5120cbc0f906d857c814d3ed4a02667",
+      "demonic-female-atlas.png": "5a7b232a4c13adcf9f972c522a3a5ee21c961551328fb70c6868f03a9370180c"
     },
     "reserved_empty_slots": [
       13,
       14,
       15
     ],
-    "usage": "Base-game human demonic male/female; static idle_s only, no combat animation adoption"
+    "static_manifest_sha256": "f0875356fff09dbb437e8dfab1ee0ef590a0398251a842d290a389d90949d0d7",
+    "drawing_hashes": {
+      "female-fall.png": "4334bf29560e65beba496f3042d5ce18e8f12c70d6068e23c9909b22a8bbf185",
+      "female-melee-cutout.png": "adc1ef2da3ad7497662607aa9a66175929aca3efdfc5087fb754131d73ce419d",
+      "female-passing.png": "4e0ea7db01332e04b8ff93a9764ffee10f4051b5de5ac26f969ac2740e68ed9f",
+      "female-response.png": "2d332181b0cb8dc3202c4f637c7dc6a6d09420760395fe62607641c80a9327fb",
+      "female-spell.png": "f18c4d936bc57662131931a7470072dc64660cfed0311430630598d00970b4e6",
+      "female-world.png": "c9e12ec90be25ba5b20c7b4b2dceb80a2ebeaeb0d53ec3e5dda51ba5aff4d446",
+      "male-fall.png": "fd9deb0d1d683c980650c93e23320ad92b7182d580223016d80767243db569a9",
+      "male-melee.png": "f59df3040dc30c1a81d52e7612cecdbdb207011f965a5b9e87b55737ce3f16da",
+      "male-passing.png": "57efeb3579ef937cf31dc7ebab30d90e0582a2b4929959972567ce6deb112cdb",
+      "male-response.png": "3c792556cae879bbb21d88c4a98a871bd8cff2f4dc2f20c75e60442a88b7d6bb",
+      "male-spell.png": "289136b6c25db9cb937ac6fa15f7fc8727edca5c4778642385c40322569cb9ba",
+      "male-world.png": "895b59d7c6b7c0fbcdd5e7f583abc7774ee70a7d86171dcb9f03372b2cae6258"
+    }
   },
   "protagonist_static_redraws": {
-    "approval": "2026-10-23 user explicitly requires the new protagonist portraits and full-body art",
-    "processing": "Byte-for-byte selected pixel exports; separate static figures, action atlases unchanged",
+    "approval": "Dao base v5 and demonic base v10 adopted 2026-11-21",
+    "processing": "Byte-for-byte selected static pixel exports",
     "assets": {
       "actor.human.dao.male.figure": {
         "file": "dao-male-static-figure.png",
@@ -43,8 +52,8 @@
           256,
           288
         ],
-        "sha256": "998a5f1398dbc58951ce6e080bc533b1cd33c502c9ba2b1423503287015cf58b",
-        "source": "design/dao-basic-redraw-20261022/pixel/figures/dao-male.png"
+        "sha256": "855968da53f3bd20015f0cb0ad035fc9a313958664431a138ece6f2cee134472",
+        "source": "design/dao-basic-redraw-20261121/v5/male-figure.png"
       },
       "actor.human.dao.male.portrait": {
         "file": "dao-male-static-portrait.png",
@@ -52,8 +61,8 @@
           128,
           128
         ],
-        "sha256": "d2fff01e03db386608616d664c0ab33993e6ec889cc3043ff21ae2be6b37282a",
-        "source": "design/dao-basic-redraw-20261022/pixel/portraits/dao-male.png"
+        "sha256": "b977df840451c45546d5c9772ed5e0c101f4bec0a57c37da92e4f560e5b5d049",
+        "source": "design/dao-basic-redraw-20261121/v5/male-portrait.png"
       },
       "actor.human.dao.female.figure": {
         "file": "dao-female-static-figure.png",
@@ -61,8 +70,8 @@
           256,
           288
         ],
-        "sha256": "ecff917772738c3ead6f587082a4c939852d482602eea5afdd8523a7e0996bf4",
-        "source": "design/dao-basic-redraw-20261022/pixel/figures/dao-female.png"
+        "sha256": "73b5933a15bc560a48070ceea9d1a5858b67b63e1c2891452c19c34c20d6356a",
+        "source": "design/dao-basic-redraw-20261121/v5/female-figure.png"
       },
       "actor.human.dao.female.portrait": {
         "file": "dao-female-static-portrait.png",
@@ -70,8 +79,8 @@
           128,
           128
         ],
-        "sha256": "8f9bbd700f20280dee30bcb1f03716e7d286a68bbfae3637c013c1a620fa9de3",
-        "source": "design/dao-basic-redraw-20261022/pixel/portraits/dao-female.png"
+        "sha256": "d20e4dc1cc7d21a3ae9d6db2530d8905e6843e7bd8d64eee4d3f29ebc1a94a01",
+        "source": "design/dao-basic-redraw-20261121/v5/female-portrait.png"
       },
       "actor.human.demonic.male.figure": {
         "file": "demonic-male-static-figure.png",
@@ -79,8 +88,8 @@
           256,
           288
         ],
-        "sha256": "31397b527b03d35acc53ce2c7b89a5f3b4b56284dedd3b46ae29bfe11082cb6d",
-        "source": "design/demonic-basic-redraw-20261022/pixel/figures/demonic-male.png"
+        "sha256": "417a6df03a8c10bac099fe1c01d25341aa3aae911cc0b65783403fe4c5dc748e",
+        "source": "design/demonic-redraw-20261121/v10/male-figure.png"
       },
       "actor.human.demonic.male.portrait": {
         "file": "demonic-male-static-portrait.png",
@@ -88,8 +97,8 @@
           128,
           128
         ],
-        "sha256": "619b0c96302121f79b7a443e2c117e1f124bb7a6e1285e691078e14701df814c",
-        "source": "design/demonic-basic-redraw-20261022/pixel/portraits/demonic-male.png"
+        "sha256": "9b3de315e590430cecd9ef02586353beb9bb1199b69a1ab8c872cab8cb6abcd3",
+        "source": "design/demonic-redraw-20261121/v10/male-portrait.png"
       },
       "actor.human.demonic.female.figure": {
         "file": "demonic-female-static-figure.png",
@@ -97,8 +106,8 @@
           256,
           288
         ],
-        "sha256": "59d11ba2b14b386d8d397403226883ca51cf61aed9f62dc2b600555494772679",
-        "source": "design/demonic-basic-redraw-20261022/pixel/figures/demonic-female.png"
+        "sha256": "ec942ac3eccb9e78ab63082ba2e29605ef327171bf8c6f56963aa469cc33dd1b",
+        "source": "design/demonic-redraw-20261121/v10/female-figure.png"
       },
       "actor.human.demonic.female.portrait": {
         "file": "demonic-female-static-portrait.png",
@@ -106,9 +115,28 @@
           128,
           128
         ],
-        "sha256": "e6ab7c801c4622b41facef412f08b3e7d262c9a3448c193255552c9995285325",
-        "source": "design/demonic-basic-redraw-20261022/pixel/portraits/demonic-female.png"
+        "sha256": "beae995477a7750824c1c2adbd833031bd1b40fb91ce67e10ef7b96f7d60ac52",
+        "source": "design/demonic-redraw-20261121/v10/female-portrait.png"
       }
+    }
+  },
+  "dao_characters": {
+    "source": "design/dao-basic-redraw-20261121/v5",
+    "source_hashes": {
+      "dao-male-atlas.png": "f725ac01fc1cc34af79a225f14a8ce9852fc3d249100b50814f033a5659c19c8",
+      "dao-female-atlas.png": "12d3ff4a187c8852ac9979656e1a3c56f8f961c9a9d13b6900296b672010ae06"
+    },
+    "reserved_empty_slots": [],
+    "static_manifest_sha256": "9216bc7640dc8fd9eac8c56ba27d152fc0ea9a24e7b5002b565d74e8b6e21989",
+    "drawing_hashes": {
+      "female-fall.png": "036a4f915c1bca02180bebb4f31d4ad1b8f0a0a48b8fea064a785e8c57015c2c",
+      "female-response.png": "d387010e424fbf8040ae607028079797c6a48ce786ebd3470ddf3514bcb95550",
+      "female-spell.png": "659f7883bb5c7570c144f6e9ca26207c527db2c206ed601a473361209bd521f6",
+      "female-world.png": "aae3fce7e465a99620f1381c7b794f340ffe20b55ef4cd343fc60ad2518f3b2a",
+      "male-fall.png": "86aa1b606d8e8d847bdc5860a4659d25e3b6369d178adc8f695ea558ae156d7e",
+      "male-response.png": "96d5866b754777445342fdef42e0aa882391e52126a20436fb5d9353b7d118b1",
+      "male-spell.png": "925409637d9d94502c7025993d613ce4fc800aca582acbdd615e4a63c2b6c642",
+      "male-world.png": "ff3f8d6625d49de6916299f7dd61d797b84d872f81735bc7e20118db36490d1d"
     }
   }
 }

@@ -10,14 +10,14 @@ PACK = ROOT / 'web/assets/pixel/v1'
 
 # Frozen selected redraws, independently pinned so an older catalog cannot pass.
 STATIC_REDRAWS = {
-    'dao.male.figure': '998a5f1398dbc58951ce6e080bc533b1cd33c502c9ba2b1423503287015cf58b',
-    'dao.male.portrait': 'd2fff01e03db386608616d664c0ab33993e6ec889cc3043ff21ae2be6b37282a',
-    'dao.female.figure': 'ecff917772738c3ead6f587082a4c939852d482602eea5afdd8523a7e0996bf4',
-    'dao.female.portrait': '8f9bbd700f20280dee30bcb1f03716e7d286a68bbfae3637c013c1a620fa9de3',
-    'demonic.male.figure': '31397b527b03d35acc53ce2c7b89a5f3b4b56284dedd3b46ae29bfe11082cb6d',
-    'demonic.male.portrait': '619b0c96302121f79b7a443e2c117e1f124bb7a6e1285e691078e14701df814c',
-    'demonic.female.figure': '59d11ba2b14b386d8d397403226883ca51cf61aed9f62dc2b600555494772679',
-    'demonic.female.portrait': 'e6ab7c801c4622b41facef412f08b3e7d262c9a3448c193255552c9995285325',
+    'dao.male.figure': '855968da53f3bd20015f0cb0ad035fc9a313958664431a138ece6f2cee134472',
+    'dao.male.portrait': 'b977df840451c45546d5c9772ed5e0c101f4bec0a57c37da92e4f560e5b5d049',
+    'dao.female.figure': '73b5933a15bc560a48070ceea9d1a5858b67b63e1c2891452c19c34c20d6356a',
+    'dao.female.portrait': 'd20e4dc1cc7d21a3ae9d6db2530d8905e6843e7bd8d64eee4d3f29ebc1a94a01',
+    'demonic.male.figure': '417a6df03a8c10bac099fe1c01d25341aa3aae911cc0b65783403fe4c5dc748e',
+    'demonic.male.portrait': '9b3de315e590430cecd9ef02586353beb9bb1199b69a1ab8c872cab8cb6abcd3',
+    'demonic.female.figure': 'ec942ac3eccb9e78ab63082ba2e29605ef327171bf8c6f56963aa469cc33dd1b',
+    'demonic.female.portrait': 'beae995477a7750824c1c2adbd833031bd1b40fb91ce67e10ef7b96f7d60ac52',
 }
 
 

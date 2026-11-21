@@ -1,6 +1,7 @@
 /* Evidence-only view. Commands always carry the revision shown on the page. */
 (() => {
   let game, send, expandedPerson = null, busy = () => false, activeTab='journal', workspaceKey='';
+  let atlasRevision='',atlasSelection=null,atlasObserver=null;
   const compactQuery=window.matchMedia('(max-width:1099px), (max-height:540px)');
   const qualities={'普通':['ordinary','谨慎探行'],'稀有':['rare','险中藏珍'],'史诗':['epic','群雄逐宝'],'传奇':['legendary','凶险争夺']};
   const el = (tag,text,cls='') => {const n=document.createElement(tag);n.className=cls;if(text!==undefined)n.textContent=text;return n;};
@@ -18,31 +19,16 @@
   function floorMap(session,token) {
     const map=session.map, pane=box('境内舆图');
     pane.classList.add('dungeon-floor');
-    pane.append(el('p',map.chasing?`追逐 · 第 ${map.round+1} 步，选择遁行方向`:`神识 ${map.sense} 阶 · 北在上方`,'dungeon-map-caption'));
-    const grid=el('div',undefined,'dungeon-map-grid');
-    grid.setAttribute('aria-label','已见地形');
-    const xs=map.cells.map(c=>c.x),ys=map.cells.map(c=>c.y);
-    const west=Math.min(...xs),north=Math.min(...ys);
-    grid.style.gridTemplateColumns=`repeat(${Math.max(...xs)-west+1},minmax(0,1fr))`;
-    map.cells.forEach(c=>{
-      const cell=el('div',undefined,'dungeon-map-cell');
-      cell.classList.toggle('current',c.here);cell.classList.toggle('visited',c.visited);
-      cell.style.gridColumn=String(c.x-west+1);cell.style.gridRow=String(c.y-north+1);
-      cell.append(el('strong',c.here?'你在此处':c.area||'岔路'));
-      if(c.omen)cell.append(el('small',c.omen));
-      if(c.marks.length)cell.append(el('small',c.marks.join(' · ')));
-      grid.append(cell);
-    });
-    pane.append(grid);
-    const compass=el('div',undefined,'dungeon-compass');
-    map.directions.forEach((dir,i)=>{
-      if(i===4)compass.append(el('span','方位'));
-      compass.append(button(dir.name,'move',{...token,choice:dir.name},dir.open));
-    });
-    pane.append(compass);
+    const stamp=workspaceKey+':'+session.revision;
+    if(atlasRevision!==stamp){atlasRevision=stamp;atlasSelection=null;}
+    atlasObserver=window.DungeonAtlas.render(pane,map,el,(direction,open)=>
+      button((map.chasing?'遁向':'前往')+direction,'move',{...token,choice:direction},open),
+      atlasSelection,coord=>{atlasSelection=coord;});
+    const tools=el('div',undefined,'atlas-formation');
+    pane.append(tools);
     const formations=game.formation_system;
     if(map.array_name){
-      pane.append(button('收回'+map.array_name,'withdraw_ward',token,map.can_withdraw));
+      tools.append(button('收回'+map.array_name,'withdraw_ward',token,map.can_withdraw));
     }else if(formations?.loadouts.length){
       const stock=new Map();
       for(const material of formations.materials){
@@ -64,9 +50,9 @@
       if(selected)select.value=selected.value;
       const payload={...token,loadout_id:select.value};
       select.onchange=()=>{payload.loadout_id=select.value;};
-      pane.append(select,button('在此布阵','ward',payload,map.can_ward&&Boolean(selected)));
+      tools.append(select,button('在此布阵','ward',payload,map.can_ward&&Boolean(selected)));
     }else{
-      pane.append(el('p','可在阵法栏保存九宫阵，再携阵材入境布置。','dungeon-map-caption'));
+      tools.append(el('p','可在阵法栏保存九宫阵，再携阵材入境布置。','dungeon-map-caption'));
     }
     if(map.readings.length)pane.append(el('p',map.readings.join('。')+'。','dungeon-sense'));
     return pane;
@@ -99,6 +85,7 @@
     });}filters.onchange=draw;subjects.onchange=draw;draw();
   }
   function render() {
+    atlasObserver?.disconnect();
     const view=game.dungeons,root=document.querySelector('#dungeon-panel');root.replaceChildren();
     if(!view)return;
     const session=view.session;
@@ -180,8 +167,9 @@
       if(session.map){panels.map=floorMap(session,{dungeon_id:session.id,revision:session.revision});workspace.append(panels.map);}
       if(session.map?.chasing)activeTab='map';
       if(activeTab==='map'&&!session.map)activeTab='journal';
-      const selected=activeTab==='team'&&!compactQuery.matches?'journal':activeTab;
-      function select(tab){activeTab=tab;Object.entries(panels).forEach(([id,pane])=>{pane.hidden=id!==tab&&(id!=='team'||compactQuery.matches);});tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.dungeonView===tab)));}
+      const teamTab=Boolean(session.map)||compactQuery.matches;
+      const selected=activeTab==='team'&&!teamTab?'journal':activeTab;
+      function select(tab){activeTab=tab;workspace.dataset.view=tab;Object.entries(panels).forEach(([id,pane])=>{pane.hidden=id!==tab&&(id!=='team'||teamTab);});tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.dungeonView===tab)));}
       [...(session.map?[['map','舆图']]:[]),['team',`队伍 ${session.party_count}/${session.team_limit}`],['journal',`见闻 ${session.logs.length}`],['manuals',`传承 ${view.manuals.length}`]].forEach(([id,label])=>{
         const tab=el('button',label,'dungeon-button dungeon-button--quiet');tab.type='button';tab.dataset.dungeonView=id;
         panels[id].id='dungeon-view-'+id;tab.setAttribute('aria-controls',panels[id].id);tab.onclick=()=>select(id);tabs.append(tab);

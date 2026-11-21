@@ -1568,7 +1568,20 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             String phase=arguments.getString("phase","initial");
             // These two legacy phases verify base-game fallback without the optional Asura DLC.
             if(phase.equals("upper-voisinage") || phase.equals("upper")) python("from cultivation_life.system.asura import config\nconfig()['enabled']=False");
-            if(phase.equals("techniques")) {
+            if(phase.equals("dungeon-art")) {
+                String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'舆图验收',spirit_root:'heavenly',path:'dao',seed:342,preset_id:'core'})}).then(g=>g.id)");
+                python(assetText("dungeon_release.py")+"\nfrom cultivation_life import server\nprepare_dungeon_player(server.ENGINE,"+JSONObject.quote(id)+")");
+                async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("[data-action-tab=living]");tapSelector("[data-action=treasure]");
+                tapSelector("[data-dungeon-action=discover]");waitForJs("!busy&&game.dungeons.used===1","Discovery saved");
+                tapSelector("[data-dungeon-action=enter]");waitForJs("!busy&&!!document.querySelector('.atlas-chart')","Dungeon atlas visible");
+                tapSelector(".atlas-node.here");
+                check(Boolean.TRUE.equals(async("(async()=>{const img=new Image();img.src=getComputedStyle(document.querySelector('.atlas-chart'),'::before').backgroundImage.slice(5,-2);await img.decode();return img.naturalWidth===768&&img.naturalHeight===512})()")),"Landscape loaded");
+                capture("dungeon-atlas-"+arguments.getString("orientation"));
+                tapSelector("[data-dungeon-action=exit]");
+                check(Boolean.TRUE.equals(async("(async()=>{const m=await (await fetch('/assets/pixel/combat/manifest.json')).json();for(const path of ['dao','demonic'])for(const sex of ['male','female']){const id='actor.human.'+path+'.'+sex;for(const k of ['portrait','figure','atlas'])if(!await VisualAssets.load(id+'.'+k))return false;const clips=m.actors[path+'-'+sex].animations;for(const clip of Object.values(clips)){const im=new Image();im.src=clip.sheet;await im.decode();if(im.naturalWidth!==clip.size[0])return false}}return true})()")),"Four protagonist looks and combat sheets decoded");
+                result.putString("dungeon_art_scope","touch-discover-enter-select-exit,landscape-art,four-portraits-world-and-combat-atlases");
+            } else if(phase.equals("techniques")) {
                 runTechniques(result);
                 runDungeons(result);
             } else if(phase.equals("asura-governance")) {

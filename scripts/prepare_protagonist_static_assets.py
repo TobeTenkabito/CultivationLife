@@ -20,7 +20,8 @@ def main():
     provenance = json.loads(provenance_path.read_text(encoding='utf-8'))
     selected = []
     for path in ('dao', 'demonic'):
-        source_root = ROOT / f'design/{path}-basic-redraw-20261022'
+        source_root = ROOT / ('design/demonic-redraw-20261121/v10' if path == 'demonic'
+                              else 'design/dao-basic-redraw-20261121/v5')
         manifest = json.loads((source_root / 'manifest.json').read_text(encoding='utf-8'))
         for actor in manifest['actors']:
             identity = actor['id']
@@ -39,8 +40,8 @@ def main():
         shutil.copyfile(source, target / row['file'])
         catalog['assets'][identity] = {k: v for k, v in row.items() if k != 'source'}
     provenance['protagonist_static_redraws'] = dict(
-        approval='2026-10-23 user explicitly requires the new protagonist portraits and full-body art',
-        processing='Byte-for-byte selected pixel exports; separate static figures, action atlases unchanged',
+        approval='Dao base v5 and demonic base v10 adopted 2026-11-21',
+        processing='Byte-for-byte selected static pixel exports',
         assets={identity: row for _, identity, row in selected})
     catalog_path.write_text('window.PixelAssetCatalog = ' + json.dumps(catalog, ensure_ascii=False, indent=2) + ';\n', encoding='utf-8')
     provenance_path.write_text(json.dumps(provenance, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

@@ -183,7 +183,11 @@
             322,
             1443
           ],
-          "scale": 0.6252873563218391
+          "scale": 0.6252873563218391,
+          "hem_source": "standing-repairs/dao-nascent-female.png",
+          "hem_sha256": "8feee6d4f54675c73cc229608fae2fb3208f62ce9b938d5a37140808f84ade4e",
+          "shin_source": "standing-repairs/dao-nascent-female-finished.png",
+          "shin_sha256": "106caf455c12c8970cc06e627c7ce28ab6bb9784986fb3514563de69b1409d2c"
         },
         "portrait": {
           "source_rect": [
@@ -201,7 +205,11 @@
             322,
             1443
           ],
-          "scale": 0.2942528735632184
+          "scale": 0.2942528735632184,
+          "hem_source": "standing-repairs/dao-nascent-female.png",
+          "hem_sha256": "8feee6d4f54675c73cc229608fae2fb3208f62ce9b938d5a37140808f84ade4e",
+          "shin_source": "standing-repairs/dao-nascent-female-finished.png",
+          "shin_sha256": "106caf455c12c8970cc06e627c7ce28ab6bb9784986fb3514563de69b1409d2c"
         },
         "idle": {
           "source_rect": [
@@ -511,7 +519,9 @@
             353,
             1437
           ],
-          "scale": 0.6650366748166259
+          "scale": 0.6650366748166259,
+          "hem_source": "standing-repairs/dao-integration-female.png",
+          "hem_sha256": "d7343da941b8842e8a5aeffb24b8ae9d31715f6ca22f085efa66ec77bfbe628b"
         },
         "portrait": {
           "source_rect": [
@@ -529,7 +539,9 @@
             353,
             1437
           ],
-          "scale": 0.31295843520782396
+          "scale": 0.31295843520782396,
+          "hem_source": "standing-repairs/dao-integration-female.png",
+          "hem_sha256": "d7343da941b8842e8a5aeffb24b8ae9d31715f6ca22f085efa66ec77bfbe628b"
         },
         "idle": {
           "source_rect": [

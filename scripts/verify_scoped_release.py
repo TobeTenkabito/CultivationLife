@@ -10,8 +10,15 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from scripts.release_evidence import inputs_digest, require
+from scripts.release_evidence import file_digest, inputs_digest, require
 from cultivation_life.version import BASE_GAME_VERSION
+
+DUNGEON_ART_TESTS = [
+    'tests/test_dungeon_spatial_exploration.py', 'tests/test_pixel_assets.py',
+    'tests/test_release_301.py', 'tests/test_combat_replay.py', 'tests/test_visual_release.py',
+    'tests/test_base_game_version.py', 'tests/test_release_212.py',
+]
+DUNGEON_ART_BROWSERS = ['browser_seeded_dungeons', 'browser_release_301', 'browser_combat_replay', 'browser_events_212']
 
 AUTHORED_TESTS = [
     'tests/test_authored_techniques.py','tests/test_technique_leveling.py','tests/test_common_elemental_techniques.py',
@@ -393,7 +400,7 @@ IMMORTAL_TESTS = list(dict.fromkeys(TUTORIAL_TESTS + [
 IMMORTAL_BROWSERS = ['browser_immortal_artifacts','browser_natal_materials','browser_events_212','browser_desktop_navigation']
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal'],default='legacy')
+    parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=['legacy','economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal','dungeon-art'],default='legacy')
     parser.add_argument('--shards',type=int,choices=range(1,7),default=3)
     parser.add_argument('--workers',type=int,choices=range(1,7),default=4)
     parser.add_argument('--balance-tests',action='store_true',help='Schedule full regressions by prior XML timings; never reuse prior results')
@@ -413,6 +420,7 @@ def main():
         parser.error('--focused-visual requires --profile visual')
     tag=BASE_GAME_VERSION.replace('.','');before=inputs_digest(ROOT);runs=[]
     selected=TEACHINGS_TESTS if profile=='teachings' else NATAL_TESTS if profile=='natal' else NAMING_TESTS if profile=='naming' else BUGFIX_TESTS if profile=='bugfix' else ECONOMY_TESTS if profile=='economy' else TESTS
+    if profile=='dungeon-art':selected=[DUNGEON_ART_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='common-techniques':selected=COMMON_TECHNIQUES_TESTS
     if profile=='combat-alpha':selected=[COMBAT_ALPHA_TESTS[i::options.shards] for i in range(options.shards)]
     if profile=='soul-lifecycle':selected=[SOUL_TESTS[i::options.shards] for i in range(options.shards)]
@@ -438,7 +446,7 @@ def main():
     if profile=='building-visits':selected=[BUILDING_VISIT_TESTS[i::options.shards] for i in range(options.shards)]
     if options.focused_visual:
         selected=[(VISUAL_ALPHA6_TESTS if options.home_scenes else VISUAL_ALPHA5_TESTS if options.path_characters else VISUAL_ALPHA4_TESTS if options.monster_visuals else VISUAL_ALPHA3_TESTS)[i::options.shards] for i in range(options.shards)]
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal','dungeon-art'}:
         jobs=[(f'related-tests-{i}',['-m','pytest',*(module if isinstance(module,list) else [module]),'-q','--tb=short',
                                    '--maxfail=0' if profile in {'architecture','buildings'} or (profile=='visual' and not options.focused_visual) else '--maxfail=3',f'--junitxml=build/scoped-{tag}-{i}.xml'])
               for i,module in enumerate(selected)]
@@ -488,6 +496,7 @@ def main():
     if profile=='immortal':browsers=IMMORTAL_BROWSERS
     if profile=='performance':browsers=PERFORMANCE_BROWSERS
     if profile=='handbook':browsers=HANDBOOK_BROWSERS
+    if profile=='dungeon-art':browsers=DUNGEON_ART_BROWSERS
     if profile=='update301':browsers=UPDATE301_BROWSERS
     if options.monster_visuals:browsers += ['browser_monster_release','browser_monster_flora_visuals']
     if options.path_characters:browsers += ['browser_path_characters']
@@ -513,27 +522,27 @@ def main():
         require(code==0,f'{name} failed; see {log}')
         require(inputs_digest(ROOT)==before,'Release source changed during checks')
         print(name+' passed',flush=True)
-        return dict(name=name,log=str(log.relative_to(ROOT)),status='passed')
+        return dict(name=name,log=str(log.relative_to(ROOT)),log_sha256=file_digest(log),status='passed')
     if profile in {'heavens','tutorial','handbook','performance'}:
         # Every job uses disposable saves, ports and browser profiles. Bound
         # concurrent jobs while letting independent UI checks overlap shards.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs))
         jobs=[]
-    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal'}:
+    elif profile in {'secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal','dungeon-art'}:
         # Isolate the declared selection while bounding host memory.
         with ThreadPoolExecutor(max_workers=options.workers) as executor:
             runs.extend(executor.map(run,jobs[:len(selected)]))
         jobs=jobs[len(selected):]
     for job in jobs:
         runs.append(run(job))
-    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal'}:
+    if profile in {'economy','bugfix','naming','natal','teachings','common-techniques','secret-arts','common-goods','regional','architecture','buildings','building-visits','visual','combat-alpha','update301','authored','soul-lifecycle','heavens','tutorial','handbook','performance','immortal','dungeon-art'}:
         combined=ET.Element('testsuites')
         for i in range(len(selected)):
             for suite in ET.parse(ROOT/f'build/scoped-{tag}-{i}.xml').getroot().iter('testsuite'): combined.append(suite)
         ET.ElementTree(combined).write(ROOT/f'build/scoped-{tag}.xml',encoding='utf-8',xml_declaration=True)
     (ROOT/f'build/scoped-{tag}.json').write_text(json.dumps(dict(version=BASE_GAME_VERSION,inputs_sha256=before,
-        profile=profile,regression_scope='alpha6-focused' if options.home_scenes else 'alpha5-focused' if options.path_characters else 'alpha4-focused' if options.monster_visuals else 'alpha3-focused' if options.focused_visual else 'standard',scope='User-requested alpha.6 home map, event animation, mirror combat, buildings and related upstreams; not full repository regression' if options.home_scenes else 'User-requested alpha.5 ghost/Confucian/Buddhist hero and NPC art, optional package ownership and presentation/combat/persistence upstreams; not full repository regression' if options.path_characters else 'User-requested alpha.4 eight-species realm appearance, optional asset isolation and presentation/combat/persistence upstreams; not full repository regression' if options.monster_visuals else 'User-requested alpha.3 presentation, combat and persistence upstream tests; not full repository regression' if options.focused_visual else 'Full repository regression, optional pixel UI and original four-theme controls, real inventory/natal, eleven maps and event browser acceptance' if profile=='visual' else 'Full repository regression, eleven-world cities, building projects, finite event rewards, estates and real event browser acceptance' if profile=='buildings' else 'Full repository regression plus character, event and regional browser acceptance; explicit character composition' if profile=='architecture' else 'Full repository regression plus secret-art, common-technique and real event browser acceptance' if profile=='secret-arts' else 'User-requested economic, related interaction and release tests only; not full repository regression' if profile=='economy' else 'User-requested related and upstream tests only; not full repository regression',tests=selected,runs=runs),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        profile=profile,regression_scope='alpha6-focused' if options.home_scenes else 'alpha5-focused' if options.path_characters else 'alpha4-focused' if options.monster_visuals else 'alpha3-focused' if options.focused_visual else 'standard',scope='Dungeon atlas, four protagonists, pixel assets, combat playback and related release interfaces; scoped regression' if profile=='dungeon-art' else 'User-requested alpha.6 home map, event animation, mirror combat, buildings and related upstreams; not full repository regression' if options.home_scenes else 'User-requested alpha.5 ghost/Confucian/Buddhist hero and NPC art, optional package ownership and presentation/combat/persistence upstreams; not full repository regression' if options.path_characters else 'User-requested alpha.4 eight-species realm appearance, optional asset isolation and presentation/combat/persistence upstreams; not full repository regression' if options.monster_visuals else 'User-requested alpha.3 presentation, combat and persistence upstream tests; not full repository regression' if options.focused_visual else 'Full repository regression, optional pixel UI and original four-theme controls, real inventory/natal, eleven maps and event browser acceptance' if profile=='visual' else 'Full repository regression, eleven-world cities, building projects, finite event rewards, estates and real event browser acceptance' if profile=='buildings' else 'Full repository regression plus character, event and regional browser acceptance; explicit character composition' if profile=='architecture' else 'Full repository regression plus secret-art, common-technique and real event browser acceptance' if profile=='secret-arts' else 'User-requested economic, related interaction and release tests only; not full repository regression' if profile=='economy' else 'User-requested related and upstream tests only; not full repository regression',tests=selected,runs=runs),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 
 
 if __name__=='__main__':main()

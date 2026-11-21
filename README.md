@@ -2,11 +2,11 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v3.13.0**，以 [version.py](cultivation_life/version.py) 为准。当前更新见[3.13.0发行说明](docs/release-3130.md)及[更新日志](CHANGELOG.md)，历史发行与安装包见[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)。
+**当前本体版本：v3.14.0**，以 [version.py](cultivation_life/version.py) 为准。当前更新见[3.14.0发行说明](docs/release-3140.md)及[更新日志](CHANGELOG.md)，历史发行与安装包见[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)。
 
 当前使用存档结构 **12**，仅支持 **12 → 12**。结构1–11拒绝加载或导入，不迁移、不映射、不覆盖原存档。当前提供山海图志与沧海夜色两个像素主题、十一界和十二个官方DLC；DLC的专属玩法与各自配色按实际加载状态生效。
 
-3.13.0为探幽寻宝加入八方舆图、神识探查、追逐和实物九宫阵伏击，并扩充当地封藏与专用丹药。完整规则从[文档索引](docs/README.md)按专题查阅。
+3.14.0 为探幽寻宝绘制八类山水舆图，更新男女道修、魔修的基础立绘与整套动作。完整规则从[文档索引](docs/README.md)按专题查阅。
 
 开发入口：[项目架构与边界](docs/project-diagnosis.md)、[引擎说明](cultivation_life/engine/README.md)、[Debug开发规范](docs/debug-development.md)。
 
@@ -14,7 +14,7 @@
 
 ### Android 12
 
-当前安卓版本为 3.13.0-android.107，仅携带新版浅暗两种配色与十二个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包和验收清单统一发布于 [GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)，`dist/`不保留安装包。使用与构建说明见 [安卓说明](android/README.md)。
+当前安卓版本为 3.14.0-android.108，仅携带新版浅暗两种配色与十二个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包和验收清单统一发布于 [GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)，`dist/`不保留安装包。使用与构建说明见 [安卓说明](android/README.md)。
 
 ### Windows 启动器
 

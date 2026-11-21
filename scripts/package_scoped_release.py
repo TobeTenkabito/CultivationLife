@@ -59,11 +59,16 @@ def main():
     tests=sum(int(s.get('tests',0)) for s in suites)
     regression=dict(collected=tests,skipped=sum(int(s.get('skipped',0)) for s in suites),failures=0,errors=0)
     regression['passed']=regression['collected']-regression['skipped']
-    transfer=(ROOT/f'build/save-transfer-{tag}.log').read_text(encoding='utf-8-sig')
-    extra=re.search(r'(\d+) passed',transfer)
-    require(extra is not None and 'failed' not in transfer.lower() and 'ERROR' not in transfer,'Save transfer smoke tests failed')
-    transfer_in_regression = bool(reconciliation and reconciliation.get('replaced_module')=='tests/test_save_transfer.py') or any('tests/test_save_transfer.py' in shard for shard in scoped['tests'])
-    if not transfer_in_regression:tests+=int(extra[1])
+    dungeon_art = scoped.get('profile') == 'dungeon-art'
+    transfer_tests = 0
+    transfer_in_regression = False
+    if not dungeon_art:
+        transfer=(ROOT/f'build/save-transfer-{tag}.log').read_text(encoding='utf-8-sig')
+        extra=re.search(r'(\d+) passed',transfer)
+        require(extra is not None and 'failed' not in transfer.lower() and 'ERROR' not in transfer,'Save transfer smoke tests failed')
+        transfer_in_regression = bool(reconciliation and reconciliation.get('replaced_module')=='tests/test_save_transfer.py') or any('tests/test_save_transfer.py' in shard for shard in scoped['tests'])
+        transfer_tests = int(extra[1])
+        if not transfer_in_regression:tests+=transfer_tests
     evidence=json.loads((ROOT/f'build/exe-{tag}-verification.json').read_text(encoding='utf-8'))
     validate_evidence(ROOT,VERSION,evidence)
     native=json.loads((ROOT/f'build/android-{tag}-scoped.json').read_text(encoding='utf-8'))
@@ -434,6 +439,22 @@ def main():
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
         code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
+    if dungeon_art:
+        from scripts.verify_scoped_release import DUNGEON_ART_TESTS, DUNGEON_ART_BROWSERS
+        require({p for shard in scoped['tests'] for p in shard} == set(DUNGEON_ART_TESTS)
+                and set(DUNGEON_ART_BROWSERS) <= {r['name'] for r in scoped['runs']}
+                and regression['passed'] > 0 and not regression['skipped'], 'Dungeon/art regression incomplete')
+        require(all(c.get('dungeon_art_verified') for c in evidence['cases']), 'Missing final EXE map/art checks')
+        required = {f'build/android-dungeon-art-{o}-{tag}.log' for o in ('portrait','landscape')}
+        require(set(native['logs']) == required and native['sdk'] == '31'
+                and all('dungeon_art_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),
+                'Missing native dungeon/art checks')
+        require(native['test_apk_sha256'] == file_digest(ROOT/'android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk'), 'Native test APK changed')
+        require((ROOT/'android/app/build/reports/lint-results-release.txt').read_text().strip()=='No issues found.', 'Android lint failed')
+        require('Verifies' in (ROOT/f'build/android-signature-{tag}.log').read_text(), 'APK signature missing')
+        code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
+        metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
+        require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
     if scoped.get('profile')=='combat-alpha':
         from scripts.verify_scoped_release import COMBAT_ALPHA_TESTS
         selected={name for shard in scoped['tests'] for name in shard}
@@ -453,10 +474,13 @@ def main():
     base=dict(base_version=VERSION,save_schema=SAVE_SCHEMA_VERSION,compatible_save_schemas=[SAVE_SCHEMA_VERSION],
               incompatible_save_schemas=f'1–{SAVE_SCHEMA_VERSION-1}; no migration',dlc_versions=dlcs,
               validation_scope=scoped['scope'],tests=tests,runs=scoped['runs'],
-              regression=regression,save_transfer_smoke_tests=int(extra[1]),
+              regression=regression,save_transfer_smoke_tests=transfer_tests,
               save_transfer_smoke_in_regression=transfer_in_regression,
-              save_transfer_log=f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
+              save_transfer_log=None if dungeon_art else f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
     if reconciliation is not None:base['regression_reconciliation']=reconciliation
+    if dungeon_art:
+        base['full_repository_regression'] = False
+        base['regression_scope'] = 'dungeon-art'
     if scoped.get('resume_receipt'):base['acceptance_resume']=resumed
     if scoped.get('regression_scope')=='full-repository':
         base['regression_scope']='full-repository'
@@ -492,7 +516,7 @@ def main():
             story_choices=combat['story_choices'],changed_story_choices=combat['changed_story_choices'])
     exe=ROOT/'dist/launcher.exe';named=output_dir/f'浮生问道-v{VERSION}.exe';shutil.copyfile(exe,named)
     win=dict(base,platform='Windows',exe_sha256=file_digest(exe),with_and_without_dlc_verified=True)
-    win['root_launcher_updated']=False
+    win['root_launcher_updated']=(ROOT/'launcher.exe').is_file() and file_digest(ROOT/'launcher.exe')==win['exe_sha256']
     win['distribution']='GitHub Releases; temporary assets under build/releases'
     manifest=output_dir/f'release-{VERSION}.json';manifest.write_text(json.dumps(win,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     output=output_dir/f'浮生问道-v{VERSION}-Windows.zip'
@@ -531,10 +555,14 @@ def main():
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for name in ('docs/immortal-artifacts.md',):
                 z.write(ROOT/name,name)
-        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura','techniques'}:
+        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura','techniques','dungeon-art'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
         else:
             z.write(ROOT/'android/README.md','README.md')
+        if dungeon_art:
+            z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
+            for name in (f'docs/release-{tag}.md','docs/visual-assets.md','docs/seeded-dungeons-implementation.md'):
+                z.write(ROOT/name,name)
         if scoped.get('profile')=='soul-lifecycle':
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for path in (ROOT/'docs').rglob('*'):

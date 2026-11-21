@@ -55,6 +55,7 @@ def view(game, site):
     level = sense(game, site)
     radius = (0, 1, 2, 3, 99)[level]
     adjacent = exits(space, center)
+    bearings = {dest: name for name, dest in adjacent.items()}
     occupants = {}
     for key, role in site["roles"].items():
         where = position(site, key)
@@ -74,6 +75,8 @@ def view(game, site):
         if not visible and idx not in space["visited"] and idx not in adjacent.values():
             continue
         cell = dict(x=x, y=y, here=idx == center, visited=idx in space["visited"], marks=[])
+        if idx in bearings:
+            cell["direction"] = bearings[idx]
         marks = cell["marks"]
         if idx in space["cleared"]:
             marks.append("已探")
@@ -110,6 +113,17 @@ def view(game, site):
                 marks.append("争斗")
         cells.append(cell)
     by_coord = {(c["x"], c["y"]): c for c in cells}
+    routes = []
+    for i, origin in enumerate(space["coords"]):
+        if tuple(origin) not in by_coord:
+            continue
+        for j in exits(space, i).values():
+            dest = space["coords"][j]
+            if i < j and tuple(dest) in by_coord and (
+                center in (i, j) or (i in space["visited"] and j in space["visited"])
+                or max(distance(space, center, i), distance(space, center, j)) <= radius
+            ):
+                routes.append([list(origin), list(dest)])
     for fact in site.get("expedition", {}).get("facts", []):
         signal = space["echoes"].get(fact["id"])
         if not signal:
@@ -140,7 +154,9 @@ def view(game, site):
     calm = not site["pending"] and not space["chase"]
 
     return dict(
+        landscape=site["theme"],
         cells=cells,
+        routes=routes,
         directions=[dict(name=d, open=d in adjacent and not site["pending"]) for d in DIRECTIONS],
         sense=divine_sense_level(game.player),
         mastery=level,

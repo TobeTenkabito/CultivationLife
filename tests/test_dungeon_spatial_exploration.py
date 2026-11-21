@@ -58,10 +58,15 @@ def test_fog_movement_and_old_blueprint(local):
     e, g, low = enter(local)
     saved, site = loaded(e, g)
     assert not any(c.get("omen") for c in low["map"]["cells"])
+    chart = low["map"]
+    seen = {(c["x"], c["y"]) for c in chart["cells"]}
+    assert chart["routes"] and all(tuple(p) in seen for route in chart["routes"] for p in route)
+    assert {c["direction"] for c in chart["cells"] if c.get("direction")} == set(trails.exits(site["space"], 0))
     saved.player.divine_sense_rank = 300
     e.store.save(saved)
     high = e.get_game(g.id)["dungeons"]["session"]["map"]
     assert len(high["cells"]) == len(site["nodes"]) and all(c.get("omen") for c in high["cells"])
+    assert len(high["routes"]) == sum(len(trails.exits(site["space"], i)) for i in range(len(site["nodes"]))) // 2
     assert not any(k in str(high) for k in ("assassinate", "power_factor", "resolve"))
     d, dest = next(iter(trails.exits(site["space"], 0).items()))
     act(e, g, "move", choice=d)

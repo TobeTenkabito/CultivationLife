@@ -40,7 +40,8 @@ def check_workspace(page):
     for button in page.locator('.dungeon-actions button,.dungeon-retreat button').all():
         assert button.evaluate('''n=>{const r=n.getBoundingClientRect();return n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}''')
     if page.viewport_size['width']>=1100 and page.viewport_size['height']>540:
-        for name in ('team','scene','manuals' if page.locator('.dungeon-manuals').is_visible() else 'floor' if page.locator('.dungeon-floor').is_visible() else 'journal'):
+        tab=page.locator('.dungeon-view-tabs [aria-pressed=true]').get_attribute('data-dungeon-view')
+        for name in ('scene',{'map':'floor'}.get(tab,tab)):
             assert page.locator('.dungeon-'+name).is_visible()
             bounds=page.locator('.dungeon-'+name).bounding_box()
             assert bounds['height']>200 and bounds['y']+bounds['height']<=result['frame']['bottom'],(name,bounds)
@@ -48,6 +49,7 @@ def check_workspace(page):
 
 def check_quality_palettes(browser,engine,url,output):
     from cultivation_life.system.dungeons import generation
+    landscapes=sorted(generation.THEMES)
     for theme in ('light','dark'):
         page=browser.new_page(viewport=dict(width=1366,height=768))
         page.emulate_media(reduced_motion='reduce')
@@ -59,12 +61,23 @@ def check_quality_palettes(browser,engine,url,output):
             page.evaluate('async id=>{await loadGame(id);window.UtilityPanels.open("dungeon");}',game.id)
             assert page.locator('#dungeon-card').get_attribute('data-quality')=='neutral'
             cfg=copy.deepcopy(generation.config())
-            cfg['profiles'][game.player.world+':'+game.player.location_id]['weights']=[int(i==index) for i in range(4)]
+            profile=cfg['profiles'][game.player.world+':'+game.player.location_id]
+            landscape=landscapes[index+(4 if theme=='dark' else 0)]
+            profile.update(weights=[int(i==index) for i in range(4)],theme=landscape)
             with patch.object(generation,'config',lambda:cfg):
                 page.locator('[data-dungeon-action=discover]').click();page.wait_for_function('!busy && game.dungeons.used===1')
             assert page.locator('#dungeon-card').get_attribute('data-quality')=='neutral'
             page.locator('[data-dungeon-action=enter]').click();page.wait_for_function('!busy && game.dungeons.active')
             assert page.locator('#dungeon-card').get_attribute('data-quality')==quality
+            loaded=page.locator('.atlas-chart').evaluate("""async n=>{
+              const img=new Image();img.src=getComputedStyle(n,'::before').backgroundImage.slice(5,-2);
+              await img.decode();return [new URL(img.src).pathname,img.naturalWidth,img.naturalHeight];
+            }""")
+            assert loaded==[f'/assets/dungeon/{landscape}.jpg',768,512],loaded
+            assert page.locator('.atlas-node:has(.atlas-illustration)').evaluate_all("""nodes=>{
+              const observed=game.dungeons.session.map.cells.filter(c=>!c.here&&c.marks.length);
+              return nodes.every(n=>observed.some(c=>String([c.x,c.y])===n.dataset.coord));
+            }""")
             check_workspace(page)
             palette=page.locator('.dungeon-actions .dungeon-button--primary').first.evaluate('n=>({fg:getComputedStyle(n).color,bg:getComputedStyle(n).backgroundColor})')
             def luminance(value):
@@ -127,10 +140,20 @@ def check_rank_gates(browser,engine,url):
 def check_map_chase(browser,engine,url):
     from test_dungeon_spatial_exploration import prepare_loadout
     from cultivation_life.system.dungeons.trails import exits
+    output=ROOT/'build'/'dungeon-atlas-preview'
+    output.mkdir(parents=True,exist_ok=True)
     for width,height in ((1366,768),(393,852)):
-        page=browser.new_page(viewport=dict(width=width,height=height))
+        page=browser.new_page(viewport=dict(width=width,height=height),has_touch=width<=1000)
         page.goto(url);page.wait_for_function('window.GameThemes && configData')
+        theme='light' if width>1000 else 'dark'
+        page.locator(f'[data-theme-picker=start] [data-pixel-theme-choice={theme}]').click()
         game=engine.store.load(engine.create_game('舆图验收','heavenly','dao',342,preset_id='core')['id'])
+        game.player.divine_sense_rank=300 if width>1000 else 4
+        if width<=1000:
+            game.player.realm_index=1
+            game.player.layer=1
+            game.player.hp=max_hp(game.player)
+            game.player.mp=max_mp(game.player)
         engine.store.save(game)
         prepare_loadout(engine,game,'赤砂伏阵')
         selected,_=prepare_loadout(engine,game,'青木炼阳阵')
@@ -138,7 +161,63 @@ def check_map_chase(browser,engine,url):
         page.locator('[data-dungeon-action=discover]').click();page.wait_for_function('!busy && game.dungeons.used===1')
         page.locator('[data-dungeon-action=enter]').click();page.wait_for_function('!busy && game.dungeons.active')
         panel_view(page,'map')
-        assert page.locator('.dungeon-compass button').count()==8
+        chart=page.locator('.atlas-chart')
+        lens=chart.locator('.atlas-viewport')
+        def assert_center():
+            page.wait_for_function("""() => {
+              const box=s=>document.querySelector(s).getBoundingClientRect();
+              const a=box('.atlas-viewport'),b=box('.atlas-node.here');
+              return Math.abs((a.x+a.width/2)-(b.x+b.width/2))<1 && Math.abs((a.y+a.height/2)-(b.y+b.height/2))<1;
+            }""")
+        assert_center()
+        assert chart.locator('.atlas-node').count()==page.evaluate('game.dungeons.session.map.cells.length')
+        assert chart.locator('.atlas-trails path').count()==page.evaluate('game.dungeons.session.map.routes.length')
+        assert chart.locator('.atlas-node.here').count()==1
+        assert page.evaluate("""async () => {
+          const chart=document.querySelector('.atlas-chart');
+          const src=getComputedStyle(chart,'::before').backgroundImage.slice(5,-2);
+          const img=new Image();img.src=src;await img.decode();return img.naturalWidth>0;
+        }""")
+        if width>1000:
+            assert chart.locator('.atlas-node:visible').count()<chart.locator('.atlas-node').count()
+            assert chart.locator('path.into-mist').count()>0
+            chart.get_by_role('button',name='展开全境').click()
+            assert lens.get_attribute('data-camera')=='overview'
+            assert chart.locator('.atlas-node:visible').count()==chart.locator('.atlas-node').count()
+            remote=chart.locator('.atlas-node:not(.here):not([data-bearing])').first
+            remote.click()
+            inspected=page.locator('.atlas-description').inner_text()
+            assert inspected.startswith('远处'),(inspected,remote.get_attribute('aria-label'),chart.locator('[aria-pressed=true]').get_attribute('aria-label'))
+            assert not page.locator('[data-dungeon-action=move]').count()
+            chart.get_by_role('button',name='返回近景').click()
+            assert_center()
+        else:
+            assert chart.locator('.atlas-node:not(.here):not([data-bearing])').count()==0
+            assert not chart.get_by_role('button',name='展开全境').count()
+        direction=chart.locator('[data-bearing]').first.get_attribute('data-bearing')
+        lens.focus()
+        lens.press({'北':'ArrowUp','南':'ArrowDown','西':'ArrowLeft','东':'ArrowRight'}[direction[0]])
+        chart.get_by_role('button',name='归位').click()
+        assert_center()
+        before_pan=page.evaluate('game.dungeons.session.revision')
+        x,y=lens.evaluate("""n=>{
+          const r=n.getBoundingClientRect();
+          for(const fx of [.28,.44,.69])for(const fy of [.25,.48,.67]){
+            const x=r.x+fx*r.width,y=r.y+fy*r.height,t=document.elementFromPoint(x,y);
+            if(n.contains(t)&&!t.closest('button'))return [x,y];
+          }
+        }""")
+        dx,dy={'北':(0,32),'南':(0,-32),'西':(32,0),'东':(-32,0)}[direction[0]]
+        if width<=1000:
+            touch=page.context.new_cdp_session(page)
+            for kind,points in [('touchStart',[dict(x=x,y=y)]),('touchMove',[dict(x=x+dx,y=y+dy)]),('touchEnd',[])]:
+                touch.send('Input.dispatchTouchEvent',dict(type=kind,touchPoints=points))
+            touch.detach()
+        else:
+            page.mouse.move(x,y);page.mouse.down();page.mouse.move(x+dx,y+dy,steps=4);page.mouse.up()
+        chart.get_by_role('button',name='归位').click()
+        assert_center()
+        assert page.evaluate('game.dungeons.session.revision')==before_pan
         page.get_by_label('选择九宫阵').select_option(selected)
         page.locator('[data-dungeon-action=ward]').click()
         page.wait_for_function('!busy && game.dungeons.session.map.cells.some(c=>c.here&&c.marks.some(m=>m.includes("青木炼阳阵")))')
@@ -146,18 +225,28 @@ def check_map_chase(browser,engine,url):
         for role in site['roles'].values():role['offer_step']=99
         site['space']['snares'].clear();engine.store.save(saved)
         direction,dest=next(iter(exits(site['space'],0).items()))
-        page.locator(f'.dungeon-compass [data-choice="{direction}"]').click();page.wait_for_function('!busy')
+        chart.locator(f'[data-bearing="{direction}"]').click()
+        assert engine.store.load(game.id).dungeon_state['instances'][site['id']]['step']==0
+        assert page.locator('.atlas-description').inner_text().startswith(direction)
+        page.locator(f'[data-dungeon-action=move][data-choice="{direction}"]').click();page.wait_for_function('!busy')
         saved=engine.store.load(game.id);site=saved.dungeon_state['instances'][site['id']]
         assert site['step']==dest
+        assert_center()
         key=site['nodes'][dest]['actor'];site['space']['positions'][key]=dest
         site['pending']=dict(kind='ambush',actor=key);engine.store.save(saved)
         page.evaluate('async id=>await loadGame(id)',game.id)
         page.locator('[data-choice=flee]').click();page.wait_for_function('!busy && game.dungeons.session.map.chasing')
         assert page.locator('[data-dungeon-action=exit]').is_disabled()
         back=next(d for d,v in exits(site['space'],dest).items() if v==0)
-        page.locator(f'.dungeon-compass [data-choice="{back}"]').click()
+        chart.locator(f'[data-bearing="{back}"]').click()
+        assert '青木炼阳阵' in page.locator('.atlas-description').inner_text()
+        assert page.locator('.atlas-detail img').get_attribute('src')=='/assets/dungeon/ward.png'
+        page.locator('#dungeon-card').screenshot(path=str(output/f'atlas-{width}.png'))
+        page.locator(f'[data-dungeon-action=move][data-choice="{back}"]').click()
         page.wait_for_function('!busy && !game.dungeons.session.map.chasing')
         assert page.locator('[data-choice=fight]').inner_text()=='启阵迎敌'
+        chart.locator('.atlas-node[data-bearing]').first.click()
+        assert page.locator('[data-dungeon-action=move]').is_disabled()
         page.locator('[data-choice=fight]').click()
         page.wait_for_function('!busy && game.last_combat_report')
         assert page.evaluate('game.last_combat_report.formation_profile.name')=='青木炼阳阵'

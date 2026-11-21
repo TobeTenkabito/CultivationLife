@@ -3,11 +3,14 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import sys
 
 from PIL import Image
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+if __package__ is None:
+    sys.path.insert(0, str(ROOT))
 OUT = ROOT / 'web/assets/pixel/combat'
 SCALE_FILE = ROOT/'scripts/combat_asset_scale.json'
 SCALES = json.loads(SCALE_FILE.read_text(encoding='utf-8'))
@@ -297,6 +300,9 @@ def main():
             standing_height=None if actor.get('creature') else 176)
     sources.append(dict(file=SCALE_FILE.relative_to(ROOT).as_posix(), sha256=digest(SCALE_FILE), output='all defeat atlases'))
     data['provenance'] = sources
+    from scripts.prepare_demonic_base_motion import update_combat
+    update_combat(data)
+    update_combat(data, 'dao')
     (OUT / 'manifest.json').write_text(json.dumps(data, ensure_ascii=False, separators=(',', ':')) + '\n', encoding='utf-8')
     print(json.dumps(dict(actors=len(output_actors), files=len(list(OUT.glob('*.png'))), bytes=sum(p.stat().st_size for p in OUT.glob('*')))))
 

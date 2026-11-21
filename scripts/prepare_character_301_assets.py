@@ -1,6 +1,7 @@
 """Export the approved base character sheets without altering painted anatomy."""
 import importlib.util
 import json
+import shutil
 from pathlib import Path
 
 from PIL import Image
@@ -41,6 +42,48 @@ def separate_sheet(source):
     return parts
 
 
+def export_static(ident, source, parts, assets, records):
+    static = 'actor.path.' + ident
+    standing, standing_box = parts[9]
+    repair_record = {}
+    if ident in ('dao-nascent-hero-female', 'dao-integration-hero-female'):
+        repair = DESIGN / 'standing-repairs' / source.name
+        hem = registered_hem(repair, standing.size)
+        repair_record = dict(hem_source=repair.relative_to(DESIGN).as_posix(), hem_sha256=sha(repair))
+        y, x = np.ogrid[:standing.height, :standing.width]
+        blend_start = .70
+        if ident == 'dao-nascent-hero-female':
+            inward = repair.with_stem(repair.stem + '-finished')
+            corrected = registered_hem(inward, standing.size)
+            # The shin and the cloth over its knee are a single painted unit.
+            cut = standing.width // 2
+            hem.paste(corrected.crop((0, 0, cut, hem.height)), (0, 0))
+            repair_record.update(shin_source=inward.relative_to(DESIGN).as_posix(), shin_sha256=sha(inward))
+            knee = np.clip(1 - abs(x / standing.width - .36) / .16, 0, 1)
+            blend_start = .70 - .16 * knee
+        blend = np.clip((y / standing.height - blend_start) / .045, 0, 1)
+        mask = Image.fromarray(np.broadcast_to(blend * 255, (standing.height, standing.width)).astype('uint8'))
+        standing = Image.composite(hem, standing, mask)
+    for kind, size in [('figure', (256, 288)), ('portrait', (128, 128)), ('thumbnail', (128, 144))]:
+        art, box = parts[10] if kind == 'portrait' else (standing, standing_box)
+        scale = min((size[0] - 12) / art.width, (size[1] - 16) / art.height)
+        art = art.resize((round(art.width * scale), round(art.height * scale)), Image.Resampling.NEAREST)
+        canvas = Image.new('RGBA', size)
+        canvas.paste(art, ((size[0] - art.width) // 2, size[1] - 8 - art.height))
+        target = OUT / f'{ident}-{kind}.png'
+        canvas.save(target, optimize=True)
+        assets[static + '.' + kind] = dict(file=URL + target.name, size=list(size), sha256=sha(target), requires=[])
+        records[kind] = dict(source_rect=box, scale=scale)
+        if kind != 'portrait':
+            records[kind].update(repair_record)
+
+
+def registered_hem(path, size):
+    with Image.open(path) as image:
+        bounds = image.getchannel('A').point(lambda a: 255 if a >= 128 else 0).getbbox()
+        return image.crop(bounds).resize(size, Image.Resampling.LANCZOS)
+
+
 def main():
     spec = importlib.util.spec_from_file_location('character_pose_tools', ROOT / 'design/flora-combat-alpha4-20261024/prepare.py')
     motion = importlib.util.module_from_spec(spec)
@@ -55,16 +98,7 @@ def main():
         name = ('元婴' if stage == 'nascent' else '合体') + ('道修' if path == 'dao' else '魔修') + ('·男' if gender == 'male' else '·女')
         parts = separate_sheet(source)
         records = {}
-        for kind, size, index in [('figure', (256, 288), 9), ('portrait', (128, 128), 10), ('thumbnail', (128, 144), 9)]:
-            art, box = parts[index]
-            scale = min((size[0] - 12) / art.width, (size[1] - 16) / art.height)
-            art = art.resize((round(art.width * scale), round(art.height * scale)), Image.Resampling.NEAREST)
-            canvas = Image.new('RGBA', size)
-            canvas.paste(art, ((size[0] - art.width) // 2, size[1] - 8 - art.height))
-            target = OUT / f'{ident}-{kind}.png'
-            canvas.save(target, optimize=True)
-            assets[static + '.' + kind] = dict(file=URL + target.name, size=list(size), sha256=sha(target), requires=[])
-            records[kind] = dict(source_rect=box, scale=scale)
+        export_static(ident, source, parts, assets, records)
         action_parts = parts[:9] + parts[11:]
         scale = min(176 / action_parts[0][0].height, 282 / max(a.width for a, _ in action_parts), 180 / max(a.height for a, _ in action_parts))
         frames = []
@@ -99,13 +133,10 @@ def main():
             ident = f'{path}-{gender}'
             static = f'actor.path.{path}-base-hero-{gender}'
             for kind, size in [('figure', (256, 288)), ('portrait', (128, 128)), ('thumbnail', (128, 144))]:
-                source = ROOT / f'web/assets/pixel/v1/{ident}-static-{ "figure" if kind == "thumbnail" else kind}.png'
                 target = OUT / f'{ident}-{kind}.png'
-                art = Image.open(source).convert('RGBA')
-                if kind == 'thumbnail':
-                    art = art.resize(size, Image.Resampling.NEAREST)
-                art.save(target, optimize=True)
-                assets[static + '.' + kind] = dict(file=URL + target.name, size=list(art.size), sha256=sha(target), requires=[])
+                selected = 'demonic-redraw-20261121/v10' if path == 'demonic' else 'dao-basic-redraw-20261121/v5'
+                shutil.copyfile(ROOT / 'design' / selected / f'{gender}-{kind}.png', target)
+                assets[static + '.' + kind] = dict(file=URL + target.name, size=list(size), sha256=sha(target), requires=[])
             base_skins.append(dict(name=('道修' if path == 'dao' else '魔修') + '·初行' + ('·男' if gender == 'male' else '·女'), path=path, race='human', gender=gender, role='hero', static=static, combat=ident))
     assets['base.character_manifest'] = dict(file=URL + manifest.name, sha256=sha(manifest), requires=[], combat_actors=list(actors), character_forms=forms, skin_forms=base_skins)
     catalog = read(ROOT / 'content/visual_assets.json')
