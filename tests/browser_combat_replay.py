@@ -301,6 +301,7 @@ def main():
                     results['performance']['natal']=page.evaluate('CombatReplay.diagnostics()')
                     # Scroll off the actual arena: visual time pauses while reading rounds.
                     page.locator('[data-combat-replay]').click()
+                    page.locator('.battle-arts > summary').click()
                     page.locator('.battle-round-details summary').click()
                     page.locator('#battle-report-card').evaluate('n=>n.scrollTop=n.scrollHeight')
                     page.wait_for_function('!CombatReplay.diagnostics().onscreen')

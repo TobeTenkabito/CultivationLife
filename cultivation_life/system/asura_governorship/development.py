@@ -45,7 +45,7 @@ def quote(game,row,operation):
         if not row['people']:raise ValueError('须先登记一名原址属员')
         _,q=operations.training(game,row,row['people'][0],axis)
         if state['last_training'] and game.player.age<state['last_training']+cfg['training_interval']:
-            q['reason']='本府本轮演武已用，须度过二十个真实年份'
+            q['reason']='本府已举行过演武，两次演武须间隔二十年'
     elif operation.startswith('supply:'):
         from ...economy_content import material_id
         key=operation.split(':',1)[1]

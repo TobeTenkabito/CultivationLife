@@ -48,7 +48,7 @@ def main():
                                 click_control(host.locator('[data-governor-action=military]'))
                             assert response.value.status==status,response.value.text();page.wait_for_function('!busy')
                         before=e.store.load(g.id);cash=balance(before,row['wallet'])
-                        act('enlist',**{'征募原人物':people[0].id})
+                        act('enlist',**{'征募人选':people[0].id})
                         act('provision',**{'营务军费金额':'100000000'})
                         loaded=e.store.load(g.id);scope=rules.offices(loaded)[0]
                         assert balance(loaded,scope['wallet'])==cash-100000000
@@ -72,7 +72,7 @@ def main():
                         for _ in range(2):loaded.player.age+=1;m.advance(loaded,e.maps,scope)
                         e.store.save(loaded);page.evaluate('id=>loadGame(id)',g.id)
                         assert not troops.active(scope)
-                        act('enlist',**{'征募原人物':people[0].id})
+                        act('enlist',**{'征募人选':people[0].id})
                         act('provision',**{'营务军费金额':'100000000'})
                         loaded=e.store.load(g.id);scope=rules.offices(loaded)[0]
                         politics.remember(loaded,people[0].id,'player',20,'原履约支持测试',scope['id']);e.store.save(loaded)

@@ -48,3 +48,44 @@
   .mechanism-cell:before{content:'';position:absolute;left:-5px;top:18px;width:8px;height:8px;border-radius:50%;background:var(--muted)}
   .mechanism-current:before{background:var(--pine)}
 }
+
+/* Keep the duel and its outcome together. Detailed records open below both. */
+#battle-report-card.battle-report-popup {
+  width:min(1120px,calc(100vw - 32px));top:clamp(12px,5dvh,50px);
+  max-height:calc(100dvh - clamp(24px,10dvh,100px));padding:0 18px 10px;
+  overscroll-behavior:contain;scrollbar-gutter:stable;
+}
+#battle-report-card>.section-title {
+  top:0;display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin:0;padding:10px 0;border-bottom:1px solid var(--line);
+}
+#battle-report-title {font-size:clamp(17px,2vw,23px);line-height:1.3;}
+#battle-report-card .battle-report-heading {flex:none;display:flex;align-items:center;gap:8px;}
+.battle-overview {display:grid;grid-template-columns:minmax(0,2.5fr) minmax(190px,1fr);gap:16px;padding:12px 0;}
+.battle-overview:has(.battle-animation[hidden]) {grid-template-columns:1fr;}
+.battle-overview .battle-animation {margin:0;align-self:start;border:1px solid var(--line);border-radius:6px;}
+.battle-highlights {min-width:0;min-height:0;display:flex;flex-direction:column;align-self:stretch;}
+.battle-highlights h3 {margin:0;color:var(--pine);font-size:15px;}
+.battle-highlights #battle-report-summary {margin:4px 0;font-size:12px;}
+.battle-highlights .battle-round-progress {flex:none;max-height:3em;overflow:auto;margin:4px 0;}
+.battle-highlights .battle-key-events {min-height:0;overflow:auto;max-height:clamp(120px,30dvh,300px);margin:4px 0;}
+.battle-overview .combat-lineup {max-height:3.8rem;overflow:auto;}
+#battle-report-card .battle-inspect {border:0;border-top:1px solid var(--line);margin:0;}
+.battle-inspect>summary {padding:9px 2px;cursor:pointer;font-size:13px;color:var(--pine);font-weight:600;}
+.battle-inspect summary:focus-visible {outline:2px solid var(--pine);outline-offset:-2px;}
+.battle-arts:has(#battle-mechanisms[hidden]) {display:none;}
+.battle-inspect .combat-mechanisms {margin:0 0 10px;}
+#battle-report-terrain {font-size:12px;color:var(--muted);line-height:1.6;}
+@media(max-width:760px) {
+  #battle-report-card.battle-report-popup {top:8px;max-height:calc(100dvh - 20px);width:calc(100vw - 12px);padding:0 10px 8px;scrollbar-gutter:auto;}
+  #battle-report-card>.section-title {gap:6px;padding:6px 0;}
+  #battle-report-card .battle-report-heading {max-width:56%;font-size:11px;}
+  .battle-overview {grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 0;}
+  .battle-highlights {display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;}
+  .battle-highlights .battle-round-progress,.battle-highlights .battle-key-events {grid-column:1/-1;}
+  .battle-highlights .battle-key-events {max-height:6em;}
+}
+.battle-highlights .battle-round-progress {
+  justify-content:flex-start;padding:2px 0;gap:4px;border:0;overflow:auto;background:transparent;
+}
+.battle-highlights .battle-round-progress>* {flex:none;}

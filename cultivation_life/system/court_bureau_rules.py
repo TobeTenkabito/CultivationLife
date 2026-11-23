@@ -37,11 +37,11 @@ def reason(game, *, home=False, recovery=False):
     return ''
 
 def officer_reason(game,npc, *, assigned=False):
-    if not npc or not is_free(npc) or npc.world!='celestial' or instance_of(game,npc.id):return '须为仙界自由、存活的原人物'
+    if not npc or not is_free(npc) or npc.world!='celestial' or instance_of(game,npc.id):return '须是在世且身在仙界的自由修士'
     official=game.heavenly_court.get('officials',{}).get(npc.id)
     if not official or official.get('source')!='npc':return '须在原天官名册中，席位代表文字记录不能派遣'
     if npc.realm_index<9:return '属员须达到真仙境界'
-    if not person_site(game,npc):return '原人物地点不明，不能调度'
+    if not person_site(game,npc):return '此人行踪不明，暂时无法调遣'
     if npc.id in game.intrigue_state.get('npc_prisons',{}):return '此人正在拘禁中'
     if any((r.get('npc_id') or r.get('id'))==npc.id for r in game.player.party):return '须先解除同行，再安排公务'
     if not assigned:

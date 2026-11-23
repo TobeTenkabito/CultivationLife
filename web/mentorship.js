@@ -123,7 +123,7 @@ window.Mentorship = (() => {
       window.NpcArt?.avatar(card,a.portrait);
       card.append(button(a.enabled?'停止化身出战':'启用化身出战',{action:'avatar_toggle'},a.reason));
       window.NpcDevelopment?.link(card,a.id);
-      card.append(node('small',a.reason||'不占同行名额，使用原人物功法、邻域、资源及伤势。'));root.append(card);
+      card.append(node('small',a.reason||'出手的人仍用自己的功法、邻域与资财，伤势也会影响发挥。此举不占同行名额。'));root.append(card);
     }
     if(data.history.length){const history=node('details');history.append(node('summary',`师承履历 (${data.history.length})`));
       const labels={graduated:'已出师',departed:'已离门',expelled:'已逐出',active:'关系已结束'};

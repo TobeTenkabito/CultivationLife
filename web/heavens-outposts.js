@@ -1,7 +1,7 @@
 /* Civilian frontier details reuse the existing heavens navigation and command. */
 (() => {
   const status={unregistered:'尚未授权',authorized:'已获开拓许可',building:'施工中',active:'正常运营',suspended:'暂停经营',withdrawing:'撤回中',closed:'已关闭'};
-  const phase={gathering:'沿路集结',outbound:'跨界去程',stationed:'已在驻地',returning:'跨界返程',homeward:'沿路返乡',home:'已归返结清',lost:'原人物陨落',local_outbound:'前往经营地点',local_work:'在当地办事',local_return:'返回异界驻地',campaign:'当地军令出征'};
+  const phase={gathering:'沿路集结',outbound:'跨界去程',stationed:'已在驻地',returning:'跨界返程',homeward:'沿路返乡',home:'已归返结清',lost:'已陨落',local_outbound:'前往经营地点',local_work:'在当地办事',local_return:'返回异界驻地',campaign:'当地军令出征'};
   function render(host, projects, ui, api) {
     const {node,title,tile,back,subview,renderActions,empty,go}=api;
     const selected=projects.find(row=>row.id===ui.target);
@@ -65,7 +65,7 @@
         const war=data.war;
         if(war){
           body.append(node('p',`${war.enemy_name} · ${war.location_name} · ${({marching:'循路开拔',engaged:'交战与控制总部',returning:'循路撤军',home:'已归返结清'})[war.phase]} · 会战 ${war.battles} 场 · 战争分数 ${war.score}`),node('p',`实际控制总部 ${war.occupation}/5 年；部众每十年会战一次。本人亲征须沿地图到战场，每十年一次。真实胜利且分数达标后，回主驻地签订原依附和约。`));
-          for(const troop of war.troops)body.append(node('p',`${troop.name} · ${({outbound:'赴战途中',stationed:'已抵战场',returning:'返回主驻地',home:'已归返',lost:'原人物陨落'})[troop.phase]}${troop.duration?' '+troop.progress+'/'+troop.duration+'年':''}`));
+          for(const troop of war.troops)body.append(node('p',`${troop.name} · ${({outbound:'赴战途中',stationed:'已抵战场',returning:'返回主驻地',home:'已归返',lost:'已陨落'})[troop.phase]}${troop.duration?' '+troop.progress+'/'+troop.duration+'年':''}`));
           for(const log of war.logs)body.append(node('p',`${log.age}岁 · ${log.title} · ${log.text}`));
         }
         const select=node('select');select.setAttribute('aria-label','选择征战事务');

@@ -170,7 +170,7 @@ def execute(deps, game, row, action, options):
             conclude(deps, game, row, war, 'vassal' if action == 'outpost_war_vassal' else 'white_peace')
         else:
             stores.refund(deps, game, row, war)
-    base.note(game, row, LABELS[action]+'，沿原人物、原战役与实款办理。')
+    base.note(game, row, LABELS[action]+'，已记入本次征战纪要。')
     return {'message': LABELS[action]+'已办理'}
 
 
@@ -282,7 +282,7 @@ def project(deps, game, row, target, blocked=None):
         result['war'] = dict(id=war['id'], enemy_name=enemy.name if enemy else war['defender_id'],
             location=war['location_id'], location_name=deps.outpost_maps().location(war['world'],war['location_id'])['name'], status=war['status'], phase=war['campaign_phase'], score=round(war['war_score'], 1),
             battles=war['battles'], winner=war.get('winner'), occupation=war['frontier']['occupation'],
-            troops=[dict(id=j['person_id'],name=(p.name if (p:=deps.resolve_person(game,j['person_id'])) else '原人物'),phase=j['phase'],progress=j['progress'],duration=j['duration']) for j in war['journeys']['attacker']],
+            troops=[dict(id=j['person_id'],name=(p.name if (p:=deps.resolve_person(game,j['person_id'])) else '姓名失载'),phase=j['phase'],progress=j['progress'],duration=j['duration']) for j in war['journeys']['attacker']],
             logs=list(war['logs'][-6:]))
     for action, label in LABELS.items():
         options = {}

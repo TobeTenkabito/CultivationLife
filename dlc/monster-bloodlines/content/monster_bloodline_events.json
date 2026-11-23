@@ -5,7 +5,7 @@
       "id": "EVT_MONSTER_DRAGON_ANCESTRY_001",
       "version": 1,
       "title": "古蛟遗蜕",
-      "body": "你在残破洞窟中触及一枚古蛟逆鳞。它没有化作可反复炼化的资源，只在你的蛇属本体中唤醒了一段久远可能。",
+      "body": "你在洞窟的碎石下触到一枚古蛟逆鳞。鳞上残留的妖气渗入血脉，颈下的蛇鳞也跟着颤了一下。",
       "category": "bloodline",
       "tags": ["monster", "bloodline", "treasure"],
       "weight": 0.7,

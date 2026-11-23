@@ -4,7 +4,7 @@
     const {node, title, back, subview, renderActions, empty} = kit;
     back(host, '返回边情目录', 'frontier');
     const heading = node('header', null, 'heavens-campaign-heading');
-    title(heading, '岚疆界门', '一地的守备与去留，取决于真实人物、道路和补给。');
+    title(heading, '岚疆界门', '守关要有人，运粮要有路。定下进退之前，先查守军与补给。');
     host.append(heading);
     if (!campaign?.known) {
       empty(host, '尚无施工情报', '取得现场见闻或守方送达的预警后，才能查阅此地战局。');

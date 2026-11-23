@@ -144,11 +144,11 @@ def command(deps,game,action,token,amount):
             npc=find_person(game,target)
             if blocked:=officer_reason(game,npc):raise ValueError(blocked)
             if person_site(game,npc)!=HOME:raise ValueError('须与原天官在玉京当面办理任命')
-            staff[target]=office;record_appointment(game,npc,office);summary=npc.name+'正式划入本司，仍为原人物。'
+            staff[target]=office;record_appointment(game,npc,office);summary=npc.name+'即日起入本司当差。'
         elif action=='bureau_release':
             if target not in s.get('staff',{}):raise ValueError('此人不是本司属员')
             if any(j['person']==target for j in active(game)):raise ValueError('须先返回并交接该属员的公务')
-            s['staff'].pop(target);summary='解除本司任命，原人物及既得公务资历保留。'
+            s['staff'].pop(target);summary='已解除本司任命，此前任职的资历仍在。'
         elif action=='bureau_resign':
             if active(game) or s.get('review') or inspection.active(game):raise ValueError('须先交接全部公务与公物')
             s.update(office=None,staff={});s.setdefault('heads',{}).pop(office,None);summary='已交接离任；原官品及七曜身份不变。'
@@ -157,7 +157,7 @@ def command(deps,game,action,token,amount):
     elif action=='bureau_accept':
         offered,person=target.split('~',1) if '~' in target else ('','')
         offer=next((o for o in projects.offers(game,deps.maps,s.get('office')) if o['token']==offered),None)
-        if not offer:raise ValueError('原对象或采购报价已变化，请刷新后重试')
+        if not offer:raise ValueError('人选或采购报价已有变化，请刷新后重试')
         plan=proposal(game,deps.maps,offer,person)
         if plan['reason']:raise ValueError(plan['reason'])
         if len(active(game))>=3:raise ValueError('本人一案及两名属员的在办名额已满')
@@ -169,7 +169,7 @@ def command(deps,game,action,token,amount):
         if person!='player' and plan['leg']['origin']!=plan['leg']['destination']:job.update(phase='outbound',leg=plan['leg'])
         projects.reserve(game,job,offer,plan['budget'])
         s.setdefault('jobs',[]).append(job);s.setdefault('accepted',{})[offer['key']]=identity
-        summary='已落实原府库预算与实际采购。'+('本人须亲赴现场履约。' if person=='player' else '原属员按实际道路与年度办理，不能同时同行、培养或再派遣。')
+        summary='府库已拨款，所需物资已采办。'+('本人须亲赴现场履约。' if person=='player' else '受命属员须赶路办差，其间无法随行、受训或另领差事。')
     elif action=='bureau_work':
         runtime.begin_work(game);return deps.advance(game.id,'court_service',1)
     elif action=='bureau_review':
@@ -216,7 +216,7 @@ def public(game,maps):
     if not game.heavenly_court or not (enabled() or state(game)):return dict(available=False)
     s=state(game);office=s.get('office');offered=projects.offers(game,maps,office) if office else []
     actors=['player',*[k for k,v in s.get('staff',{}).items() if v==office]]
-    for row in offered:row['executors']=[dict(id=k,name='本人' if k=='player' else (find_person(game,k).name if find_person(game,k) else '原人物已失效'),**proposal(game,maps,row,k)) for k in actors]
+    for row in offered:row['executors']=[dict(id=k,name='本人' if k=='player' else (find_person(game,k).name if find_person(game,k) else '查无此人'),**proposal(game,maps,row,k)) for k in actors]
     staff=[]
     for identity,department in s.get('staff',{}).items():
         npc=find_person(game,identity);official=game.heavenly_court.get('officials',{}).get(identity,{})
@@ -224,11 +224,11 @@ def public(game,maps):
         if maps and npc and place:
             try:place_name=maps.location(npc.world,place)['name']
             except ValueError:pass
-        staff.append(dict(id=identity,name=npc.name if npc else '原人物已失效',office=department,
+        staff.append(dict(id=identity,name=npc.name if npc else '查无此人',office=department,
             location=place,location_name=place_name,merit=official.get('service_merit','0'),reason=officer_reason(game,npc)))
     rows=copy.deepcopy(active(game))
     for job in rows:
-        job['remaining_cash']=balance(game,job['wallet']);job['person_name']='本人' if job['person']=='player' else (find_person(game,job['person']).name if find_person(game,job['person']) else '原人物已失效')
+        job['remaining_cash']=balance(game,job['wallet']);job['person_name']='本人' if job['person']=='player' else (find_person(game,job['person']).name if find_person(game,job['person']) else '查无此人')
         job['expired']=game.player.age>=job['deadline']
         job['site_reason']='须亲临'+job['place_name']+'办理' if game.player.location_id!=job['location'] else ''
         job['handover_reason']=handover_reason(game,job)

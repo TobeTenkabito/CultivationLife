@@ -207,7 +207,7 @@
       ]
     },
     {
-      "id":"EVT_TRUE_DEMON_ABYSS_AXIS_006","version":1,"title":"祖渊重生","body":"天幕缓缓回正。复苏的祖根不再只托住一座城，而是向黑日原、血焰山与坠星魔海分别伸出新根；若渊极城被放弃，幸存者也在远处看见三地重新连成稳定地脉。",
+      "id":"EVT_TRUE_DEMON_ABYSS_AXIS_006","version":1,"title":"祖渊重生","body":"天幕缓缓回正。祖根从地底伸向黑日原、血焰山与坠星魔海。三处地脉接续的那一刻，远处的人也觉出了脚下的震动。待余震平息，大地终于稳了下来。",
       "tags":["story_chain","true_demon_abyss_axis","manual_only"],"weight":0,
       "choices":[
         {"id":"covenant","text":"立下三宗共同养护、不得分割的界柱新约","conditions":{"has_flag":"abyss_axis_root_revived"},"disabled_reason":"祖根未能复苏","effects":[{"type":"add_item","item_id":"abyss_demon_heart"},{"type":"add_karma","value":-20},{"type":"add_renown","value":42},{"type":"set_flag","flag":"true_demon_abyss_axis_completed"},{"type":"set_milestone","milestone":"true_demon_abyss_axis_completed"}]},

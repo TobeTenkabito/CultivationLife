@@ -64,7 +64,7 @@
       if(j.person!=='player'&&j.phase!=='handover')recovery.append(button(j.phase==='homeward'?'正在返程':'召回属员','recall',j.id,data.recovery_reason||(j.phase==='homeward'?'已在返程，不可重置路程':'')));
       recovery.append(button('交接公物并结清','handover',j.id,j.handover_reason));card.append(actions,recovery);duties.append(card);
     }
-    duties.append(e('h4','本地可办差事'),e('p','费用由原府库足额托管，采购使用原市场库存。报价、原对象或人员状态变化后须重新确认。','muted'));
+    duties.append(e('h4','本地可办差事'),e('p','办差的钱须由府库备足，采买也要看当地存货。若人选、案情或市价有变，须重新议定。','muted'));
     if(!data.offers.length)duties.append(e('p',data.office==='land'?'此地没有符合条件的公开城市遗址。':data.office==='works'?'缺少已知相邻市场的真实短缺与本地货源。':data.office==='audit'?'暂无待复核的已结公务案卷。':'任职后可查看本地可办差事。','muted'));
     const board=e('div',null,'bureau-grid');
     for(const offer of data.offers){const card=e('article',null,'bureau-card');card.dataset.bureauOffer=offer.token;
@@ -77,7 +77,7 @@
       const redraw=()=>{const a=offer.executors.find(x=>x.id===select.value);detail.replaceChildren(e('p',`预算 ${fmt(a.budget)} 灵石 · ${a.travel?`属员往返 ${a.travel} 年 · `:''}总功德 ${fraction(a.reward)}`,'bureau-price'),
         button(a.id==='player'?'落实预算并亲办':'落实预算并派遣','accept',offer.token+'~'+a.id,a.reason,true));if(a.reason)detail.append(e('small',a.reason,'muted'));};select.onchange=redraw;redraw();board.append(card);
     }duties.append(board,e('p','功德余量共同累计：'+fraction(data.remainder)+'。亲办不叠发仙痕、机缘或香火；属员取得原总额九成，主管实际复核后取得一成。','muted'));
-    staff.append(e('h4','本司属员'),e('p','仅任命原天官名册中的真实人物。须在玉京当面办理；在办期间占用原人物，任务结束与公物交接后恢复自由调度。','muted'));
+    staff.append(e('h4','本司属员'),e('p','任命须在玉京当面办理，人选从天官名册中挑。属员领差后，须办完差事、交清公物，才能另领差遣。','muted'));
     for(const n of data.staff){const card=e('article',null,'bureau-card');card.append(e('h4',n.name),e('p',`所在地点：${n.location_name} · 公务功德 ${fraction(n.merit)}`),button('解除本司任命','release',n.id,data.recovery_home_reason||(data.jobs.some(j=>j.person===n.id)?'须先返回并交接公务':'')));if(n.reason)card.append(e('small',n.reason,'muted'));staff.append(card);}
     staff.append(e('h4','在场天官'));
     for(const n of data.candidates.filter(n=>!n.department)){const row=e('article',null,'bureau-person');row.append(e('strong',n.name),e('small',`${n.realm}阶`),button('任命为属员','appoint',n.id,data.home_reason||(!data.supervisor?'须先取得主管资格':'')||n.reason||(data.staff.length>=2?'两席已满':'')));staff.append(row);}

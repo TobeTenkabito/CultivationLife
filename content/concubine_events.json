@@ -26,7 +26,7 @@
       "id": "SYS_CONCUBINE_REVENGE",
       "version": 1,
       "title": "高门逼迫",
-      "body": "你拒绝{owner_name}已有一段时日，对方终究咽不下这口气，亲自带人截住去路。此事若再拖延，便不再是拉拢，而是强取。",
+      "body": "你拒绝{owner_name}已有一段时日，对方终究咽不下这口气，亲自带人截住去路。你才停步，身后的退路也叫人堵上了。",
       "category": "relationship",
       "tags": ["manual_only", "all_realms", "relationship", "concubine", "revenge", "negative"],
       "weight": 0,

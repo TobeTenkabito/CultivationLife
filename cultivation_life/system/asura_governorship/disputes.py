@@ -52,7 +52,7 @@ def offers(game,row):
         result.append(('personnel',dict(candidate=ordered[0]['id'],candidate_name=ordered[0]['name'],
             alternative=ordered[1]['id'] if len(ordered)>1 else None,
             alternative_name=ordered[1]['name'] if len(ordered)>1 else None,
-            source='原址自由人员名册',description='举荐原人物为地方执事，仍须通过任职与任务占用核验。')))
+            source='原址自由人员名册',description='从当地举荐执事。人选须有任职资格，且眼下没有别的差事。')))
     result.append(('access',dict(target=building['id'],public=building['public'],
         source='原公署公开使用许可',description='城盟主张开放办事，军府主张限制来客；只调整府署公开权，不改产权。')))
     if 0<row['expires']-game.player.age<=politics.config()['renewal_window']:
@@ -160,7 +160,7 @@ def resolve(game,row,case,decision,actor,*,spending_limit=None):
         if decision!='decline':
             person=e['candidate'] if decision=='appoint' else e['alternative']
             authority.set_staff(game,row,person);politics.appointment(game,person,actor,'staff',case['id'])
-            result='原人物受任，后续预算、占用与履约沿原机构系统。'
+            result='执事已就任，往后的开支与差事由府署经办。'
         else:result='暂缓任用，原人选保持自由，不预占名额。'
     elif kind=='performance':
         agenda=agendas.record(game,row['id'])

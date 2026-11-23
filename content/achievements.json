@@ -23,7 +23,7 @@
     },
     {
       "id": "soul_second_life", "name": "这不是我最后一条命", "category": "cultivation",
-      "description": "第二元婴实际替本尊承接一次致命结局。你以为我为什么练小号？",
+      "description": "第二元婴替本尊挡过一次死劫。多修的这条命，今日用上了。",
       "source": {"kind": "base", "id": "base", "name": "游戏本体"},
       "condition": {"soul_story": "second_rescued"}
     },

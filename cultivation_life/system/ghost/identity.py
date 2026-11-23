@@ -149,7 +149,7 @@ def _capture_defeated_ghost(game: GameState, target: dict[str, Any], rng: random
         player.milestones["ghost_became_others_attachment"] = 1
     game.history.append(HistoryRecord(
         "SYS_GHOST_CAPTURED", 1, player.age, "败亡拘魂", None, "controlled",
-        f"{player.ghost_captor['name']}没有立刻灭杀你，而是以魂印拘束本魂；失败的反抗与夺舍都会真正魂飞魄散。",
+        f"{player.ghost_captor['name']}以魂印锁住了你的本魂。此时反抗或夺舍，一旦失手便会魂飞魄散。",
         {
             "captor_id": player.ghost_captor["id"],
             "controlled_form": player.ghost_captor["controlled_form"],

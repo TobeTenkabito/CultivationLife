@@ -160,7 +160,7 @@ def test_failed_reviewer_handover_preserves_evidence_and_no_false_testimony(bure
     kill_person(g,ids[2],'验收原人物陨落');e.store.save(g)
     if paused:cmd(e,gid,'case_resume',identity)
     else:
-        with pytest.raises(ValueError,match='原人物'):work(e,gid)
+        with pytest.raises(ValueError,match='在世且身在仙界的自由修士'):work(e,gid)
         cmd(e,gid,'case_reassign',identity)
     g=e._load(gid)
     assert inquiry(g)['stage']=='decision' and len(inquiry(g)['evidence'])==3 and not research_assignment(g,ids[2])

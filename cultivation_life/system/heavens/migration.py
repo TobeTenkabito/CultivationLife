@@ -42,7 +42,7 @@ def quote(deps, game, action, target, options):
         raise ValueError('合作项目实有资金不足 4000 灵石')
     return dict(years=0, costs={}, refundable={}, project_cost=BUDGET,
         message=f'{npc.name}接受本次民用迁居安排。项目预留 4000 灵石：通行 2 年共 2000，抵达后安置 1 年耗 2000；不从玩家背包收费。',
-        warning='此为长期迁居，无自动返乡。原人物会留在目的地，出发地的交往与合作须按真实位置重新判断；每处名额及每人接引均仅一次。')
+        warning='此行是长期迁居。受邀者将在新址定居，原居地须当面办理的往来与合作也会受影响。每处名额、每人的接引机会都只有一次。')
 
 
 def finish(game, echo, status, *, year=None):

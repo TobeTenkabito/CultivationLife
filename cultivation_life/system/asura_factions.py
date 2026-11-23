@@ -297,7 +297,7 @@ def act(game, state, action, target, roster):
                 )
             )
             game.player.prisoners.append(record)
-            text = f"{npc.name}押献{victim.name}，原人物转入你的俘虏名册。"
+            text = f"{npc.name}押献{victim.name}，已记入你的俘虏名册。"
         npc.affinity = (npc.affinity or 0) - 5
     row = next(r for r in f["rows"] if r["id"] == faction)
     row["loyalty"] = max(0, row["loyalty"] - 6)

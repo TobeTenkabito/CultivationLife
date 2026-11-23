@@ -20,7 +20,7 @@
       const previous=viewing.get(`development-choice:${row.id}`);select.value=d.options.some(o=>o.id===previous)?previous:(d.options.find(o=>!o.reason)?.id||d.options[0].id);
       const explanation=el('p',null,'court-description'),cost=el('p',null,'governor-case-amount');
       const send=button('办理所选事项','development',()=>{const q=d.options.find(o=>o.id===select.value);return {office:row.id,operation:q.id,quote:q.token};});
-      const update=()=>{const q=d.options.find(o=>o.id===select.value);remember(`development-choice:${row.id}`,select.value);send.disabled=locked||!!q.reason;cost.textContent=q.id.startsWith('supply:')?`采购市场预付 ${fmt(q.total)} 灵石，货款按实际交货支付`:`本府实付 ${fmt(q.total)} 灵石${q.receipt?' · 原经营账户实付 '+fmt(q.receipt)+' 灵石':''}`;explanation.textContent=q.reason||q.growth||q.description||(q.id==='deliver'?'交出原行囊实物，分期结款；不能提前领取后续货款。':q.id==='cancel'?'退回尚未履行的预付款，签约周期不重置。':'按当前原址授权与报价办理；不改变原城市、公署和人物归属。');};
+      const update=()=>{const q=d.options.find(o=>o.id===select.value);remember(`development-choice:${row.id}`,select.value);send.disabled=locked||!!q.reason;cost.textContent=q.id.startsWith('supply:')?`采购市场预付 ${fmt(q.total)} 灵石，货款按实际交货支付`:`本府实付 ${fmt(q.total)} 灵石${q.receipt?' · 原经营账户实付 '+fmt(q.receipt)+' 灵石':''}`;explanation.textContent=q.reason||q.growth||q.description||(q.id==='deliver'?'从行囊交货，每交一期便结一期货款。':q.id==='cancel'?'退回尚未履行的预付款，签约周期不重置。':'按本地授权和本次报价办理。');};
       select.onchange=update;update();panel.append(select,cost,explanation,send);
     }
     host.append(panel);
@@ -48,13 +48,13 @@
       const controls=el('div',null,'governor-military-controls');
       const action=choose('军政事务',allowed.map(id=>({id,name:m.operations[id]})));
       const old=viewing.get(`military-choice:${row.id}`);if(allowed.includes(old))action.value=old;
-      const person=choose('征募原人物',m.candidates.map(p=>({id:p.id,name:`${p.name} · 年费 ${fmt(p.rate)}`})));
+      const person=choose('征募人选',m.candidates.map(p=>({id:p.id,name:`${p.name} · 年费 ${fmt(p.rate)}`})));
       const destination=choose('调防地点',m.destinations);
       const choice=choose('军令回应',[{id:'comply',name:'执行调防，按实减少留守'},{id:'delay',name:'出示守备或军费缺口，申请缓调'},{id:'refuse',name:'具名拒命，承担追责'}]);
       const funds=el('input');funds.type='number';funds.min='1';funds.max='1000000000000000';funds.value='1000000';funds.setAttribute('aria-label','营务军费金额');
       const note=el('p',null,'court-description');
       const send=button('执行军政事务','military',()=>({office:row.id,operation:action.value,person:person.value,destination:destination.value,choice:choice.value,amount:Number(funds.value)}));
-      const update=()=>{remember(`military-choice:${row.id}`,action.value);person.hidden=action.value!=='enlist';destination.hidden=!['dispatch','order'].includes(action.value);funds.hidden=action.value!=='provision';choice.hidden=action.value!=='respond';send.disabled=locked||(action.value==='enlist'&&!m.candidates.length);note.textContent=({rebel:'公开举兵将撤销法定任职，只有明确支持你的原部将追随；军费和败战后果保留。',claim:'亲战旧王使用实际修为、装备、伤势与元力，胜出才交接王权；未决则保留原案。',abdicate:'明确承认举兵方，交出唯一王位；原债务、人员和公款保留。',press:'仅对已经拒命的总督撤任追责；实际交接可能遭部将抵抗。',provision:'从本府公款实拨，只能在原军尚在本府时交付。已耗营务不退款。',dispatch:'须预付原部众去返道路与十年驻防费用；不会移动玩家。'})[action.value]||'在提交时复核原人物、实际地点、军令与任职权限。';};
+      const update=()=>{remember(`military-choice:${row.id}`,action.value);person.hidden=action.value!=='enlist';destination.hidden=!['dispatch','order'].includes(action.value);funds.hidden=action.value!=='provision';choice.hidden=action.value!=='respond';send.disabled=locked||(action.value==='enlist'&&!m.candidates.length);note.textContent=({rebel:'公开举兵将撤销法定任职，只有明确支持你的原部将追随；军费和败战后果保留。',claim:'亲战旧王使用实际修为、装备、伤势与元力，胜出才交接王权；未决则保留原案。',abdicate:'明确承认举兵方，交出唯一王位；原债务、人员和公款保留。',press:'仅对已经拒命的总督撤任追责；实际交接可能遭部将抵抗。',provision:'从本府公款实拨，须趁部众仍驻本府时交付，已用于营务的钱款无法收回。',dispatch:'须预付部众往返盘缠和十年驻防费用，你可留在本地。'})[action.value]||'领命前请核对人选、驻地和任职权限。';};
       action.onchange=update;update();controls.append(action,person,destination,choice,funds,note,send);panel.append(controls);
     }
     host.append(panel);
@@ -93,7 +93,7 @@
   }
   function protocols(host,row,button,choose,fold,locked){
     const p=row.protocols;if(!p||!Object.keys(p.operations).length)return;
-    const panel=fold('议政、军权与交接','供养与任将分别授权。调查、盟约与迁署均保留原人、原账和实际道路。');
+    const panel=fold('议政、军权与交接','拨军费与任命部将须分别领命。查案要核账，结盟要面见对方总督，迁署前须先办交接。');
     panel.classList.add('governor-protocols');keepOpen(panel,`protocols:${row.id}`);
     const side=v=>v==='central'?'中央':'地方';
     panel.append(el('p',`${side(p.mandate.funding)}供养 · ${side(p.mandate.appointments)}任将 · ${p.recognized?'承认现君':'新君尚待地方承认'}`,'governor-operating-policy'));
@@ -106,7 +106,7 @@
     for(const c of p.cases)panel.append(el('p',`${caseTitle(c)} · ${stages[c.stage]||c.stage} · ${c.kind==='pressure'?'联署':'具名参与'}：${c.participant_names.join('、')}${c.reviewer_name?' · 调查人 '+c.reviewer_name:''}${c.amount?' · 原额 '+fmt(c.amount)+' / 已付 '+fmt(c.paid):''}${c.progress?' · 已查 '+c.progress+' 年':''}${c.facts.suspends_authority?' · 未清原案暂停公款授权':''}`,'governor-protocol-case'));
     const action=choose('议政军权事项',Object.entries(p.operations).map(([id,name])=>({id,name})));
     const old=viewing.get(`protocol-choice:${row.id}`);if(p.operations[old])action.value=old;
-    const person=choose('议政原人物',p.people),target=choose('议政原对象',[]),cases=choose('原案凭据',p.cases.map(c=>({id:c.id,name:`${caseTitle(c)} · ${stages[c.stage]||c.stage}`})));
+    const person=choose('议政人选',p.people),target=choose('议政对象',[]),cases=choose('原案凭据',p.cases.map(c=>({id:c.id,name:`${caseTitle(c)} · ${stages[c.stage]||c.stage}`})));
     const choice=choose('具名方案',[]),destination=choose('迁署新址',p.cities),funds=el('input');funds.type='number';funds.min='0';funds.max='1000000000000000';funds.value='1000000';funds.setAttribute('aria-label','议政实际金额');
     const note=el('p',null,'court-description');
     const send=button('办理议政军权事项','protocol',()=>({office:row.id,operation:action.value,person:person.value,target:target.value,case:cases.value,choice:choice.value,destination:destination.value,amount:Number(funds.value)}));
@@ -121,7 +121,7 @@
       const choices=op==='charter'?[['central:central','中央供养 / 中央任将'],['central:local','中央供养 / 地方任将'],['local:central','地方供养 / 中央任将'],['local:local','地方供养 / 地方任将']]:op==='patronage'?[['blood_clans','血脉贵胄'],['war_hosts','战功军府'],['free_cities','自由诸城']]:op==='defend'?[['admit','认领原责任'],['contest','提出具名异议']]:op==='pressure_decide'?[['approve','批准实拨'],['reject','驳回原案']]:[];
       fill(choice,choices.map(([id,name])=>({id,name})));choice.hidden=!choices.length;if(op==='charter')choice.value=`${p.mandate.funding}:${p.mandate.appointments}`;
       send.disabled=locked||(!person.hidden&&!p.people.length)||(!cases.hidden&&!p.cases.length)||(!target.hidden&&!target.options.length)||(!destination.hidden&&!p.cities.length);
-      note.textContent=(!cases.hidden&&!p.cases.length)?'暂无可办理的原案。已结清事项不能重复领取或退赔。':({divert:'此项会把公款转入本人，并立即留下可调查、撤任和追偿的原始凭据。',charter:'只改变后续授权；原军费剩余部分仍退回实际付款机构。',relief:'须预留一个接防名额；新旧部将实际同地交接后，旧将才沿路撤回。',move_request:'先交接驻军、属员、项目、合同、案卷及公款，再亲赴王庭取得新址许可。',move_complete:'须本人沿地图抵达许可新址；旧建筑留在原地，新府署按原工程重新营造。',ally:'亲赴另一原府与在任总督交涉，个人实付担保；盟军不会复制或自动移至王庭。',integrate:'新君亲赴原府，以实际安置拨款和原人物关系争取承认；不自动恢复被撤职者。',guard_bind:'先在原阵法界面布置镇地阵，再登记到此府；撤去原阵后本府效果同时失效。',guard_repair:'每次使用一份实际持有的修阵资源，完整阵法不会扣费。',negotiate:'与原交战方实际会面；举兵者须付赔款，NPC仍有实力和意愿时可以拒降。'})[op]||'提交时重新核验身份、地点、时限、原案及实际资金；旧页不能重复结算。';
+      note.textContent=(!cases.hidden&&!p.cases.length)?'暂无可办理的原案。已结清事项不能重复领取或退赔。':({divert:'此项会把公款转入本人，并立即留下可调查、撤任和追偿的原始凭据。',charter:'只改变后续授权；原军费剩余部分仍退回实际付款机构。',relief:'须预留一个接防名额；新旧部将实际同地交接后，旧将才沿路撤回。',move_request:'先交接驻军、属员、项目、合同、案卷及公款，再亲赴王庭取得新址许可。',move_complete:'须本人沿地图抵达许可新址；旧建筑留在原地，新府署按原工程重新营造。',ally:'亲赴对方府中面见总督，自掏担保款。结盟后，盟军仍驻原地。',integrate:'新君须亲赴当地，拨付安置款，凭旧日交情争取归附。先前撤职的人仍须另行任命。',guard_bind:'先在原阵法界面布置镇地阵，再登记到此府；撤去原阵后本府效果同时失效。',guard_repair:'每次使用一份实际持有的修阵资源，完整阵法不会扣费。',negotiate:'与原交战方实际会面；举兵者须付赔款，NPC仍有实力和意愿时可以拒降。'})[op]||'办事前请核对任职、地点、期限、案卷和可用款项。';
     }
     action.onchange=update;update();panel.append(action,person,cases,target,choice,destination,funds,note,send);
     if(p.history.length){const history=fold('议政与交接记录');for(const c of [...p.history].reverse())history.append(el('p',`${caseTitle(c)} · ${c.result}`));panel.append(history);}
@@ -139,7 +139,7 @@
     const headline=el('div',null,'governor-heading');headline.append(el('span','府','governor-seal'),el('div'));
     headline.lastChild.append(el('h3',selected?'地方府务':'总督外任'),el('p',d.enabled?'任期五百年 · 原址接任 · 公私分账':'扩展已停用 · 保留原款与交接责任','court-description'));root.append(headline);
     if(!selected){
-      const request=fold(d.king?'地方任命':'申请外任','战将以上、累计功绩100、恩宠20可在王庭申请。受任后沿原地图赴任，设府及工程另付原款。');
+      const request=fold(d.king?'地方任命':'申请外任','战将以上、累计功绩100、恩宠20可在王庭申请。受任后亲赴任地，设府与营造另付工料。');
       const cities=choose('外任城市',d.cities.filter(c=>c.eligible)),people=choose('总督人选',d.candidates);
       request.append(cities);if(d.king)request.append(people);
       request.append(button(d.king?'颁发任命':'申请外任',d.king?'appoint':'request',()=>({city:cities.value,person:people.value}),!d.enabled||!d.capital||!d.cities.length||(!d.king&&!d.qualified)||(d.king&&!d.candidates.length)));
@@ -164,7 +164,7 @@
           budget.append(funds,button('资助本府','donate',()=>({office:r.id,amount:Number(funds.value)}),!d.enabled));
           if(r.building_status!=='intact'&&r.quote){const q=r.quote;budget.append(el('p',`营造总价 ${fmt(q.total)} 灵石 · 其中工费 ${fmt(q.coins)}`),el('p',q.reason||'工料及施工全额实付，原址恢复。','court-description'),button(r.building_status==='unbuilt'?'营造府署':'公费原址重建','build',{office:r.id,quote:q.token,total:q.total},!d.enabled||!!q.reason));}
           box.append(budget);
-          const staff=fold('属员与履约','从原址自由修士中聘任执事。项目沿原机构系统托管预算，按真实年份执行；离场和失去资格会暂停。');
+          const staff=fold('属员与履约','可从当地自由修士中聘任执事。经费交由府署保管，工程逐年推进。离场或失去资格时停工。');
           const person=choose('地方执事',[{id:'',name:'暂不聘任'},...(r.candidates||[])]);person.value=r.people?.[0]||'';
           staff.append(person,button('登记属员','staff',()=>({office:r.id,person:person.value}),!d.enabled||!!r.agenda?.job));
           window.InstitutionGovernance?.render(staff,d.management.filter(m=>m.id===r.id),payload=>send('management',{office:r.id,payload}),'asura-manifestation');box.append(staff);

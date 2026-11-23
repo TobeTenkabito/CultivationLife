@@ -19,10 +19,10 @@ def safe_destination(game,dest):
     return any(r.get('public') and r['status']=='intact' for r in rows)
 
 def person_reason(game,npc,*,job=None):
-    if not npc or not is_free(npc) or npc.world!='celestial' or instance_of(game,npc.id):return '原人物已失效、受控或不在仙界普通地点'
-    if npc.id in game.intrigue_state.get('npc_prisons',{}):return '原人物正在机构监禁中，巡天职司没有越权释放许可'
+    if not npc or not is_free(npc) or npc.world!='celestial' or instance_of(game,npc.id):return '须选一位身在仙界普通地点、行动自如的在世修士'
+    if npc.id in game.intrigue_state.get('npc_prisons',{}):return '此人另案在押，巡天职司无权放人'
     held=research_assignment(game,npc.id)
-    if held and (not job or held['id']!=job['id']):return '原人物已有其他任务占用'
+    if held and (not job or held['id']!=job['id']):return '此人另有差事在身'
     if any((r.get('npc_id') or r.get('id'))==npc.id for r in game.player.party):return '同行人物须先解除同行安排'
     return ''
 
@@ -158,7 +158,7 @@ def abort_reason(game,maps,job):
 def abort(game,maps,job):
     if blocked:=abort_reason(game,maps,job):raise ValueError(blocked)
     job.update(phase='failed',evacuation_aborted=True)
-    return '转运条件已经失效，保留原人物地点与已耗路费；本案不发报酬，须按原公物交接流程结清。'
+    return '转运中止，人留在当地，已花的盘缠无法收回。本案没有报酬，仍须交清公物。'
 
 def delivery(game,job):
     if not job.get('operation_done'):raise ValueError('工时足额后，还须完成讨伐或救援转运')

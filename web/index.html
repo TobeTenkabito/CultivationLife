@@ -121,26 +121,33 @@
           <p class="eyebrow">命途有变</p><h2 id="event-title"></h2><p id="event-body"></p><div id="event-choices" class="choices"></div>
         </article>
         <article id="battle-report-card" class="paper battle-report-card battle-report-popup hidden" aria-live="polite" role="dialog" aria-modal="false">
-          <div class="section-title"><div><p class="eyebrow">自动斗法</p><h2 id="battle-report-title">最近战报</h2></div><div class="battle-report-heading"><div id="battle-report-grade" class="battle-grade"></div><button id="battle-report-toggle" type="button">关闭</button></div></div>
-          <p id="battle-report-summary" class="muted"></p>
+          <div class="section-title"><div><h2 id="battle-report-title">最近战报</h2></div><div class="battle-report-heading"><div id="battle-report-grade" class="battle-grade"></div><button id="battle-report-toggle" type="button">关闭</button></div></div>
+          <div class="battle-overview">
           <section id="battle-animation" class="battle-animation" hidden aria-label="逐轮战斗态势回放">
             <div class="combat-stance"><div data-combat-meter="hero"><b>你方态势</b><output></output><progress aria-label="你方战斗态势"></progress></div><div data-combat-meter="npc"><b>敌方态势</b><output></output><progress aria-label="敌方战斗态势"></progress></div></div>
             <canvas role="img" aria-label="双方交锋动画"></canvas>
             <div class="combat-lineup"><div data-combat-lineup="hero"></div><div data-combat-lineup="npc"></div></div>
             <div class="combat-playback-controls"><span data-combat-status></span><button type="button" data-combat-replay title="重播战报" aria-label="重播战报"></button><button type="button" data-combat-pause title="暂停回放" aria-label="暂停回放" aria-pressed="false"></button><select aria-label="回放速度"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option></select><input type="range" data-combat-scrub aria-label="战斗回放进度" min="0" max="1" step="0.01" value="0" disabled></div>
           </section>
+            <section class="battle-highlights" aria-label="战况摘要">
+              <h3>战况</h3><p id="battle-report-summary"></p>
+              <div id="battle-round-progress" class="battle-round-progress" aria-label="战斗轮次进度"></div>
+              <div id="battle-key-events" class="battle-key-events"></div>
+            </section>
+          </div>
+          <details class="battle-inspect battle-arts"><summary>功法运转</summary>
           <section id="battle-mechanisms" class="combat-mechanisms" hidden aria-label="功法机制时间轴">
             <div class="mechanism-heading"><div><h3>功法运转 · 机制时间轴</h3><p data-mechanism-phase>轮末记录</p></div><label>查看轮次 <select aria-label="机制记录轮次"></select></label></div>
             <div class="combat-technique-strip" data-technique-strip aria-label="本场斗法功法"></div>
             <p class="mechanism-caption" data-mechanism-caption></p>
             <div id="combat-mechanism-timeline" data-mechanism-timeline></div>
           </section>
-          <div id="battle-rosters" class="battle-rosters"></div>
-          <div id="battle-round-progress" class="battle-round-progress" aria-label="战斗轮次进度"></div>
-          <div id="battle-key-events" class="battle-key-events"></div>
-          <div id="battle-voisinage-overview"></div>
-          <div id="battle-stat-grid" class="battle-stat-grid"></div>
-          <details class="battle-round-details"><summary>展开逐轮演算</summary><div id="battle-round-list"></div></details>
+          </details>
+          <details class="battle-inspect"><summary>双方阵容与战力</summary>
+            <p id="battle-report-terrain"></p><div id="battle-rosters" class="battle-rosters"></div>
+            <div id="battle-stat-grid" class="battle-stat-grid"></div><div id="battle-voisinage-overview"></div>
+          </details>
+          <details class="battle-inspect battle-round-details"><summary>逐轮演算</summary><div id="battle-round-list"></div></details>
         </article>
         <article id="action-card" class="paper action-card">
           <button type="button" data-tutorial-open class="tutorial-entry" aria-haspopup="dialog" aria-controls="tutorial-dialog"><svg class="tutorial-entry-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v15M3 4h5a4 4 0 0 1 4 2 4 4 0 0 1 4-2h5v14h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3z"/><path d="M6 8h3m-3 4h3m6-4h3m-3 4h3"/></svg><span class="tutorial-entry-copy"><strong>新手教程</strong><small class="tutorial-entry-status">跟随引导，亲手问道</small></span></button>
@@ -749,9 +756,9 @@
   <script src="/map-atlas.js?v=3-alpha-1"></script>
   <link rel="stylesheet" href="/trial-site-panel.css?v=2120">
   <script src="/trial-site-panel.js?v=2120"></script>
-  <link rel="stylesheet" href="/dungeon-panel.css?v=atlas-1121">
+  <link rel="stylesheet" href="/dungeon-panel.css?v=expedition-2">
   <script src="/dungeon-atlas.js?v=atlas-1121"></script>
-  <script src="/dungeon-panel.js?v=atlas-1121"></script>
+  <script src="/dungeon-panel.js?v=expedition-2"></script>
   <link rel="stylesheet" href="/panel-pages.css?v=355">
   <script src="/panel-pages.js?v=360"></script>
   <script src="/strategic-war-panel.js?v=1"></script>
@@ -776,7 +783,7 @@
   <script src="/tribulation-effects.js?v=fx3"></script>
   <script src="/event-scenes.js?v=fx3"></script>
   <script src="/combat-beasts.js?v=beasts1-monster-418"></script>
-  <link rel="stylesheet" href="/combat-mechanisms.css?v=c1">
+  <link rel="stylesheet" href="/combat-mechanisms.css?v=c2">
   <script src="/combat-mechanisms.js?v=copy-1118"></script>
   <script src="/combat-replay.js?v=c3"></script>
   <link rel="stylesheet" href="/npc-development.css?v=1">
@@ -797,7 +804,7 @@
   <script src="/westward-development.js?v=370"></script>
   <script src="/building-affairs.js?v=governorship-1"></script>
   <script src="/immortal-navigation.js?v=361"></script>
-  <script src="/app.js?v=loot-1118"></script>
+  <script src="/app.js?v=report-layout-2"></script>
   <script src="/save-transfer.js?v=1.45.0"></script>
 </body>
 </html>

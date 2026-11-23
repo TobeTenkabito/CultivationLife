@@ -89,7 +89,7 @@ def project(game,row,node):
         target=config()['city_development'][row['level']-1] if row['level']<3 else 0
         body=(f"此城为{projects.USES[row['subtype']]}、{projects.POPULATIONS[row.get('population','mixed')]}，"
               f"现为{row['level']}级，治理进度{row.get('development',0)}/{target}。\n\n")
-        body+=('每个真实年份可办理一次街坊、仓栈与公共设施的治理，完成后进度增加一。' if purpose=='govern' else '扩建只提升一级，需要完成本级治理并支付下一级全部工料。')
+        body+=('每年可整治街坊、仓栈与公共设施一次，每办成一次，治理进度加一。' if purpose=='govern' else '扩建只提升一级，需要完成本级治理并支付下一级全部工料。')
         body+='\n\n'+projects.bill_text(bill)
         choices=[option('city:commit:'+bill['token'],'确认办理' if purpose=='govern' else '确认扩建',bill['reason']),option('back','返回城中')]
     else:return None

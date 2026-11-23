@@ -8,6 +8,6 @@
   "enabled": true,
   "load_order": 130,
   "requires": [],
-  "description": "完整儒修循环：圣人教化、内圣外王，以及人界结丹与灵界炼虚两条六幕专属剧情链。 通用物品与功法定义归入本体，保留专属功能和剧情。",
+  "description": "行圣人教化之道，修内圣外王之学。人界结丹、灵界炼虚各有六幕儒门旧事，等你亲历。",
   "visual_registry": "visual/registry.json"
 }

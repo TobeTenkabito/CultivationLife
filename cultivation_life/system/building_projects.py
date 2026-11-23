@@ -65,7 +65,7 @@ def quote(game, purpose, row=None, *, payer='player', stock=None, actor=None):
         if purpose=='govern':
             used=game.building_state.get('city_usage',{}).get(row['id'],{})
             if row['level']>=3:reason='城市已达三级'
-            elif used.get('govern_year')==game.player.age:reason='本城本年已经办理治理，须在城外度过真实年份'
+            elif used.get('govern_year')==game.player.age:reason='本城今年已办过治理，须在城外度过一年再来'
             elif row.get('development',0)>=config()['city_development'][row['level']-1]:reason='治理进度已足，请先扩建'
     elif row.get('subtype')=='public_office':
         spec=row['construction'];rank=grade(world)

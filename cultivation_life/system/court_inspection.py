@@ -158,7 +158,7 @@ def command(game,action,target,*,occupied):
         if extra:
             transfer_value(game,COURT,c['wallet'],extra,'失效复核交接后的实际预算补足');c['budget']+=extra;c['funded']+=extra
         c['reviewer']=value;c['work']=dict(key='review',location=HOME,years=5,progress=0)
-        c['stage']='review';return '独立天官已接卷，须共同办理五年复核；该原人物暂被占用。'
+        c['stage']='review';return '天官已接下案卷，将与你一道复核五年。在此期间，这位天官不能另领差事。'
     if action=='case_restitution':
         if blocked:=restitution_reason(game,c):raise ValueError(blocked)
         row=source(game,c);market=local_market(game)
@@ -195,7 +195,7 @@ def public(game,maps):
         row['place_name']=maps.location('celestial',row['location'])['name'] if maps else '原案发地点'
         row['restitution_reason']=restitution_reason(game,original)
         reviewer=find_person(game,original.get('reviewer')) if original.get('reviewer') else None
-        row['reviewer_name']=reviewer.name if reviewer else '尚未指定／原人物已失效'
+        row['reviewer_name']=reviewer.name if reviewer else '暂无复核人'
         row['reviewer_reason']=reviewer_reason(game,original,find_person(game,original.get('reviewer')),assigned=True) if original.get('reviewer') and game.player.location_id==HOME else ''
         row['verdicts']=[dict(id=k,name=v,reason=verdict_reason(game,original,k)) for k,v in VERDICTS.items()]
         row['reviewers']=[dict(id=k,name=n.name,reason=reviewer_reason(game,original,n))

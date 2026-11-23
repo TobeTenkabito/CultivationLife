@@ -60,7 +60,7 @@ def project(game):
             cast_reason = '缺少对应属性且达到境界要求的内丹或元神'
         rows.append(dict(art, builtin=False, category='补灵', affinity_name=AFFINITIES[art['affinity']],
                          acquired=bool(progress or has_item(p, art['manual_id'])),
-                         acquisition_hint=f"寻找《{art['name']}玉简》：各界普通交易、黑市与游历所得均可能出现。取得后消耗真实年份与灵石修习。",
+                         acquisition_hint=f"寻找《{art['name']}玉简》：各界普通交易、黑市与游历所得均可能出现。取得后须花费灵石，并留出时日修习。",
                          has_manual=has_item(p, art['manual_id']), learned=learned, study_progress=studied,
                          study_required=required, casting=copy.deepcopy(cast), materials=sources,
                          owned=art['affinity'] in owned, study_reason=study_reason, casting_reason=cast_reason,

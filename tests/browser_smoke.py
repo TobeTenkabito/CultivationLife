@@ -279,7 +279,7 @@ def main() -> None:
                 assert page.locator("#battle-stat-grid > div").count() == 6
                 assert page.locator("#battle-round-progress > span").count() == 1
                 assert "第 1 轮" in page.locator("#battle-round-progress > span").first.get_attribute("title")
-                assert "开战后由预案执行" in page.locator("#battle-report-summary").text_content()
+                assert "开战后由预案执行" in page.locator("#battle-report-terrain").text_content()
                 assert page.locator("#battle-rosters section").count() == 2
                 assert page.locator("#battle-rosters section span").count() >= 2
                 assert page.locator("#battle-report-card").evaluate("node => getComputedStyle(node).position") == "fixed"

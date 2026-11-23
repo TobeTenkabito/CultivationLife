@@ -67,7 +67,7 @@ def command(game,maps,action,target):
         if not report or report['stage']!='reported': raise ValueError('来报已经变化，请重新选择')
         if blocked:=access(game,report,recovery=action=='earth_case_decline'): raise ValueError(blocked)
         if occupied_reason(game): raise ValueError(occupied_reason(game))
-        if action=='earth_case_decline': return close(game,report,'未许诺前婉拒；不扣信任，不改变原对象及道路事实。')
+        if action=='earth_case_decline': return close(game,report,'你在许诺前婉拒此事，当地人对你的信任如故。')
         if game.player.age>=report['until']: raise ValueError('本期来报已过期，请重新登记新一期')
         if blocked:=stale_reason(game,report): raise ValueError(blocked)
         report.update(stage='investigate',progress=0,years=5,started=game.player.age)
@@ -85,12 +85,12 @@ def command(game,maps,action,target):
         if case['stage']!='investigate' or case['progress']<5: raise ValueError('须完成5年实际调查')
         if blocked:=stale_reason(game,case): raise ValueError(blocked)
         case['stage']='decide'
-        return '原对象与权限已经核验。请比较实际成本、执行年份与地方后果，选定后才构成承诺。'
+        return '人选与办事权限已核实。先看各案所费的工料、年数与对当地的影响，选定便算应下了。'
     if action not in {'earth_case_plan','earth_case_resolve'}: raise ValueError('未知争议操作')
     parts=target.split(':')
     if len(parts)!=2: raise ValueError('请重新取得当前方案报价')
     plan=quote(game,case,parts[0])
-    if parts[1]!=plan['token']: raise ValueError('原对象或方案报价已经变化，请刷新后重试')
+    if parts[1]!=plan['token']: raise ValueError('案情或报价已经变化，请刷新后重试')
     if plan['reason']: raise ValueError(plan['reason'])
     if action=='earth_case_plan':
         if case['stage']!='decide': raise ValueError('须完成调查并核对证据后才能许诺')

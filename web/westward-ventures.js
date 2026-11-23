@@ -65,7 +65,7 @@
       const grid=e('div',null,'gather-grid');s.append(grid);
       for(const [key,title] of Object.entries({training:'公共修持预算',repair:'地方修缮优先序',procurement:'公开采购规则',service:'地仙神位与服务协议'})){
         if(r&&r.offer.policy!==key)continue;
-        const c=card(grid,title),rows=d.offers.filter(o=>o.policy===key);if(!rows.length){c.append(e('p','此地暂无符合条件的实际对象。前往有原人物、公共遗址、相邻缺货市场或自有土地庙的地点查看。','muted'));continue;}
+        const c=card(grid,title),rows=d.offers.filter(o=>o.policy===key);if(!rows.length){c.append(e('p','此地眼下无事可办。可去拜访当地修士、踏勘公共遗址，也可留意邻近缺货的坊市，或回自己的土地庙看看。','muted'));continue;}
         const select=e('select');select.setAttribute('aria-label',title+'目标');rows.forEach((o,i)=>{const op=e('option',o.name);op.value=i;select.append(op);});
         const desc=e('p'),price=e('p'),why=e('small',null,'muted'),submit=b(r?'修改并重新听议':'登记提案',r?'revise':'propose');
         const update=()=>{const o=rows[Number(select.value)];desc.textContent=o.benefit+' · 交付地：'+o.place;price.textContent=`预算 ${f(o.budget)}灵石 · 现场${o.years}年 + 复核5年`;why.textContent=d.authority||o.reason||(o.used&&!r?'本期已提案':'');submit.disabled=!!why.textContent;submit.dataset.courtUnavailable=submit.disabled?'1':'0';submit.onclick=()=>dispatch({action:r?'council_revise':'council_propose',target_id:d.token+'|'+o.token});};

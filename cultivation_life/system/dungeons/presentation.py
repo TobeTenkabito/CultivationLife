@@ -42,11 +42,11 @@ def person(game,site,role):
     # Behaviour observations are deliberately not the solver's intention/desire.
     # A bar without sufficient evidence is unknown, never an exact hidden score.
     bars=[dict(label='境界差距',value=gap,min=min(-36,gap),max=max(36,gap),display=f'{gap:+d}阶',source='接触时所显修为'),
-          dict(label='战力对照',value=round(ratio*100),min=0,max=max(200,round(ratio*100)),display=f'约为你的 {ratio:.1f} 倍',source='外显气息估计'),
+          dict(label='战力对照',value=round(ratio*100),min=0,max=max(200,round(ratio*100)),display=f'约为你的 {ratio:.1f} 倍',source='从外露的气息推算'),
           dict(label='夺宝意向',value=observed.get('desire'),min=0,max=100,
-               display='待观察' if 'desire' not in observed else f"约 {observed['desire']} / 100",source='对遗物的关注表现'),
+               display='待观察' if 'desire' not in observed else f"约 {observed['desire']} / 100",source='一路上格外留意的宝物'),
           dict(label='准备迹象',value=observed.get('preparation'),min=0,max=100,
-               display='未探明' if 'preparation' not in observed else f"约 {observed['preparation']} / 100",source='沿途符记、探路与守望表现'),
+               display='未探明' if 'preparation' not in observed else f"约 {observed['preparation']} / 100",source='沿途留下的符记、探路与守夜时的举动'),
           dict(label='合作表现',value=observed.get('trust'),min=0,max=100,
                display='未探明' if 'trust' not in observed else f"约 {observed['trust']} / 100",source='同行中的警戒交接与相互照应'),
           dict(label='履约记录',value=10 if role['id'] in site['agreements'] else 0,min=0,max=100,

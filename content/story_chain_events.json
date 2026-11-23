@@ -62,7 +62,7 @@
       "choices":[{"id":"subdue","text":"镇压器灵，将古尺重新钉入界缝（HP 4,000；战力 73,000）","effects":[{"type":"attribute_check","checks":[{"stat":"hp_ratio","op":"gte","value":0.70},{"stat":"hp","op":"gte","value":4000},{"stat":"combat_ratio","op":"gte","value":1.15},{"stat":"combat_power","op":"gte","value":73000}],"failure_reason":"镇虚尺引动整座古台之力，你被界压碾得神形俱灭","success_text":"器灵被你压服，古尺重新归位，暴涨的天裂终于开始闭合。"},{"type":"set_flag","flag":"kunwu_ruler_subdued","if_result":["check_success"]},{"type":"queue_event","event_id":"EVT_KUNWU_005","if_result":["check_success"]}]}]
     },
     {
-      "id":"EVT_KUNWU_005","version":1,"title":"归墟潮起","body":"天裂闭合之际，补天台也开始沉回地底。镇虚尺器灵为偿还你的救命之恩，分出一具尺身随你离去，并将历代修补界壁时测得的上界坐标印入其中。真正的危机，是在整座古台被归墟乱流吞没前活着离开。",
+      "id":"EVT_KUNWU_005","version":1,"title":"归墟潮起","body":"天裂闭合之际，补天台也开始沉回地底。镇虚尺器灵为偿还你的救命之恩，分出一具尺身随你离去，并将历代修补界壁时测得的上界坐标印入其中。脚下传来碎裂声，乱流已卷走半截台阶。得趁还有落脚处赶紧离开。",
       "tags":["realm:nascent","story_chain","kunwu","manual_only"],"weight":0,
       "conditions":{"has_flag":"kunwu_ruler_subdued"},
       "choices":[{"id":"escape","text":"护住镇虚尺，冲出归墟乱流（MP 4,000；战力 73,000）","effects":[{"type":"attribute_check","checks":[{"stat":"mp_ratio","op":"gte","value":0.80},{"stat":"mp","op":"gte","value":4000},{"stat":"combat_ratio","op":"gte","value":1.30},{"stat":"combat_power","op":"gte","value":73000}],"failure_reason":"归墟乱流撕裂护体灵光，你与补天古台一同沉入天裂","success_text":"你在古台彻底下沉前冲出裂谷，并从镇虚尺中得到一处灵界节点。"},{"type":"add_item","item_id":"eight_spirit_ruler","if_result":["check_success"]},{"type":"add_item","item_id":"spirit_node_info","if_result":["check_success"]},{"type":"set_flag","flag":"kunwu_completed","if_result":["check_success"],"text":"天裂重新闭合，镇虚尺自此归你所有。"}]}]

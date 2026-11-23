@@ -127,7 +127,7 @@ def command(deps,game,action,target,amount):
             summary='原协作者接任；每实际年100灵石，缺款或失联停止合作经营。'
         elif action=='garden_release':
             l['steward']=None;row.update(entrusted=False,enabled=False,auto_buy=False,auto_sell=False)
-            summary='已交接合作经营，原人物解除占用；已付批次保留。'
+            summary='经营交接已毕，执事可另领差事。已付的批次仍然有效。'
         elif action=='garden_order':
             from .westward_contracts import current
             if current(game) and current(game).get('source_kind')=='estate':raise ValueError('已有长期供货，不能为同一批产能重复签约')
@@ -179,7 +179,7 @@ def public(game):
     if l:
         if l.get('order'):l['order']['item_name']=ITEM_CATALOG[l['order']['item']].name
         steward=find_person(game,l.get('steward')) if l.get('steward') else None
-        l['steward_name']=steward.name if steward else '原人物已失效'
+        l['steward_name']=steward.name if steward else '查无此人'
     _,repair=repair_offer(game) if l and l['operator']==game.id else (None,None)
     return dict(contract_reason='请先结清长期供货合同' if record(game).get('contracts',{}).get('active',{}).get('source_kind')=='estate' else '',operator_is_player=bool(l and l['operator']==game.id),tender=copy.deepcopy(tender_state(game)) if local else None,bids=[{k:b[k] for k in ('id','name','price','score')} for b in bids(game)] if local else [],enabled=enabled(),local=local,building_id='estate:'+identity() if local else '',token=token(game) if local else '',reason=reason(game),recovery_reason=reason(game,True),
         occupied=bool(r and r['owner_kind'] not in {'background','yaochi'}),lease=copy.deepcopy(l),repair=repair,

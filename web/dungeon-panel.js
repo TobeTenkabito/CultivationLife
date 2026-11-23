@@ -2,7 +2,7 @@
 (() => {
   let game, send, expandedPerson = null, busy = () => false, activeTab='journal', workspaceKey='';
   let atlasRevision='',atlasSelection=null,atlasObserver=null;
-  const compactQuery=window.matchMedia('(max-width:1099px), (max-height:540px)');
+  const compactQuery=window.matchMedia('(max-width:959px), (max-height:540px)');
   const qualities={'普通':['ordinary','谨慎探行'],'稀有':['rare','险中藏珍'],'史诗':['epic','群雄逐宝'],'传奇':['legendary','凶险争夺']};
   const el = (tag,text,cls='') => {const n=document.createElement(tag);n.className=cls;if(text!==undefined)n.textContent=text;return n;};
   function button(label,action,payload={},enabled=true) {
@@ -87,21 +87,25 @@
   function render() {
     atlasObserver?.disconnect();
     const view=game.dungeons,root=document.querySelector('#dungeon-panel');root.replaceChildren();
-    if(!view)return;
-    const session=view.session;
     const shell=document.querySelector('#dungeon-card');
+    const titleBar=shell.querySelector('.section-title');
+    titleBar.querySelector('.dungeon-hero')?.remove();
+    if(!view){shell.classList.remove('dungeon-active');return;}
+    const session=view.session;
     const key=game.id+':'+(session?.id||'lobby');
     if(workspaceKey!==key){workspaceKey=key;activeTab=session?.map?'map':'journal';expandedPerson=null;}
     shell.classList.toggle('dungeon-active',!!session);
     shell.dataset.quality=qualities[session?.quality]?.[0]||'neutral';
     let workspace,teamPane,journalPane;
     if(!session){
-      const intro=box('寻访当地隐境');intro.append(el('p',`当地已探寻 ${view.used} / ${view.limit} 处。入境不推进岁月，撤离后须间隔一个完整行动单位。`));
+      const intro=box('寻访当地隐境');intro.classList.add('dungeon-discovery');
+      intro.append(el('p',`已探寻 ${view.used} / ${view.limit} 处 · 入境不耗岁月，撤离后须间隔一个完整行动单位。`));
       if(view.reason)intro.append(el('p',view.reason,'dungeon-warning'));
       if(view.ready_in)intro.append(el('p',`再次入境还需 ${view.ready_in} 年。`));
       intro.append(button('探寻一处入口','discover',{world:view.world,location_id:view.location_id,slot:view.used},view.available&&view.used<view.limit));root.append(intro);
       const list=el('div',undefined,'dungeon-grid');
-      view.sites.forEach(s=>{const b=box(s.name);b.append(el('p',s.quality+' · '+({open:'入口尚在',active:'正在探索',closed:'入口已封'}[s.status])));
+      const closed=view.sites.filter(site=>site.status==='closed');
+      view.sites.filter(site=>site.status!=='closed').forEach(s=>{const b=box(s.name);b.append(el('p',s.quality+' · '+({open:'入口尚在',active:'正在探索',closed:'入口已封'}[s.status])));
         b.append(button('进入副本','enter',{dungeon_id:s.id,revision:s.revision},s.can_enter));
         if(s.status==='open'&&view.invitees.length){
           const select=el('select');select.setAttribute('aria-label','选择当地同行修士');
@@ -110,21 +114,32 @@
           invite.onclick=()=>send(`/api/games/${game.id}/dungeon-action`,{action:'invite',dungeon_id:s.id,revision:s.revision,actor_id:select.value});
           const invitation=el('div',undefined,'dungeon-invite');invitation.append(select,invite);b.append(invitation);
         }
-        list.append(b);});root.append(list);
+        list.append(b);});
+      if(list.childElementCount)root.append(list);
+      if(closed.length){
+        const past=el('details',undefined,'dungeon-closed-sites');
+        past.append(el('summary',`已封入口 · ${closed.length} 处`));
+        const names=el('ul');
+        closed.forEach(site=>names.append(el('li',site.name+' · '+site.quality)));
+        past.append(names);root.append(past);
+      }
     }else{
       const token={dungeon_id:session.id,revision:session.revision},hero=el('header',undefined,'dungeon-hero');
       const identity=el('div',undefined,'dungeon-identity');
       identity.append(el('small',`${session.quality} · ${qualities[session.quality]?.[1]||session.place}`,'dungeon-quality'),el('h2',session.name));
-      hero.append(identity,el('p',`${session.place}　·　同行 ${session.party_count} / ${session.team_limit}　·　机缘 ${session.acquired} 份`));root.append(hero);
+      hero.append(identity,el('p',`${session.place}　·　同行 ${session.party_count} / ${session.team_limit}　·　机缘 ${session.acquired} 份`));titleBar.prepend(hero);
       const grid=el('div',undefined,'dungeon-grid'),left=el('div',undefined,'dungeon-column'),right=el('div',undefined,'dungeon-column');
       workspace=grid;grid.classList.add('dungeon-workspace');
       const scene=box('眼前局势'),reading=el('div',undefined,'dungeon-scene-reading');scene.classList.add('dungeon-scene');reading.append(el('p',session.text,'dungeon-narrative'));scene.append(reading);const actions=el('div',undefined,'dungeon-actions');
       session.choices.forEach(c=>actions.append(button(c.label,'choose',{...token,choice:c.id},c.enabled)));
-      const retreat=el('div',undefined,'dungeon-retreat');retreat.append(button('收拢所得，撤离','exit',token,session.can_exit));scene.append(actions,retreat);left.append(scene);
+      const heading=el('div',undefined,'dungeon-scene-heading'),retreat=el('div',undefined,'dungeon-retreat');
+      retreat.append(button('撤离副本','exit',token,session.can_exit));
+      heading.append(scene.querySelector('h3'),retreat);
+      scene.prepend(heading);scene.append(actions);left.append(scene);
       const team=box('同行名册');teamPane=team;team.classList.add('dungeon-team');
       if(session.people.length){
         const compare=el('details',undefined,'dungeon-compare'),a=el('select'),b=el('select'),values=el('div');compare.append(el('summary','双方交锋对照'));
-        compare.open=true;
+
         a.setAttribute('aria-label','对照一方');b.setAttribute('aria-label','对照另一方');
         const choices=[{id:'player',name:'你',comparison:session.player_comparison},...session.people,
           ...session.people.filter(p=>p.squad).map(p=>({id:'squad:'+p.id,name:p.name+'一方（已见 '+p.squad.count+' 人）',comparison:p.squad}))];
@@ -133,7 +148,7 @@
           const target=y.id==='player'?x:y,desire=target.bars?.find(m=>m.label.startsWith('夺宝意向'));
           if(desire)values.append(metric({...desire,label:target.name+' · '+desire.label}));
         }
-        a.onchange=b.onchange=drawComparison;compare.append(a,b,values);drawComparison();reading.append(compare);
+        a.onchange=b.onchange=drawComparison;compare.append(a,b,values);drawComparison();team.append(compare);
       }
       team.append(metric({label:'己方地势准备',value:session.preparation,min:0,max:100,display:`${session.preparation} / 100`,source:'已完成勘察与已履行的向导交易'}));
       session.people.forEach(p=>{const card=el('details',undefined,'dungeon-person');const body=el('div',undefined,'dungeon-person-body');card.open=expandedPerson===p.id;card.ontoggle=()=>{if(card.open){expandedPerson=p.id;team.querySelectorAll('.dungeon-person').forEach(other=>{if(other!==card)other.open=false;});}else if(expandedPerson===p.id)expandedPerson=null;};card.dataset.personId=p.id;
@@ -165,12 +180,13 @@
       const tabs=el('nav',undefined,'dungeon-view-tabs');tabs.setAttribute('aria-label','探境资料');
       const panels={team:teamPane,journal:journalPane,manuals};
       if(session.map){panels.map=floorMap(session,{dungeon_id:session.id,revision:session.revision});workspace.append(panels.map);}
-      if(session.map?.chasing)activeTab='map';
+      if(session.map?.chasing && compactQuery.matches)activeTab='map';
       if(activeTab==='map'&&!session.map)activeTab='journal';
       const teamTab=Boolean(session.map)||compactQuery.matches;
-      const selected=activeTab==='team'&&!teamTab?'journal':activeTab;
-      function select(tab){activeTab=tab;workspace.dataset.view=tab;Object.entries(panels).forEach(([id,pane])=>{pane.hidden=id!==tab&&(id!=='team'||teamTab);});tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.dungeonView===tab)));}
-      [...(session.map?[['map','舆图']]:[]),['team',`队伍 ${session.party_count}/${session.team_limit}`],['journal',`见闻 ${session.logs.length}`],['manuals',`传承 ${view.manuals.length}`]].forEach(([id,label])=>{
+      const fixedMap=Boolean(session.map)&&!compactQuery.matches;
+      const selected=(activeTab==='team'&&!teamTab)||(activeTab==='map'&&fixedMap)?'journal':activeTab;
+      function select(tab){activeTab=tab;workspace.dataset.view=tab;Object.entries(panels).forEach(([id,pane])=>{pane.hidden=id!==tab&&(id!=='team'||teamTab)&&(id!=='map'||!fixedMap);});tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.dungeonView===tab)));}
+      [...(session.map&&!fixedMap?[['map','舆图']]:[]),['team',`队伍 ${session.party_count}/${session.team_limit}`],['journal',`见闻 ${session.logs.length}`],['manuals',`传承 ${view.manuals.length}`]].forEach(([id,label])=>{
         const tab=el('button',label,'dungeon-button dungeon-button--quiet');tab.type='button';tab.dataset.dungeonView=id;
         panels[id].id='dungeon-view-'+id;tab.setAttribute('aria-controls',panels[id].id);tab.onclick=()=>select(id);tabs.append(tab);
       });

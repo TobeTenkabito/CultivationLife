@@ -45,7 +45,7 @@ def prepare_ghost_reincarnation(deps: GhostReincarnationDependencies, game_id: s
         f"未用往生 {player.ghost_wangsheng_energy} 点将归零；魂蚀率保持 "
         f"{player.ghost_soul_erosion_rate_pp:.4f}%，既有魂伤不会恢复；"
         f"神识等级与已有神识经验将重置为初始的 1 级、0 经验；"
-        f"本体成长最高水位仍为{highwater}，重新超过此前修为前不会再次获得境界来源的本源成长。"
+        f"本体曾修至{highwater}。来世越过这一层后，突破才能再养壮魂基。"
         f"所有突破的最终有效概率仍封顶 98%。"
     )
     game.pending_event = event

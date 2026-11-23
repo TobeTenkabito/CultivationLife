@@ -84,6 +84,15 @@ def main():
                             page.evaluate('async id=>loadGame(id)', identity)
                             navigation_locator(page, '#battle-report-open').click()
                             page.wait_for_function('CombatReplay.diagnostics().active&&!document.querySelector("[data-combat-replay]").disabled')
+                            assert not page.locator('.battle-inspect[open]').count()
+                            if kind == 'ordinary':
+                                for width,height in [(1440,900),(390,844)]:
+                                    page.set_viewport_size(dict(width=width,height=height))
+                                    card=page.locator('#battle-report-card')
+                                    assert card.evaluate('n=>n.scrollWidth<=n.clientWidth+1')
+                                    card.screenshot(path=str(output/f'overview-{palette}-{width}.png'))
+                                page.set_viewport_size(dict(width=1440,height=1100))
+                            page.locator('.battle-arts > summary').click()
                             original = page.evaluate('JSON.stringify(game)')
                             saved = copy.deepcopy(engine.store.load(identity).to_dict())
                             calls = []
@@ -105,7 +114,9 @@ def main():
                                 page.locator('[data-combat-scrub]').fill(f"{min(plan['duration'],plan['frames'][plan['paidIndex']]['settled']+.02):.2f}")
                                 assert '运功消耗' in page.locator('[data-mechanism-timeline]').inner_text(), page.locator('#battle-mechanisms').inner_text()
                                 assert all(word not in page.locator('#battle-mechanisms').inner_text() for word in ('兑现','付费','回执'))
-                                page.locator('.combat-technique[data-book]').first.click()
+                                first_book=page.locator('.combat-technique[data-book]').first
+                                if first_book.get_attribute('aria-pressed')!='true':
+                                    first_book.click()
                                 assert page.locator('.mechanism-lane:not(.observed-lane):not(.domain-lane)').count() == 1
                                 page.locator('.combat-technique[data-book]').first.click()
                             for phase in plan['domains']:
@@ -158,15 +169,18 @@ def main():
                     page.locator('[data-combat-scrub]').focus()
                     page.keyboard.press('End')
                     assert page.evaluate('CombatReplay.diagnostics().time===CombatReplay.diagnostics().duration')
+                    page.locator('.battle-arts > summary').click()
                     assert page.locator('[data-mechanism-phase]').inner_text() == '回放结束'
                     page.evaluate('''()=>{const r=structuredClone(game.last_combat_report);delete r.visual;renderBattleReport(r);}''')
                     assert page.locator('#battle-animation').is_hidden()
+                    page.locator('.battle-arts > summary').click()
                     assert page.locator('#battle-mechanisms').is_visible()
                     paid = page.evaluate("game.last_combat_report.rounds.findIndex(r=>r.voisinage.technique_effects.events.some(e=>e.owner==='player'&&e.event==='paid'))")
                     page.locator('[aria-label="机制记录轮次"]').select_option(str(paid))
                     assert '运功消耗' in page.locator('[data-mechanism-timeline]').inner_text()
                     page.evaluate('''()=>{const r=structuredClone(game.last_combat_report);delete r.visual;
                         for(const row of r.rounds)delete row.voisinage.technique_effects;renderBattleReport(r);}''')
+                    page.locator('.battle-arts > summary').click()
                     assert '未记录七部功法' in page.locator('#battle-mechanisms').inner_text()
                     assert not errors, errors
                     browser.close()

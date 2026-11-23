@@ -14,7 +14,7 @@ def work_reason(game):
     job=next((j for j in active(game) if review and j['id']==review['job']),None) if review else personal(game)
     if not job:return '没有本人正在办理或复核的公务'
     if game.player.age>=job['deadline']:return '公务已逾期，请办理交接'
-    if game.player.location_id!=job['location']:return '须亲临'+job['place_name']+'办理；请沿原地图前往'
+    if game.player.location_id!=job['location']:return '须亲临'+job['place_name']+'办理'
     if review:
         if job['phase']!='ready':return '属员尚未完成现场工作'
         npc=find_person(game,job['person'])
@@ -26,7 +26,7 @@ def work_reason(game):
     elif job['kind']=='patrol':
         if not any(h.event_id=='SYS_MAP_TRAVEL' and h.age>=job['started'] and h.result=='arrived'
             and h.state_diff.get('from')==job['origin'] and h.state_diff.get('to')==job['location'] for h in game.history):
-            return '巡检须实际沿原地图走完指定道路，传送不算巡查'
+            return '巡检须沿指定道路逐段走完'
     return ''
 
 def begin_work(game):
@@ -71,7 +71,7 @@ def year_step(game,maps):
         blocked=officer_reason(game,npc,assigned=True)
         if blocked:job['blocked']=blocked;continue
         leg=job.get('leg');expected=leg['origin'] if job['phase'] in {'outbound','homeward'} else job['location']
-        if person_site(game,npc)!=expected:job['blocked']='原人物已离开约定地点，暂停且不移动替身';continue
+        if person_site(game,npc)!=expected:job['blocked']='当事人已离开约定地点，此事暂缓';continue
         job['blocked']=''
         if job['phase'] in {'outbound','homeward'}:
             if maps.travel_plan('celestial',leg['origin'],leg['destination'],npc.realm_index).status!='ok':

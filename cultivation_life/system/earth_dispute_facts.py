@@ -72,7 +72,7 @@ def original(game, case):
 
 def stale_reason(game, case):
     row=original(game,case)
-    if row is None: return '原对象或权限已经失效；可撤回本案，不能代造对象完成'
+    if row is None: return '当事人或办事权限已有变动，可撤回此案'
     if case['kind']=='rebuild' and row['status']!='destroyed': return '原建筑已由其他途径修复，可撤回已消解事项'
     if case['kind']=='guard' and row.get('durability',100)>=100: return '原镇地阵已修复，可撤回已消解事项'
     if case['kind']=='supply' and row['stock']>=row['target']*.5: return '原市场已不缺货，可撤回已消解事项'

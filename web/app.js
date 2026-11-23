@@ -587,7 +587,7 @@ function render(data) {
     const preview = ghost.reincarnation_preview;
     $('#ghost-reincarnation-preview').classList.toggle('hidden', !preview);
     $('#ghost-reincarnation-preview').textContent = preview
-      ? `本次轮回预览：${preview.source} → ${preview.destination}；新增本境第 ${preview.next_imprint_count} 枚印记，${preview.affected_road}突破经验 +${percent(preview.added_bonus)}；往生 ${preview.wangsheng_before} → 0；魂蚀率保持 ${Number(preview.erosion_rate_pp).toFixed(4)}%；魂基 HP ${number(preview.intrinsic_hp_current)}、MP ${number(preview.intrinsic_mp_current)} 均不恢复；本体成长最高水位保持 ${preview.highwater}，重新超过前不再获得重复境界的 Intrinsic HP/MP。`
+      ? `本次轮回预览：${preview.source} → ${preview.destination}；新增本境第 ${preview.next_imprint_count} 枚印记，${preview.affected_road}突破经验 +${percent(preview.added_bonus)}；往生 ${preview.wangsheng_before} → 0；魂蚀率保持 ${Number(preview.erosion_rate_pp).toFixed(4)}%；魂基 HP ${number(preview.intrinsic_hp_current)}、MP ${number(preview.intrinsic_mp_current)} 均不恢复；本体曾修至 ${preview.highwater}，来世超过这一层后，突破才会再增加魂基气血与法力。`
       : '';
     $('#ghost-wangsheng-action').textContent = `往生息蚀 · ${ghost.wangsheng_cost} 点`;
     $('#ghost-wangsheng-action').title = `魂蚀率 -${Number(ghost.wangsheng_reduction_pp || 0).toFixed(4)} 个百分点；不恢复既有魂伤`;
@@ -4189,6 +4189,7 @@ function renderBattleReport(report) {
     return;
   }
   const reportKey = JSON.stringify([game.id, report]);
+  const previousReportKey = battlePlaybackKey;
   const shouldPlay = battlePlaybackKey !== null && battlePlaybackKey !== reportKey;
   battlePlaybackKey = reportKey;
   if (shouldPlay) battleReportOpen = game?.settings?.combat_popup !== false;
@@ -4196,7 +4197,7 @@ function renderBattleReport(report) {
   const objectiveNames = {kill:'击杀', capture:'生擒', repel:'击退', survive:'存活五轮'};
   const resultNames = {killed:'目标击杀', captured:'目标生擒', victory:'目标达成', victory_escape:'敌方逃脱', defeat:'未达目标', defeat_survived:'涅槃生还', dead:'身死', ongoing:'交战未歇，继续迎战', stalemate:'僵持', controlled:'受制', defeat_trapped:'受困'};
   $('#battle-report-title').textContent = report.title || '最近战报';
-  $('#battle-report-grade').textContent = `${report.result_grade || '结算'} · ${resultNames[report.result] || report.result || ''}`;
+  $('#battle-report-grade').textContent = [...new Set([report.result_grade, resultNames[report.result] || report.result].filter(Boolean))].join(' · ') || '结算';
   const natural = report.natural_terrain || report.battlefield_tags?.[0] || '开阔';
   const hasFields = (report.rounds || []).some(row => row.voisinage?.fields?.length || row.voisinage?.animation?.fields?.length);
   const displayMode = !hasFields && (report.rounds || []).some(row => row.ordinary_exchange)
@@ -4207,7 +4208,12 @@ function renderBattleReport(report) {
     report.formation_profile?.name ? `你方阵法 ${report.formation_profile.name}（终局完整度 ${percent(report.formation_integrity_end || 0)}）` : '',
     report.enemy_formation_profile?.name ? `敌方阵法 ${report.enemy_formation_profile.name}（终局完整度 ${percent(report.enemy_formation_integrity_end || 0)}）` : '',
   ].filter(Boolean).join(' · ');
-  $('#battle-report-summary').textContent = `${displayMode} · 目标 ${objectiveNames[report.objective] || report.objective} · 战前判断 ${report.assessment || '未知'} · 共 ${report.total_rounds || report.rounds?.length || 0} 轮 · 自然场地 ${natural} · 人工条件 ${artificial}${formationSummary ? ` · ${formationSummary}` : ''}。${report.total_rounds > report.rounds.length ? '显示最近 72 轮。' : ''}开战后由预案执行。`;
+  if (reportKey !== previousReportKey) {
+    card.querySelectorAll('.battle-inspect').forEach(section => { section.open = false; });
+    card.scrollTop = 0;
+  }
+  $('#battle-report-summary').textContent = `${displayMode} · ${objectiveNames[report.objective] || report.objective} · 共 ${report.total_rounds || report.rounds?.length || 0} 轮`;
+  $('#battle-report-terrain').textContent = `战前判断 ${report.assessment || '未知'} · 地势 ${natural} · 人工条件 ${artificial}${formationSummary ? ' · '+formationSummary : ''}。开战后由预案执行。${report.total_rounds > report.rounds.length ? '战报保留最近 72 轮。' : ''}`;
   const rosters = $('#battle-rosters'); rosters.innerHTML = '';
   [
     ['你方参战', report.player_roster || []],
@@ -4635,7 +4641,7 @@ function violenceButton(kind, person, label) {
   button.onclick = async () => {
     if (busy || button.disabled) return;
     const battle = !['captive', 'concubine'].includes(kind);
-    const warning = battle ? '将进行真实战斗，对方可能逃脱或反杀；关系与队伍也会受到影响。' : '对方将直接死亡，此操作无法撤销。';
+    const warning = battle ? '动手后，对方可能逃走，也可能杀了你。此举还会影响交情和队伍。' : '对方将直接死亡，此操作无法撤销。';
     if (!confirm(`${label}：${person.name}？\n${warning}`)) return;
     await mutate(`/api/games/${game.id}/relationship-violence`, {kind, target_id:person.id});
   };

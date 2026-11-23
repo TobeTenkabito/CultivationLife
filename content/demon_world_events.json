@@ -103,7 +103,7 @@
     },
 
     {
-      "id":"EVT_DEMON_CORPSE_MOON_001","version":1,"title":"尸月照谷","body":"炼尸谷上空升起第二轮月亮。月光所及之处，古尸纷纷离棺，却没有袭击活人，而是列队走向谷底封了三千年的玄棺。阴尸殿急召门人，血狱魔宗也派人来夺传说中的尸王本源。",
+      "id":"EVT_DEMON_CORPSE_MOON_001","version":1,"title":"尸月照谷","body":"炼尸谷上空升起第二轮月亮。月光所及之处，古尸纷纷离棺，从活人身边擦过，列队走向谷底那口封了三千年的玄棺。阴尸殿急召门人，血狱魔宗也派人来夺传说中的尸王本源。",
       "tags":["story_chain","demon_corpse_moon","probability_gate"],"weight":0,"repeat":"once","trigger":{"milestone":"demon_corpse_moon_eligible","base_chance":0.14,"unit_increment":0.03},
       "conditions":{"all":[{"path":"player.realm_index","op":"gte","value":3},{"path":"player.realm_index","op":"lte","value":4}]},
       "choices":[

@@ -39,7 +39,7 @@ def check_workspace(page):
     assert page.locator('.dungeon-scene-reading').bounding_box()['height']>=24,result
     for button in page.locator('.dungeon-actions button,.dungeon-retreat button').all():
         assert button.evaluate('''n=>{const r=n.getBoundingClientRect();return n.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}''')
-    if page.viewport_size['width']>=1100 and page.viewport_size['height']>540:
+    if page.viewport_size['width']>=960 and page.viewport_size['height']>540:
         tab=page.locator('.dungeon-view-tabs [aria-pressed=true]').get_attribute('data-dungeon-view')
         for name in ('scene',{'map':'floor'}.get(tab,tab)):
             assert page.locator('.dungeon-'+name).is_visible()
@@ -304,12 +304,13 @@ def main():
                             assert page.locator('.dungeon-person').count()>0
                             assert page.locator('.dungeon-log').filter(has_text='加入队伍').count()>0
                             assert page.locator('[role=meter]').count()>=5
-                            assert page.locator('.dungeon-compare').evaluate('n=>n.open')
+                            assert not page.locator('.dungeon-compare').evaluate('n=>n.open')
                             assert page.locator('.dungeon-compare .dungeon-metric').count()==3
                             check_workspace(page)
                             panel_view(page,'team')
                             joined=page.evaluate('game.dungeons.session.people.find(p=>p.state==="joined").id')
                             page.locator(f'.dungeon-person[data-person-id="{joined}"] > summary').click()
+                            page.locator('.dungeon-compare > summary').click()
                             page.locator('[aria-label="对照一方"]').select_option(index=1)
                             page.locator('[aria-label="对照另一方"]').select_option('player')
                             panel_view(page,'journal')
@@ -351,9 +352,11 @@ def main():
                                     page.wait_for_timeout(120)
                                     panel_view(page,'journal');check_workspace(page)
                                     if size in ((1366,768),(1280,720)):
-                                        reading=page.locator('.dungeon-scene-reading').bounding_box()
-                                        factors=page.locator('.dungeon-compare').bounding_box()
-                                        assert factors['y']+factors['height']<=reading['y']+reading['height']+2,(size,reading,factors)
+                                        chart=page.locator('.dungeon-floor').bounding_box()
+                                        scene=page.locator('.dungeon-scene').bounding_box()
+                                        journal=page.locator('.dungeon-journal').bounding_box()
+                                        assert chart['x']+chart['width'] <= scene['x']
+                                        assert scene['y']+scene['height'] <= journal['y']
                                     page.screenshot(path=str(output/f'{theme}-{size[0]}x{size[1]}.png'),animations='disabled')
                                     if size==(852,393):
                                         page.locator('.dungeon-actions').evaluate('''n=>{for(const label of ['拆除阵钉（法力 123456）','沿西北方绕行']){const b=n.lastElementChild.cloneNode(true);b.textContent=label;b.classList.add('layout-stress');n.append(b);}}''')

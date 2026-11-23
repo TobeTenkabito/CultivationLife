@@ -8,6 +8,6 @@
   "enabled": true,
   "load_order": 100,
   "requires": [],
-  "description": "配套本体3.5.0：八源血脉、本相铸域、妖躯五蜕独修与真实战斗联动。",
+  "description": "从八源血脉中寻回祖相，以本相铸域，历五蜕淬炼妖躯，在斗法中施展血脉神通。",
   "visual_registry": "visual/registry.json"
 }

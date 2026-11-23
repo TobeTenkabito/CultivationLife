@@ -55,7 +55,7 @@ window.NpcArt = (() => {
     if(!asset)return null;
     [img.width,img.height]=asset.size;
     img.dataset.art=key;img.loading='lazy';img.decoding='async';img.style.visibility='hidden';
-    if(n.restraint){img.classList.add('npc-art-restrained');img.title='受禁控制中 · 保留原人物形象';}
+    if(n.restraint){img.classList.add('npc-art-restrained');img.title='禁制缠身';}
     if(n.visual_variant==='clone'){img.classList.add('npc-art-clone');img.title='分身 · 半透明灵影';}
     img.onload=()=>{img.style.visibility='visible';};
     img.onerror=()=>{img.hidden=true;img.removeAttribute('src');onFailure?.();};
@@ -84,7 +84,7 @@ window.NpcArt = (() => {
     for(const text of [n.title,[n.realm_name,n.path_name,n.race_name,n.gender_name].filter(Boolean).join(' · '),
       n.status,n.relationship,n.affinity==null?'':`好感 ${Number(n.affinity).toFixed(0)}`])if(text)facts.append(el('p',text));
     // These labels come only from the public row; no fresh remote whereabouts are inferred.
-    if(n.world===null||n.perceived_alive===false)facts.append(el('p','依已有记录展示；当前去向与可交往状态以名册为准。','muted'));
+    if(n.world===null||n.perceived_alive===false)facts.append(el('p','此处留的是旧日所见。要寻此人，可去名册查最近的消息。','muted'));
     body.append(facts);dialog.append(head,body);dialog.showModal();
   }
   function avatar(row,person,roster=false){

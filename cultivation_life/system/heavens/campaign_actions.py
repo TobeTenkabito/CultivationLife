@@ -75,7 +75,7 @@ def quote(deps, game, action, target, options):
     if action in {'campaign_relief', 'campaign_release'}:
         unit = settlement_actions.patient(deps, game, row, captive=action == 'campaign_release')
         name = deps.campaign_facts(game, unit)['name']
-        message = f'当面处理原人物{name}：' + ('解除你对其拘禁，保留伤势并准其实际返乡。' if action == 'campaign_release' else '两年救护减轻一重伤势，每人仅有一次。')
+        message = f'你当面处置{name}：' + ('解除你对其拘禁，保留伤势并准其实际返乡。' if action == 'campaign_release' else '两年救护减轻一重伤势，每人仅有一次。')
     elif action in {'campaign_truce', 'campaign_vassal', 'campaign_withdrawal'}:
         message = '仅约束岚疆与双方原部署；双方具名代表依各自委任签署。失去履约条件即终止地方保障，原撤离许可保留。'
     elif action == 'campaign_evacuate':

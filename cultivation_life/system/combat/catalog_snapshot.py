@@ -27,7 +27,7 @@ def restore(runtime,value):
         integer(r['loss_seq'],0,sequence,'已用损耗')
         integer(r['forfeit_round'],0,round_no,'弃攻轮次')
         if type(r['forfeit_pending']) is not bool or type(r['reset']) is not bool:raise ValueError('转换标记无效')
-        for k in ('rotation','completed'):integer(r[k],0,used,'成功兑现次数')
+        for k in ('rotation','completed'):integer(r[k],0,used,'招式奏效次数')
         integer(r['expired'],0,80,'过期计数')
         if r['field'] is not None:raise ValueError('固定功法不能保存外部领域状态')
         if not isinstance(r['receipts'],list) or len(r['receipts'])!=used:raise ValueError('固定功法付款回执缺失')
@@ -41,14 +41,14 @@ def restore(runtime,value):
             finite(receipt['refunded'],0,min(receipt['paid']*.25,cap*.01)+eps,'单次退款')
             finite(receipt['spent'],0,1+1e-9,'单份预算消耗')
             integer(receipt['round'],1,round_no,'付款轮次')
-            if type(receipt['success']) is not bool:raise ValueError('成功兑现标记无效')
+            if type(receipt['success']) is not bool:raise ValueError('招式奏效标记无效')
             totals[0]+=receipt['paid'];totals[1]+=receipt['refunded']
         if any(abs(r[k]-total)>eps*max(1,used) for k,total in zip(('paid','refunded'),totals)):
             raise ValueError('固定功法付款总账不符')
         finite(r['refunded'],0,cap*.02+eps,'整场退款')
         if bool(used)!=bool(r['last_cast']) or used and r['last_cast']!=r['receipts'][-1]['round']:
             raise ValueError('施展次数与轮次不符')
-        if r['completed']!=sum(x['success'] for x in r['receipts']):raise ValueError('成功兑现次数不符')
+        if r['completed']!=sum(x['success'] for x in r['receipts']):raise ValueError('招式奏效次数不符')
         packets=r['packets']
         if not isinstance(packets,list) or len(packets)>16:raise ValueError('固定功法分包过多')
         remaining=[receipt['spent'] for receipt in r['receipts']]
