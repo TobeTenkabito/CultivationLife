@@ -440,10 +440,14 @@ def resolve_pending(deps,game,site,choice):
 def command(deps,game_id,action,payload):
     allowed={'action','dungeon_id','revision','choice','actor_id','mail_id','manual_id','world','location_id','slot'}
     if action=='ward':allowed.add('loadout_id')
+    if action=='ask_location':allowed={'action','actor_id','world','expected_age'}
     if not isinstance(payload,dict) or set(payload)-allowed or payload.get('action',action)!=action:
         raise ValueError('副本仅接受玩家操作，不接受覆盖隐藏参数')
     game=copy.deepcopy(deps.load(game_id));state=game.dungeon_state
-    if action=='read_mail':
+    if action=='ask_location':
+        from ..npc_whereabouts import send_reply
+        send_reply(game, payload.get('actor_id'), payload.get('world'), payload.get('expected_age'))
+    elif action=='read_mail':
         mail=next((m for m in state.get('mail',[]) if m['id']==payload.get('mail_id')),None)
         if mail is None:raise ValueError('来信不存在')
         mail['unread']=False
@@ -482,12 +486,12 @@ def command(deps,game_id,action,payload):
                 carry(game,site,log)
                 offer_invited(game,site)
                 for mail in state['mail']:
-                    if mail['dungeon_id']==site['id']:mail.update(status='accepted',unread=False)
+                    if mail.get('dungeon_id')==site['id']:mail.update(status='accepted',unread=False)
             elif action=='decline_invite':
                 if site['status']!='open':raise ValueError('邀请已失效')
                 site['status']='closed'
                 for mail in state['mail']:
-                    if mail['dungeon_id']==site['id']:mail.update(status='declined',unread=False)
+                    if mail.get('dungeon_id')==site['id']:mail.update(status='declined',unread=False)
             else:
                 if state['active']!=site['id'] or site['status']!='active':raise ValueError('当前未在此副本中')
                 space=site.get('space')

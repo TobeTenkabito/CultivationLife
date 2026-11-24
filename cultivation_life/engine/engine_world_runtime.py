@@ -172,6 +172,13 @@ def _ensure_world_npcs(deps: WorldRuntimeDependencies, game: GameState) -> bool:
             game.world_npcs[npc_id] = npc
             changed = True
         current = game.world_npcs[npc_id]
+        if not current.location_id and current.world == npc.world:
+            from ..system.npc_whereabouts import can_roam, map_entry
+            from ..system.faction_geography import person_site
+            home = map_entry(npc.world, npc.location_id)
+            if home and home.get('min_realm_index', 0) <= current.realm_index and can_roam(game, current) and not person_site(game, current):
+                current.location_id = npc.location_id
+                changed = True
         template_age = int(npc.age)
         recorded_age = game.world_npc_template_ages.get(npc_id)
         if recorded_age is None:

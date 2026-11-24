@@ -192,3 +192,11 @@ button, input[type="button"], input[type="submit"] {
 .bloodline-detail[open]{flex-basis:100%;border-color:var(--gold)}
 .bloodline-detail p{padding:0 12px 12px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.8;color:var(--ink)}
 .bloodline-detail summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.race-council { margin: 12px 0; }
+.race-council h3 { margin: 0 0 6px; font-size: 14px; }
+.race-council .governance-form { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.race-council .governance-form small { flex-basis: 100%; color: var(--muted); }
+.race-council select { max-width: 100%; }
+.race-council select[hidden] { display: none; }
+.race-council details { margin-top: 7px; font-size: 12px; }
+.race-council summary, details.race-factions summary { cursor: pointer; }

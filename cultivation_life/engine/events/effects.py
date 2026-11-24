@@ -579,7 +579,8 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         if FACTION_DEFINITIONS[faction_id].get("world", "human") != player.world:
             return "wrong_world", "这座宗门并不位于你当前所在的界面。"
         player.faction_id = faction_id
-        player.allegiance_race = FACTION_DEFINITIONS[faction_id].get("allegiance_race")
+        sect = game.sects.get(faction_id)
+        player.allegiance_race = sect.allegiance_race if sect else FACTION_DEFINITIONS[faction_id].get("allegiance_race")
         player.faction_join_age = player.age
         player.faction_contribution = 0
         return "faction_joined", f"你正式拜入{FACTION_DEFINITIONS[faction_id]['name']}，自此共享宗门福祸。"

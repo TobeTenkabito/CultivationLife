@@ -1814,6 +1814,7 @@ function paintFaction(faction) {
   const rewards = $('#faction-rewards'); const roster = $('#faction-roster'); const dispatch = $('#faction-dispatch');
   rewards.classList.toggle('hidden', !faction.member); roster.classList.toggle('hidden', !faction.member);
   dispatch.classList.toggle('hidden', !faction.member || !faction.can_dispatch);
+  RaceCouncil.directory(summary, game.race_system, faction.member);
   if (!faction.member) {
     $('#faction-title').textContent = `${faction.world_name}宗门`; $('#faction-role').textContent = faction.system_available ? '尚未入门' : '暂未开放';
     $('#faction-description').textContent = faction.system_available
@@ -2376,7 +2377,7 @@ function renderRaceSystem(system) {
 function paintRaceSystem(system) {
   $('#race-world-label').textContent = `${system.world_name || '上界'}族群`;
   $('#race-description').textContent = system.has_diplomatic_voice
-    ? `你当前属于${system.player_race_name}，并已拥有大乘议席；可对任一异族提出宣战、结盟、停战、断盟或依附决议。`
+    ? `你在${system.player_race_name}议中有一席。选本族可召集诸宗会商，选别族可议两族盟约。`
     : `你当前属于${system.player_race_name}。族群外交会影响遭遇、截杀与盟友因果；大乘后可取得一人一票的议席。`;
   const races = $('#race-list'); races.innerHTML = '';
   const raceEntries = Object.values(system.races);
@@ -2395,7 +2396,11 @@ function paintRaceSystem(system) {
     factions.innerHTML = '<h3>支持该族的宗门</h3>';
     (race.supported_factions || []).forEach(faction => {
       const row = document.createElement('p');
-      row.innerHTML = htmlText`<b>${faction.name}${faction.active ? '' : '（预设）'}</b><span>长老：${(faction.elders || []).join('、') || '尚未推举'}</span>`;
+      const elders = (faction.elders || []).join('、');
+      const detail = elders ? `长老 · ${elders}` : faction.active ? '长老之位暂缺' : '门人鲜少在外行走';
+      const seats = race.council?.expires > game.player.age && (!faction.kind || faction.kind === 'sect')
+        ? ` · 余${faction.places}荐额` : '';
+      row.innerHTML = htmlText`<b>${faction.name}</b><span>${detail}${seats}${faction.grievance ? ' · 分席有隙' : ''}</span>`;
       factions.appendChild(row);
     });
     const events = document.createElement('div'); events.className = 'race-events';
@@ -2404,7 +2409,9 @@ function paintRaceSystem(system) {
     (race.recent_events || []).forEach(event => {
       const row = document.createElement('p'); row.innerHTML = htmlText`<b>${timelineText(event.age)}</b><span>${event.summary}</span>`; events.appendChild(row);
     });
-    detail.append(heading, factions, relations, events);
+    detail.append(heading, factions);
+    RaceCouncil.meeting(detail, system, race, game, payload => mutate(`/api/games/${game.id}/race-council`, payload));
+    detail.append(relations, events);
     if (system.has_diplomatic_voice && race.id !== system.player_race) {
       const ownRelation = (race.relations || []).find(entry => entry.race === system.player_race) || {status_name:'中立'};
       detail.appendChild(diplomacyForm(
@@ -4454,7 +4461,7 @@ function renderButtons() {
     select.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || select.dataset.available !== '1';
   });
   document.querySelectorAll('.governance-form input, .governance-form select, .governance-form button').forEach(control => {
-    control.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment;
+    control.disabled = busy || !game?.player.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.councilUnavailable === '1';
   });
   document.querySelectorAll('#intrigue-card button, #intrigue-card select, #intrigue-card input').forEach(control => {
     if (control.id !== 'intrigue-toggle') control.disabled = busy || !game?.player?.alive || !!game?.pending_event || !!game?.imprisonment || control.dataset.intrigueUnavailable === '1';

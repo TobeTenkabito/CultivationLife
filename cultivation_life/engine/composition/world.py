@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 def bind_npcs(engine: GameEngine) -> NpcDependencies:
     return NpcDependencies(
+        roaming_roads=lambda world, origin, realm: engine.maps.roaming_roads(world, origin, realm),
         _advance_merchant_year=lambda *args, **kwargs: engine._advance_merchant_year(*args, **kwargs),
         _advance_npc_cultivation=lambda *args, **kwargs: engine._advance_npc_cultivation(*args, **kwargs),
         _all_world_npcs=lambda *args, **kwargs: engine._all_world_npcs(*args, **kwargs),

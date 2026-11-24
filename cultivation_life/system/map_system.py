@@ -92,6 +92,15 @@ class MapCatalog(MapDefinition):
         location = self.location(world, self.normalize_location(world, location_id))
         return {source: float(location["qi_gain_efficiencies"][source]) for source in QI_SOURCES}
 
+    def roaming_roads(self, world: str, origin: str, realm: int) -> list[tuple[str, int]]:
+        return [(neighbor, self._travel_years(cost, realm, 1.0))
+                for neighbor, cost in self._graphs.get(world, {}).get(origin, ())
+                if realm >= self.location(world, neighbor).get("min_realm_index", 0)]
+
+    def _travel_years(self, base_years, realm_index, travel_multiplier):
+        speed = float(self.settings["travel_speed_by_realm"][str(max(0, min(12, realm_index)))])
+        return max(1, math.ceil(base_years * speed * max(0.05, float(travel_multiplier))))
+
     def travel_plan(
         self, world: str, origin: str, destination: str, realm_index: int,
         travel_multiplier: float = 1.0,
@@ -104,8 +113,7 @@ class MapCatalog(MapDefinition):
         if destination not in routes:
             raise MapContentError("目前没有通往目标地图的路线")
         base_years, route = routes[destination]
-        speed = float(self.settings["travel_speed_by_realm"][str(max(0, min(12, realm_index)))])
-        years = max(1, math.ceil(base_years * speed * max(0.05, float(travel_multiplier))))
+        years = self._travel_years(base_years, realm_index, travel_multiplier)
         required = int(target.get("min_realm_index", 0))
         status, warning = "ok", ""
         if realm_index < required:

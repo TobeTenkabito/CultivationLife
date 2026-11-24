@@ -37,7 +37,24 @@ def act(host, game_id, payload):
     deps = bind(host)
     action = payload.get('action')
     rng = decode_rng(game.seed, game.rng_state)
-    if action == 'adopt_relation':
+    if action == 'local_council':
+        from ...system.race_council import actor_available, convene
+        if (not actor_available(game) or not deps.has_race_voice(game)
+                or payload.get('world') != p.world or payload.get('race') != host._player_allegiance_race(p)):
+            raise ValueError('须由本界本族议席召集诸宗')
+        if payload.get('expected_revision') != game.updated_at:
+            raise ValueError('议簿已有变动，请重看各宗所议')
+        motion, target = payload.get('motion'), payload.get('target', '')
+        if not isinstance(motion, str) or not isinstance(target, str) or motion == 'rotate' and target:
+            raise ValueError('议案所指山门有误')
+        ballot = payload.get('sect_vote')
+        if ballot is not None and (type(ballot) is not bool or not host._has_sect_voice(game)):
+            raise ValueError('须有本宗议事权方可代宗署名')
+        offer = payload.get('offer')
+        if motion == 'aid' and (not isinstance(offer, list) or len(offer) != 2 or type(offer[1]) is not int):
+            raise ValueError('周济须列明出资山门和实数')
+        convene(game, p.world, payload['race'], motion, target, rng, player_ballot=ballot, offer=offer)
+    elif action == 'adopt_relation':
         key = payload.get('relation_key', '')
         if ':' in key or key not in game.race_relations or not deps.has_race_voice(game):
             raise ValueError('没有可确认的本界旧约或缺少族议资格')

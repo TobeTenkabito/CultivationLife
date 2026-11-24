@@ -52,6 +52,17 @@ def accessible(game, person):
     return world == game.player.world and owner == current
 
 
+def contact_blocked(game, npc):
+    from .npc_custody import is_free
+    if not is_free(npc) or npc.custody or npc.id in game.intrigue_state.get('npc_prisons', {}) or not accessible(game, npc):
+        return '此人不在当前界面或空间，或不在自由名册'
+    p = game.player
+    if (not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
+            or (game.guixu_state.get('player_session') or {}).get('trapped')):
+        return '请先结束当前事件、战斗或拘禁'
+    return ''
+
+
 def require_access(game, person):
     if not person or accessible(game, person):
         return

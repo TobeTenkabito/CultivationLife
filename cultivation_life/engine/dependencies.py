@@ -710,6 +710,7 @@ class EffectDependencies:
 
 @dataclass(frozen=True, slots=True)
 class NpcDependencies:
+    roaming_roads: Callable[[str, str, int], list[tuple[str, int]]]
     _advance_merchant_year: Callable[..., Any]
     _advance_npc_cultivation: Callable[..., dict[str, str] | None]
     _all_world_npcs: Callable[..., list[SectNpc]]

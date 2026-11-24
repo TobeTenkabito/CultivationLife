@@ -594,6 +594,10 @@ class ContentRegistry:
             from .system.map_definition import MapDefinition
 
             MapDefinition(documents["maps.json"], set(registry.world_systems.get("world_profiles", {})))
+            for npc in registry.world_npc_templates.values():
+                sites = documents['maps.json']['worlds'][npc.world]['locations']
+                if not any(s['id'] == npc.location_id and s.get('min_realm_index', 0) <= npc.realm_index for s in sites):
+                    raise ContentError(f'世界人物{npc.name}缺少符合境界的开局落点')
             if registry.world_systems.get('building_system'):
                 from .building_content_validation import validate as validate_buildings
                 try:

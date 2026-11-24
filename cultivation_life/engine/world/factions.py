@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from ...race_diplomacy import relations_for
+from ...system import race_council
 
 import random
 from typing import Any
@@ -52,13 +53,16 @@ def _governance_threshold(world: str) -> int:
 
 def _faction_meta(game: GameState, faction_id: str) -> dict[str, Any]:
     if faction_id in FACTION_DEFINITIONS:
-        return dict(FACTION_DEFINITIONS[faction_id])
+        meta = dict(FACTION_DEFINITIONS[faction_id])
+        if (sect := game.sects.get(faction_id)) and sect.allegiance_race:
+            meta['allegiance_race'] = sect.allegiance_race
+        return meta
     sect = game.sects.get(faction_id)
     if not sect:
         return {"name": faction_id, "world": "human", "path": "dao", "description": "自立势力"}
     return {
         "name": sect.name, "world": sect.world, "path": sect.path,
-        "description": sect.description or "由玩家开创的新宗门。",
+        "description": sect.description or f"{sect.name}在本界设有山门。",
         "allegiance_race": sect.allegiance_race or "human",
     }
 
@@ -296,8 +300,14 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
         if deps._check_sect_extinction(game, sect):
             continue
         deps._compact_sect_roster(game, sect)
+        interval = int(FACTION_SYSTEMS["recruitment_interval_years"])
+        phase = player.age % interval
+        council = (race_council.minutes(game, sect.world, sect.allegiance_race)
+                   if phase and sect.kind == 'sect' and game.strategic_war_state.get('local_councils') else {})
+        places = race_council.remaining(council, player.age) if council else {}
+        referred = places.get(sect.id, 0) > 0 and council.get('used_at', {}).get(sect.id) != player.age
         if (
-            player.age % int(FACTION_SYSTEMS["recruitment_interval_years"]) == 0
+            (phase == 0 or referred)
             and recruitment_ready(game, sect)
             and len([npc for npc in deps._sect_members(game, sect) if npc.alive])
             < int(FACTION_SYSTEMS.get("max_members", 36))
@@ -305,6 +315,12 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
             newcomer = deps._recruit_sect_npc(sect, player.age, rng)
             if newcomer is None:
                 continue
+            if referred:
+                places[sect.id] -= 1
+                council.setdefault('used_at', {})[sect.id] = player.age
+                game.history.append(HistoryRecord("SYS_COUNCIL_RECRUIT", 1, player.age, "族中荐徒", sect.id,
+                    "recruited", f"{sect.name}收下族中举荐的{newcomer.name}，本届尚余{places[sect.id]}席。",
+                    {"npc_id": newcomer.id}, ["system", "race", "faction", "world_news", f"world:{sect.world}"]))
             if newcomer.realm_index >= 3:
                 if sect.world == player.world:
                     news.append(f"{player.age}岁：{newcomer.name}以{deps._npc_realm_name(newcomer)}修为加入{sect.name}")
@@ -506,6 +522,10 @@ def _advance_diplomacy_unit(deps: FactionDependencies, game: GameState, rng: ran
     if rng.random() < float(config.get("unit_event_chance", 0.08)):
         deps._random_sect_diplomacy_event(game, rng, news)
     deps._maybe_npc_found_power(game, rng, news)
+    if game.diplomacy_unit % 6 == 0 and deps._world_supports(game.player.world, 'races'):
+        report = race_council.advance(game, rng)
+        if report:
+            news.append(report)
     deps._pressure_weak_npc_powers(game, rng, news)
     deps._simulate_cultivator_duel(game, rng, news)
     return news

@@ -2,11 +2,11 @@
 
 《浮生问道》是一款本地运行、以浏览器为界面的修仙人生模拟游戏。玩家从凡人或快速开局踏入不同道途，在修炼、游历、战斗、关系与势力经营中推进人生；NPC 同时经历成长、寿尽、争斗和世界变迁。
 
-**当前本体版本：v3.14.1**，以 [version.py](cultivation_life/version.py) 为准。当前更新见[3.14.1发行说明](docs/release-3141.md)及[更新日志](CHANGELOG.md)，历史发行与安装包见[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)。
+**当前本体版本：v3.15.0**，以 [version.py](cultivation_life/version.py) 为准。当前更新见[3.15.0发行说明](docs/release-3150.md)及[更新日志](CHANGELOG.md)，历史发行与安装包见[GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)。
 
 当前使用存档结构 **12**，仅支持 **12 → 12**。结构1–11拒绝加载或导入，不迁移、不映射、不覆盖原存档。当前提供山海图志与沧海夜色两个像素主题、十一界和十二个官方DLC；DLC的专属玩法与各自配色按实际加载状态生效。
 
-3.14.1 调整斗法战报与副本布局，润色功法、游历和宗门事件。完整规则从[文档索引](docs/README.md)按专题查阅。
+3.15.0 增加本界宗门名录、族内会商、修士游历与信箱问踪。完整规则从[文档索引](docs/README.md)按专题查阅。
 
 开发入口：[项目架构与边界](docs/project-diagnosis.md)、[引擎说明](cultivation_life/engine/README.md)、[Debug开发规范](docs/debug-development.md)。
 
@@ -14,7 +14,7 @@
 
 ### Android 12
 
-当前安卓版本为 3.14.1-android.109，仅携带新版浅暗两种配色与十二个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包和验收清单统一发布于 [GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)，`dist/`不保留安装包。使用与构建说明见 [安卓说明](android/README.md)。
+当前安卓版本为 3.15.0-android.110，仅携带新版浅暗两种配色与十二个 DLC，可离线运行。支持 64 位 ARM 手机及 x86_64 模拟器；设备验收范围为 Android 12 模拟器。支持离线存档码导入、导出与分段复制，可在支持相同存档结构的 Windows 与 Android 版本间互通。发行包和验收清单统一发布于 [GitHub Releases](https://github.com/TobeTenkabito/CultivationLife/releases)，`dist/`不保留安装包。使用与构建说明见 [安卓说明](android/README.md)。
 
 ### Windows 启动器
 
@@ -92,7 +92,7 @@ Windows ZIP 附带 `scripts/debug_agent.py` 及最小标准库客户端。CLI／
 | [修罗显圣：无法无天](dlc/asura-manifestation/README.md) | 1.6.0 | 煞元转化、魔脉、八部凝身、魔域神通、心魔劫与男女主角立绘动作 |
 | [瑶池西望：紫气东来](dlc/yaochi-westward/README.md) | 1.1.0 | 专修、庙域、四司监察、仙圃仙会、三条访古与七曜项目议政；四章主线、三途交接及私人功德服务 |
 | [诸法无我：众生为镜](dlc/buddhist-dharma/README.md) | 1.2.1 | 四上界弘法与愿力、三阶段法会、地图信众、寺庙、正负业力、六项加持与佛修双飞升路线 |
-| [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.20.1 | 妖修八源血脉；五族分支补全、狐族与蛇族分境立绘及战斗动作、族血规则与本相铸域 |
+| [万妖归宗：血脉进化](dlc/monster-bloodlines/README.md) | 4.21.0 | 妖修八源血脉；五族分支补全、狐族与蛇族分境立绘及战斗动作、族血规则与本相铸域 |
 | [万灵争衡：百族兴衰](dlc/monster-civilizations/README.md) | 1.0.1 | 独立生态、氏族、王庭与万灵志 |
 | [百鬼夜行：往生轮回](dlc/ghost-reincarnation/README.md) | 3.11.1 | 鬼修魂魄、魂蚀、往生与轮回 |
 | [明争暗斗：合纵连横](dlc/intrigue-coalitions/README.md) | 1.5.0 | NPC 性格、势力职位、客卿、议案与内政 |

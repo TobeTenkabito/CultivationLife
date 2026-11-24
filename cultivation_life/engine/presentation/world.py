@@ -9,12 +9,16 @@ from ...system.monster_identity import identity
 
 from ...system.path_modifiers import modifier
 from ...system.npc_social import social_hint
+from ...spatial_people import contact_blocked
 from ...system.npc_contacts import availability, relation_kind
+from ...system.npc_whereabouts import letter_reason
+from ...system.race_faction_directory import local_sects
+from ...system import race_council
 from ...system.npc_promises import projection as promise_projection
 
 import copy
 from typing import Any
-from ...content_registry import PATH_NAMES, RACE_DEFINITIONS, RACE_SYSTEMS, WORLD_SYSTEMS
+from ...content_registry import PATH_NAMES, RACE_DEFINITIONS, WORLD_SYSTEMS
 from ...models import GameState, SectNpc
 from ...system.npc_system import attitude_label
 from ...world_state import RELATION_LABELS, race_pair, split_race_pair
@@ -24,6 +28,8 @@ from ..dependencies import WorldViewDependencies
 
 
 def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dict[str, Any]]:
+    from ...system.npc_whereabouts import reply_index
+    replies = reply_index(game)
     result: list[dict[str, Any]] = []
     institutions = {npc.id: sect for sect in game.sects.values()
                     if sect.kind == "institution" and sect.world == game.player.world
@@ -79,6 +85,8 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
         from ...system.cultivation_ranks import public_ranks
         ranks = public_ranks(npc)
         public_npc = npc.to_dict()
+        public_npc.pop("location_id", None)
+        public_npc.pop("roaming_years", None)
         public_npc["cultivation_ranks"] = ranks
         public_npc.pop("social_profile", None)
         public_npc["social_hint"] = social_hint(game, npc) if same_world else {}
@@ -92,13 +100,15 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
         if perception:
             public_npc["realm_index"] = perception["realm_index"]
             public_npc["layer"] = perception["layer"]
+        blocked = contact_blocked(game, npc)
         result.append({
             **public_npc,
             "institution_name": institutions[npc.id].name if npc.id in institutions else None,
             "contact_source": "institution" if npc.id in institutions else "fixed" if npc.id in game.world_npcs else "important" if npc.id in game.notable_npcs or npc.id in personal_ids else "pool",
-            **promise_projection(game, npc),
+            **promise_projection(game, npc, replies=replies),
             "contact_relation": relation_kind(game.player, npc.id),
-            "contact_actions": availability(game, npc),
+            "contact_actions": availability(game, npc, blocked=blocked),
+            "letter_reason": letter_reason(game, npc, blocked, replies),
             "realm_name": perception["realm_name"] if perception else deps._npc_realm_name(npc),
             "cultivation_concealment": (
                 {
@@ -253,6 +263,13 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
         if "diplomacy" in record.tags and f"world:{race_world}" in record.tags
     ]
     races: dict[str, dict[str, Any]] = {}
+    directory = local_sects(game, race_world)
+    has_voice = deps._has_race_voice(game)
+    can_convene = has_voice and race_council.actor_available(game)
+    catalog = {}
+    for entry in directory.values():
+        if not entry['active']:
+            catalog.setdefault(entry['allegiance'], []).append(entry)
     for race_id, definition in RACE_DEFINITIONS.items():
         if race_world not in definition.get("worlds", []):
             continue
@@ -276,7 +293,8 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
             if race_id in record.state_diff.get("races", [])
         ][:12]
         supported_factions: list[dict[str, Any]] = []
-        seen_factions: set[str] = set()
+        record = race_council.minutes(game, race_world, race_id)
+        places = race_council.remaining(record, game.player.age)
         for sect in [*game.sects.values(), *([game.family] if game.family else [])]:
             allegiance = sect.allegiance_race or (sect.npcs[0].race if sect.npcs else "human")
             if sect.world != race_world or allegiance != race_id or sect.extinct:
@@ -287,18 +305,19 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
                     key=lambda npc: (-npc.realm_index, -npc.layer, npc.name),
                 )[:2]
             ]
-            supported_factions.append({"id":sect.id, "name":sect.name, "elders":elders, "active":True})
-            seen_factions.add(sect.id)
-        for preset in RACE_SYSTEMS.get("faction_presets", {}).get(race_id, []):
-            if preset.get("world") != race_world:
-                continue
-            if preset["id"] not in seen_factions:
-                supported_factions.append({**copy.deepcopy(preset), "active":False})
+            supported_factions.append({"id":sect.id, "name":sect.name, "elders":elders, "active":True, "kind":sect.kind})
+        supported_factions.extend(catalog.get(race_id, []))
+        for faction in supported_factions:
+            faction['places'] = places.get(faction['id'], 0)
+            faction['grievance'] = record.get('grievances', {}).get(faction['id'], 0)
         races[race_id] = {
             "id": race_id, **definition,
             "relations": sorted(relations, key=lambda row: (row["status"] == "neutral", -abs(row["affinity"]), row["race_name"])),
             "recent_events": recent_events,
             "supported_factions": supported_factions,
+            "council": {"recent": record.get('recent', []), "expires": record.get('awarded', -10) + 10,
+                        "counter": record.get('counter') if race_council.ready(record, 'amend', game.player.age) else None,
+                        "next": {m: race_council.next_session(record, m) for m in race_council.MOTIONS}},
         }
     alliances = []
     races_in_world = set(races)
@@ -324,7 +343,14 @@ def _public_race_system(deps: WorldViewDependencies, game: GameState) -> dict[st
         "races": races, "alliances": alliances,
         "world": race_world,
         "world_name": WORLD_SYSTEMS["world_names"].get(race_world, race_world),
-        "has_diplomatic_voice": deps._has_race_voice(game),
+        "has_diplomatic_voice": has_voice,
+        "can_convene": can_convene,
+        "aid_offers": race_council.aid_offers(game, race_world, player_race)
+                      if can_convene and player_race in races and race_council.ready(race_council.minutes(game, race_world, player_race), 'aid', game.player.age) else [],
+        "council_seq": game.strategic_war_state.get('command_seq', 0) + 1,
+        "guest_sects": [dict(id=r['id'], name=r['name'], allegiance=r['allegiance'])
+                        for r in race_council.candidates(game, race_world, player_race, directory)]
+                       if can_convene and player_race in races else [],
         "vassal_transfers": [
             {"target_id": other_id, "target_name": RACE_DEFINITIONS[other_id]["name"], "candidates": deps._vassal_transfer_candidates(game, "race", player_race, other_id, relation)}
             for key, relation in relations_for(game).items()

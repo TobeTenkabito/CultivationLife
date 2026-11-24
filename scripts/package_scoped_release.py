@@ -60,9 +60,14 @@ def main():
     regression=dict(collected=tests,skipped=sum(int(s.get('skipped',0)) for s in suites),failures=0,errors=0)
     regression['passed']=regression['collected']-regression['skipped']
     dungeon_art = scoped.get('profile') == 'dungeon-art'
+    society = scoped.get('profile') == 'society'
     transfer_tests = 0
-    transfer_in_regression = False
-    if not dungeon_art:
+    transfer_in_regression = society
+    if society:
+        transfer_tests = sum(case.get('classname') == 'tests.test_save_transfer'
+                             for suite in suites for case in suite.findall('testcase'))
+        require(transfer_tests > 0, 'Missing save transfer regression cases')
+    elif not dungeon_art:
         transfer=(ROOT/f'build/save-transfer-{tag}.log').read_text(encoding='utf-8-sig')
         extra=re.search(r'(\d+) passed',transfer)
         require(extra is not None and 'failed' not in transfer.lower() and 'ERROR' not in transfer,'Save transfer smoke tests failed')
@@ -439,12 +444,18 @@ def main():
         metadata=(ROOT/f'build/android-metadata-{tag}.log').read_text(encoding='utf-8')
         code=int(re.search(r'versionCode (\d+)',(ROOT/'android/app/build.gradle').read_text(encoding='utf-8'))[1])
         require(f"versionCode='{code}'" in metadata and f"versionName='{VERSION}-android.{code}'" in metadata and "sdkVersion:'31'" in metadata and 'application-debuggable' not in metadata,'APK metadata mismatch')
-    if dungeon_art:
-        from scripts.verify_scoped_release import DUNGEON_ART_TESTS, DUNGEON_ART_BROWSERS
-        require({p for shard in scoped['tests'] for p in shard} == set(DUNGEON_ART_TESTS)
-                and set(DUNGEON_ART_BROWSERS) <= {r['name'] for r in scoped['runs']}
-                and regression['passed'] > 0 and not regression['skipped'], 'Dungeon/art regression incomplete')
-        require(all(c.get('dungeon_art_verified') for c in evidence['cases']), 'Missing final EXE map/art checks')
+    if dungeon_art or society:
+        if society:
+            from scripts.verify_scoped_release import SOCIETY_TESTS as selected_tests, SOCIETY_BROWSERS as selected_browsers
+            require(all(c.get('society_verified') for c in evidence['cases']), 'Missing compiled society checks')
+            require(all('society_mail_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in native['logs']), 'Missing native correspondence checks')
+        else:
+            from scripts.verify_scoped_release import DUNGEON_ART_TESTS as selected_tests, DUNGEON_ART_BROWSERS as selected_browsers
+        require({p for shard in scoped['tests'] for p in shard} == set(selected_tests)
+                and set(selected_browsers) <= {r['name'] for r in scoped['runs']}
+                and regression['passed'] > 0 and not regression['skipped'], 'Selected release regression incomplete')
+        if dungeon_art:
+            require(all(c.get('dungeon_art_verified') for c in evidence['cases']), 'Missing final EXE map/art checks')
         required = {f'build/android-dungeon-art-{o}-{tag}.log' for o in ('portrait','landscape')}
         require(set(native['logs']) == required and native['sdk'] == '31'
                 and all('dungeon_art_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in required),
@@ -476,11 +487,11 @@ def main():
               validation_scope=scoped['scope'],tests=tests,runs=scoped['runs'],
               regression=regression,save_transfer_smoke_tests=transfer_tests,
               save_transfer_smoke_in_regression=transfer_in_regression,
-              save_transfer_log=None if dungeon_art else f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
+              save_transfer_log=None if dungeon_art or society else f'build/save-transfer-{tag}.log',inputs_sha256=inputs_digest(ROOT))
     if reconciliation is not None:base['regression_reconciliation']=reconciliation
-    if dungeon_art:
+    if dungeon_art or society:
         base['full_repository_regression'] = False
-        base['regression_scope'] = 'dungeon-art'
+        base['regression_scope'] = scoped['profile']
     if scoped.get('resume_receipt'):base['acceptance_resume']=resumed
     if scoped.get('regression_scope')=='full-repository':
         base['regression_scope']='full-repository'
@@ -555,10 +566,13 @@ def main():
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for name in ('docs/immortal-artifacts.md',):
                 z.write(ROOT/name,name)
-        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura','techniques','dungeon-art'}:
+        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura','techniques','dungeon-art','society'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
         else:
             z.write(ROOT/'android/README.md','README.md')
+        if society:
+            for name in ('CHANGELOG.md', f'docs/release-{tag}.md', 'docs/npc-development.md', 'docs/strategic-war-implementation.md'):
+                z.write(ROOT/name,name)
         if dungeon_art:
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for name in (f'docs/release-{tag}.md','docs/visual-assets.md','docs/seeded-dungeons-implementation.md'):
@@ -631,8 +645,11 @@ def main():
             z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅结构12。解压至游戏根目录覆盖dlc/asura-manifestation后重启；Android请安装同版签名APK。不会覆盖存档或用户开关。')
             z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='asura-manifestation',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
         with zipfile.ZipFile(destination) as z:require(z.testzip() is None,'Asura DLC archive damaged')
-    if scoped.get('profile')=='body-ui':
-        for package,label in [('authored-techniques','著经立道'),('monster-bloodlines','万妖归宗'),('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')]:
+    if society or scoped.get('profile')=='body-ui':
+        packages = [('monster-bloodlines', '万妖归宗')]
+        if scoped.get('profile') == 'body-ui':
+            packages.extend([('authored-techniques','著经立道'),('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')])
+        for package,label in packages:
             version=json.loads((ROOT/'dlc'/package/'manifest.json').read_text(encoding='utf8'))['version']
             with zipfile.ZipFile(output_dir/f'{label}-v{version}-更新包.zip','w',zipfile.ZIP_DEFLATED) as z:
                 for path in (ROOT/'dlc'/package).rglob('*'):

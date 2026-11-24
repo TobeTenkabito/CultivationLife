@@ -3033,6 +3033,8 @@ class GameEngine:
     def dungeon_action(self, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:
         from .composition.dungeons import bind
         from ..system.dungeons.runtime import command
+        if action == 'ask_location':
+            self.assert_buddhist_operation_allowed(game_id, 'dungeon-action')
         return command(bind(self), game_id, action, payload)
 
     def trial_site_action(self, game_id: str, action: str, payload: dict[str, Any]) -> dict[str, Any]:

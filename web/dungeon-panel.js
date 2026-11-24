@@ -2,6 +2,7 @@
 (() => {
   let game, send, expandedPerson = null, busy = () => false, activeTab='journal', workspaceKey='';
   let atlasRevision='',atlasSelection=null,atlasObserver=null;
+  let mailDraft={topic:'ask_location',recipient:'',site:''};
   const compactQuery=window.matchMedia('(max-width:959px), (max-height:540px)');
   const qualities={'普通':['ordinary','谨慎探行'],'稀有':['rare','险中藏珍'],'史诗':['epic','群雄逐宝'],'传奇':['legendary','凶险争夺']};
   const el = (tag,text,cls='') => {const n=document.createElement(tag);n.className=cls;if(text!==undefined)n.textContent=text;return n;};
@@ -193,19 +194,66 @@
       workspace.prepend(tabs);select(selected);
     }else if(view.manuals.length)root.append(manuals);
   }
+  function composeLetter() {
+    const form=box('写信'), fields=el('div',undefined,'mail-fields'), actions=el('div',undefined,'dungeon-mail-actions');
+    const field=(name)=>{
+      const label=el('label',name),select=el('select');
+      label.append(select);fields.append(label);return select;
+    };
+    const topic=field('事由'),site=field('副本入口'),recipient=field('收信人');
+    const option=(value,label)=>new Option(label,value);
+    topic.add(option('ask_location','询问行踪'));topic.add(option('invite','邀请同行'));
+    topic.value=mailDraft.topic;
+    const view=game.dungeons;
+    const known=[...new Map([...(game.faction?.roster||[]),...(game.world_npcs||[])]
+      .filter(n=>n.perceived_alive&&!n.is_player).map(n=>[n.id,n])).values()];
+    const open=view.sites.filter(s=>s.status==='open');
+    function draw(){
+      const inviting=topic.value==='invite';
+      site.parentElement.hidden=!inviting;
+      site.replaceChildren(...open.map(s=>option(s.id,s.name)));
+      if(open.some(s=>s.id===mailDraft.site))site.value=mailDraft.site;
+      const selectedSite=open.find(s=>s.id===site.value);
+      const people=inviting?view.invitees:known;
+      recipient.replaceChildren(option('','请选择修士'),...people.map(n=>option(n.id,n.realm_name?n.name+' · '+n.realm_name:n.name)));
+      recipient.value=people.some(n=>n.id===mailDraft.recipient)?mailDraft.recipient:'';
+      const person=people.find(n=>n.id===recipient.value);
+      let reason=person?.letter_reason||'';
+      if(inviting){
+        reason=view.reason||'';
+        if(!reason&&view.active)reason='待出境后再寄邀约';
+        if(!reason&&!selectedSite)reason='先寻得一处副本入口';
+        if(!reason&&person&&view.mail.some(m=>m.dungeon_id===selectedSite.id&&m.sender_id===person.id&&m.status==='reply'))
+          reason='这处副本的邀约已有回信';
+      }
+      if(!reason&&!people.length)reason=inviting?'当地尚无可邀约的修士':'暂无可通信的修士';
+      const payload=inviting?{dungeon_id:selectedSite?.id,revision:selectedSite?.revision,actor_id:recipient.value}:
+        {actor_id:recipient.value,expected_age:game.player.age,world:game.player.world};
+      actions.replaceChildren(button('寄出',topic.value,payload,!!person&&!reason));
+      if(reason)actions.append(el('small',reason));
+    }
+    topic.onchange=()=>{mailDraft.topic=topic.value;draw();};
+    site.onchange=()=>{mailDraft.site=site.value;draw();};
+    recipient.onchange=()=>{mailDraft.recipient=recipient.value;draw();};
+    form.append(fields,actions);draw();return form;
+  }
   function mailbox() {
     const root=document.querySelector('#mailbox-panel');root.replaceChildren();
     const mail=game.dungeons?.mail||[];
+    if(game.dungeons)root.append(composeLetter());
     if(!mail.length)root.append(el('p','尚无修士来信。'));
     [...mail].reverse().forEach(m=>{const row=box(m.title);row.append(el('p',`${m.sender} · ${m.unread?'未读':'已读'}`),el('p',m.body));
       const actions=el('div',undefined,'dungeon-mail-actions');
       if(m.unread)actions.append(button('读过此信','read_mail',{mail_id:m.id}));
+      if(m.status==='whereabouts'){row.append(el('small',`于你 ${m.age} 岁时收到`),actions);root.append(row);return;}
       const s=game.dungeons.sites.find(s=>s.id===m.dungeon_id);
       if(s&&s.status==='open'){actions.append(button(m.status==='reply'?'前往副本':'赴约入境','enter',{dungeon_id:s.id,revision:s.revision},s.can_enter));if(m.status==='pending')actions.append(button('谢绝邀约','decline_invite',{dungeon_id:s.id,revision:s.revision},game.dungeons.available&&!game.dungeons.active));}
       else row.append(el('p',m.status==='pending'?'请抵达来信所述地图后赴约。':'邀约已处理。'));row.append(actions);root.append(row);});
   }
   window.DungeonPanel={
-    update(data,mutate,isBusy){game=data;send=mutate;busy=isBusy;
+    update(data,mutate,isBusy){
+      if(game?.id!==data.id)mailDraft={topic:'ask_location',recipient:'',site:''};
+      game=data;send=mutate;busy=isBusy;
       document.querySelectorAll('.mailbox-dot').forEach(dot=>{dot.hidden=!data.dungeons?.unread;});
       document.querySelector('#mailbox-main-open').onclick=()=>window.UtilityPanels.open('mailbox');
       window.UtilityPanels.schedule('dungeon',render);window.UtilityPanels.schedule('mailbox',mailbox);

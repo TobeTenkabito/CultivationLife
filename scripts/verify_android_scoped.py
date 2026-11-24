@@ -156,7 +156,10 @@ def main():
                   sdk=command('shell','getprop','ro.build.version.sdk'),logs=logs,test_apk_sha256=file_digest(test_apk),
                   log_hashes={name:file_digest(ROOT/name) for name in logs},
                   scope='Annual finance, original organizational guards, trust and real production; six native orientation phases' if economy else 'Legacy soul and upper scope')
-    if dungeon_art:receipt['scope']='Signed Android 12 portrait/landscape: touch map entry and inspection, terrain art and four character asset sets'
+    if dungeon_art:
+        receipt['scope']='Signed Android 12 portrait/landscape: touch map entry and inspection, terrain art and four character asset sets'
+        if all('society_mail_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in logs):
+            receipt['scope'] += ', mailbox inquiry and reading the dated reply'
     if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
     if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
     if body_ui:receipt['scope']=f'{BASE_GAME_VERSION} native school peer commands/cooldown/menu/replay plus NPC body/technique/domain cultivation, controlled portraits, energy and upper-world guides, two pixel palettes; signed Android 12 portrait/landscape'

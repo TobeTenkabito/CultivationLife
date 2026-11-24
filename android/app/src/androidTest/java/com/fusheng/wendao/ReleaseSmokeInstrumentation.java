@@ -1572,6 +1572,14 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'舆图验收',spirit_root:'heavenly',path:'dao',seed:342,preset_id:'core'})}).then(g=>g.id)");
                 python(assetText("dungeon_release.py")+"\nfrom cultivation_life import server\nprepare_dungeon_player(server.ENGINE,"+JSONObject.quote(id)+")");
                 async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector("[data-action-tab=living]");tapSelector("#mailbox-main-open");
+                check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('#mailbox-panel .mail-fields label:last-child select');r.value='xiang_zhili';r.dispatchEvent(new Event('change'));return r.value==='xiang_zhili'})()")),"Known correspondent listed");
+                tapSelector("#mailbox-panel [data-dungeon-action=ask_location]");
+                waitForJs("!busy&&game.dungeons.mail.some(m=>m.sender_id==='xiang_zhili'&&m.location_id==='border_void_watch'&&m.unread)","Dated reply from original NPC");
+                tapSelector("#mailbox-panel [data-dungeon-action=read_mail]");
+                waitForJs("!busy&&game.dungeons.unread===0","Mail marked read");
+                tapSelector("#mailbox-toggle");
+                result.putString("society_mail_scope","send-whereabouts-read-reply");
                 tapSelector("[data-action-tab=living]");tapSelector("[data-action=treasure]");
                 tapSelector("[data-dungeon-action=discover]");waitForJs("!busy&&game.dungeons.used===1","Discovery saved");
                 tapSelector("[data-dungeon-action=enter]");waitForJs("!busy&&!!document.querySelector('.atlas-chart')","Dungeon atlas visible");

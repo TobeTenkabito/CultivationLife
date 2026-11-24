@@ -1,6 +1,7 @@
 {
   "version": 1,
   "technique_effect_ownership_notes": {
+    "GameState.strategic_war_state.local_councils / directory_support": "global：各界各族分别保有有限议期、十年荐额、当年销额回执、历届分席积怨、待复议山门及最近三次宗门函议。未建实体的山门只登记实际改变的政治支持；落实山门时交还原 SectState.allegiance_race，原人物血缘不变。地方额外招新仅在本界原宗门年度成功招入后销额，继续核验入门和供养条件。翻名录、分席、递盟书均不造人、不设经济户、不移人或财物。周济仅对已登记的玩家同地点两宗复验供养缺口、实款与出资方签署，沿原资金账一次交割。",
     "GameState.last_combat_report.rounds.*.voisinage.technique_effects.player_loadout / events.*.name,resource,measure": "session：C版式只读轮末投影，玩家至多七部原冻结功法的身份、等级、报价、原资源类型、实付退款、次数、冷却、待用及余额是否足够；没有新的资源账本、人物或顶层字段。事件仅在报告副本补名称与资源单位，敌方不公开未使用书目或余额。后台NPC战斗不生成player_loadout；读取不准备、不付款、不投骰，跨界沿原战报session清理。旧战报缺失不补造历史，续战仍只读原运行态；结构仍12。",
     "Technique.combat_effect.mana_cost / CombatCapabilities.technique_effects.*.cost_model": "personal / session：固定目录mana_cost保存本书品阶初层法力标准的固定报价；开战投影cost_model保存原书grade、原人物实际realm、原资源单位fixed报价。低阶固定、同阶比例、越阶相加，等级减费后只沿原法力或元力账本付款。续战冻结同一报价，不读隐藏或封存境界，不新增资源池；下界仿仙灵力沿原60点单位，上界沿对应品阶初层元力标准。既有冻结战斗无此投影时保留原收据合同，场外读档不改价。",
     "UnitState.physical_defeat / combat updates.body_destroyed / NpcEngagement.escaped": "session：普通攻击及其派生余焰的致命肉身败退来源；续战保持布尔标记，非致命目标不执行死亡或离体，真实禁逃不被绕过。原NPC身魂入口处理离体；12%态势撤退、明确逃脱与离体只回写原战役escaped名册，不移动人物，不新建身体或名册副本。",
@@ -564,6 +565,8 @@
     "NPC.body_attainments / Player.ghost_host_body.body_attainments": "body：原人物实际肉身的四系分项精修，0至10重；普通NPC／受禁NPC写回唯一原人物，关系仅引用。原肉身毁坏时清空，夺舍仅把既有宿身记录带入原ghost_host_body投影；不赋予原灵魂、第二元婴或傀儡独立人物能力。DLC关闭不删除记录，不激活已关闭体系。跨界随原肉身地址规则保留，不另建人物或资源池。"
   },
   "dungeon_ownership_notes": {
+    "SectNpc.location_id / roaming_years": "people：固定人物出生于模板所属界面的指定地图。自由游历只在本地区个人年度结算；停留与道路耗年归原人物，抵达才更新同界地点。同行、受控、空间及职务另沿原入口。",
+    "GameState.dungeon_state.mail[whereabouts]": "portable：传书在双方可联系的同一普通界面寄送；年龄、原发信人、界面及回信时的落脚点是个人信件快照。读信或跨界不触发移动，不授予当前地点或约战资格。",
     "GameState.dungeon_state.instances.*.roles.*.ledger.outside_party / encounter_step": "session：outside_party仅标记同地、自由、无占用的原Player.party权威人物随玩家入境；角色保存同一npc_id，不复制或搬运人物，不重新抽取目的。正常撤离保留原外界队伍，分道或反目解除该原ID的随行。encounter_step为原址会话当前步亲见人物的位置凭据，远方传闻不授予攻击权限。灭杀沿原实战、生死、凶名、因果及关系结算，无额外节点领奖。新蓝图reference冻结生成时显露修为；刺杀下限独立核验当时真实道果，旧蓝图原值保留。",
     "GameState.dungeon_state.instances.*.roles.*.state=observed": "session：原址会话中亲眼遇见但各自行动的人物状态，保存于同一角色原型；不实例化NPC、不移动人物、不授予队伍成员资格。新生成的奖励与角色分层在发现时冻结，旧蓝图不改写。组队资格读取玩家及已实例化原NPC的当前修为。",
     "GameState.dungeon_state.instances.*.expedition.facts[].rumor": "session：新蓝图生成时冻结的远处风声，仅含方位与可闻动静，达到原消息时点才写入玩家日志；不提前公开人物、胜负或宝物。旧事实缺失时沿原通用风声，不补写或重抽。",

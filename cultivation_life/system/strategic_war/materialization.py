@@ -1,9 +1,10 @@
 """Finite first encounters with names from the existing faction directory."""
-from ...content_registry import RACE_SYSTEMS, RACE_DEFINITIONS
+from ...content_registry import RACE_DEFINITIONS
 from ...models import SectState
 from ..economy.state import ensure_regional_market
 from ..economy.organization_accounts import register, key
 from ..economy.ledger import balance, transfer_value
+from ..race_faction_directory import local_sects, adopt_support
 from .rules import organizations, local_races
 
 
@@ -14,8 +15,9 @@ def materialize(deps, game, world, race, rng):
     # or rerolled to make room. Chunked cold storage is a separate later phase.
     if sum(o.founded_by_npc for o in game.sects.values()) >= 12:
         return None
-    raw = next((r for r in RACE_SYSTEMS.get('faction_presets', {}).get(race, [])
-                if r.get('world') == world and r['id'] not in game.sects), None)
+    candidates = (entry for entry in local_sects(game, world).values()
+                  if not entry['active'] and entry['allegiance'] == race)
+    raw = min(candidates, key=lambda e: e['origin'] != 'preset', default=None)
     if not raw:
         serial = 1 + len(game.strategic_war_state.get('materialized',{}))
         raw = dict(id=f'levy-{world}-{race}-{serial}', world=world,
@@ -45,6 +47,7 @@ def materialize(deps, game, world, race, rng):
         return None
     org.founder_npc_id = org.npcs[0].id
     game.sects[org.id] = org
+    adopt_support(game, org)
     # Dynamic families in game.sects keep the existing canonical sect treasury;
     # later joining the family uses the existing alias handover transaction.
     register(game, 'sect', org.id, world)

@@ -22,6 +22,7 @@ from ...content_registry import (
 )
 from ...models import GameState, HistoryRecord, Player, SectNpc, SectState
 from ...system.npc_system import npc_breakthrough_chance, npc_combat_power
+from ...system.race_faction_directory import unformed_factions, adopt_support
 from ...rules import can_practice_technique, expected_combat_power, divine_sense_level
 from ..dependencies import NpcClassDependencies, NpcDependencies
 
@@ -222,6 +223,7 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
         if not settle_soul(npc, game.player.age):
             continue
         if deps._intrigue_is_imprisoned(game, npc.id):
+            npc.roaming_years = 0
             if npc.lifespan is not None and npc.age >= npc.lifespan:
                 npc.alive = False
                 npc.death_reason = "服刑期间寿元耗尽"
@@ -250,7 +252,10 @@ def _annual_world_npc_update(deps: NpcDependencies, game: GameState, rng: random
         from ...person_assignments import deployment_assignment
         assignment=deployment_assignment(game,npc.id)
         if assignment and assignment.get('war_id'):
+            npc.roaming_years = 0
             continue
+        from ...system.npc_whereabouts import settle_year
+        settle_year(game, npc, deps.roaming_roads)
         crossing_to_spirit = npc.world == "human" and npc.realm_index == 4 and npc.layer == REALMS[4].layers
         event_world = npc.world
         result = deps._advance_npc_cultivation(npc, rng, not crossing_to_spirit or living_human_spirits < 1, world_age=game.player.age)
@@ -375,6 +380,10 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
     layer = rng.randint(1, REALMS[realm_index].layers)
     age = rng.randint(500, 1200) if realm_cap <= 5 else rng.randint(8000, 30000)
     race = rng.choice(race_pool) if race_pool else "human"
+    if kind == "sect" and deps._world_supports(world, "races"):
+        entry = next(unformed_factions(game, world, race, include_presets=False), None)
+        if entry:
+            sect_id, power_name = entry['id'], entry['name']
     founder = SectNpc(
         f"{sect_id}_founder", founder_name, "开山祖师" if kind == "sect" else "始祖",
         realm_index, layer, age, None if realm_index >= 6 else max(age + 1, REALMS[realm_index].lifespan[1]),
@@ -387,6 +396,7 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
         path=founder.path, kind=kind, founded_by_npc=True, founder_npc_id=founder.id,
         allegiance_race=founder.race,
     )
+    adopt_support(game, sect)
     for _ in range(2):
         deps._recruit_sect_npc(sect, game.player.age, rng)
     from ...system.faction_geography import faction_site
@@ -443,6 +453,7 @@ def _advance_npc_cultivation(
             raise ValueError('携带资源账本的 NPC 飞升必须提供世界时钟')
         move_world(npc, destination, world_age or 0, WORLD_SYSTEMS.get('transcendent_combat', {}))
         npc.location_id = None
+        npc.roaming_years = 0
         npc.departed_age = npc.age
         npc.departure_reason = f"飞升{WORLD_SYSTEMS['world_names'][destination]}"
         return {"type": "departure", "old": old_name, "new": npc.departure_reason}

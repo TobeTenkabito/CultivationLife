@@ -6,6 +6,7 @@ def validate_state(state, campaigns=()):
     if not isinstance(state,dict):
         raise ValueError('战略战争状态必须为对象')
     if not state:return
+    validate_local_councils(state)
     wars=state.get('wars',[])
     if not isinstance(wars,list) or len(wars)>22:
         raise ValueError('战略战争记录超出容量')
@@ -45,6 +46,42 @@ def validate_state(state, campaigns=()):
         raise ValueError('战略战争命令序号无效')
     if not isinstance(state.get('commands',[]),list) or len(state.get('commands',[]))>64:
         raise ValueError('战略战争命令回执无效')
+
+
+def validate_local_councils(state):
+    def mapping(value, limit):
+        return (isinstance(value, dict) and len(value) <= limit
+                and all(isinstance(k, str) and 0 < len(k) <= 160 for k in value))
+
+    support = state.get('directory_support', {})
+    councils = state.get('local_councils', {})
+    if not mapping(support, 32) or not mapping(councils, 32):
+        raise ValueError('族议界面记录无效')
+    for rows in support.values():
+        if not mapping(rows, 256) or any(not isinstance(v, str) or not 0 < len(v) <= 100 for v in rows.values()):
+            raise ValueError('山门盟书无效')
+    for races in councils.values():
+        if not mapping(races, 128):
+            raise ValueError('本界议簿无效')
+        for book in races.values():
+            if not isinstance(book, dict):
+                raise ValueError('族议案卷无效')
+            for field, cap in [('places', 6), ('grievances', 5), ('sessions', None), ('used_at', None)]:
+                rows = book.get(field, {})
+                if not mapping(rows, 256) or any(type(v) is not int or v < 0 or cap is not None and v > cap for v in rows.values()):
+                    raise ValueError('分席或议期记录无效')
+            if (sum(book.get('places', {}).values()) > 6 or type(book.get('awarded', 0)) is not int
+                    or book.get('awarded', 0) < 0 or not isinstance(book.get('counter', ''), str)):
+                raise ValueError('荐额总数或起始年份无效')
+            recent = book.get('recent', [])
+            if not isinstance(recent, list) or len(recent) > 3:
+                raise ValueError('族会议案超出容量')
+            for meeting in recent:
+                if (not isinstance(meeting, dict) or not isinstance(meeting.get('summary'), str)
+                        or not isinstance(meeting.get('ballots'), list) or len(meeting['ballots']) > 256
+                        or any(not isinstance(b, dict) or type(b.get('yes')) is not bool or
+                               not all(isinstance(b.get(k), str) for k in ('id', 'name', 'reason')) for b in meeting['ballots'])):
+                    raise ValueError('各宗回函无效')
 
 
 def validate_dispatches(child):

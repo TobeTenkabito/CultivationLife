@@ -3,7 +3,9 @@ from __future__ import annotations
 import copy
 from ...system.intrigue.custody import is_imprisoned
 from ...system.npc_social import social_hint
+from ...spatial_people import contact_blocked
 from ...system.npc_contacts import availability, relation_kind
+from ...system.npc_whereabouts import letter_reason
 from ...system.npc_promises import projection as promise_projection
 from typing import Any
 from ...content_registry import (
@@ -139,6 +141,8 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         from ...system.cultivation_ranks import public_ranks
         ranks = public_ranks(npc)
         public_npc = npc.to_dict()
+        public_npc.pop("location_id", None)
+        public_npc.pop("roaming_years", None)
         public_npc["cultivation_ranks"] = ranks
         from ...system.cultivation_ranks import mask_unrevealed
         mask_unrevealed(public_npc, perception)
@@ -168,11 +172,15 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
     disciple_ids = {entry["id"] for entry in player.disciples}
     friend_ids = {entry["id"] for entry in player.dao_friends}
     concubine_ids = {str(entry.get("id")) for entry in player.concubines}
+    from ...system.npc_whereabouts import reply_index
+    replies = reply_index(game)
     for entry in roster:
         npc = npc_by_id[entry["id"]]
-        entry.update(contact_actions=availability(game,npc), contact_relation=relation_kind(player,npc.id),
+        blocked = contact_blocked(game, npc)
+        entry.update(contact_actions=availability(game,npc,blocked=blocked), contact_relation=relation_kind(player,npc.id),
+                     letter_reason=letter_reason(game,npc,blocked,replies),
                      contact_source='sect', perceived_alive=True, status='存活')
-        entry.update(promise_projection(game,npc))
+        entry.update(promise_projection(game,npc,replies=replies))
         # Relationship permissions always use the NPC's true cultivation;
         # secret arts only affect what the player can see.
         npc_rank = (npc.realm_index, npc.layer)

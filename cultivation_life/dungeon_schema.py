@@ -157,6 +157,14 @@ def decode(value):
     if any(r['status']=='active' and k!=active for k,r in value['instances'].items()):
         raise ValueError('存在多个活动副本')
     for mail in value['mail']:
+        if isinstance(mail, dict) and mail.get('status') == 'whereabouts':
+            fields(mail, {'id','sender','sender_id','title','body','unread','status','age','world','location_id'})
+            finite(mail['age'])
+            if (mail['world'] not in WORLD_IDS or type(mail['unread']) is not bool
+                    or not all(isinstance(mail[k], str) and mail[k] for k in ('sender','sender_id','title','body','id'))
+                    or mail['location_id'] is not None and not isinstance(mail['location_id'], str)):
+                raise ValueError('人物回信无效')
+            continue
         fields(mail, {'id','dungeon_id','sender','sender_id','title','body','unread','status','age'})
         if mail['dungeon_id'] not in value['instances'] or type(mail['unread']) is not bool:
             raise ValueError('副本信件引用无效')

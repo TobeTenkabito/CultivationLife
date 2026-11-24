@@ -4,6 +4,7 @@ from .npc_contact_dependencies import NpcContactDependencies
 from ..models import HistoryRecord, SectNpc
 from ..runtime import decode_rng, encode_rng, now_iso
 from ..rules import has_living_master
+from ..spatial_people import contact_blocked
 
 
 def relation_kind(player, npc_id):
@@ -15,13 +16,10 @@ def relation_kind(player, npc_id):
     return 'npc'
 
 
-def availability(game, npc, *, accepting_request=False):
-    from ..spatial_people import accessible
-    from ..npc_custody import is_free
+def availability(game, npc, *, accepting_request=False, blocked=None):
     p = game.player
-    blocked = ('此人不在当前界面或空间，或不在自由名册' if not is_free(npc) or npc.custody or npc.id in game.intrigue_state.get('npc_prisons', {}) or not accessible(game, npc) else
-               '请先结束当前事件、战斗或拘禁' if not p.alive or game.pending_event or game.active_trial or p.imprisonment or p.ghost_captor
-               or (game.guixu_state.get('player_session') or {}).get('trapped') else '')
+    if blocked is None:
+        blocked = contact_blocked(game, npc)
     actions = dict.fromkeys(['party','companion','friend','master','disciple','concubine','slay','improve','worsen','capture','promise'], blocked)
     if blocked:
         return actions

@@ -23,6 +23,7 @@ window.NpcContacts = (() => {
     const title = el('div'); title.append(el('small',n.contact_source==='institution'?`机构往来 · ${n.institution_name||'机构'}`:n.contact_source==='fixed'?'世间留名 · 重要人物':n.contact_source==='sect'?'同门问道 · 宗门同道':n.contact_source==='important'?'故人留名 · 重要人物':'萍水相逢 · 一面之缘'),el('h3',n.name),el('p',`${n.realm_name} · ${n.path_name} · ${n.gender_name}`));header.append(title);target.append(header);
     target.append(el('p',`${relation(n) || '相识'} · 好感 ${Number(n.affinity || 0).toFixed(0)} · ${n.status}`,'contact-standing'));
     target.append(el('p',`身魂状态：${n.spirit_state?.mode==='wandering'?'神游':'普通'}`,'muted'));
+    target.append(el('p',n.contact_whereabouts || '行踪未明','contact-standing'));
     if(n.cultivation_ranks) target.append(el('p',`炼体 ${n.cultivation_ranks.body.name} · 神识 ${n.cultivation_ranks.sense.name}`,'muted'));
     const tools = el('div',undefined,'contact-actions');
     for (const [action,label] of Object.entries(labels)) {
@@ -68,7 +69,7 @@ window.NpcContacts = (() => {
     const root=document.getElementById('npc-contacts'); if(!root)return;
     const focused=root.contains(document.activeElement)&&document.activeElement.type==='search';
     root.replaceChildren();
-    const head=el('div',undefined,'contact-heading');head.append(el('h3','故人笺'),el('span','重要人物 · 当面交往'));root.append(head);
+    const head=el('div',undefined,'contact-heading');head.append(el('h3','故人笺'),el('span','人物往来'));root.append(head);
     root.append(el('p','重要人物、游历相识、宗门同道与机构人物尽收此笺。同一人可见于多个分类；灰色操作会说明缘由，更多亲随事务可在下方名册办理。','muted'));
     const search=el('input');search.type='search';search.placeholder='寻姓名、称号、境界…';search.setAttribute('aria-label','搜索重要人物');search.value=query;search.className='contact-search';root.append(search);
     const tabs=el('div',undefined,'contact-filters');

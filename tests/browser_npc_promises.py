@@ -21,7 +21,7 @@ def prepare(engine):
     identity=engine.create_game('凤仪亭验收','supreme_metal','dao',329,preset_id='core')['id']
     g=engine._load(identity);p=g.player;p.gender='female';g.pending_event=None
     actor=SectNpc('promise-lover','吕奉先','故人',3,1,80,10000,world=p.world,
-        location_id=p.location_id,affinity=80,spirit_root='supreme_metal')
+        location_id=p.location_id,affinity=80,spirit_root='supreme_metal',encountered_player=True)
     owner=SectNpc('promise-owner','董仲颖','正主',1,1,50,10000,world=p.world,
         location_id=p.location_id,spirit_root='supreme_metal')
     other=SectNpc('promise-away','远方人物','故人',1,1,50,10000,world=p.world,
@@ -31,6 +31,7 @@ def prepare(engine):
     engine._set_concubine_status(g,dict(owner_id=owner.id,owner_name=owner.name,
         owner_realm_index=1,owner_layer=1,owner_realm_name='练气',owner_world=p.world),forced=True)
     engine.store.save(g)
+    engine.dungeon_action(identity,'discover',dict(world=p.world,location_id=p.location_id,slot=0))
     return identity
 
 
@@ -47,7 +48,7 @@ def main():
                 with sync_playwright() as pw:
                     browser=pw.chromium.launch()
                     smoke=bool(os.environ.get('NPC_PROMISE_UI_SMOKE'))
-                    for theme in ('a' if smoke else 'abdf'):
+                    for theme in (('light',) if smoke else ('light', 'dark')):
                         for width,height in (((1440,1000),) if smoke else ((1440,1000),(412,915),(915,412))):
                             identity=prepare(engine)
                             page=browser.new_page(viewport={'width':width,'height':height})
@@ -58,9 +59,40 @@ def main():
                             page.on('request',lambda req:posts.append(req.post_data_json) if req.method=='POST' and req.url.endswith('/npc-contact') else None)
                             page.goto(f'http://127.0.0.1:{http.server_port}')
                             page.wait_for_function('!!configData')
-                            page.evaluate('t=>document.querySelector(`[data-theme-picker=dialog] [data-theme-choice="${t}"]`).click()',theme)
-                            page.evaluate('GameThemes.saved')
+                            page.locator(f'[data-theme-picker=start] [data-pixel-theme-choice={theme}]').click()
                             page.evaluate('async id=>loadGame(id)',identity)
+                            if theme=='light' and width==1440:
+                                navigation_locator(page,'[data-panel-target=relationship]').click()
+                                search=page.locator('#npc-contacts input[type=search]')
+                                reveal_subpage(page,search).fill('顾长庚')
+                                click_control(page.locator('#npc-contacts .contact-person').first)
+                                assert '行踪未明' in page.locator('#npc-contacts').inner_text()
+                                assert not page.locator('#npc-contacts [data-contact-action=ask_location]').count()
+                                page.keyboard.press('Escape')
+                                navigation_locator(page,'[data-panel-target=mailbox]').click()
+                                mailbox=page.locator('#mailbox-panel')
+                                recipient=mailbox.get_by_label('收信人')
+                                recipient.select_option('xiang_zhili')
+                                post=mailbox.get_by_role('button',name='寄出',exact=True)
+                                with page.expect_response(lambda r:r.url.endswith('/dungeon-action')) as response:
+                                    click_control(post)
+                                assert response.value.status==200
+                                page.wait_for_function('!busy && game.dungeons.unread>0')
+                                assert post.is_disabled() and recipient.input_value()=='xiang_zhili'
+                                letter=page.locator('#mailbox-panel section').filter(has_text='答道友问行踪')
+                                letter.get_by_text('我眼下在界门古塞落脚',exact=False).wait_for(state='visible')
+                                click_control(letter.get_by_role('button',name='读过此信'))
+                                page.wait_for_function('!busy && game.dungeons.unread===0')
+                                mailbox.get_by_label('事由').select_option('invite')
+                                recipient.select_option('promise-lover')
+                                with page.expect_response(lambda r:r.url.endswith('/dungeon-action')) as response:
+                                    click_control(post)
+                                assert response.value.status==200
+                                mailbox.get_by_text('同行邀约回信',exact=True).wait_for(state='visible')
+                                page.wait_for_function('!busy && game.dungeons.unread===1')
+                                assert post.is_disabled()
+                                page.keyboard.press('Escape')
+                                assert not posts
                             def open_form():
                                 navigation_locator(page,'[data-panel-target=relationship]').click()
                                 search=page.locator('#npc-contacts input[type=search]')
@@ -71,7 +103,7 @@ def main():
                             open_form()
                             assert not page.locator('.contact-promise option[value="promise-away"]').count()
                             assert page.locator('.contact-promise').evaluate('e=>e.scrollWidth<=e.clientWidth+2')
-                            if theme=='a' and width==1440:
+                            if theme=='light' and width==1440:
                                 g=engine._load(identity)
                                 event=engine._prepare_treasure_reward_event(g,random.Random(3))
                                 follow=engine._prepare_treasure_reward_event(g,random.Random(4))
@@ -120,7 +152,7 @@ def main():
                     browser.close()
             finally:
                 http.shutdown();http.server_close()
-    print('NPC promises UI passed: real duel, Fengyi unlock, stale recovery, two rewards, no repeated POST, '+('smoke case' if smoke else 'four themes x three viewports'))
+    print('NPC correspondence and promises UI passed: letters, real duel, stale recovery and rewards, '+('smoke case' if smoke else 'two palettes x three viewports'))
 
 
 if __name__=='__main__':main()

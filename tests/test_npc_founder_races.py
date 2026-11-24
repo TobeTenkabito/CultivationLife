@@ -9,6 +9,9 @@ import pytest
 from cultivation_life.content_registry import RACE_DEFINITIONS
 from cultivation_life.engine import GameEngine
 from cultivation_life.engine.world import npcs
+from cultivation_life.engine.composition.strategic_war import bind
+from cultivation_life.system.race_faction_directory import unformed_factions
+from cultivation_life.system.strategic_war.materialization import materialize
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,6 +50,7 @@ def test_founder_and_allegiance_follow_loaded_local_race_and_survive_reload(setu
             return race
         return original_choice(rows)
     before = set(game.sects)
+    listed = list(unformed_factions(game, world, race, include_presets=False))
     news = []
     with patch.object(rng, 'random', return_value=0), patch.object(rng, 'choice', side_effect=choose):
         engine._maybe_npc_found_power(game, rng, news)
@@ -54,6 +58,10 @@ def test_founder_and_allegiance_follow_loaded_local_race_and_survive_reload(setu
     org = game.sects[identity]
     founder = next(n for n in org.npcs if n.id == org.founder_npc_id)
     assert org.kind == kind and org.allegiance_race == founder.race == race
+    if kind == 'sect' and engine._world_supports(world, 'races'):
+        assert (org.id, org.name) == (listed[0]['id'], listed[0]['name'])
+        shown = engine._public_race_system(game)['races'][race]['supported_factions']
+        assert [r['active'] for r in shown if r['id'] == org.id] == [True]
     assert founder.faction_id == identity and founder.world == org.world == world
     assert len(org.npcs) == 3 and all(n.race in pool for n in org.npcs)
     assert org.location_id == founder.location_id and news
@@ -87,3 +95,41 @@ def test_world_without_race_catalog_or_politics_preserves_native_default(setup):
     org = game.sects[identity]
     assert org.allegiance_race == 'human'
     assert next(n for n in org.npcs if n.id == org.founder_npc_id).race == 'human'
+
+
+@pytest.mark.parametrize('world', ['spirit', 'true_demon', 'monster_realm', 'phantom_underworld', 'nether'])
+def test_race_directory_on_first_visit_and_after_reload(setup, world):
+    engine, games = setup
+    game = copy.deepcopy(games[world])
+    before = set(game.sects), game.rng_state, copy.deepcopy(game.strategic_war_state)
+    def seeded(view):
+        return {race: [(r['id'], r['name']) for r in faction['supported_factions'] if r.get('origin') == 'seeded']
+                for race, faction in view['races'].items()}
+    first = seeded(engine._public_race_system(game))
+    assert first and all(len(rows) == 2 for rows in first.values())
+    assert len({identity for rows in first.values() for identity, _ in rows}) == 2 * len(first)
+    assert (set(game.sects), game.rng_state, game.strategic_war_state) == before
+    engine.store.save(game)
+    assert seeded(engine.get_game(game.id)['race_system']) == first
+    game.seed += 1
+    assert seeded(engine._public_race_system(game)) != first
+
+
+def test_mobilization_uses_directory_identity_and_extinct_sects_stay_gone(setup):
+    engine, games = setup
+    game = copy.deepcopy(games['spirit'])
+    race = 'woodborn'
+    listed = list(unformed_factions(game, 'spirit', race))
+    deps, rng = bind(engine), random.Random(542)
+    for entry in listed:
+        org = materialize(deps, game, 'spirit', race, rng)
+        assert (org.id, org.name, org.allegiance_race) == (entry['id'], entry['name'], race)
+        assert org.npcs and game.strategic_war_state['materialized'][org.id]['paid'] > 0
+    org.allegiance_race = 'seafolk'
+    view = engine._public_race_system(game)['races']
+    assert org.id not in {r['id'] for r in view[race]['supported_factions']}
+    assert [r['active'] for r in view['seafolk']['supported_factions'] if r['id'] == org.id] == [True]
+    for entry in listed:
+        game.sects[entry['id']].extinct = True
+    assert not list(unformed_factions(game, 'spirit', race))
+    assert not engine._public_race_system(game)['races'][race]['supported_factions']

@@ -1,6 +1,24 @@
 {
   "schema_version": 1,
   "systems": {
+    "faction_name_roots": {
+      "clawkin": ["伏虎", "白额", "裂石"],
+      "foxkin": ["鸣狐", "绯尾", "青丘"],
+      "scalekin": ["碧鳞", "蟠溪", "蛟潭"],
+      "hornkin": ["双犀", "负岭", "抵云"],
+      "skykin": ["雷羽", "凌霄", "击空"],
+      "chitinborn": ["青甲", "金蜣", "藏翅"],
+      "moonbeast": ["啸月", "银爪", "望朔"],
+      "dreamfox": ["枕烟", "梦泽", "九尾"],
+      "treekin": ["岁木", "盘根", "千枝"],
+      "boneborn": ["龙骸", "灵骨", "生髓"],
+      "tidephantom": ["幻潮", "泡影", "浮沫"],
+      "shadowwing": ["夜翎", "敛翼", "墨羽"],
+      "primordial_true_spirit": ["太初", "栖凤", "古麟"],
+      "self_ancestor": ["归脉", "开源", "溯祖"],
+      "worldtree_descendant": ["垂天", "通枝", "界根"],
+      "chaos_beast": ["洪荒", "辟野", "原兽"]
+    },
     "faction_presets": {
       "monster": [
         {"id": "monster_ten_thousand_court", "world": "monster_realm", "name": "万妖祖庭", "elders": ["玄岳妖圣", "青离夫人"]},

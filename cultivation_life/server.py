@@ -721,6 +721,8 @@ class Handler(BaseHTTPRequestHandler):
                 )
             elif operation == "strategic-war":
                 result = ENGINE.strategic_war_action(game_id, payload)
+            elif operation == "race-council":
+                result = ENGINE.strategic_war_action(game_id, {**payload, 'action': 'local_council'})
             elif operation == "war-action":
                 result = ENGINE.war_action(
                     game_id, payload.get("war_id", ""), payload.get("action", ""),

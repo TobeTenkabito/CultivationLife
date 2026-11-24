@@ -141,7 +141,7 @@
 .dungeon-compare .dungeon-metric small {line-height:1.3;}
 #dungeon-panel summary {cursor:pointer;min-height:36px;box-sizing:border-box;padding:6px 0;}
 .dungeon-compare>summary {font-size:13px;font-weight:600;}
-#dungeon-panel select {width:100%;min-width:0;min-height:40px;margin:0 0 8px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:12px var(--sans);}
+#dungeon-panel select,.mail-fields select {width:100%;min-width:0;min-height:40px;margin:0 0 8px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:12px var(--sans);}
 #dungeon-panel .dungeon-compare>select {width:calc(50% - 4px);}
 .dungeon-compare>select+select {margin-left:8px!important;}
 .dungeon-log-filters {flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
@@ -170,6 +170,8 @@
 .dungeon-mail-actions {display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
 .dungeon-invite {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:12px;}
 .dungeon-invite select {min-width:0;}
+.mail-fields {display:flex;flex-wrap:wrap;gap:10px;margin-block:10px;}
+.mail-fields label:not([hidden]) {display:grid;flex:1 1 10rem;gap:4px;min-width:0;}
 .mailbox-entry {position:relative;}
 .mailbox-dot {display:inline-block;width:7px;height:7px;background:#c74535;border-radius:50%;margin-left:5px;vertical-align:super;}
 .mailbox-dot[hidden] {display:none;}

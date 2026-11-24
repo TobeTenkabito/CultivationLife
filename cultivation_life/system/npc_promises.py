@@ -72,7 +72,9 @@ def resolve(game, actor, target, rng, npc_power):
     return outcome
 
 
-def projection(game, npc):
-    return dict(contact_location_id=site(game, npc) if accessible(game, npc) else None,
+def projection(game, npc, *, replies=None):
+    from .npc_whereabouts import knowledge
+    location, note = knowledge(game, npc, accessible(game, npc), replies)
+    return dict(contact_location_id=location, contact_whereabouts=note,
                 contact_promise_unit=game.diplomacy_unit,
                 contact_promise_target_reason=participant_reason(game, npc))

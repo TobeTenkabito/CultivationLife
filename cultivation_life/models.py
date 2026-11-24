@@ -296,6 +296,7 @@ class SectNpc:
     roster_origin: list[dict[str, Any]] = field(default_factory=list)
     # Actual location when a local activity requires one; legacy NPCs remain unspecified.
     location_id: str | None = None
+    roaming_years: int = 0
 
     # Paid medicinal extension is bounded across this NPC's lifetime. It is
     # personal tolerance, not an economic wallet or a copied supply inventory.
@@ -306,6 +307,8 @@ class SectNpc:
     def __post_init__(self) -> None:
         import math
         from .soul_rules import validate_spirit
+        if type(self.roaming_years) is not int or self.roaming_years < 0:
+            raise ValueError('人物游历年数无效')
         self.spirit_state = validate_spirit(self.spirit_state)
         from .npc_technique_schema import normalize
         self.technique_levels = normalize(self.technique_levels, self.main_technique_id, self.main_technique_level, self.family_traits)
@@ -338,6 +341,8 @@ class SectNpc:
         result['technique_levels'] = normalize(self.technique_levels,self.main_technique_id,self.main_technique_level,self.family_traits)
         if self.location_id is None:
             result.pop('location_id')
+        if not self.roaming_years:
+            result.pop('roaming_years')
         return result
 
     @classmethod
