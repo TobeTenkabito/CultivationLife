@@ -44,6 +44,7 @@ def _family_world_tier(world):
 
 def _family_child_npc(child):
     data = {f.name:copy.deepcopy(child[f.name]) for f in fields(SectNpc) if f.name in child}
+    data.setdefault("trait_state", {})
     data.update(title='嫡系后人', realm_index=int(child.get('realm_index', 0)),
                 layer=int(child.get('layer', 1)), age=int(child.get('age', 0)), lifespan=child.get('lifespan'))
     return SectNpc(**data)
@@ -227,7 +228,8 @@ def family_action(deps: FamilyActionsDependencies, game_id, action, payload):
             partner = SectNpc(f'{family.id}_spouse_{serial}', rng.choice(['沈清','陆瑶','顾宁','楚安'])+str(serial),
                 '姻亲族人', rank, 1, max(18, min(npc.age, 40)), max(110, int(REALMS[rank].lifespan[0])) if REALMS[rank].lifespan else None,
                 spirit_root=deps._random_npc_root(rank, rng), world=family.world, path=family.path,
-                gender='female' if npc.gender == 'male' else 'male', affinity=50, family_traits={'kin':True})
+                gender='female' if npc.gender == 'male' else 'male', affinity=50, family_traits={'kin':True},
+                trait_state=game.next_npc_birth("family_spouse"))
             require_faction_admission(family, partner)
             from .combat.npc_lifecycle import initialize_native
             initialize_native(partner, WORLD_SYSTEMS.get("transcendent_combat", {}), now=player.age)
@@ -349,6 +351,7 @@ def _family_annual_governance(deps: FamilySocietyDependencies, game, rng):
                 'realm_index':0,'layer':1,'path':family.path,'race':parent.race,'lifespan':rng.randint(80,100),
                 'gender':rng.choice(['male','female']),'parents':[parent.name,spouse.name],
                 'family_traits':{'kin':bool(parent.family_traits.get('kin') or spouse.family_traits.get('kin')),'parents':[parent.id,spouse.id]}}
+            child['trait_state'] = game.next_npc_birth('family_child')
             if player_kin(game,family) and child['family_traits']['kin']:
                 game.player.offspring.append(child)
             else:

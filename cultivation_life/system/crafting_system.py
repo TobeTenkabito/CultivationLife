@@ -70,6 +70,8 @@ def store_crafted_artifact(player: Player, artifact: dict[str, Any]) -> None:
     artifact_id = str(artifact.get("id", ""))
     if not artifact_id:
         raise ValueError("炼器法宝缺少唯一实例 ID")
+    from ..combat_attributes import profile_for
+    artifact["damage_profile"] = profile_for(artifact)
     artifact["description"] = crafted_artifact_description(artifact)
     if not any(str(row.get("id")) == artifact_id for row in player.crafted_artifacts):
         player.crafted_artifacts.append(artifact)
@@ -78,7 +80,7 @@ def store_crafted_artifact(player: Player, artifact: dict[str, Any]) -> None:
             id=artifact_id,
             name=str(artifact.get("name", "无名法宝")),
             quantity=1,
-            crafted_artifact_id=artifact_id,
+            crafted_artifact_id=artifact_id, damage_profile=artifact["damage_profile"],
             description=str(artifact["description"]),
             tags=["artifact", "equipment", "crafted_artifact"],
         ))

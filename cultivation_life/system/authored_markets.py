@@ -27,7 +27,7 @@ def append_fair(game, candidates):
         npc=persons.get(attendee['id']);book=template(game,row['content_id'])
         # The merchant's actual newly instantiated offering establishes knowledge;
         # reuse existing levels if the same person offers it at a later fair.
-        if npc and npc.realm_index>=book.grade and can_practice_technique(npc.spirit_root,book):
+        if npc and npc.realm_index>=book.grade and can_practice_technique(npc,book):
             known=levels(npc)
             level=known.get(book.id,1+hashlib.sha256(f'{game.seed}:{npc.id}:{book.id}'.encode()).digest()[0]%9)
             slot=book.authored_buffs[0]['slot'] if book.authored_buffs else 'main'

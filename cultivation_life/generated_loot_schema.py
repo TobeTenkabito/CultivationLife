@@ -10,7 +10,10 @@ FAMILIES = {
 
 
 def validate_reward(reward):
-    if set(reward) != {'kind', 'content_id', 'name', 'tier', 'roll'}:
+    if 'damage_profile' in reward:
+        from .combat_attributes import validate_profile
+        validate_profile(reward['damage_profile'])
+    if set(reward) - {'damage_profile'} != {'kind', 'content_id', 'name', 'tier', 'roll'}:
         raise ValueError('随机遗宝字段无效')
     roll = reward['roll']
     if not isinstance(roll, dict) or set(roll) != {'family', 'path', 'quality', 'stats'}:

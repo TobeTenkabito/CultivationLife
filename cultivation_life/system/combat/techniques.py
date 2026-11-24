@@ -160,6 +160,7 @@ class TechniqueRuntime:
             for packet in self.records[key]['packets']:
                 if packet['starts'] <= self.round <= packet['expires'] and packet['remaining'] > 0:
                     gain = original * packet['remaining']
+                    gain = self.battle.attribute_damage(source, target, gain, book)
                     packet['remaining'] = 0.
                     amount += gain  # Every book uses the same original input, never another book's output.
                     self.note(owner, book, 'strike', target=target, amount=gain, receipt=packet['receipt'])

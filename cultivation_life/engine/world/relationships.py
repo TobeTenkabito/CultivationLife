@@ -84,6 +84,7 @@ def _persist_relationship_npc(deps: RelationshipDependencies, game: GameState, r
         name=str(relation.get("name", "无名修士")), title=reason,
         realm_index=int(relation.get("realm_index", 0)), layer=int(relation.get("layer", 1)),
         age=int(relation.get("age", 18)), lifespan=relation.get("lifespan"),
+        trait_state=relation["trait_state"] if "trait_state" in relation else game.next_npc_birth("relationship"),
         spirit_root=str(relation.get("spirit_root", "none")),
         cultivation_progress=float(relation.get("cultivation_progress", 0)),
         path=str(relation.get("path", "dao")), race=str(relation.get("race", "human")),
@@ -340,6 +341,7 @@ def _try_conceive_child(deps: RelationshipDependencies, game: GameState, rng: ra
             child["monster_custom_lineage"] = copy.deepcopy(inherited["lineage"])
             child["monster_custom_lineage"]["id"] = inherited["id"]
             lineage_text += f"，并承袭了祖血【{child['monster_custom_lineage'].get('name', inherited['id'])}】的定型规则"
+    child["trait_state"] = game.next_npc_birth("child")
     player.offspring.append(child)
     player.children += 1
     return f" 你们诞下一名后代{child['name']}；其{'身具' + child['spirit_root_name'] if has_root else '没有显现灵根'}{lineage_text}。"
@@ -399,6 +401,7 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
                 str(child["id"]), str(child["name"]), "后代",
                 int(child.get("realm_index", 1)), int(child.get("layer", 1)),
                 int(child["age"]), child.get("lifespan"),
+                trait_state=child.setdefault("trait_state", {}),
                 spirit_root=str(child.get("spirit_root", "none")),
                 cultivation_progress=float(child.get("cultivation_progress", 0)),
                 path=str(child.get("path", player.path)), race=player.race,
@@ -519,6 +522,7 @@ def _annual_offspring_and_family_update(deps: RelationshipDependencies, game: Ga
         newcomer = deps._recruit_sect_npc(family, player.age, rng)
         if newcomer is None:
             return news
+        newcomer.trait_state = game.next_npc_birth("family_recruit")
         newcomer.title = "外姓门人"
         summary = f"低阶散修{newcomer.name}请求依附{family.name}，列入外门。"
         game.history.append(HistoryRecord(

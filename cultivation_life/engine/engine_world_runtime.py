@@ -13,6 +13,8 @@ from ..content_registry import (
     WORLD_NPC_TEMPLATES,
     WORLD_SYSTEMS,
 )
+from ..traits import birth
+from ..relationship_records import find_person
 from ..models import GameState, HistoryRecord, Player, SectNpc, SectState
 from .engine_constants import LEGACY_TRUE_DEMON_RACE_MAP
 from .dependencies import WorldRuntimeDependencies
@@ -45,6 +47,9 @@ def _new_sects() -> dict[str, SectState]:
 def _ensure_sects(deps: WorldRuntimeDependencies, game: GameState) -> None:
     fresh = deps._new_sects()
     if game.world_rules_version < 2:
+        for sect in fresh.values():
+            for npc in sect.npcs:
+                npc.trait_state = birth(game.seed, npc.id)
         game.sects = fresh
         game.world_rules_version = 6
     rosters = [*game.sects.values(), *([game.family] if game.family else [])]
@@ -54,12 +59,14 @@ def _ensure_sects(deps: WorldRuntimeDependencies, game: GameState) -> None:
             locations.setdefault(npc.id, []).append((roster.id, npc))
     for npc in [*game.world_npcs.values(), *game.notable_npcs.values()]:
         locations.setdefault(npc.id, []).append((None, npc))
-    known_ids = set(locations)
+    known_ids = set(locations) | game.inactive_npcs.keys() | game.relationship_npcs.keys()
     for sect_id, new_sect in fresh.items():
         if game.family and game.family.id == sect_id:
             continue  # An initial family choice keeps the original faction and NPC IDs.
         if sect_id not in game.sects:
             new_sect.npcs = [npc for npc in new_sect.npcs if npc.id not in known_ids]
+            for npc in new_sect.npcs:
+                npc.trait_state = birth(game.seed, npc.id)
             game.sects[sect_id] = new_sect
             known_ids.update(npc.id for npc in new_sect.npcs)
             continue
@@ -74,6 +81,8 @@ def _ensure_sects(deps: WorldRuntimeDependencies, game: GameState) -> None:
         )}
         game.sects[sect_id].npcs = [npc for npc in game.sects[sect_id].npcs if npc.id not in relocated]
         missing = [npc for npc in new_sect.npcs if npc.id not in known_ids]
+        for npc in missing:
+            npc.trait_state = birth(game.seed, npc.id)
         game.sects[sect_id].npcs.extend(missing)
         known_ids.update(npc.id for npc in missing)
         templates = {npc.id: npc for npc in new_sect.npcs}
@@ -169,6 +178,9 @@ def _ensure_world_npcs(deps: WorldRuntimeDependencies, game: GameState) -> bool:
     legacy_initial_ages = {"xiang_zhili": 2810}
     for npc_id, npc in fresh.items():
         if npc_id not in game.world_npcs:
+            if find_person(game, npc_id, include_inactive=True) is not None:
+                continue
+            npc.trait_state = birth(game.seed, npc.id)
             game.world_npcs[npc_id] = npc
             changed = True
         current = game.world_npcs[npc_id]

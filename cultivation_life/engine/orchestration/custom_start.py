@@ -146,7 +146,8 @@ def configure(game, data, rng, *, sync_natal):
             realm = max(1, {1:3, 2:6, 3:9}[tier] - index)
             npc = SectNpc(f'{identity}-{index}', definition['name'][-4] + ('承远' if index else '明玄'),
                 '族长' if not index else '族人', realm, 1, 35, None if realm >= 6 else REALMS[realm].lifespan[1],
-                world=p.world, faction_id=identity, location_id=site, spirit_root='supreme_earth')
+                world=p.world, faction_id=identity, location_id=site, spirit_root='supreme_earth',
+                birth_seed=game.seed)
             initialize_native(npc, WORLD_SYSTEMS.get('transcendent_combat', {}), now=p.age)
             clan.npcs.append(npc)
         clan.founder_npc_id = clan.npcs[0].id
@@ -165,7 +166,8 @@ def configure(game, data, rng, *, sync_natal):
                 member = SectNpc(f'{entity.id}-member-{index}', p.name + title, title,
                     realm, 1, 18, None if realm >= 6 else max(100, REALMS[realm].lifespan[1]),
                     world=p.world, faction_id=entity.id, location_id=p.location_id, path=p.path,
-                    spirit_root=p.spirit_root, race=p.race)
+                    spirit_root=p.spirit_root, race=p.race,
+                    trait_state=game.next_npc_birth("custom_" + kind))
                 initialize_native(member, WORLD_SYSTEMS.get('transcendent_combat', {}), now=p.age)
                 entity.npcs.append(member)
         else:

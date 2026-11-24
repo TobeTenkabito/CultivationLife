@@ -89,6 +89,9 @@ def forge_crafted_artifact(
         "mold_rule_description": str(preview["mold"]["rule"].get("description", "")),
         "is_natal": False,
     }
+    from ...combat_attributes import profile_for
+    recipe_name = preview["mold"]["name"] + "".join(str(m.get("name", "")) for m in artifact["materials"])
+    artifact["damage_profile"] = profile_for({"name": recipe_name})
     deps.store_crafted_artifact(player, artifact)
     deps._grant_art_experience(
         player,

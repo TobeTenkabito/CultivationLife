@@ -34,3 +34,6 @@ def settle_light(player, key, expected_level):
     if key not in levels or levels[key] != expected_level or expected_level >= 10:
         raise ValueError('神光资格或等级已变化，请刷新后重新办理')
     player.immortal_body.setdefault('divine_lights', {})[key] = expected_level + 1
+    if expected_level + 1 == 10:
+        from ..traits import mastery
+        mastery(player, 'light:' + key)

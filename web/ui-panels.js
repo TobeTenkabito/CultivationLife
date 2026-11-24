@@ -12,6 +12,34 @@ window.GameUi = Object.freeze({
     if (cls) n.className = cls;
     return n;
   },
+  traitStudy(host, rows, disabled, submit) {
+    if (!rows?.length) return;
+    const label = document.createElement('label');
+    const select = document.createElement('select');
+    label.append('参悟来源', select);
+    for (const row of rows) select.add(new Option(row.source + ' · ' + row.rarity + ' · ' + row.name, row.id));
+    select.disabled = disabled;
+    const first = rows.find(row => row.allowed);
+    if (first) select.value = first.id;
+    const detail = document.createElement('p');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = '参悟特质';
+    const current = () => rows[select.selectedIndex];
+    const refresh = () => {
+      const row = current();
+      detail.textContent = row.effect + (row.allowed ? '' : '。当前肉身、等级或互斥条件不符。')
+        + (row.replaces.length ? '。将覆盖' + row.replaces.join('、') : '');
+      button.disabled = disabled || !row.allowed;
+    };
+    select.onchange = refresh;
+    button.onclick = () => {
+      const row = current();
+      if (!row.replaces.length || window.confirm('以「' + row.name + '」覆盖' + row.replaces.join('、') + '？')) submit(row.id);
+    };
+    refresh();
+    host.append(label, detail, button);
+  },
   identifiedElement(tag, text, id) {
     const n = document.createElement(tag);
     if (text) n.textContent = text;

@@ -122,6 +122,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         self.primary_ordinary_body_loss = 0.0
         self.objectives = {"player": "kill", "enemy": "kill"}
         self.escape_forbidden_sides: frozenset[str] = frozenset()
+        self.attribute_hits = []
+        self.initiative_used = set()
         self._init_semantics()
 
     def set_objectives(self, player: str, enemy: str) -> None:
@@ -230,6 +232,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
     def begin_round(self, round_no: int, *, player_condition: float, enemy_condition: float,
                     player_mp: float, enemy_mp: float, player_morale=None, enemy_morale=None,
                     rng=None, first_side=None) -> PhaseRound:
+        self.attribute_hits = []
         self.frame = PhaseRound(round_no)
         self.animation = {'version': 1, 'opening': [max(0., 1 - self.ordinary_loss(side))
                           for side in ('player', 'enemy')], 'effects': [], 'interventions': []}
@@ -416,6 +419,62 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         if lethal and self.objectives[opponent]=='kill':self._body_death(key)
         return weighted
 
+    def ordinary_attribute_scale(self, side, amount):
+        sources = [s.unit for s in self.units.values() if s.unit.side == side and s.fighting]
+        targets = [s.unit for s in self.units.values() if s.unit.side != side and s.fighting]
+        total = sum(s.power for s in sources) * sum(t.power for t in targets)
+        if not total:
+            return amount
+        return sum(self.attribute_damage(s.id, t.id, amount*s.power*t.power/total)
+                   for s in sources for t in targets)
+
+    def first_initiative(self, side):
+        if not self._has_ordinary(side):
+            return 1.
+        bonus = 0.
+        for key, state in self.units.items():
+            if (state.unit.side == side and key not in self.initiative_used and self._available(key)
+                    and "swift_bone" in state.unit.capabilities.attributes.get("traits", ())):
+                bonus += .16 * state.unit.power / self.totals[side]
+                self.initiative_used.add(key)
+        return 1. + bonus
+
+    def active_element_ward(self, key):
+        state = self.units[key]
+        stats = state.unit.capabilities.attributes
+        ward = stats.get("ward")
+        sources = stats.get("ward_sources", {}).get(ward, ())
+        return ward if not sources or any(s not in state.restrictions for s in sources) else None
+
+    def attribute_damage(self, source, target, amount, book=None):
+        from ...combat_attributes import PHYSICAL, components
+        from ...traits import MASTERY
+        attacker = self.units[source]
+        stats = attacker.unit.capabilities.attributes
+        defense = self.units[target].unit.capabilities.attributes
+        if not stats and not defense:
+            return amount
+        if book is None:
+            choices = [v for k,v in stats.get("attacks", {}).items() if k not in attacker.restrictions]
+            attack = max(choices, key=lambda v:(v["tier"], v.get("power", 0)), default={})
+            if self._ordinary_attacks.get(source, 1) > attack.get("tier", 1):
+                attack = {"name": "本体出手"}
+            profile = attack.get("profile", PHYSICAL)
+            name = attack.get("name", "肉身")
+            identity = attack.get("id")
+        else:
+            profile = book.get("damage_profile", PHYSICAL)
+            name, identity = book["name"], book["id"]
+        traits = stats.get("traits", ())
+        if "five_flame" in traits and MASTERY.get(identity) == "five_flame":
+            profile = {stats.get("flame", "fire"): 1.}
+        ward = self.active_element_ward(target)
+        parts = components(profile, traits, ward, defense.get("traits", ()), self.active_element_ward(source))
+        loss = amount * sum(part["multiplier"] for part in parts.values())
+        self.attribute_hits.append(dict(source=source,target=target,name=name,base=amount,
+                                        ward=ward,components=parts,adjusted=loss))
+        return loss
+
     def ordinary_damage(self, dealt: float, received: float, *, breach_ratios=None) -> tuple[float, float]:
         """Allocate contributions before tier gating; mortal allies never inherit tiers.
 
@@ -477,6 +536,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                         self._semantic_commit(incoming, {'ordinary.received', 'ordinary.received_cap'})
                     if self.techniques:
                         amount = self.techniques.damage(key, target_key, amount)
+                    else:
+                        amount = self.attribute_damage(key, target_key, amount)
                     body_amounts[target_key]=body_amounts.get(target_key,0.)+amount
                     body_hit_weights[key,target_key]=amount
                     if tier>=2:amount=self._guard_state(target_key,amount)
@@ -651,6 +712,7 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             **({'semantics': self.semantic_report()} if self.semantics is not None else {}),
             **({'technique_effects': self.techniques.report()} if self.techniques is not None else {}),
             "relations": self.frame.relations,
+            "attribute_hits": getattr(self, "attribute_hits", []),
             "release_recovery": {k:s.release_recovery_round for k,s in self.units.items() if self._action_paused(k)},
             "restrictions": {k: list(s.restrictions) for k, s in self.units.items() if s.restrictions},
             **({'field_powers':{k:dict(discipline=s.unit.capabilities.field_discipline.id,

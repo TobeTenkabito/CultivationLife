@@ -62,7 +62,7 @@
         <label>修行道统倾向<select name="path" id="path-select"></select></label>
         <label id="monster-species-field" class="hidden">妖修本源种<select name="monster_species_id" id="monster-species-select"></select><span>政治身份仍为妖族；本源种只决定生命谱系。</span></label>
         <label>出生界面<select name="start_world" id="start-world-select"></select></label>
-        <label>天机数 <span>可留空</span><input name="seed" type="number" min="1" placeholder="随机"></label>
+        <label>天机数<input name="seed" type="number" min="1" placeholder="留空随机"><span>同一天机数重开，先天特质相同。</span></label>
         <label id="authored-lineage-field" class="hidden">前世著作<select name="inherit_from" id="authored-lineage"><option value="">不继承 · 从此世开始</option></select><span>只继承所选存档亲自创作的功法；须在黑市或交易会重新获得。</span></label>
         <button class="primary" type="submit">叩问长生</button>
       </form>
@@ -96,6 +96,7 @@
           <div><dt>组队战力</dt><dd id="battle-power"></dd></div>
           <div id="heart-demon-stat" class="hidden"><dt>心魔 Debug</dt><dd id="heart-demon"></dd></div>
           <div><dt>有效因果</dt><dd id="effective-karma"></dd></div>
+          <div><dt>特质与护身</dt><dd id="personal-traits"></dd></div>
           <div><dt>主修功法</dt><dd id="technique"></dd></div>
           <div><dt>机缘效率</dt><dd id="root-efficiency"></dd></div>
           <div><dt>气环境</dt><dd id="qi-environment"></dd></div>

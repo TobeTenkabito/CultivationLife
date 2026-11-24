@@ -432,7 +432,7 @@ document.querySelectorAll('#history-filters input').forEach(input => input.addEv
 async function mutate(path, payload) {
   if (busy) return;
   const trainingOperation=path.split('/').pop();
-  if (trainingOperation==='owned-training' || trainingOperation==='disciple-gift' || trainingOperation==='mentorship-action' ||
+  if (trainingOperation==='trait-config' && payload?.action==='study' || trainingOperation==='owned-training' || trainingOperation==='disciple-gift' || trainingOperation==='mentorship-action' ||
       trainingOperation==='puppet-action' && ['infuse','pill','technique'].includes(payload?.action) ||
       trainingOperation==='family-action' && ['infuse','teach','gift_equipment'].includes(payload?.action) ||
       trainingOperation==='dao-companion' && ['gift_item','teach_technique'].includes(payload?.action)) {
@@ -617,6 +617,7 @@ function render(data) {
   $('#technique').textContent = p.technique ? `${p.technique.name} Lv.${p.technique.level}` : '尚未获得';
   renderTechniques(p.technique_slots);
   renderKnownTechniques(p.known_techniques || []);
+  renderPersonalTraits(p, data);
   renderTransformationSystem(data.transformation_system || {});
   renderMonsterBloodline(data.monster_bloodline || {});
   renderSocialPanels(data);
@@ -644,7 +645,7 @@ function render(data) {
   $('#breakthrough-panel').classList.toggle('hidden', !breakthrough.ready || !!data.monster_bloodline?.awaiting_evolution);
   $('#breakthrough-title').textContent = breakthrough.target_realm ? `冲击${breakthrough.target_realm}` : '境界瓶颈';
   $('#breakthrough-action').textContent = breakthrough.action_label || '突破瓶颈';
-  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.technique_secret_bonus ? `，其中功法秘术 +${percent(breakthrough.chance.technique_secret_bonus)}` : ''}${breakthrough.chance.wish_base_bonus ? `，其中愿力 +${percent(breakthrough.chance.wish_base_bonus)}` : ''}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.sage_bonus ? `，学说 ${(breakthrough.chance.sage_bonus > 0 ? '+' : '')}${percent(breakthrough.chance.sage_bonus)}` : ''}${breakthrough.chance.natal_origin_penalty ? `，本源损伤 -${percent(breakthrough.chance.natal_origin_penalty)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
+  const chanceText = breakthrough.chance ? `本次成功率 ${percent(breakthrough.chance.final)}（基础 ${percent(breakthrough.chance.base)}${breakthrough.chance.trait_bonus ? `，特质 +${percent(breakthrough.chance.trait_bonus)}` : ''}${breakthrough.chance.technique_secret_bonus ? `，其中功法秘术 +${percent(breakthrough.chance.technique_secret_bonus)}` : ''}${breakthrough.chance.wish_base_bonus ? `，其中愿力 +${percent(breakthrough.chance.wish_base_bonus)}` : ''}${breakthrough.chance.concubine_base_bonus ? `，其中侍妾关系 +${percent(breakthrough.chance.concubine_base_bonus)}` : ''}${breakthrough.chance.pity_bonus ? `，连续失败保底 +${percent(breakthrough.chance.pity_bonus)}` : ''}${breakthrough.chance.aid_bonus ? `，丹药 +${percent(breakthrough.chance.aid_bonus)}` : ''}${breakthrough.chance.reincarnation_bonus ? `，轮回经验 +${percent(breakthrough.chance.reincarnation_bonus)}` : ''}${breakthrough.chance.devouring_bonus ? `，吞噬元神 +${percent(breakthrough.chance.devouring_bonus)}` : ''}${breakthrough.chance.companion_bonus ? `，道侣同修 +${percent(breakthrough.chance.companion_bonus)}` : ''}${breakthrough.chance.artifact_bonus ? `，法宝 +${percent(breakthrough.chance.artifact_bonus)}` : ''}${breakthrough.chance.body_training_bonus ? `，炼体 +${percent(breakthrough.chance.body_training_bonus)}` : ''}${breakthrough.chance.optimal_state_bonus ? `，状态极佳 +${percent(breakthrough.chance.optimal_state_bonus)}` : ''}${breakthrough.chance.sage_bonus ? `，学说 ${(breakthrough.chance.sage_bonus > 0 ? '+' : '')}${percent(breakthrough.chance.sage_bonus)}` : ''}${breakthrough.chance.natal_origin_penalty ? `，本源损伤 -${percent(breakthrough.chance.natal_origin_penalty)}` : ''}${breakthrough.chance.heart_demon_penalty ? `，心魔 -${percent(breakthrough.chance.heart_demon_penalty)}` : ''}）` : '';
   const aidText = breakthrough.active_aids?.length ? ` 已服：${breakthrough.active_aids.map(item => item.name).join('、')}。` : '';
   $('#breakthrough-reason').textContent = breakthrough.met ? `${chanceText}。可继续整备后再冲关。${aidText}` : breakthrough.reason;
   $('#body-breakthrough-panel').classList.toggle('hidden', !bodyCultivation.ready);
@@ -1944,6 +1945,7 @@ function paintFaction(faction) {
     addStatus('寿元', npc.lifespan == null ? '无尽' : `${npc.lifespan} 岁`);
     addStatus('战力', number(npc.combat_power || 0));
     addStatus('宗门贡献', number(npc.is_player ? faction.contribution : npc.contribution || 0));
+    if (npc.traits?.length) addStatus('特质',npc.traits.map(t=>t.rarity+' · '+t.name+'（'+t.effect+'）').join('、'));
     addStatus('突破', npc.breakthrough_chance == null ? '当前无瓶颈' : percent(npc.breakthrough_chance));
     if (npc.affinity != null) addStatus('好感', `${number(npc.affinity)}${npc.attitude ? ` · ${npc.attitude}` : ''}`);
     if (npc.wounds) addStatus('伤势', `负伤 ${npc.wounds} 级`, true);
@@ -3350,7 +3352,7 @@ function renderInventory(items) {
     row.dataset.itemId = item.id;
     const text = document.createElement('span');
     const name = document.createElement('b'); name.textContent = `${item.is_natal_artifact || artifact?.is_natal ? '本命 · ' : ''}${item.name} × ${item.quantity}`;
-    const effect = document.createElement('small'); effect.textContent = item.description || '可用于特定事件。';
+    const effect = document.createElement('small'); effect.textContent = (item.description || '可用于特定事件。') + (item.damage_profile ? ' · 攻击属性 '+damageText(item.damage_profile) : '');
     if (artifact?.tianji) {
       const limit = artifact.world_combat_power_cap == null ? '当前界面完全解放' : `当前界面单件上限 ${number(artifact.world_combat_power_cap)}`;
       effect.textContent += ` 原始战力 ${number(artifact.raw_combat_power)}；${limit}，实际生效 ${number(artifact.effective_combat_power)}。Buff 与其他属性不受此战力上限影响。`;
@@ -3657,13 +3659,57 @@ function renderDuelTechniques() {
   controls.append(select, add); panel.append(title, hint, grid, controls, preview);
 }
 
+const damageNames = {physical:'物理',metal:'金',wood:'木',water:'水',fire:'火',earth:'土',yin:'阴',yang:'阳',wind:'风',thunder:'雷'};
+function damageText(profile) {
+  return Object.entries(profile || {}).map(([key,share]) => damageNames[key] + ' ' + percent(share)).join('、');
+}
+function renderPersonalTraits(p, data) {
+  const host = document.querySelector('#personal-traits');
+  if (!host) return;
+  host.replaceChildren();
+  const info = p.attribute_setup || {};
+  const post = (action,key) => mutate('/api/games/'+data.id+'/trait-config',{action,key});
+  const disabled = !!(data.pending_event || data.active_trial || !p.alive || p.imprisonment || p.ghost_captor);
+  const button = (target,text,fn) => {
+    const b=document.createElement('button'); b.textContent=text; b.disabled=disabled; b.onclick=fn; target.append(b);
+  };
+  if (!(p.traits || []).length) host.append('暂无特质');
+  for (const t of p.traits || []) {
+    const row=document.createElement('div');
+    const name=document.createElement('strong'); name.textContent=t.rarity+' · '+t.name+' Lv.'+t.level;
+    name.textContent+=' · '+t.family;
+    name.className='trait-grade-'+({'绿':'green','蓝':'blue','紫':'purple','橙':'orange'}[t.rarity]);
+    const sourceName = key => p.artifact_source_names?.[key] || (p.known_techniques || []).find(b=>b.id===key)?.name || ({'light:kan':'坎道玄光','light:li':'离上朱光','light:qian':'乾古素光'}[key]) || key;
+    row.append(name,'　'+t.effect); row.title='来源 '+t.sources.map(sourceName).join('、');
+    button(row,'洗去',()=>{if(window.confirm('洗去「'+t.name+'」？'+(t.sources.includes('先天')?'先天来源无法重抽。':'功法大成可重炼，法宝来源须再次持有参悟。'))) post('wash',t.id);});
+    host.append(row);
+  }
+  for (const [source,key] of Object.entries(p.trait_state?.mastery || {})) {
+    if (p.trait_state.owned?.[key]?.includes(source)) continue;
+    const name=(p.known_techniques || []).find(t=>t.id===source)?.name || source;
+    button(host,'重炼 · '+name,()=>post('refine',source));
+  }
+  GameUi.traitStudy(host, p.trait_study, disabled, key => post('study',key));
+  function selector(action,title,values,current) {
+    if (!values?.length) return;
+    const label=document.createElement('label'), select=document.createElement('select');
+    label.append(title,select); select.disabled=disabled;
+    for (const key of values) select.add(new Option(damageNames[key],key));
+    select.value=current; select.onchange=()=>post(action,select.value); host.append(label);
+  }
+  const resistance=Object.entries(p.attribute_resistances || {}).map(([k,v])=>damageNames[k]+'抗 '+percent(v));
+  if (resistance.length) {const row=document.createElement('div');row.textContent=resistance.join('、');host.append(row);}
+  selector('ward','护身属性',info.wards,info.ward);
+  if (info.traits?.includes('five_flame')) selector('flame','五行之焰',['metal','wood','water','fire','earth'],info.flame);
+}
+
 function renderKnownTechniques(techniques) {
   const list = $('#known-technique-list'); list.innerHTML = '';
   $('#known-technique-count').textContent = `（${techniques.length}）`;
   if (!techniques.length) { list.innerHTML = '<p class="empty">尚无可配置功法。</p>'; return; }
   techniques.forEach(art => {
     const row = document.createElement('div'); row.className = 'known-technique';
-    const info = document.createElement('div'); const name = document.createElement('b'); name.textContent = `${art.name} Lv.${art.level} · ${art.growth_name || "均衡"}倾向 · ${art.category_name || '修仙'} · ${art.element_name}`;
+    const info = document.createElement('div'); const name = document.createElement('b'); name.textContent = `${art.name} Lv.${art.level} · ${art.growth_name || "均衡"}倾向 · ${art.category_name || '修仙'} · 灵根要求 ${art.element_name}`;
     const sourceText = art.source_display || '灵源';
     const detail = document.createElement('small'); detail.textContent = art.category === 'body'
       ? `${sourceText} · 炼体突破 +${percent(art.body_breakthrough_bonus)}（至 ${art.body_bonus_max_layer} 层） · 炼体栏修习`
@@ -3672,6 +3718,8 @@ function renderKnownTechniques(techniques) {
       : art.category === 'transformation'
         ? `变身容量 ${art.transformation_capacity} · 战斗空间 ${art.transformation_space} · 形态由真灵素材独立解锁`
       : `${sourceText} · 战斗门槛 ${art.combat_requirement_display}${art.required_body_training ? ` · 炼体门槛 ${art.required_body_training} 层${art.body_requirement_met ? '' : '（未满足）'}` : ''}${art.requires_immortal_power ? ` · 仙灵力消耗 ${percent(art.immortal_power_cost)}` : ''} · 机缘 +${percent(art.opportunity_bonus)} · HP +${percent(art.hp_bonus)} · MP +${percent(art.mp_bonus)} · 战力 +${number(art.combat_bonus)}`;
+    detail.textContent += " · 攻击属性 " + damageText(art.damage_profile);
+    if (art.mastery_preview) detail.textContent += " · " + art.mastery_preview;
     info.append(name, detail);
     appendTechniqueRules(info, art.special_effect_description);
     if (art.next_level_gains) {
@@ -4272,6 +4320,18 @@ function renderBattleReport(report) {
     const title = document.createElement('b'); title.textContent = `第 ${round.round} 轮 · ${round.initiative === 'voisinage' ? '领域阶段' : round.initiative === 'player' ? '你方先手' : '敌方先手'}`;
     block.appendChild(title);
     const voisinageView = window.DoctrinePanel?.battleRound(round); if (voisinageView) block.appendChild(voisinageView);
+    const hits = round.attribute_hits || round.voisinage?.attribute_hits || [];
+    if (hits.length) {
+      const details=document.createElement('details'), title=document.createElement('summary');
+      title.textContent='属性伤害明细'; details.append(title);
+      for (const hit of hits) {
+        const line=document.createElement('p');
+        const parts=Object.entries(hit.components).map(([k,v])=>damageNames[k]+' '+percent(v.share)+'，伤害 ×'+(1+v.bonus).toFixed(2)+'，克制 ×'+v.relation.toFixed(2)+'，抗性 '+percent(v.resistance));
+        line.textContent=hit.source+' → '+hit.target+' · '+hit.name+' · '+parts.join('；')+' · 护盾前 '+percent(hit.base)+' → '+percent(hit.adjusted);
+        details.append(line);
+      }
+      block.append(details);
+    }
     (round.events || []).forEach(text => { const event = document.createElement('p'); event.textContent = text; block.appendChild(event); });
     const state = document.createElement('small');
     state.textContent = `你方战斗态势 ${number(round.player_combat_state)}/${number(round.player_combat_state_max)} · 敌方 ${number(round.enemy_combat_state)}/${number(round.enemy_combat_state_max)} · MP ${percent(round.player_mp_ratio)} · 双方战意 ${number(round.player_morale)}/${number(round.enemy_morale)}`;

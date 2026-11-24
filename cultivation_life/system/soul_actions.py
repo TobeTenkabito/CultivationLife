@@ -233,7 +233,7 @@ def execute(deps, game, action, payload, rng):
             slot = payload.get('slot')
             if not isinstance(slot, str) or slot not in {'main', 'support', 'combat', 'body', 'sense', 'transformation'} or not book:
                 raise ValueError('功法或栏目无效')
-            if book.grade > npc.realm_index or not can_practice_technique(npc.spirit_root, book):
+            if book.grade > npc.realm_index or not can_practice_technique(npc, book):
                 raise ValueError('第二元婴的修为或灵根不符合功法要求')
             allowed = {'body': 'body', 'divine_sense': 'sense', 'transformation': 'transformation'}
             if book.category in allowed:

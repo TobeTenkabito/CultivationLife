@@ -91,7 +91,7 @@ def _advance_ghost_phase_two_year(deps: GhostCalendarDependencies, game: GameSta
                 int(captor.get("layer", 1)), game.player.age, None,
                 spirit_root=str(captor.get("spirit_root", "none")),
                 path=str(captor.get("path", "dao")), race=str(captor.get("race", "human")),
-                world=game.player.world,
+                world=game.player.world, trait_state=captor.get("trait_state", {}),
             )
             opponents = [
                 npc for npc in deps._all_world_npcs(game)

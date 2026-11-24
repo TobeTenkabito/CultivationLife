@@ -222,6 +222,7 @@ def _intrigue_apply_resolution(
                           affinity=rng.uniform(8, 28), faction_id=faction_id if kind == "sect" else None)
             if not can_enter_faction(entity, npc):
                 continue
+            npc.trait_state = game.next_npc_birth("intrigue_recruit")
             entity.npcs.append(npc)
             deps._ensure_intrigue_personality(game, npc)
         record["unrest"] = max(0.0, float(record.get("unrest", 0)) - 2)

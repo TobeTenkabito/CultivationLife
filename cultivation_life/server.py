@@ -299,6 +299,7 @@ class Handler(BaseHTTPRequestHandler):
                 raise NotFoundError("接口不存在")
             game_id, operation = parts[2], parts[3]
             training_command = (operation in {'owned-training', 'mentorship-action'}
+                or operation == 'trait-config' and payload.get('action') == 'study'
                 or operation == 'puppet-action' and payload.get('action') in {'infuse','pill','technique'}
                 or operation == 'family-action' and payload.get('action') in {'infuse','teach','gift_equipment'}
                 or operation == 'disciple-gift'
@@ -549,6 +550,8 @@ class Handler(BaseHTTPRequestHandler):
                 result = ENGINE.equip_known_technique(
                     game_id, payload.get("technique_id", ""), payload.get("slot", "")
                 )
+            elif operation == "trait-config":
+                result = ENGINE.configure_trait(game_id, payload.get("action"), payload.get("key"))
             elif operation == "technique-upgrade":
                 result = ENGINE.upgrade_technique(game_id, payload.get("technique_id", ""))
             elif operation == "technique-manual-merge":

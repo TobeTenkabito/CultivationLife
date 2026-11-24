@@ -1224,6 +1224,9 @@ class GameEngine:
     def equip_known_technique(self, game_id: str, technique_id: str, slot: str) -> dict[str, Any]:
         return inventory_actions.equip_known_technique(self._dependencies.inventory_actions, game_id, technique_id, slot)
 
+    def configure_trait(self, game_id, action, key):
+        return inventory_actions.configure_trait(self._dependencies.inventory_actions, game_id, action, key)
+
     def upgrade_technique(self, game_id: str, technique_id: str) -> dict[str, Any]:
         return inventory_actions.upgrade_technique(self._dependencies.inventory_actions, game_id, technique_id)
 
@@ -3750,6 +3753,8 @@ class GameEngine:
             game.history.append(HistoryRecord('SYS_NPC_TEACHING',1,game.player.age,'NPC传法',None,'taught',summary,{},['system','training']))
         elif payload.get('action')=='train':
             service.apply(game,kind,identity,payload.get('axis'),payload.get('method'),payload.get('batches',1))
+        elif payload.get('action') in ('wash','refine','study'):
+            service.configure_trait(game,kind,identity,payload['action'],payload.get('content_id'))
         elif payload.get('action')=='activate_domain':
             from ..system.npc_development.domains import activate
             from ..system.npc_development.targets import resolve

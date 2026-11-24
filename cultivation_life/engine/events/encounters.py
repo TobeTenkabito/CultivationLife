@@ -112,6 +112,7 @@ def _cache_encounter_target(deps: EncounterDependencies, game: GameState, target
             realm_index, layer, age, lifespan,
             spirit_root=deps._random_npc_root(realm_index, rng), path=rng.choice(list(PATH_NAMES)),
             race=race_id, world=game.player.world, location_id=game.player.location_id, affinity=rng.uniform(-18, 12),
+            trait_state=deepcopy(member["trait_state"]) if "trait_state" in member else game.next_npc_birth("encounter"),
             transcendence=deepcopy(member.get("transcendence")),
         )
         if npc.world in {'lost', 'rift'}:

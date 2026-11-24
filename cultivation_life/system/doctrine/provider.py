@@ -72,7 +72,7 @@ def battle_sources(game, owners) -> dict[str, CapabilitySource]:
                 held.setdefault(npc_id, []).append(definitions_by_id[artifact_id])
     for key, owner in owners.items():
         value = project_loadout(game, owner, results.get(key), player=key == 'player', tianji_artifacts=held.get(read(owner, 'id'), ()))
-        if (value.voisinages or value.technique_tier > 1 or value.artifact_tier > 1
+        if (value.attributes.get("ward") or value.attributes.get("traits") or value.voisinages or value.technique_tier > 1 or value.artifact_tier > 1
                 or value.passive_ward_tier == 2 or value.interventions or value.semantic_rules or value.technique_effects):
             results[key] = value
     return results

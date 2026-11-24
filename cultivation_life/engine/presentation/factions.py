@@ -198,6 +198,10 @@ def _public_faction(deps: FactionViewDependencies, game: GameState) -> dict[str,
         entry["breakthrough_chance"] = deps._npc_breakthrough_probability(npc)
         entry["treasure_name"] = ITEM_CATALOG[npc.treasure_item_id].name if npc.treasure_item_id in ITEM_CATALOG else None
         from ...system.combat_loadout import public_loadout
+        from ...traits import public as public_traits
+        entry.pop("trait_state", None)
+        if perception.get("revealed", True):
+            entry["traits"] = public_traits(npc)
         if not perception.get('revealed', True):
             entry.pop('technique_levels', None)
             entry.pop('technique_slots', None)

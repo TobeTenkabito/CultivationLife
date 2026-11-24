@@ -71,9 +71,12 @@ def _npc_breakthrough_probability(deps: NpcDependencies, npc: SectNpc) -> float:
         return 0.0
     if npc.realm_index == len(REALMS) - 1 and npc.layer >= REALMS[-1].layers:
         return 0.0
-    return npc_breakthrough_chance(
+    from ...traits import breakthrough_bonus
+    departure = npc.world == "human" and npc.realm_index == 5 and npc.layer >= 3
+    bonus = 0. if departure else breakthrough_bonus(npc, npc.layer >= REALMS[npc.realm_index].layers)
+    return min(.98, bonus + npc_breakthrough_chance(
         npc, FACTION_SYSTEMS["npc_cultivation"], deps._npc_root_efficiency(npc.spirit_root)
-    )
+    ))
 
 
 def _npc_faction_id(deps: NpcDependencies, game: GameState, npc_id: str) -> str | None:
@@ -114,7 +117,7 @@ def _find_npc(deps: NpcDependencies, game: GameState, npc_id: str) -> SectNpc | 
     child = next((row for row in game.player.offspring if row.get("id") == npc_id), None)
     if child:
         return SectNpc(**{key:value for key,value in child.items() if key in SectNpc.__dataclass_fields__} |
-                       {"title":"后代", "realm_index":int(child.get("realm_index",0)), "layer":int(child.get("layer",1)),
+                       {"title":"后代", "trait_state":child.get("trait_state", {}), "realm_index":int(child.get("realm_index",0)), "layer":int(child.get("layer",1)),
                         "age":int(child.get("age",0)), "lifespan":child.get("lifespan")})
     if npc_id in game.world_npcs:
         return game.world_npcs[npc_id]
@@ -389,7 +392,7 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
         realm_index, layer, age, None if realm_index >= 6 else max(age + 1, REALMS[realm_index].lifespan[1]),
         spirit_root=deps._random_npc_root(realm_index, rng), path=rng.choice(list(PATH_NAMES)),
         race=race, world=world, faction_id=sect_id, affinity=0,
-    )
+        trait_state=game.next_npc_birth("faction_founder"))
     founder.lifespan = deps._scale_npc_lifespan(founder.lifespan, founder.path, founder.age)
     sect = SectState(
         sect_id, power_name, world, [founder], f"由{founder_name}自行建立的{'修仙家族' if kind == 'family' else '宗门'}。",
@@ -398,7 +401,9 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
     )
     adopt_support(game, sect)
     for _ in range(2):
-        deps._recruit_sect_npc(sect, game.player.age, rng)
+        newcomer = deps._recruit_sect_npc(sect, game.player.age, rng)
+        if newcomer is not None:
+            newcomer.trait_state = game.next_npc_birth("sect_recruit")
     from ...system.faction_geography import faction_site
     site = faction_site(sect)
     for member in sect.npcs:
@@ -431,6 +436,8 @@ def _advance_npc_cultivation(
     settings = FACTION_SYSTEMS["npc_cultivation"]
     rate = float(settings["progress_per_year"][str(npc.realm_index)])
     root_efficiency = deps._npc_root_efficiency(npc.spirit_root)
+    from ...traits import practice_multiplier, record_roll
+    rate *= practice_multiplier(npc)
     npc.cultivation_progress += rate * root_efficiency * rng.uniform(0.82, 1.18) * (1+.1*max(0.,min(1.,support)))
     threshold = float(settings["threshold"]) * (1 + 0.06 * (npc.layer - 1))
     if npc.cultivation_progress < threshold:
@@ -441,7 +448,10 @@ def _advance_npc_cultivation(
         npc.cultivation_progress = min(npc.cultivation_progress, threshold)
         return None
     success_chance = min(0.98, deps._npc_breakthrough_probability(npc) + max(0.0, float(breakthrough_bonus)))
-    if rng.random() >= success_chance:
+    success = rng.random() < success_chance
+    if not leaving_human_world:
+        record_roll(npc, success)
+    if not success:
         npc.cultivation_progress = threshold * float(settings["failed_progress_retained"])
         return None
     old_name = deps._npc_realm_name(npc)
@@ -667,7 +677,7 @@ def _default_npc_main_technique(npc: SectNpc) -> str | None:
     candidates = [
         technique for technique in TECHNIQUE_CATALOG.values()
         if technique.path == npc.path and technique.grade <= max(1, npc.realm_index)
-        and technique.element != "sex" and can_practice_technique(npc.spirit_root, technique)
+        and technique.element != "sex" and can_practice_technique(npc, technique)
         and technique.id not in GUIXU_EXCLUSIVE_TECHNIQUE_IDS
     ]
     if not candidates:

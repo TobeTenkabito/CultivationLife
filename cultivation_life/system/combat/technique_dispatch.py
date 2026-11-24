@@ -39,11 +39,14 @@ class TechniqueDispatch(TechniqueRuntime):
             self.original_shares[source,target]=1.
             return 0.
         old=super().damage(source,target,amount)
-        result=old if not self.catalog else max(0.,old+self.catalog.damage(source,target,amount)-amount)
+        base = self.battle.attribute_damage(source, target, amount)
+        result = max(0., base + (old - amount))
+        if self.catalog:
+            result = max(0., result + (self.catalog.damage(source,target,amount) - amount))
         if self.catalog:
             self.catalog.hit_sources.setdefault((source,target),[]).extend(book for (owner,book,receipt),victim in self.legacy_pending.items()
                 if owner==source and victim in (None,target))
-        self.original_shares[source,target]=min(1.,amount/max(1e-12,result))
+        self.original_shares[source,target]=min(1.,base/max(1e-12,result))
         return result
 
     def absorb(self,target,amount,contributions=()):

@@ -145,7 +145,10 @@ def bind_relationship(game, row, npc_type, *, labels=None):
     identity = str(row.get('npc_id') or row.get('id') or '')
     npc = find_person(game, identity, include_inactive=True)
     if npc is None:
-        npc = npc_type(**person_seed(row, game.player.world))
+        facts = person_seed(row, game.player.world)
+        if "trait_state" not in facts:
+            facts["trait_state"] = game.next_npc_birth("relationship")
+        npc = npc_type(**facts)
         game.relationship_npcs[npc.id] = npc
     for key in ('affinity', 'main_technique_id'):
         if getattr(npc, key) is None and row.get(key) is not None:

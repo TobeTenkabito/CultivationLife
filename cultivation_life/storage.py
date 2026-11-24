@@ -95,6 +95,9 @@ class SaveStore:
                     temporary = Path(output.name)
                     output.write(data)
                 with self._file_lock:
+                    if path.exists():
+                        with path.open("rb") as existing:
+                            migration_path(schema_version(json.load(existing)))
                     temporary.replace(path)
             finally:
                 if temporary is not None:

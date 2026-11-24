@@ -2,6 +2,7 @@
 from ..content_registry import REALMS, WORLD_SYSTEMS
 from ..models import HistoryRecord, SectNpc
 from ..rules import has_living_master
+from ..traits import birth
 
 MENTOR_STEP = 6
 
@@ -54,7 +55,8 @@ def mentor_action(engine, game, action):
         npc = SectNpc(key, '沈照尘', '云游讲道的前辈', 3, 7, 180,
             max(181, sum(span) // 2) if span else None,
             spirit_root='supreme_wood', path=p.path, race=p.race,
-            world=p.world, affinity=35, encountered_player=True)
+            world=p.world, affinity=35, encountered_player=True,
+            trait_state=birth(game.seed, "tutorial_mentor"))
         from .cultivation_ranks import ensure_npc
         from .npc_social import instantiate_social
         from .spatial_capabilities import site_key

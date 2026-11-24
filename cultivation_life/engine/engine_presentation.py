@@ -72,6 +72,15 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
     deps._ensure_natal_artifact(game)
     from ..system.monster_identity import identity
     player_data = public_player(game.player)
+    from ..system.combat_loadout import player_attributes
+    player_data["attribute_setup"] = player_attributes(game)
+    from ..system.trait_study import options, source_name
+    player_data["trait_study"] = options(game, game.player)
+    player_data["artifact_source_names"] = {s: source_name(s) for trait in player_data["traits"]
+                                            for s in trait["sources"] if s.startswith("artifact:")}
+    from ..combat_attributes import LABELS, resistance
+    player_data["attribute_resistances"] = {element:value for element in LABELS
+        if (value := resistance(element, player_data["attribute_setup"]["traits"]))}
     from ..system.duel_techniques import public as public_duel
     player_data['duel_techniques'] = public_duel(game.player)
     player_data['duel_techniques']['can_configure'] = bool(game.player.alive and not game.player.imprisonment

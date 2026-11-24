@@ -41,8 +41,11 @@ def _public_major_breakthrough(deps: CharacterViewDependencies, player: Player) 
     requirement = deps._major_breakthrough_requirement(player) if major else {
         "met": True, "reason": "尚未抵达大境界瓶颈。", "missing_affinities": [],
     }
+    from ..progression.upper_trials import eligible as upper_trial_eligible
+    pure_trial = major and (upper_trial_eligible(player) or is_asura or
+                            player.world == "celestial" and player.realm_index in {9,10,11})
     chance = (
-        None if deterministic_monster_evolution or (is_asura and major)
+        None if deterministic_monster_evolution or pure_trial
         else deps._breakthrough_chance(player, major=major) if at_bottleneck else None
     )
     active_aids = [
@@ -212,7 +215,7 @@ def _public_personal_relations(deps: CharacterViewDependencies, game: GameState)
                         int(relation.get("age",18)),relation.get("lifespan"),
                         spirit_root=str(relation.get("spirit_root","none")),path=str(relation.get("path","dao")),
                         race=str(relation.get("race","human")),world=str(relation.get("world",game.player.world)),
-                        affinity=float(relation.get("affinity",0)),
+                        affinity=float(relation.get("affinity",0)), trait_state=relation.get("trait_state", {}),
                     )
     rows = [{
         "id":npc.id,"name":npc.name,"affinity":round(float(npc.affinity or 0),1),

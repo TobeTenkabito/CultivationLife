@@ -46,6 +46,10 @@ def plan(game,target,facts,axis,batches,method):
     if not rounds:raise ValueError('已达十重或施教者掌握的上限')
     after=before+rounds;result=copy.deepcopy(facts)
     result.setdefault('body_attainments',{}).setdefault(family,{})[key]=after
+    if family == 'lights' and after == 10:
+        from ...traits import mastery
+        result.setdefault('trait_state', {})
+        mastery(result, 'light:' + key)
     return dict(axis=axis,label='精修'+choice['name'],batches=batches,rounds=rounds,gain=rounds,
         before=f'{choice["name"]} {before}重',after=f'{choice["name"]} {after}重',result=result,
         specialized_reference=sum(1000*(i+1) for i in range(before,after)))

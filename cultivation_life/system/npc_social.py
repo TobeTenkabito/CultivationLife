@@ -71,7 +71,7 @@ def instantiate_social(game: GameState, npc: SectNpc) -> None:
         lifespan=npc.lifespan, spirit_root=npc.spirit_root, path=npc.path,
         race=npc.race, world=npc.world, gender="female" if npc.gender == "male" else "male",
         social_profile={"companion_id": npc.id, "companion_name": npc.name, "concubine_count": 0},
-    )
+        trait_state=game.next_npc_birth("npc_partner"))
     from .faction_geography import person_site
     partner.location_id = person_site(game, npc)
     if instance is not None:

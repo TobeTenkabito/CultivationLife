@@ -74,6 +74,8 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
     # Most background encounters are mortal. Do not parse definitions or build
     # a voisinage battle for them, and preserve the legacy RNG sequence.
     from ..cultivation_ranks import npc_golden_light
+    from ..combat_loadout import npc_attribute_sources
+    sources = npc_attribute_sources(attackers, defenders, sources)
     if not sources and not any(npc.transcendence or (npc.immortal_body_level and npc_golden_light(npc))
                                for roster in (attackers, defenders) for npc, _ in roster):
         return None
@@ -109,7 +111,8 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
                                    cultivation_rank=rank_for(npc.realm_index, npc.layer),
                                    body_integrity=max(.01, 1 - npc.wounds * .15)))
     battle = VoisinageBattle(units, contest_ratio=float(config.get("contest_ratio", 1.25)))
-    if not battle.enabled:
+    if not battle.enabled and not any(s.unit.capabilities.attributes.get("ward") or
+            set(s.unit.capabilities.attributes.get("traits", ())) & {"strength","star_body","swift_bone","red_bones"} for s in battle.units.values()):
         return None  # No combat RNG or combat costs on the conventional path.
     battle.set_objectives(attacker_objective, defender_objective)
     reports = []
@@ -124,7 +127,9 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             if battle.techniques:
                 p = max(0., 1 - battle.ordinary_loss('player'))
                 e = max(0., 1 - battle.ordinary_loss('enemy'))
-            first = p_power * (semantic['player']['mobility'] + semantic['player']['sense']) >= e_power * (semantic['enemy']['mobility'] + semantic['enemy']['sense'])
+            p_initiative = battle.first_initiative('player')
+            e_initiative = battle.first_initiative('enemy')
+            first = p_initiative * p_power * (semantic['player']['mobility'] + semantic['player']['sense']) >= e_initiative * e_power * (semantic['enemy']['mobility'] + semantic['enemy']['sense'])
             if frame.divine_first is not None:first=frame.divine_first=='player'
             after = battle.semantic_initiative(first)
             for side in ('player', 'enemy'):
@@ -140,7 +145,7 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
                             / battle.totals[side] for side in ('player', 'enemy')}
             factors = {side: (.6 + .4 * morale[side] / 100) * (.65 + .35 * frame.stat_factors[side]['sense'])
                        for side in ('player', 'enemy')}
-            if battle.semantics:
+            if battle.semantics or p_initiative != 1. or e_initiative != 1.:
                 factors['player'] *= ps['sense'] * (1.05 if first else .97)
                 factors['enemy'] *= es['sense'] * (.97 if first else 1.05)
             battle.ordinary_damage(dealt * factors['player'], received * factors['enemy'],breach_ratios={

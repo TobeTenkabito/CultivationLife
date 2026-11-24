@@ -89,7 +89,8 @@ def bind_heavens(engine) -> HeavensDependencies:
             raise ValueError('合作人物身份已存在，不能重建或复活')
         npc = SectNpc(identity, site.visitor_name, '诸天访学者',
             9, 1, 3000, None, spirit_root=site.spirit_root, world=site.world, path=site.visitor_path,
-            affinity=0, location_id=site.location_id, encountered_player=True)
+            affinity=0, location_id=site.location_id, encountered_player=True,
+            trait_state=game.next_npc_birth("visitor"))
         initialize_native(npc, WORLD_SYSTEMS.get('transcendent_combat', {}), now=game.player.age)
         game.world_npcs[identity] = npc
 

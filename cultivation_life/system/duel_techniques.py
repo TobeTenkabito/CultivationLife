@@ -62,7 +62,7 @@ def npc_eligible(npc, book):
     # Some scripted combat actors have no recorded affinity. They can use
     # unconditional neutral books, but must never gain an invented root.
     try:
-        root_allowed = can_practice_technique(read(npc, 'spirit_root', ''), book)
+        root_allowed = can_practice_technique(npc, book)
     except KeyError:
         root_allowed = False
     return (book.category == 'spiritual'

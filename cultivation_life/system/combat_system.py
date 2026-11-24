@@ -472,6 +472,7 @@ class PlayerCombatSystem:
         school_actors = (target.get('single_combat') or target.get('mentorship_contest') or target.get('mentorship_betrayal')
                          or target.get('mentorship_master_betrayed')
                          or any(unit.kind == 'external_avatar' for unit in player_units))
+        attribute_battle = phases if phases and any(u.unit.capabilities.attributes for u in phases.units.values()) else None
         phases = phases if phases is not None and (phases.enabled or school_actors) else None
         if phases is not None:
             phases.semantic_environment(natural, artificial)
@@ -737,6 +738,9 @@ class PlayerCombatSystem:
                 p_init *= 1.12
             if round_no == 1 and natural == "开阔" and "airborne" in transformation_traits:
                 p_init *= 1.08
+            if attribute_battle is not None:
+                p_init *= attribute_battle.first_initiative("player")
+                e_init *= attribute_battle.first_initiative("enemy")
             player_first = (
                 phase.divine_first=='player' if phase is not None and phase.divine_first is not None else
                 True if dragon_pressure_active and round_no <= 2
@@ -1013,6 +1017,10 @@ class PlayerCombatSystem:
                 player_mp = phases.mp_ratio("player", player_mp)
                 enemy_mp = phases.mp_ratio("enemy", enemy_mp)
 
+            if phases is None and attribute_battle is not None:
+                attribute_battle.attribute_hits = []
+                dealt = attribute_battle.ordinary_attribute_scale("player", dealt)
+                received = attribute_battle.ordinary_attribute_scale("enemy", received)
             received_amount = received * player_power_max
             absorbed_amount, guard_event = (cls._absorb_with_support(
                 player_units, received_amount, support_updates,
@@ -1341,6 +1349,7 @@ class PlayerCombatSystem:
             rounds.append({
                 "round": round_no,
                 "initiative": "player" if player_first else "enemy",
+                "attribute_hits": list(attribute_battle.attribute_hits) if attribute_battle else [],
                 "ordinary_exchange": dict(opening=replay_opening, before=replay_before, after=replay_after,
                     actors={'player': phase.ordinary_player if phase else True,
                             'enemy': phase.ordinary_enemy if phase else True}),

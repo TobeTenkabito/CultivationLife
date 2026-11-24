@@ -153,7 +153,8 @@ def initialize_peers(game, teacher):
                        max(1, master.layer - 1), age,
                        lifespan, spirit_root=master.spirit_root, path=master.path,
                        race=master.race, world=master.world,
-                       location_id=person_site(game, master), gender='female' if index else 'male')
+                       location_id=person_site(game, master), gender='female' if index else 'male',
+                       trait_state=game.next_npc_birth("fellow_disciple"))
         game.notable_npcs[identity] = peer
         instance = instance_of(game, master.id)
         if instance is not None: game.spatial_state['instances'][instance].setdefault('npc_ids', []).append(identity)

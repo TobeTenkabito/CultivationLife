@@ -254,6 +254,8 @@ def _generate_tianji_artifacts(deps: TianjiGenerationDependencies, game: GameSta
     for rank, artifact in enumerate(artifacts, 1):
         from cultivation_life.system.tianji.tiers import artifact_force_tier
         artifact['force_tier'] = artifact_force_tier(artifact)
+        from ...combat_attributes import profile_for
+        artifact["damage_profile"] = profile_for({"name":artifact["theme_name"] + artifact["name"]})
         artifact["rank"] = rank
         # A small universal weight preserves the intended possibility of a
         # high treasure falling into a low world.

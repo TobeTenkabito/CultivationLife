@@ -142,11 +142,11 @@ def test_independent_training_pays_once_and_rejects_stale_level(prepared):
     assert len(shown['golden_light']['lights'])==5
 
 
-@pytest.mark.parametrize('version',range(1,12))
+@pytest.mark.parametrize('version',range(1,13))
 def test_old_save_structures_rejected_without_conversion(version):
     raw={'version':version,'id':'preserved','player':{'immortal_body':{'level':100}}};before=copy.deepcopy(raw)
-    assert SAVE_SCHEMA_VERSION==12
-    with pytest.raises(ValueError,match='结构 12'):migrate_document(raw)
+    assert SAVE_SCHEMA_VERSION==13
+    with pytest.raises(ValueError,match='结构 13'):migrate_document(raw)
     assert raw==before
 
 

@@ -126,6 +126,7 @@ def _generate_intrigue_recruitment_session(
             continue
         from ..combat.npc_lifecycle import initialize_native
         initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}), now=game.player.age)
+        npc.trait_state = game.next_npc_birth("disciple_candidate")
         candidates.append({
             "npc": npc.to_dict(), "combat_power": round(power, 1),
             "combat_ratio": round(ratio, 3),

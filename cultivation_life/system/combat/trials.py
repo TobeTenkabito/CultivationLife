@@ -15,7 +15,7 @@ from .field_contracts import validate_memory,validate_leases
 
 
 def dump_battle(battle):
-    return {'units': [asdict(s.unit) for s in battle.units.values()],
+    return {'initiative_used': sorted(battle.initiative_used), 'units': [asdict(s.unit) for s in battle.units.values()],
             'objectives':dict(battle.objectives),'contest_ratio':battle.contest_ratio,
             'supplies':[asdict(s) for s in battle.supplies], 'seals':[asdict(s) for s in battle.seals],
             'applied_seals':sorted(battle._applied_seals),
@@ -83,6 +83,9 @@ def load_battle(snapshot):
                 raise ValueError('Invalid attack target history')
         for name, value in values.items():
             setattr(battle.units[key], name, tuple(value) if name=='last_attack_targets' and value is not None else copy.deepcopy(value))
+    battle.initiative_used = set(snapshot.get('initiative_used', ()))
+    if not battle.initiative_used <= battle.units.keys():
+        raise ValueError('先手记录中存在未知参战者')
     battle._dominated = dict(snapshot['dominated'])
     battle.escape_forbidden_sides = frozenset(snapshot.get('escape_forbidden_sides', ()))
     if snapshot.get('semantic_runtime'):
@@ -171,7 +174,8 @@ def run_batch(battle, state, rng, *, batch_size=24):
             enemy_condition *= e['sustain'] / max(1., state['stats']['enemy']['sustain'])
             p_condition *= p['sustain'] / max(1., state['stats']['player']['sustain'])
             p_condition *= .6 + .4 * player.morale / 100
-            first = p['mobility'] + p['sense'] >= e['mobility'] + e['sense']
+            first = ((p['mobility'] + p['sense']) * battle.first_initiative('player') >=
+                     (e['mobility'] + e['sense']) * battle.first_initiative('enemy'))
             if frame.divine_first is not None:first=frame.divine_first=='player'
             semantic_factors = battle.semantic_initiative(first)
             for side in ('player', 'enemy'):

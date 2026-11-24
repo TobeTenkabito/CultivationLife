@@ -48,7 +48,7 @@ def create_faction(deps: FactionActionDependencies, game_id: str, name: str) -> 
             "开山门人", realm_index, layer, age, lifespan,
             spirit_root=deps._random_npc_root(realm_index, rng) if realm_index else "none",
             path=path, race=player.race, world=player.world, affinity=rng.uniform(28, 48),
-        )
+            trait_state=game.next_npc_birth("sect_founder"))
         npc.treasure_item_id = deps._select_npc_treasure(npc, rng)
         if can_enter_faction(sect, npc):
             initialize_native(npc, WORLD_SYSTEMS.get("transcendent_combat", {}), now=player.age)
@@ -130,8 +130,7 @@ def create_family(deps: FactionActionDependencies, game_id: str, name: str) -> d
             gender=str(child.get("gender") or deps._stable_gender(str(child.get("id", "")))),
             family_traits=dict(child.get("family_traits", {})),
             family_combat_bonus=float(child.get("family_combat_bonus", 0)),
-            transcendence=deepcopy(child.get("transcendence")),
-        )
+            transcendence=deepcopy(child.get("transcendence")), trait_state=child.get("trait_state", {}))
         family.npcs.append(npc)
     game.family = family
     game.family_state = {}

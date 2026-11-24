@@ -157,6 +157,7 @@ class CapabilitySource:
     interventions: tuple[Intervention, ...] = ()
     semantic_rules: tuple[Mapping[str, Any], ...] = ()
     technique_effects: tuple[Mapping[str, Any], ...] = ()
+    attributes: Mapping[str, Any] = field(default_factory=dict)
 
     divine_lights: Mapping[str, float] = field(default_factory=dict)
     divine_light_levels: Mapping[str, int] = field(default_factory=dict)
@@ -180,6 +181,7 @@ def resolve_source(state, definitions, source: CapabilitySource | None = None, *
                          ward_tier=result.ward_tier if source.passive_ward_tier is None else source.passive_ward_tier,
                          interventions=source.interventions or result.interventions,
                          semantic_rules=source.semantic_rules or result.semantic_rules,
+                         attributes=source.attributes or result.attributes,
                          technique_effects=source.technique_effects or result.technique_effects)
         result = replace(result, divine_lights=dict(source.divine_lights),
                          divine_light_levels=dict(source.divine_light_levels),body_mechanisms=tuple(source.body_mechanisms),
@@ -216,6 +218,7 @@ class CombatCapabilities:
     body_voisinage_resistance: float = 0.0
     semantic_rules: tuple[Mapping[str, Any], ...] = ()
     technique_effects: tuple[Mapping[str, Any], ...] = ()
+    attributes: Mapping[str, Any] = field(default_factory=dict)
     divine_lights: Mapping[str, float] = field(default_factory=dict)
     divine_light_levels: Mapping[str, int] = field(default_factory=dict)
     body_mechanisms: tuple[BodyMechanism, ...] = ()
@@ -236,6 +239,8 @@ class CombatCapabilities:
 
     def __post_init__(self) -> None:
         from ...technique_effect_schema import validate_loadout
+        from ...trait_combat_schema import validate_snapshot
+        object.__setattr__(self, 'attributes', validate_snapshot(self.attributes))
         object.__setattr__(self, 'technique_effects', validate_loadout(self.technique_effects))
         if self.operating_energy is not None:
             number(self.operating_energy, 'operating_energy')
@@ -446,5 +451,6 @@ def resolve_capabilities(
         interventions=tuple(state.get('interventions', ())),
         semantic_rules=tuple(state.get('semantic_rules', ())),
         technique_effects=tuple(state.get('technique_effects', ())),
+        attributes=state.get('attributes', {}),
         field_discipline=state.get('field_discipline'),
     )

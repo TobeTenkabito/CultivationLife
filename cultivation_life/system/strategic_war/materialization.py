@@ -42,6 +42,7 @@ def materialize(deps, game, world, race, rng):
     for _ in range(6):
         person = deps.recruit(org, game.player.age, rng)
         if person:
+            person.trait_state = game.next_npc_birth("sect_recruit")
             person.location_id, person.faction_id = location, org.id
     if not org.npcs:
         return None

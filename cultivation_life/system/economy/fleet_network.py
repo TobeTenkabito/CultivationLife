@@ -321,4 +321,5 @@ def advance_network(game, maps):
 def leader_record(game, identity, title, realm, *, world=None):
     """A newly contracted local officer, never a copied player or existing NPC."""
     from ...models import SectNpc
-    return SectNpc(identity, title, '盟务主事', realm, REALMS[realm].layers, 100, None, world=world or game.player.world).to_dict()
+    return SectNpc(identity, title, '盟务主事', realm, REALMS[realm].layers, 100, None, world=world or game.player.world,
+        trait_state=game.next_npc_birth("merchant_officer")).to_dict()

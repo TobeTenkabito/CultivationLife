@@ -141,7 +141,7 @@ def require(game,target,axis=None):
 
 def write(target,result):
     fields=('realm_index','layer','cultivation_progress','body_training','immortal_body_level',
-            'divine_sense_rank','lifespan','breakthrough_bonus','transcendence','body_attainments','technique_levels','main_technique_level','family_traits','family_combat_bonus')
+            'divine_sense_rank','lifespan','breakthrough_bonus','transcendence','trait_state','body_attainments','technique_levels','main_technique_level','family_traits','family_combat_bonus')
     for key in fields:
         if key == 'breakthrough_bonus' and target.bonus_owner is not None:
             if key in result: target.bonus_owner[key] = result[key]

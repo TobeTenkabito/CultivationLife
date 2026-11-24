@@ -274,7 +274,11 @@ def breakthrough(deps: CultivationActionDependencies, game_id: str) -> dict[str,
     upper_trial = major and upper_trial_eligible(player)
     asura_trial = major and asura_active(player) and player.realm_index in {9, 10, 11}
     celestial_trial = upper_trial or asura_trial or (major and player.world == 'celestial' and player.realm_index in {9, 10, 11})
-    if not celestial_trial and rng.random() >= chance["final"]:
+    success = celestial_trial or rng.random() < chance["final"]
+    if not celestial_trial:
+        from ...traits import record_roll
+        record_roll(player, success)
+    if not success:
         player.joint_companion_breakthrough = None
         failure_type = "major" if major else "minor"
         retained = required * float(WORLD_SYSTEMS["breakthrough"][f"{failure_type}_failure_retention"])

@@ -200,3 +200,8 @@ button, input[type="button"], input[type="submit"] {
 .race-council select[hidden] { display: none; }
 .race-council details { margin-top: 7px; font-size: 12px; }
 .race-council summary, details.race-factions summary { cursor: pointer; }
+
+.trait-grade-green { color: #58976b; }
+.trait-grade-blue { color: #568cc8; }
+.trait-grade-purple { color: #ac78c6; }
+.trait-grade-orange { color: #c98032; }

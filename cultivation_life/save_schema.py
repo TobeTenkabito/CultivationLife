@@ -1,8 +1,7 @@
 """Save-document versions and pure, sequential migrations.
 
-Release versions are independent. Schema 12 uses fifty-layer bodies and five
-independent divine lights. Schemas 1--11 are explicitly incompatible and are
-never rewritten. Future supported migrations register one step per version.
+Schema 13 stores personal traits and explicit attack compositions. Release and
+transfer-envelope versions are independent. Older saves require a new character.
 """
 from __future__ import annotations
 
@@ -12,8 +11,8 @@ from types import MappingProxyType
 from typing import Any
 
 
-SAVE_SCHEMA_VERSION = 12
-MIN_SAVE_SCHEMA_VERSION = 12
+SAVE_SCHEMA_VERSION = 13
+MIN_SAVE_SCHEMA_VERSION = 13
 Migration = Callable[[dict[str, Any]], None]
 # Key N transforms schema N into N + 1; the runner owns version advancement.
 SAVE_MIGRATIONS: Mapping[int, Migration] = MappingProxyType({
@@ -31,7 +30,7 @@ def migration_path(version: int, *, target: int = SAVE_SCHEMA_VERSION,
     if type(version) is not int:
         raise ValueError('存档结构版本无效')
     if version < MIN_SAVE_SCHEMA_VERSION:
-        raise ValueError('旧存档与五色神光／五十层仙躯体系不兼容（仅支持结构 12），请新建角色；原存档不会转换或覆盖')
+        raise ValueError(f'旧存档与特质及战斗属性系统不兼容（仅支持结构 {SAVE_SCHEMA_VERSION}），请新建角色；原存档不会转换或覆盖')
     if version > target:
         raise ValueError('此存档来自更高结构版本，请先更新游戏')
     path = []

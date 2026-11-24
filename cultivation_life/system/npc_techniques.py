@@ -28,9 +28,12 @@ def learn(npc, book, level=1, slot=None):
     from ..authored_technique_schema import integer
     integer(level,1,9,'人物功法等级')
     if slot == 'combat' and (book.grade > read(npc, 'realm_index', 0) or book.category != 'spiritual'
-                             or not can_practice_technique(read(npc, 'spirit_root', ''), book)):
+                             or not can_practice_technique(npc, book)):
         raise ValueError('人物境界、灵根或功法类别不满足斗法配置')
     facts=levels(npc)
+    if level == 9 and facts.get(book.id, 0) < 9:
+        from ..traits import mastery
+        mastery(npc, book.id)
     facts[book.id]=max(facts.get(book.id,1),level)
     def write(key,value):
         if isinstance(npc,dict):npc[key]=value
@@ -71,7 +74,7 @@ def equipped(game,npc):
     for slot,identity in slots.items():
         if not identity or identity not in facts:continue
         book=resolve(game,identity)
-        if not book or not can_practice_technique(read(npc,'spirit_root',''),book):continue
+        if not book or not can_practice_technique(npc,book):continue
         from ..technique_evolution import evolve
         book.level=facts[identity];evolve(book)
         if book.grade>read(npc,'realm_index',0):continue

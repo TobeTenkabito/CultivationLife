@@ -55,7 +55,9 @@ window.AuthoredTechniques = (() => {
     const name=el('input');name.value=draft.name;name.maxLength=24;name.placeholder='为功法题名';name.dataset.authoredInput='name';name.oninput=()=>{draft.name=name.value;schedule();};
     fields.append(label('功法名称',name),label('功法类型',select(categories,draft.category,v=>{draft.category=v;if(!['main','support','combat'].includes(v))draft.buffs=[];const slot={body:'body',divine_sense:'sense',transformation:'transformation'}[v]||v;draft.buffs.forEach(b=>b.slot=slot);drawBuffs();},'category')),
       label('功法境界',select(Object.fromEntries(Array.from({length:Math.max(1,state.max_grade)},(_,i)=>[i+1,configData.combat_benchmarks[i]?.name||`${i+1}阶`])),String(draft.grade),v=>draft.grade=Number(v),'grade')),
-      label('灵根属性',select({neutral:'无属性',metal:'金',wood:'木',water:'水',fire:'火',earth:'土',wind:'风',thunder:'雷',yin:'阴',yang:'阳'},draft.element,v=>draft.element=v,'element')));
+      label('灵根属性',select({neutral:'无属性',metal:'金',wood:'木',water:'水',fire:'火',earth:'土',wind:'风',thunder:'雷',yin:'阴',yang:'阳'},draft.element,v=>draft.element=v,'element')),
+      label('攻击属性',select({physical:'物理',metal:'金',wood:'木',water:'水',fire:'火',earth:'土',wind:'风',thunder:'雷',yin:'阴',yang:'阳'},Object.keys(draft.damage_profile || {physical:1})[0],v=>draft.damage_profile={[v]:1},'damage')));
+    draft.damage_profile ||= {physical:1};
     form.append(fields,el('h4','属性投入'));
     const allocations=el('div',undefined,'at-allocations');for(const [key,title]of Object.entries(state.stats))allocations.append(label(title,number(draft.allocations[key],1,1000000,v=>draft.allocations[key]=v,key)));form.append(allocations);
     const effects=el('div',undefined,'at-section-title'),add=el('button','＋ 添加效果');add.type='button';add.dataset.authorAddBuff='';add.onclick=()=>{const slot={body:'body',divine_sense:'sense',transformation:'transformation'}[draft.category]||draft.category;draft.buffs.push({slot,effect:'might',value:5,level:1,condition:'always',round:1});drawBuffs();schedule();};effects.append(el('h4','功法效果'),add);form.append(effects);const buffs=el('div');buffs.id='authored-buffs';form.append(buffs);

@@ -200,6 +200,8 @@ def recipe(rng, identity, realm, path, theme, quality, core=False,world=None):
                     immortal_power_cost=max((t.immortal_power_cost for t in candidates),default=.08) if realm>=9 and path=='dao' else 0,
                     sources={source:1.},combat_effect=effect,
                     description=('前人合练完成的完整真传，可直接研习。' if fused else '秘境中保存的完整修习之法。')+describe(effect))
+        from ...combat_attributes import profile_for
+        book["damage_profile"] = profile_for({"name": THEMES.get(theme, "") + book["name"]})
         return dict(id=identity,kind=family,name=book['name'],realm=realm,fused=fused,book=book)
     anchor=equipment_anchor(realm,world)
     power = round(anchor.combat_bonus*factor,3)
@@ -213,6 +215,9 @@ def recipe(rng, identity, realm, path, theme, quality, core=False,world=None):
     else:
         item.update(permanent_intrinsic_hp_bonus=round(expected_combat_power(realm,9)*.02*factor,3))
         item['description']=f"服用后本体气血永久 +{item['permanent_intrinsic_hp_bonus']:g}；药力由遗境品阶确定。"
+    if family == "artifact":
+        from ...combat_attributes import profile_for
+        item["damage_profile"] = profile_for({"name": THEMES.get(theme, "") + item["name"]})
     return dict(id=identity,kind=family,name=item['name'],realm=realm,fused=False,item=item)
 
 

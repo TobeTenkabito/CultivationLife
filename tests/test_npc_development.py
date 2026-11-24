@@ -247,3 +247,16 @@ def test_material_batch_cannot_cross_recipe_or_upper_route(game):
     n.realm_index=8;n.layer=8
     final=service.quote(game,'npc',n.id,'cultivation','material',10)
     assert (final['result']['realm_index'],final['result']['layer'])==(8,9)
+
+
+def test_trait_wash_and_refinement_use_the_existing_student(game):
+    from cultivation_life.traits import mastery, active
+    student = game.world_npcs['student']
+    student.trait_state = {}
+    mastery(student, 'light:kan')
+    service.configure_trait(game,'npc',student.id,'wash','fish_scales')
+    assert not active(student)
+    service.configure_trait(game,'npc',student.id,'refine','light:kan')
+    assert active(student)['fish_scales'] == ['light:kan']
+    assert game.player.disciples[0]['trait_state'] == student.trait_state
+    assert not active(game.player)

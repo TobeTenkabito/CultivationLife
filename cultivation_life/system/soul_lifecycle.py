@@ -45,6 +45,10 @@ def leave_body(game, *, destroyed=False):
     p.spirit_state = dict(mode='wandering', body_intact=not destroyed,
         entered=p.age, deadline=p.age + unit_years(p), address=address(game))
     if destroyed:
+        from ..traits import BODY_TRAITS
+        owned = p.trait_state.get("owned", {})
+        for key in BODY_TRAITS:
+            owned.pop(key, None)
         p.body_training = 0
         from .possession_system import is_possessed
         if not is_possessed(p):p.immortal_body.pop('monster',None)

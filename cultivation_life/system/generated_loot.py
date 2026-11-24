@@ -33,6 +33,9 @@ def generate_rewards(seed, world, number, realm, path, names):
             stats = {rng.choice(['permanent_intrinsic_hp_bonus','permanent_intrinsic_mp_bonus']):max(1,round(amount*.2))}
         row = dict(kind='technique' if family == 'technique' else 'item', content_id='RELIC_'+identity,
                    name=name, tier=realm, roll=dict(family=family,path=path,quality=quality,stats=stats))
+        if family in {"technique", "artifact", "treasure"}:
+            from ..combat_attributes import profile_for
+            row["damage_profile"] = profile_for(row)
         validate_reward(row); rewards.append(row)
     return rewards
 
@@ -47,7 +50,7 @@ def grant(game, reward):
     force_tier = 2 if tier >= 9 else 1
     if roll['family'] == 'technique':
         learn_technique(game.player, Technique(id=identity, name=name, path=roll['path'], grade=tier,
-            force_tier=force_tier, element='neutral', growth_preference='combat', **stats))
+            damage_profile=reward.get("damage_profile"), force_tier=force_tier, element='neutral', growth_preference='combat', **stats))
     elif roll['family'] == 'artifact':
         artifact = dict(id=identity, name=name, quality='excellent', quality_name=roll['quality'],
             quality_multiplier=1., mold_id='relic', mold_name='上古遗宝', creator_name='前代修士',
@@ -55,13 +58,13 @@ def grant(game, reward):
             scaling_realm_name='', scaling_benchmarks={}, materials=[], material_effects=[],
             allocations={}, designed_stats=copy.deepcopy(stats), actual_stats=stats, combat_effects=[],
             anchor_value=max(100,round(sum(stats.values())*10)), mold_rule_description='古修遗下的道韵，随器而存。',
-            description=description,is_natal=False,force_tier=force_tier)
+            description=description,is_natal=False,force_tier=force_tier,damage_profile=reward.get('damage_profile'))
         store_crafted_artifact(game.player, artifact)
         for item in game.player.inventory:
             if item.id == identity: item.force_tier = force_tier
     else:
         consumable = roll['family'] == 'item'
-        item = Item(id=identity,name=name,force_tier=force_tier,description=description,
+        item = Item(id=identity,name=name,damage_profile=reward.get('damage_profile'),force_tier=force_tier,description=description,
             tags=['generated_loot', 'pill' if consumable else 'equipment', f'grade:{tier}'],**stats)
         add_item(game.player,item)
     return f'获得{roll["quality"]}遗泽“{name}”。'

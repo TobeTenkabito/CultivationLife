@@ -315,6 +315,7 @@ def _annual_sect_update(deps: FactionDependencies, game: GameState, rng: random.
             newcomer = deps._recruit_sect_npc(sect, player.age, rng)
             if newcomer is None:
                 continue
+            newcomer.trait_state = game.next_npc_birth("sect_recruit")
             if referred:
                 places[sect.id] -= 1
                 council.setdefault('used_at', {})[sect.id] = player.age

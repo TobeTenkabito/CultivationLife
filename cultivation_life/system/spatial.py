@@ -41,6 +41,7 @@ LOCAL_COMMANDS = frozenset(
         "use_item",
         "equip_known_technique",
         "upgrade_technique",
+        "configure_trait",
         "merge_technique_manuals",
         "update_setting",
         "set_world_news_debug",
@@ -296,7 +297,7 @@ def create_instance(game, rng, kind):
             gender=generator.choice(['male', 'female']),
             next_tribulation_age=game.player.age + 3000,
             tribulation_count=0,
-        )
+            birth_seed=game.seed)
         npcs.append(npc.to_dict())
     scene = dict(
         id=identity,

@@ -1,6 +1,7 @@
 {
   "version": 1,
   "technique_effect_ownership_notes": {
+    "trait_state": "personal：保存本人已得特质、实际大成来源、已领悟的法宝来源（artifact:物品编号）、洗练后的归属与护身选择。体质随实际肉身生效；出手配比、护身及战斗特质按参战者冻结于现有战斗快照。",
     "GameState.strategic_war_state.local_councils / directory_support": "global：各界各族分别保有有限议期、十年荐额、当年销额回执、历届分席积怨、待复议山门及最近三次宗门函议。未建实体的山门只登记实际改变的政治支持；落实山门时交还原 SectState.allegiance_race，原人物血缘不变。地方额外招新仅在本界原宗门年度成功招入后销额，继续核验入门和供养条件。翻名录、分席、递盟书均不造人、不设经济户、不移人或财物。周济仅对已登记的玩家同地点两宗复验供养缺口、实款与出资方签署，沿原资金账一次交割。",
     "GameState.last_combat_report.rounds.*.voisinage.technique_effects.player_loadout / events.*.name,resource,measure": "session：C版式只读轮末投影，玩家至多七部原冻结功法的身份、等级、报价、原资源类型、实付退款、次数、冷却、待用及余额是否足够；没有新的资源账本、人物或顶层字段。事件仅在报告副本补名称与资源单位，敌方不公开未使用书目或余额。后台NPC战斗不生成player_loadout；读取不准备、不付款、不投骰，跨界沿原战报session清理。旧战报缺失不补造历史，续战仍只读原运行态；结构仍12。",
     "Technique.combat_effect.mana_cost / CombatCapabilities.technique_effects.*.cost_model": "personal / session：固定目录mana_cost保存本书品阶初层法力标准的固定报价；开战投影cost_model保存原书grade、原人物实际realm、原资源单位fixed报价。低阶固定、同阶比例、越阶相加，等级减费后只沿原法力或元力账本付款。续战冻结同一报价，不读隐藏或封存境界，不新增资源池；下界仿仙灵力沿原60点单位，上界沿对应品阶初层元力标准。既有冻结战斗无此投影时保留原收据合同，场外读档不改价。",
@@ -246,6 +247,7 @@
     "support_technique": "personal",
     "combat_techniques": "personal",
     "duel_technique_ids": "personal",
+    "trait_state": "personal",
     "known_techniques": "personal",
     "additional_roots": "personal",
     "secret_art_state": "personal",
@@ -425,6 +427,7 @@
     "economy_v2": "global",
     "id": "history",
     "seed": "history",
+    "npc_birth_counts": "history",
     "player": "global",
     "created_at": "history",
     "updated_at": "history",

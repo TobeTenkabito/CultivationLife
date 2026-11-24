@@ -167,7 +167,7 @@ def test_possession_requires_wandering_and_lower_realm(ready):
 
 def test_old_schema_rejected_without_mutating():
     old={'version':10,'id':'untouched'};before=copy.deepcopy(old)
-    with pytest.raises(ValueError,match='结构 12'):migrate_document(old)
+    with pytest.raises(ValueError,match='结构 13'):migrate_document(old)
     assert old==before
 
 

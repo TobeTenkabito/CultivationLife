@@ -164,6 +164,7 @@ class CatalogPayloads:
             ratio=self.battle._ordinary_breach_ratios.get(self.battle.units[source].unit.side,
                 self.battle.units[source].unit.power/max(1.,self.battle.units[target].unit.power))
             gain=min(1.,original)*((.88+min(.28,ratio*.13*(1+strength*share)))/(.88+min(.28,ratio*.13))-1)
+        gain = self.battle.attribute_damage(source, target, gain, b) if gain > 0 else gain
         self.attack_packets.append((key,p,target,gain))
         return gain
 
@@ -184,7 +185,8 @@ class CatalogPayloads:
             for p in self.records[key]['packets']:
                 if self.ready(key,p):
                     added=self.pair_modifier(key,p,source,target,original)
-                    if added>0:sources.append(b['id'])
+                    if added > 0:
+                        sources.append(b['id'])
                     gain+=added
         self.hit_sources[source,target]=sources
         return max(0.,original+gain-min(original,reduction))
@@ -275,6 +277,7 @@ class CatalogPayloads:
                     # Derived damage deliberately does not call observed(): no
                     # recursive hit, loss, source or new preparation receipt.
                     amount=p['amount']
+                    amount = self.battle.attribute_damage(owner, target, amount, b)
                     if self.battle.attack_tier(s)>=2:amount=self.battle._guard_state(target,amount)
                     self.derived_damage=True
                     try:

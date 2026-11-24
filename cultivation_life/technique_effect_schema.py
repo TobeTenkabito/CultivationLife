@@ -69,7 +69,7 @@ def validate_loadout(rows):
         raise ValueError('功法效果战斗快照超过技术容量')
     result, seen = [], set()
     for row in rows:
-        if not isinstance(row, dict) or set(row) not in ({'id','name','level','effect'}, {'id','name','level','effect','cost_model'}):
+        if not isinstance(row, dict) or set(row) - {'damage_profile'} not in ({'id','name','level','effect'}, {'id','name','level','effect','cost_model'}):
             raise ValueError('功法效果战斗快照字段无效')
         if 'cost_model' in row:
             terms=row['cost_model']
@@ -87,6 +87,9 @@ def validate_loadout(rows):
         if effect.get('version') == 3 and effect.get('identity') != row['id']:
             raise ValueError('固定功法专属配方与原书身份不符')
         normalized={**row,'effect':effect}
+        if 'damage_profile' in row:
+            from .combat_attributes import validate_profile
+            normalized['damage_profile'] = validate_profile(row['damage_profile'])
         if 'cost_model' in row:normalized['cost_model']=copy.deepcopy(row['cost_model'])
         result.append(normalized)
     return tuple(result)

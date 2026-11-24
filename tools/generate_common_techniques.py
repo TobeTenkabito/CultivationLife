@@ -92,6 +92,8 @@ def definitions(profiles, purity_caps):
                                      karma_multiplier=1.0, sources={source:1.0},
                                      combat_requirements=requirement,
                                      required_affinities=list(roots))
+                    from cultivation_life.combat_attributes import catalog_profile
+                    technique["damage_profile"] = catalog_profile(technique)
                     techniques.append(technique)
                     for world, native_path in WORLD_PATHS.items():
                         if path==native_path and grade<=int(profiles[world]['npc_realm_cap']):

@@ -162,6 +162,8 @@ def forge_tianji_artifact(deps: TianjiForgingDependencies, game_id: str, payload
         "is_natal": False,
         "tianji": {"definition_id": artifact_def["id"], "kind": "true_body" if is_true else "replica", "replica_ratio": ratio},
     }
+    from ...combat_attributes import profile_for
+    instance["damage_profile"] = profile_for(artifact_def)
     store_crafted_artifact(game.player, instance)
     game.tianji_state["player_artifacts"].append(instance_id)
     if is_true:

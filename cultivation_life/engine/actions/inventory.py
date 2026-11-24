@@ -400,6 +400,34 @@ def equip_known_technique(deps: InventoryDependencies, game_id: str, technique_i
     return deps.present(game)
 
 
+def configure_trait(deps: InventoryDependencies, game_id, action, key):
+    game = deps._load(game_id)
+    p = game.player
+    if game.pending_event or game.active_trial or not p.alive or p.imprisonment or p.ghost_captor:
+        raise ValueError("当前状态无法调整特质")
+    from ...traits import active, wash, mastery
+    from ...combat_attributes import FIVE
+    from ...system.combat_loadout import player_attributes
+    if action == "wash":
+        wash(p, key)
+    elif action == "study":
+        from ...system.trait_study import study
+        study(game, p, key)
+    elif action == "refine":
+        trait = p.trait_state.get("mastery", {}).get(key)
+        if not trait or key in active(p).get(trait, ()) or not mastery(p, key):
+            raise ValueError("该来源未大成、已经凝成或与当前特质冲突")
+    elif action == "ward" and key in player_attributes(game)["wards"]:
+        p.trait_state["ward"] = key
+    elif action == "flame" and key in FIVE and "five_flame" in active(p):
+        p.trait_state["flame"] = key
+    else:
+        raise ValueError("当前无法采用这项特质配置")
+    game.updated_at = now_iso()
+    deps.store.save(game)
+    return deps.present(game)
+
+
 def upgrade_technique(deps: InventoryDependencies, game_id: str, technique_id: str) -> dict[str, Any]:
     technique_id = canonical_content_id(technique_id)
     game = deps._load(game_id)
@@ -420,12 +448,22 @@ def upgrade_technique(deps: InventoryDependencies, game_id: str, technique_id: s
     payment = (f'《{technique_name}》Lv.{old_level} 传承玉简 ×1'
         if technique_copy_count(game.player, technique_id, old_level) else
         f'{universal_manuals.name(known.path, known.grade, known.level)} ×1')
+    prior = set(game.player.trait_state.get("owned", {}))
     new_level = upgrade_known_technique(game.player, technique_id)
+    from ...traits import active, MASTERY, TRAITS
+    outcome = ""
+    if new_level == 9 and technique_id in MASTERY:
+        key = MASTERY[technique_id]
+        owned = active(game.player)
+        outcome = ("凝成" + TRAITS[key][0] if key in owned else "特质冲突，未凝成" + TRAITS[key][0]) + "。"
+        displaced = prior - owned.keys()
+        if displaced:
+            outcome += "覆盖" + "、".join(TRAITS[k][0] for k in sorted(displaced)) + "。"
     if row:
         row['level'] = new_level
     game.history.append(HistoryRecord(
         "SYS_TECHNIQUE_UPGRADE", 1, game.player.age, "合参功法", technique_id, "upgraded",
-        f"你消耗{payment}，将《{technique_name}》提升至 Lv.{new_level}。",
+        f"你消耗{payment}，将《{technique_name}》提升至 Lv.{new_level}。{outcome}",
         {"technique_id":technique_id, "level":[old_level, new_level]},
         ["system", "technique", "upgrade"],
     ))

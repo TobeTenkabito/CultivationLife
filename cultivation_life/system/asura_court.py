@@ -5,6 +5,7 @@ import hashlib
 
 from ..content_registry import FACTION_NPC_TEMPLATES, ITEM_CATALOG, ROOT_DEFINITIONS, WORLD_SYSTEMS
 from ..models import SectNpc
+from ..traits import birth
 from ..rules import combat_power, expected_combat_power, max_hp, max_mp
 from .npc_system import npc_combat_power
 from . import asura_factions
@@ -62,6 +63,8 @@ def ensure(game):
             if raw['id'] not in existing:
                 from .combat.npc_lifecycle import initialize_native
                 npc = SectNpc.from_dict(copy.deepcopy(raw))
+                if "trait_state" not in raw:
+                    npc.trait_state = birth(game.seed, npc.id)
                 npc.faction_id = COURT
                 initialize_native(npc, WORLD_SYSTEMS['transcendent_combat'], now=game.player.age)
                 entity.npcs.append(npc)

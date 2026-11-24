@@ -35,5 +35,5 @@ def project(game, owner, *, player=False):
             reference=60. if lower else 1000.*(1+3*max(0,grade-9))
             fixed=reference*effect['cost_bp']/10000
         terms=dict(grade=grade,realm=int(read(owner,'realm_index',0)),fixed=fixed)
-        result.append(dict(id=book.id, name=book.name, level=book.level, effect=effect,cost_model=terms))
+        result.append(dict(id=book.id, name=book.name, level=book.level, damage_profile=dict(book.damage_profile), effect=effect,cost_model=terms))
     return tuple(result)

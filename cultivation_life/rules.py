@@ -166,6 +166,10 @@ def technique_special_effect(technique: Technique) -> str:
     elif technique.possession_limit_bonus:
         effects.append(f'习得后成功夺舍次数上限 +{technique.possession_limit_bonus}；同类加成取最高值。')
     from .technique_description import generated
+    from .traits import MASTERY, TRAITS, EFFECTS
+    trait = MASTERY.get(technique.id)
+    if trait:
+        effects.append(f"大成可凝成「{TRAITS[trait][0]}」：{EFFECTS[trait]}。")
     template = TECHNIQUE_CATALOG.get(technique.id)
     effects.append(template.description if template else generated(technique))
     if technique.category=='spiritual' and technique.combat_effect and technique.combat_effect.get('version') in (1,2):
@@ -184,6 +188,12 @@ def public_catalog_entry(row: dict[str, Any]) -> dict[str, Any]:
         result['name'] = template.name
         if old_name and old_name != template.name and isinstance(row.get('description'), str):
             result['description'] = row['description'].replace(old_name, template.name)
+        if kind == 'item':
+            from .traits import ARTIFACT_TRAITS, TRAITS
+            if trait := ARTIFACT_TRAITS.get(identity):
+                note = f"可参悟「{TRAITS[trait][0]}」。"
+                if note not in (result.get('description') or ''):
+                    result['description'] = (result.get('description') or template.description) + note
         if kind == 'technique' and (special := technique_special_effect(template)):
             result['description'] = special
     return result
@@ -291,8 +301,7 @@ def acquire_technique(player: Player, technique: Technique) -> bool:
     if any(known.id == technique.id for known in player.known_techniques):
         add_technique_copy(player, technique)
         return False
-    player.known_techniques.append(copy.deepcopy(technique))
-    return True
+    return learn_technique(player, technique)
 
 
 def upgrade_known_technique(player: Player, technique_id: str) -> int:
@@ -318,6 +327,9 @@ def upgrade_known_technique(player: Player, technique_id: str) -> int:
         if entry and entry.id == technique_id:
             entry.level = new_level
             evolve_technique(entry)
+    if new_level == TECHNIQUE_MAX_LEVEL:
+        from .traits import mastery
+        mastery(player, technique_id)
     return new_level
 
 
@@ -396,6 +408,9 @@ def learn_technique(player: Player, technique: Technique) -> bool:
     if any(known.id == technique.id for known in player.known_techniques):
         return False
     player.known_techniques.append(copy.deepcopy(technique))
+    if technique.level == TECHNIQUE_MAX_LEVEL:
+        from .traits import mastery
+        mastery(player, technique.id)
     return True
 
 
@@ -902,6 +917,8 @@ def intrinsic_resource_breakdown(player: Player) -> dict[str, Any]:
 def public_player(player: Player) -> dict[str, Any]:
     ensure_technique_set(player)
     data = player.to_dict()
+    from .traits import public as public_traits
+    data["traits"] = public_traits(player)
     from .reputation import assess
     data["renown"] = player.renown
     data["renown_breakdown"] = assess(player)
@@ -946,7 +963,18 @@ def public_player(player: Player) -> dict[str, Any]:
     def public_technique(technique: Technique | None, environment_active: bool) -> dict[str, Any] | None:
         if technique is None:
             return None
+        from .combat_attributes import label
+        from .traits import MASTERY, TRAITS, grant
         result = dict(technique.__dict__)
+        result["damage_display"] = label(technique.damage_profile)
+        trait = MASTERY.get(technique.id)
+        if trait and technique.level == 8:
+            preview = copy.deepcopy(player.trait_state)
+            allowed = grant(preview, trait, technique.id)
+            displaced = set(player.trait_state.get("owned", {})) - preview["owned"].keys()
+            result["mastery_preview"] = ("大成凝成" + TRAITS[trait][0] if allowed else "大成后因冲突无法凝成" + TRAITS[trait][0])
+            if displaced:
+                result["mastery_preview"] += "，覆盖" + "、".join(TRAITS[k][0] for k in sorted(displaced))
         result['affinity_requirement_display'] = technique_affinity_display(technique)
         result['root_requirement_met'] = can_player_practice_technique(player, technique)
         result['special_effect_description'] = technique_special_effect(technique)

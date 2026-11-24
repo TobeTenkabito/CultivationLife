@@ -46,7 +46,8 @@ def materialize(game, site, role):
         world=site['world'], location_id=site['location_id'], path=role['path'],race=race,
         faction_id=role['sect_id'], combat_factor=role['power_factor'], affinity=role['trust'],
         encountered_player=True,
-        family_traits={'dungeon_origin': {'instance': site['id'], 'true_realm': role['true_realm'], 'domain_rank':field_rank}})
+        family_traits={'dungeon_origin': {'instance': site['id'], 'true_realm': role['true_realm'], 'domain_rank':field_rank}},
+        birth_seed=game.seed)
     if role['true_realm'] >= 9:
         domain = identity + ':domain'
         npc.transcendence = dict(version=1, conversion=1., capacity=1200., current=1200.,

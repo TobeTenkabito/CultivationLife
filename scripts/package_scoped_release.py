@@ -631,7 +631,7 @@ def main():
                 if path.is_file():z.write(path,path.relative_to(ROOT).as_posix())
             for name in ('CHANGELOG.md','docs/institution-ai-and-westward-110.md','docs/temple-art-361.md','docs/westward-finale.md','docs/yaochi-westward-implementation.md'):
                 z.write(ROOT/name,name)
-            z.writestr('安装说明.txt',f'需配套本体v{VERSION}，仅结构12。解压到游戏目录覆盖dlc/yaochi-westward后重启。Android请使用同版签名APK；存档和用户开关不会被本包覆盖。')
+            z.writestr('安装说明.txt',f'需配套本体v{VERSION}，仅结构{SAVE_SCHEMA_VERSION}。解压到游戏目录覆盖dlc/yaochi-westward后重启。Android请使用同版签名APK；存档和用户开关不会被本包覆盖。')
             z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='yaochi-westward',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
         with zipfile.ZipFile(destination) as z:require(z.testzip() is None,'Westward DLC archive damaged')
     if scoped.get('profile')=='asura':
@@ -642,7 +642,7 @@ def main():
                 if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
             for name in ('CHANGELOG.md','docs/asura-local-development.md','docs/asura-protocols.md','docs/asura-governorship-implementation.md','docs/asura-politics-and-disputes.md','docs/asura-military-and-succession.md'):
                 z.write(ROOT/name,name)
-            z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅结构12。解压至游戏根目录覆盖dlc/asura-manifestation后重启；Android请安装同版签名APK。不会覆盖存档或用户开关。')
+            z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅结构{SAVE_SCHEMA_VERSION}。解压至游戏根目录覆盖dlc/asura-manifestation后重启；Android请安装同版签名APK。不会覆盖存档或用户开关。')
             z.writestr('release.json',json.dumps(dict(base_version=VERSION,dlc='asura-manifestation',version=version,inputs_sha256=base['inputs_sha256']),ensure_ascii=False,indent=2))
         with zipfile.ZipFile(destination) as z:require(z.testzip() is None,'Asura DLC archive damaged')
     if society or scoped.get('profile')=='body-ui':
@@ -655,7 +655,7 @@ def main():
                 for path in (ROOT/'dlc'/package).rglob('*'):
                     if path.is_file() and '__pycache__' not in path.parts:z.write(path,path.relative_to(ROOT).as_posix())
                 z.write(ROOT/'CHANGELOG.md','更新说明.md')
-                z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅支持结构12。覆盖对应dlc目录后重启；Android请安装同版签名APK。')
+                z.writestr('安装说明.txt',f'配套本体v{VERSION}，仅支持结构{SAVE_SCHEMA_VERSION}。覆盖对应dlc目录后重启；Android请安装同版签名APK。')
     print(json.dumps(dict(version=VERSION,tests=tests,windows=str(output),android=str(target)),ensure_ascii=False))
 
 

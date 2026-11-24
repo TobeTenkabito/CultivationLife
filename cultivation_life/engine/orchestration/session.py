@@ -218,6 +218,7 @@ def create_game(
         thunder = WORLD_SYSTEMS["breakthrough"]["periodic_thunder"]
         player.next_tribulation_age = player.age + int(thunder["interval_years"])
         player.tribulation_power = float(thunder["base_power"])
+    from ...traits import birth
     created = now_iso()
     game = GameState(str(uuid.uuid4()), actual_seed, player, created, created)
     if authored_inheritance:
@@ -241,6 +242,8 @@ def create_game(
                 player.asura_cultivation['conversion'] = 5
     game.sects = deps._new_sects()
     game.world_npcs = deps._new_world_npcs()
+    for npc in [*game.world_npcs.values(), *(n for sect in game.sects.values() for n in sect.npcs)]:
+        npc.trait_state = birth(actual_seed, npc.id)
     deps._ensure_sects(game)
     from ...system.asura_court import ensure as ensure_asura_court
     ensure_asura_court(game)
@@ -267,6 +270,9 @@ def create_game(
         from .dlc_birth import upper_path
         upper_path(game, custom)
         player.hp, player.mp = max_hp(player), max_mp(player)
+    from ...traits import grant
+    for trait in birth(actual_seed, "player").get("owned", {}):
+        grant(player.trait_state, trait, "先天")
     from ...soul_rules import body_cap, soul_cap
     player.body_energy, player.soul_energy = body_cap(player), soul_cap(player)
     game.history.append(HistoryRecord(

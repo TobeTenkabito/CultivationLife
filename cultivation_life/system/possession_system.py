@@ -162,6 +162,11 @@ def enter_host_body(player: Player, target: dict[str, Any], *, technique=None) -
         for field in ('body_training', 'divine_sense_rank'):
             if target.get(field) is not None:
                 coordinates[field] = target[field]
+    from ..traits import BODY_TRAITS
+    owned = player.trait_state.setdefault("owned", {})
+    core["body_traits"] = {k:owned.pop(k) for k in list(owned) if k in BODY_TRAITS}
+    target_traits = (target.get("trait_state") or {}).get("owned", {})
+    owned.update({k:copy.deepcopy(v) for k,v in target_traits.items() if k in BODY_TRAITS})
     player.ghost_core_state = core
     world_age = player.age
     target_age = max(0, int(target.get("age", world_age)))
@@ -239,6 +244,10 @@ def leave_host_body(player: Player) -> dict[str, Any]:
     host = copy.deepcopy(player.ghost_host_body or {})
     core = copy.deepcopy(player.ghost_core_state or {})
     count = player.possession_count
+    from ..traits import BODY_TRAITS
+    owned = player.trait_state.setdefault("owned", {})
+    host["body_traits"] = {k:owned.pop(k) for k in list(owned) if k in BODY_TRAITS}
+    owned.update(core.get("body_traits", {}))
     _restore_body(player, core)
     player.ghost_core_state = None
     player.ghost_host_body = None

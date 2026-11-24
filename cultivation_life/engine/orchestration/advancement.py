@@ -169,6 +169,9 @@ def advance(deps: AdvancementDependencies, game_id: str, action: str, years: int
         gain = rng.randint(low, high) * opportunity_multiplier(player)
         from ...system.yaochi_guidance import active as guidance_active,annual_gain as guidance_gain,record_gain
         guidance=action=='yaochi_practice' and guidance_active(game)
+        if action == "cultivate":
+            from ...traits import practice_multiplier
+            gain *= practice_multiplier(player)
         if guidance:gain=guidance_gain(game)
         if action == "cultivate" and player.path == "demonic":
             gain *= float(WORLD_SYSTEMS["demonic_cultivation"]["natural_cultivation_multiplier"])

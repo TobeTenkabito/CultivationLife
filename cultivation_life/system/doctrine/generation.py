@@ -170,7 +170,8 @@ def generate(seed: int, config: Mapping[str, Any], realm_power: Mapping[int, flo
                 title = f"{title}·{slot['id']}-{index + 1}"
             used_names.add(title)
             base = float(realm_power[grade])
-            manuals.append(dict(id=f"{key}:manual:{index + 1}", doctrine_id=key, name=title,
+            from ...combat_attributes import profile_for
+            manuals.append(dict(damage_profile=profile_for({"name":title}), id=f"{key}:manual:{index + 1}", doctrine_id=key, name=title,
                                 path="dao", element="neutral", grade=grade, level=1, category="spiritual",
                                 growth_preference=preference, requires_immortal_power=True,
                                 immortal_power_cost=round(.025 + .005 * (grade - 9), 3),

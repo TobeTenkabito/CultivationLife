@@ -184,6 +184,7 @@
     },
     {
       "id": "spirit_sword",
+      "damage_profile": {"metal": 1.0},
       "name": "青锋灵剑",
       "combat_bonus": 22,
       "description": "装备在身，战斗力 +22。",
@@ -193,6 +194,7 @@
     },
     {
       "id": "mortal_beast_core_charm",
+      "damage_profile": {"physical": 1.0},
       "name": "镇妖骨符",
       "combat_bonus": 760,
       "description": "人界散修以寻常兽骨和灵墨制成的护身骨符，供未得祖血传承的妖修稳固妖丹；战斗力 +760。",
@@ -215,6 +217,7 @@
     },
     {
       "id": "blood_banner",
+      "damage_profile": {"yin": 1.0},
       "name": "血魂幡",
       "combat_bonus": 55,
       "description": "战斗力 +55。",
@@ -490,6 +493,7 @@
     },
     {
       "id": "heaven_bearing_scepter",
+      "damage_profile": {"physical": 1.0},
       "name": "承天如意",
       "combat_bonus": 12000,
       "description": "灵界化神阶制式重宝，独立战斗力 +12,000。",
@@ -537,6 +541,7 @@
     },
     {
       "id": "realm_severing_halberd",
+      "damage_profile": {"physical": 1.0},
       "name": "斩界戈",
       "combat_bonus": 85000,
       "description": "锋芒足以割裂小界壁，独立战斗力 +85,000。",
@@ -584,6 +589,7 @@
     },
     {
       "id": "celestial_star_array",
+      "damage_profile": {"physical": 1.0},
       "name": "周天星斗盘",
       "combat_bonus": 600000,
       "description": "引动周天星力御敌，独立战斗力 +600,000。",
@@ -631,6 +637,7 @@
     },
     {
       "id": "mystic_heaven_sword",
+      "damage_profile": {"metal": 1.0},
       "name": "枯荣天剑",
       "combat_bonus": 4000000,
       "description": "万年枯荣藤历经九次荣枯后凝成的木心之剑，可令敌方法力随草木枯荣而盛衰，独立战斗力 +4,000,000。",
@@ -959,6 +966,7 @@
     },
     {
       "id": "yuanhe_five_poles_mountain",
+      "damage_profile": {"earth": 1.0},
       "name": "三元镇劫山",
       "combat_bonus": 1720000,
       "tribulation_damage_reduction": 0.25,
@@ -1947,6 +1955,7 @@
     },
     {
       "id": "green_bamboo_sword",
+      "damage_profile": {"wood": 0.7, "metal": 0.3},
       "name": "青竹飞剑",
       "combat_bonus": 28,
       "description": "练气修士常用的成套竹制飞剑，独立战斗力 +28。",
@@ -1979,6 +1988,7 @@
     },
     {
       "id": "soul_banner",
+      "damage_profile": {"yin": 1.0},
       "name": "鬼罗幡",
       "combat_bonus": 2800,
       "description": "元婴神念驱策的护道法幡，独立战斗力 +2,800。",
@@ -2002,6 +2012,7 @@
     },
     {
       "id": "empty_heaven_mirror",
+      "damage_profile": {"physical": 1.0},
       "name": "空天宝镜",
       "combat_bonus": 125000,
       "description": "可折叠虚空反照神通，独立战斗力 +125,000。",
@@ -2014,6 +2025,7 @@
     },
     {
       "id": "myriad_law_wheel",
+      "damage_profile": {"physical": 1.0},
       "name": "万法天轮",
       "combat_bonus": 760000,
       "description": "驾驭多重法则轮转攻守，独立战斗力 +760,000。",
@@ -2026,6 +2038,7 @@
     },
     {
       "id": "chaos_dao_bell",
+      "damage_profile": {"physical": 1.0},
       "name": "混沌道钟",
       "combat_bonus": 4800000,
       "tribulation_damage_reduction": 0.06,
@@ -2897,6 +2910,7 @@
     },
     {
       "id": "xuanhuang_immortal_armor",
+      "damage_profile": {"physical": 1.0},
       "name": "玄黄仙甲",
       "combat_interventions": [
         {
@@ -2921,6 +2935,7 @@
     },
     {
       "id": "heavenly_river_sword_embryo",
+      "damage_profile": {"water": 0.7, "metal": 0.3},
       "name": "天河剑胎",
       "force_tier": 2,
       "combat_bonus": 62000000,
@@ -3482,6 +3497,7 @@
     },
     {
       "id": "ghost_silk_robe",
+      "damage_profile": {"yin": 1.0},
       "name": "幽蚕法衣",
       "combat_bonus": 55,
       "hp_bonus": 60,
@@ -3495,6 +3511,7 @@
     },
     {
       "id": "soul_lamp",
+      "damage_profile": {"yin": 1.0},
       "name": "守命魂灯",
       "combat_bonus": 150,
       "mp_bonus": 180,
@@ -3508,6 +3525,7 @@
     },
     {
       "id": "ghost_gate_ward",
+      "damage_profile": {"yin": 1.0},
       "name": "幽关镇魂尺",
       "combat_bonus": 1100,
       "hp_bonus": 260,
@@ -3684,6 +3702,7 @@
     },
     {
       "id": "beast_pattern_bone",
+      "damage_profile": {"physical": 1.0},
       "name": "兽纹灵骨",
       "combat_bonus": 72,
       "description": "铭刻天然兽纹的灵骨，可作法器核心，战斗力 +72。",
@@ -3716,6 +3735,7 @@
     },
     {
       "id": "thunder_plume_talisman",
+      "damage_profile": {"thunder": 1.0},
       "name": "雷羽符骨",
       "combat_bonus": 2600,
       "description": "雷羽族以本命翎骨炼成的符器，战斗力 +2,600。",
@@ -3749,6 +3769,7 @@
     },
     {
       "id": "heaven_bone_relic",
+      "damage_profile": {"physical": 1.0},
       "name": "天骨遗宝",
       "combat_bonus": 92000,
       "description": "天骨岭深处完整保存的巨兽骨兵，战斗力 +92,000。",
@@ -3771,6 +3792,7 @@
     },
     {
       "id": "ancestral_court_seal",
+      "damage_profile": {"physical": 1.0},
       "name": "祖庭万兽印",
       "combat_bonus": 720000,
       "description": "万妖祖庭册封大妖的重印，战斗力 +720,000。",
@@ -3792,6 +3814,7 @@
     },
     {
       "id": "myriad_demon_crown",
+      "damage_profile": {"physical": 1.0},
       "name": "万妖帝冠",
       "combat_bonus": 4600000,
       "description": "以百族血契共同铸成的妖界帝器，战斗力 +4,600,000。",
@@ -3932,6 +3955,7 @@
     },
     {
       "id": "confucian_jade_ruler",
+      "damage_profile": {"physical": 1.0},
       "name": "明德玉衡",
       "combat_bonus": 1210,
       "mp_bonus": 90,
@@ -3945,6 +3969,7 @@
     },
     {
       "id": "guixu_canghai_equipment_01",
+      "damage_profile": {"water": 1.0},
       "name": "定海玄珠",
       "combat_bonus": 1750,
       "hp_bonus": 18,
@@ -3959,6 +3984,7 @@
     },
     {
       "id": "guixu_canghai_equipment_02",
+      "damage_profile": {"physical": 1.0},
       "name": "归流古鼎",
       "combat_bonus": 2900,
       "hp_bonus": 36,
@@ -3973,6 +3999,7 @@
     },
     {
       "id": "guixu_canghai_equipment_03",
+      "damage_profile": {"water": 0.7, "metal": 0.3},
       "name": "潮音剑",
       "combat_bonus": 4050,
       "hp_bonus": 54,
@@ -3987,6 +4014,7 @@
     },
     {
       "id": "guixu_canghai_equipment_04",
+      "damage_profile": {"physical": 1.0},
       "name": "伏流甲",
       "combat_bonus": 5200,
       "hp_bonus": 72,
@@ -4001,6 +4029,7 @@
     },
     {
       "id": "guixu_canghai_equipment_05",
+      "damage_profile": {"water": 1.0},
       "name": "断浪尺",
       "combat_bonus": 6350,
       "hp_bonus": 90,
@@ -4015,6 +4044,7 @@
     },
     {
       "id": "guixu_canghai_equipment_06",
+      "damage_profile": {"physical": 1.0},
       "name": "蜃光镜",
       "combat_bonus": 7500,
       "hp_bonus": 108,
@@ -4029,6 +4059,7 @@
     },
     {
       "id": "guixu_canghai_equipment_07",
+      "damage_profile": {"physical": 1.0},
       "name": "玄龟盾",
       "combat_bonus": 8650,
       "hp_bonus": 126,
@@ -4043,6 +4074,7 @@
     },
     {
       "id": "guixu_canghai_equipment_08",
+      "damage_profile": {"water": 1.0},
       "name": "听潮铃",
       "combat_bonus": 9800,
       "hp_bonus": 144,
@@ -4057,6 +4089,7 @@
     },
     {
       "id": "guixu_canghai_equipment_09",
+      "damage_profile": {"physical": 1.0},
       "name": "泊舟靴",
       "combat_bonus": 10950,
       "hp_bonus": 162,
@@ -4071,6 +4104,7 @@
     },
     {
       "id": "guixu_canghai_equipment_10",
+      "damage_profile": {"water": 1.0},
       "name": "量海斗",
       "combat_bonus": 12100,
       "hp_bonus": 180,
@@ -4085,6 +4119,7 @@
     },
     {
       "id": "guixu_canghai_equipment_11",
+      "damage_profile": {"physical": 1.0},
       "name": "沧波旗",
       "combat_bonus": 13250,
       "hp_bonus": 198,
@@ -4099,6 +4134,7 @@
     },
     {
       "id": "guixu_canghai_equipment_12",
+      "damage_profile": {"water": 1.0},
       "name": "雨师环",
       "combat_bonus": 14400,
       "hp_bonus": 216,
@@ -4509,6 +4545,7 @@
     },
     {
       "id": "guixu_weir_equipment_01",
+      "damage_profile": {"physical": 1.0},
       "name": "尾闾界轮",
       "combat_bonus": 37000,
       "hp_bonus": 360,
@@ -4523,6 +4560,7 @@
     },
     {
       "id": "guixu_weir_equipment_02",
+      "damage_profile": {"physical": 1.0},
       "name": "万流星槎",
       "combat_bonus": 56000,
       "hp_bonus": 720,
@@ -4537,6 +4575,7 @@
     },
     {
       "id": "guixu_weir_equipment_03",
+      "damage_profile": {"physical": 1.0},
       "name": "断界天戈",
       "combat_bonus": 75000,
       "hp_bonus": 1080,
@@ -4551,6 +4590,7 @@
     },
     {
       "id": "guixu_weir_equipment_04",
+      "damage_profile": {"physical": 1.0},
       "name": "虚鲸法衣",
       "combat_bonus": 94000,
       "hp_bonus": 1440,
@@ -4565,6 +4605,7 @@
     },
     {
       "id": "guixu_weir_equipment_05",
+      "damage_profile": {"physical": 1.0},
       "name": "无岸神镜",
       "combat_bonus": 113000,
       "hp_bonus": 1800,
@@ -4579,6 +4620,7 @@
     },
     {
       "id": "guixu_weir_equipment_06",
+      "damage_profile": {"water": 1.0},
       "name": "星潮镇尺",
       "combat_bonus": 132000,
       "hp_bonus": 2160,
@@ -4593,6 +4635,7 @@
     },
     {
       "id": "guixu_weir_equipment_07",
+      "damage_profile": {"water": 1.0},
       "name": "雾海天幕",
       "combat_bonus": 151000,
       "hp_bonus": 2520,
@@ -4607,6 +4650,7 @@
     },
     {
       "id": "guixu_weir_equipment_08",
+      "damage_profile": {"physical": 1.0},
       "name": "界骸骨盾",
       "combat_bonus": 170000,
       "hp_bonus": 2880,
@@ -4621,6 +4665,7 @@
     },
     {
       "id": "guixu_weir_equipment_09",
+      "damage_profile": {"physical": 1.0},
       "name": "折空履",
       "combat_bonus": 189000,
       "hp_bonus": 3240,
@@ -4635,6 +4680,7 @@
     },
     {
       "id": "guixu_weir_equipment_10",
+      "damage_profile": {"physical": 1.0},
       "name": "尾闾法环",
       "combat_bonus": 208000,
       "hp_bonus": 3600,
@@ -4649,6 +4695,7 @@
     },
     {
       "id": "guixu_weir_equipment_11",
+      "damage_profile": {"water": 1.0},
       "name": "天河定盘",
       "combat_bonus": 227000,
       "hp_bonus": 3960,
@@ -4663,6 +4710,7 @@
     },
     {
       "id": "guixu_weir_equipment_12",
+      "damage_profile": {"physical": 1.0},
       "name": "太虚鸣钟",
       "combat_bonus": 246000,
       "hp_bonus": 4320,
@@ -5073,6 +5121,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_01",
+      "damage_profile": {"water": 1.0},
       "name": "血河魔珠",
       "description": "血河魔珠出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5087,6 +5136,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_02",
+      "damage_profile": {"physical": 1.0},
       "name": "沉骨战旗",
       "description": "沉骨战旗出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5101,6 +5151,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_03",
+      "damage_profile": {"metal": 0.7, "yin": 0.3},
       "name": "九阴噬魂剑",
       "description": "九阴噬魂剑出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5115,6 +5166,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_04",
+      "damage_profile": {"physical": 1.0},
       "name": "万骸魔甲",
       "description": "万骸魔甲出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5129,6 +5181,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_05",
+      "damage_profile": {"water": 0.7, "yin": 0.3},
       "name": "赤潮炼魂鼎",
       "description": "赤潮炼魂鼎出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5143,6 +5196,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_06",
+      "damage_profile": {"physical": 1.0},
       "name": "无间血轮",
       "description": "无间血轮出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5157,6 +5211,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_07",
+      "damage_profile": {"yin": 1.0},
       "name": "葬魂幡",
       "description": "葬魂幡出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5171,6 +5226,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_08",
+      "damage_profile": {"physical": 1.0},
       "name": "魔胎心镜",
       "description": "魔胎心镜出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5185,6 +5241,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_09",
+      "damage_profile": {"physical": 1.0},
       "name": "逆流骨舟",
       "description": "逆流骨舟出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5199,6 +5256,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_10",
+      "damage_profile": {"physical": 1.0},
       "name": "黑莲界尺",
       "description": "黑莲界尺出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5213,6 +5271,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_11",
+      "damage_profile": {"water": 1.0},
       "name": "血狱镇河碑",
       "description": "血狱镇河碑出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5227,6 +5286,7 @@
     },
     {
       "id": "guixu_bloodriver_equipment_12",
+      "damage_profile": {"water": 1.0},
       "name": "沉渊万煞钟",
       "description": "沉渊万煞钟出自血河沉渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -5637,6 +5697,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_01",
+      "damage_profile": {"yang": 1.0},
       "name": "黑日魔轮",
       "description": "黑日魔轮出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5651,6 +5712,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_02",
+      "damage_profile": {"physical": 1.0},
       "name": "太古神骸甲",
       "description": "太古神骸甲出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5665,6 +5727,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_03",
+      "damage_profile": {"metal": 1.0},
       "name": "葬天魔剑",
       "description": "葬天魔剑出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5679,6 +5742,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_04",
+      "damage_profile": {"physical": 1.0},
       "name": "无相心镜",
       "description": "无相心镜出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5693,6 +5757,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_05",
+      "damage_profile": {"yin": 1.0},
       "name": "万劫镇魂钟",
       "description": "万劫镇魂钟出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5707,6 +5772,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_06",
+      "damage_profile": {"physical": 1.0},
       "name": "堕星血旗",
       "description": "堕星血旗出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5721,6 +5787,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_07",
+      "damage_profile": {"water": 1.0},
       "name": "九渊魔鼎",
       "description": "九渊魔鼎出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5735,6 +5802,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_08",
+      "damage_profile": {"physical": 1.0},
       "name": "神骨界舟",
       "description": "神骨界舟出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5749,6 +5817,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_09",
+      "damage_profile": {"fire": 1.0},
       "name": "血焰天戈",
       "description": "血焰天戈出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5763,6 +5832,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_10",
+      "damage_profile": {"physical": 1.0},
       "name": "魔皇印",
       "description": "魔皇印出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5777,6 +5847,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_11",
+      "damage_profile": {"physical": 1.0},
       "name": "葬神碑",
       "description": "葬神碑出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -5791,6 +5862,7 @@
     },
     {
       "id": "guixu_demon_grave_equipment_12",
+      "damage_profile": {"physical": 1.0},
       "name": "混沌魔胎珠",
       "description": "混沌魔胎珠出自太古葬魔墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -6201,6 +6273,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_01",
+      "damage_profile": {"physical": 1.0},
       "name": "祖血妖珠",
       "description": "祖血妖珠出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6215,6 +6288,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_02",
+      "damage_profile": {"physical": 1.0},
       "name": "万兽战旗",
       "description": "万兽战旗出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6229,6 +6303,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_03",
+      "damage_profile": {"water": 1.0},
       "name": "苍鳞裂海戟",
       "description": "苍鳞裂海戟出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6243,6 +6318,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_04",
+      "damage_profile": {"physical": 1.0},
       "name": "百骸祖甲",
       "description": "百骸祖甲出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6257,6 +6333,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_05",
+      "damage_profile": {"thunder": 1.0},
       "name": "雷羽天冠",
       "description": "雷羽天冠出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6271,6 +6348,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_06",
+      "damage_profile": {"physical": 1.0},
       "name": "青丘幻镜",
       "description": "青丘幻镜出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6285,6 +6363,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_07",
+      "damage_profile": {"physical": 1.0},
       "name": "吞天妖鼎",
       "description": "吞天妖鼎出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6299,6 +6378,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_08",
+      "damage_profile": {"physical": 1.0},
       "name": "始祖骨轮",
       "description": "始祖骨轮出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6313,6 +6393,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_09",
+      "damage_profile": {"physical": 1.0},
       "name": "鲲胎云舟",
       "description": "鲲胎云舟出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6327,6 +6408,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_10",
+      "damage_profile": {"physical": 1.0},
       "name": "星落妖钟",
       "description": "星落妖钟出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6341,6 +6423,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_11",
+      "damage_profile": {"physical": 1.0},
       "name": "万灵镇脉碑",
       "description": "万灵镇脉碑出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6355,6 +6438,7 @@
     },
     {
       "id": "guixu_beast_vortex_equipment_12",
+      "damage_profile": {"physical": 1.0},
       "name": "祖涡源印",
       "description": "祖涡源印出自万兽祖涡，无法从归墟之外的途径获得。",
       "tags": [
@@ -6765,6 +6849,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_01",
+      "damage_profile": {"water": 0.7, "yin": 0.3},
       "name": "黄泉魂灯",
       "description": "黄泉魂灯出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6779,6 +6864,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_02",
+      "damage_profile": {"physical": 1.0},
       "name": "忘川渡舟",
       "description": "忘川渡舟出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6793,6 +6879,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_03",
+      "damage_profile": {"physical": 1.0},
       "name": "无底狱甲",
       "description": "无底狱甲出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6807,6 +6894,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_04",
+      "damage_profile": {"physical": 1.0},
       "name": "十殿判官笔",
       "description": "十殿判官笔出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6821,6 +6909,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_05",
+      "damage_profile": {"physical": 1.0},
       "name": "罪业轮",
       "description": "罪业轮出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6835,6 +6924,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_06",
+      "damage_profile": {"yin": 1.0},
       "name": "鬼柏心镜",
       "description": "鬼柏心镜出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6849,6 +6939,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_07",
+      "damage_profile": {"physical": 1.0},
       "name": "生死簿残页",
       "description": "生死簿残页出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6863,6 +6954,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_08",
+      "damage_profile": {"yin": 1.0},
       "name": "六道魂幡",
       "description": "六道魂幡出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6877,6 +6969,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_09",
+      "damage_profile": {"yin": 1.0},
       "name": "幽关镇魄印",
       "description": "幽关镇魄印出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6891,6 +6984,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_10",
+      "damage_profile": {"yin": 1.0},
       "name": "引魂天索",
       "description": "引魂天索出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6905,6 +6999,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_11",
+      "damage_profile": {"earth": 1.0},
       "name": "轮回石碑",
       "description": "轮回石碑出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -6919,6 +7014,7 @@
     },
     {
       "id": "guixu_yellow_spring_equipment_12",
+      "damage_profile": {"yin": 1.0},
       "name": "无岸冥钟",
       "description": "无岸冥钟出自黄泉无底狱，无法从归墟之外的途径获得。",
       "tags": [
@@ -7329,6 +7425,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_01",
+      "damage_profile": {"water": 0.7, "earth": 0.3},
       "name": "苍山镇海珠",
       "description": "苍山镇海珠出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7343,6 +7440,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_02",
+      "damage_profile": {"wood": 1.0},
       "name": "万木招灵旗",
       "description": "万木招灵旗出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7357,6 +7455,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_03",
+      "damage_profile": {"metal": 1.0},
       "name": "獠月裂界剑",
       "description": "獠月裂界剑出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7371,6 +7470,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_04",
+      "damage_profile": {"physical": 1.0},
       "name": "玄兕负天甲",
       "description": "玄兕负天甲出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7385,6 +7485,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_05",
+      "damage_profile": {"yin": 1.0},
       "name": "百兽照魂鼎",
       "description": "百兽照魂鼎出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7399,6 +7500,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_06",
+      "damage_profile": {"earth": 1.0},
       "name": "回山渡劫轮",
       "description": "回山渡劫轮出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7413,6 +7515,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_07",
+      "damage_profile": {"physical": 1.0},
       "name": "灵犀照心镜",
       "description": "灵犀照心镜出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7427,6 +7530,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_08",
+      "damage_profile": {"physical": 1.0},
       "name": "青鸾流光舟",
       "description": "青鸾流光舟出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7441,6 +7545,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_09",
+      "damage_profile": {"physical": 1.0},
       "name": "量天骨尺",
       "description": "量天骨尺出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7455,6 +7560,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_10",
+      "damage_profile": {"physical": 1.0},
       "name": "祖庭镇源碑",
       "description": "祖庭镇源碑出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7469,6 +7575,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_11",
+      "damage_profile": {"earth": 1.0},
       "name": "空山无相钟",
       "description": "空山无相钟出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7483,6 +7590,7 @@
     },
     {
       "id": "guixu_monster_realm_equipment_12",
+      "damage_profile": {"physical": 1.0},
       "name": "洪荒初文印",
       "description": "洪荒初文印出自妖祖沉庭，无法从归墟之外的途径获得。",
       "tags": [
@@ -7893,6 +8001,7 @@
     },
     {
       "id": "guixu_celestial_equipment_01",
+      "damage_profile": {"water": 1.0},
       "name": "玉宸镇海珠",
       "description": "玉宸镇海珠出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -7907,6 +8016,7 @@
     },
     {
       "id": "guixu_celestial_equipment_02",
+      "damage_profile": {"water": 1.0},
       "name": "云笈归潮旗",
       "description": "云笈归潮旗出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -7921,6 +8031,7 @@
     },
     {
       "id": "guixu_celestial_equipment_03",
+      "damage_profile": {"metal": 1.0},
       "name": "天衡裂界剑",
       "description": "天衡裂界剑出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -7935,6 +8046,7 @@
     },
     {
       "id": "guixu_celestial_equipment_04",
+      "damage_profile": {"metal": 1.0},
       "name": "金阙定天甲",
       "description": "金阙定天甲出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -7949,6 +8061,7 @@
     },
     {
       "id": "guixu_celestial_equipment_05",
+      "damage_profile": {"yin": 1.0},
       "name": "紫微照魂鼎",
       "description": "紫微照魂鼎出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -7963,6 +8076,7 @@
     },
     {
       "id": "guixu_celestial_equipment_06",
+      "damage_profile": {"physical": 1.0},
       "name": "星槎渡劫轮",
       "description": "星槎渡劫轮出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -7977,6 +8091,7 @@
     },
     {
       "id": "guixu_celestial_equipment_07",
+      "damage_profile": {"physical": 1.0},
       "name": "太清天心镜",
       "description": "太清天心镜出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -7991,6 +8106,7 @@
     },
     {
       "id": "guixu_celestial_equipment_08",
+      "damage_profile": {"physical": 1.0},
       "name": "蹑景流光舟",
       "description": "蹑景流光舟出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -8005,6 +8121,7 @@
     },
     {
       "id": "guixu_celestial_equipment_09",
+      "damage_profile": {"water": 1.0},
       "name": "河洛界尺",
       "description": "河洛界尺出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -8019,6 +8136,7 @@
     },
     {
       "id": "guixu_celestial_equipment_10",
+      "damage_profile": {"physical": 1.0},
       "name": "玄都镇源碑",
       "description": "玄都镇源碑出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -8033,6 +8151,7 @@
     },
     {
       "id": "guixu_celestial_equipment_11",
+      "damage_profile": {"physical": 1.0},
       "name": "清都无相钟",
       "description": "清都无相钟出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -8047,6 +8166,7 @@
     },
     {
       "id": "guixu_celestial_equipment_12",
+      "damage_profile": {"water": 1.0},
       "name": "先天河图印",
       "description": "先天河图印出自天律沉宫，无法从归墟之外的途径获得。",
       "tags": [
@@ -8457,6 +8577,7 @@
     },
     {
       "id": "guixu_asura_equipment_01",
+      "damage_profile": {"water": 0.7, "fire": 0.3},
       "name": "烬海镇潮珠",
       "description": "烬海镇潮珠出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8471,6 +8592,7 @@
     },
     {
       "id": "guixu_asura_equipment_02",
+      "damage_profile": {"water": 1.0},
       "name": "血月归潮旗",
       "description": "血月归潮旗出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8485,6 +8607,7 @@
     },
     {
       "id": "guixu_asura_equipment_03",
+      "damage_profile": {"metal": 1.0},
       "name": "无回裂界剑",
       "description": "无回裂界剑出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8499,6 +8622,7 @@
     },
     {
       "id": "guixu_asura_equipment_04",
+      "damage_profile": {"metal": 1.0},
       "name": "铜狱定天甲",
       "description": "铜狱定天甲出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8513,6 +8637,7 @@
     },
     {
       "id": "guixu_asura_equipment_05",
+      "damage_profile": {"yin": 1.0},
       "name": "寒灯照魂鼎",
       "description": "寒灯照魂鼎出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8527,6 +8652,7 @@
     },
     {
       "id": "guixu_asura_equipment_06",
+      "damage_profile": {"physical": 1.0},
       "name": "断劫无回轮",
       "description": "断劫无回轮出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8541,6 +8667,7 @@
     },
     {
       "id": "guixu_asura_equipment_07",
+      "damage_profile": {"physical": 1.0},
       "name": "赤瞳天心镜",
       "description": "赤瞳天心镜出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8555,6 +8682,7 @@
     },
     {
       "id": "guixu_asura_equipment_08",
+      "damage_profile": {"fire": 1.0},
       "name": "掠火流光舟",
       "description": "掠火流光舟出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8569,6 +8697,7 @@
     },
     {
       "id": "guixu_asura_equipment_09",
+      "damage_profile": {"metal": 1.0},
       "name": "裁疆铁尺",
       "description": "裁疆铁尺出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8583,6 +8712,7 @@
     },
     {
       "id": "guixu_asura_equipment_10",
+      "damage_profile": {"physical": 1.0},
       "name": "兵主镇源碑",
       "description": "兵主镇源碑出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8597,6 +8727,7 @@
     },
     {
       "id": "guixu_asura_equipment_11",
+      "damage_profile": {"physical": 1.0},
       "name": "寂照无相钟",
       "description": "寂照无相钟出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -8611,6 +8742,7 @@
     },
     {
       "id": "guixu_asura_equipment_12",
+      "damage_profile": {"physical": 1.0},
       "name": "无间玄枢印",
       "description": "无间玄枢印出自修罗劫海，无法从归墟之外的途径获得。",
       "tags": [
@@ -9021,6 +9153,7 @@
     },
     {
       "id": "guixu_nether_equipment_01",
+      "damage_profile": {"water": 1.0},
       "name": "沧溟镇海珠",
       "description": "沧溟镇海珠出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9035,6 +9168,7 @@
     },
     {
       "id": "guixu_nether_equipment_02",
+      "damage_profile": {"thunder": 0.7, "water": 0.3},
       "name": "御霆归潮旗",
       "description": "御霆归潮旗出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9049,6 +9183,7 @@
     },
     {
       "id": "guixu_nether_equipment_03",
+      "damage_profile": {"metal": 1.0},
       "name": "龙牙裂界剑",
       "description": "龙牙裂界剑出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9063,6 +9198,7 @@
     },
     {
       "id": "guixu_nether_equipment_04",
+      "damage_profile": {"physical": 1.0},
       "name": "玄鳞定天甲",
       "description": "玄鳞定天甲出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9077,6 +9213,7 @@
     },
     {
       "id": "guixu_nether_equipment_05",
+      "damage_profile": {"yin": 1.0},
       "name": "烛夜照魂鼎",
       "description": "烛夜照魂鼎出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9091,6 +9228,7 @@
     },
     {
       "id": "guixu_nether_equipment_06",
+      "damage_profile": {"water": 1.0},
       "name": "游渊渡劫轮",
       "description": "游渊渡劫轮出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9105,6 +9243,7 @@
     },
     {
       "id": "guixu_nether_equipment_07",
+      "damage_profile": {"water": 1.0},
       "name": "明渊天心镜",
       "description": "明渊天心镜出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9119,6 +9258,7 @@
     },
     {
       "id": "guixu_nether_equipment_08",
+      "damage_profile": {"physical": 1.0},
       "name": "蜃影流光舟",
       "description": "蜃影流光舟出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9133,6 +9273,7 @@
     },
     {
       "id": "guixu_nether_equipment_09",
+      "damage_profile": {"physical": 1.0},
       "name": "盘天龙尺",
       "description": "盘天龙尺出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9147,6 +9288,7 @@
     },
     {
       "id": "guixu_nether_equipment_10",
+      "damage_profile": {"water": 1.0},
       "name": "九渊镇源碑",
       "description": "九渊镇源碑出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9161,6 +9303,7 @@
     },
     {
       "id": "guixu_nether_equipment_11",
+      "damage_profile": {"physical": 1.0},
       "name": "潜龙无相钟",
       "description": "潜龙无相钟出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9175,6 +9318,7 @@
     },
     {
       "id": "guixu_nether_equipment_12",
+      "damage_profile": {"yang": 1.0},
       "name": "烛龙初曜印",
       "description": "烛龙初曜印出自太初龙渊，无法从归墟之外的途径获得。",
       "tags": [
@@ -9585,6 +9729,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_01",
+      "damage_profile": {"water": 1.0},
       "name": "忘川镇海珠",
       "description": "忘川镇海珠出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9599,6 +9744,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_02",
+      "damage_profile": {"water": 1.0},
       "name": "残梦归潮旗",
       "description": "残梦归潮旗出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9613,6 +9759,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_03",
+      "damage_profile": {"metal": 1.0},
       "name": "断缘裂界剑",
       "description": "断缘裂界剑出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9627,6 +9774,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_04",
+      "damage_profile": {"yin": 1.0},
       "name": "幽莲定天甲",
       "description": "幽莲定天甲出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9641,6 +9789,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_05",
+      "damage_profile": {"yin": 1.0},
       "name": "宿世照魂鼎",
       "description": "宿世照魂鼎出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9655,6 +9804,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_06",
+      "damage_profile": {"physical": 1.0},
       "name": "彼岸渡劫轮",
       "description": "彼岸渡劫轮出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9669,6 +9819,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_07",
+      "damage_profile": {"physical": 1.0},
       "name": "返照天心镜",
       "description": "返照天心镜出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9683,6 +9834,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_08",
+      "damage_profile": {"physical": 1.0},
       "name": "渡影流光舟",
       "description": "渡影流光舟出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9697,6 +9849,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_09",
+      "damage_profile": {"yin": 1.0},
       "name": "冥衡界尺",
       "description": "冥衡界尺出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9711,6 +9864,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_10",
+      "damage_profile": {"physical": 1.0},
       "name": "无始镇源碑",
       "description": "无始镇源碑出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9725,6 +9879,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_11",
+      "damage_profile": {"physical": 1.0},
       "name": "长夜无相钟",
       "description": "长夜无相钟出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [
@@ -9739,6 +9894,7 @@
     },
     {
       "id": "guixu_reincarnation_equipment_12",
+      "damage_profile": {"physical": 1.0},
       "name": "三生玄牒印",
       "description": "三生玄牒印出自无时轮回墟，无法从归墟之外的途径获得。",
       "tags": [

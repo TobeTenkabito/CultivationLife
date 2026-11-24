@@ -14,7 +14,7 @@ from .models import GameState
 from .errors import NotFoundError
 from .runtime import decode_rng
 from .version import BASE_GAME_VERSION, release_order
-from .save_schema import migrate_document
+from .save_schema import migrate_document, migration_path, schema_version
 
 MAX_RAW = 64 * 1024 * 1024
 MAX_PACKED = 12 * 1024 * 1024
@@ -114,10 +114,18 @@ def decode_snapshot(payload):
     return document, data
 
 
+def existing_save(path):
+    if not path.exists():
+        return None
+    raw = path.read_bytes()
+    migration_path(schema_version(json.loads(raw)))
+    return raw
+
+
 def preview_snapshot(store, payload, extensions=()):
     document, data = decode_snapshot(payload)
     path = store._path(data['id'])
-    existing = path.read_bytes() if path.exists() else None
+    existing = existing_save(path)
     from .content_registry import WORLD_SYSTEMS, REALMS, PATH_NAMES
     player = data['player']
     rank = player.get('realm_index', 0)
@@ -137,7 +145,7 @@ def import_snapshot(store, payload, expected_existing_hash):
     raw = json.dumps(data, ensure_ascii=False, separators=(',', ':'), allow_nan=False).encode('utf-8')
     with store.lock, TRANSFER_LOCK:
         path = store._path(data['id'])
-        existing = path.read_bytes() if path.exists() else None
+        existing = existing_save(path)
         actual_hash = hashlib.sha256(existing).hexdigest() if existing is not None else None
         if actual_hash != expected_existing_hash:
             raise ValueError("本机存档已发生变化，请重新预览后再导入")

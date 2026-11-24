@@ -1,3 +1,4 @@
+import hashlib
 import base64
 import copy
 import json
@@ -125,3 +126,32 @@ def test_large_ten_mb_journey_is_compressed_and_restored(snapshot):
     import_snapshot(target, exported['payload'], None)
     assert json.loads(target._path(game_id).read_bytes()) == data
     print(f"Large save: {len(original)} -> {exported['packed_bytes']} bytes; {time.perf_counter()-started:.2f}s roundtrip")
+
+
+def test_structure_12_blocks_load_preview_import_and_overwrite(snapshot):
+    from cultivation_life.models import GameState
+    from cultivation_life.save_schema import SAVE_SCHEMA_VERSION
+    source, game_id, target = snapshot
+    path = source._path(game_id)
+    current = source.load(game_id)
+    exported = export_snapshot(source, game_id)
+    document = json.loads(zlib.decompress(base64.b64decode(exported["payload"])))
+    assert document["save"]["version"] == SAVE_SCHEMA_VERSION == 13
+    document["save"]["version"] = 12
+    old_payload = encode(document)
+    with pytest.raises(ValueError,match="结构 13"):
+        preview_snapshot(target,old_payload)
+    with pytest.raises(ValueError,match="结构 13"):
+        import_snapshot(target,old_payload,None)
+    assert not target._path(game_id).exists()
+
+    old = json.dumps(document["save"]).encode()
+    path.write_bytes(old)
+    for action in (lambda: GameState.from_dict(document["save"]), lambda: source.load(game_id),
+                   lambda: source.save(current), lambda: preview_snapshot(source,exported["payload"]),
+                   lambda: import_snapshot(source,exported["payload"],hashlib.sha256(old).hexdigest())):
+        with pytest.raises(ValueError,match="结构 13"):
+            action()
+        assert path.read_bytes() == old
+    listed = next(row for row in source.list_games() if row["id"] == game_id)
+    assert not listed["compatible"]

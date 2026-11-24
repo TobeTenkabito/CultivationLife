@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from ...traits import birth
+
 import copy
 import random
 
@@ -45,7 +47,8 @@ def _ensure_merchant(deps: MerchantStateDependencies, game) -> bool:
             realm_index = deps._merchant_realm_cap(world)
             leader = SectNpc(f"merchant-{world}-{alliance_id}-leader", rng.choice(["沈", "陆", "宁", "虞"]) + rng.choice(["望舒", "玄衡", "听澜", "怀璧"]),
                              "分盟主" if cross and world != cross[1] else "盟主", realm_index,
-                             REALMS[realm_index].layers, 100, None, world=world)
+                             REALMS[realm_index].layers, 100, None, world=world,
+                             birth_seed=game.seed)
             locations = sites[index::3] or sites[:1]
             locations = locations[:3]
             chief_realm = 8 if alliance_id in {"xuanji", "jiukun"} else realm_index
@@ -54,6 +57,7 @@ def _ensure_merchant(deps: MerchantStateDependencies, game) -> bool:
             for site in locations:
                 deputy = copy.deepcopy(leader)
                 deputy.id += f"-{site}"
+                deputy.trait_state = birth(game.seed, deputy.id)
                 deputy.name = rng.choice(["许", "苏", "秦"]) + rng.choice(["青川", "知微", "照月"])
                 deputy.title = "分部主事"
                 deputy.realm_index = max(1, realm_index - 1)

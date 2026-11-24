@@ -203,7 +203,7 @@ def teach(game,kind,identity,book_id,*,slot=None,family=False):
     facts=normalize_facts(target.facts(game))
     if kind=='puppet' and facts.get('type') not in {'living','clone'}:raise ValueError('只有活傀或分身能学习人物功法')
     root=facts.get('spirit_root')
-    if root not in ROOT_DEFINITIONS or not can_practice_technique(root,book):raise ValueError('目标灵根未确认或无法修习此功法')
+    if root not in ROOT_DEFINITIONS or not can_practice_technique(facts,book):raise ValueError('目标灵根未确认或无法修习此功法')
     if book.required_body_training>int(facts.get('body_training') or 0):raise ValueError('目标炼体尚未达到功法要求')
     if book.requires_immortal_power and (facts.get('transcendence') or {}).get('conversion', 0) < 1:
         raise ValueError('目标尚未完成仙灵力转化')
@@ -286,3 +286,26 @@ def feed_pill(game,identity,item_id):
     gain=float(WORLD_SYSTEMS['demonic_cultivation']['pill_breakthrough_bonus'])
     target.owner['breakthrough_bonus']=min(.35,bonus+gain)
     return f"赐予{target.owner['name']}{item.name}，下次机缘培养费用减免提升至{target.owner['breakthrough_bonus']:.0%}。"
+
+
+def configure_trait(game, kind, identity, action, key):
+    from ...traits import active, wash, mastery
+    target = resolve(game, kind, identity)
+    require(game, target)
+    if kind == "puppet":
+        raise ValueError("傀儡不能洗练人物特质")
+    facts = target.facts(game)
+    if action == "wash":
+        wash(facts, key)
+    elif action == "study":
+        from ..trait_study import study
+        study(game, facts, key)
+    elif action == "refine":
+        trait = facts.get("trait_state", {}).get("mastery", {}).get(key)
+        if not trait or key in active(facts).get(trait, ()) or not mastery(facts, key):
+            raise ValueError("当前无法重炼该来源")
+    else:
+        raise ValueError("未知特质操作")
+    write(target, facts)
+    if target.person:
+        sync_offspring(game, target.person)

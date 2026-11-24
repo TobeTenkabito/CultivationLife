@@ -4,7 +4,7 @@ import copy
 import math
 from .snapshot_copy import copy_plain_data
 from .authored_technique_schema import validate_library as validate_authored_library
-from dataclasses import asdict, dataclass, field
+from dataclasses import InitVar, asdict, dataclass, field
 from typing import Any
 
 from .generated_event_schema import decode_state as decode_generated_event_state
@@ -82,7 +82,12 @@ class Item:
     artifact_origin_id: str | None = None
     immortal_grade: int | None = None
 
+    damage_profile: dict[str, float] | None = None
+
     def __post_init__(self):
+        if self.damage_profile is not None or set(self.tags) & {"artifact", "equipment"}:
+            from .combat_attributes import profile_for
+            self.damage_profile = profile_for(self)
         for value in (self.recovery_hp_limit,self.recovery_mp_limit):
             if value is not None and (type(value) not in (int,float) or not math.isfinite(value) or value<0):
                 raise ValueError('灵药恢复上限无效')
@@ -137,10 +142,14 @@ class Technique:
     description: str = ""
     combat_effect: dict[str, Any] = field(default_factory=dict)
 
+    damage_profile: dict[str, float] | None = None
+
     def active_in(self, world: str) -> bool:
         return not self.effective_worlds or world in self.effective_worlds
 
     def __post_init__(self) -> None:
+        from .combat_attributes import profile_for, catalog_profile
+        self.damage_profile = catalog_profile(self) if self.damage_profile is None and self.id.startswith("TECH_") else profile_for(self)
         # The first expedition recipe omitted this required field. Complete
         # only that identifiable recipe when materializing its Technique;
         # frozen loot stats, seed and identity are never regenerated.
@@ -304,7 +313,14 @@ class SectNpc:
     economic_provision_year: int | None = None
     spirit_state: dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self) -> None:
+    trait_state: dict[str, Any] | None = None
+    birth_seed: InitVar[int | None] = None
+
+    def __post_init__(self, birth_seed=None) -> None:
+        from .traits import birth, validate as validate_traits
+        if self.trait_state is None:
+            self.trait_state = {} if birth_seed is None else birth(birth_seed, self.id)
+        validate_traits(self.trait_state)
         import math
         from .soul_rules import validate_spirit
         if type(self.roaming_years) is not int or self.roaming_years < 0:
@@ -349,7 +365,8 @@ class SectNpc:
     def from_dict(cls, value: dict[str, Any]) -> SectNpc:
         from .npc_body_schema import validate
         validate(value.get("body_attainments", {}))
-        return cls(**value)
+        from .traits import validate as validate_traits
+        return cls(**(value | {"trait_state": validate_traits(value.get("trait_state", {}))}))
 
 
 @dataclass
@@ -448,6 +465,7 @@ class Player:
     support_technique: Technique | None = None
     combat_techniques: list[Technique] = field(default_factory=list)
     duel_technique_ids: list[str] = field(default_factory=list)
+    trait_state: dict[str, Any] = field(default_factory=dict)
     known_techniques: list[Technique] = field(default_factory=list)
     additional_roots: list[str] = field(default_factory=list)
     secret_art_state: dict[str, Any] = field(default_factory=dict)
@@ -676,6 +694,8 @@ class Player:
         from .reputation import decode_player
         decode_player(data)
         from .duel_technique_schema import validate_ids
+        from .traits import validate as validate_traits
+        data['trait_state'] = validate_traits(data.get('trait_state', {}))
         data['duel_technique_ids'] = validate_ids(data.get('duel_technique_ids', []))
         if set(data['duel_technique_ids']) - {row['id'] for row in data.get('combat_techniques', [])}:
             raise ValueError('斗法功法必须先成功装备为战斗功法')
@@ -1088,8 +1108,20 @@ class GameState:
     last_saved_with_game_version: str = BASE_GAME_VERSION
     version: int = SAVE_SCHEMA_VERSION
     map_war_last_encounter_unit: int = -2
+    npc_birth_counts: dict[str, int] = field(default_factory=dict)
+
+    def next_npc_birth(self, origin: str) -> dict[str, Any]:
+        """Allocate one reproducible roll for a newly created, dynamically identified NPC."""
+        from .traits import birth
+        index = self.npc_birth_counts.get(origin, 0)
+        self.npc_birth_counts[origin] = index + 1
+        return birth(self.seed, f"generated/{origin}/{index}")
 
     def __post_init__(self):
+        if not isinstance(self.npc_birth_counts, dict) or any(
+                not isinstance(k, str) or not k or type(v) is not int or v < 0
+                for k, v in self.npc_birth_counts.items()):
+            raise ValueError("人物出生计数无效")
         from .dungeon_schema import decode as decode_dungeons
         self.dungeon_state = decode_dungeons(self.dungeon_state)
         from .reputation import bind_scope
@@ -1128,6 +1160,7 @@ class GameState:
         document = {
             "id": self.id,
             "seed": self.seed,
+            "npc_birth_counts": dict(self.npc_birth_counts),
             "voisinage_schema": 1,
             "player": self.player.to_dict(),
             "created_at": self.created_at,
@@ -1211,6 +1244,22 @@ class GameState:
 
     @classmethod
     def from_dict(cls, value: dict[str, Any]) -> GameState:
+        from .save_schema import schema_version, migration_path
+        migration_path(schema_version(value))
+        player_data = value.get("player")
+        if not isinstance(player_data, dict) or "trait_state" not in player_data:
+            raise ValueError("结构 13 人物缺少特质记录")
+        from .combat_attributes import validate_profile
+        slots = ("technique", "support_technique", "body_technique", "divine_sense_technique", "transformation_technique")
+        books = [player_data.get(key) for key in slots]
+        books.extend(player_data.get("combat_techniques", ()))
+        books.extend(player_data.get("known_techniques", ()))
+        for entry in books:
+            if entry is not None:
+                validate_profile(entry.get("damage_profile"))
+        for item in player_data.get("inventory", ()):
+            if {"equipment","artifact"}.intersection(item.get("tags", ())):
+                validate_profile(item.get("damage_profile"))
         value = normalize_content_references(value)
         from .reputation import decode_pending
         value['pending_event'] = decode_pending(value.get('pending_event'))
@@ -1307,4 +1356,5 @@ class GameState:
             created_with_game_version=str(value.get("created_with_game_version", "pre-1.0.0")),
             last_saved_with_game_version=str(value.get("last_saved_with_game_version", "pre-1.0.0")),
             version=value.get("version", 1),
+            npc_birth_counts=copy_plain_data(value.get("npc_birth_counts", {})),
         )

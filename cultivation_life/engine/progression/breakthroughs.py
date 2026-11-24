@@ -165,7 +165,10 @@ def _resolve_breakthroughs(deps: BreakthroughDependencies, game: GameState, rng:
         # 练气层级仍沿用自动检定；筑基以后所有层级均停留等待手动冲击。
         chance = deps._breakthrough_chance(player, major=False, allow_aids=False)
         player.natal_origin_penalty = 0.0
-        if rng.random() >= chance["final"]:
+        from ...traits import record_roll
+        success = rng.random() < chance["final"]
+        record_roll(player, success)
+        if not success:
             player.opportunity = required * float(WORLD_SYSTEMS["breakthrough"]["minor_failure_retention"])
             gain = deps._sage_scaled_gain(
                 player, float(WORLD_SYSTEMS["breakthrough"]["minor_failure_heart_demon"]),
@@ -382,16 +385,18 @@ def _breakthrough_chance(deps: BreakthroughDependencies, player: Player, major: 
     configured_cap = float(
         WORLD_SYSTEMS.get("ghost_cultivation", {}).get("reincarnation_final_probability_cap", 0.98)
     ) if ghost_cultivation_active(player) else 0.98
+    from ...traits import breakthrough_bonus
+    trait_bonus = breakthrough_bonus(player, major)
     final_cap = min(0.98, max(0.01, configured_cap))
     final = max(0.01, min(
-        final_cap, base + aid_bonus + companion_bonus + artifact_bonus + pity_bonus
+        final_cap, base + trait_bonus + aid_bonus + companion_bonus + artifact_bonus + pity_bonus
         + body_training_bonus + optimal_state_bonus + devouring_bonus + reincarnation_bonus + sage_bonus - penalty,
     ))
     final = max(0.01, final - max(0.0, player.natal_origin_penalty))
     return {
         "base": base, "aid_bonus": aid_bonus, "companion_bonus": companion_bonus,
         "concubine_base_bonus": concubine_base_bonus,
-        "wish_base_bonus": wish_base_bonus,
+        "wish_base_bonus": wish_base_bonus, "trait_bonus": trait_bonus,
         "technique_secret_bonus": technique_secret_bonus,
         "artifact_bonus": artifact_bonus, "pity_bonus": pity_bonus,
         "devouring_bonus": devouring_bonus,

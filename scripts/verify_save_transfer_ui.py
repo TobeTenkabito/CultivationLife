@@ -1,4 +1,4 @@
-"""Six-theme save UI and Web Crypto roundtrips against an isolated real server."""
+"""Two-palette save UI and Web Crypto roundtrips against an isolated real server."""
 import json
 import sys
 import tempfile
@@ -73,8 +73,8 @@ def main():
                 if '--preserve-fixture' not in sys.argv:
                     (fixtures/'from-windows.txt').write_text(page.evaluate('window.__transferTestCode'), encoding='utf-8')
                     (fixtures/'from-windows.json').write_text(json.dumps(original, ensure_ascii=False), encoding='utf-8')
-                for theme in 'abdf':
-                    page.evaluate('(theme)=>document.querySelector(`[data-theme-picker="start"] [data-theme-choice="${theme}"]`).click()',theme)
+                for theme in ('light', 'dark'):
+                    page.locator(f'[data-theme-picker=start] [data-pixel-theme-choice="{theme}"]').click()
                     page.evaluate('GameThemes.saved')
                     page.locator('.save-library').scroll_into_view_if_needed()
                     for width in (1440, 800, 412):
@@ -108,14 +108,14 @@ def main():
                     }''')
                     assert colours[0] == colours[1] and colours[0] != colours[2], (theme,colours)
                     page.evaluate('showStart()'); page.wait_for_function('!busy')
-                    # Loading may migrate state. The next export must reflect that new snapshot.
+                    # Session preparation may update the current-schema snapshot.
                     original = json.loads(engine.store._path(game.id).read_bytes())
                     page.evaluate('''async id=>{const r=await api('/api/save-transfer/export',{method:'POST',body:JSON.stringify({id})});window.__transferTestCode=await SaveCode.encode(r.payload)}''',game.id)
                 assert not errors, errors
                 browser.close()
         finally:
             httpd.shutdown()
-    print('Six-theme save library, import/export, AES-GCM, chunks, and Buddhist dock colours passed')
+    print('Two-palette save library, import/export, AES-GCM, chunks, and Buddhist dock colours passed')
 
 
 if __name__ == '__main__':

@@ -379,7 +379,7 @@ def manage_dao_companion(
             technique = next((entry for entry in player.known_techniques if entry.id == content_id), None)
             if not technique:
                 raise ValueError("你尚未掌握这部功法")
-            if not can_practice_technique(str(companion.get("spirit_root", "none")), technique):
+            if not can_practice_technique(companion, technique):
                 raise ValueError("道侣的灵根无法修习这部功法")
             from ...system.npc_development.service import teach
             slot='main' if technique.category=='spiritual' else {'body':'body','divine_sense':'sense','transformation':'transformation'}.get(technique.category)

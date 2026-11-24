@@ -62,7 +62,20 @@
     profile.append(art,info);detail.append(profile);
     if(n.reason){detail.append(el('p',n.reason,'npc-development-reason'));return;}
     const controls=el('div',null,'npc-development-controls');detail.append(controls);
-    controls.append(choose('培养方向',[['cultivation','修为'],['body','肉身'],['sense','神识'],['conversion','元力转化'],['technique','传授功法'],['technique_growth','研修功法'],['domain','邻域'],['body_art','肉身精修']],axis,v=>{axis=v;paint();}));
+    controls.append(choose('培养方向',[['cultivation','修为'],['body','肉身'],['sense','神识'],['conversion','元力转化'],['technique','传授功法'],['technique_growth','研修功法'],['domain','邻域'],['body_art','肉身精修'],...(n.traits ? [['traits','特质洗练']] : [])],axis,v=>{axis=v;paint();}));
+    if(axis==='traits'){
+      for(const t of n.traits || []){
+        const b=el('button','洗去'+t.name); b.disabled=env.busy();
+        b.onclick=()=>{if(window.confirm('为'+n.name+'洗去「'+t.name+'」？')) submit(n,{action:'wash',content_id:t.id});};
+        detail.append(el('p',t.rarity+' · '+t.name+' · '+t.effect+' · 来源 '+t.source_names.join('、')),b);
+      }
+      for(const s of n.trait_sources || []){
+        const b=el('button','重炼'+s.name);b.disabled=env.busy();b.onclick=()=>submit(n,{action:'refine',content_id:s.id});detail.append(b);
+      }
+      window.GameUi.traitStudy(detail,n.trait_study,env.busy(),key=>submit(n,{action:'study',content_id:key}));
+      if(!n.traits?.length && !n.trait_sources?.length && !n.trait_study?.length)detail.append(el('p','暂无可洗练特质或已大成来源。'));
+      return;
+    }
     let quoteAxis=axis;
     if(axis==='body_art'||axis==='domain'){
       const rows=axis==='body_art'?(n.specializations||[]):(n.domains||[]);

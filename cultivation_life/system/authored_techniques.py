@@ -44,7 +44,7 @@ def spend(player, cost):
 
 
 def quote(player, payload):
-    if not isinstance(payload, dict) or set(payload) - {'name', 'grade', 'category', 'element', 'allocations', 'buffs'}:
+    if not isinstance(payload, dict) or set(payload) - {'name', 'grade', 'category', 'element', 'damage_profile', 'allocations', 'buffs'}:
         raise ValueError('创法参数无效')
     name = payload.get('name', '').strip() if isinstance(payload.get('name'), str) else ''
     if not 2 <= len(name) <= 24 or any(ord(c) < 32 for c in name):
@@ -81,7 +81,7 @@ def quote(player, payload):
     if baseline is None:
         baseline = next(t for t in registry.TECHNIQUE_CATALOG.values() if t.grade == grade and t.id.startswith('TECH_OPEN_'))
     values = {key: round(max(.1, float(getattr(baseline, key))) * allocations[key] / (10*grade**2), 4) for key in STATS}
-    book = Technique(id=PREFIX+'preview', name=name, path=player.path, element=element, grade=grade,
+    book = Technique(damage_profile=payload.get('damage_profile'), id=PREFIX+'preview', name=name, path=player.path, element=element, grade=grade,
         category='spiritual' if category in {'main','support','combat'} else category,
         growth_preference=category, authored_buffs=buffs, **values)
     if category == 'body':
