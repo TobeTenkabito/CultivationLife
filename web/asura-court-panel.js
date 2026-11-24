@@ -43,6 +43,7 @@
         const row = node('section', null, `court-seat${person.player ? ' is-player' : ''}${next ? ' is-next' : ''}`);
         row.append(node('span', String(person.rank).padStart(2, '0'), 'court-seat-number'));
         const identity = node('div'); identity.append(node('small', person.title), node('strong', person.name), node('span', person.player ? '你当前的席位' : person.present ? '在位廷臣' : '席位空缺', 'court-description')); row.append(identity);
+        if(person.present&&!person.player)window.NpcArt?.traits(identity,person);
         if (next) row.append(button(person.present ? '换位血战' : '接任空缺', 'blood_duel', person.id || '', !!c.challenge || d.unit - c.last_duel < 2));
         ladder.append(row);
       }); body.append(ladder);

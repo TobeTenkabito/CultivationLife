@@ -18,6 +18,7 @@
 - [固定4258部功法实战接入](fixed-technique-combat.md)：逐书V3配方、玩家与原NPC法力、七部斗法配置、太元归墟剑升级及对抗测试。
 - [斗法资源与混合费用](combat-resource-costs.md)：低阶固定、同阶比例、越阶混合；普通出手、弱敌伤害与HP上限收益。
 - [特质与战斗属性策划案 V0.2（待审）](trait-and-combat-attributes-design.md)
+- [新增 101 项特质的效果、功法与法宝来源](trait-repertoire-catalog.md)
 - [修罗第二轮完整实现](asura-protocols.md)：军权、追责、迁署、盟约、战后整合与验证。
 
 

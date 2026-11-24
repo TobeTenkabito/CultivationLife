@@ -68,7 +68,11 @@
           const place=scene.locations.find(l=>l.id===row.location_id);
           card.append(node('h3',row.name+(row.joined?' · 已加入':'')),node('p',`${place?.name||'本界驻地'} · 在世成员 ${row.members.length} 人`));
           const members=node('details');members.append(node('summary','查看成员'));
-          row.members.forEach(n=>members.append(node('p',`${n.name} · ${n.realm_index}阶${n.layer}层`),button('交流 · 一年','spatial','talk',{target_id:n.id})));
+          row.members.forEach(n=>{
+            const info=node('div');info.append(node('p',`${n.name} · ${n.realm_index}阶${n.layer}层`));
+            window.NpcArt?.traits(info,n);
+            members.append(info,button('交流 · 一年','spatial','talk',{target_id:n.id}));
+          });
           card.append(members);
           if(!row.here)card.append(button('前往驻地 · 一年','spatial','move',{target_id:row.location_id}));
           if(row.joined){card.append(button('请教本界传承 · 一年','spatial','study_'+kind,{target_id:row.id},!row.here||!row.members.length),button('辞别 · 一年','spatial','leave_'+kind,{target_id:row.id}));}
@@ -125,7 +129,11 @@
       if(scene.population_rules){const r=scene.population_rules;root.append(node('p',`本界${r.abundance==='barren'?'资源匮乏':'资源寻常'}，修炼收益 ×${r.cultivation_multiplier}；初始修士最高 ${r.npc_realm_ceiling}阶后期。当地修士的修为分布。`));}
       scene.locations.forEach(l=>{const card=node('article');card.className='map-location';card.dataset.location=l.id;card.append(node('h3',l.name),node('p',l.description||'独立空间内的地域。'),node('small',`气经验：${Object.entries(l.qi_gain_efficiencies).map(([key,value])=>`${({spirit:'灵气',demon:'魔气',monster:'妖气',yin:'阴气'})[key]} ×${value.toFixed(2)}`).join(' · ')}`),button(l.id===scene.location_id?'所在地':'前往 · 一年','spatial','move',{target_id:l.id},l.id===scene.location_id));appendRifts(card,l.id);root.append(card);});
       scene.sects.forEach(f=>root.append(button(scene.joined_sect===f.id?`已加入${f.name}`:`拜入${f.name}`,'spatial','join',{target_id:f.id},f.location_id!==scene.location_id || scene.joined_sect===f.id)));
-      scene.npcs.forEach(n=>root.append(button(`${n.name} · ${n.realm_index}阶${n.layer}层 · ${n.alive?'交流':n.death_reason}`,'spatial','talk',{target_id:n.id},!n.alive)));
+      scene.npcs.forEach(n=>{
+        const entry=node('div');
+        entry.append(button(`${n.name} · ${n.realm_index}阶${n.layer}层 · ${n.alive?'交流':n.death_reason}`,'spatial','talk',{target_id:n.id},!n.alive));
+        window.NpcArt?.traits(entry,n);root.append(entry);
+      });
     }
     if(s.visible && !s.inside && (game.secret_arts?.suppression?.active || (game.player.realm_index>=6) || s.visited.length)){
       const panel=node('details');panel.append(node('summary','秘法下界至失落界面'));

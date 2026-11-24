@@ -96,21 +96,8 @@ class CatalogRuntime(CatalogPayloads):
             r['packets']=[p for p in r['packets'] if p['share']>1e-12]
 
     def debuff(self, owner, aged=False):
-        semantics=self.battle.semantics
-        if semantics is None:return None
-        allowed={'ordinary.might','ordinary.guard','ordinary.breach','ordinary.mobility','ordinary.sense','ordinary.sustain',
-                 'ordinary.dealt','ordinary.received'}
-        for key,s in sorted(semantics.statuses.items(),key=lambda row:(row[1]['starts'],row[0])):
-            mods=s['modifiers']
-            # Only finite ordinary numerical debuffs qualify. Controls and
-            # field rules never enter this registry of status modifiers.
-            negative = mods and all(m['channel'] in allowed and
-                (m['value']>0 if m['channel']=='ordinary.received' else m['value']<0) for m in mods)
-            if (s.get('dispellable',False) and negative and s['owner']==owner and s['origin']!=owner and s['starts']<=self.round<=s['expires']
-                    and s['expires']-self.round<=1 and (not aged or s['starts']<self.round)
-                    and mods and all(m['channel'] in allowed for m in mods)):
-                return key
-        return None
+        semantics = self.battle.semantics
+        return semantics.short_debuff(owner, aged=aged) if semantics else None
 
     def _offer(self, key, fact):
         owner,b=self.books[key];r=self.records[key];e=b['effect']

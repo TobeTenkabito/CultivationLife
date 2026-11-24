@@ -574,37 +574,15 @@ def _npc_realm_name(npc: SectNpc) -> str:
 
 
 def _stable_secret_art_roll(identity: str) -> int:
-    return sum((index + 1) * ord(character) for index, character in enumerate(identity))
+    from ...system.npc_concealment import stable_roll
+    return stable_roll(identity)
 
 
 def _ensure_npc_concealment(deps: NpcDependencies, npc: SectNpc) -> tuple[int, int] | None:
-    if (
-        npc.concealed_realm_index is not None
-        and 0 <= int(npc.concealed_realm_index) < npc.realm_index
-    ):
-        realm_index = int(npc.concealed_realm_index)
-        layer = max(1, min(int(npc.concealed_layer or 1), REALMS[realm_index].layers))
-        npc.concealed_layer = layer
-        return realm_index, layer
-    npc.concealed_realm_index = None
-    npc.concealed_layer = None
-    if npc.realm_index < 2:
-        return None
-    rules = WORLD_SYSTEMS.get("secret_arts", {})
-    roll = deps._stable_secret_art_roll(f"{npc.id}|{npc.name}|收敛修为")
-    chance = max(0.0, min(1.0, float(rules.get("npc_concealment_chance", 0.18))))
-    if roll % 10_000 >= round(chance * 10_000):
-        return None
-    maximum_drop = min(
-        npc.realm_index,
-        max(1, int(rules.get("npc_max_realm_drop", 3))),
-    )
-    drop = 1 + (roll // 10_000) % maximum_drop
-    realm_index = max(0, npc.realm_index - drop)
-    layer = 1 + (roll // 100_000) % REALMS[realm_index].layers
-    npc.concealed_realm_index = realm_index
-    npc.concealed_layer = layer
-    return realm_index, layer
+    from ...system.npc_concealment import concealed_rank
+    shown = concealed_rank(npc, deps._stable_secret_art_roll)
+    npc.concealed_realm_index, npc.concealed_layer = shown or (None, None)
+    return shown
 
 
 def _npc_cultivation_perception(

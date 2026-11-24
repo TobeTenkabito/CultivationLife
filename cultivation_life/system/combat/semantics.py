@@ -17,6 +17,8 @@ class CombatSemantics:
         self._semantic_first = {}
         self._semantic_ended = False
         self._semantic_environment = {}
+        self._opening_actors = tuple(key for key, rows in rules.items()
+                                     if any(row['trigger'] == 'battle_start' for row in rows))
 
     def semantic_environment(self, natural, artificial):
         self._semantic_environment = {'environment.terrain': natural,
@@ -100,8 +102,16 @@ class CombatSemantics:
                 attr = 'field_strain' if stat == 'strain' else stat
                 limit = .85 if stat == 'pressure' else .5 if stat == 'strain' else 1.
                 setattr(s, attr, max(0., min(limit, getattr(s, attr) + value)))
+        for source, name in evaluation.spent_statuses:
+            if source.startswith('特质·'):
+                self.frame.events.append(f"{self.units[evaluation.actor].unit.name}身上的【{name}】生效，消耗一层。")
         for row in self.semantics.log:
             if row['token'] != evaluation.token:
+                continue
+            if row['source'].startswith('特质·'):
+                target = self.units[row['target']].unit.name if row['target'] in self.units else ''
+                self.frame.events.append(f"{self.units[row['actor']].unit.name}发动【{row['source'][3:]}·{row['rule']}】"
+                                         + (f"（对手：{target}）。" if target else "。"))
                 continue
             self.frame.events.append(f"{self.units[row['actor']].unit.name}触发战斗规则【{row['source']}/{row['rule']}】（{row['trigger']}）。")
 
@@ -109,6 +119,26 @@ class CombatSemantics:
         ev = self._semantic_preview(key, phase, target, role, **event)
         self._semantic_commit(ev)
         return ev
+
+    def _semantic_opening(self):
+        # Freeze both sides before applying losses so opposing openers resolve together.
+        losses = {}
+        for key in self._opening_actors:
+            owner = self.units[key]
+            if not owner.fighting:
+                continue
+            plan = self._semantic_preview(key, 'battle_start')
+            loss = max((m['value'] for m in plan.modifiers if m['channel'] == 'opening.enemy_state_loss'), default=0.)
+            if loss:
+                for target, enemy in self.units.items():
+                    if enemy.fighting and enemy.unit.side != owner.unit.side and self._can_reach(owner, target):
+                        losses[target] = max(losses.get(target, 0.), loss)
+            self._semantic_commit(plan, {'opening.enemy_state_loss'})
+        for key, fraction in losses.items():
+            state = self.units[key]
+            before = state.vitality
+            self._lose(key, fraction, physical=False)
+            self.frame.events.append(f"{state.unit.name}开战受压，战斗态势由 {before:.1%} 降至 {state.vitality:.1%}。")
 
     def _semantic_begin(self, number, player_mp, enemy_mp, player_morale=None, enemy_morale=None):
         if self.techniques:
@@ -121,8 +151,11 @@ class CombatSemantics:
         self._semantic_totals = {}
         self._semantic_first = {}
         self._semantic_ended = False
+        if number == 1 and self._opening_actors:
+            self._semantic_opening()
         # All peers see the same boundary snapshot, independent of actor order.
-        plans = [self._semantic_preview(k, 'round_start') for k, s in self.units.items() if s.fighting]
+        plans = [self._semantic_preview(k, 'round_start', short_debuff=self.semantics.short_debuff(k) is not None)
+                 for k, s in self.units.items() if s.fighting]
         for plan in plans:
             self._semantic_commit(plan)
 

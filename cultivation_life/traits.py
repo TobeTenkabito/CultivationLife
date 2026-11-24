@@ -1,6 +1,7 @@
 """Shared personal traits, mastery sources and birth weights."""
 import random
 from .combat_attributes import LABELS, read
+from .trait_mechanics import SIGNATURES
 from .trait_lineages import ARTIFACT_TRAITS, LINEAGES, LINEAGE_BODY_TRAITS
 
 # id -> name, rarity, replacement family, level
@@ -167,11 +168,11 @@ FAMILY_NAMES = {"strength":"膂力","hearing":"听觉","sight":"目力","focus":
                 "destiny":"命格","roots":"灵根","flame":"神通"}
 
 
-FAMILY_NAMES.update(breath="息法", palm="掌法", sinew="筋络", wood_heart="木心", fist="拳意",
+FAMILY_NAMES.update(weave="配气", breath="息法", palm="掌法", sinew="筋络", wood_heart="木心", fist="拳意",
                     yang_channels="阳脉", sword_bone="剑骨", thunder_mark="雷纹", furnace_heart="炉心")
 for _key, _lineage in LINEAGES.items():
     TRAITS[_key] = (_lineage.name, _lineage.rarity, _lineage.family, _lineage.level)
-    EFFECTS[_key] = _lineage.description(LABELS)
+    EFFECTS[_key] = SIGNATURES[_key].description if _lineage.rule == "signature" else _lineage.description(LABELS)
     if not _lineage.innate:
         MASTERY_ONLY.add(_key)
     for _book in _lineage.books:

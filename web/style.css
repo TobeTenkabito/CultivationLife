@@ -201,6 +201,10 @@ button, input[type="button"], input[type="submit"] {
 .race-council details { margin-top: 7px; font-size: 12px; }
 .race-council summary, details.race-factions summary { cursor: pointer; }
 
+.npc-traits { display: block; margin-block: .25rem; overflow-wrap: anywhere; }
+.roster-identity > .npc-traits { grid-column: 1 / -1; }
+.npc-traits summary { cursor: pointer; }
+.npc-trait-entry { display: grid; gap: .15rem; margin: .4rem 0; }
 .trait-grade-green { color: #58976b; }
 .trait-grade-blue { color: #568cc8; }
 .trait-grade-purple { color: #ac78c6; }

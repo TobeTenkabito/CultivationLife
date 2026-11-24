@@ -77,7 +77,11 @@ def person(game,site,role):
     can_trade=bool(site.get('expedition') and role['id'] in site['party'] and not site['pending'])
     support=[r for r in opposition(game,site,role) if r['known']]
     from .encounters import can_slay
+    from ...relationship_records import find_person
+    from ..npc_trait_view import visible_traits
+    owner = find_person(game, role['npc_id']) if role.get('npc_id') else None
     return dict(id=role['id'],name=role['name'],sect=role['sect_name'],
+        traits=visible_traits(game, owner),
         realm=REALMS[role['realm']]+f" {role['layer']} 层",status=STATES[role['state']],state=role['state'],
         story=role['story'],clues=copy.deepcopy(clues[-5:]),bars=bars,treasure_bars=treasure_bars,
         comparison=dict(rank=rank_for(role['realm'],role['layer']),power=round(power(game,role))),

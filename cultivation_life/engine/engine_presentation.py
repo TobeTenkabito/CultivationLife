@@ -409,6 +409,8 @@ def prepare_view(deps: ViewPreparationDependencies, game: GameState) -> dict[str
     buildings.attach_overview(game, result['map'])
     result['player']['qi_gain_efficiencies'] = {source:value*cave_qi_multiplier(game.player)
         for source,value in result['player']['qi_gain_efficiencies'].items()}
+    from ..system.npc_trait_view import attach_to_views
+    attach_to_views(game, result)
     return result
 
 

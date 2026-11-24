@@ -31,6 +31,7 @@ window.DebugNpcDevelopment = (() => {
       for(const key of ['axis','method','batches','book','source'])visible(key,false);
       if(!n){status.textContent='当前没有培养对象。可在副本中沿正常收徒、家族或御傀流程建立关系。';return;}
       profile.append(el('b',`${n.name} · ${n.relations.join(' / ')}`));
+      if(n.kind!=='puppet'||n.traits)window.NpcArt?.traits(profile,n);
       const art=n.portrait&&window.NpcArt?.image(n.portrait,'portrait',null,true);if(art)profile.prepend(art);
       if(n.energy)profile.append(el('p',`${n.energy.name} · 耐久 ${n.energy.current}/${n.energy.capacity} · ${n.energy.operation.reason||`出手耗能 ${n.energy.action_cost}`}`));
       const labels={cultivation:'修为',body:'肉身',sense:'神识',conversion:'元力转化',domain:'邻域（默认）'};

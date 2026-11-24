@@ -1318,7 +1318,7 @@ function paintHeavenlyCourt(court) {
   }); root.appendChild(summary);
   window.renderOrganizationFinance?.(root, court.finance);
   const officeSection=document.createElement('section'), officeTitle=document.createElement('h3'), offices=document.createElement('div'); officeTitle.textContent='七曜星君'; offices.className='court-offices';
-  (court.offices||[]).forEach(office => { const row=document.createElement('div'), name=document.createElement('b'), holder=document.createElement('small'); row.className=office.holder?.holder_id==='player'?'player-held':''; name.textContent=`${office.name} · ${office.element}`; holder.textContent=office.holder?`${office.holder.holder_name}${office.holder.holder_id==='player'?'（你）':''} · 至第 ${office.holder.end_unit} 单位`:'席位待选'; row.append(name,holder); offices.appendChild(row); });
+  (court.offices||[]).forEach(office => { const row=document.createElement('div'), name=document.createElement('b'), holder=document.createElement('small'); row.className=office.holder?.holder_id==='player'?'player-held':''; name.textContent=`${office.name} · ${office.element}`; holder.textContent=office.holder?`${office.holder.holder_name}${office.holder.holder_id==='player'?'（你）':''} · 至第 ${office.holder.end_unit} 单位`:'席位待选'; row.append(name,holder); if(office.holder && office.holder.holder_id!=='player')window.NpcArt?.traits(row,office.holder); offices.appendChild(row); });
   officeSection.append(officeTitle,offices); root.appendChild(officeSection);
   const electionHint=document.createElement('p');electionHint.className='doctrine-note';electionHint.textContent=`任期 ${court.term_units} 个时间单位；任满才换届。${court.election_notices?'选举可跳过，继续修行视为放弃当前参选。':'已关闭选举提示，由天庭自行选任。'} 获得四席之前较易争取支持，掌握多数后继续竞逐需要更多游说。`;root.append(electionHint);
   if (court.election) {
@@ -1451,6 +1451,7 @@ function paintIntrigue(system) {
         ? `${member.realm_name} · 玩家本人 · 有票`
         : `${member.realm_name} · ${member.primary}${member.secondary ? ` / ${member.secondary}` : ''}${member.governance_style ? ` · ${member.governance_style}` : ''} · ${member.decision_authority ? '有票' : '无票'} · 好感 ${member.affinity} · 贡献 ${member.contribution}${member.imprisoned ? ' · 服刑中' : ''}`;
       info.append(name, detail);
+      window.NpcArt?.traits(info,member);
       row.appendChild(info);
       if (section.control_authority) {
         const tools = document.createElement('div'); tools.className = 'intrigue-member-tools';
@@ -1476,6 +1477,7 @@ function paintIntrigue(system) {
       detachedPrisoners.forEach(prisoner => {
         const row = document.createElement('div'); row.className = 'intrigue-member';
         const text = document.createElement('span'); text.textContent = `${prisoner.name} · 剩余 ${number(prisoner.sentence_remaining)} 年 · ${prisoner.reason || '未注明事由'}`; row.appendChild(text);
+        window.NpcArt?.traits(text,prisoner);
         if (section.control_authority) {
           const release = document.createElement('button'); release.textContent = '释放'; release.disabled = locked();
           release.onclick = () => mutate(`/api/games/${game.id}/intrigue-personnel`, {kind:section.kind, action:'release', npc_id:prisoner.prisoner_id});
@@ -1492,6 +1494,7 @@ function paintIntrigue(system) {
       const guestList = document.createElement('div'); guestList.className = 'intrigue-guest-list';
       (section.guests || []).forEach(guest => {
         const row = document.createElement('div'); row.className = 'intrigue-guest'; const label = document.createElement('span'); label.textContent = `${guest.name} · 守土必至 / 征伐自愿`; row.appendChild(label);
+        if(guest.npc_id!=='player')window.NpcArt?.traits(label,guest);
         if (section.control_authority && guest.npc_id !== 'player') {
           [['regularize','转正'],['remove','撤销']].forEach(([action,text]) => { const button=document.createElement('button'); button.textContent=text; button.disabled=locked(); button.onclick=()=>mutate(`/api/games/${game.id}/intrigue-guest`,{kind:section.kind,action,npc_id:guest.npc_id}); row.appendChild(button); });
         }
@@ -1516,7 +1519,7 @@ function paintIntrigue(system) {
           const label=document.createElement('label'),check=document.createElement('input'),text=document.createElement('span'),name=document.createElement('b'),detail=document.createElement('small');
           label.className='intrigue-recruitment-candidate';check.type='checkbox';check.value=candidate.id;check.disabled=locked();name.textContent=`${candidate.name} · ${candidate.realm_name} · ${candidate.gender_name}`;
           detail.textContent=`${candidate.spirit_root_name} · ${candidate.path_name} · 战力 ${number(candidate.combat_power)}（同境基准 ${Math.round(candidate.combat_ratio*100)}%） · ${candidate.age}岁${candidate.lifespan?` / 寿元 ${candidate.lifespan}`:' / 寿元无尽'}`;
-          text.append(name,detail);label.append(check,text);list.appendChild(label);
+          text.append(name,detail);label.append(check,text);list.appendChild(label);window.NpcArt?.traits(text,candidate);
         });
         if (!(recruitment.pending.candidates||[]).length) { const empty=document.createElement('p');empty.className='empty';empty.textContent='宗门要求太苛刻，暂无散修符合。';list.appendChild(empty); }
         const confirm=document.createElement('button');confirm.className='primary';confirm.textContent=(recruitment.pending.candidates||[]).length?'录取所选弟子':'结束本次招募';confirm.disabled=locked();confirm.onclick=()=>{
@@ -1747,6 +1750,7 @@ function paintSageTeaching(system) {
       const identity = document.createElement('span'); identity.className = 'sage-member-identity';
       identity.innerHTML = htmlText`<i>${member.rank}</i><span><b>${member.name}${member.is_player ? '（你）' : ''}</b><small>${member.role_name} · ${member.realm_name}</small></span>`;
       const values = document.createElement('span'); values.className = 'sage-member-values'; values.innerHTML = htmlText`<b>门内威望 ${Number(member.inner || 0).toFixed(2)}</b><small>战力 ${number(member.combat_power || 0)}</small>`;
+      window.NpcArt?.traits(identity.lastElementChild,member);
       memberRow.append(identity, values);
       if (!member.is_player && system.membership_id) {
         const debate = document.createElement('button'); debate.type = 'button'; debate.className = 'sage-debate-button';
@@ -1945,7 +1949,6 @@ function paintFaction(faction) {
     addStatus('寿元', npc.lifespan == null ? '无尽' : `${npc.lifespan} 岁`);
     addStatus('战力', number(npc.combat_power || 0));
     addStatus('宗门贡献', number(npc.is_player ? faction.contribution : npc.contribution || 0));
-    if (npc.traits?.length) addStatus('特质',npc.traits.map(t=>t.rarity+' · '+t.name+'（'+t.effect+'）').join('、'));
     addStatus('突破', npc.breakthrough_chance == null ? '当前无瓶颈' : percent(npc.breakthrough_chance));
     if (npc.affinity != null) addStatus('好感', `${number(npc.affinity)}${npc.attitude ? ` · ${npc.attitude}` : ''}`);
     if (npc.wounds) addStatus('伤势', `负伤 ${npc.wounds} 级`, true);
@@ -2054,6 +2057,7 @@ function renderWars(system) {
         const row = document.createElement('small');
         row.className = !npc.alive ? 'fallen' : npc.escaped ? 'escaped' : '';
         row.textContent = `${npc.name || '无名修士'}〔${npc.owner_name || '势力未明'}〕 · ${npc.realm_name || '境界未明'} · 战力 ${number(npc.combat_power)}${!npc.alive ? ' · 阵亡' : npc.escaped ? ' · 逃脱' : npc.wounds ? ` · 负伤${npc.wounds}级` : ''}`;
+        window.NpcArt?.traits(row,npc);
         column.appendChild(row);
       });
       rosters.appendChild(column);
@@ -2311,6 +2315,7 @@ function paintSpiritRanking(ranking) {
   ranking.entries.forEach(entry => {
     const row = document.createElement('div'); row.className = `ranking-row${entry.is_player ? ' self' : ''}`;
     row.innerHTML = htmlText`<i>${String(entry.rank).padStart(2, '0')}</i><span><b>${entry.name}${entry.is_player ? '（你）' : ''}</b><small>${entry.title || `${ranking.world_name || '上界'}强者`} · ${entry.race_name} · 战力 ${number(entry.combat_power)}</small></span><strong>${entry.realm_name}</strong>`;
+    if(!entry.is_player)window.NpcArt?.traits(row.querySelector('span'),entry);
     list.appendChild(row);
   });
 }
@@ -2322,6 +2327,7 @@ function renderParty(party) {
     const row = document.createElement('div'); row.className = 'party-row';
     const info = document.createElement('div'); info.className = 'party-member-info';
     info.innerHTML = htmlText`<b>${member.name}</b><small>${member.realm_name} · 战力 ${number(member.combat_power)}</small><small>关系：${member.attitude} · 好感 ${number(member.affinity || 0)}</small>`;
+    window.NpcArt?.traits(info,member);
     const tools = document.createElement('div'); tools.className = 'party-tools';
     const interact = document.createElement('button'); interact.className = 'party-action'; interact.textContent = member.can_interact ? '交流心得' : '本期已交流';
     interact.dataset.available = member.can_interact ? '1' : '0';
@@ -3484,7 +3490,7 @@ function renderDemonicSystem(system) {
       button.onclick = () => mutate(`/api/games/${game.id}/${action === 'concubine' ? 'concubine-action' : 'captive-action'}`, {target_id:person.id, action:action === 'concubine' ? 'recruit' : action}); tools.appendChild(button);
     });
     tools.appendChild(violenceButton("captive", person, "处死"));
-    row.appendChild(tools); appendTraining(row, person, 'prisoner'); if(person.portrait)window.NpcArt?.avatar(row,person.portrait,true); captiveList.appendChild(row);
+    row.appendChild(tools); appendTraining(row, person, 'prisoner'); if(person.portrait)window.NpcArt?.avatar(row,person.portrait,true); else window.NpcArt?.traits(row,person); captiveList.appendChild(row);
   });
   if (!captiveList.children.length) captiveList.innerHTML = '<p class="empty">尚未生擒任何修士。</p>';
 
@@ -3508,7 +3514,7 @@ function renderDemonicSystem(system) {
     if (available && system.is_demonic && ['corpse','living'].includes(puppet.type)) tools.appendChild(puppetButton('吞噬', puppet.id, 'devour'));
     tools.appendChild(puppetButton('解除', puppet.id, 'dismiss'));
     const dimensions=document.createElement('small');dimensions.textContent=`${puppet.form_name ? puppet.form_name+' · ' : ''}普通炼体 ${puppet.body_training||0}/100层 · 高阶肉身 ${puppet.immortal_body_level||0}层 · 神识 ${puppet.divine_sense_rank||0}阶`;row.append(dimensions);
-    row.appendChild(tools); if (available) appendTraining(row, puppet, 'puppet'); if(puppet.portrait)window.NpcArt?.avatar(row,puppet.portrait,true); puppetList.appendChild(row);
+    row.appendChild(tools); if (available) appendTraining(row, puppet, 'puppet'); if(puppet.portrait)window.NpcArt?.avatar(row,puppet.portrait,true); else if(puppet.type==='living')window.NpcArt?.traits(row,puppet); puppetList.appendChild(row);
   });
   if (!puppetList.children.length) puppetList.innerHTML = '<p class="empty">尚无受控傀儡。</p>';
 
@@ -4165,6 +4171,7 @@ function renderConcubines(system) {
     const relation = system.status.dependent ? ' · 已主动依附' : '';
     const anger = system.status.angered ? ' · 正主震怒' : '';
     status.innerHTML = htmlText`<b>你是${system.status.owner_name}的侍妾</b><small>${system.status.owner_realm_name} · 机缘获取效率 ×0.8${bonus}${relation}${anger}</small>`;
+    window.NpcArt?.traits(status,system.status);
     const tools = document.createElement('div'); tools.className = 'relationship-tools';
     const statusAction = (label, action, available = true, danger = false) => {
       const button = document.createElement('button'); button.className = `concubine-owner-action${danger ? ' danger' : ''}`;

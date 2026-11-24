@@ -115,6 +115,7 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             set(s.unit.capabilities.attributes.get("traits", ())) & {"strength","star_body","swift_bone","red_bones"} for s in battle.units.values()):
         return None  # No combat RNG or combat costs on the conventional path.
     battle.set_objectives(attacker_objective, defender_objective)
+    ongoing_rules = any(row['trigger'] != 'battle_start' for u in units for row in u.capabilities.semantic_rules)
     reports = []
     for round_no in range(1, max(1, min(8, max_rounds)) + 1):
         p = max(0.0, 1 - battle.ordinary_loss("player"))
@@ -124,7 +125,7 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
         if frame.ordinary and battle.verdict() is None:
             p_power, e_power = battle.totals["player"], battle.totals["enemy"]
             semantic = battle.semantic_ordinary_start()
-            if battle.techniques:
+            if battle.techniques or battle.semantics:
                 p = max(0., 1 - battle.ordinary_loss('player'))
                 e = max(0., 1 - battle.ordinary_loss('enemy'))
             p_initiative = battle.first_initiative('player')
@@ -145,7 +146,7 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
                             / battle.totals[side] for side in ('player', 'enemy')}
             factors = {side: (.6 + .4 * morale[side] / 100) * (.65 + .35 * frame.stat_factors[side]['sense'])
                        for side in ('player', 'enemy')}
-            if battle.semantics or p_initiative != 1. or e_initiative != 1.:
+            if ongoing_rules or p_initiative != 1. or e_initiative != 1.:
                 factors['player'] *= ps['sense'] * (1.05 if first else .97)
                 factors['enemy'] *= es['sense'] * (.97 if first else 1.05)
             battle.ordinary_damage(dealt * factors['player'], received * factors['enemy'],breach_ratios={

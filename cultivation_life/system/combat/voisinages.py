@@ -444,7 +444,9 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         stats = state.unit.capabilities.attributes
         ward = stats.get("ward")
         sources = stats.get("ward_sources", {}).get(ward, ())
-        return ward if not sources or any(s not in state.restrictions for s in sources) else None
+        if not sources or any(s not in state.restrictions for s in sources):
+            return ward
+        return "yin" if "orchid_shade" in stats.get("traits", ()) else None
 
     def attribute_damage(self, source, target, amount, book=None):
         from ...combat_attributes import PHYSICAL, components
@@ -524,6 +526,9 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                         self._blocked_pairs.add((key, target_key))
                         pair=(key,target_key)
                         self._light_prevented[pair]=self._light_prevented.get(pair,0.)+contribution*self.totals[target.unit.side]/target_total
+                        continue
+                    # A forfeited exchange cannot cash a mark or spend the opponent's guard.
+                    if self.techniques and self.techniques.catalog and self.techniques.catalog.forfeit_attack(key):
                         continue
                     amount = contribution * self.totals[target.unit.side] / target_total
                     if self.semantics is not None:

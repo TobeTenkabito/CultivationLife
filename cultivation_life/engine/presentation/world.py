@@ -93,10 +93,10 @@ def _public_world_npcs(deps: WorldViewDependencies, game: GameState) -> list[dic
         perception = deps._npc_cultivation_perception(game, npc) if same_world and npc.alive else None
         from ...system.cultivation_ranks import mask_unrevealed
         mask_unrevealed(public_npc, perception)
-        from ...traits import public as public_traits
+        from ...system.npc_trait_view import visible_traits
         public_npc.pop("trait_state", None)
         if perception and perception.get("revealed"):
-            public_npc["traits"] = public_traits(npc)
+            public_npc["traits"] = visible_traits(game, npc)
         if not same_world:
             public_npc["departure_reason"] = None
         public_npc.pop("concealed_realm_index", None)

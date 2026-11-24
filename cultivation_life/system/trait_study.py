@@ -13,7 +13,7 @@ def source_name(source):
     if source.startswith("artifact:"):
         return ITEM_CATALOG[source.removeprefix("artifact:")].name
     book = TECHNIQUE_CATALOG.get(source)
-    return book.name if book else source
+    return book.name if book else {"light:kan": "坎道玄光", "light:li": "离上朱光", "light:qian": "乾古素光"}.get(source, source)
 
 
 def available_sources(game, owner):

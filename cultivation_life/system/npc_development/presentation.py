@@ -40,12 +40,14 @@ def public(game,power=None):
         if row['portrait']:row['portrait']['realm_name']=row['realm_name']
         row['facts']={k:facts.get(k,0) for k in ('body_training','immortal_body_level','divine_sense_rank')}
         row['facts']['conversion']=float((facts.get('transcendence') or {}).get('conversion',0))
-        if target.kind != 'puppet' and not row.get('reason'):
-            from ...traits import public as public_traits, active, TRAITS
-            from ..trait_study import options, source_name
-            row['traits'] = public_traits(facts)
-            for trait in row['traits']:
-                trait['source_names'] = [source_name(s) for s in trait['sources']]
+        if target.kind != 'puppet' or (target.owner.get('type') == 'living' and target.person):
+            from ..npc_trait_view import visible_traits
+            row['traits'] = visible_traits(game, target.person or facts)
+            if row['portrait']:
+                row['portrait']['traits'] = row['traits']
+        if target.kind != 'puppet' and row.get('traits') is not None and not row.get('reason'):
+            from ...traits import active, TRAITS
+            from ..trait_study import options
             row['trait_study'] = options(game, facts)
             row['trait_sources'] = [dict(id=s,name=TRAITS[k][0]) for s,k in
                 facts.get('trait_state', {}).get('mastery', {}).items() if s not in active(facts).get(k, ())]

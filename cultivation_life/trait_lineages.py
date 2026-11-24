@@ -1,5 +1,6 @@
 """Curated personal lineages. Books and artifacts refer to canonical content IDs."""
 from dataclasses import dataclass
+from .trait_repertoires import BY_RARITY, REPERTOIRES
 
 
 @dataclass(frozen=True)
@@ -9,7 +10,7 @@ class Lineage:
     family: str
     level: int
     rule: str
-    percent: int
+    percent: int = 0
     element: str = ""
     other: str = ""
     innate: bool = False
@@ -36,6 +37,46 @@ class Lineage:
 
 
 LINEAGES = {
+    "iron_shirt": Lineage("铁衣劲", "绿", "skin", 1, "signature", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_METAL_SUPPORT",)),
+    "brook_breath": Lineage("临溪息", "绿", "breath", 1, "signature", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_WATER_MAIN",)),
+    "swallow_turn": Lineage("燕回身", "绿", "speed", 1, "signature", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_WIND_COMBAT",)),
+    "sunrise_palm": Lineage("迎晖劲", "绿", "palm", 1, "pure", 6, "yang", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_YANG_MAIN",)),
+    "willow_hook": Lineage("垂丝剑意", "绿", "sword", 1, "signature", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_WATER_COMBAT",)),
+    "moss_veil": Lineage("苔衣", "绿", "skin", 1, "signature", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_WATER_WOOD_SUPPORT",)),
+    "stone_wall": Lineage("石壁劲", "绿", "bones", 1, "resist", 6, "earth", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_EARTH_SUPPORT",)),
+    "reed_ward": Lineage("听雷护脉", "绿", "channels", 1, "resist", 6, "thunder", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_THUNDER_SUPPORT",)),
+    "warm_jade": Lineage("暖玉息", "绿", "breath", 1, "signature", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_NEUTRAL_SUPPORT",)),
+    "red_sand": Lineage("赤砂手", "绿", "palm", 1, "signature", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_FIRE_EARTH_COMBAT",)),
+    "kiln_clay": Lineage("窑泥衣", "绿", "skin", 1, "own", 6, "fire", "earth", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_FIRE_EARTH_SUPPORT",)),
+    "dawn_drum": Lineage("晨雷引", "绿", "thunder_mark", 1, "signature", innate=True,
+        books=("TECH_OPEN_SONGCHUANG_WIND_THUNDER_YANG_MAIN",)),
+    "winter_current": Lineage("听雪凝波", "蓝", "focus", 2, "signature", innate=True,
+        books=("TECH_OPEN_YUNXIU_NEUTRAL_MAIN",), artifacts=("guixu_canghai_equipment_06",)),
+    "silver_shear": Lineage("断雁剑意", "蓝", "sword", 2, "signature", innate=True,
+        books=("TECH_OPEN_YUNXIU_METAL_COMBAT",)),
+    "vine_coil": Lineage("藤蛇劲", "蓝", "sinew", 2, "signature", innate=True,
+        books=("TECH_OPEN_YUNXIU_WOOD_COMBAT",)),
+    "candle_shadow": Lineage("烛影掌", "蓝", "palm", 2, "signature",
+        books=("TECH_OPEN_YUNXIU_FIRE_COMBAT",)),
+    "stele_breaker": Lineage("裂碑劲", "蓝", "fist", 2, "signature", innate=True,
+        books=("TECH_OPEN_YUNXIU_EARTH_COMBAT",)),
+    "river_banner": Lineage("沧波叠浪", "蓝", "circulation", 2, "signature",
+        books=("TECH_OPEN_YUNXIU_WATER_MAIN",), artifacts=("guixu_canghai_equipment_11",)),
+    "orchid_shade": Lineage("幽兰守念", "蓝", "focus", 2, "signature", innate=True,
+        books=("TECH_OPEN_YUNXIU_YIN_SUPPORT",)),
+    "sun_duster": Lineage("拂尘清秽", "蓝", "yang_channels", 2, "signature", innate=True,
+        books=("TECH_OPEN_YUNXIU_YANG_COMBAT",)),
     "first_circuit": Lineage("小周天", "绿", "focus", 1, "foundation_practice", 5, innate=True,
         books=("TECH_BASIC_QI",)),
     "needle_intent": Lineage("引针意", "绿", "sword", 1, "damage", 5, "metal", innate=True,
@@ -166,6 +207,12 @@ LINEAGES = {
         books=("TECH_YELLOW_COURT_INNER", "TECH_NINE_TURN_UNITY",)),
 }
 
+for level, rarity in enumerate(("绿", "蓝", "紫", "橙"), start=1):
+    for key, entry in BY_RARITY[rarity].items():
+        LINEAGES[key] = Lineage(entry.name, rarity, entry.family, level, "signature",
+                                innate=rarity in {"绿", "蓝"}, books=(entry.book,),
+                                artifacts=(entry.artifact,) if entry.artifact else ())
+
 # Selected old traits also have an artifact lineage. All other items retain their ordinary use.
 ARTIFACT_TRAITS = {
     "spirit_sword": "sheathed_edge", "blood_banner": "night_sense",
@@ -176,5 +223,6 @@ ARTIFACT_TRAITS = {
 }
 
 # These abilities follow the physical body during wandering and possession.
-LINEAGE_BODY_TRAITS = {"iron_grain", "iron_rib", "ghost_marrows", "sunstone_bone", "tempered_edge",
+LINEAGE_BODY_TRAITS = {"iron_shirt", "moss_veil", "stone_wall", "vine_coil", "iron_grain", "iron_rib", "ghost_marrows", "sunstone_bone", "tempered_edge",
                        "dusky_pupil", "ember_skin", "willow_sinew", "bell_bone", "bamboo_edge", "river_blade"}
+LINEAGE_BODY_TRAITS.update(key for key, entry in REPERTOIRES.items() if entry.bodily)

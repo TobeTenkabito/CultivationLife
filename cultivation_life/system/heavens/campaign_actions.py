@@ -176,7 +176,10 @@ def project(deps, game):
     if result['local'] and row['surveyed']:
         result['gate'] = dict(state=row['gate']['state'], target_progress=row['gate']['target_progress'],
                               duration=BUILD_YEARS, stability=row['gate']['stability'])
+        from ...relationship_records import find_person
+        from ..npc_trait_view import visible_traits
         result['people'] = [dict(id=u['person_id'], name=deps.campaign_facts(game, u)['name'],
+                                traits=visible_traits(game, find_person(game, u['person_id'])),
                                 side='本地守备' if u['faction_id'] != SOURCE else '来方驻守')
                             for u in row['units'] if u['observed'] and located(deps, game, u, 'human', TARGET_SITE)]
     if row['aid']:

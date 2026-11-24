@@ -35,7 +35,12 @@ def test_curated_sources_and_effects(key):
     assert len(traits.active(owner)) == int(bool(row.books))
     unit = row.percent / 100
     element = row.element
-    if row.rule == "resist":
+    if row.rule == "signature":
+        from cultivation_life.trait_mechanics import SIGNATURES, combat_rules
+        from cultivation_life.combat_semantics import parse_rules
+        assert traits.EFFECTS[key] == SIGNATURES[key].description
+        assert len(parse_rules(combat_rules([key]))) == len(SIGNATURES[key].rules)
+    elif row.rule == "resist":
         assert resistance(element, [key]) == pytest.approx(unit)
         assert resistance("physical", [key]) == 0
     elif row.rule == "guard":
@@ -163,3 +168,53 @@ def test_old_mastery_claim_conflicts_and_stale_inventory_are_rechecked():
     with pytest.raises(ValueError):
         trait_study.study(game, p, "artifact:spirit_sword")
     assert set(traits.active(p)) == {"sundering_edge"}
+
+
+def test_concealment_also_applies_before_first_roster_visit():
+    from cultivation_life.system.npc_trait_view import visible_traits
+    game = game_with_player()
+    game.player.location_id = "local"
+    npc = SectNpc("student", "林清", "", 2, 1, 30, 200, world=game.player.world,
+                  location_id=game.player.location_id, combat_artifact_id="soul_lamp")
+    game.world_npcs[npc.id] = npc
+    game.player.disciples = [game.link_relationship({"id": npc.id})]
+    game.player.divine_sense_rank = 0
+    assert visible_traits(game, npc) is None
+    assert npc.concealed_realm_index is None
+    with pytest.raises(ValueError, match="尚未探明"):
+        service.configure_trait(game, "npc", npc.id, "study", "artifact:soul_lamp")
+    assert not traits.active(npc)
+
+
+def test_npc_trait_visibility_follows_current_person_across_views(tmp_path):
+    from pathlib import Path
+    from cultivation_life.engine import GameEngine
+
+    engine = GameEngine(Path(__file__).resolve().parents[1], tmp_path / "saves")
+    initial = engine.create_game("观相", "supreme_water", "dao", 19)
+    game = engine.store.load(initial["id"])
+    npc = SectNpc("hidden_disciple", "林澜", "", 3, 1, 32, 180, world="human",
+                  concealed_realm_index=1, concealed_layer=1)
+    game.world_npcs[npc.id] = npc
+    game.player.disciples = [game.link_relationship({"id": npc.id})]
+    game.player.offspring = [{"id": npc.id, "name": npc.name, "world": npc.world}]
+    game.player.divine_sense_rank = 0
+    traits.mastery(npc, "light:kan")
+    def check(expected):
+        data = engine.present(game)
+        rows = [next(row for row in group if row["id"] == npc.id) for group in
+                (data["world_npcs"], data["player"]["disciples"], data["family"]["offspring"],
+                 data["mentorship"]["disciples"])]
+        for row in [*rows, rows[-1]["portrait"]]:
+            assert row.get("traits") == expected
+            assert "trait_state" not in row
+    check(None)
+    game.player.divine_sense_rank = 99
+    check([dict(traits.public(npc)[0], source_names=["坎道玄光"])])
+    traits.wash(npc, "fish_scales")
+    check([])
+    traits.mastery(npc, "light:li")
+    npc.world = "spirit"
+    npc.departed_age = game.player.age
+    check(None)
+    assert traits.active(npc) == {traits.MASTERY["light:li"]: ["light:li"]}

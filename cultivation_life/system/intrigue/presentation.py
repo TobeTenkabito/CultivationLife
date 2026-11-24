@@ -36,7 +36,9 @@ def _public_intrigue_recruitment(
         rows = []
         for candidate in pending.get("candidates", []):
             npc = SectNpc.from_dict(candidate["npc"])
+            from ..npc_trait_view import visible_traits
             rows.append({
+                "traits": visible_traits(game, npc),
                 "id": npc.id, "name": npc.name,
                 "realm_index": npc.realm_index,
                 "realm_name": REALMS[npc.realm_index].name if npc.realm_index == 0 else f"{REALMS[npc.realm_index].name}{npc.layer}层",

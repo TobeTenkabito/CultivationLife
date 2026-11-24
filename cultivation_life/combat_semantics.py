@@ -19,7 +19,7 @@ MAX_STACKS = 99
 MAX_DURATION = 10000
 STATS = ('might', 'guard', 'mobility', 'sense', 'sustain', 'breach')
 PHASES = (
-    'round_start', 'field_prepare', 'field_established', 'contest_prepare',
+    'battle_start', 'round_start', 'field_prepare', 'field_established', 'contest_prepare',
     'contest_resolved', 'pressure_resolved', 'effect_prepare', 'effect_before_apply', 'effect_resolved',
     'intervention_resolved', 'ordinary_start',
     'initiative_resolved', 'ordinary_before_damage', 'ordinary_after_damage', 'round_end',
@@ -52,6 +52,7 @@ for _prefix in ('self', 'target', 'previous.self', 'previous.target'):
     FACTS.update({f'{_prefix}.{k}': (v, TARGET_PHASES if _prefix.endswith('target') else set(PHASES)) for k, v in ACTOR_FACTS.items()})
 FACTS.update({
     'rank_delta': (float, TARGET_PHASES),
+    'event.short_debuff': (bool, {'round_start'}),
     'event.first': (bool, {'initiative_resolved', 'ordinary_before_damage', 'ordinary_after_damage', 'round_end'}),
     'event.relation': (str, {'contest_resolved'}),
     'event.incursion': (float, {'contest_resolved'}),
@@ -73,6 +74,7 @@ FACTS.update({
     'environment.formation': (bool, set(PHASES)),
 })
 CHANNELS = {
+    'opening.enemy_state_loss': {'battle_start'},
     **{f'ordinary.{s}': {'ordinary_start', 'initiative_resolved'} if s in ('might', 'guard', 'breach')
        else {'ordinary_start'} for s in STATS},
     'ordinary.dealt': {'ordinary_before_damage'},
@@ -157,7 +159,7 @@ def _modifier(row, phase=None):
     channel = row['channel']
     if channel not in CHANNELS or (phase is not None and phase not in CHANNELS[channel]):
         raise ValueError('Modifier cannot affect this phase')
-    if not _number(row['value'], 0 if channel.endswith('_cap') else -.75, 1):
+    if not _number(row['value'], 0 if channel.endswith('_cap') or channel == 'opening.enemy_state_loss' else -.75, 1):
         raise ValueError('Modifier value is outside the finite budget')
 
 
@@ -244,6 +246,10 @@ def _parse_rule(raw):
                 consume = action['consume_on']
                 if consume not in PHASES or not any(consume in CHANNELS[m['channel']] for m in modifiers):
                     raise ValueError('A consuming status must contribute to its consuming phase')
+        elif kind == 'dispel_short_debuff':
+            _keys(action, ('op',))
+            if phase != 'round_start':
+                raise ValueError('Short debuffs may only be dispelled at round start')
         elif kind == 'adjust':
             _keys(action, ('op', 'stat', 'value', 'recipient'), ('stat', 'value'))
             if phase not in ('round_start', 'round_end') or action['stat'] not in ADJUSTMENTS:
@@ -281,13 +287,13 @@ def semantic_catalog():
         'schema_version': SCHEMA_VERSION, 'triggers': list(PHASES),
         'facts': {key: {'type': 'number' if kind is float else kind.__name__,
                         'phases': sorted(phases)} for key, (kind, phases) in FACTS.items()},
-        'modifiers': {key: {'phases': sorted(phases), 'mode': 'cap' if key.endswith('_cap') else 'relative',
-                            'min': 0 if key.endswith('_cap') else -.75, 'max': 1}
+        'modifiers': {key: {'phases': sorted(phases), 'mode': 'fraction' if key == 'opening.enemy_state_loss' else 'cap' if key.endswith('_cap') else 'relative',
+                            'min': 0 if key.endswith('_cap') or key == 'opening.enemy_state_loss' else -.75, 'max': 1}
                       for key, phases in CHANNELS.items()},
         'comparisons': ['eq', 'ne', 'lt', 'le', 'gt', 'ge', 'in', 'not_in', 'exists'],
         'logic': ['all', 'any', 'not'],
         'actions': ['modify', 'counter_add', 'counter_set', 'counter_consume',
-                    'status', 'clear_status', 'consume_status', 'adjust'],
+                    'status', 'clear_status', 'consume_status', 'adjust', 'dispel_short_debuff'],
         'adjustments': sorted(ADJUSTMENTS),
         'scopes': ['self', 'target'], 'stacking': ['refresh', 'extend', 'keep'],
     }
@@ -307,6 +313,7 @@ class Evaluation:
     modifiers: list = field(default_factory=list)
     statuses: list = field(default_factory=list)
     resets: list = field(default_factory=list)
+    spent_statuses: list = field(default_factory=list)
 
     def factor(self, channel):
         return max(.25, min(2., 1 + sum(m['value'] for m in self.modifiers if m['channel'] == channel)))
@@ -344,6 +351,14 @@ class SemanticRuntime:
         self.committed.clear()
         self.log = []
         self.statuses = {k: v for k, v in self.statuses.items() if v['expires'] >= number}
+
+    def short_debuff(self, owner, *, aged=False):
+        eligible = ((status['starts'], key) for key, status in self.statuses.items()
+                    if status['owner'] == owner and status['origin'] != owner
+                    and status.get('dispellable') and dispellable_modifiers(status['modifiers'])
+                    and status['starts'] <= self.round <= status['expires'] <= self.round + 1
+                    and (not aged or status['starts'] < self.round))
+        return min(eligible, default=(0, None))[1]
 
     def _namespace(self, actor, target, rule):
         return self.key(actor, rule['source_id'], target if rule.get('scope') == 'target' else None)
@@ -485,7 +500,9 @@ class SemanticRuntime:
             self.bindings[binding] = evaluation.target
         for key, used_channels in evaluation.statuses:
             if used_channels.intersection(channels) and key in self.statuses:
-                self.statuses[key]['stacks'] -= 1
+                status = self.statuses[key]
+                evaluation.spent_statuses.append((json.loads(status['namespace'])[1], status['key']))
+                status['stacks'] -= 1
                 if self.statuses[key]['stacks'] <= 0:
                     del self.statuses[key]
         for rule, namespace, usage_key in evaluation.rules:
@@ -546,6 +563,10 @@ class SemanticRuntime:
                                 status['stacks'] -= spent
                                 if not status['stacks']:
                                     del self.statuses[status_key]
+                elif op == 'dispel_short_debuff':
+                    key = self.short_debuff(evaluation.actor)
+                    if key is not None:
+                        del self.statuses[key]
                 elif op == 'adjust':
                     recipient = evaluation.actor if action.get('recipient', 'self') == 'self' else evaluation.target
                     if recipient is not None:

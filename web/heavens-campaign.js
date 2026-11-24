@@ -130,7 +130,7 @@
           for (const person of people) {
             const row = node('article');
             row.append(node('small', person.side), node('strong', person.name));
-            roster.append(row);
+            window.NpcArt?.traits(row,person);roster.append(row);
           }
           body.append(roster);
         }

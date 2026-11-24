@@ -42,7 +42,7 @@
         const choices=e('div',null,'bureau-grid');
         for(const v of c.verdicts){const choice=e('div',null,'bureau-verdict');choice.append(button((c.proposed===v.id?'已拟定 · ':'')+v.name,'case_propose',c.id+'~'+v.id,data.reason||(!c.defence?'请先登记说明':'')||v.reason));if(v.reason)choice.append(e('small',v.reason,'muted'));choices.append(choice);}card.append(choices);
         if(c.proposed){card.append(e('h4','选择独立复核人'));
-          for(const n of c.reviewers){const row=e('div',null,'bureau-person');row.append(e('strong',n.name),button('请其复核','case_reviewer',c.id+'~'+n.id,data.reason||n.reason||(view.location!==view.home?'须回玉京':'')));if(n.reason)row.append(e('small',n.reason,'muted'));card.append(row);}
+          for(const n of c.reviewers){const row=e('div',null,'bureau-person');row.append(e('strong',n.name),button('请其复核','case_reviewer',c.id+'~'+n.id,data.reason||n.reason||(view.location!==view.home?'须回玉京':'')));if(n.reason)row.append(e('small',n.reason,'muted'));window.NpcArt?.traits(row,n);card.append(row);}
           if(!c.reviewers.length)card.append(e('p','玉京暂无独立原天官可当面接卷；不能生成替代裁判。','muted'));}
       }
       if(c.status==='active'&&c.stage==='execute')card.append(button('执行已复核处置','case_execute',c.id,data.reason||(view.location!==view.home?'须回玉京':''),true));

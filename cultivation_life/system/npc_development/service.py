@@ -295,6 +295,9 @@ def configure_trait(game, kind, identity, action, key):
     if kind == "puppet":
         raise ValueError("傀儡不能洗练人物特质")
     facts = target.facts(game)
+    from ..npc_trait_view import visible_traits
+    if visible_traits(game, target.person or facts) is None:
+        raise ValueError("当前尚未探明此人的特质")
     if action == "wash":
         wash(facts, key)
     elif action == "study":

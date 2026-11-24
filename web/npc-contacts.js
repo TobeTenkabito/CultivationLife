@@ -25,6 +25,7 @@ window.NpcContacts = (() => {
     target.append(el('p',`身魂状态：${n.spirit_state?.mode==='wandering'?'神游':'普通'}`,'muted'));
     target.append(el('p',n.contact_whereabouts || '行踪未明','contact-standing'));
     if(n.cultivation_ranks) target.append(el('p',`炼体 ${n.cultivation_ranks.body.name} · 神识 ${n.cultivation_ranks.sense.name}`,'muted'));
+    window.NpcArt?.traits(target,n);
     const tools = el('div',undefined,'contact-actions');
     for (const [action,label] of Object.entries(labels)) {
       const reason = n.contact_actions?.[action] ?? '暂不可交往';

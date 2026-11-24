@@ -59,10 +59,11 @@
       pick.onchange=validate;validate();charge.onclick=()=>submit(n,{action:'charge',source:pick.value});
       info.append(pick,charge,el('p','优先自供，不双重扣费；低一阶耗20、低两阶耗60、低三阶不能驱动；高一阶耗2、高两阶耗1、更高耗0.5。仙阶能源不能用于凡阶傀儡。卸下的能源保留剩余耐久。'));
     }else if(n.facts)info.append(el('p',`元力转化 ${Math.round(n.facts.conversion*100)}%`));
+    if(n.kind!=='puppet'||n.traits)window.NpcArt?.traits(info,n);
     profile.append(art,info);detail.append(profile);
     if(n.reason){detail.append(el('p',n.reason,'npc-development-reason'));return;}
     const controls=el('div',null,'npc-development-controls');detail.append(controls);
-    controls.append(choose('培养方向',[['cultivation','修为'],['body','肉身'],['sense','神识'],['conversion','元力转化'],['technique','传授功法'],['technique_growth','研修功法'],['domain','邻域'],['body_art','肉身精修'],...(n.traits ? [['traits','特质洗练']] : [])],axis,v=>{axis=v;paint();}));
+    controls.append(choose('培养方向',[['cultivation','修为'],['body','肉身'],['sense','神识'],['conversion','元力转化'],['technique','传授功法'],['technique_growth','研修功法'],['domain','邻域'],['body_art','肉身精修'],...(n.trait_study ? [['traits','特质洗练']] : [])],axis,v=>{axis=v;paint();}));
     if(axis==='traits'){
       for(const t of n.traits || []){
         const b=el('button','洗去'+t.name); b.disabled=env.busy();

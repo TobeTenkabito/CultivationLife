@@ -105,8 +105,10 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
     body=body or monster_profile(owner,player=player)
     from .ghost_body import profile as ghost_profile
     body=body or ghost_profile(owner,player=player)
+    from ..trait_mechanics import combat_rules as trait_rules
     attributes = project_attributes(owner, techniques, artifacts, player=player)
     return replace(source, attributes=attributes, semantic_rules=source.semantic_rules + combat_rules(game, owner, player=player),
+                   trait_rules=trait_rules(attributes["traits"]),
                    technique_effects=project_technique_effects(game, owner, player=player),
                    technique_tier=attributes["attacks"].get("technique", {}).get("tier", 1),
                    artifact_tier=max((_tier(i) for i in artifacts), default=1), passive_ward_tier=ward,
@@ -159,7 +161,7 @@ def project_attributes(owner, techniques, artifacts, *, player=False):
                 if element != "physical" and kind not in ward_sources.setdefault(element, []):
                     ward_sources[element].append(kind)
     traits = [t for t in active(owner) if t not in NON_COMBAT_TRAITS]
-    body_wards = {"five_body": FIVE, "fish_scales": ("water",),
+    body_wards = {"moss_veil": ("wood",), "five_body": FIVE, "fish_scales": ("water",),
                   "stone_frame": ("earth",), "mountain_body": ("earth",)}
     for trait, elements in body_wards.items():
         if trait in traits:
@@ -186,7 +188,8 @@ def npc_attribute_sources(attackers, defenders, sources):
             projection = project_attributes(npc, [book] if book and book.active_in(npc.world) else [],
                                             [artifact] if artifact else [])
             if projection["ward"] or projection["traits"]:
-                sources[npc.id] = CapabilitySource(attributes=projection,
+                from ..trait_mechanics import combat_rules as trait_rules
+                sources[npc.id] = CapabilitySource(attributes=projection, trait_rules=trait_rules(projection["traits"]),
                     technique_tier=projection["attacks"].get("technique", {}).get("tier",1),
                     artifact_tier=projection["attacks"].get("artifact", {}).get("tier",1))
     return sources

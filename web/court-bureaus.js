@@ -78,9 +78,9 @@
         button(a.id==='player'?'落实预算并亲办':'落实预算并派遣','accept',offer.token+'~'+a.id,a.reason,true));if(a.reason)detail.append(e('small',a.reason,'muted'));};select.onchange=redraw;redraw();board.append(card);
     }duties.append(board,e('p','功德余量共同累计：'+fraction(data.remainder)+'。亲办不叠发仙痕、机缘或香火；属员取得原总额九成，主管实际复核后取得一成。','muted'));
     staff.append(e('h4','本司属员'),e('p','任命须在玉京当面办理，人选从天官名册中挑。属员领差后，须办完差事、交清公物，才能另领差遣。','muted'));
-    for(const n of data.staff){const card=e('article',null,'bureau-card');card.append(e('h4',n.name),e('p',`所在地点：${n.location_name} · 公务功德 ${fraction(n.merit)}`),button('解除本司任命','release',n.id,data.recovery_home_reason||(data.jobs.some(j=>j.person===n.id)?'须先返回并交接公务':'')));if(n.reason)card.append(e('small',n.reason,'muted'));staff.append(card);}
+    for(const n of data.staff){const card=e('article',null,'bureau-card');card.append(e('h4',n.name),e('p',`所在地点：${n.location_name} · 公务功德 ${fraction(n.merit)}`),button('解除本司任命','release',n.id,data.recovery_home_reason||(data.jobs.some(j=>j.person===n.id)?'须先返回并交接公务':'')));if(n.reason)card.append(e('small',n.reason,'muted'));window.NpcArt?.traits(card,n);staff.append(card);}
     staff.append(e('h4','在场天官'));
-    for(const n of data.candidates.filter(n=>!n.department)){const row=e('article',null,'bureau-person');row.append(e('strong',n.name),e('small',`${n.realm}阶`),button('任命为属员','appoint',n.id,data.home_reason||(!data.supervisor?'须先取得主管资格':'')||n.reason||(data.staff.length>=2?'两席已满':'')));staff.append(row);}
+    for(const n of data.candidates.filter(n=>!n.department)){const row=e('article',null,'bureau-person');row.append(e('strong',n.name),e('small',`${n.realm}阶`),button('任命为属员','appoint',n.id,data.home_reason||(!data.supervisor?'须先取得主管资格':'')||n.reason||(data.staff.length>=2?'两席已满':'')));window.NpcArt?.traits(row,n);staff.append(row);}
     if(!data.candidates.length)staff.append(e('p','此地没有可见的原天官人物。虚拟选举席位不能替代属员。','muted'));
     history.append(e('h4','近十二份履历'));
     for(const j of [...data.history].reverse()){const r=j.receipt,card=e('article',null,'bureau-card');card.append(e('h4',j.name),e('p',r?.result||'已归档'),e('small',`采购 ${fmt(r?.purchase)} · 劳务 ${fmt(r?.labor)} · 工程 ${fmt(r?.engineering)} · 退回 ${fmt(r?.refunded)} 灵石${j.audited?' · 已经御史复核':''}`));history.append(card);}

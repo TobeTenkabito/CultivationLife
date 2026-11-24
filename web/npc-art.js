@@ -39,7 +39,30 @@ window.NpcArt = (() => {
     let hash=2166136261;for(const c of String(n.id)){hash=Math.imul(hash^c.codePointAt(0),16777619)>>>0;}
     return pool[hash%pool.length];
   }
-  function resolve(n){return n&&people.get(n.id)||n;}
+  function traits(host,person){
+    if(!person || person.is_player || person.asset_kind || person.visual_variant==='clone' || host.querySelector(':scope > .npc-traits'))return;
+    const rows=person.traits;
+    if(!rows?.length){
+      host.append(el('small',Array.isArray(rows)?'特质 · 暂无':'特质 · 未探明','npc-traits muted'));
+      return;
+    }
+    const box=el('details',undefined,'npc-traits'),head=el('summary','特质 · ');
+    const colors={'绿':'green','蓝':'blue','紫':'purple','橙':'orange'};
+    for(const [index,t] of rows.entries()){
+      if(index)head.append('、');
+      head.append(el('span',t.name,'trait-grade-'+colors[t.rarity]));
+      const line=el('div',undefined,'npc-trait-entry');
+      line.append(el('b',t.rarity+' · '+t.name+' · '+t.family+' '+t.level+'级'),
+        el('span',t.effect),el('small','来源 · '+(t.source_names || t.sources).join('、')));
+      box.append(line);
+    }
+    box.prepend(head);host.append(box);
+  }
+  function resolve(n){
+    const cached=n&&people.get(n.id);
+    if(!cached || n.identity_known===false)return n;
+    return {...cached,traits:n.traits};
+  }
   function frame(img,n,portrait=false){
     if(!img||!window.DivineLightVisuals?.ids(n.visual_lights).length)return img;
     const wrap=el('span',undefined,portrait?'npc-light-portrait':'npc-light-figure');
@@ -85,10 +108,13 @@ window.NpcArt = (() => {
       n.status,n.relationship,n.affinity==null?'':`好感 ${Number(n.affinity).toFixed(0)}`])if(text)facts.append(el('p',text));
     // These labels come only from the public row; no fresh remote whereabouts are inferred.
     if(n.world===null||n.perceived_alive===false)facts.append(el('p','此处留的是旧日所见。要寻此人，可去名册查最近的消息。','muted'));
+    traits(facts,n);
     body.append(facts);dialog.append(head,body);dialog.showModal();
   }
   function avatar(row,person,roster=false){
-    const n=roster?person:resolve(person);if(!active()&&!roster)return;
+    const n=roster?person:resolve(person);
+    traits(row,n);
+    if(!active()&&!roster)return;
     if(!window.PixelLibrary?.catalog&&!select(n)){
       window.PixelLibrary?.ensure(true).then(catalog=>{if(catalog&&row.isConnected&&!row.querySelector('.npc-art-avatar'))avatar(row,person,roster);});
       return;
@@ -145,5 +171,5 @@ window.NpcArt = (() => {
   }
   function close(){if(dialog?.open)dialog.close();}
   window.addEventListener('pagehide',()=>{close();people.clear();data=null;});
-  return Object.freeze({context,select,image,avatar,selfAvatar,contactPortrait,contactFigure,event,open,close});
+  return Object.freeze({context,select,image,traits,avatar,selfAvatar,contactPortrait,contactFigure,event,open,close});
 })();

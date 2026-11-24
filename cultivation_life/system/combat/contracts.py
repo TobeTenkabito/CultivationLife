@@ -163,7 +163,7 @@ class CapabilitySource:
     divine_light_levels: Mapping[str, int] = field(default_factory=dict)
     body_mechanisms: tuple[BodyMechanism, ...] = ()
     field_discipline: FieldDiscipline | None = None
-
+    trait_rules: tuple[Mapping[str, Any], ...] = ()
 
 
 def resolve_source(state, definitions, source: CapabilitySource | None = None, **kwargs):
@@ -180,7 +180,7 @@ def resolve_source(state, definitions, source: CapabilitySource | None = None, *
                          body_voisinage_resistance=source.body_voisinage_resistance,
                          ward_tier=result.ward_tier if source.passive_ward_tier is None else source.passive_ward_tier,
                          interventions=source.interventions or result.interventions,
-                         semantic_rules=source.semantic_rules or result.semantic_rules,
+                         semantic_rules=tuple(source.semantic_rules or result.semantic_rules) + source.trait_rules,
                          attributes=source.attributes or result.attributes,
                          technique_effects=source.technique_effects or result.technique_effects)
         result = replace(result, divine_lights=dict(source.divine_lights),

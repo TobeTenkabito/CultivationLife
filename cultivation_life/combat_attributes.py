@@ -86,10 +86,69 @@ def lineage_damage(lineage, element, profile, own_ward):
     return 0.
 
 
+def woven_profile(profile, key, ward, own_ward):
+    """Move existing shares before resistance. The single active 配气 family selects one form."""
+    shares = dict(profile)
+
+    def transfer(source, destination, amount):
+        shares[source] -= amount
+        if shares[source] == 0:
+            del shares[source]
+        shares[destination] = shares.get(destination, 0.) + amount
+
+    if key == "washed_ingot" and "metal" in shares and "water" in shares:
+        shares["metal"] = shares["water"] = (shares["metal"] + shares["water"]) / 2
+    elif key == "seed_flame" and set(shares) == {"wood"}:
+        transfer("wood", "fire", shares["wood"] / 4)
+    elif key == "echo_strings" and own_ward in {"yin", "yang"} and {"yin", "yang"} <= shares.keys():
+        opposite = "yin" if own_ward == "yang" else "yang"
+        if shares[own_ward] > shares[opposite]:
+            shares[own_ward], shares[opposite] = shares[opposite], shares[own_ward]
+    elif key == "storm_rod" and own_ward == "water" and {"wind", "thunder"} <= shares.keys():
+        transfer("wind", "water", shares["wind"])
+    elif key == "split_prism" and len(shares) == 1 and ward in FIVE:
+        element = next(iter(shares))
+        if element in FIVE and element != ward:
+            transfer(element, ward, shares[element] / 5)
+    elif key == "hidden_clay" and own_ward == "earth" and 0 < shares.get("earth", 0) < shares.get("wood", 0):
+        transfer("wood", "fire", shares["wood"] - shares["earth"])
+    elif key == "estuary" and ward == "earth" and "water" in shares:
+        others = [e for e in FIVE if e in shares and e != "water"]
+        if others:
+            water = shares.pop("water")
+            for element in others:
+                shares[element] += water / len(others)
+    elif key == "balance_beam" and own_ward in FIVE and own_ward in shares:
+        elements = sorted((e for e in FIVE if e in shares), key=shares.get)
+        if len(elements) >= 3:
+            low, high = elements[0], elements[-1]
+            shares[low] = shares[high] = (shares[low] + shares[high]) / 2
+    elif key == "river_chart" and ward in FIVE:
+        index = FIVE.index(ward)
+        favorable, adverse = FIVE[index - 1], FIVE[(index + 1) % len(FIVE)]
+        if favorable in shares and adverse in shares:
+            transfer(adverse, favorable, shares[adverse])
+    return shares
+
+
 def components(profile, traits, ward, defense_traits, own_ward=None):
+    # Each stance uses one live ward, so their conversions are mutually exclusive.
+    if "red_sand" in traits and own_ward == "fire" and "earth" in profile:
+        profile = dict(profile)
+        converted = profile["earth"] / 3
+        profile["earth"] -= converted
+        profile["fire"] = profile.get("fire", 0.) + converted
+    elif "silver_shear" in traits and own_ward == "metal" and "metal" in profile:
+        physical = profile.get("physical", 0.)
+        profile = {"metal": sum(share for element, share in profile.items() if element != "physical")}
+        if physical:
+            profile["physical"] = physical
+    lineages = [LINEAGES[key] for key in traits if key in LINEAGES]
+    weave = next((key for key in traits if key in LINEAGES and LINEAGES[key].family == "weave"), None)
+    if weave:
+        profile = woven_profile(profile, weave, ward, own_ward)
     mixed = "physical" in profile and "fire" in profile and "red_bones" in traits
     steam = "water" in profile and "fire" in profile and "steam_cycle" in traits
-    lineages = [LINEAGES[key] for key in traits if key in LINEAGES]
     result = {}
     for element, share in profile.items():
         bonus = .12 if mixed and element in {"physical", "fire"} else 0.

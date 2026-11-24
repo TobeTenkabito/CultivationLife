@@ -14,7 +14,7 @@ from cultivation_life.engine import GameEngine
 from cultivation_life.traits import mastery
 from cultivation_life.models import SectNpc
 from cultivation_life.rules import add_item
-from scripts.browser_navigation import navigation_locator
+from scripts.browser_navigation import navigation_locator, reveal_subpage
 
 
 def main():
@@ -23,12 +23,18 @@ def main():
         view = engine.create_game("试法", "supreme_water","dao",19)
         game = engine._load(view["id"])
         game.pending_event = None
+        game.player.divine_sense_rank = 99
         game.player.trait_state = {}
         mastery(game.player,"light:kan")
         add_item(game.player, "green_bamboo_sword")
         disciple = SectNpc("student", "林清", "", 2, 1, 30, 200, world=game.player.world,
                            location_id=game.player.location_id, combat_artifact_id="soul_lamp")
-        game.world_npcs[disciple.id] = disciple
+        sect = next(s for s in game.sects.values() if s.world == game.player.world and s.kind == "sect" and not s.extinct)
+        game.player.faction_id = sect.id
+        disciple.faction_id = sect.id
+        sect.npcs.append(disciple)
+        game.player.offspring = [dict(id=disciple.id, name=disciple.name, age=30,
+                                     world=disciple.world, cultivation_started=True)]
         game.player.disciples = [game.link_relationship({"id": disciple.id})]
         engine.store.save(game)
         class Handler(server.Handler):
@@ -75,8 +81,37 @@ def main():
                     dialog.get_by_role("button",name="参悟特质").click()
                     page.wait_for_function("!busy && document.querySelector('#npc-development-dialog')?.innerText.includes('洗去守魄灯心')")
                     saved = engine.store.load(game.id)
-                    assert saved.world_npcs["student"].trait_state["owned"]["moon_lamp"] == ["artifact:soul_lamp"]
+                    assert next(n for n in saved.sects[sect.id].npcs if n.id == disciple.id).trait_state["owned"]["moon_lamp"] == ["artifact:soul_lamp"]
                     assert "moon_lamp" not in saved.player.trait_state["owned"]
+                    def verify_trait(host):
+                        summary = host.locator('.npc-traits summary').filter(has_text="守魄灯心").first
+                        reveal_subpage(page, summary).click()
+                        entry = host.locator('.npc-trait-entry').filter(has_text="守魄灯心").first
+                        assert "阴抗提高 12 个百分点" in entry.inner_text()
+                        assert "来源 · " + lamp_name in entry.inner_text()
+
+                    from cultivation_life.content_registry import ITEM_CATALOG
+                    lamp_name = ITEM_CATALOG["soul_lamp"].name
+                    verify_trait(dialog.locator(".npc-development-profile"))
+                    page.keyboard.press("Escape")
+                    for panel_id, selector in (("family", '[data-family-member="student"]'),
+                                               ("faction", "#faction-roster-list .roster-row"),
+                                               ("world-npc", "#world-npc-list .world-npc-row")):
+                        navigation_locator(page, f"[data-panel-target={panel_id}]").click()
+                        host = page.locator(selector).filter(has_text="林清").first
+                        page.wait_for_selector(selector, state="attached", timeout=5000)
+                        verify_trait(host)
+                        if panel_id == "world-npc":
+                            host.get_by_role("button", name="查看林清的人物卡").click()
+                            verify_trait(page.locator("#npc-art-dialog"))
+                            page.locator("#npc-art-dialog").get_by_role("button", name="关闭").click()
+                        page.locator(f"#{panel_id}-toggle").click()
+                    navigation_locator(page, "[data-panel-target=relationship]").click()
+                    search = page.get_by_label("搜索重要人物")
+                    reveal_subpage(page, search).fill("林清")
+                    page.locator('.contact-person[data-npc-id="student"]').click()
+                    verify_trait(page.locator("#npc-contacts .contact-detail"))
+                    verify_trait(page.locator("#relationship-list .relationship-row").filter(has_text="林清"))
                     assert not errors, errors
                     browser.close()
             finally:

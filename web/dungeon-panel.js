@@ -156,6 +156,7 @@
         const head=el('summary',undefined,'dungeon-person-head');head.append(el('b',p.name),el('span',p.status,'dungeon-state'),el('small',`${p.sect} · ${p.realm}`));if(p.clues.length)head.append(el('small',p.clues[p.clues.length-1].text,'dungeon-last-clue'));card.append(head,body);
         if(p.exposed)body.append(el('p','已亲见其敌对行动','dungeon-warning'));
         if(p.representative)body.append(el('p','以本宗身份在场','muted'));
+        window.NpcArt?.traits(body,p);
         p.bars.forEach(m=>body.append(metric(m)));
         if(p.treasure_bars?.length){const select=el('select'),observed=el('div');select.setAttribute('aria-label','查看'+p.name+'对已知宝物的表现');p.treasure_bars.forEach(m=>{const o=el('option',m.label.replace('夺宝意向 · ',''));o.value=m.id;select.append(o);});const show=()=>observed.replaceChildren(metric(p.treasure_bars.find(m=>m.id===select.value)));select.onchange=show;show();body.append(select,observed);}
         p.clues.forEach(c=>body.append(el('p','实证 · '+c.text,'dungeon-clue')));
