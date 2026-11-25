@@ -25,6 +25,11 @@ def build(state,config):
 
 def validate(config):
     if not config:return
+    routes = config.get('routes', {})
+    if (not isinstance(routes, dict) or set(routes) != set(ROUTES)
+            or not all(isinstance(row, dict) and isinstance(row.get('name'), str) and row['name'].strip()
+                       for row in routes.values())):
+        raise ValueError('修罗八部须各有本命名称')
     rows=config.get('field_disciplines',{})
     if set(rows)!=set(ROUTES):raise ValueError('八部须分别声明本命权能')
     kinds=[]

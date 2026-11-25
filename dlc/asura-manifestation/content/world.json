@@ -731,6 +731,21 @@
           }
         }
       ],
+      "trial_encounters": {
+        "fusion_title": "凝练肉身",
+        "breakthrough_title": "心魔天魔劫",
+        "opponents": {
+          "9": [{"name": "心魔", "ratio": 1.0, "copy_field": false, "visual_variant": "heart_demon"}],
+          "10": [
+            {"name": "心魔", "ratio": 1.0, "copy_field": true, "visual_variant": "heart_demon"},
+            {"name": "域外天魔", "ratio": 0.8, "copy_field": false, "visual_variant": "heavenly_demon"}
+          ],
+          "11": [
+            {"name": "心魔", "ratio": 1.5, "copy_field": true, "visual_variant": "heart_demon"},
+            {"name": "域外天魔", "ratio": 1.0, "copy_field": true, "visual_variant": "heavenly_demon"}
+          ]
+        }
+      },
       "breakthrough_trials": {
         "10": {
           "enemy_ratios": [

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "HEAVEN_FIELD": {
+      "id": "trial:heaven", "name": "天域", "attainment": "heaven", "required_level": 1,
+      "opening_cost": 80, "upkeep_cost": 45, "effect": "strike", "effect_cost": 35,
+      "effect_power": 0.24, "authority": 100, "max_targets": 1,
+      "effects": [{"kind": "strike", "cost": 35, "power": 0.24, "defense": "ward"}]
+    },
+    "HEAVEN_OPPONENT": {"name": "天道", "kind": "environment", "path": "dao"},
+    "HEAVEN_DECLINE": {"field_name": "天五衰·天域", "strength": 235, "power_factor": 1.15},
+    "BACKLASH_FIELD_NAME": "大道同化·天域",
+    "THREE_CORPSES": [
+      {"name": "自我尸", "visual_variant": "corpse_self"},
+      {"name": "本我尸", "visual_variant": "corpse_primal"},
+      {"name": "超我尸", "visual_variant": "corpse_superego", "copied_field": {"id": "trial:superego", "attainment": "superego"}}
+    ]
+  }
+}

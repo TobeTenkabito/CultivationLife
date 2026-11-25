@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "INVITATION": {
+      "title": "邀你同探一处隐境",
+      "body": "我在{place}发现一处入口，愿邀道友同行。{story}。内中情形尚待探明。"
+    },
+    "EPIC_OUTCOMES": {
+      "$tuple": [
+        "重伤退走",
+        "丢下阵旗败退",
+        "折损数名同门"
+      ]
+    },
+    "LEGENDARY_OUTCOMES": {
+      "$tuple": [
+        "死伤惨重，余众四散",
+        "多人陨落，山谷被夷平",
+        "护阵尽毁，几乎无人全身而退"
+      ]
+    }
+  }
+}

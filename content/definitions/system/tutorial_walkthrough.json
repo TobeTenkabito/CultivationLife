@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "MENTOR_OFFER": {
+      "id": "SYS_TUTORIAL_GUIDED_MENTOR",
+      "title": "山道授业 · 新手师缘",
+      "body": "{realm}修士{name}愿引你入门。执弟子礼必定建立师徒关系；谢绝不损声望。此次不消耗年月或灵石。",
+      "choices": [
+        {
+          "id": "guide_accept",
+          "text": "执弟子礼，拜入门下",
+          "enabled": true
+        },
+        {
+          "id": "guide_decline",
+          "text": "谢过好意，自行问道",
+          "enabled": true
+        }
+      ]
+    }
+  }
+}

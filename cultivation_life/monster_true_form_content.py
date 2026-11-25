@@ -1,5 +1,6 @@
 """Pure validation for the optional, data-only true-form catalog."""
 import math
+from .system.combat.trial_difficulty import validate_upper_stages
 
 EFFECTS = {'strike', 'suppress', 'seal', 'restrict', 'isolate',
            'restore_body', 'restore_spirit', 'restore_field'}
@@ -9,6 +10,7 @@ FEATURES = {'fortify', 'opening', 'retaliate', 'sacrifice', 'frugal', 'shelter'}
 def validate(document, species, evolutions=None):
     if not isinstance(document, dict) or document.get('schema_version') != 1 or document.get('blueprint_version') != 1:
         raise ValueError('本相目录版本不受支持')
+    validate_upper_stages(document.get('breakthrough_stages'), monster=True)
     rows = document.get('forms')
     if not isinstance(rows, dict) or set(rows) != set(species):
         raise ValueError('本相目录须覆盖全部本源种属')

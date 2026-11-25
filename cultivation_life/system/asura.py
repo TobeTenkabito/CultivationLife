@@ -3,16 +3,17 @@ import copy
 import random
 
 from ..content_registry import WORLD_SYSTEMS
+from ..asura_discipline_content import ROUTES
 from ..combat_semantics import parse_rule
 from .combat.contracts import CapabilitySource, VoisinageDefinition, VoisinageEffect
 from .doctrine.voisinage_training import multiplier, label
 
-ROUTE_NAMES = dict(zip(('deva', 'naga', 'yaksha', 'gandharva', 'mahoraga', 'kinnara', 'garuda', 'asura'),
-                      ('天', '龙', '夜叉', '乾达婆', '摩睺罗', '紧那罗', '迦楼罗', '阿修罗')))
-
-
 def config():
     return WORLD_SYSTEMS.get('asura_manifestation', {})
+
+
+# NPC seed assignment depends on this traversal order even if a DLC reorders its JSON.
+ROUTE_NAMES = {route: config()['routes'][route]['name'] for route in ROUTES} if config().get('routes') else {}
 
 
 def enabled():

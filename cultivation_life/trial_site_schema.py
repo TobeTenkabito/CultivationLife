@@ -1,5 +1,6 @@
 """Bounded save protocol for static, player-only trial sites (structure 10)."""
 from __future__ import annotations
+from .definition_data import definition as _content_definition
 
 import copy
 import math
@@ -16,7 +17,7 @@ WORLD_TIERS = {'human': 1, 'demon': 1, 'spirit': 2, 'true_demon': 2,
                'celestial': 3, 'asura': 3, 'nether': 3, 'reincarnation': 3}
 REALM_ROWS = {world: TIER_ROWS[tier] for world, tier in WORLD_TIERS.items()}
 KINDS = ('flow', 'cooling', 'seal', 'treasure', 'core')
-SUBJECTS = ('炉纹', '灵泉', '灯座', '古碑', '石匣', '遗圃')
+SUBJECTS = _content_definition(__name__, "SUBJECTS")
 
 
 def integer(value, low, high):

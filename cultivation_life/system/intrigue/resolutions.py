@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 
 from ...race_diplomacy import relations_for
 from ..semantic_events import emit
@@ -13,6 +14,9 @@ from ...runtime import decode_rng, encode_rng, now_iso
 from ...world_state import race_pair
 from .dependencies import IntrigueResolutionsDependencies
 from ..war.policy import system_war_allowed
+
+
+RECRUIT_NAMES = _content_definition(__name__, "RECRUIT_NAMES")
 
 
 def _intrigue_vote_chance(
@@ -216,7 +220,7 @@ def _intrigue_apply_resolution(
             lifespan_range = REALMS[realm_index].lifespan
             age = rng.randint(16, 42)
             lifespan = max(age + 1, rng.randint(*lifespan_range)) if lifespan_range else None
-            npc = SectNpc(f"intrigue_recruit_{index}", rng.choice(["宁川", "苏砚", "沈禾", "顾霜", "陆迟", "叶青"]),
+            npc = SectNpc(f"intrigue_recruit_{index}", rng.choice(RECRUIT_NAMES),
                           "新晋成员", realm_index, 1, age, lifespan, path=entity.path,
                           race=entity.allegiance_race or "human", world=entity.world,
                           affinity=rng.uniform(8, 28), faction_id=faction_id if kind == "sect" else None)

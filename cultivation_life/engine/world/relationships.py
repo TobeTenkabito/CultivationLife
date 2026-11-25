@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 from ...npc_names import person_name
 
 from ...npc_custody import is_free, kill_person
@@ -23,6 +24,9 @@ from ...relationship_records import bind_relationships
 from ...system.combat.npc_lifecycle import initialize_native
 from ...system.concubine_system import gender_name
 from ..dependencies import RelationshipDependencies
+
+
+CHILD_NAMES = _content_definition(__name__, "CHILD_NAMES")
 
 
 def _party_invitation_chance(player: Player, npc: SectNpc, global_hostility: float = 0.0) -> float:
@@ -300,7 +304,7 @@ def _try_conceive_child(deps: RelationshipDependencies, game: GameState, rng: ra
         child_root = rng.choice([key for key in ROOT_DEFINITIONS if key.startswith(("supreme_", "mutated_"))])
     surn = player.name[:1] if player.name else "韩"
     child = {
-        "id":f"child_{game.id.replace('-', '')[:8]}_{len(player.offspring)}", "name":surn + rng.choice(["宁","安","澄","昭","遥","真","元","清"]),
+        "id":f"child_{game.id.replace('-', '')[:8]}_{len(player.offspring)}", "name":surn + rng.choice(CHILD_NAMES),
         "age":0, "alive":True, "world":player.world, "spirit_root":child_root,
         "spirit_root_name":deps._npc_root_name(child_root), "cultivation_started":False,
         "realm_index":0, "layer":1, "path":player.technique.path if player.technique else player.path,

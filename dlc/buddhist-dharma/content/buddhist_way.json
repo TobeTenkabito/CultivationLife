@@ -31,6 +31,7 @@
     "burden_difficulty_scale": 0.003,
     "debate_burden_scale": 0.0008,
     "spar_win_score": 24,
+    "spar_opponent": {"target_name": "问法修士", "combat_type": "cultivator", "path": "buddhist", "nonlethal": true},
     "spar_loss_score": -20,
     "debate_win_score": 22,
     "debate_loss_score": -14,

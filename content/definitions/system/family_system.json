@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "CHILD_NAMES": [
+      "宁",
+      "安",
+      "澄",
+      "清"
+    ],
+    "FAMILY_NAMES": [
+      "沈清",
+      "陆瑶",
+      "顾宁",
+      "楚安"
+    ]
+  }
+}

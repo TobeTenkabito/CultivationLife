@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "SOUL_SURNAMES": "沈顾谢陆萧楚苏宁白叶",
+    "SOUL_GIVEN_NAMES": {
+      "$tuple": [
+        "无咎",
+        "照夜",
+        "忘川",
+        "玄衣",
+        "引灯",
+        "归尘",
+        "青冥",
+        "幽篁"
+      ]
+    }
+  }
+}

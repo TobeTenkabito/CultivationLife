@@ -3,6 +3,7 @@
 Generated definitions are never inserted into shared content registries. Dormant
 instances retain their data but have no yearly simulation cost.
 """
+from ..definition_data import definition as _content_definition
 
 import copy
 import math
@@ -55,6 +56,11 @@ LOCAL_COMMANDS = frozenset(
         "list_achievements",
     }
 )
+
+
+LOCATION_SUFFIXES = _content_definition(__name__, "LOCATION_SUFFIXES")
+PLACE_PREFIXES = _content_definition(__name__, "PLACE_PREFIXES")
+PLACE_STEMS = _content_definition(__name__, "PLACE_STEMS")
 
 
 def cfg():
@@ -209,11 +215,11 @@ def create_instance(game, rng, kind):
     power_ceiling = generator.randint(5, 7) if kind == "lost" and generator.random() < .4 else 8
     resource_ceiling = min(power_ceiling, generator.randint(5, 7) if kind == "lost" and generator.random() < .4 else 8)
     population = generation_profile(generator, power_ceiling, resource_ceiling) if kind == "lost" else None
-    stem = generator.choice(["苍", "玄", "霜", "赤", "玉", "幽"]) + generator.choice(
-        ["岚", "岑", "渊", "陵", "岳", "泽"]
+    stem = generator.choice(PLACE_PREFIXES) + generator.choice(
+        PLACE_STEMS
     )
     name = stem + ("秘境" if kind == "secluded" else "界")
-    suffixes = generator.sample(["古原", "灵谷", "荒海", "天山", "幽林", "石岭"], 4)
+    suffixes = generator.sample(LOCATION_SUFFIXES, 4)
     locations = [
         dict(
             id=f"{identity}_map_{i}",

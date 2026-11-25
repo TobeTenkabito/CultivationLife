@@ -2,22 +2,28 @@
 import copy
 from dataclasses import asdict, replace
 
-from ...content_registry import WORLD_SYSTEMS
+from ...content_registry import CONTENT_DOCUMENTS, WORLD_SYSTEMS
+from ...definition_data import definition as _content_definition
 from ...models import HistoryRecord
 from ...rules import combat_power, expected_combat_power, max_hp, max_mp, public_player
 from ...system.doctrine.provider import player_record, config
 from ...system.doctrine.progression import source
 from ...system.doctrine.voisinage_training import rank, label, base_multiplier
-from ...system.combat.contracts import VoisinageDefinition, VoisinageEffect
+from ...system.combat.contracts import VoisinageDefinition
 from ...system.combat.trials import dump_battle, load_battle, run_batch
 from ...system.combat_system import PlayerCombatSystem, BattleUnit
 from ...system.combat_adapter import bind_capabilities
 from ..dependencies import ImmortalTrialDependencies
 
 KINDS = {'human_decline', 'heaven_decline', 'three_corpses', 'voisinage_backlash'}
-TITLES = {'human_decline': '人五衰', 'heaven_decline': '天五衰', 'three_corpses': '斩三尸',
-          'voisinage_backlash': '道统反噬'}
 EVENTS = {kind: f'EVT_IMMORTAL_TRIAL_{kind.upper()}' for kind in KINDS}
+_EVENT_TITLES = {row['id']: row['title'] for row in CONTENT_DOCUMENTS['breakthrough_trial_events.json']['events']}
+TITLES = {kind: _EVENT_TITLES[event] for kind, event in EVENTS.items()}
+HEAVEN_FIELD = _content_definition(__name__, "HEAVEN_FIELD")
+HEAVEN_OPPONENT = _content_definition(__name__, "HEAVEN_OPPONENT")
+HEAVEN_DECLINE = _content_definition(__name__, "HEAVEN_DECLINE")
+BACKLASH_FIELD_NAME = _content_definition(__name__, "BACKLASH_FIELD_NAME")
+THREE_CORPSES = _content_definition(__name__, "THREE_CORPSES")
 
 
 def chosen_field(game, key=None, *, cap=None):
@@ -32,10 +38,11 @@ def chosen_field(game, key=None, *, cap=None):
     return fields[0] if fields else None
 
 
-def heaven_field(strength, *, name='天域'):
-    return VoisinageDefinition('trial:heaven', name, 'heaven', 1, strength, 80, 45,
-        'strike', 35, .24, stability=strength, incursion=strength, authority=100,
-        max_targets=1, effects=(VoisinageEffect('strike', 35, .24, defense='ward'),))
+def heaven_field(strength, *, name=None):
+    spec = dict(HEAVEN_FIELD, strength=strength, stability=strength, incursion=strength)
+    if name is not None:
+        spec['name'] = name
+    return VoisinageDefinition(**spec)
 
 
 def state_for(field=None):
@@ -43,23 +50,26 @@ def state_for(field=None):
                 voisinage_ids=[field.id] if field else [], attainments={field.attainment: 9} if field else {})
 
 
-def target_for(game, trial):
+def target_for(game, trial, *, title=None):
     p, kind = game.player, trial['kind']
     definitions = []
     if kind == 'three_corpses':
         field = trial.get('corpse_field')
         field = VoisinageDefinition(**field) if field else None
-        if field:
-            field = replace(field, id='trial:superego', attainment='superego', name='超我尸·' + field.name)
-            definitions.append(asdict(field))
-        members = [dict(name=f'{p.name}·{name}', power=trial['power'], realm_index=p.realm_index, layer=p.layer,
-                        path=p.path, kind='environment', visual_variant=('corpse_self','corpse_primal','corpse_superego')[i], transcendence=state_for(field if i == 2 else None))
-                   for i, name in enumerate(('自我尸', '本我尸', '超我尸'))]
+        members = []
+        for row in THREE_CORPSES:
+            copied = None
+            if field and 'copied_field' in row:
+                copied = replace(field, **row['copied_field'], name=f"{row['name']}·{field.name}")
+                definitions.append(asdict(copied))
+            members.append(dict(name=f"{p.name}·{row['name']}", power=trial['power'], realm_index=p.realm_index,
+                                layer=p.layer, path=p.path, kind='environment', visual_variant=row['visual_variant'],
+                                transcendence=state_for(copied)))
     else:
         field = None
         strength = 0
         if kind == 'heaven_decline':
-            strength = 235
+            strength = HEAVEN_DECLINE['strength']
         elif kind == 'voisinage_backlash':
             # A fixed trial of this tradition, not an enemy which scales with
             # extra tempering. Defensive preparation can overtake the backlash.
@@ -70,12 +80,12 @@ def target_for(game, trial):
             # it must not strengthen the trial before that reward is earned.
             strength = original['stability'] * base_multiplier(trial['target_rank']) * factors[trial['target_rank']]
         if strength:
-            field = heaven_field(strength, name='大道同化·天域' if kind == 'voisinage_backlash' else '天五衰·天域')
+            field = heaven_field(strength, name=BACKLASH_FIELD_NAME if kind == 'voisinage_backlash' else HEAVEN_DECLINE['field_name'])
             definitions.append(asdict(field))
-        power = expected_combat_power(p.realm_index, 9) * (1.15 if kind == 'heaven_decline' else 1.0)
-        members = [dict(name='天道', power=power, realm_index=p.realm_index, layer=p.layer,
-                        kind='environment', path='dao', transcendence=state_for(field))]
-    return dict(target_name=f'{p.name}的三尸' if kind == 'three_corpses' else TITLES[kind], target_power=sum(m['power'] for m in members), members=members,
+        power = expected_combat_power(p.realm_index, 9) * (HEAVEN_DECLINE['power_factor'] if kind == 'heaven_decline' else 1.0)
+        members = [dict(HEAVEN_OPPONENT, power=power, realm_index=p.realm_index, layer=p.layer,
+                        transcendence=state_for(field))]
+    return dict(target_name=f'{p.name}的三尸' if kind == 'three_corpses' else (title or TITLES[kind]), target_power=sum(m['power'] for m in members), members=members,
                 target_realm_index=p.realm_index, target_layer=p.layer, combat_type='trial',
                 objective='kill', enemy_objective='kill', voisinages=definitions)
 
@@ -111,9 +121,9 @@ def start(deps: ImmortalTrialDependencies, game, kind, *, doctrine_id=None):
     queue(deps, game)
 
 
-def initialize(game, trial):
+def initialize(game, trial, *, title=None):
     p = game.player
-    target = target_for(game, trial)
+    target = target_for(game, trial, title=title)
     # Owned clones are the explicit exception; ordinary allies remain excluded.
     units = [BattleUnit('player', p.name, 'player', combat_power(p), p.realm_index, p.path,
                        integrity=min(1, max(.001, p.hp / max_hp(p))))]
@@ -133,12 +143,13 @@ def initialize(game, trial):
         own = battle.units['player'].unit.capabilities
         for key, state in battle.units.items():
             if state.unit.side == 'enemy':
+                inherits_field = 'copied_field' in THREE_CORPSES[int(key.removeprefix('enemy-'))]
                 state.unit = replace(state.unit, capabilities=replace(state.unit.capabilities,
                     capacity=own.capacity, current=own.current, usable_capacity=own.usable_capacity,
                     divine_lights=dict(own.divine_lights),divine_light_levels=dict(own.divine_light_levels),
                     ward_tier=own.ward_tier,body_voisinage_resistance=own.body_voisinage_resistance,body_mechanisms=own.body_mechanisms,
-                    investment=own.investment if key == 'enemy-2' else 0,
-                    investment_limit=own.investment_limit if key == 'enemy-2' else None))
+                    investment=own.investment if inherits_field else 0,
+                    investment_limit=own.investment_limit if inherits_field else None))
                 state.current = own.current
     stats = {side: PlayerCombatSystem._aggregate_stats(roster, player=p if side == 'player' else None,
                                                        terrain_tags=['开阔'])
@@ -160,10 +171,11 @@ def resolve(deps: ImmortalTrialDependencies, game, step, rng):
     trial = game.active_trial
     if not trial or trial.get('kind') not in KINDS or step != 'immortal_battle':
         raise ValueError('当前没有对应的仙境劫战')
-    battle = load_battle(trial['snapshot']) if 'snapshot' in trial else initialize(game, trial)
+    title = deps.events_by_id[EVENTS[trial['kind']]]['title']
+    battle = load_battle(trial['snapshot']) if 'snapshot' in trial else initialize(game, trial, title=title)
     if trial['kind'] == 'three_corpses':
         for state in battle.units.values():
-            if state.unit.side == 'enemy' and state.unit.name in {'自我尸', '本我尸', '超我尸'}:
+            if state.unit.side == 'enemy' and any(state.unit.name == row['name'] for row in THREE_CORPSES):
                 state.unit = replace(state.unit, name=f'{game.player.name}·{state.unit.name}')
     state = trial['battle_state']
     before_body = battle.units['player'].body
@@ -183,7 +195,7 @@ def resolve(deps: ImmortalTrialDependencies, game, step, rng):
         p.transcendence['current'] = own.current
     trial['snapshot'] = dump_battle(battle)
     previous = (game.last_combat_report or {}).get('rounds', []) if state['round'] > len(rounds) else []
-    report = dict(title=TITLES[trial['kind']], target_name=f'{p.name}的三尸' if trial['kind'] == 'three_corpses' else TITLES[trial['kind']], result=result,
+    report = dict(title=title, target_name=trial['target']['target_name'], result=result,
         outcome=result, result_grade={'victory':'渡劫成功','defeat':'劫中陨落','ongoing':'交战未歇'}[result],
         objective='kill' if trial['kind'] == 'three_corpses' else 'survive', mode='仙境劫战',
         rounds=(previous + rounds)[-72:], total_rounds=state['round'], key_events=[],
@@ -208,7 +220,7 @@ def resolve(deps: ImmortalTrialDependencies, game, step, rng):
         return 'trial_step_success', f'三尸尚未尽灭，已交战 {state["round"]} 轮；继续交战不会补满任何资源。'
     game.active_trial = None
     if result == 'defeat':
-        reason = '冲击至臻时被道统同化' if trial.get('target_rank') == 13 else f'未能渡过{TITLES[trial["kind"]]}'
+        reason = '冲击至臻时被道统同化' if trial.get('target_rank') == 13 else f'未能渡过{title}'
         deps._die(game, reason, 'SYS_IMMORTAL_TRIAL_FAILED')
         report['result'] = 'dead'
         return 'dead', reason + '，身死道消。'
@@ -217,8 +229,8 @@ def resolve(deps: ImmortalTrialDependencies, game, step, rng):
         message = f'以邻域对抗天域存活五轮，修至{label(trial["target_rank"])}。'
     else:
         deps._complete_major_breakthrough(game, rng, trial['old_label'])
-        message = '三尸已全部斩灭，证得大罗。' if trial['kind']=='three_corpses' else f'在{TITLES[trial["kind"]]}中存活五轮，破境成功。'
+        message = '三尸已全部斩灭，证得大罗。' if trial['kind']=='three_corpses' else f'在{title}中存活五轮，破境成功。'
     report['key_events'].append(message)
-    game.history.append(HistoryRecord('SYS_IMMORTAL_TRIAL', 1, p.age, TITLES[trial['kind']], None,
+    game.history.append(HistoryRecord('SYS_IMMORTAL_TRIAL', 1, p.age, title, None,
                                      'success', message, {}, ['system','trial','cultivation']))
     return 'trial_completed', message

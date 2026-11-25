@@ -1,4 +1,5 @@
 """Independent immutable seed streams and finite map slots; no world simulation."""
+from ...definition_data import definition as _content_definition
 import hashlib
 import random
 from ...dungeon_schema import QUALITIES, PURPOSES
@@ -8,12 +9,10 @@ from ...content_registry import WORLD_SYSTEMS, FACTION_DEFINITIONS
 from .rewards import recipe
 from . import prose, scenes, ecology
 
-NAMES = ('沈砚','洛凝','陆衍','顾长庚','宋微澜','钟离朔','叶闻秋','秦照','温玄','韩晚舟','裴渊','萧弦','许承风','苏问尘','关苍','陈雪岑')
+NAMES = _content_definition(__name__, "NAMES")
 NAMES += tuple(prose.extra.PERSON_NAMES)
-THEMES = {'water':('沉水','水府','潮眼','积水石阶'),'mountain':('镇岳','洞府','地脉','断裂岩桥'),
-    'fire':('离火','炉宫','火眼','熔岩裂谷'),'frost':('凝霜','冰宫','冰髓','覆霜长廊'),
-    'fort':('古塞','遗堡','阵枢','残破门楼'),'shadow':('照夜','冥宫','魂灯','阴风侧殿'),
-    'grove':('青木','药圃','灵根','荒草石径'),'ruins':('归藏','古府','灵纹','倾塌石廊')}
+THEMES = _content_definition(__name__, "THEMES")
+NAME_PARTS = _content_definition(__name__, "NAME_PARTS")
 
 
 def stream(seed, *parts):
@@ -36,7 +35,7 @@ def generate(game, location, slot, legends):
     realm=ecology.site_rank(world,quality,profile,reference,ceiling)
     tier=WORLD_SYSTEMS['world_profiles'][world]['tier']
     theme=profile['theme'];words=THEMES[theme]
-    name=words[0]+rng.choice(('太微','九曜','承露','含章','流霞','问玄','长离','栖真','照夜','归藏','怀璧','通幽','观澜','悬星','鸣玉','玄都','少清','停云','步虚','洞明')+tuple(prose.extra.NAMES))+words[1]
+    name=words[0]+rng.choice(NAME_PARTS+tuple(prose.extra.NAMES))+words[1]
     factions=[(sect.id,sect.name) for sect in game.sects.values() if sect.world==world and not sect.extinct]
     if not factions:factions=[(None,'散修')]
     roles={}

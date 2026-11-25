@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "SITES": {
+      "causal_ruins": {
+        "$tuple": [
+          "ruins",
+          "因果遗址",
+          "无棣原"
+        ]
+      },
+      "mirror_field": {
+        "$tuple": [
+          "mirror",
+          "镜律场域",
+          "穆陵沙漠"
+        ]
+      }
+    }
+  }
+}

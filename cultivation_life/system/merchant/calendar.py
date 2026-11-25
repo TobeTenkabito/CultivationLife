@@ -1,6 +1,7 @@
 """Explicit operations for calendar."""
 
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 from ..merchant_definitions import intelligence_route
 
 import copy
@@ -11,6 +12,9 @@ from ..merchant_definitions import POLICIES
 from .dependencies import MerchantCalendarDependencies
 from ..economy.ledger import transfer_value, balance
 from ..economy.caravans import treasury
+
+
+WORKER_NAMES = _content_definition(__name__, "WORKER_NAMES")
 
 
 def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
@@ -49,7 +53,7 @@ def _advance_merchant_year(deps: MerchantCalendarDependencies, game):
             if not alliance.get('player_owned') and expansion and alliance['reserves'] >= 40000 and rng.random() < .2:
                 location = rng.choice(expansion)
                 deputy = copy.deepcopy(alliance["offices"][0]["leader"] if alliance['offices'] else alliance['leader'])
-                deputy.update(id=f"merchant-{world}-{alliance['id']}-{location}", name=rng.choice(["叶知秋", "方清和", "江行远"]))
+                deputy.update(id=f"merchant-{world}-{alliance['id']}-{location}", name=rng.choice(WORKER_NAMES))
                 alliance["offices"].append({"location_id": location, "leader": deputy})
                 transfer_value(game, treasury(world, alliance['id']), f'background:{world}', 10000, '商盟分部建设')
             elif not alliance.get('player_owned') and len(alliance["offices"]) > 1 and alliance["reserves"] < 3000:

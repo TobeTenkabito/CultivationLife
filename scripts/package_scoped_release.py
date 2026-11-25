@@ -60,7 +60,8 @@ def main():
     regression=dict(collected=tests,skipped=sum(int(s.get('skipped',0)) for s in suites),failures=0,errors=0)
     regression['passed']=regression['collected']-regression['skipped']
     dungeon_art = scoped.get('profile') == 'dungeon-art'
-    society = scoped.get('profile') == 'society'
+    trait_release = scoped.get('profile') == 'traits'
+    society = scoped.get('profile') in {'society', 'traits'}
     transfer_tests = 0
     transfer_in_regression = society
     if society:
@@ -447,6 +448,10 @@ def main():
     if dungeon_art or society:
         if society:
             from scripts.verify_scoped_release import SOCIETY_TESTS as selected_tests, SOCIETY_BROWSERS as selected_browsers
+            if trait_release:
+                from scripts.verify_scoped_release import TRAIT_TESTS as selected_tests, TRAIT_BROWSERS as selected_browsers
+                require(all(c.get('trait_verified') for c in evidence['cases']), 'Missing compiled trait checks')
+                require(all('trait_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in native['logs']), 'Missing native trait checks')
             require(all(c.get('society_verified') for c in evidence['cases']), 'Missing compiled society checks')
             require(all('society_mail_scope' in (ROOT/n).read_text(encoding='utf-8-sig') for n in native['logs']), 'Missing native correspondence checks')
         else:
@@ -566,12 +571,12 @@ def main():
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
             for name in ('docs/immortal-artifacts.md',):
                 z.write(ROOT/name,name)
-        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura','techniques','dungeon-art','society'}:
+        if scoped.get('profile') in {'heavens','tutorial','handbook','performance','soul-lifecycle','westward','asura','techniques','dungeon-art','society','traits'}:
             z.writestr('README.md',(ROOT/'android/README.md').read_text(encoding='utf-8').replace('../docs/','docs/'))
         else:
             z.write(ROOT/'android/README.md','README.md')
         if society:
-            for name in ('CHANGELOG.md', f'docs/release-{tag}.md', 'docs/npc-development.md', 'docs/strategic-war-implementation.md'):
+            for name in ('CHANGELOG.md', f'docs/release-{tag}.md', *(('docs/trait-and-combat-attributes-design.md', 'docs/trait-repertoire-catalog.md') if trait_release else ('docs/npc-development.md', 'docs/strategic-war-implementation.md'))):
                 z.write(ROOT/name,name)
         if dungeon_art:
             z.write(ROOT/'CHANGELOG.md','CHANGELOG.md')
@@ -647,6 +652,8 @@ def main():
         with zipfile.ZipFile(destination) as z:require(z.testzip() is None,'Asura DLC archive damaged')
     if society or scoped.get('profile')=='body-ui':
         packages = [('monster-bloodlines', '万妖归宗')]
+        if trait_release:
+            packages.extend([('asura-manifestation','修罗显圣'), ('ghost-reincarnation','百鬼夜行'), ('buddhist-dharma','诸法无我')])
         if scoped.get('profile') == 'body-ui':
             packages.extend([('authored-techniques','著经立道'),('ghost-reincarnation','百鬼夜行'),('sage-way','圣人之道'),('buddhist-dharma','诸法无我')])
         for package,label in packages:

@@ -1,14 +1,18 @@
 """Stable local sect names. Only actual founding or mobilization creates a roster."""
+from ..definition_data import definition as _content_definition
 import random
 from functools import lru_cache
 
 from ..content_registry import RACE_DEFINITIONS, RACE_SYSTEMS
 
 
+FACTION_SUFFIXES = _content_definition(__name__, "FACTION_SUFFIXES")
+
+
 @lru_cache(maxsize=512)
 def _names(seed, world, race, roots):
     rng = random.Random(f'race-sects-v1:{seed}:{world}:{race}')
-    endings = ('宗', '门', '宫', '观', '谷', '阁', '山庄', '洞府')
+    endings = FACTION_SUFFIXES
     prefixes = rng.sample(roots, 2) if len(roots) >= 2 else (roots[0], roots[0])
     return tuple(prefix + ending for prefix, ending in zip(prefixes, rng.sample(endings, 2)))
 

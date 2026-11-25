@@ -55,9 +55,8 @@ def _resolve_buddhist_assembly(deps: BuddhistAssemblyDependencies, effect, game,
     detail = ""
     if action == "spar":
         difficulty = 1 + min(config["burden_difficulty_cap"], session["burden"] * config["burden_difficulty_scale"])
-        target = {"target_name": "问法修士", "target_power": expected_combat_power(game.player.realm_index, game.player.layer) * difficulty,
-                  "target_realm_index": game.player.realm_index, "target_layer": game.player.layer,
-                  "combat_type": "cultivator", "path": "buddhist", "nonlethal": True}
+        target = dict(config["spar_opponent"], target_power=expected_combat_power(game.player.realm_index, game.player.layer) * difficulty,
+                      target_realm_index=game.player.realm_index, target_layer=game.player.layer)
         result, detail = deps._combat(game, target, False, rng)
         score = config["spar_win_score"] if result == "victory" else config["spar_loss_score"]
     elif action == "debate":

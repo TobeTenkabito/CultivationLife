@@ -5,7 +5,12 @@ import math
 def validate(config,maps,profiles):
     def require(condition,message):
         if not condition:raise ValueError(message)
+    def validate_story(story):
+        require(isinstance(story,dict) and isinstance(story.get('title'),str) and isinstance(story.get('body'),str),'城市专有事件缺失')
+        choices=story.get('choices')
+        require(isinstance(choices,list) and len(choices)==2 and all(isinstance(c,list) and len(c)==2 and all(isinstance(t,str) and t for t in c) for c in choices),'城市事件分支无效')
     require(isinstance(config,dict),'建筑配置缺失')
+    validate_story(config.get('founded_city_story'))
     for key in ('cave_prices','cave_bonus'):
         require(set(config.get(key,{}))=={'self','professional'},'洞府营造方式无效')
         for values in config[key].values():
@@ -55,7 +60,4 @@ def validate(config,maps,profiles):
                 require(type(row.get('level')) is int and 1<=row['level']<=3,'城市规模无效')
                 for field in ('flavor','audience','rumor','arena'):
                     require(isinstance(row.get(field),str) and bool(row[field]),'城市专有描述缺失')
-                story=row.get('story',{})
-                require(isinstance(story,dict) and isinstance(story.get('title'),str) and isinstance(story.get('body'),str),'城市专有事件缺失')
-                choices=story.get('choices')
-                require(isinstance(choices,list) and len(choices)==2 and all(isinstance(c,list) and len(c)==2 and all(isinstance(t,str) and t for t in c) for c in choices),'城市事件分支无效')
+                validate_story(row.get('story'))

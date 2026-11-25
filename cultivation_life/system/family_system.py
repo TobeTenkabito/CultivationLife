@@ -1,5 +1,6 @@
 """Base-game descendants, family decisions and authoritative family finance."""
 from __future__ import annotations
+from ..definition_data import definition as _content_definition
 
 from ..npc_custody import is_free
 from ..relationship_records import find_person
@@ -24,6 +25,10 @@ from .character.dependencies import (
     FamilySocietyDependencies,
     FamilyViewDependencies,
 )
+
+CHILD_NAMES = _content_definition(__name__, "CHILD_NAMES")
+FAMILY_NAMES = _content_definition(__name__, "FAMILY_NAMES")
+
 
 def _family_equipment(player, item):
     if item.quantity <= 0 or not set(item.tags) & {'equipment', 'artifact'}:
@@ -225,7 +230,7 @@ def family_action(deps: FamilyActionsDependencies, game_id, action, payload):
             serial = int(game.family_state.get('marriage_serial', 0)) + 1
             game.family_state['marriage_serial'] = serial
             rank = max(1, npc.realm_index)
-            partner = SectNpc(f'{family.id}_spouse_{serial}', rng.choice(['沈清','陆瑶','顾宁','楚安'])+str(serial),
+            partner = SectNpc(f'{family.id}_spouse_{serial}', rng.choice(FAMILY_NAMES)+str(serial),
                 '姻亲族人', rank, 1, max(18, min(npc.age, 40)), max(110, int(REALMS[rank].lifespan[0])) if REALMS[rank].lifespan else None,
                 spirit_root=deps._random_npc_root(rank, rng), world=family.world, path=family.path,
                 gender='female' if npc.gender == 'male' else 'male', affinity=50, family_traits={'kin':True},
@@ -346,7 +351,7 @@ def _family_annual_governance(deps: FamilySocietyDependencies, game, rng):
             roots = [r for r in (parent.spirit_root,spouse.spirit_root) if r in ROOT_DEFINITIONS and r != 'none']
             root = rng.choice(roots or ['supreme_wood'])
             serial = int(state.get('birth_serial',0))+1;state['birth_serial']=serial
-            child = {'id':f'{family.id}_born_{serial}', 'name':family.name[:1]+rng.choice(['宁','安','澄','清'])+str(serial),
+            child = {'id':f'{family.id}_born_{serial}', 'name':family.name[:1]+rng.choice(CHILD_NAMES)+str(serial),
                 'age':0,'alive':True,'world':family.world,'spirit_root':root,'cultivation_started':False,
                 'realm_index':0,'layer':1,'path':family.path,'race':parent.race,'lifespan':rng.randint(80,100),
                 'gender':rng.choice(['male','female']),'parents':[parent.name,spouse.name],

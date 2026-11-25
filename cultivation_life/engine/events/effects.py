@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ...npc_custody import is_free
 from ...relationship_records import RelationshipRecord
+from ...definition_data import definition as _content_definition
 from ...system.combat.npc_lifecycle import move_world
 
 import copy
@@ -600,12 +601,9 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         detail = ""
         if mode == "fight":
             required = float(runtime.get("required_power", 1))
-            combat_result, combat_summary = deps._combat(game, {
-                "target_name": "来犯山门的敌修", "target_power": required,
-                "target_realm_index": player.realm_index, "target_layer": player.layer,
-                "combat_type": "cultivator", "action": "repel",
-                "enemy_objective": "break_formation",
-            }, False, rng)
+            target = _content_definition(__name__, "SECT_DEFENSE_OPPONENT")
+            target.update(target_power=required, target_realm_index=player.realm_index, target_layer=player.layer)
+            combat_result, combat_summary = deps._combat(game, target, False, rng)
             success = combat_result == "victory"
             detail = combat_summary
         elif mode == "formation":
@@ -666,18 +664,10 @@ def _effect(deps: EffectDependencies, effect: dict[str, Any], game: GameState, p
         target_power = expected_combat_power(player.realm_index, max(1, player.layer))
         target_power *= rng.uniform(0.68, 0.88) if veteran else rng.uniform(0.95, 1.25)
         formation_duty = int(effect.get("contribution", 12)) <= 9
-        combat_result, summary = deps._combat(game, {
-            "target_name": "敌宗会战修士",
-            "target_power": target_power,
-            "target_realm_index": player.realm_index,
-            "target_layer": max(1, player.layer),
-            "combat_type": "cultivator",
-            "objective": "repel",
-            "enemy_objective": "repel",
-            "max_rounds": 5,
-            "non_story_combat": True,
-            "artificial_conditions": ["大阵"] if formation_duty else [],
-        }, True, rng)
+        target = _content_definition(__name__, "FACTION_WAR_OPPONENT")
+        target.update(target_power=target_power, target_realm_index=player.realm_index,
+                      target_layer=max(1, player.layer), artificial_conditions=["大阵"] if formation_duty else [])
+        combat_result, summary = deps._combat(game, target, True, rng)
         if combat_result == "dead":
             return "dead", summary
         if combat_result == "defeat":

@@ -1,14 +1,18 @@
 """Frozen branch, contract and evidence definitions; no offscreen person inventories."""
+from ...definition_data import definition as _content_definition
 from ...rules import combat_power, expected_combat_power, max_hp, max_mp, remove_item
 from . import prose
 from .ecology import appearance_depth, close_realms
 from .prose_expansion import EPIC_RESULTS, LEGENDARY_RESULTS, RUMORS, DEPARTURES, TREASURES
 
 
+ESCAPE_ROUTES = _content_definition(__name__, "ESCAPE_ROUTES")
+
+
 def blueprint(site, rng, reward_factory):
     nodes=site['nodes'];roles=site['roles']
     routes={n['id']:dict(destination=min(len(nodes)-1,i+rng.randint(2,3)),
-        direction=rng.choice(('东侧暗渠','西侧栈道','北面夹道')),cost=round(rng.uniform(.04,.08),3))
+        direction=rng.choice(ESCAPE_ROUTES),cost=round(rng.uniform(.04,.08),3))
         for i,n in enumerate(nodes[:-2])}
     goals={}
     for key,role in roles.items():

@@ -17,9 +17,6 @@ from ...system.possession_system import is_possessed
 from ...combat_visuals import report_visuals
 
 KINDS = {'monster_upper', 'ghost_upper'}
-TITLES = {'monster_upper': ('蜕形劫', '祖性劫', '万象劫'), 'ghost_upper': ('辨魂劫', '前尘劫', '轮回劫')}
-NAMES = {'monster_upper': (('血脉劫相',), ('祖性劫相',), ('本相劫身', '万象劫主')),
-         'ghost_upper': (('伪我劫相',), ('前尘劫主',), ('生相', '灭相'))}
 
 
 @dataclass(frozen=True)
@@ -51,15 +48,17 @@ def start(deps: Dependencies, game, kind, *, evolution=None, lineage=None):
     if kind not in KINDS or not eligible(p) or kind != p.path + '_upper' or game.active_trial:
         raise ValueError('当前无法引发此道途劫难')
     stage = p.realm_index - 9
-    names = NAMES[kind][stage]
-    if kind == 'monster_upper' and stage == 1 and '_SELF_' in str(p.monster_evolution_id):
-        names = ('新脉劫相',)
+    catalog = ghost_soul_form.catalog() if kind == 'ghost_upper' else CONTENT_DOCUMENTS['monster_true_forms.json']
+    encounter = catalog['breakthrough_stages'][str(p.realm_index)]
+    names = encounter['opponents']
+    if kind == 'monster_upper' and '_SELF_' in str(p.monster_evolution_id):
+        names = encounter.get('self_lineage_opponents', names)
     ratios,copy_cap,copy_scale=trial_pressure(WORLD_SYSTEMS['upper_voisinages'].get('breakthrough_trials',{}).get(p.path,{}),
                                             p.realm_index,(1.,)*len(names))
     source = player_source(p, cap=copy_cap)
     power = combat_power(p)
     members = [dict(name=name, power=power*ratio, realm_index=p.realm_index, layer=p.layer, path=p.path, kind='environment') for name,ratio in zip(names,ratios)]
-    target = dict(target_name=TITLES[kind][stage], target_power=power*sum(ratios), members=members,
+    target = dict(target_name=encounter['title'], target_power=power*sum(ratios), members=members,
                   target_realm_index=p.realm_index, target_layer=p.layer, combat_type='trial', objective='kill', enemy_objective='kill')
     units = [BattleUnit('player', p.name, 'player', power, p.realm_index, p.path, integrity=min(1., p.hp/max_hp(p)))]
     from ...system import clone_support
@@ -86,7 +85,7 @@ def start(deps: Dependencies, game, kind, *, evolution=None, lineage=None):
     clone_support.freeze_stats(state,clones)
     p.joint_companion_breakthrough = None
     game.active_trial = dict(kind=kind, major=True, lethal=True, old_label=public_player(p)['realm_name'],
-        source_realm=p.realm_index, target_realm=p.realm_index+1, title=TITLES[kind][stage],
+        source_realm=p.realm_index, target_realm=p.realm_index+1, title=encounter['title'],
         field_name=' / '.join(f.name for f in own.voisinages) or '未装备邻域',
         event_ids=['EVT_UPPER_FINAL' if stage == 2 else 'EVT_UPPER_ENDURANCE'],
         snapshot=dump_battle(battle), battle_state=state, target=target,

@@ -9,6 +9,10 @@ def validate_buddhist_content(document, documents):
             raise ValueError("佛修内容：" + message)
     def numeric(value):
         return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    spar = config.get("spar_opponent")
+    require(isinstance(spar, dict) and isinstance(spar.get("target_name"), str) and spar["target_name"].strip()
+            and spar.get("nonlethal") is True and spar.get("combat_type") == "cultivator"
+            and spar.get("path") == "buddhist", "法会切磋须有具名的非致死佛修对手")
     positive = ("grace_units", "upkeep_follower_scale", "annual_karma_cap", "follower_income_scale",
                 "follower_income_coefficient", "temple_tier_scale", "permission_fee", "permission_years",
                 "technique_level_score", "great_threshold", "success_threshold", "normal_threshold")

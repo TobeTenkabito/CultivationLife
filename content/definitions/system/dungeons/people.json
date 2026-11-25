@@ -7,6 +7,11 @@
       "stat": "might",
       "floor": 0.85,
       "reduction_per_preparation": 0.03
+    },
+    "INVITATION_REPLY": {
+      "title": "同行邀约回信",
+      "accepted": "愿与道友在入口会合。",
+      "declined": "此行另有安排，恕难同行。"
     }
   }
 }

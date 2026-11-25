@@ -1,5 +1,6 @@
 """Registry-independent validation of the optional soul-form catalog."""
 import math
+from .system.combat.trial_difficulty import validate_upper_stages
 
 EFFECTS = {'strike', 'suppress', 'seal', 'restrict', 'isolate', 'restore_body', 'restore_spirit', 'restore_field'}
 RESTRICTIONS = {'technique', 'support', 'voisinage'}
@@ -9,6 +10,11 @@ FEATURES = {'fortify', 'opening', 'retaliate', 'sacrifice', 'frugal', 'shelter',
 def validate(doc):
     if doc.get('schema_version') != 1 or doc.get('blueprint_version') != 1:
         raise ValueError('魂相目录版本无效')
+    validate_upper_stages(doc.get('breakthrough_stages'), monster=False)
+    routes = doc.get('routes', {})
+    if (not isinstance(routes, dict) or set(routes) != {'guard', 'sever', 'transmute'}
+            or not all(isinstance(name, str) and name.strip() for name in routes.values())):
+        raise ValueError('魂相道路名称无效')
     causes, forms = doc['causes'], doc['forms']
     if len(causes) != 12 or len(forms) != 36:
         raise ValueError('魂相须覆盖十二魂因和三条道路')

@@ -1,6 +1,7 @@
 """Explicit operations for state."""
 
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 
 from ...traits import birth
 
@@ -13,6 +14,12 @@ from ...rules import expected_combat_power
 from ..exchange_system import EXCHANGE_VENUES
 from ..merchant_definitions import CROSS_ALLIANCES, POLICIES
 from .dependencies import MerchantStateDependencies
+
+
+LEADER_SURNAMES = _content_definition(__name__, "LEADER_SURNAMES")
+LEADER_GIVEN_NAMES = _content_definition(__name__, "LEADER_GIVEN_NAMES")
+WORKER_SURNAMES = _content_definition(__name__, "WORKER_SURNAMES")
+WORKER_GIVEN_NAMES = _content_definition(__name__, "WORKER_GIVEN_NAMES")
 
 
 def _merchant_realm_cap(world):
@@ -45,7 +52,7 @@ def _ensure_merchant(deps: MerchantStateDependencies, game) -> bool:
             cross = CROSS_ALLIANCES.get(alliance_id)
             name = cross[0] if cross else WORLD_SYSTEMS["world_names"][world] + ["通宝商盟", "万珍商盟", "聚贤商盟"][index]
             realm_index = deps._merchant_realm_cap(world)
-            leader = SectNpc(f"merchant-{world}-{alliance_id}-leader", rng.choice(["沈", "陆", "宁", "虞"]) + rng.choice(["望舒", "玄衡", "听澜", "怀璧"]),
+            leader = SectNpc(f"merchant-{world}-{alliance_id}-leader", rng.choice(LEADER_SURNAMES) + rng.choice(LEADER_GIVEN_NAMES),
                              "分盟主" if cross and world != cross[1] else "盟主", realm_index,
                              REALMS[realm_index].layers, 100, None, world=world,
                              birth_seed=game.seed)
@@ -58,7 +65,7 @@ def _ensure_merchant(deps: MerchantStateDependencies, game) -> bool:
                 deputy = copy.deepcopy(leader)
                 deputy.id += f"-{site}"
                 deputy.trait_state = birth(game.seed, deputy.id)
-                deputy.name = rng.choice(["许", "苏", "秦"]) + rng.choice(["青川", "知微", "照月"])
+                deputy.name = rng.choice(WORKER_SURNAMES) + rng.choice(WORKER_GIVEN_NAMES)
                 deputy.title = "分部主事"
                 deputy.realm_index = max(1, realm_index - 1)
                 deputy.layer = REALMS[deputy.realm_index].layers

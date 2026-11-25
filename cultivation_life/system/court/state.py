@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 import math
 from typing import Any
 from ...content_registry import WORLD_SYSTEMS
@@ -6,6 +7,11 @@ from ...models import GameState, HistoryRecord
 from ...runtime import decode_rng, encode_rng, now_iso
 from .dependencies import CourtStateDependencies
 from ..economy import organizations as finance
+
+
+SECT_PREFIXES = _content_definition(__name__, "SECT_PREFIXES")
+SECT_SUFFIXES = _content_definition(__name__, "SECT_SUFFIXES")
+DELEGATE_NAMES = _content_definition(__name__, "DELEGATE_NAMES")
 
 
 def _court_config() -> dict[str, Any]:
@@ -38,9 +44,9 @@ def _ensure_heavenly_court(deps: CourtStateDependencies, game: GameState, rng: A
 
     real_sects = [sect for sect in game.sects.values() if sect.kind == "sect" and sect.world == "celestial" and not sect.extinct]
     seats: list[dict[str, Any]] = []
-    prefixes = ["玄都", "云海", "青帝", "天河", "万象", "九元", "紫极"]
-    suffixes = ["宗", "阁", "宫", "院", "门", "府", "观", "殿", "洞"]
-    delegate_names = ["沈观澜", "陆星河", "闻天羽", "顾元真", "苏玄微", "江法明", "凌清风", "白云生", "夏无尘", "唐子衿", "韩清远", "林天行"]
+    prefixes = SECT_PREFIXES
+    suffixes = SECT_SUFFIXES
+    delegate_names = DELEGATE_NAMES
     for index in range(int(config["seat_count"])):
         if index < len(real_sects):
             sect = real_sects[index]

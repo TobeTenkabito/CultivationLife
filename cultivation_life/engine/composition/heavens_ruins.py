@@ -6,6 +6,7 @@ from ...system.heavens.definitions import RUINS_ID
 from ...system.heavens import survey
 from ...system.formation_system import make_formation_material_instance
 from ..actions.exploration import move_world
+from .heavens_guardians import fight_guardian
 
 
 def bind_ruins(engine):
@@ -67,17 +68,7 @@ def bind_ruins(engine):
                    location=ruins['definition']['location_id'])
 
     def fight(game, ruins, rng):
-        guardian = ruins['guardian']
-        power = ruins['definition']['guardian_power'] * (1 - .15 * guardian['wounds'])
-        member = dict(npc_id=f'{ruins["scene_id"]}-guardian', name='回潮守阵机关', realm_index=4, layer=1,
-                      path='dao', kind='mechanical', power=power, wounds=guardian['wounds'], world='rift')
-        target = dict(target_name=member['name'], target_power=power, target_realm_index=4, target_layer=1,
-                      combat_type='mechanical', objective='repel', enemy_objective='repel', members=[member],
-                      natural_terrain='狭窄', artificial_conditions=[], max_rounds=12)
-        before = game.last_combat_report
-        result, summary = engine._combat(game, target, True, rng)
-        report = game.last_combat_report if game.last_combat_report is not before else {}
-        wounds = max(guardian['wounds'], member.get('wounds', 0), min(4, int((1-report.get('enemy_hp_ratio', 1))*4)))
-        return result, summary, wounds
+        return fight_guardian(engine, game, 'ruins', f'{ruins["scene_id"]}-guardian',
+                              ruins['definition']['guardian_power'], ruins['guardian']['wounds'], rng)
 
     return dict(read_ruins_facts=facts, ruins_material=material, enter_ruins=enter, leave_ruins=leave, fight_ruins=fight, prepare_ruins=prepare)

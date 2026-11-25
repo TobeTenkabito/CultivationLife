@@ -1,5 +1,5 @@
 """Finite M1 action scope and framework definition validation."""
-from ...definition_data import definition as _content_definition
+from ...definition_data import base_world_system
 from dataclasses import dataclass, field, asdict
 from .frontier_definitions import FRONTIER_ACTIONS
 from .campaign_definitions import CAMPAIGN_ACTIONS
@@ -39,7 +39,8 @@ class OmenDefinition:
     lifetime_years: int = 600
 
 
-OMENS = _content_definition(__name__, "OMENS", OmenDefinition)
+_BASE_FRAMEWORK = base_world_system("heavens_framework")
+OMENS = tuple(OmenDefinition(**row) for row in _BASE_FRAMEWORK["omens"])
 OMEN_IDS = frozenset(row.id for row in OMENS)
 
 
@@ -57,7 +58,7 @@ def validate_omen_definition(raw):
             raise ValueError('诸天征兆初值或版本无效')
 
 
-RUINS_DEFINITION_DEFAULTS = _content_definition(__name__, "RUINS_DEFINITION_DEFAULTS")
+RUINS_DEFINITION_DEFAULTS = _BASE_FRAMEWORK["ruins"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,7 +100,7 @@ def validate_ruins_definition(raw):
         raise ValueError('因果遗址守护强度无效')
 
 
-MIRROR_DEFINITION_DEFAULTS = _content_definition(__name__, "MIRROR_DEFINITION_DEFAULTS")
+MIRROR_DEFINITION_DEFAULTS = _BASE_FRAMEWORK["mirror"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,7 +150,8 @@ class ContactSite:
     correspondence_stones: int = 2500
 
 
-CONTACT_SITES = _content_definition(__name__, "CONTACT_SITES", ContactSite)
+CONTACT_SITES = tuple(ContactSite(**dict(row, evidence=tuple(row["evidence"]), findings=tuple(row["findings"])))
+                      for row in _BASE_FRAMEWORK["contact_sites"])
 SITE_IDS = frozenset(site.id for site in CONTACT_SITES)
 
 
@@ -176,7 +178,7 @@ def validate_site(raw):
             raise ValueError('诸天和平协作初值无效')
 
 
-SEA_ECHO_DEFINITION_DEFAULTS = _content_definition(__name__, "SEA_ECHO_DEFINITION_DEFAULTS")
+SEA_ECHO_DEFINITION_DEFAULTS = _BASE_FRAMEWORK["sea_echo"]
 
 
 @dataclass(frozen=True, slots=True)

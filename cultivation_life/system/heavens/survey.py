@@ -1,10 +1,11 @@
 """Bounded resident surveys share the authoritative clock of each anomaly."""
+from ...definition_data import definition as _content_definition
 from .definitions import RUINS_ID, MIRROR_ID, SURVEY_ACTIONS
 from .state import active_task, record
 
 LABELS = {'survey_start': '邀约勘察', 'survey_recall': '结束勘察', 'survey_share': '交换勘察笔记', 'survey_wait': '等候一年'}
 DURATIONS = {'outbound': 2, 'studying': 8, 'returning': 1}
-SITES = {RUINS_ID: ('ruins', '因果遗址', '无棣原'), MIRROR_ID: ('mirror', '镜律场域', '穆陵沙漠')}
+SITES = _content_definition(__name__, "SITES")
 
 
 def scene_for(game, target=RUINS_ID):

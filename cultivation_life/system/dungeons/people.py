@@ -124,8 +124,9 @@ def invite(game,site,identity):
             desires={n['reward']['id']:role['desire'] if n['reward']['id']==target else 25 for n in site['nodes']},
             fulfilled=False,work=0,seen_power=0.)
     if not accepts:role['state']='declined'
+    reply = _content_definition(__name__, 'INVITATION_REPLY')
     game.dungeon_state['mail'].append(dict(id=site['id']+':reply:'+identity,dungeon_id=site['id'],sender=npc.name,
-        sender_id=identity,title='同行邀约回信',body='愿与道友在入口会合。' if accepts else '此行另有安排，恕难同行。',
+        sender_id=identity,title=reply['title'],body=reply['accepted' if accepts else 'declined'],
         unread=True,status='reply',age=game.player.age))
     return role
 

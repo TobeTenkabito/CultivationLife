@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "FACTION_SUFFIXES": {
+      "$tuple": [
+        "宗",
+        "门",
+        "宫",
+        "观",
+        "谷",
+        "阁",
+        "山庄",
+        "洞府"
+      ]
+    }
+  }
+}

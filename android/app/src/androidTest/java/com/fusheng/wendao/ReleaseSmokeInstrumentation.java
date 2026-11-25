@@ -1551,7 +1551,8 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
             activity=startActivitySync(new Intent(getTargetContext(),MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             if("portrait".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
             if("landscape".equals(arguments.getString("orientation"))) runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
-            long deadline=System.currentTimeMillis()+(requested.equals("tutorial-ui")?180000:60000);
+            boolean waitForFullCatalog = requested.equals("tutorial-ui") || requested.equals("dungeon-art");
+            long deadline=System.currentTimeMillis()+(waitForFullCatalog?180000:60000);
             while(web==null && System.currentTimeMillis()<deadline) {
                 runOnMainSync(()->web=findWeb(activity.findViewById(android.R.id.content)));
                 Thread.sleep(150);
@@ -1572,6 +1573,10 @@ public class ReleaseSmokeInstrumentation extends Instrumentation {
                 String id=(String)async("api('/api/games',{method:'POST',body:JSON.stringify({name:'舆图验收',spirit_root:'heavenly',path:'dao',seed:342,preset_id:'core'})}).then(g=>g.id)");
                 python(assetText("dungeon_release.py")+"\nfrom cultivation_life import server\nprepare_dungeon_player(server.ENGINE,"+JSONObject.quote(id)+")");
                 async("loadGame("+JSONObject.quote(id)+")");
+                tapSelector(".hud-identity");
+                waitForJs("Array.isArray(game.player.traits)&&!!game.player.attribute_setup&&document.querySelector('#personal-traits').innerText.length>0","Loaded character traits");
+                tapSelector("[data-close-dialog=player-details-dialog]");
+                result.putString("trait_scope","open-character-read-traits-and-attribute-setup");
                 tapSelector("[data-action-tab=living]");tapSelector("#mailbox-main-open");
                 check(Boolean.TRUE.equals(js("(()=>{const r=document.querySelector('#mailbox-panel .mail-fields label:last-child select');r.value='xiang_zhili';r.dispatchEvent(new Event('change'));return r.value==='xiang_zhili'})()")),"Known correspondent listed");
                 tapSelector("#mailbox-panel [data-dungeon-action=ask_location]");

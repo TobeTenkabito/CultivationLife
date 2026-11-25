@@ -1,6 +1,7 @@
 """Explicit operations for settlement."""
 
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 from dataclasses import asdict
 
 import copy
@@ -42,11 +43,11 @@ def _deliver_order(deps: MerchantSettlementDependencies, game, order, recipient=
         order["delivery"] = f"获得{definition['name']} ×{order['quantity']}"
     elif kind == "weapon":
         power = order["principal"] * .08
-        artifact = {"id": f"merchant-weapon-{game.id}-{order['id']}", "name": f"商盟订制灵刃·{stars}星",
-                    "mold_id": "merchant_blade", "mold_name": "商盟灵刃", "quality": "normal", "quality_name": "合格",
-                    "creator_name": order["worker"], "created_year": game.player.age,
-                    "actual_stats": {"combat_power": power}, "designed_stats": {"combat_power": power},
-                    "anchor_value": round(order["principal"] * .5), "materials": [], "combat_effects": [], "is_natal": False}
+        artifact = _content_definition(__name__, "COMMISSIONED_BLADE")
+        artifact.update(id=f"merchant-weapon-{game.id}-{order['id']}", name=artifact['name'].format(stars=stars),
+                        creator_name=order["worker"], created_year=game.player.age,
+                        actual_stats={"combat_power": power}, designed_stats={"combat_power": power},
+                        anchor_value=round(order["principal"] * .5))
         store_crafted_artifact(recipient, artifact)
         order["delivery"] = f"获得订制灵刃，基础战力 {power:,.0f}"
     elif kind == "formation":

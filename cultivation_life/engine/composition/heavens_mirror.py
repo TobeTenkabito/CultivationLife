@@ -6,6 +6,7 @@ from ...system.heavens.definitions import MIRROR_ID
 from ...system.heavens import survey
 from ...system.formation_system import make_formation_material_instance
 from ..actions.exploration import move_world
+from .heavens_guardians import fight_guardian
 
 
 def bind_mirror(engine):
@@ -73,17 +74,7 @@ def bind_mirror(engine):
 
     def fight(game, mirror, chamber, rng):
         guardian = mirror['chambers'][chamber]['guardian']
-        power = guardian['power'] * (1 - .15 * guardian['wounds'])
-        member = dict(npc_id=f'{mirror["scene_id"]}-guardian-{chamber}', name=f'第 {chamber+1} 处守镜机关',
-                      realm_index=4, layer=1, path='dao', kind='mechanical', power=power,
-                      wounds=guardian['wounds'], world='rift')
-        target = dict(target_name=member['name'], target_power=power, target_realm_index=4, target_layer=1,
-                      combat_type='mechanical', objective='repel', enemy_objective='repel', members=[member],
-                      natural_terrain='狭窄', artificial_conditions=[], max_rounds=12)
-        before = game.last_combat_report
-        result, summary = engine._combat(game, target, True, rng)
-        report = game.last_combat_report if game.last_combat_report is not before else {}
-        wounds = max(guardian['wounds'], member.get('wounds', 0), min(4, int((1-report.get('enemy_hp_ratio', 1))*4)))
-        return result, summary, wounds
+        return fight_guardian(engine, game, 'mirror', f'{mirror["scene_id"]}-guardian-{chamber}',
+                              guardian['power'], guardian['wounds'], rng, chamber=chamber + 1)
 
     return dict(read_mirror_facts=facts, mirror_materials=materials, enter_mirror=enter, leave_mirror=leave, fight_mirror=fight, prepare_mirror=prepare)

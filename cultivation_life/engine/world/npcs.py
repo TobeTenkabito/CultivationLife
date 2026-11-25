@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 from ...npc_names import person_name
 from ...relationship_records import find_person
 
@@ -25,6 +26,9 @@ from ...system.npc_system import npc_breakthrough_chance, npc_combat_power
 from ...system.race_faction_directory import unformed_factions, adopt_support
 from ...rules import can_practice_technique, expected_combat_power, divine_sense_level
 from ..dependencies import NpcClassDependencies, NpcDependencies
+
+
+FACTION_NAMES = _content_definition(__name__, "FACTION_NAMES")
 
 
 @lru_cache(maxsize=1)
@@ -378,7 +382,7 @@ def _maybe_npc_found_power(deps: NpcDependencies, game: GameState, rng: random.R
     kind = rng.choice(["sect", "family"])
     serial = sum(sect.founded_by_npc for sect in game.sects.values()) + 1
     founder_name = person_name(rng)
-    power_name = (founder_name[0] + "氏仙族") if kind == "family" else rng.choice(["玄岳门", "长风谷", "照夜宫", "问天盟"]) + str(serial)
+    power_name = (founder_name[0] + "氏仙族") if kind == "family" else rng.choice(FACTION_NAMES) + str(serial)
     sect_id = f"npc_{kind}_{game.diplomacy_unit}_{serial}"
     layer = rng.randint(1, REALMS[realm_index].layers)
     age = rng.randint(500, 1200) if realm_cap <= 5 else rng.randint(8000, 30000)

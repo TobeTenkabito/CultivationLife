@@ -1,4 +1,5 @@
 """City-specific zero-year activities with persistent, identity-bound reward caps."""
+from copy import deepcopy
 from ..building_schema import address
 from ..building_rules import config, city_content, describe, ensure_state
 from ..content_registry import REALMS, WORLD_SYSTEMS
@@ -28,10 +29,8 @@ def rank(row):
 
 
 def story(row):
-    return city_content(row).get('story',dict(title='新城的第一张告示',
-        body='新城的商户与住户都希望知道街道、仓栈和静室将如何分区。众人请你把最初的约定写清楚。',
-        choices=[['分清公共道路与各户用地','新告示写清了边界与通行，搬来的人终于知道该如何与邻人相处。'],
-                 ['召集住户共同核对街坊图','几处容易混淆的界线被重新标注。新城的秩序从可查的约定开始，而不是从谁先占住门口开始。']]))
+    content = city_content(row)
+    return content['story'] if 'story' in content else deepcopy(config()['founded_city_story'])
 
 
 def arena_reason(game,row):

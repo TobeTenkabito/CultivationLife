@@ -7,6 +7,15 @@ from .content_paths import default_content_root
 from .errors import ContentError
 
 
+def base_world_system(name):
+    """Read the shipped baseline used to validate overlays, before registry initialization."""
+    path = default_content_root() / "world.json"
+    try:
+        return read_json(path)["systems"][name]
+    except (KeyError, TypeError) as exc:
+        raise ContentError(f"{path}: missing world system {name}") from exc
+
+
 @lru_cache(maxsize=None)
 def _document(path):
     doc = read_json(path)

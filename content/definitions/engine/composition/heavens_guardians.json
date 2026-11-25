@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "GUARDIANS": {
+      "mirror": {"name": "第 {chamber} 处守镜机关", "realm_index": 4, "layer": 1, "path": "dao", "kind": "mechanical", "world": "rift"},
+      "ruins": {"name": "回潮守阵机关", "realm_index": 4, "layer": 1, "path": "dao", "kind": "mechanical", "world": "rift"}
+    },
+    "ENCOUNTER": {"objective": "repel", "enemy_objective": "repel", "natural_terrain": "狭窄", "max_rounds": 12}
+  }
+}

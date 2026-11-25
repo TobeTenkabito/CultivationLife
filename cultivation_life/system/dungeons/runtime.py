@@ -1,4 +1,5 @@
 """Local expedition decisions, evidence and bounded receipts; no offscreen armies."""
+from ...definition_data import definition as _content_definition
 import copy
 from dataclasses import dataclass
 from ...dungeon_schema import empty, decode
@@ -14,6 +15,10 @@ from .ecology import appearance_depth
 from .rewards import grant, learn
 from . import expedition, scenes, topography, formations
 from .companions import carry, separate
+
+
+EPIC_OUTCOMES = _content_definition(__name__, "EPIC_OUTCOMES")
+LEGENDARY_OUTCOMES = _content_definition(__name__, "LEGENDARY_OUTCOMES")
 
 
 @dataclass(frozen=True)
@@ -105,9 +110,10 @@ def invite_tick(game, maps):
     if role is None:return
     role.update(known=True,state='invited')
     site['initiator']=role['id']
+    invitation = _content_definition(__name__, 'INVITATION')
     state['mail'].append(dict(id=site['id']+':invitation',dungeon_id=site['id'],
-        sender=role['name'],sender_id=role['id'],title='邀你同探一处隐境',
-        body=f"我在{maps.location(p.world,p.location_id)['name']}发现一处入口，愿邀道友同行。{role['story']}。内中情形尚待探明。",
+        sender=role['name'],sender_id=role['id'],title=invitation['title'],
+        body=invitation['body'].format(place=maps.location(p.world,p.location_id)['name'], story=role['story']),
         unread=True,status='pending',age=p.age))
 
 
@@ -187,7 +193,7 @@ def background(site):
     if site['depth']<2:
         log(site,f"听说在{rng.choice(('东','西','南','北'))}方有灵力波动，杀气重重，想来是有不得了的人物在交手。",'听说',source='远处传言')
     else:
-        outcome=rng.choice(('重伤退走','丢下阵旗败退','折损数名同门')) if site['quality']=='epic' else rng.choice(('死伤惨重，余众四散','多人陨落，山谷被夷平','护阵尽毁，几乎无人全身而退'))
+        outcome=rng.choice(EPIC_OUTCOMES) if site['quality']=='epic' else rng.choice(LEGENDARY_OUTCOMES)
         log(site,f"据说{label(a)}所代表的一方与{label(b)}一方争夺阵枢，前者{outcome}。",'据说',source='撤离修士转述')
 
 

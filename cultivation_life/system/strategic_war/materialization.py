@@ -1,4 +1,5 @@
 """Finite first encounters with names from the existing faction directory."""
+from ...definition_data import definition as _content_definition
 from ...content_registry import RACE_DEFINITIONS
 from ...models import SectState
 from ..economy.state import ensure_regional_market
@@ -6,6 +7,9 @@ from ..economy.organization_accounts import register, key
 from ..economy.ledger import balance, transfer_value
 from ..race_faction_directory import local_sects, adopt_support
 from .rules import organizations, local_races
+
+
+FACTION_PREFIXES = _content_definition(__name__, "FACTION_PREFIXES")
 
 
 def materialize(deps, game, world, race, rng):
@@ -21,7 +25,7 @@ def materialize(deps, game, world, race, rng):
     if not raw:
         serial = 1 + len(game.strategic_war_state.get('materialized',{}))
         raw = dict(id=f'levy-{world}-{race}-{serial}', world=world,
-                   name=f"{RACE_DEFINITIONS[race]['name']}·{rng.choice(['青崖','栖霞','归云','照夜'])}家族{serial}", kind='family')
+                   name=f"{RACE_DEFINITIONS[race]['name']}·{rng.choice(FACTION_PREFIXES)}家族{serial}", kind='family')
     forbidden = {o.location_id for o in organizations(game, world)
                  if o.founded_by_player or o.id == game.player.faction_id or o is game.family}
     if game.player.world == world:

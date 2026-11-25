@@ -61,12 +61,12 @@ dlc/
 | 包 | 版本 | ID |
 | --- | --- | --- |
 | [瑶池西望：紫气东来](yaochi-westward/README.md) | 1.1.0 | `official.yaochi-westward` |
-| [修罗显圣：无法无天](asura-manifestation/README.md) | 1.6.0 | `official.asura-manifestation` |
-| [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.2.1 | `official.buddhist-dharma` |
-| [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.11.1 | `official.ghost-reincarnation` |
+| [修罗显圣：无法无天](asura-manifestation/README.md) | 1.6.1 | `official.asura-manifestation` |
+| [诸法无我：众生为镜](buddhist-dharma/README.md) | 1.2.2 | `official.buddhist-dharma` |
+| [百鬼夜行：往生轮回](ghost-reincarnation/README.md) | 3.11.2 | `official.ghost-reincarnation` |
 | [归墟之潮：九死一生](guixu-tide/README.md) | 2.7.3 | `official.guixu-tide` |
 | [明争暗斗：合纵连横](intrigue-coalitions/README.md) | 1.5.0 | `official.intrigue-coalitions` |
-| [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.21.0 | `official.monster-bloodlines` |
+| [万妖归宗：血脉进化](monster-bloodlines/README.md) | 4.21.1 | `official.monster-bloodlines` |
 | [万灵争衡：百族兴衰](monster-civilizations/README.md) | 1.0.1 | `official.monster-civilizations` |
 | [圣人之道：内圣外王](sage-way/README.md) | 1.6.1 | `official.sage-way` |
 | [神机百变：巧夺天工](tianji-artifacts/README.md) | 2.2.1 | `official.tianji-artifacts` |

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "FACTION_NAMES": [
+      "玄岳门",
+      "长风谷",
+      "照夜宫",
+      "问天盟"
+    ]
+  }
+}

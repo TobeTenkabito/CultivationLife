@@ -1,6 +1,12 @@
 {
   "schema_version": 1,
   "blueprint_version": 1,
+  "routes": {"guard": "守念", "sever": "断执", "transmute": "化愿"},
+  "breakthrough_stages": {
+    "9": {"title": "辨魂劫", "opponents": ["伪我劫相"]},
+    "10": {"title": "前尘劫", "opponents": ["前尘劫主"]},
+    "11": {"title": "轮回劫", "opponents": ["生相", "灭相"]}
+  },
   "causes": {
     "life_death": "生死",
     "resentment": "怨憎",

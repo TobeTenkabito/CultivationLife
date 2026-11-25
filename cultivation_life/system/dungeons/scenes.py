@@ -1,22 +1,11 @@
 """Finite scene composition and structural variety, frozen at discovery."""
+from ...definition_data import definition as _content_definition
 from collections import Counter
 from . import prose
 
-MECHANISMS = {
-    'seal': ('fractured','resonant','volatile'),
-    'hazard': ('fractured','resonant','volatile'),
-    'core': ('volatile',), 'cache': ('cache',), 'trace': ('trail',),
-    'contact': ('contact',), 'conflict': ('conflict',),
-}
-CLUES = {
-    'fractured': '阵钉已从石座中松脱，灵流经过缺口时分成数股。',
-    'resonant': '阵纹随护身灵光明灭，几道灵流正沿同一节律回旋。',
-    'volatile': '积蓄的灵压冲撞石壁，阵眼深处传来接连的爆鸣。',
-}
-TACTICS = {
-    'disarm': ('fractured', .08, 0., '顺着裂隙拆除阵钉'),
-    'attune': ('resonant', .12, .25, '引导灵流平息阵势'),
-}
+MECHANISMS = _content_definition(__name__, "MECHANISMS")
+CLUES = _content_definition(__name__, "CLUES")
+TACTICS = _content_definition(__name__, "TACTICS")
 
 
 def signature(node, roles):

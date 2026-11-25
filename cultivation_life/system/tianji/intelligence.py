@@ -1,9 +1,13 @@
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 import random
 from typing import Any
 from ...models import GameState, HistoryRecord
 from ...runtime import now_iso
 from .dependencies import TianjiIntelligenceDependencies
+
+
+INTELLIGENCE_FALLBACKS = _content_definition(__name__, "INTELLIGENCE_FALLBACKS")
 
 
 def _tianji_reveal(deps: TianjiIntelligenceDependencies, game: GameState, artifact_id: str, level: int, source: str) -> bool:
@@ -100,13 +104,7 @@ def _maybe_tianji_intelligence_event(
     artifact = rng.choices(candidates, weights=weights, k=1)[0]
     old = int(state["knowledge"].get(artifact["id"], 0))
     new = min(max_level, old + 1)
-    fallback_sources = {
-        1: ("残卷露名", "你在一卷残破游记的夹层里发现了器名与模糊形制。"),
-        2: ("斗痕辨器", "一处古战场残留的器痕，与坊间密谈相互印证。"),
-        3: ("器纹拓影", "流散黑市的器纹拓片补全了关键材料方向。"),
-        4: ("真方残页", "一页被多重禁制封存的古方，显出了完整材料次序。"),
-        5: ("天机落点", "跨界行商与古阵星图的数处记录，终于指向同一条踪迹。"),
-    }
+    fallback_sources = INTELLIGENCE_FALLBACKS
     event_pool = settings.get("event_pool", {}).get(str(new), [])
     source = rng.choice(event_pool) if event_pool else None
     title, body = (

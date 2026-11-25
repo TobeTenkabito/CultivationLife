@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "LEADER_SURNAMES": [
+      "沈",
+      "陆",
+      "宁",
+      "虞"
+    ],
+    "LEADER_GIVEN_NAMES": [
+      "望舒",
+      "玄衡",
+      "听澜",
+      "怀璧"
+    ],
+    "WORKER_SURNAMES": [
+      "许",
+      "苏",
+      "秦"
+    ],
+    "WORKER_GIVEN_NAMES": [
+      "青川",
+      "知微",
+      "照月"
+    ]
+  }
+}

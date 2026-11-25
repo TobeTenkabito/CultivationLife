@@ -1,4 +1,5 @@
 """Ordered, once-only teaching actions. No annual hook or random event overrides."""
+from ..definition_data import definition as _content_definition
 from copy import deepcopy
 import random
 
@@ -79,10 +80,8 @@ def public_guide(game):
     choices = admissions(game) if active and STEPS[index] == 'join' else []
     event = None
     if active and STEPS[index] == 'mentor_choice' and npc and not mentor_reason:
-        event = {'id':'SYS_TUTORIAL_GUIDED_MENTOR', 'title':'山道授业 · 新手师缘',
-                 'body':f'{MENTOR["realm_label"]}修士{npc.name}愿引你入门。执弟子礼必定建立师徒关系；谢绝不损声望。此次不消耗年月或灵石。',
-                 'choices':[{'id':'guide_accept', 'text':'执弟子礼，拜入门下', 'enabled':True},
-                            {'id':'guide_decline', 'text':'谢过好意，自行问道', 'enabled':True}]}
+        event = _content_definition(__name__, "MENTOR_OFFER")
+        event['body'] = event['body'].format(realm=MENTOR['realm_label'], name=npc.name)
     return {'active':active, 'index':index, 'step':STEPS[index], 'total':len(STEPS),
             'completed':bool(state.get('guide_completed')), 'blocked':reason,
             'beginner':beginner(game), 'practice_gain':5 if beginner(game) and game.player.spirit_root != 'none' else 0,

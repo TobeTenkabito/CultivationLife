@@ -13,10 +13,13 @@ from .prose_expansion import NAMES as EXTRA_NAMES
 
 
 
-THEMES = {'water':'沧溟','mountain':'山岳','fire':'离火','frost':'霜雪',
-          'fort':'镇封','shadow':'寂灭','grove':'青木','ruins':'玄文'}
+THEMES = _content_definition(__name__, "THEMES")
 
 RELIC_FORMS = _content_definition(__name__, "RELIC_FORMS")
+
+
+UNIFIED_BOOK_NAMES = _content_definition(__name__, "UNIFIED_BOOK_NAMES")
+BOOK_SUFFIXES = _content_definition(__name__, "BOOK_SUFFIXES")
 
 
 @lru_cache(maxsize=144)
@@ -182,7 +185,7 @@ def recipe(rng, identity, realm, path, theme, quality, core=False,world=None):
         hp = max(float(t.hp_bonus) for t in candidates)
         mp = max(float(t.mp_bonus) for t in candidates)
         opportunity = max(float(t.opportunity_bonus) for t in candidates)
-        book = dict(id=key,name=name+(rng.choice(('归一真典','合元宝录','一炁真解','圆融道藏')) if fused else rng.choice(('秘经','真解','心诀','道书','玄章','宝录','灵枢篇','玉箓'))),path=path,grade=realm,level=1,
+        book = dict(id=key,name=name+(rng.choice(UNIFIED_BOOK_NAMES) if fused else rng.choice(BOOK_SUFFIXES)),path=path,grade=realm,level=1,
                     element='neutral',growth_preference='balanced',force_tier=2 if realm>=9 else 1,
                     combat_bonus=round(amount,3),hp_bonus=round(hp*factor,3),
                     mp_bonus=round(mp*factor,3),opportunity_bonus=round(opportunity*factor,3),

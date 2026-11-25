@@ -72,6 +72,10 @@ class CalendarGame:
     def __getattr__(self, name):
         return getattr(self._game, name)
 
+    def next_npc_birth(self, origin):
+        # Catch-up may interleave independent regions in a different order.
+        return self._game.next_npc_birth(f'region/{self._region_world}/{origin}')
+
     def __setattr__(self, name, value):
         setattr(self._game, name, value)
 

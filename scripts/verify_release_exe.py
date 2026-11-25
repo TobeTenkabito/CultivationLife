@@ -42,7 +42,7 @@ def verify(with_dlc):
             else:
                 raise AssertionError("Packaged server did not start")
             assert config["base_game"]["version"] == VERSION
-            if '--society' in sys.argv:
+            if '--society' in sys.argv or '--traits' in sys.argv:
                 assert bool(config['extensions']) == with_dlc and all(e['status']=='loaded' for e in config['extensions'])
                 def submit(endpoint, **payload):
                     req = urllib.request.Request(base+'/api/games'+endpoint, data=json.dumps(payload).encode(),
@@ -50,6 +50,12 @@ def verify(with_dlc):
                     with urllib.request.urlopen(req, timeout=90) as reply:
                         return json.load(reply)
                 player = submit('', name='故人回书', spirit_root='heavenly', path='dao', preset_id='core', seed=342)
+                trait_verified = '--traits' in sys.argv
+                if trait_verified:
+                    repeat = submit('', name='同种再修', spirit_root='heavenly', path='dao', preset_id='core', seed=342)
+                    assert isinstance(player['player']['traits'], list)
+                    assert player['player']['traits'] == repeat['player']['traits']
+                    assert 'traits' in player['player']['attribute_setup']
                 sent = submit('/'+player['id']+'/dungeon-action', action='ask_location', actor_id='xiang_zhili',
                               world='human', expected_age=player['player']['age'])
                 letter = sent['dungeons']['mail'][-1]
@@ -66,7 +72,7 @@ def verify(with_dlc):
                                  sect_vote=None, command_seq=seq, command_id='council-'+str(seq))
                 assert meeting['race_system']['races'][race['player_race']]['council']['recent'][-1]['ballots']
                 print(f'EXE society checks passed: DLC={with_dlc}',flush=True)
-                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,society_verified=True)
+                return dict(with_dlc=with_dlc,exe_sha256=verified_digest,base_version=VERSION,society_verified=True,trait_verified=trait_verified)
             if '--dungeon-art' in sys.argv:
                 from scripts.verify_dungeon_exe import verify_dungeons
                 from scripts.verify_update301_exe import verify_update301

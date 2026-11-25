@@ -160,6 +160,8 @@ def main():
         receipt['scope']='Signed Android 12 portrait/landscape: touch map entry and inspection, terrain art and four character asset sets'
         if all('society_mail_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in logs):
             receipt['scope'] += ', mailbox inquiry and reading the dated reply'
+        if all('trait_scope' in (ROOT/name).read_text(encoding='utf-8-sig') for name in logs):
+            receipt['scope'] += ', character trait panel and attribute setup'
     if bugfix:receipt['scope']='Original descent/return, lifespan, remaining work, economic trust, native imprisonment, production/supply, fixed-site guard and seven inheritance branches; four orientation phases'
     if naming:receipt['scope']='Content naming and legacy identity preservation, actual native upgrade and item use, idle coalition dispatch/hold/recall; four themes and four orientation phases'
     if body_ui:receipt['scope']=f'{BASE_GAME_VERSION} native school peer commands/cooldown/menu/replay plus NPC body/technique/domain cultivation, controlled portraits, energy and upper-world guides, two pixel palettes; signed Android 12 portrait/landscape'

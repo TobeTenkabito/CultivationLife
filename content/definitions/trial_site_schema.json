@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "SUBJECTS": {
+      "$tuple": [
+        "炉纹",
+        "灵泉",
+        "灯座",
+        "古碑",
+        "石匣",
+        "遗圃"
+      ]
+    }
+  }
+}

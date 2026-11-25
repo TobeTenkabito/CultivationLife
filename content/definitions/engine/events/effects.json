@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "SECT_DEFENSE_OPPONENT": {
+      "target_name": "来犯山门的敌修", "combat_type": "cultivator", "action": "repel", "enemy_objective": "break_formation"
+    },
+    "FACTION_WAR_OPPONENT": {
+      "target_name": "敌宗会战修士", "combat_type": "cultivator", "objective": "repel", "enemy_objective": "repel",
+      "max_rounds": 5, "non_story_combat": true
+    }
+  }
+}

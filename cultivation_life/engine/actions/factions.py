@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ...definition_data import definition as _content_definition
 
 from ...race_diplomacy import relations_for
 
@@ -16,6 +17,9 @@ from ...runtime import decode_rng, encode_rng, now_iso
 from ...world_state import race_pair
 from ..dependencies import FactionActionDependencies
 from ...system.faction_geography import can_enter_faction, require_faction_admission
+
+
+MEMBER_NAMES = _content_definition(__name__, "MEMBER_NAMES")
 
 
 def create_faction(deps: FactionActionDependencies, game_id: str, name: str) -> dict[str, Any]:
@@ -44,7 +48,7 @@ def create_faction(deps: FactionActionDependencies, game_id: str, name: str) -> 
         layer = 1 if realm_index == 0 else rng.randint(1, min(REALMS[realm_index].layers, 3))
         age, lifespan = deps._roll_recruit_age_lifespan(realm_index, path, rng, young=True)
         npc = SectNpc(
-            f"{sect_id}_founder_{index}", rng.choice(["沈砚", "叶舟", "顾青", "陆遥", "白川", "楚宁"]),
+            f"{sect_id}_founder_{index}", rng.choice(MEMBER_NAMES),
             "开山门人", realm_index, layer, age, lifespan,
             spirit_root=deps._random_npc_root(realm_index, rng) if realm_index else "none",
             path=path, race=player.race, world=player.world, affinity=rng.uniform(28, 48),

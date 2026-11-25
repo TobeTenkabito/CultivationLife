@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ..definition_data import definition as _content_definition
 
 from .ghost.progression import (
     grant_intrinsic_growth as grant_intrinsic_growth,
@@ -64,6 +65,10 @@ from .character.dependencies import (
     GhostStateDependencies,
 )
 
+SOUL_SURNAMES = _content_definition(__name__, "SOUL_SURNAMES")
+SOUL_GIVEN_NAMES = _content_definition(__name__, "SOUL_GIVEN_NAMES")
+
+
 def assert_ghost_operation_allowed(deps: GhostActionsDependencies, game_id: str, operation: str) -> None:
     """Enforce the controlled-state boundary at the HTTP command gateway."""
     game = deps._load(game_id)
@@ -108,8 +113,8 @@ def _ensure_ghost_parade(deps: GhostStateDependencies, game: GameState, rng: ran
 def _generate_parade_souls(game: GameState, rng: random.Random, *, realm_index=None) -> list[dict[str, Any]]:
     from ..rules import expected_combat_power
 
-    surnames = "沈顾谢陆萧楚苏宁白叶"
-    given = ("无咎", "照夜", "忘川", "玄衣", "引灯", "归尘", "青冥", "幽篁")
+    surnames = SOUL_SURNAMES
+    given = SOUL_GIVEN_NAMES
     count = max(3, int(ghost_phase_two_config().get("parade", {}).get("soul_count", 6)))
     souls = []
     base_realm = game.player.realm_index if realm_index is None else realm_index

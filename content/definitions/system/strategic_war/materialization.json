@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "FACTION_PREFIXES": [
+      "青崖",
+      "栖霞",
+      "归云",
+      "照夜"
+    ]
+  }
+}

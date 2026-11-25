@@ -5,9 +5,6 @@ import hashlib
 from ..content_registry import CONTENT_DOCUMENTS, WORLD_SYSTEMS
 from .possession_system import is_possessed
 
-ROUTES = {'guard': '守念', 'sever': '断执', 'transmute': '化愿'}
-
-
 def catalog():
     return CONTENT_DOCUMENTS.get('ghost_soul_forms.json', {}) if WORLD_SYSTEMS.get('ghost_cultivation', {}).get('enabled') else {}
 
@@ -84,7 +81,7 @@ def evidence(game):
 def public(player, game=None):
     if not catalog() or player.path != 'ghost':
         return None
-    result = dict(title='照魂归真', reason=None, blueprint=copy.deepcopy(stored(player)), routes=ROUTES,
+    result = dict(title='照魂归真', reason=None, blueprint=copy.deepcopy(stored(player)), routes=catalog()['routes'],
                   causes=catalog()['causes'], forms=catalog()['forms'], evidence=evidence(game) if game else [], level=0)
     result['contemplation'] = copy.deepcopy(player.world_voisinages.get('reincarnation', {}).get('contemplation'))
     try:
@@ -109,7 +106,7 @@ def confirm(game, cause, route):
                 evidence_refs=[e['ref'] for e in evidence(game)])
     data['blueprint_id'] = identity(data)
     p.world_voisinages.setdefault('reincarnation', {})['ghost_soul_form'] = data
-    return f'沿{ROUTES[route]}凝定【{row["name"]}】。蓝图永久确认；领悟仍需正常付费，不赠送元力。'
+    return f'沿{catalog()["routes"][route]}凝定【{row["name"]}】。蓝图永久确认；领悟仍需正常付费，不赠送元力。'
 
 
 def configure(player, action, choice):

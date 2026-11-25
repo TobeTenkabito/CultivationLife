@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "ESCAPE_ROUTES": {
+      "$tuple": [
+        "东侧暗渠",
+        "西侧栈道",
+        "北面夹道"
+      ]
+    }
+  }
+}

@@ -40,22 +40,24 @@ def start(deps: AsuraTrialDependencies, game, kind, *, bodies=None, route=None):
 def initialize(game):
     p, trial = game.player, game.active_trial
     fusion = trial['kind'] == 'asura_fusion'
-    specs = [(b['name'], b['power'] / trial['power'], False) for b in trial['bodies']] if fusion else {
-        9: [('心魔', 1., False)],
-        10: [('心魔', 1., True), ('域外天魔', .8, False)],
-        11: [('心魔', 1.5, True), ('域外天魔', 1., True)],
-    }[p.realm_index]
-    copy_cap,copy_scale=8,1.
-    if not fusion:
-        ratios,copy_cap,copy_scale=trial_pressure(asura.config().get('breakthrough_trials',{}),p.realm_index,
-                                               tuple(ratio for _,ratio,_ in specs))
-        specs=[(name,ratio,field) for (name,_,field),ratio in zip(specs,ratios)]
-    members = [dict(name=name, power=trial['power'] * ratio, realm_index=p.realm_index, layer=p.layer,
-                    path=p.path, kind='environment') for name, ratio, field in specs]
-    if not fusion:
-        for index, member in enumerate(members):
-            member['visual_variant'] = 'heart_demon' if index == 0 else 'heavenly_demon'
-    target = dict(target_name='凝练肉身' if fusion else '心魔天魔劫', target_power=sum(b['power'] for b in members),
+    config = asura.config()
+    encounters = config['trial_encounters']
+    if fusion:
+        specs = trial['bodies']
+        ratios = [body['power'] / trial['power'] for body in specs]
+        copy_cap, copy_scale = 8, 1.
+    else:
+        specs = encounters['opponents'][str(p.realm_index)]
+        ratios, copy_cap, copy_scale = trial_pressure(config.get('breakthrough_trials', {}), p.realm_index,
+                                                     tuple(row['ratio'] for row in specs))
+    members = []
+    for row, ratio in zip(specs, ratios):
+        member = dict(name=row['name'], power=trial['power'] * ratio, realm_index=p.realm_index,
+                      layer=p.layer, path=p.path, kind='environment')
+        if not fusion:
+            member['visual_variant'] = row['visual_variant']
+        members.append(member)
+    target = dict(target_name=encounters['fusion_title' if fusion else 'breakthrough_title'], target_power=sum(b['power'] for b in members),
         target_realm_index=p.realm_index, target_layer=p.layer, combat_type='trial',
         objective='capture' if fusion else 'kill', enemy_objective='kill', members=members)
     units = [BattleUnit('player', p.name, 'player', trial['power'], p.realm_index, p.path,
@@ -72,7 +74,7 @@ def initialize(game):
         actor = state.unit
         if actor.side == 'enemy':
             index = int(key.split('-')[-1])
-            has_field = specs[index][2]
+            has_field = not fusion and specs[index]['copy_field']
             if fusion:
                 body = trial['bodies'][index]
                 from ...system.divine_lights import profile
@@ -102,7 +104,7 @@ def initialize(game):
     if not fusion:
         # Snapshot all six actual ordinary attributes, including the player's
         # existing cultivation, and scale every opponent by the declared ratio.
-        total_ratio = sum(ratio for _, ratio, _ in specs)
+        total_ratio = sum(ratios)
         stats['enemy'] = {k: v * total_ratio for k, v in stats['player'].items()}
     from ...system.technique_secret_rules import trial_stats
     trial_stats(p,stats['player'],major=not fusion)

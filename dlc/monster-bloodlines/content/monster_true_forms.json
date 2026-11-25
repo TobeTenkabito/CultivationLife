@@ -1,6 +1,11 @@
 {
   "schema_version": 1,
   "blueprint_version": 1,
+  "breakthrough_stages": {
+    "9": {"title": "蜕形劫", "opponents": ["血脉劫相"]},
+    "10": {"title": "祖性劫", "opponents": ["祖性劫相"], "self_lineage_opponents": ["新脉劫相"]},
+    "11": {"title": "万象劫", "opponents": ["本相劫身", "万象劫主"]}
+  },
   "forms": {
     "serpent": {
       "name": "蟠天锁相",
