@@ -1,0 +1,625 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "BLOODLINE_RULE_EFFECTS": {
+      "self_might_minor": {
+        "name": "威能滋长",
+        "description": "本轮自身威能提高6%",
+        "family": "self_stat:might",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "might",
+        "value": 0.06
+      },
+      "self_might_major": {
+        "name": "威能滋长",
+        "description": "本轮自身威能提高10%",
+        "family": "self_stat:might",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "might",
+        "value": 0.1
+      },
+      "self_guard_minor": {
+        "name": "防护滋长",
+        "description": "本轮自身防护提高6%",
+        "family": "self_stat:guard",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "guard",
+        "value": 0.06
+      },
+      "self_guard_major": {
+        "name": "防护滋长",
+        "description": "本轮自身防护提高10%",
+        "family": "self_stat:guard",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "guard",
+        "value": 0.1
+      },
+      "self_mobility_minor": {
+        "name": "身法滋长",
+        "description": "本轮自身身法提高6%",
+        "family": "self_stat:mobility",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "mobility",
+        "value": 0.06
+      },
+      "self_mobility_major": {
+        "name": "身法滋长",
+        "description": "本轮自身身法提高10%",
+        "family": "self_stat:mobility",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "mobility",
+        "value": 0.1
+      },
+      "self_sense_minor": {
+        "name": "神识滋长",
+        "description": "本轮自身神识提高6%",
+        "family": "self_stat:sense",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "sense",
+        "value": 0.06
+      },
+      "self_sense_major": {
+        "name": "神识滋长",
+        "description": "本轮自身神识提高10%",
+        "family": "self_stat:sense",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "sense",
+        "value": 0.1
+      },
+      "self_sustain_minor": {
+        "name": "续航滋长",
+        "description": "本轮自身续航提高6%",
+        "family": "self_stat:sustain",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "sustain",
+        "value": 0.06
+      },
+      "self_sustain_major": {
+        "name": "续航滋长",
+        "description": "本轮自身续航提高10%",
+        "family": "self_stat:sustain",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "sustain",
+        "value": 0.1
+      },
+      "self_breach_minor": {
+        "name": "破法滋长",
+        "description": "本轮自身破法提高6%",
+        "family": "self_stat:breach",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "breach",
+        "value": 0.06
+      },
+      "self_breach_major": {
+        "name": "破法滋长",
+        "description": "本轮自身破法提高10%",
+        "family": "self_stat:breach",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "breach",
+        "value": 0.1
+      },
+      "enemy_might_minor": {
+        "name": "威能侵蚀",
+        "description": "本轮敌方威能降低5%",
+        "family": "enemy_stat:might",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "might",
+        "value": 0.05
+      },
+      "enemy_might_major": {
+        "name": "威能侵蚀",
+        "description": "本轮敌方威能降低8%",
+        "family": "enemy_stat:might",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "might",
+        "value": 0.08
+      },
+      "enemy_guard_minor": {
+        "name": "防护侵蚀",
+        "description": "本轮敌方防护降低5%",
+        "family": "enemy_stat:guard",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "guard",
+        "value": 0.05
+      },
+      "enemy_guard_major": {
+        "name": "防护侵蚀",
+        "description": "本轮敌方防护降低8%",
+        "family": "enemy_stat:guard",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "guard",
+        "value": 0.08
+      },
+      "enemy_mobility_minor": {
+        "name": "身法侵蚀",
+        "description": "本轮敌方身法降低5%",
+        "family": "enemy_stat:mobility",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "mobility",
+        "value": 0.05
+      },
+      "enemy_mobility_major": {
+        "name": "身法侵蚀",
+        "description": "本轮敌方身法降低8%",
+        "family": "enemy_stat:mobility",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "mobility",
+        "value": 0.08
+      },
+      "enemy_sense_minor": {
+        "name": "神识侵蚀",
+        "description": "本轮敌方神识降低5%",
+        "family": "enemy_stat:sense",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "sense",
+        "value": 0.05
+      },
+      "enemy_sense_major": {
+        "name": "神识侵蚀",
+        "description": "本轮敌方神识降低8%",
+        "family": "enemy_stat:sense",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "sense",
+        "value": 0.08
+      },
+      "enemy_sustain_minor": {
+        "name": "续航侵蚀",
+        "description": "本轮敌方续航降低5%",
+        "family": "enemy_stat:sustain",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "sustain",
+        "value": 0.05
+      },
+      "enemy_sustain_major": {
+        "name": "续航侵蚀",
+        "description": "本轮敌方续航降低8%",
+        "family": "enemy_stat:sustain",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "sustain",
+        "value": 0.08
+      },
+      "enemy_breach_minor": {
+        "name": "破法侵蚀",
+        "description": "本轮敌方破法降低5%",
+        "family": "enemy_stat:breach",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 6.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "breach",
+        "value": 0.05
+      },
+      "enemy_breach_major": {
+        "name": "破法侵蚀",
+        "description": "本轮敌方破法降低8%",
+        "family": "enemy_stat:breach",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 10.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "breach",
+        "value": 0.08
+      },
+      "damage_up_08": {
+        "name": "猎伤",
+        "description": "本轮造成的态势损耗提高8%",
+        "family": "damage_up",
+        "triggers": {
+          "$tuple": [
+            "initiative_resolved",
+            "before_damage"
+          ]
+        },
+        "power": 7.0,
+        "kind": "damage_multiplier",
+        "target": "enemy",
+        "value": 0.08
+      },
+      "damage_up_12": {
+        "name": "猎杀",
+        "description": "本轮造成的态势损耗提高12%",
+        "family": "damage_up",
+        "triggers": {
+          "$tuple": [
+            "initiative_resolved",
+            "before_damage"
+          ]
+        },
+        "power": 10.5,
+        "kind": "damage_multiplier",
+        "target": "enemy",
+        "value": 0.12
+      },
+      "damage_down_08": {
+        "name": "卸力",
+        "description": "本轮受到的态势损耗降低8%",
+        "family": "damage_down",
+        "triggers": {
+          "$tuple": [
+            "initiative_resolved",
+            "before_damage"
+          ]
+        },
+        "power": 7.5,
+        "kind": "damage_multiplier",
+        "target": "player",
+        "value": 0.08
+      },
+      "damage_down_12": {
+        "name": "护生",
+        "description": "本轮受到的态势损耗降低12%",
+        "family": "damage_down",
+        "triggers": {
+          "$tuple": [
+            "initiative_resolved",
+            "before_damage"
+          ]
+        },
+        "power": 11.0,
+        "kind": "damage_multiplier",
+        "target": "player",
+        "value": 0.12
+      },
+      "damage_cap_28": {
+        "name": "分震",
+        "description": "使本轮战斗态势损失不超过28%",
+        "family": "damage_cap",
+        "triggers": {
+          "$tuple": [
+            "before_damage"
+          ]
+        },
+        "power": 9.0,
+        "kind": "damage_cap",
+        "target": "player",
+        "value": 0.28
+      },
+      "damage_cap_24": {
+        "name": "锁命",
+        "description": "使本轮战斗态势损失不超过24%",
+        "family": "damage_cap",
+        "triggers": {
+          "$tuple": [
+            "before_damage"
+          ]
+        },
+        "power": 13.0,
+        "kind": "damage_cap",
+        "target": "player",
+        "value": 0.24
+      },
+      "reclaim_15": {
+        "name": "回元",
+        "description": "回收本轮态势损失的15%，每轮最多恢复3%",
+        "family": "reclaim",
+        "triggers": {
+          "$tuple": [
+            "after_damage"
+          ]
+        },
+        "power": 8.0,
+        "kind": "reclaim_loss",
+        "target": "player",
+        "value": 0.15,
+        "cap": 0.03
+      },
+      "reclaim_20": {
+        "name": "返生",
+        "description": "回收本轮态势损失的20%，每轮最多恢复4%",
+        "family": "reclaim",
+        "triggers": {
+          "$tuple": [
+            "after_damage"
+          ]
+        },
+        "power": 11.5,
+        "kind": "reclaim_loss",
+        "target": "player",
+        "value": 0.2,
+        "cap": 0.04
+      },
+      "restore_state_02": {
+        "name": "养命",
+        "description": "恢复2%最大战斗态势",
+        "family": "state_restore",
+        "triggers": {
+          "$tuple": [
+            "round_end"
+          ]
+        },
+        "power": 7.0,
+        "kind": "restore_state",
+        "target": "player",
+        "value": 0.02
+      },
+      "restore_state_03": {
+        "name": "生息",
+        "description": "恢复3%最大战斗态势",
+        "family": "state_restore",
+        "triggers": {
+          "$tuple": [
+            "round_end"
+          ]
+        },
+        "power": 10.5,
+        "kind": "restore_state",
+        "target": "player",
+        "value": 0.03
+      },
+      "restore_mp_02": {
+        "name": "回气",
+        "description": "恢复2%最大法力",
+        "family": "mp_restore",
+        "triggers": {
+          "$tuple": [
+            "round_end"
+          ]
+        },
+        "power": 4.5,
+        "kind": "restore_mp",
+        "target": "player",
+        "value": 0.02
+      },
+      "restore_mp_03": {
+        "name": "纳灵",
+        "description": "恢复3%最大法力",
+        "family": "mp_restore",
+        "triggers": {
+          "$tuple": [
+            "round_end"
+          ]
+        },
+        "power": 6.5,
+        "kind": "restore_mp",
+        "target": "player",
+        "value": 0.03
+      },
+      "morale_self_4": {
+        "name": "定魄",
+        "description": "恢复4点己方战意",
+        "family": "self_morale",
+        "triggers": {
+          "$tuple": [
+            "after_damage",
+            "round_end"
+          ]
+        },
+        "power": 4.0,
+        "kind": "modify_morale",
+        "target": "player",
+        "value": 4.0
+      },
+      "morale_self_6": {
+        "name": "不屈",
+        "description": "恢复6点己方战意",
+        "family": "self_morale",
+        "triggers": {
+          "$tuple": [
+            "after_damage",
+            "round_end"
+          ]
+        },
+        "power": 6.0,
+        "kind": "modify_morale",
+        "target": "player",
+        "value": 6.0
+      },
+      "morale_enemy_4": {
+        "name": "惊魂",
+        "description": "额外削弱敌方4点战意",
+        "family": "enemy_morale",
+        "triggers": {
+          "$tuple": [
+            "after_damage",
+            "round_end"
+          ]
+        },
+        "power": 4.0,
+        "kind": "modify_morale",
+        "target": "enemy",
+        "value": 4.0
+      },
+      "morale_enemy_6": {
+        "name": "慑魄",
+        "description": "额外削弱敌方6点战意",
+        "family": "enemy_morale",
+        "triggers": {
+          "$tuple": [
+            "after_damage",
+            "round_end"
+          ]
+        },
+        "power": 6.0,
+        "kind": "modify_morale",
+        "target": "enemy",
+        "value": 6.0
+      }
+    }
+  }
+}

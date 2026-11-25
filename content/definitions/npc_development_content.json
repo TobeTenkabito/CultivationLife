@@ -1,0 +1,667 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "MATERIALS": {
+      "npc_training_dao_cultivation_1": {
+        "id": "npc_training_dao_cultivation_1",
+        "path": "dao",
+        "axis": "cultivation",
+        "tier": 1,
+        "name": "凡品养元丹",
+        "price": 1
+      },
+      "npc_training_dao_cultivation_2": {
+        "id": "npc_training_dao_cultivation_2",
+        "path": "dao",
+        "axis": "cultivation",
+        "tier": 2,
+        "name": "灵品养元丹",
+        "price": 4
+      },
+      "npc_training_dao_cultivation_3": {
+        "id": "npc_training_dao_cultivation_3",
+        "path": "dao",
+        "axis": "cultivation",
+        "tier": 3,
+        "name": "上境养元丹",
+        "price": 12
+      },
+      "npc_training_dao_body_1": {
+        "id": "npc_training_dao_body_1",
+        "path": "dao",
+        "axis": "body",
+        "tier": 1,
+        "name": "凡品淬玉髓",
+        "price": 1
+      },
+      "npc_training_dao_body_2": {
+        "id": "npc_training_dao_body_2",
+        "path": "dao",
+        "axis": "body",
+        "tier": 2,
+        "name": "灵品淬玉髓",
+        "price": 4
+      },
+      "npc_training_dao_body_3": {
+        "id": "npc_training_dao_body_3",
+        "path": "dao",
+        "axis": "body",
+        "tier": 3,
+        "name": "上境淬玉髓",
+        "price": 12
+      },
+      "npc_training_dao_sense_1": {
+        "id": "npc_training_dao_sense_1",
+        "path": "dao",
+        "axis": "sense",
+        "tier": 1,
+        "name": "凡品明神砂",
+        "price": 1
+      },
+      "npc_training_dao_sense_2": {
+        "id": "npc_training_dao_sense_2",
+        "path": "dao",
+        "axis": "sense",
+        "tier": 2,
+        "name": "灵品明神砂",
+        "price": 4
+      },
+      "npc_training_dao_sense_3": {
+        "id": "npc_training_dao_sense_3",
+        "path": "dao",
+        "axis": "sense",
+        "tier": 3,
+        "name": "上境明神砂",
+        "price": 12
+      },
+      "npc_training_demonic_cultivation_1": {
+        "id": "npc_training_demonic_cultivation_1",
+        "path": "demonic",
+        "axis": "cultivation",
+        "tier": 1,
+        "name": "凡品凝煞丹",
+        "price": 1
+      },
+      "npc_training_demonic_cultivation_2": {
+        "id": "npc_training_demonic_cultivation_2",
+        "path": "demonic",
+        "axis": "cultivation",
+        "tier": 2,
+        "name": "灵品凝煞丹",
+        "price": 4
+      },
+      "npc_training_demonic_cultivation_3": {
+        "id": "npc_training_demonic_cultivation_3",
+        "path": "demonic",
+        "axis": "cultivation",
+        "tier": 3,
+        "name": "上境凝煞丹",
+        "price": 12
+      },
+      "npc_training_demonic_body_1": {
+        "id": "npc_training_demonic_body_1",
+        "path": "demonic",
+        "axis": "body",
+        "tier": 1,
+        "name": "凡品炼煞髓",
+        "price": 1
+      },
+      "npc_training_demonic_body_2": {
+        "id": "npc_training_demonic_body_2",
+        "path": "demonic",
+        "axis": "body",
+        "tier": 2,
+        "name": "灵品炼煞髓",
+        "price": 4
+      },
+      "npc_training_demonic_body_3": {
+        "id": "npc_training_demonic_body_3",
+        "path": "demonic",
+        "axis": "body",
+        "tier": 3,
+        "name": "上境炼煞髓",
+        "price": 12
+      },
+      "npc_training_demonic_sense_1": {
+        "id": "npc_training_demonic_sense_1",
+        "path": "demonic",
+        "axis": "sense",
+        "tier": 1,
+        "name": "凡品镇念晶",
+        "price": 1
+      },
+      "npc_training_demonic_sense_2": {
+        "id": "npc_training_demonic_sense_2",
+        "path": "demonic",
+        "axis": "sense",
+        "tier": 2,
+        "name": "灵品镇念晶",
+        "price": 4
+      },
+      "npc_training_demonic_sense_3": {
+        "id": "npc_training_demonic_sense_3",
+        "path": "demonic",
+        "axis": "sense",
+        "tier": 3,
+        "name": "上境镇念晶",
+        "price": 12
+      },
+      "npc_training_monster_cultivation_1": {
+        "id": "npc_training_monster_cultivation_1",
+        "path": "monster",
+        "axis": "cultivation",
+        "tier": 1,
+        "name": "凡品血蕴丹",
+        "price": 1
+      },
+      "npc_training_monster_cultivation_2": {
+        "id": "npc_training_monster_cultivation_2",
+        "path": "monster",
+        "axis": "cultivation",
+        "tier": 2,
+        "name": "灵品血蕴丹",
+        "price": 4
+      },
+      "npc_training_monster_cultivation_3": {
+        "id": "npc_training_monster_cultivation_3",
+        "path": "monster",
+        "axis": "cultivation",
+        "tier": 3,
+        "name": "上境血蕴丹",
+        "price": 12
+      },
+      "npc_training_monster_body_1": {
+        "id": "npc_training_monster_body_1",
+        "path": "monster",
+        "axis": "body",
+        "tier": 1,
+        "name": "凡品百骸髓",
+        "price": 1
+      },
+      "npc_training_monster_body_2": {
+        "id": "npc_training_monster_body_2",
+        "path": "monster",
+        "axis": "body",
+        "tier": 2,
+        "name": "灵品百骸髓",
+        "price": 4
+      },
+      "npc_training_monster_body_3": {
+        "id": "npc_training_monster_body_3",
+        "path": "monster",
+        "axis": "body",
+        "tier": 3,
+        "name": "上境百骸髓",
+        "price": 12
+      },
+      "npc_training_monster_sense_1": {
+        "id": "npc_training_monster_sense_1",
+        "path": "monster",
+        "axis": "sense",
+        "tier": 1,
+        "name": "凡品灵慧露",
+        "price": 1
+      },
+      "npc_training_monster_sense_2": {
+        "id": "npc_training_monster_sense_2",
+        "path": "monster",
+        "axis": "sense",
+        "tier": 2,
+        "name": "灵品灵慧露",
+        "price": 4
+      },
+      "npc_training_monster_sense_3": {
+        "id": "npc_training_monster_sense_3",
+        "path": "monster",
+        "axis": "sense",
+        "tier": 3,
+        "name": "上境灵慧露",
+        "price": 12
+      },
+      "npc_training_ghost_cultivation_1": {
+        "id": "npc_training_ghost_cultivation_1",
+        "path": "ghost",
+        "axis": "cultivation",
+        "tier": 1,
+        "name": "凡品养魄丹",
+        "price": 1
+      },
+      "npc_training_ghost_cultivation_2": {
+        "id": "npc_training_ghost_cultivation_2",
+        "path": "ghost",
+        "axis": "cultivation",
+        "tier": 2,
+        "name": "灵品养魄丹",
+        "price": 4
+      },
+      "npc_training_ghost_cultivation_3": {
+        "id": "npc_training_ghost_cultivation_3",
+        "path": "ghost",
+        "axis": "cultivation",
+        "tier": 3,
+        "name": "上境养魄丹",
+        "price": 12
+      },
+      "npc_training_ghost_body_1": {
+        "id": "npc_training_ghost_body_1",
+        "path": "ghost",
+        "axis": "body",
+        "tier": 1,
+        "name": "凡品冥骨髓",
+        "price": 1
+      },
+      "npc_training_ghost_body_2": {
+        "id": "npc_training_ghost_body_2",
+        "path": "ghost",
+        "axis": "body",
+        "tier": 2,
+        "name": "灵品冥骨髓",
+        "price": 4
+      },
+      "npc_training_ghost_body_3": {
+        "id": "npc_training_ghost_body_3",
+        "path": "ghost",
+        "axis": "body",
+        "tier": 3,
+        "name": "上境冥骨髓",
+        "price": 12
+      },
+      "npc_training_ghost_sense_1": {
+        "id": "npc_training_ghost_sense_1",
+        "path": "ghost",
+        "axis": "sense",
+        "tier": 1,
+        "name": "凡品澄魂砂",
+        "price": 1
+      },
+      "npc_training_ghost_sense_2": {
+        "id": "npc_training_ghost_sense_2",
+        "path": "ghost",
+        "axis": "sense",
+        "tier": 2,
+        "name": "灵品澄魂砂",
+        "price": 4
+      },
+      "npc_training_ghost_sense_3": {
+        "id": "npc_training_ghost_sense_3",
+        "path": "ghost",
+        "axis": "sense",
+        "tier": 3,
+        "name": "上境澄魂砂",
+        "price": 12
+      },
+      "npc_training_puppet_cultivation_1": {
+        "id": "npc_training_puppet_cultivation_1",
+        "path": "puppet",
+        "axis": "cultivation",
+        "tier": 1,
+        "name": "凡品蕴能芯",
+        "price": 1
+      },
+      "npc_training_puppet_cultivation_2": {
+        "id": "npc_training_puppet_cultivation_2",
+        "path": "puppet",
+        "axis": "cultivation",
+        "tier": 2,
+        "name": "灵品蕴能芯",
+        "price": 4
+      },
+      "npc_training_puppet_cultivation_3": {
+        "id": "npc_training_puppet_cultivation_3",
+        "path": "puppet",
+        "axis": "cultivation",
+        "tier": 3,
+        "name": "上境蕴能芯",
+        "price": 12
+      },
+      "npc_training_puppet_body_1": {
+        "id": "npc_training_puppet_body_1",
+        "path": "puppet",
+        "axis": "body",
+        "tier": 1,
+        "name": "凡品淬甲髓",
+        "price": 1
+      },
+      "npc_training_puppet_body_2": {
+        "id": "npc_training_puppet_body_2",
+        "path": "puppet",
+        "axis": "body",
+        "tier": 2,
+        "name": "灵品淬甲髓",
+        "price": 4
+      },
+      "npc_training_puppet_body_3": {
+        "id": "npc_training_puppet_body_3",
+        "path": "puppet",
+        "axis": "body",
+        "tier": 3,
+        "name": "上境淬甲髓",
+        "price": 12
+      },
+      "npc_training_puppet_sense_1": {
+        "id": "npc_training_puppet_sense_1",
+        "path": "puppet",
+        "axis": "sense",
+        "tier": 1,
+        "name": "凡品凝识枢",
+        "price": 1
+      },
+      "npc_training_puppet_sense_2": {
+        "id": "npc_training_puppet_sense_2",
+        "path": "puppet",
+        "axis": "sense",
+        "tier": 2,
+        "name": "灵品凝识枢",
+        "price": 4
+      },
+      "npc_training_puppet_sense_3": {
+        "id": "npc_training_puppet_sense_3",
+        "path": "puppet",
+        "axis": "sense",
+        "tier": 3,
+        "name": "上境凝识枢",
+        "price": 12
+      },
+      "npc_training_puppet_energy_1": {
+        "id": "npc_training_puppet_energy_1",
+        "path": "puppet",
+        "axis": "energy",
+        "tier": 1,
+        "name": "1阶傀儡能源晶",
+        "price": 1,
+        "rank": 1
+      },
+      "npc_training_puppet_energy_2": {
+        "id": "npc_training_puppet_energy_2",
+        "path": "puppet",
+        "axis": "energy",
+        "tier": 1,
+        "name": "5阶傀儡能源晶",
+        "price": 4,
+        "rank": 5
+      },
+      "npc_training_puppet_energy_3": {
+        "id": "npc_training_puppet_energy_3",
+        "path": "puppet",
+        "axis": "energy",
+        "tier": 3,
+        "name": "9阶傀儡能源晶",
+        "price": 12,
+        "rank": 9
+      },
+      "npc_training_puppet_energy_rank_2": {
+        "id": "npc_training_puppet_energy_rank_2",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 2,
+        "tier": 1,
+        "name": "2阶傀儡能源晶",
+        "price": 4
+      },
+      "npc_training_puppet_energy_rank_3": {
+        "id": "npc_training_puppet_energy_rank_3",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 3,
+        "tier": 1,
+        "name": "3阶傀儡能源晶",
+        "price": 9
+      },
+      "npc_training_puppet_energy_rank_4": {
+        "id": "npc_training_puppet_energy_rank_4",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 4,
+        "tier": 1,
+        "name": "4阶傀儡能源晶",
+        "price": 16
+      },
+      "npc_training_puppet_energy_rank_6": {
+        "id": "npc_training_puppet_energy_rank_6",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 6,
+        "tier": 2,
+        "name": "6阶傀儡能源晶",
+        "price": 36
+      },
+      "npc_training_puppet_energy_rank_7": {
+        "id": "npc_training_puppet_energy_rank_7",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 7,
+        "tier": 2,
+        "name": "7阶傀儡能源晶",
+        "price": 49
+      },
+      "npc_training_puppet_energy_rank_8": {
+        "id": "npc_training_puppet_energy_rank_8",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 8,
+        "tier": 2,
+        "name": "8阶傀儡能源晶",
+        "price": 64
+      },
+      "npc_training_puppet_energy_rank_10": {
+        "id": "npc_training_puppet_energy_rank_10",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 10,
+        "tier": 3,
+        "name": "10阶傀儡能源晶",
+        "price": 100
+      },
+      "npc_training_puppet_energy_rank_11": {
+        "id": "npc_training_puppet_energy_rank_11",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 11,
+        "tier": 3,
+        "name": "11阶傀儡能源晶",
+        "price": 121
+      },
+      "npc_training_puppet_energy_rank_12": {
+        "id": "npc_training_puppet_energy_rank_12",
+        "path": "puppet",
+        "axis": "energy",
+        "rank": 12,
+        "tier": 3,
+        "name": "12阶傀儡能源晶",
+        "price": 144
+      },
+      "npc_training_dao_conversion_3": {
+        "id": "npc_training_dao_conversion_3",
+        "path": "dao",
+        "axis": "conversion",
+        "tier": 3,
+        "name": "仙元露",
+        "price": 12
+      },
+      "npc_training_demonic_conversion_3": {
+        "id": "npc_training_demonic_conversion_3",
+        "path": "demonic",
+        "axis": "conversion",
+        "tier": 3,
+        "name": "煞元露",
+        "price": 12
+      },
+      "npc_training_monster_conversion_3": {
+        "id": "npc_training_monster_conversion_3",
+        "path": "monster",
+        "axis": "conversion",
+        "tier": 3,
+        "name": "妖元露",
+        "price": 12
+      },
+      "npc_training_ghost_conversion_3": {
+        "id": "npc_training_ghost_conversion_3",
+        "path": "ghost",
+        "axis": "conversion",
+        "tier": 3,
+        "name": "魂元露",
+        "price": 12
+      },
+      "npc_training_dao_domain_3": {
+        "id": "npc_training_dao_domain_3",
+        "path": "dao",
+        "axis": "domain",
+        "tier": 3,
+        "name": "悟域仙砂",
+        "price": 12
+      },
+      "npc_training_demonic_domain_3": {
+        "id": "npc_training_demonic_domain_3",
+        "path": "demonic",
+        "axis": "domain",
+        "tier": 3,
+        "name": "凝域煞晶",
+        "price": 12
+      },
+      "npc_training_monster_domain_3": {
+        "id": "npc_training_monster_domain_3",
+        "path": "monster",
+        "axis": "domain",
+        "tier": 3,
+        "name": "镇域妖髓",
+        "price": 12
+      },
+      "npc_training_ghost_domain_3": {
+        "id": "npc_training_ghost_domain_3",
+        "path": "ghost",
+        "axis": "domain",
+        "tier": 3,
+        "name": "轮域魂砂",
+        "price": 12
+      },
+      "npc_training_dao_technique_1": {
+        "id": "npc_training_dao_technique_1",
+        "path": "dao",
+        "axis": "technique",
+        "tier": 1,
+        "name": "凡品悟法仙笺",
+        "price": 1
+      },
+      "npc_training_dao_technique_2": {
+        "id": "npc_training_dao_technique_2",
+        "path": "dao",
+        "axis": "technique",
+        "tier": 2,
+        "name": "灵品悟法仙笺",
+        "price": 4
+      },
+      "npc_training_dao_technique_3": {
+        "id": "npc_training_dao_technique_3",
+        "path": "dao",
+        "axis": "technique",
+        "tier": 3,
+        "name": "上境悟法仙笺",
+        "price": 12
+      },
+      "npc_training_demonic_technique_1": {
+        "id": "npc_training_demonic_technique_1",
+        "path": "demonic",
+        "axis": "technique",
+        "tier": 1,
+        "name": "凡品演法煞笺",
+        "price": 1
+      },
+      "npc_training_demonic_technique_2": {
+        "id": "npc_training_demonic_technique_2",
+        "path": "demonic",
+        "axis": "technique",
+        "tier": 2,
+        "name": "灵品演法煞笺",
+        "price": 4
+      },
+      "npc_training_demonic_technique_3": {
+        "id": "npc_training_demonic_technique_3",
+        "path": "demonic",
+        "axis": "technique",
+        "tier": 3,
+        "name": "上境演法煞笺",
+        "price": 12
+      },
+      "npc_training_monster_technique_1": {
+        "id": "npc_training_monster_technique_1",
+        "path": "monster",
+        "axis": "technique",
+        "tier": 1,
+        "name": "凡品演法灵笺",
+        "price": 1
+      },
+      "npc_training_monster_technique_2": {
+        "id": "npc_training_monster_technique_2",
+        "path": "monster",
+        "axis": "technique",
+        "tier": 2,
+        "name": "灵品演法灵笺",
+        "price": 4
+      },
+      "npc_training_monster_technique_3": {
+        "id": "npc_training_monster_technique_3",
+        "path": "monster",
+        "axis": "technique",
+        "tier": 3,
+        "name": "上境演法灵笺",
+        "price": 12
+      },
+      "npc_training_ghost_technique_1": {
+        "id": "npc_training_ghost_technique_1",
+        "path": "ghost",
+        "axis": "technique",
+        "tier": 1,
+        "name": "凡品悟法魂笺",
+        "price": 1
+      },
+      "npc_training_ghost_technique_2": {
+        "id": "npc_training_ghost_technique_2",
+        "path": "ghost",
+        "axis": "technique",
+        "tier": 2,
+        "name": "灵品悟法魂笺",
+        "price": 4
+      },
+      "npc_training_ghost_technique_3": {
+        "id": "npc_training_ghost_technique_3",
+        "path": "ghost",
+        "axis": "technique",
+        "tier": 3,
+        "name": "上境悟法魂笺",
+        "price": 12
+      },
+      "npc_training_dao_body_art_3": {
+        "id": "npc_training_dao_body_art_3",
+        "path": "dao",
+        "axis": "body_art",
+        "tier": 3,
+        "name": "五光玉露",
+        "price": 12
+      },
+      "npc_training_demonic_body_art_3": {
+        "id": "npc_training_demonic_body_art_3",
+        "path": "demonic",
+        "axis": "body_art",
+        "tier": 3,
+        "name": "五蕴煞髓",
+        "price": 12
+      },
+      "npc_training_monster_body_art_3": {
+        "id": "npc_training_monster_body_art_3",
+        "path": "monster",
+        "axis": "body_art",
+        "tier": 3,
+        "name": "妖躯精粹",
+        "price": 12
+      },
+      "npc_training_ghost_body_art_3": {
+        "id": "npc_training_ghost_body_art_3",
+        "path": "ghost",
+        "axis": "body_art",
+        "tier": 3,
+        "name": "五法魂露",
+        "price": 12
+      }
+    }
+  }
+}

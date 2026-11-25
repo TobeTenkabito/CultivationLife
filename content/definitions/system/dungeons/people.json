@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "OBSERVED_TERRAIN": {
+      "id": "dungeon_observed_terrain",
+      "name": "已探明地势",
+      "stat": "might",
+      "floor": 0.85,
+      "reduction_per_preparation": 0.03
+    }
+  }
+}

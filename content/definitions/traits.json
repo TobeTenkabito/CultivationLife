@@ -1,0 +1,385 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "TRAITS": {
+      "strength": {
+        "$tuple": [
+          "天生膂力",
+          "绿",
+          "strength",
+          1
+        ]
+      },
+      "tide_ear": {
+        "$tuple": [
+          "听潮耳",
+          "绿",
+          "hearing",
+          1
+        ]
+      },
+      "fire_eye": {
+        "$tuple": [
+          "丹炉火眼",
+          "绿",
+          "sight",
+          1
+        ]
+      },
+      "meditation": {
+        "$tuple": [
+          "易入定",
+          "绿",
+          "focus",
+          1
+        ]
+      },
+      "fish_scales": {
+        "$tuple": [
+          "鱼鳞之体",
+          "蓝",
+          "body",
+          2
+        ]
+      },
+      "swift_bone": {
+        "$tuple": [
+          "追风骨",
+          "蓝",
+          "speed",
+          2
+        ]
+      },
+      "open_gates": {
+        "$tuple": [
+          "关窍通明",
+          "蓝",
+          "gates",
+          2
+        ]
+      },
+      "earth_metal": {
+        "$tuple": [
+          "地肺藏金",
+          "蓝",
+          "lungs",
+          2
+        ]
+      },
+      "wind_thunder": {
+        "$tuple": [
+          "风雷双窍",
+          "紫",
+          "channels",
+          3
+        ]
+      },
+      "tenacity": {
+        "$tuple": [
+          "百折道心",
+          "紫",
+          "will",
+          3
+        ]
+      },
+      "red_bones": {
+        "$tuple": [
+          "赤炼筋骨",
+          "紫",
+          "body",
+          3
+        ]
+      },
+      "five_body": {
+        "$tuple": [
+          "五行之体",
+          "紫",
+          "body",
+          3
+        ]
+      },
+      "heaven": {
+        "$tuple": [
+          "昊天之仙",
+          "橙",
+          "destiny",
+          4
+        ]
+      },
+      "confluence": {
+        "$tuple": [
+          "万法归流",
+          "橙",
+          "roots",
+          4
+        ]
+      },
+      "star_body": {
+        "$tuple": [
+          "星辰之体",
+          "紫",
+          "body",
+          4
+        ]
+      },
+      "five_flame": {
+        "$tuple": [
+          "五行之焰",
+          "紫",
+          "flame",
+          3
+        ]
+      },
+      "green_veins": {
+        "$tuple": [
+          "青枝灵脉",
+          "绿",
+          "channels",
+          1
+        ]
+      },
+      "thunder_bone": {
+        "$tuple": [
+          "鸣雷骨",
+          "绿",
+          "bones",
+          1
+        ]
+      },
+      "sun_eye": {
+        "$tuple": [
+          "朝阳眼",
+          "绿",
+          "sight",
+          1
+        ]
+      },
+      "sand_skin": {
+        "$tuple": [
+          "御砂肤",
+          "绿",
+          "skin",
+          1
+        ]
+      },
+      "sheathed_edge": {
+        "$tuple": [
+          "藏锋剑心",
+          "蓝",
+          "sword",
+          2
+        ]
+      },
+      "stone_frame": {
+        "$tuple": [
+          "磐山骨",
+          "蓝",
+          "body",
+          2
+        ]
+      },
+      "night_sense": {
+        "$tuple": [
+          "照夜灵识",
+          "蓝",
+          "perception",
+          2
+        ]
+      },
+      "paired_poles": {
+        "$tuple": [
+          "两仪同心",
+          "紫",
+          "polarity",
+          3
+        ]
+      },
+      "steam_cycle": {
+        "$tuple": [
+          "水火既济",
+          "紫",
+          "circulation",
+          3
+        ]
+      },
+      "sundering_edge": {
+        "$tuple": [
+          "破障剑心",
+          "紫",
+          "sword",
+          3
+        ]
+      },
+      "mountain_body": {
+        "$tuple": [
+          "镇岳之体",
+          "紫",
+          "body",
+          3
+        ]
+      },
+      "storm_seal": {
+        "$tuple": [
+          "风雷法印",
+          "紫",
+          "seal",
+          3
+        ]
+      }
+    },
+    "MASTERY_ONLY": {
+      "$set": [
+        "five_flame",
+        "mountain_body",
+        "star_body",
+        "storm_seal"
+      ]
+    },
+    "COMPATIBLE": {
+      "$set": [
+        {
+          "$frozenset": [
+            "fish_scales",
+            "five_body"
+          ]
+        },
+        {
+          "$frozenset": [
+            "five_body",
+            "red_bones"
+          ]
+        }
+      ]
+    },
+    "EXCLUSIVE": {
+      "$set": [
+        {
+          "$frozenset": [
+            "red_bones",
+            "star_body"
+          ]
+        }
+      ]
+    },
+    "MASTERY": {
+      "TECH_OPEN_HUANGZE_METAL_SUPPORT": "fish_scales",
+      "TECH_YUAN_MAGNETIC_LIGHT": "five_body",
+      "TECH_GUIXU_WEIR_07": "five_body",
+      "TECH_OPEN_ZIFU_FIRE_MAIN": "five_flame",
+      "TECH_OPEN_QINGDU_FIRE_MAIN": "five_flame",
+      "light:kan": "fish_scales",
+      "light:li": "five_flame",
+      "light:qian": "five_body",
+      "TECH_TIANJIAN": "sundering_edge",
+      "TECH_METAL_SCRIPTURE": "sheathed_edge",
+      "TECH_EARTH_SCRIPTURE": "stone_frame",
+      "TECH_YINYANG_BLISS": "paired_poles",
+      "TECH_YIN_YANG_SOUL_UNITY": "paired_poles",
+      "TECH_DRY_BLUE_ICE_FLAME": "steam_cycle",
+      "TECH_GUIXU_CANGHAI_09": "steam_cycle",
+      "TECH_MOUNTAIN_BEARING_BODY": "mountain_body",
+      "TECH_MYSTIC_MOUNTAIN": "mountain_body",
+      "TECH_WIND_ADVANCED": "storm_seal",
+      "TECH_THUNDER_ADVANCED": "storm_seal",
+      "TECH_BODY_STARS": "star_body",
+      "TECH_OPEN_HONGHUANG_METAL_SUPPORT": "fish_scales"
+    },
+    "BODY_TRAITS": {
+      "$set": [
+        "earth_metal",
+        "fire_eye",
+        "fish_scales",
+        "five_body",
+        "green_veins",
+        "mountain_body",
+        "red_bones",
+        "sand_skin",
+        "star_body",
+        "stone_frame",
+        "strength",
+        "sun_eye",
+        "swift_bone",
+        "thunder_bone",
+        "tide_ear",
+        "wind_thunder"
+      ]
+    },
+    "EFFECTS": {
+      "green_veins": "木伤 +5%",
+      "thunder_bone": "雷抗 +6 个百分点",
+      "sun_eye": "阳伤 +5%",
+      "sand_skin": "土抗 +6 个百分点",
+      "sheathed_edge": "纯金攻击的金伤 +8%",
+      "stone_frame": "可用土属性护身，土抗 +8 个百分点",
+      "night_sense": "阴抗 +10 个百分点，对阴护身目标造成的阳伤 +8%",
+      "paired_poles": "以阴攻阳或以阳攻阴时，克制倍率升至 1.32",
+      "steam_cycle": "同一击兼具水火时，水伤和火伤各 +14%",
+      "sundering_edge": "纯金攻击的金伤 +8%，任何金伤都可穿透至多 12 个百分点金抗",
+      "mountain_body": "可用土属性护身，土抗 +8 个百分点。土护身承受木伤时，克制倍率降至 1.05",
+      "storm_seal": "风护身时雷伤 +16%，雷护身时风伤 +16%",
+      "strength": "物理伤害 +5%",
+      "tide_ear": "水抗 +6%",
+      "fire_eye": "火伤 +5%",
+      "meditation": "日常修炼进度 +4%",
+      "fish_scales": "水抗 +12%，水伤 +5%",
+      "swift_bone": "首次普通交锋先手 +16%",
+      "open_gates": "小境界突破率 +6 个百分点",
+      "earth_metal": "土属性护身时金伤 +12%",
+      "wind_thunder": "风雷互抗的减伤幅度减半",
+      "tenacity": "同关每次失败使下次突破率 +4 个百分点，至多 +12",
+      "red_bones": "同击兼具物理和火时，这两项伤害各 +12%",
+      "five_body": "五行各项抗性 +10%",
+      "heaven": "大、小境界突破率 +25 个百分点，沿用原上限。纯劫战无额外护持",
+      "confluence": "以自身五行灵根种数满足同数或更少的功法五行灵根要求",
+      "star_body": "物理伤害 +12%",
+      "five_flame": "相应真火功法可选择五行之一出手"
+    },
+    "NON_COMBAT_TRAITS": {
+      "$set": [
+        "confluence",
+        "heaven",
+        "meditation",
+        "open_gates",
+        "tenacity"
+      ]
+    },
+    "BREAKTHROUGH": {
+      "always": {
+        "heaven": 0.25
+      },
+      "minor": {
+        "open_gates": 0.06
+      },
+      "retry_trait": "tenacity",
+      "retry_cap": 3,
+      "retry_bonus": 0.04
+    },
+    "PRACTICE": {
+      "flat": {
+        "meditation": 0.04
+      },
+      "foundation_realms": [
+        1,
+        2
+      ],
+      "balanced_minimum": 3
+    },
+    "SPECIAL_EFFECTS": {
+      "first_initiative": {
+        "swift_bone": 0.16
+      },
+      "fallback_wards": {
+        "orchid_shade": "yin"
+      },
+      "selectable_flame": "five_flame",
+      "default_flame": "fire",
+      "interchangeable_five_roots": "confluence",
+      "unarmed_npc_combat": [
+        "strength",
+        "star_body",
+        "swift_bone",
+        "red_bones"
+      ]
+    }
+  }
+}

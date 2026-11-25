@@ -1,0 +1,1761 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "LINEAGES": {
+      "iron_shirt": {
+        "$record": "Lineage",
+        "name": "铁衣劲",
+        "rarity": "绿",
+        "family": "skin",
+        "level": 1,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_METAL_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "brook_breath": {
+        "$record": "Lineage",
+        "name": "临溪息",
+        "rarity": "绿",
+        "family": "breath",
+        "level": 1,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WATER_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "swallow_turn": {
+        "$record": "Lineage",
+        "name": "燕回身",
+        "rarity": "绿",
+        "family": "speed",
+        "level": 1,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WIND_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "sunrise_palm": {
+        "$record": "Lineage",
+        "name": "迎晖劲",
+        "rarity": "绿",
+        "family": "palm",
+        "level": 1,
+        "rule": "pure",
+        "percent": 6,
+        "element": "yang",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_YANG_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "willow_hook": {
+        "$record": "Lineage",
+        "name": "垂丝剑意",
+        "rarity": "绿",
+        "family": "sword",
+        "level": 1,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WATER_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "moss_veil": {
+        "$record": "Lineage",
+        "name": "苔衣",
+        "rarity": "绿",
+        "family": "skin",
+        "level": 1,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WATER_WOOD_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "stone_wall": {
+        "$record": "Lineage",
+        "name": "石壁劲",
+        "rarity": "绿",
+        "family": "bones",
+        "level": 1,
+        "rule": "resist",
+        "percent": 6,
+        "element": "earth",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_EARTH_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "reed_ward": {
+        "$record": "Lineage",
+        "name": "听雷护脉",
+        "rarity": "绿",
+        "family": "channels",
+        "level": 1,
+        "rule": "resist",
+        "percent": 6,
+        "element": "thunder",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_THUNDER_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "warm_jade": {
+        "$record": "Lineage",
+        "name": "暖玉息",
+        "rarity": "绿",
+        "family": "breath",
+        "level": 1,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_NEUTRAL_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "red_sand": {
+        "$record": "Lineage",
+        "name": "赤砂手",
+        "rarity": "绿",
+        "family": "palm",
+        "level": 1,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_FIRE_EARTH_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "kiln_clay": {
+        "$record": "Lineage",
+        "name": "窑泥衣",
+        "rarity": "绿",
+        "family": "skin",
+        "level": 1,
+        "rule": "own",
+        "percent": 6,
+        "element": "fire",
+        "other": "earth",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_FIRE_EARTH_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "dawn_drum": {
+        "$record": "Lineage",
+        "name": "晨雷引",
+        "rarity": "绿",
+        "family": "thunder_mark",
+        "level": 1,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WIND_THUNDER_YANG_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "winter_current": {
+        "$record": "Lineage",
+        "name": "听雪凝波",
+        "rarity": "蓝",
+        "family": "focus",
+        "level": 2,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_NEUTRAL_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_06"
+          ]
+        }
+      },
+      "silver_shear": {
+        "$record": "Lineage",
+        "name": "断雁剑意",
+        "rarity": "蓝",
+        "family": "sword",
+        "level": 2,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_METAL_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "vine_coil": {
+        "$record": "Lineage",
+        "name": "藤蛇劲",
+        "rarity": "蓝",
+        "family": "sinew",
+        "level": 2,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_WOOD_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "candle_shadow": {
+        "$record": "Lineage",
+        "name": "烛影掌",
+        "rarity": "蓝",
+        "family": "palm",
+        "level": 2,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_FIRE_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "stele_breaker": {
+        "$record": "Lineage",
+        "name": "裂碑劲",
+        "rarity": "蓝",
+        "family": "fist",
+        "level": 2,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_EARTH_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "river_banner": {
+        "$record": "Lineage",
+        "name": "沧波叠浪",
+        "rarity": "蓝",
+        "family": "circulation",
+        "level": 2,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_WATER_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_11"
+          ]
+        }
+      },
+      "orchid_shade": {
+        "$record": "Lineage",
+        "name": "幽兰守念",
+        "rarity": "蓝",
+        "family": "focus",
+        "level": 2,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_YIN_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "sun_duster": {
+        "$record": "Lineage",
+        "name": "拂尘清秽",
+        "rarity": "蓝",
+        "family": "yang_channels",
+        "level": 2,
+        "rule": "signature",
+        "percent": 0,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_YANG_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "first_circuit": {
+        "$record": "Lineage",
+        "name": "小周天",
+        "rarity": "绿",
+        "family": "focus",
+        "level": 1,
+        "rule": "foundation_practice",
+        "percent": 5,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_BASIC_QI"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "needle_intent": {
+        "$record": "Lineage",
+        "name": "引针意",
+        "rarity": "绿",
+        "family": "sword",
+        "level": 1,
+        "rule": "damage",
+        "percent": 5,
+        "element": "metal",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_METAL_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "palm_spark": {
+        "$record": "Lineage",
+        "name": "掌心雷纹",
+        "rarity": "绿",
+        "family": "thunder_mark",
+        "level": 1,
+        "rule": "damage",
+        "percent": 5,
+        "element": "thunder",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_THUNDER_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "frost_soul": {
+        "$record": "Lineage",
+        "name": "霜魄",
+        "rarity": "绿",
+        "family": "perception",
+        "level": 1,
+        "rule": "resist",
+        "percent": 6,
+        "element": "yin",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_YIN_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "morning_veil": {
+        "$record": "Lineage",
+        "name": "朝霞衣",
+        "rarity": "绿",
+        "family": "yang_channels",
+        "level": 1,
+        "rule": "resist",
+        "percent": 6,
+        "element": "yang",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_YANG_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "rooted_stance": {
+        "$record": "Lineage",
+        "name": "沉桩劲",
+        "rarity": "绿",
+        "family": "fist",
+        "level": 1,
+        "rule": "own",
+        "percent": 6,
+        "element": "physical",
+        "other": "earth",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_EARTH_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "mortal_beast_core_charm"
+          ]
+        }
+      },
+      "duckweed_step": {
+        "$record": "Lineage",
+        "name": "踏萍步",
+        "rarity": "绿",
+        "family": "speed",
+        "level": 1,
+        "rule": "own",
+        "percent": 6,
+        "element": "physical",
+        "other": "water",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WATER_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_09"
+          ]
+        }
+      },
+      "cinder_finger": {
+        "$record": "Lineage",
+        "name": "引炭指",
+        "rarity": "绿",
+        "family": "palm",
+        "level": 1,
+        "rule": "pure",
+        "percent": 6,
+        "element": "fire",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_FIRE_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "pine_needle": {
+        "$record": "Lineage",
+        "name": "松针劲",
+        "rarity": "绿",
+        "family": "wood_heart",
+        "level": 1,
+        "rule": "pure",
+        "percent": 6,
+        "element": "wood",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WOOD_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "sand_breath": {
+        "$record": "Lineage",
+        "name": "聚砂息",
+        "rarity": "绿",
+        "family": "breath",
+        "level": 1,
+        "rule": "pure",
+        "percent": 6,
+        "element": "earth",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_DEMON_HERITAGE_1"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "moon_thread": {
+        "$record": "Lineage",
+        "name": "纤月引",
+        "rarity": "绿",
+        "family": "perception",
+        "level": 1,
+        "rule": "pure",
+        "percent": 6,
+        "element": "yin",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_YIN_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "stream_leaf": {
+        "$record": "Lineage",
+        "name": "浮花劲",
+        "rarity": "绿",
+        "family": "circulation",
+        "level": 1,
+        "rule": "pair",
+        "percent": 6,
+        "element": "water",
+        "other": "wood",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WOOD_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "iron_grain": {
+        "$record": "Lineage",
+        "name": "铁砂筋",
+        "rarity": "绿",
+        "family": "sinew",
+        "level": 1,
+        "rule": "pair",
+        "percent": 6,
+        "element": "metal",
+        "other": "earth",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_EARTH_METAL_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "well_edge": {
+        "$record": "Lineage",
+        "name": "泉刃",
+        "rarity": "绿",
+        "family": "sword",
+        "level": 1,
+        "rule": "pair",
+        "percent": 6,
+        "element": "water",
+        "other": "metal",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_METAL_WATER_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "storm_reed": {
+        "$record": "Lineage",
+        "name": "听霆息",
+        "rarity": "绿",
+        "family": "breath",
+        "level": 1,
+        "rule": "pair",
+        "percent": 6,
+        "element": "wind",
+        "other": "thunder",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WIND_THUNDER_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "flat_stone": {
+        "$record": "Lineage",
+        "name": "叠石掌",
+        "rarity": "绿",
+        "family": "palm",
+        "level": 1,
+        "rule": "own",
+        "percent": 6,
+        "element": "earth",
+        "other": "earth",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_EARTH_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "ember_meridian": {
+        "$record": "Lineage",
+        "name": "温炉脉",
+        "rarity": "绿",
+        "family": "channels",
+        "level": 1,
+        "rule": "own",
+        "percent": 6,
+        "element": "fire",
+        "other": "fire",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_FIRE_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "silver_scale": {
+        "$record": "Lineage",
+        "name": "银鳞气",
+        "rarity": "绿",
+        "family": "circulation",
+        "level": 1,
+        "rule": "own",
+        "percent": 6,
+        "element": "water",
+        "other": "metal",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_METAL_WATER_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "mirror_glint": {
+        "$record": "Lineage",
+        "name": "镜里锋",
+        "rarity": "绿",
+        "family": "sight",
+        "level": 1,
+        "rule": "own",
+        "percent": 6,
+        "element": "metal",
+        "other": "yin",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_YIN_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "sunlit_branch": {
+        "$record": "Lineage",
+        "name": "向阳枝",
+        "rarity": "绿",
+        "family": "wood_heart",
+        "level": 1,
+        "rule": "own",
+        "percent": 6,
+        "element": "wood",
+        "other": "yang",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WOOD_FIRE_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "clear_foundation": {
+        "$record": "Lineage",
+        "name": "澄台筑基",
+        "rarity": "蓝",
+        "family": "focus",
+        "level": 2,
+        "rule": "foundation_practice",
+        "percent": 9,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_HUMAN_HERITAGE_3"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "anvil_breath": {
+        "$record": "Lineage",
+        "name": "百炼整劲",
+        "rarity": "蓝",
+        "family": "fist",
+        "level": 2,
+        "rule": "pure",
+        "percent": 9,
+        "element": "physical",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_BODY_HUNDRED_REFINEMENT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "hidden_thunder": {
+        "$record": "Lineage",
+        "name": "藏震指",
+        "rarity": "蓝",
+        "family": "thunder_mark",
+        "level": 2,
+        "rule": "pure",
+        "percent": 10,
+        "element": "thunder",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_THUNDER_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "returning_ash": {
+        "$record": "Lineage",
+        "name": "烬中真火",
+        "rarity": "蓝",
+        "family": "furnace_heart",
+        "level": 2,
+        "rule": "pure",
+        "percent": 10,
+        "element": "fire",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_DEMON_HERITAGE_2"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "iron_rib": {
+        "$record": "Lineage",
+        "name": "岩铜骨",
+        "rarity": "蓝",
+        "family": "sinew",
+        "level": 2,
+        "rule": "pair",
+        "percent": 10,
+        "element": "metal",
+        "other": "earth",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_EARTH_METAL_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "rill_branch": {
+        "$record": "Lineage",
+        "name": "溪桥折柳",
+        "rarity": "蓝",
+        "family": "circulation",
+        "level": 2,
+        "rule": "pair",
+        "percent": 10,
+        "element": "wood",
+        "other": "water",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_SONGCHUANG_WOOD_WATER_FIRE_EARTH_MAIN"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "dark_thunder": {
+        "$record": "Lineage",
+        "name": "阴雷痕",
+        "rarity": "蓝",
+        "family": "thunder_mark",
+        "level": 2,
+        "rule": "pair",
+        "percent": 10,
+        "element": "yin",
+        "other": "thunder",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_WIND_THUNDER_YIN_COMBAT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "ghost_marrows": {
+        "$record": "Lineage",
+        "name": "白骨凝阴",
+        "rarity": "蓝",
+        "family": "bones",
+        "level": 2,
+        "rule": "pair",
+        "percent": 10,
+        "element": "physical",
+        "other": "yin",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_BONE_VESSEL_BODY"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "sunstone_bone": {
+        "$record": "Lineage",
+        "name": "曜石骨",
+        "rarity": "蓝",
+        "family": "bones",
+        "level": 2,
+        "rule": "pair",
+        "percent": 10,
+        "element": "physical",
+        "other": "yang",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_DEMON_HERITAGE_6"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "mountain_step": {
+        "$record": "Lineage",
+        "name": "负山劲",
+        "rarity": "蓝",
+        "family": "fist",
+        "level": 2,
+        "rule": "pair",
+        "percent": 10,
+        "element": "physical",
+        "other": "earth",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_HUMAN_HERITAGE_6"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_07"
+          ]
+        }
+      },
+      "deep_keel": {
+        "$record": "Lineage",
+        "name": "分波劲",
+        "rarity": "蓝",
+        "family": "palm",
+        "level": 2,
+        "rule": "pierce",
+        "percent": 8,
+        "element": "water",
+        "other": "",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_GUIXU_CANGHAI_03"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_05"
+          ]
+        }
+      },
+      "quiet_shade": {
+        "$record": "Lineage",
+        "name": "镇幽识",
+        "rarity": "蓝",
+        "family": "perception",
+        "level": 2,
+        "rule": "pierce",
+        "percent": 8,
+        "element": "yin",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_YIN_ADVANCED"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "ghost_gate_ward"
+          ]
+        }
+      },
+      "flood_bank": {
+        "$record": "Lineage",
+        "name": "束水成堤",
+        "rarity": "蓝",
+        "family": "circulation",
+        "level": 2,
+        "rule": "guard",
+        "percent": 12,
+        "element": "earth",
+        "other": "water",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_WATER_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_04"
+          ]
+        }
+      },
+      "tempered_edge": {
+        "$record": "Lineage",
+        "name": "淬火金衣",
+        "rarity": "蓝",
+        "family": "skin",
+        "level": 2,
+        "rule": "guard",
+        "percent": 12,
+        "element": "fire",
+        "other": "metal",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_OPEN_YUNXIU_METAL_WATER_SUPPORT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "reed_breath": {
+        "$record": "Lineage",
+        "name": "芦风息",
+        "rarity": "绿",
+        "family": "breath",
+        "level": 1,
+        "rule": "damage",
+        "percent": 5,
+        "element": "wind",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_WIND"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "dew_palm": {
+        "$record": "Lineage",
+        "name": "凝露掌",
+        "rarity": "绿",
+        "family": "palm",
+        "level": 1,
+        "rule": "damage",
+        "percent": 5,
+        "element": "water",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_GUIXU_CANGHAI_01"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_12"
+          ]
+        }
+      },
+      "dusky_pupil": {
+        "$record": "Lineage",
+        "name": "识幽瞳",
+        "rarity": "绿",
+        "family": "sight",
+        "level": 1,
+        "rule": "damage",
+        "percent": 5,
+        "element": "yin",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_SOUL_ECHO_SENSE"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "stone_palm": {
+        "$record": "Lineage",
+        "name": "叩石掌",
+        "rarity": "绿",
+        "family": "palm",
+        "level": 1,
+        "rule": "damage",
+        "percent": 5,
+        "element": "earth",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_CONFUCIAN_PEOPLE_ROOT"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "ember_skin": {
+        "$record": "Lineage",
+        "name": "避火肤",
+        "rarity": "绿",
+        "family": "skin",
+        "level": 1,
+        "rule": "resist",
+        "percent": 6,
+        "element": "fire",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_CRIMSON_FURNACE"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "willow_sinew": {
+        "$record": "Lineage",
+        "name": "柳韧筋",
+        "rarity": "绿",
+        "family": "sinew",
+        "level": 1,
+        "rule": "resist",
+        "percent": 6,
+        "element": "wood",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_MONSTER_HIDE_FORGING"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "bell_bone": {
+        "$record": "Lineage",
+        "name": "金声骨",
+        "rarity": "绿",
+        "family": "bones",
+        "level": 1,
+        "rule": "resist",
+        "percent": 6,
+        "element": "metal",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_BODY_MORTAL"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "beast_pattern_bone"
+          ]
+        }
+      },
+      "still_breath": {
+        "$record": "Lineage",
+        "name": "守一息",
+        "rarity": "绿",
+        "family": "breath",
+        "level": 1,
+        "rule": "resist",
+        "percent": 6,
+        "element": "wind",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_COMMON_QI"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "tide_edge": {
+        "$record": "Lineage",
+        "name": "洗剑潮生",
+        "rarity": "蓝",
+        "family": "sword",
+        "level": 2,
+        "rule": "own",
+        "percent": 12,
+        "element": "metal",
+        "other": "water",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_GUIXU_CANGHAI_02"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_03"
+          ]
+        }
+      },
+      "wood_kiln": {
+        "$record": "Lineage",
+        "name": "青薪火候",
+        "rarity": "蓝",
+        "family": "circulation",
+        "level": 2,
+        "rule": "own",
+        "percent": 12,
+        "element": "fire",
+        "other": "wood",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_FIRE_SCRIPTURE"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "rainwood": {
+        "$record": "Lineage",
+        "name": "春霖木心",
+        "rarity": "蓝",
+        "family": "wood_heart",
+        "level": 2,
+        "rule": "own",
+        "percent": 12,
+        "element": "wood",
+        "other": "water",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_WOOD_SCRIPTURE"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_monster_realm_equipment_02"
+          ]
+        }
+      },
+      "thunder_fist": {
+        "$record": "Lineage",
+        "name": "惊蛰拳意",
+        "rarity": "蓝",
+        "family": "fist",
+        "level": 2,
+        "rule": "own",
+        "percent": 10,
+        "element": "physical",
+        "other": "thunder",
+        "innate": false,
+        "books": {
+          "$tuple": []
+        },
+        "artifacts": {
+          "$tuple": [
+            "thunder_plume_talisman"
+          ]
+        }
+      },
+      "moon_lamp": {
+        "$record": "Lineage",
+        "name": "守魄灯心",
+        "rarity": "蓝",
+        "family": "perception",
+        "level": 2,
+        "rule": "resist",
+        "percent": 12,
+        "element": "yin",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_SOUL_LAMP_CANON"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "soul_lamp"
+          ]
+        }
+      },
+      "golden_cicada": {
+        "$record": "Lineage",
+        "name": "金蝉息",
+        "rarity": "蓝",
+        "family": "breath",
+        "level": 2,
+        "rule": "resist",
+        "percent": 12,
+        "element": "yang",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_PUTI"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "ghost_silk_robe"
+          ]
+        }
+      },
+      "river_pearl": {
+        "$record": "Lineage",
+        "name": "定海珠心",
+        "rarity": "蓝",
+        "family": "circulation",
+        "level": 2,
+        "rule": "pure",
+        "percent": 10,
+        "element": "water",
+        "other": "",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_WATER_SCRIPTURE"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_canghai_equipment_01"
+          ]
+        }
+      },
+      "scarlet_wick": {
+        "$record": "Lineage",
+        "name": "赤心烛",
+        "rarity": "蓝",
+        "family": "yang_channels",
+        "level": 2,
+        "rule": "pure",
+        "percent": 10,
+        "element": "yang",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_YANG",
+            "TECH_CONFUCIAN_VAST_QI"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "cloud_tread": {
+        "$record": "Lineage",
+        "name": "御罡步",
+        "rarity": "蓝",
+        "family": "speed",
+        "level": 2,
+        "rule": "pure",
+        "percent": 10,
+        "element": "wind",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_GUIXU_CANGHAI_08"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "jade_platform": {
+        "$record": "Lineage",
+        "name": "玉台守静",
+        "rarity": "蓝",
+        "family": "focus",
+        "level": 2,
+        "rule": "practice",
+        "percent": 7,
+        "element": "",
+        "other": "",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_COMMON_FOUNDATION",
+            "TECH_BAOPU_CANON"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "bamboo_edge": {
+        "$record": "Lineage",
+        "name": "青篁剑骨",
+        "rarity": "紫",
+        "family": "sword_bone",
+        "level": 3,
+        "rule": "pair",
+        "percent": 14,
+        "element": "wood",
+        "other": "metal",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_QINGYUAN_SWORD"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "green_bamboo_sword"
+          ]
+        }
+      },
+      "river_blade": {
+        "$record": "Lineage",
+        "name": "天河淬锋",
+        "rarity": "紫",
+        "family": "sword_bone",
+        "level": 3,
+        "rule": "pair",
+        "percent": 14,
+        "element": "water",
+        "other": "metal",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_HEAVENLY_RIVER_REFINING"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "heavenly_river_sword_embryo"
+          ]
+        }
+      },
+      "nether_tide": {
+        "$record": "Lineage",
+        "name": "冥潮魂印",
+        "rarity": "紫",
+        "family": "seal",
+        "level": 3,
+        "rule": "pair",
+        "percent": 14,
+        "element": "water",
+        "other": "yin",
+        "innate": true,
+        "books": {
+          "$tuple": [
+            "TECH_NETHER_TIDE_CANON",
+            "TECH_BLOOD_RIVER"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_yellow_spring_equipment_01"
+          ]
+        }
+      },
+      "ghost_wick": {
+        "$record": "Lineage",
+        "name": "幽焰灯芯",
+        "rarity": "紫",
+        "family": "flame",
+        "level": 3,
+        "rule": "pair",
+        "percent": 14,
+        "element": "yin",
+        "other": "fire",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_GHOSTFIRE_BLADE"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "black_sun": {
+        "$record": "Lineage",
+        "name": "黑日火种",
+        "rarity": "紫",
+        "family": "flame",
+        "level": 3,
+        "rule": "pair",
+        "percent": 14,
+        "element": "fire",
+        "other": "yang",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_BLACK_SUN_TRUE_FLAME"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "storm_tide": {
+        "$record": "Lineage",
+        "name": "霆潮交鸣",
+        "rarity": "紫",
+        "family": "seal",
+        "level": 3,
+        "rule": "pair",
+        "percent": 14,
+        "element": "thunder",
+        "other": "water",
+        "innate": false,
+        "books": {
+          "$tuple": []
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_nether_equipment_02"
+          ]
+        }
+      },
+      "soul_hunting": {
+        "$record": "Lineage",
+        "name": "摄魂幡意",
+        "rarity": "紫",
+        "family": "perception",
+        "level": 3,
+        "rule": "pierce",
+        "percent": 12,
+        "element": "yin",
+        "other": "",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_MYRIAD_SOUL_SENSE"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "soul_banner",
+            "guixu_bloodriver_equipment_07"
+          ]
+        }
+      },
+      "sky_thunder": {
+        "$record": "Lineage",
+        "name": "天罚雷纹",
+        "rarity": "紫",
+        "family": "thunder_mark",
+        "level": 3,
+        "rule": "pierce",
+        "percent": 12,
+        "element": "thunder",
+        "other": "",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_NINE_HEAVENS_THUNDER"
+          ]
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_beast_vortex_equipment_05"
+          ]
+        }
+      },
+      "lotus_heart": {
+        "$record": "Lineage",
+        "name": "烬里莲心",
+        "rarity": "紫",
+        "family": "wood_heart",
+        "level": 3,
+        "rule": "guard",
+        "percent": 6,
+        "element": "metal",
+        "other": "wood",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_QINGPAN_SWORD_ARRAY"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "quenched_flame": {
+        "$record": "Lineage",
+        "name": "不熄炉心",
+        "rarity": "紫",
+        "family": "furnace_heart",
+        "level": 3,
+        "rule": "guard",
+        "percent": 6,
+        "element": "water",
+        "other": "fire",
+        "innate": true,
+        "books": {
+          "$tuple": []
+        },
+        "artifacts": {
+          "$tuple": [
+            "guixu_asura_equipment_01"
+          ]
+        }
+      },
+      "sea_sun": {
+        "$record": "Lineage",
+        "name": "海上生阳",
+        "rarity": "紫",
+        "family": "yang_channels",
+        "level": 3,
+        "rule": "pair",
+        "percent": 14,
+        "element": "water",
+        "other": "yang",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_SEA"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      },
+      "yellow_court": {
+        "$record": "Lineage",
+        "name": "黄庭内照",
+        "rarity": "紫",
+        "family": "focus",
+        "level": 3,
+        "rule": "balanced",
+        "percent": 12,
+        "element": "",
+        "other": "",
+        "innate": false,
+        "books": {
+          "$tuple": [
+            "TECH_YELLOW_COURT_INNER",
+            "TECH_NINE_TURN_UNITY"
+          ]
+        },
+        "artifacts": {
+          "$tuple": []
+        }
+      }
+    },
+    "LINEAGE_BODY_TRAITS": {
+      "$set": [
+        "bamboo_edge",
+        "bell_bone",
+        "dusky_pupil",
+        "ember_skin",
+        "ghost_marrows",
+        "iron_grain",
+        "iron_rib",
+        "iron_shirt",
+        "moss_veil",
+        "river_blade",
+        "stone_wall",
+        "sunstone_bone",
+        "tempered_edge",
+        "vine_coil",
+        "willow_sinew"
+      ]
+    },
+    "ARTIFACT_TRAITS": {
+      "spirit_sword": "sheathed_edge",
+      "blood_banner": "night_sense",
+      "yuanhe_five_poles_mountain": "mountain_body",
+      "celestial_star_array": "star_body",
+      "guixu_canghai_equipment_08": "tide_ear",
+      "guixu_monster_realm_equipment_06": "stone_frame",
+      "guixu_celestial_equipment_03": "sundering_edge",
+      "guixu_celestial_equipment_12": "paired_poles"
+    }
+  }
+}

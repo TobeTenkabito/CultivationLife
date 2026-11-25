@@ -1,14 +1,8 @@
 """Base-game soul rules. Pure formulas; never move an actor or advance time."""
+from .definition_data import definition as _content_definition
 import math
 
-SECRETS = {
-    'second_nascent': ('第二元婴', 4),
-    'path_dao': ('返璞归真', 1),
-    'path_demonic': ('化魔诀', 1),
-    'path_ghost': ('阴魂续命诀', 1),
-    'path_buddhist': ('转轮入禅', 1),
-    'path_confucian': ('养浩归儒', 1),
-}
+SECRETS = _content_definition(__name__, "SECRETS")
 PATH_QI = {'dao': 'spirit', 'demonic': 'demon', 'ghost': 'yin',
             'buddhist': 'spirit', 'confucian': 'spirit'}
 

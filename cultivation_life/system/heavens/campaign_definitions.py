@@ -1,20 +1,21 @@
 """Finite, explicitly authorized military case; no generic invasion generator."""
+from ...definition_data import definition as _content_definition
 from .settlement_definitions import LABELS as SETTLEMENT_LABELS
-CAMPAIGN_ID = 'lanjiang_gate'
-SOURCE = 'blood_prison'
-DEFENDER = 'tianjian'
-DONOR = 'taixuan'
-SOURCE_WORLD, SOURCE_SITE = 'demon', 'red_marrow_city'
-TARGET_WORLD, TARGET_SITE = 'human', 'lanjiang_steppe'
-REPORT_SITE = 'wudi_plain'
-BUILD_YEARS, LIFT_YEARS, EVAC_YEARS = 40, 16, 8
-MANDATE_YEARS, BUDGET, ANNUAL_COST = 600, 90000, 100
-INITIAL_SUPPLY, CARRIED_SUPPLY, BATCH = 120, 36, 24
-AID_BUDGET, AID_COST = 12000, 500
-DEFENSE_BUDGET = 30000
-ROUTE_ID = 'military:demon:human:lanjiang'
-EVAC_ROUTE = 'evacuation:human:demon:lanjiang'
-AID_ROUTE = 'aid:spirit:human:wudi'
+CAMPAIGN_ID = _content_definition(__name__, "CAMPAIGN_ID")
+SOURCE = _content_definition(__name__, "SOURCE")
+DEFENDER = _content_definition(__name__, "DEFENDER")
+DONOR = _content_definition(__name__, "DONOR")
+SOURCE_WORLD, SOURCE_SITE = _content_definition(__name__, "SOURCE_WORLD_SOURCE_SITE")
+TARGET_WORLD, TARGET_SITE = _content_definition(__name__, "TARGET_WORLD_TARGET_SITE")
+REPORT_SITE = _content_definition(__name__, "REPORT_SITE")
+BUILD_YEARS, LIFT_YEARS, EVAC_YEARS = _content_definition(__name__, "BUILD_YEARS_LIFT_YEARS_EVAC_YEARS")
+MANDATE_YEARS, BUDGET, ANNUAL_COST = _content_definition(__name__, "MANDATE_YEARS_BUDGET_ANNUAL_COST")
+INITIAL_SUPPLY, CARRIED_SUPPLY, BATCH = _content_definition(__name__, "INITIAL_SUPPLY_CARRIED_SUPPLY_BATCH")
+AID_BUDGET, AID_COST = _content_definition(__name__, "AID_BUDGET_AID_COST")
+DEFENSE_BUDGET = _content_definition(__name__, "DEFENSE_BUDGET")
+ROUTE_ID = _content_definition(__name__, "ROUTE_ID")
+EVAC_ROUTE = _content_definition(__name__, "EVAC_ROUTE")
+AID_ROUTE = _content_definition(__name__, "AID_ROUTE")
 LABELS = {'campaign_scout': '查勘界门工地', 'campaign_report': '呈交守备请求',
           'campaign_assault': '击退当地守卫', 'campaign_capture': '尝试擒拿守卫',
           'campaign_sabotage': '拆除目标端界门', 'campaign_aid': '申请灵界物资',

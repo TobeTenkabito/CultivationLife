@@ -21,7 +21,7 @@ def root_elements(root_id: str) -> list[str]:
 
 def can_practice_technique(root_id: str, technique_element: str | Technique) -> bool:
     from .combat_attributes import read
-    from .traits import active
+    from .traits import SPECIAL_EFFECTS, active
     if isinstance(technique_element, str):
         if technique_element in {"neutral","sex"}:
             return True
@@ -33,7 +33,7 @@ def can_practice_technique(root_id: str, technique_element: str | Technique) -> 
     else:
         root = read(root_id, "spirit_root", "none")
         affinities = set(root_elements(root) if LEGACY_ROOTS.get(root, root) in ROOT_DEFINITIONS else ()) | set(read(root_id, "additional_roots", ()))
-        confluence = "confluence" in active(root_id)
+        confluence = SPECIAL_EFFECTS["interchangeable_five_roots"] in active(root_id)
     return _affinities_allow_technique(affinities, technique_element, confluence)
 
 

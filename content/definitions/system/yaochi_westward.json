@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "TRACE_POOL": {
+      "id": "trace",
+      "kind": "trace",
+      "name": "澄心池",
+      "mark": "澄",
+      "materials": {},
+      "comparison": "专修期间不获得普通闭关机缘"
+    },
+    "BODY_POOL": {
+      "id": "body",
+      "kind": "body",
+      "name": "玉液池",
+      "mark": "玉",
+      "description": "以完整仙药配方淬体，成功率增加15个百分点，保留失败保底。"
+    }
+  }
+}

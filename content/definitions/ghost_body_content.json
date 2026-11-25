@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "IDS": {
+      "$tuple": [
+        "wuxiang",
+        "zhaoye",
+        "yuhun",
+        "wangqing",
+        "yinguo"
+      ]
+    },
+    "NAMES": {
+      "$tuple": [
+        "无相",
+        "照业",
+        "御魂",
+        "忘情",
+        "因果"
+      ]
+    },
+    "MATERIAL_IDS": {
+      "$tuple": [
+        "ghost_formless_amber",
+        "ghost_karma_mirror",
+        "ghost_returning_lotus",
+        "ghost_oblivion_crystal",
+        "ghost_causality_thread"
+      ]
+    },
+    "MATERIAL_NAMES": {
+      "$tuple": [
+        "无相空珀",
+        "照业冥镜",
+        "归魂幽莲",
+        "忘川泪晶",
+        "因果赤丝"
+      ]
+    },
+    "MATERIAL_COUNTS": {
+      "$tuple": [
+        4,
+        6,
+        8,
+        10,
+        12
+      ]
+    },
+    "EFFECTS": {
+      "wuxiang": {
+        "ward": {
+          "$tuple": [
+            2,
+            0
+          ]
+        },
+        "recovery_bonus": {
+          "$tuple": [
+            0,
+            0.03
+          ]
+        }
+      },
+      "zhaoye": {
+        "split": {
+          "$tuple": [
+            0.4,
+            0.025
+          ]
+        }
+      },
+      "yuhun": {
+        "death_restore": {
+          "$tuple": [
+            0.03,
+            0.003
+          ]
+        }
+      },
+      "wangqing": {
+        "forget": {
+          "$tuple": [
+            0.25,
+            0.035
+          ]
+        }
+      },
+      "yinguo": {
+        "karma_threshold": {
+          "$tuple": [
+            0.5,
+            -0.035
+          ]
+        },
+        "karma_power": {
+          "$tuple": [
+            0.18,
+            0
+          ]
+        }
+      }
+    }
+  }
+}

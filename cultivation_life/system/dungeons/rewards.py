@@ -1,4 +1,5 @@
 """Frozen expedition rewards, original inventory/learning/equipment settlement."""
+from ...definition_data import definition as _content_definition
 import copy
 import hashlib
 import json
@@ -10,23 +11,12 @@ from ...technique_effect_generation import generate_effect, concordance_effect
 from ...technique_effect_schema import describe, validate_effect
 from .prose_expansion import NAMES as EXTRA_NAMES
 
+
+
 THEMES = {'water':'沧溟','mountain':'山岳','fire':'离火','frost':'霜雪',
           'fort':'镇封','shadow':'寂灭','grove':'青木','ruins':'玄文'}
 
-RELIC_FORMS = {
-    '护道印':'印底的篆文磨得发亮，托在掌中还能摸出笔锋。',
-    '镇灵环':'环身由两股银丝拧成，接口处扣着一粒乌金。',
-    '承光镜':'镜背铸着一枝梅，迎光转动时，镜中花影比镜身慢上半拍。',
-    '照影灯':'灯腹开了六扇小窗，火苗在窗纸上映出细细的竹叶。',
-    '凝华佩':'佩上还系着一截旧绦，贴近手腕时，玉里的白絮便缓缓舒展。',
-    '观星盘':'拨动外圈，盘上七枚银钉依次指向同一片星野。',
-    '听泉铃':'铃舌是一颗磨圆的青石，摇响时像水珠落进深潭。',
-    '引风幡':'幡尾缀着三枚鱼形铜片，风一起，鱼尾便齐齐转向。',
-    '栖云伞':'将伞骨撑开一寸，伞面上绣的山影便退远一分。',
-    '分水针':'针身细如松芒，一滴水沿针尖分成两股滑落。',
-    '照夜剑':'剑脊上留着磨石走过的细痕，近锷处藏着一线青光。',
-    '温玉鼎':'三只鼎足各衔一颗白石，鼎腹尚有淡淡松脂香。',
-}
+RELIC_FORMS = _content_definition(__name__, "RELIC_FORMS")
 
 
 @lru_cache(maxsize=144)

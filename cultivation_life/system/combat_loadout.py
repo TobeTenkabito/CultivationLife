@@ -3,12 +3,16 @@
 NPC treasure is deliberately never inspected here. Empty/unresolved slots do
 not invent equipment, and a combat snapshot is not another ownership ledger.
 """
+from ..definition_data import definition as _content_definition
 from dataclasses import replace
 
 from ..content_registry import ITEM_CATALOG, TECHNIQUE_CATALOG
 from .combat.contracts import CapabilitySource, Intervention
 from .combat.npc_lifecycle import read
 from .cultivation_ranks import npc_golden_light
+
+
+BODY_WARDS = _content_definition(__name__, "BODY_WARDS")
 
 
 def _tier(entry):
@@ -119,8 +123,8 @@ def project_loadout(game, owner, source=None, *, player=False, tianji_artifacts=
 
 
 def project_attributes(owner, techniques, artifacts, *, player=False):
-    from ..combat_attributes import FIVE, profile_for
-    from ..traits import NON_COMBAT_TRAITS, active, state
+    from ..combat_attributes import profile_for
+    from ..traits import SPECIAL_EFFECTS, NON_COMBAT_TRAITS, active, state
     from ..technique_affinity import can_practice_technique
     attacks = {}
     from ..models import Technique
@@ -161,9 +165,7 @@ def project_attributes(owner, techniques, artifacts, *, player=False):
                 if element != "physical" and kind not in ward_sources.setdefault(element, []):
                     ward_sources[element].append(kind)
     traits = [t for t in active(owner) if t not in NON_COMBAT_TRAITS]
-    body_wards = {"moss_veil": ("wood",), "five_body": FIVE, "fish_scales": ("water",),
-                  "stone_frame": ("earth",), "mountain_body": ("earth",)}
-    for trait, elements in body_wards.items():
+    for trait, elements in BODY_WARDS.items():
         if trait in traits:
             for element in elements:
                 sources = ward_sources.setdefault(element, [])
@@ -173,7 +175,7 @@ def project_attributes(owner, techniques, artifacts, *, player=False):
     preferred = state(owner).get("ward")
     ward_element = preferred if preferred in ward_options else next(iter(ward_options), None)
     return dict(attacks=attacks, traits=traits, ward=ward_element, wards=ward_options, ward_sources=ward_sources,
-                      flame=state(owner).get("flame", "fire"))
+                      flame=state(owner).get("flame", SPECIAL_EFFECTS["default_flame"]))
 
 
 def npc_attribute_sources(attackers, defenders, sources):

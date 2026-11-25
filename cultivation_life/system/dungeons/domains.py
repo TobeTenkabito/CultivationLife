@@ -1,13 +1,19 @@
 """Original finite domain grants follow the same NPC after an expedition ends."""
+from ...definition_data import definition as _content_definition
 from ..combat.actor_state import read
 from ..doctrine.voisinage_training import multiplier
 
 
+DOMAIN = _content_definition(__name__, "DOMAIN")
+
+
+def domain(identity, rank, realm):
+    name = DOMAIN['perfected_name'] if rank == DOMAIN['perfected_rank'] else DOMAIN['name']
+    strength = (1 + (realm - DOMAIN['base_realm']) * DOMAIN['growth']) * multiplier(rank)
+    return dict(id=identity + ':domain', name=name, strength=strength, **DOMAIN['field'])
+
+
 def definitions(npc):
-    origin=(read(npc,'family_traits',{}) or {}).get('dungeon_origin',{})
-    rank=origin.get('domain_rank',0)
-    if not rank:return []
-    realm=origin['true_realm'];identity=read(npc,'id')
-    return [dict(id=identity+':domain',name='至臻归藏道域' if rank==13 else '归藏灵域',
-        attainment='dungeon_domain',required_level=1,strength=(1+(realm-9)*.8)*multiplier(rank),
-        opening_cost=80.,upkeep_cost=40.,effect='strike',effect_cost=35.,effect_power=.2,max_investment=0.)]
+    origin = (read(npc, 'family_traits', {}) or {}).get('dungeon_origin', {})
+    rank = origin.get('domain_rank', 0)
+    return [domain(read(npc, 'id'), rank, origin['true_realm'])] if rank else []

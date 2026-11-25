@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "DOMAIN": {
+      "name": "归藏灵域",
+      "perfected_name": "至臻归藏道域",
+      "perfected_rank": 13,
+      "base_realm": 9,
+      "growth": 0.8,
+      "field": {
+        "attainment": "dungeon_domain",
+        "required_level": 1,
+        "opening_cost": 80.0,
+        "upkeep_cost": 40.0,
+        "effect": "strike",
+        "effect_cost": 35.0,
+        "effect_power": 0.2,
+        "max_investment": 0.0
+      }
+    }
+  }
+}

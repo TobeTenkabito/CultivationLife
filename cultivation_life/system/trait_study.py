@@ -13,7 +13,12 @@ def source_name(source):
     if source.startswith("artifact:"):
         return ITEM_CATALOG[source.removeprefix("artifact:")].name
     book = TECHNIQUE_CATALOG.get(source)
-    return book.name if book else {"light:kan": "坎道玄光", "light:li": "离上朱光", "light:qian": "乾古素光"}.get(source, source)
+    if book:
+        return book.name
+    if source.startswith("light:") and source in MASTERY:
+        from .divine_lights import definitions
+        return next((row["name"] for row in definitions() if row["id"] == source[6:]), source)
+    return source
 
 
 def available_sources(game, owner):

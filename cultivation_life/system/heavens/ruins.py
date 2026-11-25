@@ -1,4 +1,5 @@
 """One relic, two linked mechanisms, finite rewards and scoped evidence."""
+from ...definition_data import definition as _content_definition
 import copy
 from dataclasses import asdict
 from hashlib import sha256
@@ -28,7 +29,7 @@ def create(deps, game, *, known=True, year=None):
     ruins = dict(id=RUINS_ID, scene_id=identity, definition=definition, created_year=runtime['processed_years'] if year is None else year,
                  observed=False, verified=False, record_acquired=False, contact_known=False,
                  reward=deps.ruins_material(game, identity),
-                 core=dict(id=identity+'-core', definition_id='returning_tide_core', name='回潮阵芯', owner='ward', acquisition=None),
+                 core=dict(id=identity+'-core', **_content_definition(__name__, "TIDE_CORE"), owner='ward', acquisition=None),
                  ward=dict(id=identity+'-ward', world=definition['linked_world'], location_id=definition['linked_location_id'], component='core'),
                  guardian=dict(wounds=0, encounters=0, result=None), local_traces={}, guardian_records={}, sent_records={})
     runtime['ruins'] = ruins

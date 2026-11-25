@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "PROFILES": {
+      "thunder": {
+        "$tuple": [
+          "breach:after_hit:immediate",
+          "guard:first_exchange:immediate",
+          "strike:first_exchange:immediate"
+        ]
+      },
+      "star": {
+        "$tuple": [
+          "frugal:odd_round:split",
+          "guard:even_round:split",
+          "strike:even_round:delayed"
+        ]
+      },
+      "void": {
+        "$tuple": [
+          "breach:steady:immediate",
+          "guard:after_hurt:delayed",
+          "strike:steady:immediate"
+        ]
+      },
+      "frost": {
+        "$tuple": [
+          "guard:opening:split",
+          "frugal:after_hurt:split",
+          "breach:after_hurt:delayed"
+        ]
+      },
+      "flame": {
+        "$tuple": [
+          "strike:after_hit:split",
+          "frugal:after_hit:immediate",
+          "strike:after_hit:immediate"
+        ]
+      },
+      "water": {
+        "$tuple": [
+          "recover:after_hurt:split",
+          "guard:after_hurt:split",
+          "breach:even_round:immediate"
+        ]
+      },
+      "mountain": {
+        "$tuple": [
+          "guard:opening:immediate",
+          "recover:low_state:immediate",
+          "strike:after_hurt:immediate"
+        ]
+      },
+      "wind": {
+        "$tuple": [
+          "frugal:first_exchange:immediate",
+          "guard:odd_round:immediate",
+          "strike:odd_round:immediate"
+        ]
+      },
+      "wood": {
+        "$tuple": [
+          "recover:opening:split",
+          "guard:low_state:split",
+          "strike:steady:split"
+        ]
+      },
+      "metal": {
+        "$tuple": [
+          "breach:opening:immediate",
+          "guard:after_hit:immediate",
+          "strike:after_hit:delayed"
+        ]
+      },
+      "sun": {
+        "$tuple": [
+          "strike:odd_round:immediate",
+          "recover:odd_round:immediate",
+          "breach:odd_round:immediate"
+        ]
+      },
+      "moon": {
+        "$tuple": [
+          "recover:even_round:split",
+          "guard:even_round:immediate",
+          "strike:even_round:immediate"
+        ]
+      },
+      "mirror": {
+        "$tuple": [
+          "frugal:after_hurt:immediate",
+          "guard:after_hurt:immediate",
+          "breach:after_hurt:immediate"
+        ]
+      },
+      "dream": {
+        "$tuple": [
+          "guard:steady:delayed",
+          "recover:steady:delayed",
+          "strike:steady:delayed"
+        ]
+      },
+      "sound": {
+        "$tuple": [
+          "recover:after_hit:split",
+          "guard:after_hit:split",
+          "strike:opening:split"
+        ]
+      },
+      "time": {
+        "$tuple": [
+          "frugal:opening:delayed",
+          "recover:opening:delayed",
+          "breach:opening:delayed"
+        ]
+      },
+      "fate": {
+        "$tuple": [
+          "frugal:after_hit:delayed",
+          "guard:after_hurt:delayed",
+          "strike:after_hurt:delayed"
+        ]
+      },
+      "sword": {
+        "$tuple": [
+          "breach:after_hit:immediate",
+          "frugal:after_hit:immediate",
+          "strike:target_wounded:immediate"
+        ]
+      },
+      "seal": {
+        "$tuple": [
+          "guard:first_exchange:delayed",
+          "frugal:steady:immediate",
+          "breach:steady:delayed"
+        ]
+      },
+      "lotus": {
+        "$tuple": [
+          "recover:low_state:immediate",
+          "frugal:low_state:immediate",
+          "breach:low_state:immediate"
+        ]
+      },
+      "mist": {
+        "$tuple": [
+          "frugal:opening:split",
+          "guard:opening:delayed",
+          "strike:odd_round:delayed"
+        ]
+      },
+      "life": {
+        "$tuple": [
+          "recover:after_hurt:immediate",
+          "guard:low_state:immediate",
+          "strike:low_state:split"
+        ]
+      },
+      "death": {
+        "$tuple": [
+          "breach:target_wounded:immediate",
+          "frugal:target_wounded:immediate",
+          "strike:target_wounded:split"
+        ]
+      },
+      "dragon": {
+        "$tuple": [
+          "strike:first_exchange:immediate",
+          "guard:after_hit:immediate",
+          "breach:first_exchange:immediate"
+        ]
+      },
+      "ink": {
+        "$tuple": [
+          "breach:even_round:delayed",
+          "frugal:odd_round:immediate",
+          "strike:even_round:split"
+        ]
+      },
+      "jade": {
+        "$tuple": [
+          "guard:steady:immediate",
+          "recover:steady:immediate",
+          "breach:steady:immediate"
+        ]
+      },
+      "ocean": {
+        "$tuple": [
+          "recover:even_round:immediate",
+          "frugal:even_round:split",
+          "strike:even_round:split"
+        ]
+      },
+      "balance": {
+        "$tuple": [
+          "frugal:even_round:immediate",
+          "guard:odd_round:split",
+          "breach:even_round:immediate"
+        ]
+      },
+      "lightning": {
+        "$tuple": [
+          "breach:first_exchange:immediate",
+          "frugal:first_exchange:immediate",
+          "strike:first_exchange:split"
+        ]
+      },
+      "dust": {
+        "$tuple": [
+          "guard:low_state:split",
+          "frugal:low_state:split",
+          "strike:after_hurt:split"
+        ]
+      },
+      "heaven": {
+        "$tuple": [
+          "breach:odd_round:immediate",
+          "guard:steady:split",
+          "strike:steady:immediate"
+        ]
+      },
+      "origin": {
+        "$tuple": [
+          "recover:opening:immediate",
+          "frugal:opening:immediate",
+          "breach:opening:immediate"
+        ]
+      }
+    },
+    "GENERATED_BRANCHES": {
+      "origin": {
+        "$tuple": [
+          "recover:opening:split",
+          "frugal:steady:immediate",
+          "breach:steady:delayed"
+        ]
+      },
+      "balance": {
+        "$tuple": [
+          "frugal:even_round:split",
+          "guard:odd_round:immediate",
+          "breach:after_hurt:immediate"
+        ]
+      }
+    },
+    "UPPER_PROFILES": {
+      "asura": {
+        "MAIN": "frugal:after_hurt:immediate",
+        "COMBAT": "strike:low_state:immediate",
+        "BODY": "guard:after_hurt:immediate",
+        "SENSE": "breach:after_hit:immediate"
+      },
+      "nether": {
+        "MAIN": "recover:after_hurt:split",
+        "COMBAT": "strike:after_hit:split",
+        "BODY": "guard:opening:split",
+        "SENSE": "breach:target_wounded:immediate"
+      },
+      "reincarnation": {
+        "MAIN": "frugal:even_round:immediate",
+        "COMBAT": "strike:even_round:delayed",
+        "BODY": "guard:odd_round:split",
+        "SENSE": "breach:odd_round:immediate"
+      }
+    }
+  }
+}

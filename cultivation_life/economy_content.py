@@ -3,24 +3,15 @@
 Roles describe actual ingredients; uses describe finished demand. Neither is a
 second inventory. Special/quest crafting definitions remain independent.
 """
+from .definition_data import definition as _content_definition
 from functools import lru_cache
 from .common_talisman_content import SLOTS as TALISMAN_SLOTS
 
+
+
 ROLES = ('ore_structure', 'ore_conduct', 'ore_store', 'herb_nurture',
          'herb_heal', 'herb_spirit', 'core_energy', 'core_blood', 'core_soul')
-WORLD_MATERIALS = {
-    'human': ('玄铁矿', '导灵铜', '蓄灵玉', '养元芝', '回春藤', '凝神莲', '灵兽元丹', '赤兽血丹', '幽兽魂丹'),
-    'demon': ('煞铁矿', '蚀灵铜', '封煞晶', '血元芝', '续骨藤', '镇魔花', '魔兽煞丹', '狂兽血丹', '梦魇魂丹'),
-    'spirit': ('空冥矿', '通玄银', '纳虚石', '玄元参', '玉髓草', '清虚莲', '玄兽元丹', '麟兽血丹', '灵犀魂丹'),
-    'true_demon': ('渊魔矿', '引煞金', '锁魔晶', '渊血芝', '魔髓藤', '定魄花', '渊兽魔丹', '冥犼血丹', '噬梦魂丹'),
-    'monster_realm': ('蛮骨矿', '雷纹铜', '地脉玉', '祖灵果', '生肌木', '启智花', '荒兽元丹', '祖兽血丹', '慧兽魂丹'),
-    'phantom_underworld': ('幻冥矿', '映魂银', '藏影石', '幻生芝', '聚形草', '醒梦莲', '幻兽元丹', '影兽血丹', '梦兽魂丹'),
-    'hell': ('狱骨矿', '引魂铁', '镇狱晶', '冥生果', '续魂藤', '净业花', '狱兽元丹', '恶兽血丹', '罪兽魂丹'),
-    'celestial': ('仙罡矿', '天纹金', '太清玉', '长生芝', '琼华草', '悟道莲', '仙兽元丹', '天麟血丹', '云鹤魂丹'),
-    'asura': ('修罗矿', '战纹铜', '藏煞晶', '战血果', '不屈藤', '止杀花', '战兽煞丹', '罗犼血丹', '怒兽魂丹'),
-    'nether': ('幽冥矿', '渡魂银', '黄泉玉', '还阳芝', '补魂草', '忘川莲', '冥兽元丹', '冥龙血丹', '渡厄魂丹'),
-    'reincarnation': ('轮回矿', '因果金', '宿命晶', '三生果', '返生藤', '照心莲', '劫兽元丹', '转生血丹', '忆世魂丹'),
-}
+WORLD_MATERIALS = _content_definition(__name__, "WORLD_MATERIALS")
 THEMES = dict(human='玄门', demon='血煞', spirit='清虚', true_demon='渊魔',
               monster_realm='祖灵', phantom_underworld='幻冥', hell='镇狱',
               celestial='太清', asura='战魂', nether='黄泉', reincarnation='三生')
@@ -28,32 +19,11 @@ THEMES = dict(human='玄门', demon='血煞', spirit='清虚', true_demon='渊�
 BASE_PRICES = (2, 8, 35, 180, 900, 4500, 22500, 110000,
                1400000, 100000000, 800000000, 6000000000)
 # At most three same-grade inputs. Every one of the nine roles has a sink.
-TEMPLATES = {
-    'healing': ('疗伤丹', 'medical', ('herb_heal', 'core_blood'), 5),
-    'cultivation': ('养元丹', 'training', ('herb_nurture', 'core_energy'), 5),
-    'longevity': ('延寿丹', 'training', ('herb_nurture', 'herb_heal', 'core_blood'), 7),
-    'breakthrough': ('破境丹', 'training', ('herb_spirit', 'core_soul', 'core_energy'), 8),
-    'artifact_attack': ('攻伐法宝', 'arms', ('ore_structure', 'ore_conduct', 'core_blood'), 9),
-    'artifact_guard': ('护身法宝', 'arms', ('ore_structure', 'ore_store', 'core_soul'), 9),
-    'repair': ('修补资材', 'material', ('ore_structure', 'herb_heal'), 5),
-    'energy': ('阵能灵珠', 'energy', ('ore_conduct', 'ore_store', 'core_energy'), 7),
-}
+TEMPLATES = _content_definition(__name__, "TEMPLATES")
 
 # Names describe a world's craft tradition; use and grade remain explicit in
 # the specification, tags and market. Keep this separate from recipe roles.
-PRODUCT_NAMES = {
-    'human': ('青囊丹', '松风丹', '松龄丹', '启玄丹', '霜华剑', '青岚佩', '续纹玉膏', '涵光珠'),
-    'demon': ('血芝丹', '赤髓丹', '续烛丹', '开幽丹', '赤煞刃', '玄鳞护符', '血炼金泥', '凝煞珠'),
-    'spirit': ('玉泉丹', '清虚丹', '鹤龄丹', '洞微丹', '流霞剑', '碧落环', '补阙灵膏', '澄虚珠'),
-    'true_demon': ('渊泉丹', '冥火丹', '长烬丹', '叩渊丹', '烬渊戈', '黑莲护印', '蚀纹玄膏', '藏渊珠'),
-    'monster_realm': ('百草丹', '月华丹', '古木丹', '鸣山丹', '苍牙刃', '青兕甲', '龙脂骨胶', '地脉明珠'),
-    'phantom_underworld': ('聚形丹', '蜃露丹', '梦华丹', '醒梦丹', '掠影刃', '蜃华镜', '织影灵胶', '映魂珠'),
-    'hell': ('冥泉丹', '幽灯丹', '长明丹', '开冥丹', '镇狱尺', '幽关护符', '续魄玄膏', '照狱珠'),
-    'celestial': ('琼华丹', '餐霞丹', '椿龄丹', '叩天丹', '天衡剑', '云笈宝衣', '琼玉续纹膏', '太清涵光珠'),
-    'asura': ('赤泉丹', '战血丹', '余烬丹', '断劫丹', '无回刀', '铜狱战甲', '赤铜血髓胶', '烬海玄珠'),
-    'nether': ('还阳丹', '玄夜丹', '冥椿丹', '叩幽丹', '烛夜剑', '玄鳞宝甲', '蜃纹玉膏', '渡魂珠'),
-    'reincarnation': ('返生丹', '三生丹', '续灯丹', '明因丹', '断缘剑', '彼岸莲台', '三生续纹膏', '照心珠'),
-}
+PRODUCT_NAMES = _content_definition(__name__, "PRODUCT_NAMES")
 
 
 def material_id(world, grade, role):

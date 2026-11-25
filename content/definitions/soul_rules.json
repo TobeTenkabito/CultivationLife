@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "SECRETS": {
+      "second_nascent": {
+        "$tuple": [
+          "第二元婴",
+          4
+        ]
+      },
+      "path_dao": {
+        "$tuple": [
+          "返璞归真",
+          1
+        ]
+      },
+      "path_demonic": {
+        "$tuple": [
+          "化魔诀",
+          1
+        ]
+      },
+      "path_ghost": {
+        "$tuple": [
+          "阴魂续命诀",
+          1
+        ]
+      },
+      "path_buddhist": {
+        "$tuple": [
+          "转轮入禅",
+          1
+        ]
+      },
+      "path_confucian": {
+        "$tuple": [
+          "养浩归儒",
+          1
+        ]
+      }
+    }
+  }
+}

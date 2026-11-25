@@ -1,4 +1,5 @@
 """DLC supply terms and independent-cultivator contracts use base escrow logic."""
+from ..definition_data import definition as _content_definition
 import copy
 from .institution_ai import contracts
 from .institution_ai.rules import digest
@@ -29,12 +30,19 @@ def offers(game):
         if recipe:
             from .westward_fair_benefits import credential
             prize=credential(game,'supply')
-            item=recipe['output'];rows.append(dict(id='garden',name='仙圃三期供货',item=item,quantity=12 if prize else 8,fair_credential=prize['id'] if prize else None,interval=50,periods=3,deadline=min(l['until'],game.player.age+200),source='estate',estate=r['id']))
+            item=recipe['output'];rows.append(dict(**_content_definition(__name__, "GARDEN_CONTRACT"),
+                                                   item=item,
+                                                   quantity=12 if prize else 8,
+                                                   fair_credential=prize['id'] if prize else None,
+                                                   deadline=min(l['until'],game.player.age+200),
+                                                   estate=r['id']))
     if primary(game)=='free':
         candidates=[(k,p) for k,p in market['commodities'].items() if k in ITEM_CATALOG and 9<=p['tier']<=game.player.realm_index+1 and p['stock']<p['target']*.6]
         if candidates:
             item,_=min(candidates,key=lambda kv:(kv[1]['stock']/max(1,kv[1]['target']),kv[0]))
-            rows.append(dict(id='free',name='散仙独立补缺契约',item=item,quantity=4,interval=10,periods=1,deadline=game.player.age+100,source='inventory'))
+            rows.append(dict(**_content_definition(__name__, "FREE_CONTRACT"),
+                             item=item,
+                             deadline=game.player.age+100))
     for row in rows:
         row['item_name']=ITEM_CATALOG[row['item']].name
         row['price']=quote(market['commodities'][row['item']],'buy',row['quantity'])['total']

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from .definition_data import definition as _content_definition
 import hashlib
 import json
 from typing import Any, Final, Iterable
@@ -57,26 +58,7 @@ SOUL_RULE_CONDITIONS: Final[dict[str, dict[str, Any]]] = {
 }
 
 
-def _effect(name: str, description: str, triggers: Iterable[str], power: float, **payload: Any) -> dict[str, Any]:
-    return {"name": name, "description": description, "triggers": tuple(triggers), "power": power, **payload}
-
-
-SOUL_RULE_EFFECTS: Final[dict[str, dict[str, Any]]] = {
-    "might_05": _effect("振威", "本轮威能提高5%", ("round_start", "initiative_resolved"), 5.0, kind="stat_multiplier", target="player", stat="might", value=0.05),
-    "guard_05": _effect("护生", "本轮防护提高5%", ("round_start", "initiative_resolved"), 5.0, kind="stat_multiplier", target="player", stat="guard", value=0.05),
-    "mobility_05": _effect("掠影", "本轮身法提高5%", ("round_start", "initiative_resolved"), 5.0, kind="stat_multiplier", target="player", stat="mobility", value=0.05),
-    "sense_05": _effect("照识", "本轮神识提高5%", ("round_start", "initiative_resolved"), 5.0, kind="stat_multiplier", target="player", stat="sense", value=0.05),
-    "sustain_05": _effect("续烛", "本轮续航提高5%", ("round_start", "initiative_resolved"), 5.0, kind="stat_multiplier", target="player", stat="sustain", value=0.05),
-    "breach_05": _effect("裂罅", "本轮破法提高5%", ("round_start", "initiative_resolved"), 5.0, kind="stat_multiplier", target="player", stat="breach", value=0.05),
-    "enemy_guard_04": _effect("蚀甲", "本轮敌方防护降低4%", ("round_start", "initiative_resolved"), 5.0, kind="stat_multiplier", target="enemy", stat="guard", value=0.04),
-    "enemy_mobility_04": _effect("缚影", "本轮敌方身法降低4%", ("round_start", "initiative_resolved"), 5.0, kind="stat_multiplier", target="enemy", stat="mobility", value=0.04),
-    "damage_up_06": _effect("逐伤", "本轮造成的态势损耗提高6%", ("initiative_resolved", "before_damage"), 6.0, kind="damage_multiplier", target="enemy", value=0.06),
-    "damage_down_06": _effect("卸煞", "本轮受到的态势损耗降低6%", ("initiative_resolved", "before_damage"), 6.0, kind="damage_multiplier", target="player", value=0.06),
-    "restore_state_02": _effect("归魂", "恢复2%最大战斗态势", ("after_damage", "round_end"), 6.0, kind="restore_state", target="player", value=0.02),
-    "restore_mp_02": _effect("纳阴", "恢复2%最大法力", ("after_damage", "round_end"), 5.0, kind="restore_mp", target="player", value=0.02),
-    "morale_self_4": _effect("镇念", "恢复4点己方战意", ("after_damage", "round_end"), 4.0, kind="modify_morale", target="player", value=4.0),
-    "morale_enemy_4": _effect("惊魄", "额外削弱敌方4点战意", ("after_damage", "round_end"), 4.0, kind="modify_morale", target="enemy", value=4.0),
-}
+SOUL_RULE_EFFECTS: dict[str, dict[str, Any]] = _content_definition(__name__, "SOUL_RULE_EFFECTS")
 
 
 def _condition_met(condition_id: str, context: dict[str, Any]) -> bool:

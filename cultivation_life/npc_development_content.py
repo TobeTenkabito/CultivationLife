@@ -1,48 +1,18 @@
 """NPC-only materials; shared ordinary-world supply policy, no game mutation."""
+from .definition_data import definition as _content_definition
 from functools import lru_cache
 from .cultivation_coordinates import STARTS, END_RANK
 
 SENSE_LIMITS = (STARTS[6]-1, STARTS[9]-1, END_RANK-1)
 
-PATHS = {'dao': ('养元丹','淬玉髓','明神砂'), 'demonic': ('凝煞丹','炼煞髓','镇念晶'),
-         'monster': ('血蕴丹','百骸髓','灵慧露'), 'ghost': ('养魄丹','冥骨髓','澄魂砂')}
-AXES = ('cultivation','body','sense')
 UPPER = dict(dao='celestial', demonic='asura', monster='nether', ghost='reincarnation')
 TIERS = dict(human=1,demon=1,spirit=2,true_demon=2,monster_realm=2,
              phantom_underworld=2,hell=2,celestial=3,asura=3,nether=3,reincarnation=3)
 
 @lru_cache(maxsize=1)
 def definitions():
-    rows = {f'npc_training_{path}_{axis}_{tier}':dict(
-        id=f'npc_training_{path}_{axis}_{tier}',path=path,axis=axis,tier=tier,
-        name=('凡品','灵品','上境')[tier-1]+names[i], price=(1,4,12)[tier-1])
-        for path,names in PATHS.items() for i,axis in enumerate(AXES) for tier in (1,2,3)}
-    for axis,name in dict(cultivation='蕴能芯',body='淬甲髓',sense='凝识枢',energy='能源晶').items():
-        for tier in (1,2,3):
-            identity=f'npc_training_puppet_{axis}_{tier}'
-            rows[identity]=dict(id=identity,path='puppet',axis=axis,tier=tier,
-                name=('凡品','灵品','上境')[tier-1]+name,price=(1,4,12)[tier-1])
-            if axis=='energy':
-                rank=(1,5,9)[tier-1]
-                rows[identity].update(rank=rank,tier=1 if rank<=5 else 2 if rank<=8 else 3,name=f'{rank}阶傀儡能源晶')
-    for rank in (2,3,4,6,7,8,10,11,12):
-        identity=f'npc_training_puppet_energy_rank_{rank}'
-        rows[identity]=dict(id=identity,path='puppet',axis='energy',rank=rank,
-            tier=1 if rank<=4 else 2 if rank<=8 else 3,name=f'{rank}阶傀儡能源晶',price=rank*rank)
-    for path,name in dict(dao='仙元露',demonic='煞元露',monster='妖元露',ghost='魂元露').items():
-        identity=f'npc_training_{path}_conversion_3'
-        rows[identity]=dict(id=identity,path=path,axis='conversion',tier=3,name=name,price=12)
-    for path,name in dict(dao='悟域仙砂',demonic='凝域煞晶',monster='镇域妖髓',ghost='轮域魂砂').items():
-        identity=f'npc_training_{path}_domain_3'
-        rows[identity]=dict(id=identity,path=path,axis='domain',tier=3,name=name,price=12)
-    for path,name in dict(dao='悟法仙笺',demonic='演法煞笺',monster='演法灵笺',ghost='悟法魂笺').items():
-        for tier in (1,2,3):
-            identity=f'npc_training_{path}_technique_{tier}'
-            rows[identity]=dict(id=identity,path=path,axis='technique',tier=tier,name=('凡品','灵品','上境')[tier-1]+name,price=(1,4,12)[tier-1])
-    for path,name in dict(dao='五光玉露',demonic='五蕴煞髓',monster='妖躯精粹',ghost='五法魂露').items():
-        identity=f'npc_training_{path}_body_art_3'
-        rows[identity]=dict(id=identity,path=path,axis='body_art',tier=3,name=name,price=12)
-    return rows
+    return _content_definition(__name__, "MATERIALS")
+
 
 def allowed(identity, world):
     row=definitions().get(identity)

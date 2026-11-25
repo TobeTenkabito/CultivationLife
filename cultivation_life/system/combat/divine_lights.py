@@ -1,6 +1,7 @@
 """Battle integration for the neutral round-start mechanism planner."""
 from .body_mechanisms import BodyRound,mechanisms
 from .body_effects import BodyEffects
+from ...divine_light_content import base_light_names
 
 
 class DivineLights(BodyEffects):
@@ -47,11 +48,10 @@ class DivineLights(BodyEffects):
                 triggered='、'.join(r['name'] for r in records.values() if r['triggered']) or '无'
                 self._light_note('body_rolls',key,f'{self.units[key].unit.name}轮首统一判定，原始触发：{triggered}；此清单在静默裁决后保留。')
         if self.frame.round_no==1:
-            names={'kun':'坤元缃光','zhen':'震合缥光','kan':'坎道玄光','li':'离上朱光','qian':'乾古素光'}
             for key in self._unit_order():
                 state=self.units[key]
                 caps=state.unit.capabilities;rows=[]
-                for light,name in names.items():
+                for light,name in (base_light_names().items() if caps.divine_lights else ()):
                     if not caps.divine_lights.get(light):continue
                     value=caps.divine_lights.get('kun_resist' if light=='kun' else 'zhen_heal' if light=='zhen' else light,0)
                     meaning='免疫凡伤，抵抗封禁' if light=='kun' else '治疗保留普通出手，治疗增强' if light=='zhen' else '基础态势削弱' if light=='li' else '触发概率'

@@ -2,12 +2,12 @@
 from ..content_registry import CONTENT_DOCUMENTS
 from .npc_body_attainments import rank as trained_rank
 
-IDS = ('kun', 'zhen', 'kan', 'li', 'qian')
-NAMES = ('坤元缃光', '震合缥光', '坎道玄光', '离上朱光', '乾古素光')
-
-
 def definitions():
     return CONTENT_DOCUMENTS['doctrines.json']['cultivation']['divine_lights']
+
+
+IDS = tuple(row['id'] for row in definitions())
+NAMES = tuple(row['name'] for row in definitions())
 
 
 def body_record(owner, *, player=False):

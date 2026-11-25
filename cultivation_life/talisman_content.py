@@ -3,6 +3,7 @@
 No mutable runtime registry or dependency on the engine. Instance catalogs are
 derived only for the occupied space, and never become outside trade goods.
 """
+from .definition_data import definition as _content_definition
 
 from functools import lru_cache
 from itertools import combinations
@@ -17,7 +18,7 @@ WORLD_TIERS = {
     "asura": ("修罗", range(9, 13)), "nether": ("幽天", range(9, 13)),
     "reincarnation": ("轮回", range(9, 13)),
 }
-PATTERN_NAMES = ("破军", "护元", "扶灵", "攻守", "御风", "护灵", "三元")
+PATTERN_NAMES = _content_definition(__name__, "PATTERN_NAMES")
 PATTERNS = dict(zip(
     ("_".join(c) for size in (1, 2, 3) for c in combinations(DIMENSIONS, size)),
     PATTERN_NAMES,
@@ -31,8 +32,7 @@ def generate(world, prefix, tiers):
     for tier in tiers:
         label = TIER_NAMES[tier] + "阶"
         value = round(6 * 3.2 ** (tier - 1))
-        for suffix, name, quality in (("paper", "符纸", 1.), ("ink", "朱砂", 1.2),
-                                      ("jade", "符玉", 1.4)):
+        for suffix, name, quality in _content_definition(__name__, "generate_suffix_name_quality"):
             identity = f"talisman_{world}_{tier}_{suffix}"
             materials[identity] = dict(id=identity, name=f"{label}{prefix}{name}",
                 world=world, tier=tier, quality=quality, base_value=round(value * quality),

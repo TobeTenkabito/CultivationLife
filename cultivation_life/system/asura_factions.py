@@ -1,4 +1,5 @@
 """Optional royal factions. State belongs to the court, never to Sage DLC."""
+from ..definition_data import definition as _content_definition
 
 import copy
 import hashlib
@@ -18,11 +19,9 @@ from ..rules import add_item, opportunity_required
 from . import asura
 from .influence import redistribute
 
-FACTIONS = {
-    "blood_clans": "血裔诸族",
-    "war_hosts": "征伐军府",
-    "free_cities": "万战城盟",
-}
+
+
+FACTIONS = _content_definition(__name__, "FACTIONS")
 CATEGORIES = {"political": "政治", "diplomatic": "外交", "military": "军事"}
 POLICY_CATEGORIES = {"war": "military", "recruit": "military", "tax": "military"}
 RULES = {

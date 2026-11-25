@@ -1,5 +1,6 @@
 """Static trial sites: causal text decisions, original effects and combat ports."""
 from __future__ import annotations
+from ..definition_data import definition as _content_definition
 
 import copy
 from dataclasses import dataclass
@@ -268,9 +269,9 @@ def target_for(site, floor):
                   members=[member], natural_terrain='开阔', artificial_conditions=[],
                   static_resource_ids=[key], enemy_buffs=[])
     if floor['guard']:
-        target['enemy_buffs'].append(dict(id='trial_guard', name='香火庇护', stat='guard', multiplier=1.2))
+        target['enemy_buffs'].append(_content_definition(__name__, "GUARD_BUFF"))
     if floor['bonus']:
-        target['enemy_buffs'].append(dict(id='trial_residue', name='旧愿加持', stat='might', multiplier=1.1))
+        target['enemy_buffs'].append(_content_definition(__name__, "RESIDUE_BUFF"))
     if floor['realm'] >= 9:
         domain_id = key + '_field'
         member['transcendence'] = dict(version=1, conversion=1, capacity=1200., current=floor['energy'],
@@ -278,10 +279,9 @@ def target_for(site, floor):
             attainments={'trial_field': floor['realm'] - 8}, voisinage_ids=[domain_id] if floor['field'] else [])
         # Empty explicit grant after sealing must not fabricate a learned NPC doctrine.
         member['transcendence']['doctrine'] = {'manuals': [], 'manual_level': 0, 'progress': {}, 'active': None, 'at': 0, 'world': ''}
-        target['voisinages'] = [dict(id=domain_id, name='试境守关域', attainment='trial_field', required_level=1,
-            strength=1 + (floor['realm'] - 9) * .8 + (floor['layer'] - 1) * .03,
-            opening_cost=80., upkeep_cost=40., effect='strike', effect_cost=35., effect_power=.2,
-            max_investment=0.)]
+        target['voisinages'] = [dict(**_content_definition(__name__, "GUARD_DOMAIN"),
+                                     id=domain_id,
+                                     strength=1 + (floor['realm'] - 9) * .8 + (floor['layer'] - 1) * .03)]
     return target
 
 

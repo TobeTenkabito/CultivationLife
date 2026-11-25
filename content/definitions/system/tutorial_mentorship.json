@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "MENTOR": {
+      "name": "沈照尘",
+      "title": "云游讲道的前辈",
+      "realm_index": 3,
+      "layer": 7,
+      "age": 180,
+      "spirit_root": "supreme_wood",
+      "affinity": 35,
+      "realm_label": "结丹后期"
+    }
+  }
+}

@@ -1,10 +1,14 @@
 """Shared apprenticeship rules for reading lessons and the interactive walkthrough."""
+from ..definition_data import definition as _content_definition
 from ..content_registry import REALMS, WORLD_SYSTEMS
 from ..models import HistoryRecord, SectNpc
 from ..rules import has_living_master
 from ..traits import birth
 
 MENTOR_STEP = 6
+
+
+MENTOR = _content_definition(__name__, "MENTOR")
 
 
 def blocked_reason(game):
@@ -15,7 +19,7 @@ def blocked_reason(game):
         return '请先处理眼前的事件、试炼或困境，再赴师缘。'
     if has_living_master(p):
         return '你已有在世的师父；本课不会替换现有师承。'
-    if max(p.realm_index, int((p.sealed_cultivation or {}).get('realm_index', 0))) >= 3:
+    if max(p.realm_index, int((p.sealed_cultivation or {}).get('realm_index', 0))) >= MENTOR['realm_index']:
         return '这份结丹师缘留给尚未结丹的新手；你仍可阅读这一课。'
     if WORLD_SYSTEMS['world_profiles'].get(p.world, {}).get('tier', 1) != 1:
         return '这位结丹修士在人间诸界云游，上界角色可阅读师承说明。'
@@ -26,7 +30,7 @@ def mentor_status(game):
     state = game.player.tutorial_state
     npc = game.notable_npcs.get(state.get('mentor_id'))
     reason = blocked_reason(game)
-    if npc and (not npc.alive or npc.world != game.player.world or npc.realm_index != 3):
+    if npc and (not npc.alive or npc.world != game.player.world or npc.realm_index != MENTOR['realm_index']):
         reason = '师缘已随岁月或行踪改变；请在同道往来中另寻师承。'
     result = state.get('mentor_result')
     return dict(enabled=bool(state.get('enabled')), step=state.get('step', 0),
@@ -34,7 +38,7 @@ def mentor_status(game):
         can_offer=not reason and not result and npc is None,
         can_accept=not reason and not result and npc is not None,
         blocked_reason=reason,
-        mentor=({'name': npc.name, 'id': npc.id, 'realm': '结丹后期', 'alive': npc.alive} if npc else None))
+        mentor=({'name': npc.name, 'id': npc.id, 'realm': MENTOR['realm_label'], 'alive': npc.alive} if npc else None))
 
 
 def mentor_action(engine, game, action):
@@ -51,11 +55,11 @@ def mentor_action(engine, game, action):
         if not info['can_offer']:
             raise ValueError(info['blocked_reason'])
         key = 'tutorial_mentor:' + game.id
-        span = REALMS[3].lifespan
-        npc = SectNpc(key, '沈照尘', '云游讲道的前辈', 3, 7, 180,
-            max(181, sum(span) // 2) if span else None,
-            spirit_root='supreme_wood', path=p.path, race=p.race,
-            world=p.world, affinity=35, encountered_player=True,
+        span = REALMS[MENTOR['realm_index']].lifespan
+        npc = SectNpc(key, MENTOR['name'], MENTOR['title'], MENTOR['realm_index'], MENTOR['layer'], MENTOR['age'],
+            max(MENTOR["age"] + 1, sum(span) // 2) if span else None,
+            spirit_root=MENTOR['spirit_root'], path=p.path, race=p.race,
+            world=p.world, affinity=MENTOR["affinity"], encountered_player=True,
             trait_state=birth(game.seed, "tutorial_mentor"))
         from .cultivation_ranks import ensure_npc
         from .npc_social import instantiate_social
@@ -65,7 +69,7 @@ def mentor_action(engine, game, action):
         game.notable_npcs[key] = npc
         instantiate_social(game, npc)
         state['mentor_id'] = key
-        summary = '结丹后期修士沈照尘停步讲道，愿引你入门。你可以执弟子礼，或谢过这份好意。'
+        summary = f'{MENTOR["realm_label"]}修士{npc.name}停步讲道，愿引你入门。你可以执弟子礼，或谢过这份好意。'
         result = 'offered'
     else:
         npc = game.notable_npcs.get(state.get('mentor_id'))
@@ -76,15 +80,15 @@ def mentor_action(engine, game, action):
                 raise ValueError(info['blocked_reason'])
             relation = engine._relationship_snapshot(npc.id, npc.name, npc.realm_index, npc.layer,
                 'world', npc.age, npc.lifespan, spirit_root=npc.spirit_root,
-                path=npc.path, race=npc.race, world=npc.world, affinity=35, gender=npc.gender)
+                path=npc.path, race=npc.race, world=npc.world, affinity=MENTOR["affinity"], gender=npc.gender)
             from .mentorship import admit, replace_master
             replace_master(game, game.link_relationship(relation))
             admit(game, npc.id, "player")
             result = 'accepted'
-            summary = '你执弟子礼，沈照尘欣然收徒。自此可在关系窗口查看师承、请益修行；师父也有自己的修行与际遇。'
+            summary = f'你执弟子礼，{npc.name}欣然收徒。自此可在关系窗口查看师承、请益修行；师父也有自己的修行与际遇。'
         else:
             result = 'declined'
-            summary = '你谢过沈照尘的好意，决定自行问道。这次选择不损及声望，也不影响日后另寻师承。'
+            summary = f'你谢过{npc.name}的好意，决定自行问道。这次选择不损及声望，也不影响日后另寻师承。'
         state['mentor_result'] = result
     game.history.append(HistoryRecord('SYS_TUTORIAL_MENTOR', 1, p.age, '山道授业', action,
         result, summary, {'npc_id': state['mentor_id']}, ['system', 'relationship', 'master', 'tutorial']))

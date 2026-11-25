@@ -1,4 +1,5 @@
 """Original land-temple network and local services through real yearly actions."""
+from ..definition_data import definition as _content_definition
 import copy
 import hashlib
 import json
@@ -19,14 +20,7 @@ from .westward_rules import enabled
 from .immortal_identity_rules import official
 
 
-DUTIES = {
-    'watch': dict(name='巡境护民', mark='境', description='勘查城郊公共道路，定期巡守并维护沿途警示。',
-                  role='ore_structure', count=12, labor=120, trust=10),
-    'care': dict(name='庙前济用', mark='生', description='核对庙前公共设施，补置导灵器材并持续照料。',
-                 role='ore_conduct', count=8, labor=180, trust=15),
-    'teach': dict(name='开坛讲习', mark='教', description='筹备凡人可听的养生与识险讲习，亲自轮值授课。',
-                  role='ore_store', count=4, labor=80, trust=5),
-}
+DUTIES = _content_definition(__name__, "DUTIES")
 
 
 def settle_service(game,ledger,kind,started):

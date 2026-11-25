@@ -1,4 +1,5 @@
 """Persistent royal seats and elapsed-time governance, available without DLC."""
+from ..definition_data import definition as _content_definition
 from .character.dependencies import AsuraCourtDependencies
 import copy
 import hashlib
@@ -12,21 +13,9 @@ from . import asura_factions
 
 from .asura_court_finance import COURT, people, present, talent, benefits
 KING = 5
-OFFICES = {
-    'treasury': ('府库总管', '每单位府库收入增加才干值的千分之二'),
-    'marshal': ('掌军使', '新委托功勋增加才干值的千分之二'),
-    'ritual': ('养域使', '本界邻域培养费用额外减免才干值的千分之一'),
-}
-WORKS = {
-    'market': ('万战互市', '每级使府库单位收入增加一成'),
-    'barracks': ('血战武院', '每级使新委托功勋增加一成'),
-    'sanctum': ('养域坛', '每级使本界邻域培养费用额外减少三个百分点'),
-}
-DECREES = {
-    'relief': ('开仓安抚', 240000, '府库 −240,000，民心 +15'),
-    'levy': ('征收战赋', 0, '府库 +300,000，民心 −15；民心至少四十'),
-    'reward': ('犒赏群臣', 200000, '府库 −200,000，所有在世廷臣忠诚 +12'),
-}
+OFFICES = _content_definition(__name__, "OFFICES")
+WORKS = _content_definition(__name__, "WORKS")
+DECREES = _content_definition(__name__, "DECREES")
 
 
 def cfg():

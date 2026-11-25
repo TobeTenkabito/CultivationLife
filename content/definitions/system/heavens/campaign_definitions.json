@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "CAMPAIGN_ID": "lanjiang_gate",
+    "SOURCE": "blood_prison",
+    "DEFENDER": "tianjian",
+    "DONOR": "taixuan",
+    "SOURCE_WORLD_SOURCE_SITE": {
+      "$tuple": [
+        "demon",
+        "red_marrow_city"
+      ]
+    },
+    "TARGET_WORLD_TARGET_SITE": {
+      "$tuple": [
+        "human",
+        "lanjiang_steppe"
+      ]
+    },
+    "REPORT_SITE": "wudi_plain",
+    "BUILD_YEARS_LIFT_YEARS_EVAC_YEARS": {
+      "$tuple": [
+        40,
+        16,
+        8
+      ]
+    },
+    "MANDATE_YEARS_BUDGET_ANNUAL_COST": {
+      "$tuple": [
+        600,
+        90000,
+        100
+      ]
+    },
+    "INITIAL_SUPPLY_CARRIED_SUPPLY_BATCH": {
+      "$tuple": [
+        120,
+        36,
+        24
+      ]
+    },
+    "AID_BUDGET_AID_COST": {
+      "$tuple": [
+        12000,
+        500
+      ]
+    },
+    "DEFENSE_BUDGET": 30000,
+    "ROUTE_ID": "military:demon:human:lanjiang",
+    "EVAC_ROUTE": "evacuation:human:demon:lanjiang",
+    "AID_ROUTE": "aid:spirit:human:wudi"
+  }
+}

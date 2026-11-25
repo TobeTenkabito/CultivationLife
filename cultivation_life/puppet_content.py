@@ -1,16 +1,8 @@
 """Base-game puppet forms and tiered components for all eleven worlds."""
+from .definition_data import definition as _content_definition
 from functools import lru_cache
 
-FORMS = {
-    'humanoid': dict(name='人形', shell='玄甲外骨', route=None),
-    'deva': dict(name='天人像', shell='净相玉躯', route='deva'),
-    'dragon': dict(name='龙形', shell='盘龙鳞骨', route='naga'),
-    'yaksha': dict(name='夜叉形', shell='夜叉战甲', route='yaksha'),
-    'flora': dict(name='灵木形', shell='香音灵木', route='gandharva'),
-    'serpent': dict(name='蛇形', shell='玄蛇柔骨', route='mahoraga'),
-    'kinnara': dict(name='乐伎形', shell='合鸣音躯', route='kinnara'),
-    'bird': dict(name='鸟形', shell='云翼羽骨', route='garuda'),
-}
+FORMS = _content_definition(__name__, "FORMS")
 WORLDS = {
     'human': ('青岚', range(1,6)), 'demon': ('赤煞', range(1,6)),
     'spirit': ('玄灵',range(5,9)), 'true_demon': ('真魔',range(5,9)),
@@ -23,8 +15,7 @@ PRICES = (0, 18, 80, 360, 1600, 7200, 32000, 144000, 648000, 2900000, 13000000, 
 @lru_cache(maxsize=1)
 def definitions():
     rows = {}
-    components = [('core','array','阵枢',1.), ('core','spirit','灵枢',1.15),
-                  ('energy','crystal','蕴光晶',1.), ('energy','marrow','凝元髓',1.15)]
+    components = _content_definition(__name__, "definitions_components")
     components += [('shell',form,info['shell'],1.) for form,info in FORMS.items()]
     for world,(prefix,tiers) in WORLDS.items():
         for tier in tiers:

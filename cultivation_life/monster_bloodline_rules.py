@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from .definition_data import definition as _content_definition
 import hashlib
 import json
 from typing import Any, Final, Iterable
@@ -87,50 +88,8 @@ BLOODLINE_RULE_CONDITIONS: Final[dict[str, dict[str, Any]]] = {
 }
 
 
-def _effect(
-    name: str, description: str, family: str, triggers: Iterable[str], power: float,
-    **payload: Any,
-) -> dict[str, Any]:
-    return {
-        "name": name, "description": description, "family": family,
-        "triggers": tuple(triggers), "power": power, **payload,
-    }
+BLOODLINE_RULE_EFFECTS: dict[str, dict[str, Any]] = _content_definition(__name__, "BLOODLINE_RULE_EFFECTS")
 
-
-BLOODLINE_RULE_EFFECTS: dict[str, dict[str, Any]] = {}
-for _stat, _label in STAT_NAMES.items():
-    for _suffix, _value, _power in (("minor", 0.06, 6.0), ("major", 0.10, 10.0)):
-        BLOODLINE_RULE_EFFECTS[f"self_{_stat}_{_suffix}"] = _effect(
-            f"{_label}滋长", f"本轮自身{_label}提高{_value:.0%}", f"self_stat:{_stat}",
-            ("round_start", "initiative_resolved"), _power,
-            kind="stat_multiplier", target="player", stat=_stat, value=_value,
-        )
-for _stat, _label in STAT_NAMES.items():
-    for _suffix, _value, _power in (("minor", 0.05, 6.0), ("major", 0.08, 10.0)):
-        BLOODLINE_RULE_EFFECTS[f"enemy_{_stat}_{_suffix}"] = _effect(
-            f"{_label}侵蚀", f"本轮敌方{_label}降低{_value:.0%}", f"enemy_stat:{_stat}",
-            ("round_start", "initiative_resolved"), _power,
-            kind="stat_multiplier", target="enemy", stat=_stat, value=_value,
-        )
-BLOODLINE_RULE_EFFECTS.update({
-    "damage_up_08": _effect("猎伤", "本轮造成的态势损耗提高8%", "damage_up", ("initiative_resolved", "before_damage"), 7.0, kind="damage_multiplier", target="enemy", value=0.08),
-    "damage_up_12": _effect("猎杀", "本轮造成的态势损耗提高12%", "damage_up", ("initiative_resolved", "before_damage"), 10.5, kind="damage_multiplier", target="enemy", value=0.12),
-    "damage_down_08": _effect("卸力", "本轮受到的态势损耗降低8%", "damage_down", ("initiative_resolved", "before_damage"), 7.5, kind="damage_multiplier", target="player", value=0.08),
-    "damage_down_12": _effect("护生", "本轮受到的态势损耗降低12%", "damage_down", ("initiative_resolved", "before_damage"), 11.0, kind="damage_multiplier", target="player", value=0.12),
-    "damage_cap_28": _effect("分震", "使本轮战斗态势损失不超过28%", "damage_cap", ("before_damage",), 9.0, kind="damage_cap", target="player", value=0.28),
-    "damage_cap_24": _effect("锁命", "使本轮战斗态势损失不超过24%", "damage_cap", ("before_damage",), 13.0, kind="damage_cap", target="player", value=0.24),
-    "reclaim_15": _effect("回元", "回收本轮态势损失的15%，每轮最多恢复3%", "reclaim", ("after_damage",), 8.0, kind="reclaim_loss", target="player", value=0.15, cap=0.03),
-    "reclaim_20": _effect("返生", "回收本轮态势损失的20%，每轮最多恢复4%", "reclaim", ("after_damage",), 11.5, kind="reclaim_loss", target="player", value=0.20, cap=0.04),
-    "restore_state_02": _effect("养命", "恢复2%最大战斗态势", "state_restore", ("round_end",), 7.0, kind="restore_state", target="player", value=0.02),
-    "restore_state_03": _effect("生息", "恢复3%最大战斗态势", "state_restore", ("round_end",), 10.5, kind="restore_state", target="player", value=0.03),
-    "restore_mp_02": _effect("回气", "恢复2%最大法力", "mp_restore", ("round_end",), 4.5, kind="restore_mp", target="player", value=0.02),
-    "restore_mp_03": _effect("纳灵", "恢复3%最大法力", "mp_restore", ("round_end",), 6.5, kind="restore_mp", target="player", value=0.03),
-    "morale_self_4": _effect("定魄", "恢复4点己方战意", "self_morale", ("after_damage", "round_end"), 4.0, kind="modify_morale", target="player", value=4.0),
-    "morale_self_6": _effect("不屈", "恢复6点己方战意", "self_morale", ("after_damage", "round_end"), 6.0, kind="modify_morale", target="player", value=6.0),
-    "morale_enemy_4": _effect("惊魂", "额外削弱敌方4点战意", "enemy_morale", ("after_damage", "round_end"), 4.0, kind="modify_morale", target="enemy", value=4.0),
-    "morale_enemy_6": _effect("慑魄", "额外削弱敌方6点战意", "enemy_morale", ("after_damage", "round_end"), 6.0, kind="modify_morale", target="enemy", value=6.0),
-})
-BLOODLINE_RULE_EFFECTS = dict(BLOODLINE_RULE_EFFECTS)
 
 _SPECIES_EFFECT_FAMILIES: Final[dict[str, tuple[str, ...]]] = {
     "serpent": ("damage_up", "enemy_stat:mobility", "enemy_stat:guard", "self_stat:breach"),

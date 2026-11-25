@@ -110,9 +110,10 @@ def resolve_npc_engagement(attackers: list[tuple[Any, float]], defenders: list[t
             units.append(Combatant(npc.id, npc.name, side, max(1.0, power), capabilities,
                                    cultivation_rank=rank_for(npc.realm_index, npc.layer),
                                    body_integrity=max(.01, 1 - npc.wounds * .15)))
+    from ...traits import SPECIAL_EFFECTS
     battle = VoisinageBattle(units, contest_ratio=float(config.get("contest_ratio", 1.25)))
     if not battle.enabled and not any(s.unit.capabilities.attributes.get("ward") or
-            set(s.unit.capabilities.attributes.get("traits", ())) & {"strength","star_body","swift_bone","red_bones"} for s in battle.units.values()):
+            set(s.unit.capabilities.attributes.get("traits", ())) & set(SPECIAL_EFFECTS["unarmed_npc_combat"]) for s in battle.units.values()):
         return None  # No combat RNG or combat costs on the conventional path.
     battle.set_objectives(attacker_objective, defender_objective)
     ongoing_rules = any(row['trigger'] != 'battle_start' for u in units for row in u.capabilities.semantic_rules)

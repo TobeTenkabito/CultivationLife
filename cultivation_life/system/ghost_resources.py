@@ -1,5 +1,6 @@
 """Ghost resource state and soul projections without reincarnation or world actions."""
 from __future__ import annotations
+from ..definition_data import definition as _content_definition
 import copy
 import math
 from typing import Any
@@ -29,16 +30,7 @@ THREE_SOUL_STATS = frozenset({"opportunity", "external_mp", "external_hp"})
 # Legacy fixed soul traits remain executable so existing saves keep their exact
 # behavior.  Newly spawned night-parade souls use the generated rule grammar in
 # ghost_soul_traits.py instead.
-SOUL_TRAIT_RULES = {
-    "寒魄": "失去先手时，本轮防护提高 12%",
-    "执念": "受到的战意损失降低 25%，战意最低保留 8 点",
-    "迅影": "前两轮争夺先手时，身法判定提高 12%",
-    "噬灵": "每次有效攻势侵蚀敌方 4% 防护，最多叠加三层",
-    "宿慧": "所有机缘获取额外提高 8%",
-    "不灭": "每场战斗首次陷入危局时，恢复 8% 战斗态势与 5% 法力",
-    "凶魂": "敌方战斗态势不高于 35% 时，造成的损耗提高 15%",
-    "明识": "禁神识环境的惩罚由 14% 降至 6%",
-}
+SOUL_TRAIT_RULES = _content_definition(__name__, "SOUL_TRAIT_RULES")
 
 
 def ghost_cultivation_config() -> dict[str, Any]:

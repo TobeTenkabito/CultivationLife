@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "MATERIALS": {
+      "$tuple": [
+        {
+          "$tuple": [
+            "triple_forged_god_demon_iron",
+            "三铸神魔铁"
+          ]
+        },
+        {
+          "$tuple": [
+            "yin_yang_hespring_steel",
+            "阴阳和泉钢"
+          ]
+        },
+        {
+          "$tuple": [
+            "primordial_taiyi_silver",
+            "原初太一银"
+          ]
+        },
+        {
+          "$tuple": [
+            "innate_yuanhe_alloy",
+            "先天元合金"
+          ]
+        }
+      ]
+    }
+  }
+}

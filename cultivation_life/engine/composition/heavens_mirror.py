@@ -1,4 +1,5 @@
 """Mirror anomaly adapters reuse world transitions, spatial isolation and combat."""
+from ...definition_data import definition as _content_definition
 from ...rules import max_mp
 from ...system import spatial
 from ...system.heavens.definitions import MIRROR_ID
@@ -49,14 +50,10 @@ def bind_mirror(engine):
         state = spatial.ensure(game)
         scene = state['instances'].get(mirror['scene_id'])
         if scene is None:
-            scene = dict(id=mirror['scene_id'], name='镜律场域', kind='heavens', tier=0,
-                heavens_target=MIRROR_ID, location_id='mirror_hall',
-                locations=[dict(id='mirror_hall', name='三镜回廊', description='三处机关保存独立状态，入口通向人界穆陵沙漠。',
-                    combat_terrain='狭窄', combat_conditions=[],
-                    qi_gain_efficiencies=dict(spirit=1, demon=1, monster=1, yin=1))],
-                edges=[], materials=[], techniques=[], npc_ids=[], sects=[], joined_sect=None,
-                visits=0, explored=0, power_ceiling=None, resource_ceiling=None,
-                power_description='有限机关场域。', resource_description='所得仅来自三处已登记机关，不生成随机战利品。')
+            scene = dict(**_content_definition(__name__, "MIRROR"),
+                         id=mirror['scene_id'],
+                         heavens_target=MIRROR_ID,
+                         locations=[_content_definition(__name__, "prepare_id")])
             state['instances'][scene['id']] = scene
         return scene
 

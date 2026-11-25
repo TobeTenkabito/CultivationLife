@@ -3,13 +3,12 @@ from __future__ import annotations
 import json
 import copy
 import math
-import os
-import sys
 from dataclasses import dataclass
 from itertools import combinations
 from pathlib import Path
 from typing import Any
 
+from .content_paths import default_content_root, default_extension_root
 from .models import Item, RealmDef, SectNpc, Technique, TransformationForm
 from .combat_traits import COMBAT_TRAIT_REGISTRY
 from .monster_bloodline_traits import BLOODLINE_TRAIT_REGISTRY
@@ -1868,26 +1867,6 @@ class ContentRegistry:
             raise ContentError("宗门招募概率必须分别配置人界、魔界、灵界、真魔界、仙界与修罗界")
         if any(not rows or float(rows[-1].get("upper", 0)) != 1.0 for rows in distributions_by_world.values()):
             raise ContentError("各世界宗门招募概率表必须覆盖完整概率区间")
-
-
-def default_content_root() -> Path:
-    if os.environ.get("CULTIVATION_APP_ROOT"):
-        return Path(os.environ["CULTIVATION_APP_ROOT"]) / "content"
-    source_root = Path(__file__).resolve().parent.parent
-    if getattr(sys, "frozen", False):
-        editable_content = Path(sys.executable).resolve().parent / "content"
-        if editable_content.is_dir():
-            return editable_content
-        source_root = Path(getattr(sys, "_MEIPASS", source_root))
-    return source_root / "content"
-
-
-def default_extension_root() -> Path:
-    if os.environ.get("CULTIVATION_APP_ROOT"):
-        return Path(os.environ["CULTIVATION_APP_ROOT"])
-    if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
-    return Path(__file__).resolve().parent.parent
 
 
 CONTENT = ContentRegistry.load(default_content_root(), default_extension_root())

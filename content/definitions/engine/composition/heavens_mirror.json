@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "prepare_id": {
+      "id": "mirror_hall",
+      "name": "三镜回廊",
+      "description": "三处机关保存独立状态，入口通向人界穆陵沙漠。",
+      "combat_terrain": "狭窄",
+      "combat_conditions": [],
+      "qi_gain_efficiencies": {
+        "spirit": 1,
+        "demon": 1,
+        "monster": 1,
+        "yin": 1
+      }
+    },
+    "MIRROR": {
+      "name": "镜律场域",
+      "kind": "heavens",
+      "tier": 0,
+      "location_id": "mirror_hall",
+      "edges": [],
+      "materials": [],
+      "techniques": [],
+      "npc_ids": [],
+      "sects": [],
+      "joined_sect": null,
+      "visits": 0,
+      "explored": 0,
+      "power_ceiling": null,
+      "resource_ceiling": null,
+      "power_description": "有限机关场域。",
+      "resource_description": "所得仅来自三处已登记机关，不生成随机战利品。"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "ENDPOINTS": {
+      "human": "wudi_plain",
+      "demon": "red_marrow_city",
+      "spirit": "hundred_race_city",
+      "true_demon": "abyss_city",
+      "monster_realm": "myriad_beast_city",
+      "phantom_underworld": "nine_tail_dream_city",
+      "hell": "yin_market_capital",
+      "celestial": "jade_capital",
+      "asura": "ten_thousand_battle_city",
+      "nether": "world_tree_crown",
+      "reincarnation": "karma_city"
+    }
+  }
+}

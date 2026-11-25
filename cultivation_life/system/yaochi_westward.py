@@ -1,6 +1,7 @@
 """Yaochi personal projects: authoritative quotes, paid years and one-time delivery."""
 from __future__ import annotations
 
+from ..definition_data import definition as _content_definition
 import copy
 import hashlib
 import json
@@ -75,10 +76,12 @@ def quotes(game):
     if not enabled() or p.path != 'dao' or p.realm_index < 9:
         return []
     base = reason(game) or ('请先完成或退出当前专修' if project(game) else '')
-    rows = [dict(id='trace', kind='trace', name='澄心池', mark='澄', years=cfg['trace_years'],
-                 price=cfg['trace_price'], materials={}, reason=base,
+    rows = [dict(**_content_definition(__name__, "TRACE_POOL"),
+                 years=cfg['trace_years'],
+                 price=cfg['trace_price'],
+                 reason=base,
                  description=f"凝聚 {cfg['trace_reward']} 道仙痕，按实际修持年数积累。",
-                 benefit=f"{cfg['trace_reward']} 仙痕", comparison='专修期间不获得普通闭关机缘')]
+                 benefit=f"{cfg['trace_reward']} 仙痕")]
     from .yaochi_guidance import quote as guidance_quote
     rows.append(guidance_quote(game,base))
     manual = body_manual(p)
@@ -92,12 +95,15 @@ def quotes(game):
             body_reason = '仙躯已达五十层'
     materials = body_recipe(p) if manual and p.immortal_body.get('level', 0) < 50 else {}
     fee = math.ceil(_material_value(game, materials) * Fraction(str(cfg['body_fee_rate']))) if materials else 0
-    rows.append(dict(id='body', kind='body', name='玉液池', mark='玉', years=cfg['body_years'],
-                     price=fee, materials=materials, reason=body_reason,
-                     level=p.immortal_body.get('level', 0), manual=manual['id'] if manual else None,
+    rows.append(dict(**_content_definition(__name__, "BODY_POOL"),
+                     years=cfg['body_years'],
+                     price=fee,
+                     materials=materials,
+                     reason=body_reason,
+                     level=p.immortal_body.get('level', 0),
+                     manual=manual['id'] if manual else None,
                      failures=p.immortal_body.get('failures', 0),
                      chance=min(1, body_probability(p) + cfg['body_chance_bonus']),
-                     description='以完整仙药配方淬体，成功率增加15个百分点，保留失败保底。',
                      benefit=f"{min(1, body_probability(p) + cfg['body_chance_bonus']):.0%} 成功率",
                      comparison=f"普通淬体 {body_probability(p):.0%} · 原入口无需十年工时"))
     _, levels = profile(p, player=True)

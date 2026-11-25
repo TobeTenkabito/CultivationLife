@@ -1,4 +1,5 @@
 """Finite M1 action scope and framework definition validation."""
+from ...definition_data import definition as _content_definition
 from dataclasses import dataclass, field, asdict
 from .frontier_definitions import FRONTIER_ACTIONS
 from .campaign_definitions import CAMPAIGN_ACTIONS
@@ -38,14 +39,7 @@ class OmenDefinition:
     lifetime_years: int = 600
 
 
-OMENS = (
-    OmenDefinition('sand_glimmer', '沙中重影', 'muling_desert', '穆陵沙漠',
-        '沙上偶尔映出两道错开的影子。你拾起石片，底下露出一点微光。',
-        '你绕石走了半圈。日影在移，石旁那道重影却钉在原处。那是一道镜纹，修至元婴便可感知入口。', MIRROR_ID),
-    OmenDefinition('stone_resonance', '旧石回声', 'wudi_plain', '无棣原',
-        '风停了，旧石还在嗡嗡作响。你把砂砾洒在石面上，几粒细砂沿着石纹轻轻跳动。',
-        '附近旧阵每响一声，石上的细砂便跳一下。沿着这些石纹可以找到遗址，修至元婴便可感知入口。', RUINS_ID),
-)
+OMENS = _content_definition(__name__, "OMENS", OmenDefinition)
 OMEN_IDS = frozenset(row.id for row in OMENS)
 
 
@@ -63,27 +57,30 @@ def validate_omen_definition(raw):
             raise ValueError('诸天征兆初值或版本无效')
 
 
+RUINS_DEFINITION_DEFAULTS = _content_definition(__name__, "RUINS_DEFINITION_DEFAULTS")
+
+
 @dataclass(frozen=True, slots=True)
 class RuinsDefinition:
-    revision: int = 1
-    world: str = 'human'
-    location_id: str = 'wudi_plain'
-    linked_world: str = 'demon'
-    linked_location_id: str = 'red_marrow_city'
-    observe_years: int = 2
-    verify_years: int = 4
-    read_years: int = 6
-    take_years: int = 1
-    replace_years: int = 8
-    erase_years: int = 3
-    contact_years: int = 4
-    return_years: int = 2
-    replace_stones: int = 500
-    erase_stones: int = 300
-    mana_fraction: float = .05
-    guardian_power: float = 2200.0
-    trace_read_years: int = 6
-    trace_send_years: int = 4
+    revision: int = RUINS_DEFINITION_DEFAULTS["revision"]
+    world: str = RUINS_DEFINITION_DEFAULTS["world"]
+    location_id: str = RUINS_DEFINITION_DEFAULTS["location_id"]
+    linked_world: str = RUINS_DEFINITION_DEFAULTS["linked_world"]
+    linked_location_id: str = RUINS_DEFINITION_DEFAULTS["linked_location_id"]
+    observe_years: int = RUINS_DEFINITION_DEFAULTS["observe_years"]
+    verify_years: int = RUINS_DEFINITION_DEFAULTS["verify_years"]
+    read_years: int = RUINS_DEFINITION_DEFAULTS["read_years"]
+    take_years: int = RUINS_DEFINITION_DEFAULTS["take_years"]
+    replace_years: int = RUINS_DEFINITION_DEFAULTS["replace_years"]
+    erase_years: int = RUINS_DEFINITION_DEFAULTS["erase_years"]
+    contact_years: int = RUINS_DEFINITION_DEFAULTS["contact_years"]
+    return_years: int = RUINS_DEFINITION_DEFAULTS["return_years"]
+    replace_stones: int = RUINS_DEFINITION_DEFAULTS["replace_stones"]
+    erase_stones: int = RUINS_DEFINITION_DEFAULTS["erase_stones"]
+    mana_fraction: float = RUINS_DEFINITION_DEFAULTS["mana_fraction"]
+    guardian_power: float = RUINS_DEFINITION_DEFAULTS["guardian_power"]
+    trace_read_years: int = RUINS_DEFINITION_DEFAULTS["trace_read_years"]
+    trace_send_years: int = RUINS_DEFINITION_DEFAULTS["trace_send_years"]
 
 
 def validate_ruins_definition(raw):
@@ -102,20 +99,23 @@ def validate_ruins_definition(raw):
         raise ValueError('因果遗址守护强度无效')
 
 
+MIRROR_DEFINITION_DEFAULTS = _content_definition(__name__, "MIRROR_DEFINITION_DEFAULTS")
+
+
 @dataclass(frozen=True, slots=True)
 class MirrorDefinition:
-    revision: int = 1
-    world: str = 'human'
-    location_id: str = 'muling_desert'
-    probe_years: int = 2
-    decipher_years: int = 4
-    isolate_years: int = 3
-    assault_years: int = 1
-    mana_fraction: float = .05
-    collection_fraction: float = .25
-    capacity_fraction: float = .25
-    strength_cap: float = .15
-    guardian_power: float = 2200.0
+    revision: int = MIRROR_DEFINITION_DEFAULTS["revision"]
+    world: str = MIRROR_DEFINITION_DEFAULTS["world"]
+    location_id: str = MIRROR_DEFINITION_DEFAULTS["location_id"]
+    probe_years: int = MIRROR_DEFINITION_DEFAULTS["probe_years"]
+    decipher_years: int = MIRROR_DEFINITION_DEFAULTS["decipher_years"]
+    isolate_years: int = MIRROR_DEFINITION_DEFAULTS["isolate_years"]
+    assault_years: int = MIRROR_DEFINITION_DEFAULTS["assault_years"]
+    mana_fraction: float = MIRROR_DEFINITION_DEFAULTS["mana_fraction"]
+    collection_fraction: float = MIRROR_DEFINITION_DEFAULTS["collection_fraction"]
+    capacity_fraction: float = MIRROR_DEFINITION_DEFAULTS["capacity_fraction"]
+    strength_cap: float = MIRROR_DEFINITION_DEFAULTS["strength_cap"]
+    guardian_power: float = MIRROR_DEFINITION_DEFAULTS["guardian_power"]
 
 
 def validate_mirror_definition(raw):
@@ -149,20 +149,7 @@ class ContactSite:
     correspondence_stones: int = 2500
 
 
-CONTACT_SITES = (
-    ContactSite('sea_echo', 'celestial', 'law_sea', '法则天海 · 潮汐回响', '观澜散人', 'dao', 'supreme_water', 'karma_city_old_copy',
-        ('潮汐体察', '接引碑旧记', '因果天城合法抄录'),
-        ('每次潮落，阵中的回声总要迟上一拍。你听了几轮，次次如此。', '接引碑上先后两段旧记都记着这半拍的迟滞。照碑文所记吐纳，正好赶上回潮。', '你把因果天城的旧图摊在潮刻旁。旧节点每亮一次，此地便起一潮。这回相约查潮的事也有了交代。')),
-    ContactSite('asura_echo', 'asura', 'destruction_sea', '寂灭海 · 战律余响', '止戈客', 'demonic', 'mutated_thunder', 'celestial_seal_copy',
-        ('战律余响', '古战阵铭', '仙界封阵抄录'),
-        ('守军早已收兵，寂灭海深处却又传出一阵有节律的震响。', '你从阵铭上找到两段休战的日子。那几年兵马未动，海中的余响依旧如期而至。', '你将封阵拓片与海边的铭文相对，两界旧阵的纹路恰好首尾相接。一端震动，另一端便有回响。')),
-    ContactSite('nether_echo', 'nether', 'world_tree_crown', '界树天冠 · 万灵年轮', '听木叟', 'monster', 'supreme_wood', 'asura_growth_copy',
-        ('万灵年轮', '树冠旧痕', '修罗古木抄录'),
-        ('灵潮已歇，世界树深处仍传来一阵轻颤。你贴近树干，手掌下的年轮又动了一次。', '树冠的旧痕分作两层。几族修士各自记下树身震动的时刻，摊开一对，竟刻刻相合。', '你顺着古木拓本上的轮纹看去，修罗界旧阵每动一次，轮纹便深一分。记下这个间隔，平日参悟时用得上。')),
-    ContactSite('reincarnation_echo', 'reincarnation', 'karma_city', '因果天城 · 三生回照', '照尘居士', 'ghost', 'supreme_water', 'nether_ring_copy',
-        ('三生回照', '因果碑旧记', '幽冥年轮抄录'),
-        ('碑前人影来去，衣冠相隔数代，脚下的石阶却是同一块。', '碑上两处旧刻相继泛光。你这才认出，刚才那两道人影各从一道刻痕中走出。', '你依年轮抄本排好先后。幽冥旧节点留下的每一道痕，都能在碑前找到同年的回影。')),
-)
+CONTACT_SITES = _content_definition(__name__, "CONTACT_SITES", ContactSite)
 SITE_IDS = frozenset(site.id for site in CONTACT_SITES)
 
 
@@ -189,19 +176,22 @@ def validate_site(raw):
             raise ValueError('诸天和平协作初值无效')
 
 
+SEA_ECHO_DEFINITION_DEFAULTS = _content_definition(__name__, "SEA_ECHO_DEFINITION_DEFAULTS")
+
+
 @dataclass(frozen=True, slots=True)
 class SeaEchoDefinition:
-    revision: int = 1
-    period_years: int = 2000
-    window_years: int = 1200
-    extension_years: int = 600
-    observe_years: int = 20
-    history_years: int = 30
-    exchange_years: int = 20
-    maintain_years: int = 50
-    history_stones: int = 10000
-    exchange_stones: int = 20000
-    maintain_stones: int = 20000
+    revision: int = SEA_ECHO_DEFINITION_DEFAULTS["revision"]
+    period_years: int = SEA_ECHO_DEFINITION_DEFAULTS["period_years"]
+    window_years: int = SEA_ECHO_DEFINITION_DEFAULTS["window_years"]
+    extension_years: int = SEA_ECHO_DEFINITION_DEFAULTS["extension_years"]
+    observe_years: int = SEA_ECHO_DEFINITION_DEFAULTS["observe_years"]
+    history_years: int = SEA_ECHO_DEFINITION_DEFAULTS["history_years"]
+    exchange_years: int = SEA_ECHO_DEFINITION_DEFAULTS["exchange_years"]
+    maintain_years: int = SEA_ECHO_DEFINITION_DEFAULTS["maintain_years"]
+    history_stones: int = SEA_ECHO_DEFINITION_DEFAULTS["history_stones"]
+    exchange_stones: int = SEA_ECHO_DEFINITION_DEFAULTS["exchange_stones"]
+    maintain_stones: int = SEA_ECHO_DEFINITION_DEFAULTS["maintain_stones"]
 
 
 @dataclass(frozen=True, slots=True)

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ..definition_data import definition as _content_definition
 from functools import cached_property
 from .war.wiring import bind_war
 from .war import state as war_state
@@ -29,20 +30,7 @@ from ..world_state import RELATION_LABELS, race_pair
 from .faction_geography import war_site, can_enter_faction
 
 
-WAR_TERM_DEFS = {
-    "remove_influence": ("移除指定地区影响力", 25),
-    "destroy_outpost": ("捣毁指定地区据点", 5),
-    "economic_rights": ("接管当地产业与市税", 55),
-    "execute": ("处死指定修士", 30),
-    "alliance": ("确立同盟", 18),
-    "vassal": ("迫使对方依附", 55),
-    "change_relation": ("迫使对方改变外交关系", 25),
-    "stones": ("上供大量灵石", 20),
-    "supplies": ("缴纳丹药与装备", 25),
-    "dissolve": ("解散对方势力", 70),
-    "annex": ("合并对方势力", 90),
-    "white_peace": ("无条件和平", 0),
-}
+WAR_TERM_DEFS = _content_definition(__name__, "WAR_TERM_DEFS")
 
 
 def _war_sect(game, power_id):

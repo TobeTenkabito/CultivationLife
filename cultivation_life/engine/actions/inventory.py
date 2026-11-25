@@ -405,7 +405,7 @@ def configure_trait(deps: InventoryDependencies, game_id, action, key):
     p = game.player
     if game.pending_event or game.active_trial or not p.alive or p.imprisonment or p.ghost_captor:
         raise ValueError("当前状态无法调整特质")
-    from ...traits import active, wash, mastery
+    from ...traits import SPECIAL_EFFECTS, active, wash, mastery
     from ...combat_attributes import FIVE
     from ...system.combat_loadout import player_attributes
     if action == "wash":
@@ -419,7 +419,7 @@ def configure_trait(deps: InventoryDependencies, game_id, action, key):
             raise ValueError("该来源未大成、已经凝成或与当前特质冲突")
     elif action == "ward" and key in player_attributes(game)["wards"]:
         p.trait_state["ward"] = key
-    elif action == "flame" and key in FIVE and "five_flame" in active(p):
+    elif action == "flame" and key in FIVE and SPECIAL_EFFECTS["selectable_flame"] in active(p):
         p.trait_state["flame"] = key
     else:
         raise ValueError("当前无法采用这项特质配置")

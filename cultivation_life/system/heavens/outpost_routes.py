@@ -1,11 +1,9 @@
 """Reviewed peer-world pairs and costs, independent of registry and game state."""
+from ...definition_data import definition as _content_definition
 GROUPS = (('human', 'demon'), ('spirit', 'true_demon', 'monster_realm', 'phantom_underworld', 'hell'),
           ('celestial', 'asura', 'nether', 'reincarnation'))
 TIERS = {world: tier for tier, worlds in enumerate(GROUPS, 1) for world in worlds}
-ENDPOINTS = dict(human='wudi_plain', demon='red_marrow_city', spirit='hundred_race_city',
-    true_demon='abyss_city', monster_realm='myriad_beast_city', phantom_underworld='nine_tail_dream_city',
-    hell='yin_market_capital', celestial='jade_capital', asura='ten_thousand_battle_city',
-    nether='world_tree_crown', reincarnation='karma_city')
+ENDPOINTS = _content_definition(__name__, "ENDPOINTS")
 WORLD_NAMES = dict(human='人界', demon='魔界', spirit='灵界', true_demon='真魔界', monster_realm='妖界',
                    phantom_underworld='幻冥界', hell='地狱界', celestial='仙界', asura='修罗界', nether='幽冥界', reincarnation='轮回界')
 SITE_NAMES = dict(human='无棣原', demon='赤髓城', spirit='百族天城', true_demon='渊极城', monster_realm='万兽天城',

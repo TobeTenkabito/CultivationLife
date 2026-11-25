@@ -1,17 +1,28 @@
 """Damage composition belongs to the attack source. Root eligibility is independent."""
+from .definition_data import definition as _content_definition
 from math import isfinite
 
+from .damage_weaves import FIVE, LABELS, validate_weave, woven_profile
+from .trait_repertoires import WEAVES
 from .trait_lineages import LINEAGES
 
-FIVE = ("metal", "wood", "earth", "water", "fire")
-LABELS = dict(physical="物理", metal="金", wood="木", water="水", fire="火", earth="土",
-              yin="阴", yang="阳", wind="风", thunder="雷")
 THEMES = {
     "thunder": "雷霆电", "wind": "风岚飙", "water": "水海江河潮泉雨浪冰雪霜渊",
     "fire": "火焰炎灼烬熔焚", "wood": "木树藤竹花草林", "earth": "土岩山岳砂石",
     "metal": "金铁铜银钢刃剑锋", "yin": "阴冥幽鬼魂魄", "yang": "阳日曦曜",
 }
 PHYSICAL = {"physical": 1.0}
+
+
+CATALOG_OVERRIDES = _content_definition(__name__, "CATALOG_OVERRIDES")
+GUARD_RELATIONS = _content_definition(__name__, "GUARD_RELATIONS")
+PAIR_OVERRIDES = _content_definition(__name__, "PAIR_OVERRIDES")
+STANCES = _content_definition(__name__, "STANCES")
+DAMAGE_BONUSES = _content_definition(__name__, "DAMAGE_BONUSES")
+PENETRATION = _content_definition(__name__, "PENETRATION")
+RESISTANCE_CAP = .8
+for _stance in STANCES.values():
+    validate_weave(_stance)
 
 
 def read(owner, key, default=None):
@@ -43,14 +54,15 @@ def profile_for(entry):
 
 def catalog_profile(entry):
     profile = profile_for(entry)
-    if read(entry, "id") == "TECH_BLOOD_RIVER":
-        return {"water": .7, "yin": .3}
+    override = CATALOG_OVERRIDES.get(read(entry, "id"))
+    if override:
+        return dict(override)
     if profile == PHYSICAL and read(entry, "category") != "body":
         theme = read(entry, "element")
         if theme in LABELS:
             return {theme: 1.}
         if theme == "five_elements":
-            return dict.fromkeys(FIVE, .2)
+            return dict.fromkeys(FIVE, 1 / len(FIVE))
     return profile
 
 
@@ -63,15 +75,19 @@ def relation(attack, ward, traits=(), defense_traits=()):
         lineage = LINEAGES.get(key)
         if lineage and lineage.rule == "guard" and attack == lineage.element and ward == lineage.other:
             return 1 + lineage.percent / 100
-    if attack == "wood" and ward == "earth" and "mountain_body" in defense_traits:
-        return 1.05
+    for guard in GUARD_RELATIONS:
+        if attack == guard["attack"] and ward == guard["ward"] and guard["trait"] in defense_traits:
+            return guard["factor"]
+    for override in PAIR_OVERRIDES:
+        if override["trait"] in traits and {attack, ward} == set(override["elements"]):
+            return override["factor"]
     if attack in FIVE and ward in FIVE:
-        distance = (FIVE.index(ward) - FIVE.index(attack)) % 5
-        return {1: 1.2, 4: .8}.get(distance, 1.)
+        distance = (FIVE.index(ward) - FIVE.index(attack)) % len(FIVE)
+        return {1: 1.2, len(FIVE) - 1: .8}.get(distance, 1.)
     if {attack, ward} == {"yin", "yang"}:
-        return 1.32 if "paired_poles" in traits else 1.2
+        return 1.2
     if {attack, ward} == {"wind", "thunder"}:
-        return .9 if "wind_thunder" in traits else .8
+        return .8
     return 1.
 
 
@@ -86,91 +102,26 @@ def lineage_damage(lineage, element, profile, own_ward):
     return 0.
 
 
-def woven_profile(profile, key, ward, own_ward):
-    """Move existing shares before resistance. The single active 配气 family selects one form."""
-    shares = dict(profile)
-
-    def transfer(source, destination, amount):
-        shares[source] -= amount
-        if shares[source] == 0:
-            del shares[source]
-        shares[destination] = shares.get(destination, 0.) + amount
-
-    if key == "washed_ingot" and "metal" in shares and "water" in shares:
-        shares["metal"] = shares["water"] = (shares["metal"] + shares["water"]) / 2
-    elif key == "seed_flame" and set(shares) == {"wood"}:
-        transfer("wood", "fire", shares["wood"] / 4)
-    elif key == "echo_strings" and own_ward in {"yin", "yang"} and {"yin", "yang"} <= shares.keys():
-        opposite = "yin" if own_ward == "yang" else "yang"
-        if shares[own_ward] > shares[opposite]:
-            shares[own_ward], shares[opposite] = shares[opposite], shares[own_ward]
-    elif key == "storm_rod" and own_ward == "water" and {"wind", "thunder"} <= shares.keys():
-        transfer("wind", "water", shares["wind"])
-    elif key == "split_prism" and len(shares) == 1 and ward in FIVE:
-        element = next(iter(shares))
-        if element in FIVE and element != ward:
-            transfer(element, ward, shares[element] / 5)
-    elif key == "hidden_clay" and own_ward == "earth" and 0 < shares.get("earth", 0) < shares.get("wood", 0):
-        transfer("wood", "fire", shares["wood"] - shares["earth"])
-    elif key == "estuary" and ward == "earth" and "water" in shares:
-        others = [e for e in FIVE if e in shares and e != "water"]
-        if others:
-            water = shares.pop("water")
-            for element in others:
-                shares[element] += water / len(others)
-    elif key == "balance_beam" and own_ward in FIVE and own_ward in shares:
-        elements = sorted((e for e in FIVE if e in shares), key=shares.get)
-        if len(elements) >= 3:
-            low, high = elements[0], elements[-1]
-            shares[low] = shares[high] = (shares[low] + shares[high]) / 2
-    elif key == "river_chart" and ward in FIVE:
-        index = FIVE.index(ward)
-        favorable, adverse = FIVE[index - 1], FIVE[(index + 1) % len(FIVE)]
-        if favorable in shares and adverse in shares:
-            transfer(adverse, favorable, shares[adverse])
-    return shares
-
-
 def components(profile, traits, ward, defense_traits, own_ward=None):
     # Each stance uses one live ward, so their conversions are mutually exclusive.
-    if "red_sand" in traits and own_ward == "fire" and "earth" in profile:
-        profile = dict(profile)
-        converted = profile["earth"] / 3
-        profile["earth"] -= converted
-        profile["fire"] = profile.get("fire", 0.) + converted
-    elif "silver_shear" in traits and own_ward == "metal" and "metal" in profile:
-        physical = profile.get("physical", 0.)
-        profile = {"metal": sum(share for element, share in profile.items() if element != "physical")}
-        if physical:
-            profile["physical"] = physical
+    for key, recipe in STANCES.items():
+        if key in traits:
+            profile = woven_profile(profile, recipe, ward, own_ward)
     lineages = [LINEAGES[key] for key in traits if key in LINEAGES]
-    weave = next((key for key in traits if key in LINEAGES and LINEAGES[key].family == "weave"), None)
+    weave = next((WEAVES[key] for key in traits if key in WEAVES), None)
     if weave:
         profile = woven_profile(profile, weave, ward, own_ward)
-    mixed = "physical" in profile and "fire" in profile and "red_bones" in traits
-    steam = "water" in profile and "fire" in profile and "steam_cycle" in traits
+    bonuses = [rule for rule in DAMAGE_BONUSES
+               if any(key in traits for key in rule["traits"])
+               and all(e in profile for e in rule.get("requires", ()))
+               and (not rule.get("pure") or len(profile) == 1)
+               and rule.get("own_ward", own_ward) == own_ward and rule.get("ward", ward) == ward]
     result = {}
     for element, share in profile.items():
-        bonus = .12 if mixed and element in {"physical", "fire"} else 0.
+        bonus = sum((rule["bonus"] for rule in bonuses if element in rule["elements"]), 0.)
         bonus += sum(lineage_damage(lineage, element, profile, own_ward) for lineage in lineages)
-        if steam and element in {"water", "fire"}:
-            bonus += .14
-        if BASIC_DAMAGE_TRAITS.get(element) in traits:
-            bonus += .05
-        if element == "physical" and "star_body" in traits:
-            bonus += .12
-        if element == "metal" and own_ward == "earth" and "earth_metal" in traits:
-            bonus += .12
         resist = resistance(element, defense_traits)
-        if element == "metal":
-            if len(profile) == 1 and ("sheathed_edge" in traits or "sundering_edge" in traits):
-                bonus += .08
-            if "sundering_edge" in traits:
-                resist = max(0., resist - .12)
-        if element == "yang" and ward == "yin" and "night_sense" in traits:
-            bonus += .08
-        if "storm_seal" in traits and {element, own_ward} == {"wind", "thunder"}:
-            bonus += .16
+        resist -= sum(value for key, value in PENETRATION.get(element, {}).items() if key in traits)
         penetration = sum(lineage.percent for lineage in lineages if lineage.rule == "pierce" and lineage.element == element)
         resist = max(0., resist - penetration / 100)
         factor = relation(element, ward, traits, defense_traits)
@@ -179,21 +130,13 @@ def components(profile, traits, ward, defense_traits, own_ward=None):
     return result
 
 
-BASIC_DAMAGE_TRAITS = {"physical": "strength", "fire": "fire_eye", "water": "fish_scales",
-                       "wood": "green_veins", "yang": "sun_eye"}
-RESISTANCE_TRAITS = {
-    "water": (("tide_ear", .06), ("fish_scales", .12)),
-    "thunder": (("thunder_bone", .06),),
-    "yin": (("night_sense", .10),),
-    "earth": (("sand_skin", .06), ("stone_frame", .08), ("mountain_body", .08)),
-}
+RESISTANCE_TRAITS = _content_definition(__name__, "RESISTANCE_TRAITS")
 
 
 def resistance(element, traits):
-    value = .1 if element in FIVE and "five_body" in traits else 0.
-    value += sum(amount for key, amount in RESISTANCE_TRAITS.get(element, ()) if key in traits)
+    value = sum((amount for key, amount in RESISTANCE_TRAITS.get(element, ()) if key in traits), 0.)
     for key in traits:
         lineage = LINEAGES.get(key)
         if lineage and lineage.rule == "resist" and element == lineage.element:
             value += lineage.percent / 100
-    return min(.8, value)
+    return min(RESISTANCE_CAP, value)

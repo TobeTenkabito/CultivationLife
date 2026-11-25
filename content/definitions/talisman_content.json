@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "PATTERN_NAMES": {
+      "$tuple": [
+        "破军",
+        "护元",
+        "扶灵",
+        "攻守",
+        "御风",
+        "护灵",
+        "三元"
+      ]
+    },
+    "generate_suffix_name_quality": {
+      "$tuple": [
+        {
+          "$tuple": [
+            "paper",
+            "符纸",
+            1.0
+          ]
+        },
+        {
+          "$tuple": [
+            "ink",
+            "朱砂",
+            1.2
+          ]
+        },
+        {
+          "$tuple": [
+            "jade",
+            "符玉",
+            1.4
+          ]
+        }
+      ]
+    }
+  }
+}

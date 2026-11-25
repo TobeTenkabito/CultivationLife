@@ -2,6 +2,13 @@
 
 本次检查本体与已安装官方 DLC 的固定目录、归墟宝物、十一界经济成品、傀儡部件、符箓及神机命名入口。保留已有成形的器名和药名，调整境界拼接、功能直译、重复套词与不通顺的名称。
 
+## 正式内容的维护位置
+
+- 修改既有功法、法宝或 DLC 条目时，先查该条目原有的 `content/` 或 `dlc/<包名>/content/` 目录。以具体对象为单位填写名称、来源、修习要求、属性占比和效果。用于生成同类对象的具名模板也按条目维护。
+- 此前由各 Python 模块直接定义的对象收在 `content/definitions/` 下。文件路径与使用它的模块对应。目录声明 `schema_version: 1`，条目位于 `definitions`。普通数组和对象可直接编辑。需要保持原调用约定时，`$tuple` 表示有序元组，`$set` 和 `$frozenset` 表示集合，`$pairs` 用于非字符串键，`$record` 对应加载入口明确声明的数据类。
+- 传承特质目录为 `content/trait_repertoires.json`。同一特质的多个功法来源填入 `books`，多个法宝来源填入 `artifacts`，共享一个特质 ID。条目分别指定稀有度、等级、先天资格和战斗效果。例如「剑道阑珊」的生效对象、开战时机和扣除比例都在同一条目内。先天候选的相对顺序参与种子复现。
+- 抽取权重、评分算法、属性克制公式、状态校验和战斗结算流程由 Python 维护。例如先天稀有度的试玩权重在 `cultivation_life/traits.py` 的 `BIRTH_WEIGHTS`，而「昊天之仙」专属的突破加成在 `content/definitions/traits.json` 的 `BREAKTHROUGH.always.heaven`。改动正式定义后重启游戏加载。
+
 ## 命名规则
 
 v3.3.2新增约定：通用功法取消道途与品阶前缀，为每部传承重写独立完整书名；不能通过追加前缀或数字处理重名。本轮保留已登记的全部内容ID，仅更新权威名称及归墟绑定奖励；下文标识随名调整与兼容表属于上一轮历史更名，不适用于本轮。当前只读取结构12，结构1–11拒绝加载，不迁移。自创作品、自命名物品与历史叙述保持原样。详见[通用功法](common-elemental-techniques.md)与[历史：3.3.2说明](https://github.com/TobeTenkabito/CultivationLife/blob/290c75b7bd5fc39c5bce5a9087d5774558bd45b4/docs/release-332.md)。

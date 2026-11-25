@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "prepare_id": {
+      "id": "causal_hall",
+      "name": "回潮阵室",
+      "description": "异界阵纹与阵芯一同明灭，入口通向人界无棣原。",
+      "combat_terrain": "狭窄",
+      "combat_conditions": [],
+      "qi_gain_efficiencies": {
+        "spirit": 1,
+        "demon": 1,
+        "monster": 1,
+        "yin": 1
+      }
+    },
+    "RUINS": {
+      "name": "因果遗址",
+      "kind": "heavens",
+      "tier": 0,
+      "location_id": "causal_hall",
+      "edges": [],
+      "materials": [],
+      "techniques": [],
+      "npc_ids": [],
+      "sects": [],
+      "joined_sect": null,
+      "visits": 0,
+      "explored": 0,
+      "power_ceiling": null,
+      "resource_ceiling": null,
+      "power_description": "有限机关遗址。",
+      "resource_description": "抄本、阵材和唯一阵芯均有固定归属。"
+    }
+  }
+}

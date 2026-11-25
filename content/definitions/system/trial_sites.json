@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "GUARD_BUFF": {
+      "id": "trial_guard",
+      "name": "香火庇护",
+      "stat": "guard",
+      "multiplier": 1.2
+    },
+    "RESIDUE_BUFF": {
+      "id": "trial_residue",
+      "name": "旧愿加持",
+      "stat": "might",
+      "multiplier": 1.1
+    },
+    "GUARD_DOMAIN": {
+      "name": "试境守关域",
+      "attainment": "trial_field",
+      "required_level": 1,
+      "opening_cost": 80.0,
+      "upkeep_cost": 40.0,
+      "effect": "strike",
+      "effect_cost": 35.0,
+      "effect_power": 0.2,
+      "max_investment": 0.0
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "STARTING_BODY": {
+      "mold_name": "天工神机",
+      "quality": "tianji_true",
+      "quality_name": "真体",
+      "quality_multiplier": 1.0,
+      "description": "自定义开局携带的神机真体"
+    }
+  }
+}

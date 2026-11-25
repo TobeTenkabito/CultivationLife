@@ -172,6 +172,9 @@ def violations(edges):
                 ('cultivation_life.system.spirit_voisinage', 'cultivation_life.system.doctrine.provider'),
             })
         core_reverse_import = (
+            source == 'cultivation_life.definition_data' and target.startswith('cultivation_life.')
+            and target not in {'cultivation_life.content_io', 'cultivation_life.content_paths', 'cultivation_life.errors'}
+            or
             source in CONTENT_VALIDATORS
             and target in CORE_FACADES | {'cultivation_life.content_registry'}
             or source in CORE_SHARED and target in CORE_FACADES
@@ -197,7 +200,7 @@ def violations(edges):
                        'cultivation_life.system.heavens.development_schema', 'cultivation_life.system.heavens.development_definitions',
                        'cultivation_life.system.heavens.conquest_schema', 'cultivation_life.system.heavens.conquest_definitions', 'cultivation_life.system.heavens.outpost_routes'}
             and target.startswith('cultivation_life.')
-            and target not in {'cultivation_life.system.heavens.definitions', 'cultivation_life.system.heavens.frontier_definitions',
+            and target not in {'cultivation_life.definition_data', 'cultivation_life.system.heavens.definitions', 'cultivation_life.system.heavens.frontier_definitions',
                                'cultivation_life.system.heavens.frontier_schema', 'cultivation_life.system.heavens.campaign_schema',
                                'cultivation_life.system.heavens.campaign_definitions',
                                'cultivation_life.system.heavens.settlement_schema', 'cultivation_life.system.heavens.settlement_definitions',

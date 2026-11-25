@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "FOUNDER": {
+      "id": "founder_base",
+      "name": "立祖根基",
+      "source": "固定",
+      "detail": "每位立祖者固定获得，不受年龄、财富或声望影响。"
+    }
+  }
+}

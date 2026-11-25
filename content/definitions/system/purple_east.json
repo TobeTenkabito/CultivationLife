@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "CAVE": {
+      "name": "紫宸古仙府",
+      "type": "artificiality",
+      "subtype": "cave",
+      "level": 1,
+      "status": "destroyed",
+      "quality": "professional",
+      "invested": 0,
+      "users": [],
+      "public": false,
+      "description": "府门久闭，旧封条仍在，门缝里透出一线紫气。重修仙府所需的工料须经公议筹措。"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 """Finite ruins use the existing spatial, resource and combat capabilities."""
+from ...definition_data import definition as _content_definition
 from ...rules import max_mp, can_player_practice_technique
 from ...system import spatial
 from ...system.heavens.definitions import RUINS_ID
@@ -46,13 +47,10 @@ def bind_ruins(engine):
         state = spatial.ensure(game)
         scene = state['instances'].get(ruins['scene_id'])
         if scene is None:
-            scene = dict(id=ruins['scene_id'], name='因果遗址', kind='heavens', tier=0,
-                heavens_target=RUINS_ID, location_id='causal_hall',
-                locations=[dict(id='causal_hall', name='回潮阵室', description='异界阵纹与阵芯一同明灭，入口通向人界无棣原。',
-                    combat_terrain='狭窄', combat_conditions=[], qi_gain_efficiencies=dict(spirit=1, demon=1, monster=1, yin=1))],
-                edges=[], materials=[], techniques=[], npc_ids=[], sects=[], joined_sect=None,
-                visits=0, explored=0, power_ceiling=None, resource_ceiling=None,
-                power_description='有限机关遗址。', resource_description='抄本、阵材和唯一阵芯均有固定归属。')
+            scene = dict(**_content_definition(__name__, "RUINS"),
+                         id=ruins['scene_id'],
+                         heavens_target=RUINS_ID,
+                         locations=[_content_definition(__name__, "prepare_id")])
             state['instances'][scene['id']] = scene
         return scene
 

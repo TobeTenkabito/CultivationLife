@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ..definition_data import definition as _content_definition
 
 import copy
 import hashlib
@@ -24,11 +25,8 @@ def is_self_lineage_node(node_id: str | None) -> bool:
 def lineage_deed_budget(game: GameState, config: dict[str, Any]) -> dict[str, Any]:
     """Derive points only from the V4 whitelist; incidental player stats never count."""
     player = game.player
-    rows: list[dict[str, Any]] = [{
-        "id": "founder_base", "name": "立祖根基", "source": "固定",
-        "points": max(0, int(config.get("founder_base_points", 0))),
-        "detail": "每位立祖者固定获得，不受年龄、财富或声望影响。",
-    }]
+    rows: list[dict[str, Any]] = [dict(**_content_definition(__name__, "FOUNDER"),
+                                       points=max(0, int(config.get("founder_base_points", 0))))]
     history_ids = set(map(str, player.monster_evolution_history))
     definitions = list(config.get("deed_definitions", []))
     for deed in (row for row in definitions if row.get("kind") == "evolution"):

@@ -1,4 +1,5 @@
 """Independent immortal-equipment grades, using the original owned equipment."""
+from ..definition_data import definition as _content_definition
 import copy
 import re
 import uuid
@@ -7,12 +8,7 @@ from ..content_registry import ITEM_CATALOG, WORLD_SYSTEMS
 from ..models import Item
 from ..rules import has_item, remove_item
 
-MATERIALS = (
-    ('triple_forged_god_demon_iron', '三铸神魔铁'),
-    ('yin_yang_hespring_steel', '阴阳和泉钢'),
-    ('primordial_taiyi_silver', '原初太一银'),
-    ('innate_yuanhe_alloy', '先天元合金'),
-)
+MATERIALS = _content_definition(__name__, "MATERIALS")
 GRADE_NAMES = {5:'五品',4:'四品',3:'三品',2:'二品',1:'一品'}
 
 

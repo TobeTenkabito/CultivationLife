@@ -1,11 +1,10 @@
 """Standard commodities become ordinary finite-charge talismans when unpacked."""
+from .definition_data import definition as _content_definition
 import math
 
 from .talisman_content import WORLD_TIERS, DIMENSIONS
 
-SLOTS = dict(talisman_power=('破敌符', 'power'),
-             talisman_protection=('护身符', 'protection'),
-             talisman_assistance=('助行符', 'assistance'))
+SLOTS = _content_definition(__name__, "SLOTS")
 
 
 def price(grade):

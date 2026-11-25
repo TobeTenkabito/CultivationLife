@@ -1,5 +1,9 @@
 """Initial-life transfer of one generated true body; never clones its holder."""
+from ...definition_data import definition as _content_definition
 from ..crafting_system import store_crafted_artifact
+
+
+STARTING_BODY = _content_definition(__name__, "STARTING_BODY")
 
 
 def grant(game, bracket, rng, *, scale, available):
@@ -14,11 +18,11 @@ def grant(game, bracket, rng, *, scale, available):
     p.crafting_sequence += 1
     identity = f'tianji-start-{game.id}-{p.crafting_sequence}'
     artifact = dict(id=identity, name=definition['name'], mold_id=definition['mold_id'],
-        mold_name='天工神机', quality='tianji_true', quality_name='真体', quality_multiplier=1.,
+        **STARTING_BODY,
         creator_name=p.name, creator_id=game.id, created_year=p.age, materials=[], material_effects=[],
         actual_stats={'combat_power': definition['base_combat_power'], **persistent}, combat_effects=effects,
         anchor_value=max(1, round(definition['base_combat_power'] / 12)), is_natal=False,
-        force_tier=definition.get('force_tier', 1), description='自定义开局携带的神机真体',
+        force_tier=definition.get('force_tier', 1),
         tianji=dict(definition_id=definition['id'], kind='true_body', replica_ratio=1.))
     store_crafted_artifact(p, artifact)
     state = game.tianji_state

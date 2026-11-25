@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "FACTIONS": {
+      "blood_clans": "血裔诸族",
+      "war_hosts": "征伐军府",
+      "free_cities": "万战城盟"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "FIXED_COUPLE": {
+      "zeng_canghai": {
+        "$tuple": [
+          "曾沧海",
+          "male",
+          "wu_xingyun",
+          "巫行云"
+        ]
+      },
+      "wu_xingyun": {
+        "$tuple": [
+          "巫行云",
+          "female",
+          "zeng_canghai",
+          "曾沧海"
+        ]
+      }
+    }
+  }
+}

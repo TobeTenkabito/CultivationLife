@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "GARDEN_CONTRACT": {
+      "id": "garden",
+      "name": "仙圃三期供货",
+      "interval": 50,
+      "periods": 3,
+      "source": "estate"
+    },
+    "FREE_CONTRACT": {
+      "id": "free",
+      "name": "散仙独立补缺契约",
+      "quantity": 4,
+      "interval": 10,
+      "periods": 1,
+      "source": "inventory"
+    }
+  }
+}

@@ -1,10 +1,13 @@
 """Encounter-only materialization. Roles reference one authoritative person."""
+from ...definition_data import definition as _content_definition
 from ...models import SectNpc
 from ...relationship_records import find_person
 from ...rules import expected_combat_power, combat_power, max_hp
 from ...cultivation_coordinates import rank_for
 from ...reputation import true_rank
 from .ecology import close_realms, appearance_depth
+
+
 
 
 def team_reason(game,role):
@@ -153,13 +156,12 @@ def domains(site):
     for role in site['roles'].values():
         if not role['materialized'] or role['existing'] or not role['ledger'].get('domain_rank'):
             continue
-        from ..doctrine.voisinage_training import multiplier
-        perfected=role['ledger']['domain_rank']==13
-        result.append(dict(id=role['id']+':domain', name='至臻归藏道域' if perfected else '归藏灵域', attainment='dungeon_domain',
-            required_level=1, strength=(1+(role['true_realm']-9)*.8)*multiplier(role['ledger']['domain_rank']),
-            opening_cost=80., upkeep_cost=40., effect='strike', effect_cost=35.,
-            effect_power=.2, max_investment=0.))
+        from .domains import domain
+        result.append(domain(role['id'], role['ledger']['domain_rank'], role['true_realm']))
     return result
+
+
+OBSERVED_TERRAIN = _content_definition(__name__, "OBSERVED_TERRAIN")
 
 
 def opposition(game,site,enemy):
@@ -196,8 +198,8 @@ def fight(deps, game, site, enemy, allies=(), *, attack=False):
         if enemy['ledger'].get('outside_party'):target['relationship_kind']='party'
         target['exclude_allied_ids']=[r['npc_id'] for r in participants]
     if site['preparations']:
-        target['enemy_debuffs']=[dict(id='dungeon_observed_terrain',name='已探明地势',stat='might',
-            multiplier=max(.85,1-.03*site['preparations']))]
+        target['enemy_debuffs']=[dict(id=OBSERVED_TERRAIN['id'], name=OBSERVED_TERRAIN['name'], stat=OBSERVED_TERRAIN['stat'],
+            multiplier=max(OBSERVED_TERRAIN['floor'], 1 - OBSERVED_TERRAIN['reduction_per_preparation'] * site['preparations']))]
     from .generation import stream
     outcome, summary = deps.combat(game, target, True, stream(site['seed'], site['revision'], 'combat'))
     for role in participants:

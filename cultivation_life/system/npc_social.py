@@ -1,5 +1,6 @@
 """Stable, inexpensive social hints; family actors are created only on interaction."""
 from __future__ import annotations
+from ..definition_data import definition as _content_definition
 
 import hashlib
 import random
@@ -10,10 +11,7 @@ from ..content_registry import WORLD_SYSTEMS
 from ..npc_names import person_name
 from .combat.npc_lifecycle import initialize_native
 
-FIXED_COUPLE = {
-    "zeng_canghai": ("曾沧海", "male", "wu_xingyun", "巫行云"),
-    "wu_xingyun": ("巫行云", "female", "zeng_canghai", "曾沧海"),
-}
+FIXED_COUPLE = _content_definition(__name__, "FIXED_COUPLE")
 
 
 @lru_cache(maxsize=4096)

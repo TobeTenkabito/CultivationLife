@@ -1,18 +1,13 @@
 """Pure ghost-body descriptors, shared by player and NPC projections."""
+from .definition_data import definition as _content_definition
 from .system.combat.body_mechanisms import BodyMechanism
 
-IDS=('wuxiang','zhaoye','yuhun','wangqing','yinguo')
-NAMES=('无相','照业','御魂','忘情','因果')
-MATERIAL_IDS=('ghost_formless_amber','ghost_karma_mirror','ghost_returning_lotus','ghost_oblivion_crystal','ghost_causality_thread')
-MATERIAL_NAMES=('无相空珀','照业冥镜','归魂幽莲','忘川泪晶','因果赤丝')
-MATERIAL_COUNTS=(4,6,8,10,12)
-EFFECTS={
-    'wuxiang':{'ward':(2,0),'recovery_bonus':(0,.03)},
-    'zhaoye':{'split':(.4,.025)},
-    'yuhun':{'death_restore':(.03,.003)},
-    'wangqing':{'forget':(.25,.035)},
-    'yinguo':{'karma_threshold':(.5,-.035),'karma_power':(.18,0)}
-}
+IDS=_content_definition(__name__, "IDS")
+NAMES=_content_definition(__name__, "NAMES")
+MATERIAL_IDS=_content_definition(__name__, "MATERIAL_IDS")
+MATERIAL_NAMES=_content_definition(__name__, "MATERIAL_NAMES")
+MATERIAL_COUNTS=_content_definition(__name__, "MATERIAL_COUNTS")
+EFFECTS=_content_definition(__name__, "EFFECTS")
 
 
 def recipe(key,rank):

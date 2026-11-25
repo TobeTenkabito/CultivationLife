@@ -429,13 +429,17 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
                    for s in sources for t in targets)
 
     def first_initiative(self, side):
+        from ...traits import SPECIAL_EFFECTS
         if not self._has_ordinary(side):
             return 1.
         bonus = 0.
         for key, state in self.units.items():
-            if (state.unit.side == side and key not in self.initiative_used and self._available(key)
-                    and "swift_bone" in state.unit.capabilities.attributes.get("traits", ())):
-                bonus += .16 * state.unit.power / self.totals[side]
+            if state.unit.side != side or key in self.initiative_used or not self._available(key):
+                continue
+            traits = state.unit.capabilities.attributes.get("traits", ())
+            amount = sum(value for trait, value in SPECIAL_EFFECTS["first_initiative"].items() if trait in traits)
+            if amount:
+                bonus += amount * state.unit.power / self.totals[side]
                 self.initiative_used.add(key)
         return 1. + bonus
 
@@ -446,11 +450,13 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
         sources = stats.get("ward_sources", {}).get(ward, ())
         if not sources or any(s not in state.restrictions for s in sources):
             return ward
-        return "yin" if "orchid_shade" in stats.get("traits", ()) else None
+        from ...traits import SPECIAL_EFFECTS
+        return next((element for trait, element in SPECIAL_EFFECTS["fallback_wards"].items()
+                     if trait in stats.get("traits", ())), None)
 
     def attribute_damage(self, source, target, amount, book=None):
         from ...combat_attributes import PHYSICAL, components
-        from ...traits import MASTERY
+        from ...traits import MASTERY, SPECIAL_EFFECTS
         attacker = self.units[source]
         stats = attacker.unit.capabilities.attributes
         defense = self.units[target].unit.capabilities.attributes
@@ -468,8 +474,8 @@ class VoisinageBattle(CombatSemantics, VoisinageEffects, DivineLights, BodyEvent
             profile = book.get("damage_profile", PHYSICAL)
             name, identity = book["name"], book["id"]
         traits = stats.get("traits", ())
-        if "five_flame" in traits and MASTERY.get(identity) == "five_flame":
-            profile = {stats.get("flame", "fire"): 1.}
+        if MASTERY.get(identity) == SPECIAL_EFFECTS["selectable_flame"] and SPECIAL_EFFECTS["selectable_flame"] in traits:
+            profile = {stats.get("flame", SPECIAL_EFFECTS["default_flame"]): 1.}
         ward = self.active_element_ward(target)
         parts = components(profile, traits, ward, defense.get("traits", ()), self.active_element_ward(source))
         loss = amount * sum(part["multiplier"] for part in parts.values())

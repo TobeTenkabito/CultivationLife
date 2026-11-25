@@ -7,6 +7,7 @@ from ..models import HistoryRecord
 from ..rules import acquire_technique, add_item, assign_technique
 from ..runtime import now_iso
 from .faction_geography import can_enter_faction
+from .tutorial_mentorship import MENTOR
 
 STEPS = (
     'welcome', 'identity', 'roots', 'close_identity', 'practice', 'gain',
@@ -73,13 +74,13 @@ def public_guide(game):
     if state.get('mentor_result'):
         mentor_reason = '你已结算过这份师缘，这次只回顾师徒关系。'
     npc = game.notable_npcs.get(state.get('mentor_id'))
-    if npc and (not npc.alive or npc.world != game.player.world or npc.realm_index != 3):
+    if npc and (not npc.alive or npc.world != game.player.world or npc.realm_index != MENTOR["realm_index"]):
         mentor_reason = '前辈的处境已改变，这次只回顾师承说明。'
     choices = admissions(game) if active and STEPS[index] == 'join' else []
     event = None
     if active and STEPS[index] == 'mentor_choice' and npc and not mentor_reason:
         event = {'id':'SYS_TUTORIAL_GUIDED_MENTOR', 'title':'山道授业 · 新手师缘',
-                 'body':'结丹后期修士沈照尘愿引你入门。执弟子礼必定建立师徒关系；谢绝不损声望。此次不消耗年月或灵石。',
+                 'body':f'{MENTOR["realm_label"]}修士{npc.name}愿引你入门。执弟子礼必定建立师徒关系；谢绝不损声望。此次不消耗年月或灵石。',
                  'choices':[{'id':'guide_accept', 'text':'执弟子礼，拜入门下', 'enabled':True},
                             {'id':'guide_decline', 'text':'谢过好意，自行问道', 'enabled':True}]}
     return {'active':active, 'index':index, 'step':STEPS[index], 'total':len(STEPS),
@@ -131,7 +132,7 @@ def perform_guide(engine, game, action, expected, target_id=None):
         from .tutorial_mentorship import mentor_action
         state['step'] = 6
         mentor_action(engine, game, {'guide_meet':'offer_mentor','guide_accept':'accept_mentor','guide_decline':'decline_mentor'}[action])
-        summary = '你遇到结丹后期的沈照尘，请在事件中亲自作出选择。' if action == 'guide_meet' else ('沈照尘已收你为徒。' if action == 'guide_accept' else '你谢过师缘，日后仍可另寻师承。')
+        summary = f'你遇到{MENTOR["realm_label"]}的{MENTOR["name"]}，请在事件中亲自作出选择。' if action == 'guide_meet' else (f'{MENTOR["name"]}已收你为徒。' if action == 'guide_accept' else '你谢过师缘，日后仍可另寻师承。')
     elif action == 'guide_join' and step == 'join':
         if target_id not in {s['id'] for s in info['admissions']}:
             raise ValueError('这座宗门当前不能通过教学引荐加入')

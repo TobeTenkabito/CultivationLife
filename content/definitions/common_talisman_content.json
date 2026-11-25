@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "SLOTS": {
+      "talisman_power": {
+        "$tuple": [
+          "破敌符",
+          "power"
+        ]
+      },
+      "talisman_protection": {
+        "$tuple": [
+          "护身符",
+          "protection"
+        ]
+      },
+      "talisman_assistance": {
+        "$tuple": [
+          "助行符",
+          "assistance"
+        ]
+      }
+    }
+  }
+}

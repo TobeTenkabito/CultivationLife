@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "RESISTANCE_TRAITS": {
+      "water": {
+        "$tuple": [
+          {
+            "$tuple": [
+              "five_body",
+              0.1
+            ]
+          },
+          {
+            "$tuple": [
+              "tide_ear",
+              0.06
+            ]
+          },
+          {
+            "$tuple": [
+              "fish_scales",
+              0.12
+            ]
+          }
+        ]
+      },
+      "thunder": {
+        "$tuple": [
+          {
+            "$tuple": [
+              "thunder_bone",
+              0.06
+            ]
+          }
+        ]
+      },
+      "yin": {
+        "$tuple": [
+          {
+            "$tuple": [
+              "night_sense",
+              0.1
+            ]
+          }
+        ]
+      },
+      "earth": {
+        "$tuple": [
+          {
+            "$tuple": [
+              "five_body",
+              0.1
+            ]
+          },
+          {
+            "$tuple": [
+              "sand_skin",
+              0.06
+            ]
+          },
+          {
+            "$tuple": [
+              "stone_frame",
+              0.08
+            ]
+          },
+          {
+            "$tuple": [
+              "mountain_body",
+              0.08
+            ]
+          }
+        ]
+      },
+      "wood": {
+        "$tuple": [
+          {
+            "$tuple": [
+              "five_body",
+              0.1
+            ]
+          }
+        ]
+      },
+      "fire": {
+        "$tuple": [
+          {
+            "$tuple": [
+              "five_body",
+              0.1
+            ]
+          }
+        ]
+      },
+      "metal": {
+        "$tuple": [
+          {
+            "$tuple": [
+              "five_body",
+              0.1
+            ]
+          }
+        ]
+      }
+    },
+    "CATALOG_OVERRIDES": {
+      "TECH_BLOOD_RIVER": {
+        "water": 0.7,
+        "yin": 0.3
+      }
+    },
+    "STANCES": {
+      "red_sand": {
+        "op": "transfer",
+        "own_wards": [
+          "fire"
+        ],
+        "source": "earth",
+        "target": "fire",
+        "fraction": 0.3333333333333333
+      },
+      "silver_shear": {
+        "op": "consolidate",
+        "own_wards": [
+          "metal"
+        ],
+        "requires": [
+          "metal"
+        ],
+        "target": "metal"
+      }
+    },
+    "DAMAGE_BONUSES": [
+      {
+        "traits": [
+          "red_bones"
+        ],
+        "elements": [
+          "physical",
+          "fire"
+        ],
+        "requires": [
+          "physical",
+          "fire"
+        ],
+        "bonus": 0.12
+      },
+      {
+        "traits": [
+          "steam_cycle"
+        ],
+        "elements": [
+          "water",
+          "fire"
+        ],
+        "requires": [
+          "water",
+          "fire"
+        ],
+        "bonus": 0.14
+      },
+      {
+        "traits": [
+          "strength"
+        ],
+        "elements": [
+          "physical"
+        ],
+        "bonus": 0.05
+      },
+      {
+        "traits": [
+          "fire_eye"
+        ],
+        "elements": [
+          "fire"
+        ],
+        "bonus": 0.05
+      },
+      {
+        "traits": [
+          "fish_scales"
+        ],
+        "elements": [
+          "water"
+        ],
+        "bonus": 0.05
+      },
+      {
+        "traits": [
+          "green_veins"
+        ],
+        "elements": [
+          "wood"
+        ],
+        "bonus": 0.05
+      },
+      {
+        "traits": [
+          "sun_eye"
+        ],
+        "elements": [
+          "yang"
+        ],
+        "bonus": 0.05
+      },
+      {
+        "traits": [
+          "star_body"
+        ],
+        "elements": [
+          "physical"
+        ],
+        "bonus": 0.12
+      },
+      {
+        "traits": [
+          "earth_metal"
+        ],
+        "elements": [
+          "metal"
+        ],
+        "own_ward": "earth",
+        "bonus": 0.12
+      },
+      {
+        "traits": [
+          "sheathed_edge",
+          "sundering_edge"
+        ],
+        "elements": [
+          "metal"
+        ],
+        "pure": true,
+        "bonus": 0.08
+      },
+      {
+        "traits": [
+          "night_sense"
+        ],
+        "elements": [
+          "yang"
+        ],
+        "ward": "yin",
+        "bonus": 0.08
+      },
+      {
+        "traits": [
+          "storm_seal"
+        ],
+        "elements": [
+          "wind"
+        ],
+        "own_ward": "thunder",
+        "bonus": 0.16
+      },
+      {
+        "traits": [
+          "storm_seal"
+        ],
+        "elements": [
+          "thunder"
+        ],
+        "own_ward": "wind",
+        "bonus": 0.16
+      }
+    ],
+    "PENETRATION": {
+      "metal": {
+        "sundering_edge": 0.12
+      }
+    },
+    "GUARD_RELATIONS": [
+      {
+        "trait": "mountain_body",
+        "attack": "wood",
+        "ward": "earth",
+        "factor": 1.05
+      }
+    ],
+    "PAIR_OVERRIDES": [
+      {
+        "elements": [
+          "yin",
+          "yang"
+        ],
+        "trait": "paired_poles",
+        "factor": 1.32
+      },
+      {
+        "elements": [
+          "wind",
+          "thunder"
+        ],
+        "trait": "wind_thunder",
+        "factor": 0.9
+      }
+    ]
+  }
+}

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ..definition_data import definition as _content_definition
 from functools import cached_property
 from .tianji.wiring import bind_tianji
 from .tianji import forging as tianji_forging
@@ -60,64 +61,7 @@ TIANJI_ATTRIBUTE_NAMES: dict[str, str] = {
     "player_debuff_immunity": "削弱效果免疫",
     "enemy_escape_lock": "敌方遁逃封锁",
 }
-PRIMITIVES: tuple[dict[str, Any], ...] = (
-    {"id": "might", "name": "神威", "stat": "might", "low": 1.06, "high": 1.22},
-    {"id": "guard", "name": "镇守", "stat": "guard", "low": 1.06, "high": 1.22},
-    {"id": "mobility", "name": "遁空", "stat": "mobility", "low": 1.05, "high": 1.20},
-    {"id": "sense", "name": "照神", "stat": "sense", "low": 1.06, "high": 1.22},
-    {"id": "sustain", "name": "归元", "stat": "sustain", "low": 1.05, "high": 1.20},
-    {"id": "breach", "name": "破界", "stat": "breach", "low": 1.06, "high": 1.22},
-    {
-        "id": "enemy_guard",
-        "name": "蚀甲",
-        "enemy_stat": "guard",
-        "low": 0.80,
-        "high": 0.94,
-    },
-    {
-        "id": "enemy_mobility",
-        "name": "锁空",
-        "enemy_stat": "mobility",
-        "low": 0.82,
-        "high": 0.95,
-    },
-    {
-        "id": "enemy_sense",
-        "name": "蒙识",
-        "enemy_stat": "sense",
-        "low": 0.82,
-        "high": 0.95,
-    },
-    {
-        "id": "tribulation",
-        "name": "渡厄",
-        "persistent": "tribulation_reduction",
-        "low": 0.05,
-        "high": 0.25,
-    },
-    {
-        "id": "vitality",
-        "name": "护生",
-        "persistent": "max_hp",
-        "low": 0.03,
-        "high": 0.18,
-    },
-    {"id": "mana", "name": "法海", "persistent": "max_mp", "low": 0.04, "high": 0.22},
-    {
-        "id": "debuff_ward",
-        "name": "万法不侵",
-        "trait": "player_debuff_immunity",
-        "low": 0.25,
-        "high": 1.0,
-    },
-    {
-        "id": "escape_lock",
-        "name": "禁绝虚空",
-        "trait": "enemy_escape_lock",
-        "low": 0.25,
-        "high": 1.0,
-    },
-)
+PRIMITIVES: tuple[dict[str, Any], ...] = _content_definition(__name__, "PRIMITIVES")
 
 
 def tianji_config() -> dict[str, Any]:

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "GUIDANCE": {
+      "id": "guidance",
+      "kind": "guidance",
+      "name": "清修讲席",
+      "mark": "讲",
+      "materials": {},
+      "comparison": "不刷新师门次数、香火额度或原专修进度；讲师与本人同时占用"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "TIDE_CORE": {
+      "definition_id": "returning_tide_core",
+      "name": "回潮阵芯"
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "BODY_WARDS": {
+      "moss_veil": {
+        "$tuple": [
+          "wood"
+        ]
+      },
+      "five_body": {
+        "$tuple": [
+          "metal",
+          "wood",
+          "earth",
+          "water",
+          "fire"
+        ]
+      },
+      "fish_scales": {
+        "$tuple": [
+          "water"
+        ]
+      },
+      "stone_frame": {
+        "$tuple": [
+          "earth"
+        ]
+      },
+      "mountain_body": {
+        "$tuple": [
+          "earth"
+        ]
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .definition_data import definition as _content_definition
 
 import random
 from typing import Any, Final, Iterable
@@ -11,72 +12,7 @@ STAT_KEYS: Final = ("might", "guard", "mobility", "sense", "sustain", "breach")
 # These are the base-game fallback for monster cultivators whose bloodline DLC
 # is disabled.  Their 2-4% bonuses are intentionally below bloodline traits,
 # which commonly grant 8-18% or change a combat rule outright.
-GENERAL_MONSTER_TRAIT_REGISTRY: Final[dict[str, dict[str, Any]]] = {
-    "monster_common_stout_hide": {
-        "name": "坚韧皮膜", "description": "防护提高 3%。",
-        "condition": "always", "multipliers": {"guard": 1.03},
-    },
-    "monster_common_heavy_sinew": {
-        "name": "厚重筋力", "description": "威能提高 3%。",
-        "condition": "always", "multipliers": {"might": 1.03},
-    },
-    "monster_common_light_step": {
-        "name": "轻灵步态", "description": "身法提高 3%。",
-        "condition": "always", "multipliers": {"mobility": 1.03},
-    },
-    "monster_common_clear_sense": {
-        "name": "澄明灵觉", "description": "神识提高 3%。",
-        "condition": "always", "multipliers": {"sense": 1.03},
-    },
-    "monster_common_long_breath": {
-        "name": "绵长吐息", "description": "续航提高 3%。",
-        "condition": "always", "multipliers": {"sustain": 1.03},
-    },
-    "monster_common_sharp_claw": {
-        "name": "锐爪利齿", "description": "破法提高 3%。",
-        "condition": "always", "multipliers": {"breach": 1.03},
-    },
-    "monster_common_hunting_instinct": {
-        "name": "寻隙本能", "description": "威能与神识各提高 2%。",
-        "condition": "always", "multipliers": {"might": 1.02, "sense": 1.02},
-    },
-    "monster_common_rock_bones": {
-        "name": "岩骨沉血", "description": "防护与续航各提高 2%。",
-        "condition": "always", "multipliers": {"guard": 1.02, "sustain": 1.02},
-    },
-    "monster_common_wind_listener": {
-        "name": "听风辨位", "description": "身法与神识各提高 2%。",
-        "condition": "always", "multipliers": {"mobility": 1.02, "sense": 1.02},
-    },
-    "monster_common_armor_gnawer": {
-        "name": "啮甲习性", "description": "威能与破法各提高 2%。",
-        "condition": "always", "multipliers": {"might": 1.02, "breach": 1.02},
-    },
-    "monster_common_evasive_hide": {
-        "name": "滑鳞卸势", "description": "身法与防护各提高 2%。",
-        "condition": "always", "multipliers": {"mobility": 1.02, "guard": 1.02},
-    },
-    "monster_common_qi_cycle": {
-        "name": "妖息小周天", "description": "续航与破法各提高 2%。",
-        "condition": "always", "multipliers": {"sustain": 1.02, "breach": 1.02},
-    },
-    "monster_common_open_stride": {
-        "name": "旷野疾行", "description": "开阔战场中，身法提高 4%。",
-        "condition": "terrain_open", "multipliers": {"mobility": 1.04},
-    },
-    "monster_common_tight_footing": {
-        "name": "窄地盘踞", "description": "狭窄战场中，防护提高 4%。",
-        "condition": "terrain_narrow", "multipliers": {"guard": 1.04},
-    },
-    "monster_common_peril_awareness": {
-        "name": "险地警觉", "description": "险要战场中，神识提高 4%。",
-        "condition": "terrain_dangerous", "multipliers": {"sense": 1.04},
-    },
-    "monster_common_uphill_tenacity": {
-        "name": "禁制耐性", "description": "战场存在禁空、禁神识或大阵时，防护提高 4%。",
-        "condition": "artificial_field", "multipliers": {"guard": 1.04},
-    },
-}
+GENERAL_MONSTER_TRAIT_REGISTRY: Final[dict[str, dict[str, Any]]] = _content_definition(__name__, "GENERAL_MONSTER_TRAIT_REGISTRY")
 
 
 def public_general_monster_trait(trait_id: str) -> dict[str, str]:

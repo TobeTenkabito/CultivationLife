@@ -1,0 +1,520 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "SIGNATURES": {
+      "iron_shirt": {
+        "$record": "Signature",
+        "description": "每战首次迎上基础威力达到自身满态势 16% 的普通攻击时，以铁衣硬接，本次交锋合计普通损耗封顶 13%。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "硬接",
+              "trigger": "ordinary_before_damage",
+              "actions": [
+                {
+                  "op": "modify",
+                  "channel": "ordinary.received_cap",
+                  "value": 0.13
+                }
+              ],
+              "when": {
+                "all": [
+                  {
+                    "fact": "role",
+                    "op": "eq",
+                    "value": "defender"
+                  },
+                  {
+                    "fact": "event.amount",
+                    "op": "ge",
+                    "value": 0.16
+                  }
+                ]
+              },
+              "limits": {
+                "per_battle": 1
+              }
+            }
+          ]
+        }
+      },
+      "brook_breath": {
+        "$record": "Signature",
+        "description": "上轮普通交锋受创、本轮未再受普通战损时，轮末恢复 2 个百分点肉身完整度。每战最多两次。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "回息",
+              "trigger": "round_end",
+              "actions": [
+                {
+                  "op": "adjust",
+                  "stat": "body",
+                  "value": 0.02
+                }
+              ],
+              "limits": {
+                "per_battle": 2
+              },
+              "when": {
+                "all": [
+                  {
+                    "fact": "previous.self.ordinary_received",
+                    "op": "gt",
+                    "value": 0
+                  },
+                  {
+                    "fact": "self.ordinary_received",
+                    "op": "eq",
+                    "value": 0
+                  },
+                  {
+                    "fact": "self.body",
+                    "op": "lt",
+                    "value": 1
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "swallow_turn": {
+        "$record": "Signature",
+        "description": "普通交锋失去先手时蓄一次回身。随后两轮内，下次参与普通交锋时身法提高 25%，用后消散。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "回身",
+              "trigger": "initiative_resolved",
+              "actions": [
+                {
+                  "op": "status",
+                  "key": "回身",
+                  "duration": 2,
+                  "modifiers": [
+                    {
+                      "channel": "ordinary.mobility",
+                      "value": 0.25
+                    }
+                  ],
+                  "delay": 1,
+                  "consume_on": "ordinary_start"
+                }
+              ],
+              "when": {
+                "fact": "event.first",
+                "op": "eq",
+                "value": false
+              }
+            }
+          ]
+        }
+      },
+      "willow_hook": {
+        "$record": "Signature",
+        "description": "普通攻击造成战损时钩住该敌。随后两轮内，自己对其下一次普通攻击增伤 15%。施钩后间隔两轮才能再次施钩。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "牵丝",
+              "trigger": "ordinary_after_damage",
+              "actions": [
+                {
+                  "op": "status",
+                  "key": "钩丝",
+                  "duration": 2,
+                  "modifiers": [
+                    {
+                      "channel": "ordinary.dealt",
+                      "value": 0.15
+                    }
+                  ],
+                  "delay": 1,
+                  "bind_target": true,
+                  "consume_on": "ordinary_before_damage"
+                }
+              ],
+              "when": {
+                "all": [
+                  {
+                    "fact": "role",
+                    "op": "eq",
+                    "value": "attacker"
+                  },
+                  {
+                    "fact": "event.actual_loss",
+                    "op": "gt",
+                    "value": 0
+                  }
+                ]
+              },
+              "limits": {
+                "cooldown": 2
+              }
+            }
+          ]
+        }
+      },
+      "moss_veil": {
+        "$record": "Signature",
+        "description": "肉身自带木属性护身选项，空手或法宝遭封禁时仍可选择木护身。",
+        "rules": {
+          "$tuple": []
+        }
+      },
+      "warm_jade": {
+        "$record": "Signature",
+        "description": "战意低于 55 且自身态势高于 40% 时，轮末以 3 个百分点态势换回 12 点战意。每战一次。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "舍劲定心",
+              "trigger": "round_end",
+              "actions": [
+                {
+                  "op": "adjust",
+                  "stat": "state",
+                  "value": -0.03
+                },
+                {
+                  "op": "adjust",
+                  "stat": "morale",
+                  "value": 12
+                }
+              ],
+              "limits": {
+                "per_battle": 1
+              },
+              "when": {
+                "all": [
+                  {
+                    "fact": "self.morale",
+                    "op": "lt",
+                    "value": 55
+                  },
+                  {
+                    "fact": "self.state",
+                    "op": "gt",
+                    "value": 0.4
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "red_sand": {
+        "$record": "Signature",
+        "description": "选择火护身时，把每击土伤份额的三分之一转为火伤。土、火各自结算克制和抗性。",
+        "rules": {
+          "$tuple": []
+        }
+      },
+      "dawn_drum": {
+        "$record": "Signature",
+        "description": "每战首次夺得普通交锋先手时击鼓。本轮若实际击伤敌人，轮末本方回复 8 点战意，按本人参战战力占比分摊。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "鸣鼓",
+              "trigger": "initiative_resolved",
+              "actions": [
+                {
+                  "op": "status",
+                  "key": "鼓声",
+                  "duration": 1
+                }
+              ],
+              "when": {
+                "fact": "event.first",
+                "op": "eq",
+                "value": true
+              },
+              "limits": {
+                "per_battle": 1
+              }
+            },
+            {
+              "id": "应鼓",
+              "trigger": "round_end",
+              "actions": [
+                {
+                  "op": "adjust",
+                  "stat": "morale",
+                  "value": 8
+                }
+              ],
+              "when": {
+                "all": [
+                  {
+                    "status": "鼓声",
+                    "op": "gt",
+                    "value": 0
+                  },
+                  {
+                    "fact": "self.ordinary_dealt",
+                    "op": "gt",
+                    "value": 0
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "winter_current": {
+        "$record": "Signature",
+        "description": "普通交锋后手时收势，威能降低 10%，换得一层雪衣。本轮第一份落向自己的普通攻击伤害降低 28%。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "收势凝衣",
+              "trigger": "initiative_resolved",
+              "actions": [
+                {
+                  "op": "modify",
+                  "channel": "ordinary.might",
+                  "value": -0.1
+                },
+                {
+                  "op": "status",
+                  "key": "雪衣",
+                  "duration": 1,
+                  "modifiers": [
+                    {
+                      "channel": "ordinary.received",
+                      "value": -0.28
+                    }
+                  ],
+                  "consume_on": "ordinary_before_damage"
+                }
+              ],
+              "when": {
+                "fact": "event.first",
+                "op": "eq",
+                "value": false
+              }
+            }
+          ]
+        }
+      },
+      "silver_shear": {
+        "$record": "Signature",
+        "description": "选择金护身时，含金的混合攻击把其他灵属性份额收束为金伤。物理份额照常结算。",
+        "rules": {
+          "$tuple": []
+        }
+      },
+      "vine_coil": {
+        "$record": "Signature",
+        "description": "普通攻击造成战损后缠住该敌，使其下轮身法降低 20%，影响双方争先。敌方可以驱散，施缠后间隔两轮。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "缠足",
+              "trigger": "ordinary_after_damage",
+              "actions": [
+                {
+                  "op": "status",
+                  "key": "缠足",
+                  "duration": 1,
+                  "modifiers": [
+                    {
+                      "channel": "ordinary.mobility",
+                      "value": -0.2
+                    }
+                  ],
+                  "delay": 1,
+                  "recipient": "target",
+                  "dispellable": true
+                }
+              ],
+              "when": {
+                "all": [
+                  {
+                    "fact": "role",
+                    "op": "eq",
+                    "value": "attacker"
+                  },
+                  {
+                    "fact": "event.actual_loss",
+                    "op": "gt",
+                    "value": 0
+                  }
+                ]
+              },
+              "limits": {
+                "cooldown": 2
+              }
+            }
+          ]
+        }
+      },
+      "candle_shadow": {
+        "$record": "Signature",
+        "description": "每战首次对敌普通出手为虚掌，伤害降低 20%，在该敌身上留下烛影。随后两轮内自己首次再攻该敌时增伤 40%。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "虚掌留影",
+              "trigger": "ordinary_before_damage",
+              "actions": [
+                {
+                  "op": "modify",
+                  "channel": "ordinary.dealt",
+                  "value": -0.2
+                },
+                {
+                  "op": "status",
+                  "key": "烛影",
+                  "duration": 2,
+                  "modifiers": [
+                    {
+                      "channel": "ordinary.dealt",
+                      "value": 0.4
+                    }
+                  ],
+                  "delay": 1,
+                  "bind_target": true,
+                  "consume_on": "ordinary_before_damage"
+                }
+              ],
+              "when": {
+                "fact": "role",
+                "op": "eq",
+                "value": "attacker"
+              },
+              "limits": {
+                "per_battle": 1
+              }
+            }
+          ]
+        }
+      },
+      "stele_breaker": {
+        "$record": "Signature",
+        "description": "每战首次普通攻击造成战损时打出一道裂口。随后两轮内，任一友方对该敌的第一份普通攻击增伤 25%，用后裂口合拢。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "碎碑开隙",
+              "trigger": "ordinary_after_damage",
+              "actions": [
+                {
+                  "op": "status",
+                  "key": "裂口",
+                  "duration": 2,
+                  "modifiers": [
+                    {
+                      "channel": "ordinary.received",
+                      "value": 0.25
+                    }
+                  ],
+                  "delay": 1,
+                  "recipient": "target",
+                  "consume_on": "ordinary_before_damage"
+                }
+              ],
+              "when": {
+                "all": [
+                  {
+                    "fact": "role",
+                    "op": "eq",
+                    "value": "attacker"
+                  },
+                  {
+                    "fact": "event.actual_loss",
+                    "op": "gt",
+                    "value": 0
+                  }
+                ]
+              },
+              "limits": {
+                "per_battle": 1
+              }
+            }
+          ]
+        }
+      },
+      "river_banner": {
+        "$record": "Signature",
+        "description": "每个实际击伤敌人的普通交锋轮末积一层浪，最多两层。满层后下一份普通攻击耗尽两层、增伤 30%，命中当轮可以重新积浪。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "积浪",
+              "trigger": "round_end",
+              "actions": [
+                {
+                  "op": "counter_add",
+                  "key": "浪",
+                  "value": 1,
+                  "max": 2
+                }
+              ],
+              "when": {
+                "fact": "self.ordinary_dealt",
+                "op": "gt",
+                "value": 0
+              }
+            },
+            {
+              "id": "放浪",
+              "trigger": "ordinary_before_damage",
+              "actions": [
+                {
+                  "op": "counter_consume",
+                  "key": "浪",
+                  "value": 2
+                },
+                {
+                  "op": "modify",
+                  "channel": "ordinary.dealt",
+                  "value": 0.3
+                }
+              ],
+              "when": {
+                "fact": "role",
+                "op": "eq",
+                "value": "attacker"
+              }
+            }
+          ]
+        }
+      },
+      "orchid_shade": {
+        "$record": "Signature",
+        "description": "已选护身属性的所有来源被封禁时，以阴护身暂代。任一原来源恢复后，立即切回原属性。",
+        "rules": {
+          "$tuple": []
+        }
+      },
+      "sun_duster": {
+        "$record": "Signature",
+        "description": "轮初拂去自己身上最早生效的一项敌方短效减益。仅限可驱散且含本轮最多剩两轮的普通交锋减益，每战一次。",
+        "rules": {
+          "$tuple": [
+            {
+              "id": "拂秽",
+              "trigger": "round_start",
+              "actions": [
+                {
+                  "op": "dispel_short_debuff"
+                }
+              ],
+              "when": {
+                "fact": "event.short_debuff",
+                "op": "eq",
+                "value": true
+              },
+              "limits": {
+                "per_battle": 1
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

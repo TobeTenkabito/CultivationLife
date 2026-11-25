@@ -1,4 +1,5 @@
 """Four chapters resolve one incident through original industry, court and buildings."""
+from ..definition_data import definition as _content_definition
 import copy
 from ..building_schema import address
 from ..building_rules import ensure_state
@@ -55,10 +56,10 @@ def command(deps,game,action,target,amount):
             disruption_until=game.player.age+20,recorded_identity=None)
         from .immortal_identity_rules import primary
         s['recorded_identity']=primary(game)
-        ensure_state(game)['records'][BUILDING]=dict(id=BUILDING,name='紫宸古仙府',type='artificiality',subtype='cave',
-            level=1,status='destroyed',quality='professional',invested=0,address=address(game),
-            owner=dict(kind='background',id=BUILDING),users=[],public=False,
-            description='府门久闭，旧封条仍在，门缝里透出一线紫气。重修仙府所需的工料须经公议筹措。')
+        ensure_state(game)['records'][BUILDING]=dict(**_content_definition(__name__, "CAVE"),
+                                                     id=BUILDING,
+                                                     address=address(game),
+                                                     owner=dict(kind='background',id=BUILDING))
         buildings.persist(game,city)['civic_disruption_until']=s['disruption_until']
         farm['public_water_until']=max(game.player.age,farm.get('public_water_until',0))+10
         if farm.get('job'):farm['job']['finish']+=10

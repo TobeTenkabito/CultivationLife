@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "FORMS": {
+      "humanoid": {
+        "name": "人形",
+        "shell": "玄甲外骨",
+        "route": null
+      },
+      "deva": {
+        "name": "天人像",
+        "shell": "净相玉躯",
+        "route": "deva"
+      },
+      "dragon": {
+        "name": "龙形",
+        "shell": "盘龙鳞骨",
+        "route": "naga"
+      },
+      "yaksha": {
+        "name": "夜叉形",
+        "shell": "夜叉战甲",
+        "route": "yaksha"
+      },
+      "flora": {
+        "name": "灵木形",
+        "shell": "香音灵木",
+        "route": "gandharva"
+      },
+      "serpent": {
+        "name": "蛇形",
+        "shell": "玄蛇柔骨",
+        "route": "mahoraga"
+      },
+      "kinnara": {
+        "name": "乐伎形",
+        "shell": "合鸣音躯",
+        "route": "kinnara"
+      },
+      "bird": {
+        "name": "鸟形",
+        "shell": "云翼羽骨",
+        "route": "garuda"
+      }
+    },
+    "definitions_components": [
+      {
+        "$tuple": [
+          "core",
+          "array",
+          "阵枢",
+          1.0
+        ]
+      },
+      {
+        "$tuple": [
+          "core",
+          "spirit",
+          "灵枢",
+          1.15
+        ]
+      },
+      {
+        "$tuple": [
+          "energy",
+          "crystal",
+          "蕴光晶",
+          1.0
+        ]
+      },
+      {
+        "$tuple": [
+          "energy",
+          "marrow",
+          "凝元髓",
+          1.15
+        ]
+      }
+    ]
+  }
+}

@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+from ..content_io import ExtensionError, read_json
+
 
 REGISTRY_DOCUMENTS = (
     "items.json", "techniques.json", "transformations.json", "market.json",
@@ -22,10 +24,6 @@ OPTIONAL_DOCUMENTS = (
 )
 PACKAGE_ID = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,63}$")
 PREFERENCES_FILE = "extension_preferences.json"
-
-
-class ExtensionError(ValueError):
-    pass
 
 
 @dataclass(frozen=True)
@@ -48,25 +46,6 @@ class ExtensionPackage:
             "requires": list(self.requires), "description": self.description,
             "status": status, "error": error,
         }
-
-
-def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-    result: dict[str, Any] = {}
-    for key, value in pairs:
-        if key in result:
-            raise ExtensionError(f"JSON 含重复字段：{key}")
-        result[key] = value
-    return result
-
-
-def read_json(path: Path) -> dict[str, Any]:
-    try:
-        value = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_unique_object)
-    except (OSError, json.JSONDecodeError, ExtensionError) as error:
-        raise ExtensionError(f"{path.name} 无法读取：{error}") from error
-    if not isinstance(value, dict):
-        raise ExtensionError(f"{path.name} 顶层必须是对象")
-    return value
 
 
 def read_extension_preferences(project_root: Path) -> dict[str, bool]:

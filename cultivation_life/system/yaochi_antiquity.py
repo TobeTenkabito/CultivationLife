@@ -1,4 +1,5 @@
 """Three finite ruins on ordinary celestial roads; no pocket-world copies."""
+from ..definition_data import definition as _content_definition
 import copy
 from ..building_rules import ensure_state
 from ..content_registry import ITEM_CATALOG
@@ -19,16 +20,7 @@ from .yaochi_rules import config
 from . import building_projects as buildings
 from .building_destruction import rebuild
 
-SITES={
-    'archive':dict(name='栖霞遗府',location='expanse_celestial_9',realm=9,years=15,
-        text='旧府残碑记着封藏次序。先拓录外壁，再决定循阵入室，或请同道合校。',
-        choice='取出封存铁料，或保留藏室、承接原址修复。',item='triple_forged_god_demon_iron'),
-    'forge':dict(name='玄炉别府',location='expanse_celestial_11',realm=10,years=20,
-        text='炉道已冷，余热仍沿断裂导槽回流。前府拓片指出可以逐段导流。',
-        choice='拆取炉心合金，或保全炉室、修作静修洞府。',item='yin_yang_hespring_steel'),
-    'observatory':dict(name='问星仙府',location='expanse_celestial_15',realm=11,years=30,
-        text='星台的三层刻盘失去校准。前府留下的方位记录能辨别真假星位。',
-        choice='收取星台银髓，或保全观星静室、承接原址修复。',item='primordial_taiyi_silver')}
+SITES=_content_definition(__name__, "SITES")
 
 def state(game):return record(game).get('antiquity',{})
 def current(game):return state(game).get('active')

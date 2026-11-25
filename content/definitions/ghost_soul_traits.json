@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "SOUL_RULE_EFFECTS": {
+      "might_05": {
+        "name": "振威",
+        "description": "本轮威能提高5%",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 5.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "might",
+        "value": 0.05
+      },
+      "guard_05": {
+        "name": "护生",
+        "description": "本轮防护提高5%",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 5.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "guard",
+        "value": 0.05
+      },
+      "mobility_05": {
+        "name": "掠影",
+        "description": "本轮身法提高5%",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 5.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "mobility",
+        "value": 0.05
+      },
+      "sense_05": {
+        "name": "照识",
+        "description": "本轮神识提高5%",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 5.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "sense",
+        "value": 0.05
+      },
+      "sustain_05": {
+        "name": "续烛",
+        "description": "本轮续航提高5%",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 5.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "sustain",
+        "value": 0.05
+      },
+      "breach_05": {
+        "name": "裂罅",
+        "description": "本轮破法提高5%",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 5.0,
+        "kind": "stat_multiplier",
+        "target": "player",
+        "stat": "breach",
+        "value": 0.05
+      },
+      "enemy_guard_04": {
+        "name": "蚀甲",
+        "description": "本轮敌方防护降低4%",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 5.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "guard",
+        "value": 0.04
+      },
+      "enemy_mobility_04": {
+        "name": "缚影",
+        "description": "本轮敌方身法降低4%",
+        "triggers": {
+          "$tuple": [
+            "round_start",
+            "initiative_resolved"
+          ]
+        },
+        "power": 5.0,
+        "kind": "stat_multiplier",
+        "target": "enemy",
+        "stat": "mobility",
+        "value": 0.04
+      },
+      "damage_up_06": {
+        "name": "逐伤",
+        "description": "本轮造成的态势损耗提高6%",
+        "triggers": {
+          "$tuple": [
+            "initiative_resolved",
+            "before_damage"
+          ]
+        },
+        "power": 6.0,
+        "kind": "damage_multiplier",
+        "target": "enemy",
+        "value": 0.06
+      },
+      "damage_down_06": {
+        "name": "卸煞",
+        "description": "本轮受到的态势损耗降低6%",
+        "triggers": {
+          "$tuple": [
+            "initiative_resolved",
+            "before_damage"
+          ]
+        },
+        "power": 6.0,
+        "kind": "damage_multiplier",
+        "target": "player",
+        "value": 0.06
+      },
+      "restore_state_02": {
+        "name": "归魂",
+        "description": "恢复2%最大战斗态势",
+        "triggers": {
+          "$tuple": [
+            "after_damage",
+            "round_end"
+          ]
+        },
+        "power": 6.0,
+        "kind": "restore_state",
+        "target": "player",
+        "value": 0.02
+      },
+      "restore_mp_02": {
+        "name": "纳阴",
+        "description": "恢复2%最大法力",
+        "triggers": {
+          "$tuple": [
+            "after_damage",
+            "round_end"
+          ]
+        },
+        "power": 5.0,
+        "kind": "restore_mp",
+        "target": "player",
+        "value": 0.02
+      },
+      "morale_self_4": {
+        "name": "镇念",
+        "description": "恢复4点己方战意",
+        "triggers": {
+          "$tuple": [
+            "after_damage",
+            "round_end"
+          ]
+        },
+        "power": 4.0,
+        "kind": "modify_morale",
+        "target": "player",
+        "value": 4.0
+      },
+      "morale_enemy_4": {
+        "name": "惊魄",
+        "description": "额外削弱敌方4点战意",
+        "triggers": {
+          "$tuple": [
+            "after_damage",
+            "round_end"
+          ]
+        },
+        "power": 4.0,
+        "kind": "modify_morale",
+        "target": "enemy",
+        "value": 4.0
+      }
+    }
+  }
+}

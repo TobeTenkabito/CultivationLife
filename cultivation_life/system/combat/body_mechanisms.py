@@ -1,6 +1,7 @@
 """Round eligibility and causal action allowances; no content or persistence IO."""
 from dataclasses import dataclass, field, asdict
 from math import isfinite
+from ...divine_light_content import base_light_names
 
 CHANNELS = frozenset({'ward','seal_resist','heal_preserve','heal_bonus','extra','erosion','silence',
     'authority','critical','critical_extra','free','exploit','restore_state','restore_energy',
@@ -47,13 +48,16 @@ def mechanisms(caps):
     if caps.body_mechanisms:return caps.body_mechanisms
     d=caps.divine_lights;levels=caps.divine_light_levels
     # Adapter for existing schema-12 battle snapshots and the public five-light API.
-    specs=(('kun','坤元缃光',{'ward':2,'seal_resist':d.get('kun_resist',0)},1),
-           ('zhen','震合缥光',{'heal_preserve':1,'heal_bonus':d.get('zhen_heal',0)},1),
-           ('kan','坎道玄光',{'extra':1},d.get('kan',0)),
-           ('li','离上朱光',{'erosion':d.get('li',0)},1),
-           ('qian','乾古素光',{'silence':1},d.get('qian',0)))
-    return tuple(BodyMechanism(k,n,e,i*10,c,level=levels.get(k,0))
-                 for i,(k,n,e,c) in enumerate(specs) if d.get(k))
+    if not d:
+        return ()
+    names = base_light_names()
+    specs=(('kun',{'ward':2,'seal_resist':d.get('kun_resist',0)},1),
+           ('zhen',{'heal_preserve':1,'heal_bonus':d.get('zhen_heal',0)},1),
+           ('kan',{'extra':1},d.get('kan',0)),
+           ('li',{'erosion':d.get('li',0)},1),
+           ('qian',{'silence':1},d.get('qian',0)))
+    return tuple(BodyMechanism(k,names[k],e,i*10,c,level=levels.get(k,0))
+                 for i,(k,e,c) in enumerate(specs) if d.get(k))
 
 
 def validate_mechanisms(rows):

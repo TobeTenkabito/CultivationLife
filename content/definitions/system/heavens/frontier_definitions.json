@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "definitions": {
+    "FRONTIER_ID": "lanjiang_frontier",
+    "SOURCE_FACTION": "blood_prison",
+    "INITIAL_RESERVE": 18000,
+    "ANNUAL_COST": 100,
+    "SCOUT_YEARS": 12,
+    "MANDATE_YEARS": 200,
+    "RECON_ROUTE": {
+      "id": "recon:demon:human:lanjiang",
+      "source_world": "demon",
+      "source_location": "red_marrow_city",
+      "destination_world": "human",
+      "destination_location": "lanjiang_steppe",
+      "capacity": 1,
+      "maximum_realm": 5,
+      "crossing_years": 8
+    }
+  }
+}
